@@ -1,0 +1,234 @@
+import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:patterns_canvas/patterns_canvas.dart';
+import 'package:provider/provider.dart';
+
+class FMSInfo extends StatelessWidget with NT4Widget {
+  @override
+  String type = 'FMSInfo';
+
+  static const int ENABLED_FLAG = 0x01;
+  static const int AUTO_FLAG = 0x02;
+  static const int TEST_FLAG = 0x04;
+  static const int EMERGENCY_STOP_FLAG = 0x08;
+  static const int FMS_ATTACHED_FLAG = 0x10;
+  static const int DS_ATTACHED_FLAG = 0x20;
+
+  late String eventNameTopic;
+  late String controlDataTopic;
+  late String allianceTopic;
+  late String matchNumberTopic;
+  late String matchTypeTopic;
+  late String replayNumberTopic;
+  late String stationNumberTopic;
+
+  FMSInfo({super.key, required topic, period = Globals.defaultPeriod}) {
+    super.topic = topic;
+    super.period = period;
+
+    init();
+  }
+
+  FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData}) {
+    super.topic = jsonData['topic'] ?? '';
+    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+
+    init();
+  }
+
+  @override
+  void init() {
+    super.init();
+
+    eventNameTopic = '$topic/EventName';
+    controlDataTopic = '$topic/FMSControlData';
+    allianceTopic = '$topic/IsRedAlliance';
+    matchNumberTopic = '$topic/MatchNumber';
+    matchTypeTopic = '$topic/MatchType';
+    replayNumberTopic = '$topic/ReplayNumber';
+    stationNumberTopic = '$topic/StationNumber';
+  }
+
+  String _getMatchTypeString(int matchType) {
+    switch (matchType) {
+      case 1:
+        return 'Practice';
+      case 2:
+        return 'Qualification';
+      case 3:
+        return 'Elimination';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  bool _flagMatches(int word, int flag) {
+    return (word & flag) != 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    notifier = context.watch<NT4WidgetNotifier?>();
+    
+    return StreamBuilder(
+      stream: subscription?.periodicStream(),
+      builder: (context, snapshot) {
+        String eventName =
+            NT4Connection.getLastAnnouncedValue(eventNameTopic) as String? ??
+                '';
+        int controlData =
+            NT4Connection.getLastAnnouncedValue(controlDataTopic) as int? ?? 32;
+        bool redAlliance =
+            NT4Connection.getLastAnnouncedValue(allianceTopic) as bool? ?? true;
+        int matchNumber =
+            NT4Connection.getLastAnnouncedValue(matchNumberTopic) as int? ?? 0;
+        int matchType =
+            NT4Connection.getLastAnnouncedValue(matchTypeTopic) as int? ?? 0;
+        int replayNumber =
+            NT4Connection.getLastAnnouncedValue(replayNumberTopic) as int? ?? 0;
+
+        String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
+        String matchTypeString = _getMatchTypeString(matchType);
+        String replayNumberDisplay =
+            (replayNumber != 0) ? ' (replay $replayNumber)' : '';
+
+        bool fmsConnected = _flagMatches(controlData, FMS_ATTACHED_FLAG);
+        bool dsAttached = _flagMatches(controlData, DS_ATTACHED_FLAG);
+
+        bool emergencyStopped = _flagMatches(controlData, EMERGENCY_STOP_FLAG);
+
+        String robotControlState = 'Disabled';
+        if (_flagMatches(controlData, ENABLED_FLAG)) {
+          if (_flagMatches(controlData, TEST_FLAG)) {
+            robotControlState = 'Test';
+          } else if (_flagMatches(controlData, AUTO_FLAG)) {
+            robotControlState = 'Autonomous';
+          } else {
+            robotControlState = 'Teleoperated';
+          }
+        }
+
+        String matchDisplayString =
+            '$eventNameDisplay$matchTypeString match $matchNumber$replayNumberDisplay';
+        Widget matchDisplayWidget = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              decoration: BoxDecoration(
+                color: (redAlliance) ? Colors.red.shade900 : Colors.blue.shade900,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Text(matchDisplayString,
+                  style: Theme.of(context).textTheme.titleSmall),
+            ),
+          ],
+        );
+
+        String fmsDisplayString =
+            (fmsConnected) ? 'FMS Connected' : 'FMS Disconnected';
+        String dsDisplayString = (dsAttached)
+            ? 'DriverStation Connected'
+            : 'DriverStation Disconnected';
+
+        Icon fmsDisplayIcon = (fmsConnected)
+            ? const Icon(Icons.check, color: Colors.green, size: 18)
+            : const Icon(
+                Icons.clear,
+                color: Colors.red,
+                size: 18,
+              );
+        Icon dsDisplayIcon = (dsAttached)
+            ? const Icon(Icons.check, color: Colors.green, size: 18)
+            : const Icon(Icons.clear, color: Colors.red, size: 18);
+
+        String robotStateDisplayString = 'Robot State: $robotControlState';
+
+        late Widget robotStateWidget;
+        if (emergencyStopped) {
+          robotStateWidget = Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                flex: 25,
+                child: CustomPaint(
+                  size: const Size(80, 15),
+                  painter: _BlackAndYellowStripes(),
+                ),
+              ),
+              const Spacer(),
+              const Text(
+                'EMERGENCY STOPPED',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              Expanded(
+                flex: 25,
+                child: CustomPaint(
+                  size: const Size(80, 15),
+                  painter: _BlackAndYellowStripes(),
+                ),
+              ),
+            ],
+          );
+        } else {
+          robotStateWidget = Text(robotStateDisplayString);
+        }
+
+        return Column(
+          children: [
+            matchDisplayWidget,
+            const Spacer(flex: 2),
+            // DS and FMS connected
+            Row(
+              children: [
+                const Spacer(),
+                Row(
+                  children: [
+                    fmsDisplayIcon,
+                    const SizedBox(width: 5),
+                    Text(fmsDisplayString),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    dsDisplayIcon,
+                    const SizedBox(width: 5),
+                    Text(dsDisplayString),
+                  ],
+                ),
+                const Spacer(),
+              ],
+            ),
+            const Spacer(),
+            // Robot State
+            robotStateWidget,
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BlackAndYellowStripes extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    const DiagonalStripesThick(
+            bgColor: Colors.black, fgColor: Colors.yellow, featuresCount: 10)
+        .paintOnRect(canvas, size, rect);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}

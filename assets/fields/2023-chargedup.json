@@ -1,0 +1,18 @@
+{
+  "game": "Charged Up",
+  "field-image": "assets/fields/2023-field.png",
+  "field-corners": {
+    "top-left": [
+      46,
+      36
+    ],
+    "bottom-right": [
+      1088,
+      544
+    ]
+  },
+  "field-size": [
+    16.54,
+    8.01
+  ]
+}
