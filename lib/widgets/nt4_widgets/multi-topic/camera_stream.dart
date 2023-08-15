@@ -20,7 +20,8 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   late Client httpClient;
   bool clientOpen = false;
 
-  CameraStreamWidget({super.key, required topic, period = Globals.defaultPeriod}) {
+  CameraStreamWidget(
+      {super.key, required topic, period = Globals.defaultPeriod}) {
     super.topic = topic;
     super.period = period;
 
@@ -72,7 +73,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: streamsSubscription.periodicStream(),
       builder: (context, snapshot) {
-        if (!NT4Connection.connected) {
+        if (!NT4Connection.connected && clientOpen) {
           httpClient.close();
           clientOpen = false;
         }

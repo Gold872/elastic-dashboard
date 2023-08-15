@@ -113,7 +113,6 @@ class NT4Client {
     sub.useCount--;
 
     if (sub.useCount <= 0) {
-      print('${sub.topic}\t${sub.useCount}');
       _subscriptions.remove(sub.uid);
       _subscribedTopics.remove(sub);
       _wsUnsubscribe(sub);
