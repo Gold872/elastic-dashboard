@@ -83,29 +83,29 @@ mixin NT4Widget on StatelessWidget {
   }
 
   void init() async {
-    subscription = NT4Connection.subscribe(topic, period);
+    subscription = nt4Connection.subscribe(topic, period);
   }
 
   void createTopicIfNull() {
-    nt4Topic ??= NT4Connection.getTopicFromName(topic);
+    nt4Topic ??= nt4Connection.getTopicFromName(topic);
   }
 
   void dispose() {}
 
   void unSubscribe() {
     if (subscription != null) {
-      NT4Connection.unSubscribe(subscription!);
+      nt4Connection.unSubscribe(subscription!);
     }
   }
 
   void resetSubscription() {
     if (subscription == null) {
-      subscription = NT4Connection.subscribe(topic, period);
+      subscription = nt4Connection.subscribe(topic, period);
       return;
     }
 
-    NT4Connection.unSubscribe(subscription!);
-    subscription = NT4Connection.subscribe(topic, period);
+    nt4Connection.unSubscribe(subscription!);
+    subscription = nt4Connection.subscribe(topic, period);
 
     nt4Topic = null;
 

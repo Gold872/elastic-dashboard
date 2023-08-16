@@ -151,7 +151,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         List<Object?> robotPositionRaw =
-            NT4Connection.getLastAnnouncedValue(robotTopicName)
+            nt4Connection.getLastAnnouncedValue(robotTopicName)
                     as List<Object?>? ??
                 [];
 

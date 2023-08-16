@@ -133,7 +133,7 @@ class TreeRow {
   }
 
   NT4Widget? getTypedWidget(String typeTopic) {
-    String? type = NT4Connection.getLastAnnouncedValue(typeTopic) as String?;
+    String? type = NT4Connection().getLastAnnouncedValue(typeTopic) as String?;
 
     if (type == null) {
       return null;

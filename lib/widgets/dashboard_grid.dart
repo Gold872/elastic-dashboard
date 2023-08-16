@@ -35,7 +35,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void init() {
-    if (jsonData != null) {
+    if (jsonData != null && jsonData!['containers'] != null) {
       loadFromJson(jsonData!);
     }
   }
@@ -44,7 +44,7 @@ class DashboardGrid extends StatelessWidget {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetContainers.add(DraggableWidgetContainer.fromJson(
         key: UniqueKey(),
-        enabled: NT4Connection.connected,
+        enabled: nt4Connection.isConnected,
         validMoveLocation: isValidMoveLocation,
         jsonData: containerData,
         onUpdate: (widget) {
@@ -186,7 +186,7 @@ class DashboardGrid extends StatelessWidget {
         widget,
         Rect.fromLTWH(previewLocation.left, previewLocation.top,
             previewLocation.width, previewLocation.height),
-        enabled: NT4Connection.connected);
+        enabled: nt4Connection.isConnected);
 
     _containerDraggingIn = null;
 
@@ -227,7 +227,7 @@ class DashboardGrid extends StatelessWidget {
         child: widget.child! as NT4Widget));
   }
 
-  void removeWidget(DashboardGridModel model, DraggableWidgetContainer widget) {
+  void removeWidget(DraggableWidgetContainer widget) {
     _widgetContainers.remove(widget);
     widget.child?.dispose();
     widget.child?.unSubscribe();
@@ -327,7 +327,7 @@ class DashboardGrid extends StatelessWidget {
               title: const Text('Remove'),
               onTap: () {
                 Navigator.of(context).pop();
-                removeWidget(model!, container);
+                removeWidget(container);
               },
             ),
           ],

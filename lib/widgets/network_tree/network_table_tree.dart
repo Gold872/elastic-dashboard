@@ -74,7 +74,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   Widget build(BuildContext context) {
     List<NT4Topic> topics = [];
 
-    for (NT4Topic topic in NT4Connection.nt4Client.announcedTopics.values) {
+    for (NT4Topic topic in nt4Connection.nt4Client.announcedTopics.values) {
       if (topic.name == 'Time') {
         continue;
       }

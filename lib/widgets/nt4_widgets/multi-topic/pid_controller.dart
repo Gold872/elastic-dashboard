@@ -82,16 +82,16 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
         stream: subscription?.periodicStream(),
         builder: (context, snapshot) {
           double kP =
-              NT4Connection.getLastAnnouncedValue(kpTopicName) as double? ??
+              nt4Connection.getLastAnnouncedValue(kpTopicName) as double? ??
                   0.0;
           double kI =
-              NT4Connection.getLastAnnouncedValue(kiTopicName) as double? ??
+              nt4Connection.getLastAnnouncedValue(kiTopicName) as double? ??
                   0.0;
           double kD =
-              NT4Connection.getLastAnnouncedValue(kdTopicName) as double? ??
+              nt4Connection.getLastAnnouncedValue(kdTopicName) as double? ??
                   0.0;
           double setpoint =
-              NT4Connection.getLastAnnouncedValue(setpointTopicName)
+              nt4Connection.getLastAnnouncedValue(setpointTopicName)
                       as double? ??
                   0.0;
 
@@ -149,7 +149,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                       onSubmit: (value) {
                         bool publishTopic = kpTopic == null;
 
-                        kpTopic ??= NT4Connection.getTopicFromName(kpTopicName);
+                        kpTopic ??= nt4Connection.getTopicFromName(kpTopicName);
 
                         double? data = double.tryParse(value);
 
@@ -158,10 +158,10 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                         }
 
                         if (publishTopic) {
-                          NT4Connection.nt4Client.publishTopic(kpTopic!);
+                          nt4Connection.nt4Client.publishTopic(kpTopic!);
                         }
 
-                        NT4Connection.updateDataFromTopic(kpTopic!, data);
+                        nt4Connection.updateDataFromTopic(kpTopic!, data);
                       },
                     ),
                   ),
@@ -184,7 +184,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                       onSubmit: (value) {
                         bool publishTopic = kiTopic == null;
 
-                        kiTopic ??= NT4Connection.getTopicFromName(kiTopicName);
+                        kiTopic ??= nt4Connection.getTopicFromName(kiTopicName);
 
                         double? data = double.tryParse(value);
 
@@ -193,10 +193,10 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                         }
 
                         if (publishTopic) {
-                          NT4Connection.nt4Client.publishTopic(kiTopic!);
+                          nt4Connection.nt4Client.publishTopic(kiTopic!);
                         }
 
-                        NT4Connection.updateDataFromTopic(kiTopic!, data);
+                        nt4Connection.updateDataFromTopic(kiTopic!, data);
                       },
                     ),
                   ),
@@ -219,7 +219,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                       onSubmit: (value) {
                         bool publishTopic = kdTopic == null;
 
-                        kdTopic ??= NT4Connection.getTopicFromName(kdTopicName);
+                        kdTopic ??= nt4Connection.getTopicFromName(kdTopicName);
 
                         double? data = double.tryParse(value);
 
@@ -228,10 +228,10 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                         }
 
                         if (publishTopic) {
-                          NT4Connection.nt4Client.publishTopic(kdTopic!);
+                          nt4Connection.nt4Client.publishTopic(kdTopic!);
                         }
 
-                        NT4Connection.updateDataFromTopic(kdTopic!, data);
+                        nt4Connection.updateDataFromTopic(kdTopic!, data);
                       },
                     ),
                   ),
@@ -253,7 +253,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                         bool publishTopic = setpointTopic == null;
 
                         setpointTopic ??=
-                            NT4Connection.getTopicFromName(setpointTopicName);
+                            nt4Connection.getTopicFromName(setpointTopicName);
 
                         double? data = double.tryParse(value);
 
@@ -262,10 +262,10 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
                         }
 
                         if (publishTopic) {
-                          NT4Connection.nt4Client.publishTopic(setpointTopic!);
+                          nt4Connection.nt4Client.publishTopic(setpointTopic!);
                         }
 
-                        NT4Connection.updateDataFromTopic(setpointTopic!, data);
+                        nt4Connection.updateDataFromTopic(setpointTopic!, data);
                       },
                     ),
                   ),

@@ -168,10 +168,10 @@ class NumberBar extends StatelessWidget with NT4Widget {
                   }
 
                   if (publishTopic) {
-                    NT4Connection.nt4Client.publishTopic(nt4Topic!);
+                    nt4Connection.nt4Client.publishTopic(nt4Topic!);
                   }
 
-                  NT4Connection.updateDataFromTopic(nt4Topic!, value);
+                  nt4Connection.updateDataFromTopic(nt4Topic!, value);
 
                   _previousValue = value;
                 },

@@ -15,7 +15,7 @@ void main() async {
   Globals.snapToGrid = preferences.getBool('snap_to_grid') ?? true;
   Globals.showGrid = preferences.getBool('show_grid') ?? false;
 
-  NT4Connection.connect();
+  nt4Connection.connect();
 
   await FieldImages.loadFields('assets/fields/');
 
@@ -41,6 +41,7 @@ class Elastic extends StatelessWidget {
       title: 'Elastic',
       theme: theme,
       home: DashboardPage(
+        connectionStream: nt4Connection.connectionStatus(),
         preferences: preferences,
       ),
     );

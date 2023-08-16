@@ -37,7 +37,7 @@ class NT4Client {
       _wsSendTimestamp();
     });
 
-    _wsConnect();
+    wsConnect();
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
@@ -249,7 +249,7 @@ class NT4Client {
     _ws?.sink.add(data);
   }
 
-  void _wsConnect() async {
+  void wsConnect() async {
     _clientId = Random().nextInt(99999999);
 
     String serverAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
@@ -261,7 +261,7 @@ class NT4Client {
       await _ws!.ready;
     } catch (e) {
       // Failed to connect... try again
-      Future.delayed(const Duration(seconds: 1), _wsConnect);
+      Future.delayed(const Duration(seconds: 1), wsConnect);
       return;
     }
 
@@ -314,7 +314,7 @@ class NT4Client {
     if (kDebugMode) {
       print('[NT4] Connection closed. Attempting to reconnect in 1s');
     }
-    Future.delayed(const Duration(seconds: 1), _wsConnect);
+    Future.delayed(const Duration(seconds: 1), wsConnect);
   }
 
   void _wsOnMessage(data) {

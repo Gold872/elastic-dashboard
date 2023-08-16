@@ -79,11 +79,11 @@ class TextDisplay extends StatelessWidget with NT4Widget {
             }
 
             if (publishTopic) {
-              NT4Connection.nt4Client.publishTopic(nt4Topic!);
+              nt4Connection.nt4Client.publishTopic(nt4Topic!);
             }
 
             if (formattedData != null) {
-              NT4Connection.updateDataFromTopic(nt4Topic!, formattedData);
+              nt4Connection.updateDataFromTopic(nt4Topic!, formattedData);
             }
 
             _previousValue = value;

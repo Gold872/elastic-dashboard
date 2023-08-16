@@ -45,34 +45,34 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
   }
 
   void publishSelectedValue(String? selected) {
-    if (selected == null || !NT4Connection.connected) {
+    if (selected == null || !nt4Connection.isConnected) {
       return;
     }
 
-    selectedTopic ??= NT4Connection.nt4Client
+    selectedTopic ??= nt4Connection.nt4Client
         .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
-    NT4Connection.updateDataFromTopic(selectedTopic!, selected);
+    nt4Connection.updateDataFromTopic(selectedTopic!, selected);
   }
 
   void publishActiveValue(String? active) {
-    if (active == null || !NT4Connection.connected) {
+    if (active == null || !nt4Connection.isConnected) {
       return;
     }
 
     bool publishTopic = activeTopic == null;
 
-    activeTopic ??= NT4Connection.getTopicFromName(activeTopicName);
+    activeTopic ??= nt4Connection.getTopicFromName(activeTopicName);
 
     if (activeTopic == null) {
       return;
     }
 
     if (publishTopic) {
-      NT4Connection.nt4Client.publishTopic(activeTopic!);
+      nt4Connection.nt4Client.publishTopic(activeTopic!);
     }
 
-    NT4Connection.updateDataFromTopic(activeTopic!, active);
+    nt4Connection.updateDataFromTopic(activeTopic!, active);
   }
 
   @override
@@ -83,7 +83,7 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         List<Object?> rawOptions =
-            NT4Connection.getLastAnnouncedValue(optionsTopicName)
+            nt4Connection.getLastAnnouncedValue(optionsTopicName)
                     as List<Object?>? ??
                 [];
 
@@ -98,25 +98,25 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
         }
 
         String? active =
-            NT4Connection.getLastAnnouncedValue(activeTopicName) as String?;
+            nt4Connection.getLastAnnouncedValue(activeTopicName) as String?;
         if (active != null && active == '') {
           active = null;
         }
 
         String? selected =
-            NT4Connection.getLastAnnouncedValue(selectedTopicName) as String?;
+            nt4Connection.getLastAnnouncedValue(selectedTopicName) as String?;
         if (selected != null && selected == '') {
           selected = null;
         }
 
         String? defaultOption =
-            NT4Connection.getLastAnnouncedValue(defaultTopicName) as String?;
+            nt4Connection.getLastAnnouncedValue(defaultTopicName) as String?;
 
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
 
-        if (!NT4Connection.connected) {
+        if (!nt4Connection.isConnected) {
           active = null;
           selected = null;
           defaultOption = null;

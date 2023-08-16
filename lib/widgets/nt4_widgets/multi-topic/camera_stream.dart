@@ -41,7 +41,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     super.init();
 
     streamsTopic = '$topic/streams';
-    streamsSubscription = NT4Connection.subscribe(streamsTopic, super.period);
+    streamsSubscription = nt4Connection.subscribe(streamsTopic, super.period);
 
     httpClient = Client();
     clientOpen = true;
@@ -63,7 +63,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   void unSubscribe() {
     super.unSubscribe();
 
-    NT4Connection.unSubscribe(streamsSubscription);
+    nt4Connection.unSubscribe(streamsSubscription);
   }
 
   @override
@@ -73,7 +73,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: streamsSubscription.periodicStream(),
       builder: (context, snapshot) {
-        if (!NT4Connection.connected && clientOpen) {
+        if (!nt4Connection.isConnected && clientOpen) {
           httpClient.close();
           clientOpen = false;
         }
@@ -81,7 +81,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
         bool createNewWidget = streamWidget == null ||
             rawStreams != value ||
-            (!clientOpen && NT4Connection.connected);
+            (!clientOpen && nt4Connection.isConnected);
 
         rawStreams = value;
 

@@ -15,9 +15,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardPage extends StatefulWidget {
+  final Stream<dynamic> connectionStream;
   final SharedPreferences preferences;
 
-  const DashboardPage({super.key, required this.preferences});
+  const DashboardPage({super.key, required this.connectionStream, required this.preferences});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -42,7 +43,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
     loadLayout();
 
-    NT4Connection.addConnectedListener(() {
+    if (tabData.isEmpty) {
+      tabData.addAll([
+        TabData(name: 'Teleoperated'),
+        TabData(name: 'Autonomous'),
+      ]);
+
+      grids.addAll([
+        DashboardGrid(key: GlobalKey(), jsonData: const {}),
+        DashboardGrid(key: GlobalKey(), jsonData: const {}),
+      ]);
+    }
+
+    nt4Connection.addConnectedListener(() {
       setState(() {
         for (DashboardGrid grid in grids) {
           grid.onNTConnect();
@@ -50,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
       });
     });
 
-    NT4Connection.addDisconnectedListener(() {
+    nt4Connection.addDisconnectedListener(() {
       setState(() {
         for (DashboardGrid grid in grids) {
           grid.onNTDisconnect();
@@ -169,18 +182,6 @@ class _DashboardPageState extends State<DashboardPage> {
           key: GlobalKey(),
           jsonData: data['grid_layout'],
           onAddWidgetPressed: displayAddWidgetDialog));
-    }
-
-    if (tabData.isEmpty) {
-      tabData.addAll([
-        TabData(name: 'Teleoperated'),
-        TabData(name: 'Autonomous'),
-      ]);
-
-      grids.addAll([
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
-      ]);
     }
   }
 
@@ -412,7 +413,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       StreamBuilder(
-                        stream: NT4Connection.connectionStatus(),
+                        stream: widget.connectionStream,
                         builder: (context, snapshot) {
                           bool connected = snapshot.data ?? false;
 

@@ -47,7 +47,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
 
     for (int channel = start; channel <= end; channel++) {
       double current =
-          NT4Connection.getLastAnnouncedValue(channelTopics[channel])
+          nt4Connection.getLastAnnouncedValue(channelTopics[channel])
                   as double? ??
               0.0;
 
@@ -85,7 +85,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
 
     for (int channel = start; channel >= end; channel--) {
       double current =
-          NT4Connection.getLastAnnouncedValue(channelTopics[channel])
+          nt4Connection.getLastAnnouncedValue(channelTopics[channel])
                   as double? ??
               0.0;
 
@@ -127,9 +127,9 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         double voltage =
-            NT4Connection.getLastAnnouncedValue(voltageTopic) as double? ?? 0.0;
+            nt4Connection.getLastAnnouncedValue(voltageTopic) as double? ?? 0.0;
         double totalCurrent =
-            NT4Connection.getLastAnnouncedValue(currentTopic) as double? ?? 0.0;
+            nt4Connection.getLastAnnouncedValue(currentTopic) as double? ?? 0.0;
 
         return Column(
           children: [

@@ -76,18 +76,18 @@ class FMSInfo extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         String eventName =
-            NT4Connection.getLastAnnouncedValue(eventNameTopic) as String? ??
+            nt4Connection.getLastAnnouncedValue(eventNameTopic) as String? ??
                 '';
         int controlData =
-            NT4Connection.getLastAnnouncedValue(controlDataTopic) as int? ?? 32;
+            nt4Connection.getLastAnnouncedValue(controlDataTopic) as int? ?? 32;
         bool redAlliance =
-            NT4Connection.getLastAnnouncedValue(allianceTopic) as bool? ?? true;
+            nt4Connection.getLastAnnouncedValue(allianceTopic) as bool? ?? true;
         int matchNumber =
-            NT4Connection.getLastAnnouncedValue(matchNumberTopic) as int? ?? 0;
+            nt4Connection.getLastAnnouncedValue(matchNumberTopic) as int? ?? 0;
         int matchType =
-            NT4Connection.getLastAnnouncedValue(matchTypeTopic) as int? ?? 0;
+            nt4Connection.getLastAnnouncedValue(matchTypeTopic) as int? ?? 0;
         int replayNumber =
-            NT4Connection.getLastAnnouncedValue(replayNumberTopic) as int? ?? 0;
+            nt4Connection.getLastAnnouncedValue(replayNumberTopic) as int? ?? 0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);
