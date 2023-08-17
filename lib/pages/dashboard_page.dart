@@ -256,6 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
             await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
             if (nt4Connection.isDSConnected) {
+              setState(() {});
               return;
             }
 
@@ -315,6 +316,8 @@ class _DashboardPageState extends State<DashboardPage> {
     await _preferences.setString(PrefKeys.ipAddress, ipAddress);
 
     nt4Connection.changeIPAddress(ipAddress);
+
+    setState(() {});
   }
 
   @override
@@ -444,6 +447,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Focus(
           autofocus: true,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Main dashboard page
               Expanded(
@@ -504,28 +508,33 @@ class _DashboardPageState extends State<DashboardPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: SizedBox(
                   height: 32,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      StreamBuilder(
-                        stream: widget.connectionStream,
-                        builder: (context, snapshot) {
-                          bool connected = snapshot.data ?? false;
+                  child: StreamBuilder(
+                    stream: widget.connectionStream,
+                    builder: (context, snapshot) {
+                      bool connected = snapshot.data ?? false;
 
-                          if (connected) {
-                            return Text('Network Tables: Connected',
-                                style: footerStyle!.copyWith(
-                                  color: Colors.green,
-                                ));
-                          } else {
-                            return Text('Network Tables: Disconnected',
-                                style: footerStyle!.copyWith(
-                                  color: Colors.red,
-                                ));
-                          }
-                        },
-                      ),
-                    ],
+                      Widget connectedText = (connected)
+                          ? Text(
+                              'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})',
+                              style: footerStyle!.copyWith(
+                                color: Colors.green,
+                              ))
+                          : Text('Network Tables: Disconnected',
+                              style: footerStyle!.copyWith(
+                                color: Colors.red,
+                              ));
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          connectedText,
+                          Text(
+                            'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                          ),
+                          Opacity(opacity: 0.0, child: connectedText),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
