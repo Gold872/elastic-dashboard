@@ -175,7 +175,9 @@ class DashboardGrid extends StatelessWidget {
       _containerDraggingIn = null;
 
       if (widget.child is NT4Widget) {
-        (widget.child as NT4Widget).dispose();
+        (widget.child as NT4Widget)
+          ..dispose()
+          ..unSubscribe();
       }
 
       refresh();
