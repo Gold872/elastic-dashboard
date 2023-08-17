@@ -47,7 +47,7 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
   }
 
   void publishSelectedValue(String? selected) {
-    if (selected == null || !nt4Connection.isConnected) {
+    if (selected == null || !nt4Connection.isNT4Connected) {
       return;
     }
 
@@ -98,7 +98,7 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
           defaultOption = null;
         }
 
-        if (!nt4Connection.isConnected) {
+        if (!nt4Connection.isNT4Connected) {
           active = null;
           selected = null;
           defaultOption = null;

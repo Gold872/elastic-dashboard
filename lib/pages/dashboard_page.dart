@@ -253,53 +253,68 @@ class _DashboardPageState extends State<DashboardPage> {
               return;
             }
 
-            await widget.preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
+            await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
+
+            if (nt4Connection.isDSConnected) {
+              return;
+            }
 
             bool determineAddressFromTeamNumber =
-                widget.preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
+                _preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
 
             if (determineAddressFromTeamNumber) {
-              String ipAddress = IPAddressUtil.teamNumberToIP(newTeamNumber);
-
-              widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
-
-              nt4Connection.changeIPAddress(ipAddress);
+              _updateIPAddress(newIPAddress: data);
             }
           },
-          onUseTeamNumberToggle: (value) {
-            widget.preferences.setBool(PrefKeys.useTeamNumberForIP, value);
+          onUseTeamNumberToggle: (value) async {
+            await _preferences.setBool(PrefKeys.useTeamNumberForIP, value);
+
+            if (nt4Connection.isDSConnected) {
+              return;
+            }
 
             if (value) {
-              int? teamNumber = widget.preferences.getInt(PrefKeys.teamNumber);
-
-              if (teamNumber != null) {
-                String ipAddress = IPAddressUtil.teamNumberToIP(teamNumber);
-
-                widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
-
-                nt4Connection.changeIPAddress(ipAddress);
-              }
+              _updateIPAddress();
             }
           },
-          onIPAddressChanged: (String? data) {
+          onIPAddressChanged: (String? data) async {
             if (data == null) {
               return;
             }
 
-            String ipAddress = data;
-
-            bool isTeamNumber = IPAddressUtil.isTeamNumber(data);
-
-            if (isTeamNumber) {
-              ipAddress = IPAddressUtil.teamNumberToIP(int.parse(data));
+            if (nt4Connection.isDSConnected) {
+              return;
             }
 
-            widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
-
-            nt4Connection.changeIPAddress(ipAddress);
+            _updateIPAddress(newIPAddress: data);
           },
           onColorChanged: widget.onColorChanged),
     );
+  }
+
+  void _updateIPAddress({String? newIPAddress}) async {
+    String ipAddress =
+        _preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1';
+
+    if (newIPAddress != null) {
+      bool isTeamNumber = IPAddressUtil.isTeamNumber(newIPAddress);
+
+      if (isTeamNumber) {
+        ipAddress = IPAddressUtil.teamNumberToIP(int.parse(newIPAddress));
+      } else {
+        ipAddress = newIPAddress;
+      }
+    } else {
+      int? teamNumber = _preferences.getInt(PrefKeys.teamNumber);
+
+      if (teamNumber != null) {
+        ipAddress = IPAddressUtil.teamNumberToIP(teamNumber);
+      }
+    }
+
+    await _preferences.setString(PrefKeys.ipAddress, ipAddress);
+
+    nt4Connection.changeIPAddress(ipAddress);
   }
 
   @override

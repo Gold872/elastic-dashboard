@@ -131,7 +131,7 @@ class TreeTile extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: GestureDetector(
-            onPanStart: (details) {
+            onPanStart: (details) async {
               if (draggingWidget != null) {
                 return;
               }
@@ -143,7 +143,7 @@ class TreeTile extends StatelessWidget {
                 return;
               }
 
-              draggingWidget = entry.node.toWidgetContainer();
+              draggingWidget = await entry.node.toWidgetContainer();
             },
             onPanUpdate: (details) {
               if (draggingWidget == null) {

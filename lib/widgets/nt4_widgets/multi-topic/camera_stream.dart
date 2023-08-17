@@ -73,7 +73,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: streamsSubscription.periodicStream(),
       builder: (context, snapshot) {
-        if (!nt4Connection.isConnected && clientOpen) {
+        if (!nt4Connection.isNT4Connected && clientOpen) {
           httpClient.close();
           clientOpen = false;
         }
@@ -81,7 +81,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
         bool createNewWidget = streamWidget == null ||
             rawStreams != value ||
-            (!clientOpen && nt4Connection.isConnected);
+            (!clientOpen && nt4Connection.isNT4Connected);
 
         rawStreams = value;
 

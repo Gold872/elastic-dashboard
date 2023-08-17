@@ -102,7 +102,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     initialText:
                         widget.preferences.getString(PrefKeys.ipAddress),
                     label: 'IP Address',
-                    onSubmit: widget.onIPAddressChanged,
+                    onSubmit: (String? data) {
+                      setState(() {
+                        widget.onIPAddressChanged.call(data);
+                      });
+                    },
                   ),
                 ),
               ],

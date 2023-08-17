@@ -16,7 +16,17 @@ void main() async {
   Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? false;
 
   nt4Connection
-      .connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
+      .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
+
+  nt4Connection.dsClientConnect((ip) async {
+    if (preferences.getString(PrefKeys.ipAddress) != ip) {
+      await preferences.setString(PrefKeys.ipAddress, ip);
+    } else {
+      return;
+    }
+
+    nt4Connection.changeIPAddress(ip);
+  });
 
   await FieldImages.loadFields('assets/fields/');
 
@@ -35,8 +45,8 @@ class Elastic extends StatefulWidget {
 }
 
 class _ElasticState extends State<Elastic> {
-  late Color teamColor =
-      Color(widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+  late Color teamColor = Color(
+      widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
 
   @override
   Widget build(BuildContext context) {

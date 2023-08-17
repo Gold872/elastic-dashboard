@@ -84,10 +84,10 @@ class TreeRow {
     }
   }
 
-  NT4Widget? getPrimaryWidget() {
+  Future<NT4Widget?>? getPrimaryWidget() async {
     if (nt4Topic == null) {
       if (hasRow('.type')) {
-        return getTypedWidget('$topic/.type');
+        return await getTypedWidget('$topic/.type');
       }
 
       // If it's a camera stream
@@ -132,8 +132,26 @@ class TreeRow {
     return null;
   }
 
-  NT4Widget? getTypedWidget(String typeTopic) {
-    String? type = NT4Connection().getLastAnnouncedValue(typeTopic) as String?;
+  Future<String?> getTypeString(String typeTopic) async {
+    NT4Subscription typeSubscription = nt4Connection.subscribe(typeTopic);
+
+    Object? type;
+    try {
+      type = await typeSubscription
+          .periodicStream()
+          .firstWhere((element) => element != null && element is String)
+          .timeout(const Duration(seconds: 2, milliseconds: 500));
+    } catch (e) {
+      type = null;
+    }
+
+    nt4Connection.unSubscribe(typeSubscription);
+
+    return type as String?;
+  }
+
+  Future<NT4Widget?>? getTypedWidget(String typeTopic) async {
+    String? type = await getTypeString(typeTopic);
 
     if (type == null) {
       return null;
@@ -157,8 +175,8 @@ class TreeRow {
     return null;
   }
 
-  WidgetContainer? toWidgetContainer() {
-    NT4Widget? primary = getPrimaryWidget();
+  Future<WidgetContainer?> toWidgetContainer() async {
+    NT4Widget? primary = await getPrimaryWidget();
 
     if (primary == null) {
       return null;

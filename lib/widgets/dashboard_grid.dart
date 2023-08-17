@@ -44,7 +44,7 @@ class DashboardGrid extends StatelessWidget {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetContainers.add(DraggableWidgetContainer.fromJson(
         key: UniqueKey(),
-        enabled: nt4Connection.isConnected,
+        enabled: nt4Connection.isNT4Connected,
         validMoveLocation: isValidMoveLocation,
         jsonData: containerData,
         onUpdate: (widget) {
@@ -186,7 +186,7 @@ class DashboardGrid extends StatelessWidget {
         widget,
         Rect.fromLTWH(previewLocation.left, previewLocation.top,
             previewLocation.width, previewLocation.height),
-        enabled: nt4Connection.isConnected);
+        enabled: nt4Connection.isNT4Connected);
 
     _containerDraggingIn = null;
 

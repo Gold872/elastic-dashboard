@@ -120,7 +120,7 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValueForMissingStub: null,
       );
   @override
-  bool get isConnected => (super.noSuchMethod(
+  bool get isNT4Connected => (super.noSuchMethod(
         Invocation.getter(#isConnected),
         returnValue: false,
         returnValueForMissingStub: false,
@@ -138,7 +138,7 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         ),
       ) as _i2.NT4Client);
   @override
-  void connect(String? ipAddress) => super.noSuchMethod(
+  void nt4Connect(String? ipAddress) => super.noSuchMethod(
         Invocation.method(
           #connect,
           [ipAddress],
