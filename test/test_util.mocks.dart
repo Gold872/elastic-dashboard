@@ -417,14 +417,6 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
         returnValueForMissingStub: null,
       );
   @override
-  void reSubscribeAllSubscriptions() => super.noSuchMethod(
-        Invocation.method(
-          #reSubscribeAllSubscriptions,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-  @override
   void setProperties(
     _i2.NT4Topic? topic,
     bool? isPersistent,
