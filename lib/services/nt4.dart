@@ -255,7 +255,7 @@ class NT4Client {
   }
 
   void wsConnect() async {
-    if (_ws != null) {
+    if (_serverConnectionActive) {
       return;
     }
 
