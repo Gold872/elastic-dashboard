@@ -15,7 +15,8 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
   late String voltageTopic;
   late String currentTopic;
 
-  PowerDistribution({super.key, required topic, period = Globals.defaultPeriod}) {
+  PowerDistribution(
+      {super.key, required topic, period = Globals.defaultPeriod}) {
     super.topic = topic;
     super.period = period;
 
@@ -46,10 +47,9 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current =
-          nt4Connection.getLastAnnouncedValue(channelTopics[channel])
-                  as double? ??
-              0.0;
+      double current = nt4Connection
+              .getLastAnnouncedValue(channelTopics[channel]) as double? ??
+          0.0;
 
       channels.add(
         Row(
@@ -84,10 +84,9 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current =
-          nt4Connection.getLastAnnouncedValue(channelTopics[channel])
-                  as double? ??
-              0.0;
+      double current = nt4Connection
+              .getLastAnnouncedValue(channelTopics[channel]) as double? ??
+          0.0;
 
       channels.add(
         Row(
@@ -122,7 +121,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {

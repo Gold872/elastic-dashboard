@@ -77,7 +77,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
         stream: subscription?.periodicStream(),
         builder: (context, snapshot) {
@@ -90,10 +90,9 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
           double kD =
               nt4Connection.getLastAnnouncedValue(kdTopicName) as double? ??
                   0.0;
-          double setpoint =
-              nt4Connection.getLastAnnouncedValue(setpointTopicName)
-                      as double? ??
-                  0.0;
+          double setpoint = nt4Connection
+                  .getLastAnnouncedValue(setpointTopicName) as double? ??
+              0.0;
 
           // Creates the text editing controllers if they are null
           kpTextController ??= TextEditingController(text: kP.toString());
@@ -126,9 +125,10 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
           }
           setpointLastValue = setpoint;
 
-          TextStyle labelStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
-            fontWeight: FontWeight.bold,
-          );
+          TextStyle labelStyle =
+              Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  );
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

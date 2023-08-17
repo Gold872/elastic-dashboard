@@ -71,7 +71,7 @@ class FMSInfo extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
@@ -119,7 +119,8 @@ class FMSInfo extends StatelessWidget with NT4Widget {
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               decoration: BoxDecoration(
-                color: (redAlliance) ? Colors.red.shade900 : Colors.blue.shade900,
+                color:
+                    (redAlliance) ? Colors.red.shade900 : Colors.blue.shade900,
                 borderRadius: BorderRadius.circular(5.0),
               ),
               child: Text(matchDisplayString,

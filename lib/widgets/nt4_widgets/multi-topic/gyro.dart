@@ -14,7 +14,8 @@ class Gyro extends StatelessWidget with NT4Widget {
 
   late NT4Subscription valueSubscription;
 
-  Gyro({super.key, required topic, valueTopic, period = Globals.defaultPeriod}) {
+  Gyro(
+      {super.key, required topic, valueTopic, period = Globals.defaultPeriod}) {
     super.topic = topic;
     super.period = period;
 
@@ -69,7 +70,7 @@ class Gyro extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
       stream: valueSubscription.periodicStream(),
       builder: (context, snapshot) {
@@ -115,7 +116,8 @@ class Gyro extends StatelessWidget with NT4Widget {
                 ],
               ),
             ),
-            Text(value.toStringAsFixed(3), style: Theme.of(context).textTheme.bodyLarge),
+            Text(value.toStringAsFixed(3),
+                style: Theme.of(context).textTheme.bodyLarge),
           ],
         );
       },

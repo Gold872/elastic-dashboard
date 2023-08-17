@@ -27,7 +27,8 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
     init();
   }
 
-  ComboBoxChooser.fromJson({super.key, required Map<String, dynamic> jsonData}) {
+  ComboBoxChooser.fromJson(
+      {super.key, required Map<String, dynamic> jsonData}) {
     super.topic = jsonData['topic'] ?? '';
     super.period = jsonData['period'] ?? 0.033;
 
@@ -78,14 +79,13 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        List<Object?> rawOptions =
-            nt4Connection.getLastAnnouncedValue(optionsTopicName)
-                    as List<Object?>? ??
-                [];
+        List<Object?> rawOptions = nt4Connection
+                .getLastAnnouncedValue(optionsTopicName) as List<Object?>? ??
+            [];
 
         List<String> options = [];
 

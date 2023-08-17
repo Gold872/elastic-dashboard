@@ -20,7 +20,7 @@ class BooleanBox extends StatelessWidget with NT4Widget {
   }) {
     super.topic = topic;
     super.period = period;
-    
+
     init();
   }
 

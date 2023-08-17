@@ -25,7 +25,11 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   late String robotTopicName;
 
-  FieldWidget({super.key, required topic, String? fieldName, period = Globals.defaultPeriod}) {
+  FieldWidget(
+      {super.key,
+      required topic,
+      String? fieldName,
+      period = Globals.defaultPeriod}) {
     super.topic = topic;
     super.period = period;
 
@@ -150,10 +154,9 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        List<Object?> robotPositionRaw =
-            nt4Connection.getLastAnnouncedValue(robotTopicName)
-                    as List<Object?>? ??
-                [];
+        List<Object?> robotPositionRaw = nt4Connection
+                .getLastAnnouncedValue(robotTopicName) as List<Object?>? ??
+            [];
 
         List<double>? robotPosition = [];
         for (Object? object in robotPositionRaw) {

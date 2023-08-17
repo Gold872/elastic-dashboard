@@ -149,7 +149,8 @@ class EditableTabBar extends StatelessWidget {
                           dense: true,
                           visualDensity: const VisualDensity(
                               horizontal: 0.0, vertical: -4.0),
-                          leading: const Icon(Icons.drive_file_rename_outline_outlined),
+                          leading: const Icon(
+                              Icons.drive_file_rename_outline_outlined),
                           title: const Text('Rename'),
                           onTap: () {
                             Navigator.of(context).pop();

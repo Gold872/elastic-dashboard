@@ -21,7 +21,8 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
 
   NT4Topic? selectedTopic;
 
-  SplitButtonChooser({super.key, required topic, period = Globals.defaultPeriod}) {
+  SplitButtonChooser(
+      {super.key, required topic, period = Globals.defaultPeriod}) {
     super.topic = topic;
     super.period = period;
 
@@ -60,14 +61,13 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
-    
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        List<Object?> rawOptions =
-            nt4Connection.getLastAnnouncedValue(optionsTopicName)
-                    as List<Object?>? ??
-                [];
+        List<Object?> rawOptions = nt4Connection
+                .getLastAnnouncedValue(optionsTopicName) as List<Object?>? ??
+            [];
 
         List<String> options = [];
 

@@ -21,7 +21,7 @@ class ToggleSwitch extends StatelessWidget with NT4Widget {
 
     init();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();

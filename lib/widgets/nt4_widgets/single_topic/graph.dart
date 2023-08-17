@@ -107,9 +107,9 @@ class GraphWidget extends StatelessWidget with NT4Widget {
               onSubmit: (value) {
                 double? newMinimum = double.tryParse(value);
                 bool refreshGraph = newMinimum != minValue;
-          
+
                 minValue = newMinimum;
-          
+
                 if (refreshGraph) {
                   refresh();
                 }
@@ -120,7 +120,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
               allowEmptySubmission: true,
             ),
           ),
-          
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
@@ -128,7 +127,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
                 bool refreshGraph = newMaximum != maxValue;
 
                 maxValue = newMaximum;
-          
+
                 if (refreshGraph) {
                   refresh();
                 }

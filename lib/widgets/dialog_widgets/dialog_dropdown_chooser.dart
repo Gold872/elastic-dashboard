@@ -54,7 +54,7 @@ class _DialogDropdownChooserState<T> extends State<DialogDropdownChooser<T>> {
               onChanged: (value) {
                 setState(() {
                   selectedValue = value;
-                  
+
                   widget.onSelectionChanged.call(value);
                 });
               },
