@@ -21,8 +21,10 @@ Elastic is not complete, there are still more features in the works, such as:
 
 This dashboard wouldn't have been made without the help and support from the following people
 
-* Michael Jansen from Team 3015
+* [Michael Jansen](https://github.com/mjansen4857) from Team 3015
     * Created the Network Tables library, along with PathPlanner, which inspired many parts of the UI and structure
-* Jason and Peter from WPILib
-    * Provided significant insight on issues regarding Network Tables
+* [Jason](https://github.com/jasondaming) and [Peter](https://github.com/PeterJohnson) from [WPILib](https://wpilib.org)
+    * Provided significant help on issues regarding Network Tables
+* [Oh yes 10 FPS](https://github.com/oh-yes-0-fps) from Team 3173
+    * Provided insight on the backend of Shuffleboard and DriverStation connection to obtain the robot's IP address
 * All mentors and advisors of Team 353, the POBots
