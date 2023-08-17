@@ -138,10 +138,10 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         ),
       ) as _i2.NT4Client);
   @override
-  void connect() => super.noSuchMethod(
+  void connect(String? ipAddress) => super.noSuchMethod(
         Invocation.method(
           #connect,
-          [],
+          [ipAddress],
         ),
         returnValueForMissingStub: null,
       );
@@ -171,6 +171,14 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValue: _i5.Stream<bool>.empty(),
         returnValueForMissingStub: _i5.Stream<bool>.empty(),
       ) as _i5.Stream<bool>);
+  @override
+  void changeIPAddress(String? ipAddress) => super.noSuchMethod(
+        Invocation.method(
+          #changeIPAddress,
+          [ipAddress],
+        ),
+        returnValueForMissingStub: null,
+      );
   @override
   _i2.NT4Subscription subscribe(
     String? topic, [
@@ -289,6 +297,14 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
         returnValueForMissingStub: '',
       ) as String);
   @override
+  set serverBaseAddress(String? _serverBaseAddress) => super.noSuchMethod(
+        Invocation.setter(
+          #serverBaseAddress,
+          _serverBaseAddress,
+        ),
+        returnValueForMissingStub: null,
+      );
+  @override
   Map<String, Object?> get lastAnnouncedValues => (super.noSuchMethod(
         Invocation.getter(#lastAnnouncedValues),
         returnValue: <String, Object?>{},
@@ -300,6 +316,14 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
         returnValue: <int, _i2.NT4Topic>{},
         returnValueForMissingStub: <int, _i2.NT4Topic>{},
       ) as Map<int, _i2.NT4Topic>);
+  @override
+  void setServerBaseAddreess(String? serverBaseAddress) => super.noSuchMethod(
+        Invocation.method(
+          #setServerBaseAddreess,
+          [serverBaseAddress],
+        ),
+        returnValueForMissingStub: null,
+      );
   @override
   _i2.NT4Subscription subscribe(
     String? topic, [
@@ -388,6 +412,14 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
   void clearAllSubscriptions() => super.noSuchMethod(
         Invocation.method(
           #clearAllSubscriptions,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+  @override
+  void reSubscribeAllSubscriptions() => super.noSuchMethod(
+        Invocation.method(
+          #reSubscribeAllSubscriptions,
           [],
         ),
         returnValueForMissingStub: null,

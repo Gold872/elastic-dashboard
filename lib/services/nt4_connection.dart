@@ -1,9 +1,7 @@
-
-import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:flutter/foundation.dart';
 
-NT4Connection get nt4Connection  => NT4Connection.instance;
+NT4Connection get nt4Connection => NT4Connection.instance;
 
 class NT4Connection {
   static NT4Connection instance = NT4Connection._internal();
@@ -26,9 +24,9 @@ class NT4Connection {
     return instance;
   }
 
-  void connect() async {
+  void connect(String ipAddress) async {
     _client = NT4Client(
-        serverBaseAddress: Globals.ipAddress,
+        serverBaseAddress: ipAddress,
         onConnect: () {
           _connected = true;
 
@@ -69,6 +67,14 @@ class NT4Connection {
     }
   }
 
+  void changeIPAddress(String ipAddress) {
+    if (_client.serverBaseAddress == ipAddress) {
+      return;
+    }
+
+    _client.setServerBaseAddreess(ipAddress);
+  }
+
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
     return _client.subscribe(topic, period);
   }
@@ -97,8 +103,7 @@ class NT4Connection {
     _client.unpublishTopic(topic);
   }
 
-  void updateDataFromSubscription(
-      NT4Subscription subscription, dynamic data) {
+  void updateDataFromSubscription(NT4Subscription subscription, dynamic data) {
     _client.addSampleFromName(subscription.topic, data);
   }
 

@@ -8,3 +8,13 @@ class Globals {
 
   static const double defaultPeriod = 0.033;
 }
+
+class PrefKeys {
+  static String ipAddress = 'ip_address';
+  static String useTeamNumberForIP = 'ip_from_team_number';
+  static String teamNumber = 'team_number';
+  static String teamColor = 'team_color';
+  static String gridSize = 'grid_size';
+  static String snapToGrid = 'snap_to_grid';
+  static String showGrid = 'show_grid';
+}

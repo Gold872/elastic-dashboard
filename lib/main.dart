@@ -11,11 +11,12 @@ void main() async {
   final SharedPreferences preferences = await SharedPreferences.getInstance();
   await windowManager.ensureInitialized();
 
-  Globals.gridSize = preferences.getInt('grid_size') ?? 128;
-  Globals.snapToGrid = preferences.getBool('snap_to_grid') ?? true;
-  Globals.showGrid = preferences.getBool('show_grid') ?? false;
+  Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? 128;
+  Globals.snapToGrid = preferences.getBool(PrefKeys.snapToGrid) ?? true;
+  Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? false;
 
-  nt4Connection.connect();
+  nt4Connection
+      .connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
 
   await FieldImages.loadFields('assets/fields/');
 
@@ -24,16 +25,24 @@ void main() async {
   runApp(Elastic(preferences: preferences));
 }
 
-class Elastic extends StatelessWidget {
+class Elastic extends StatefulWidget {
   final SharedPreferences preferences;
 
   const Elastic({super.key, required this.preferences});
 
   @override
+  State<Elastic> createState() => _ElasticState();
+}
+
+class _ElasticState extends State<Elastic> {
+  late Color teamColor =
+      Color(widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+
+  @override
   Widget build(BuildContext context) {
     ThemeData theme = ThemeData(
       useMaterial3: true,
-      colorSchemeSeed: Colors.blueAccent,
+      colorSchemeSeed: teamColor,
       brightness: Brightness.dark,
     );
     return MaterialApp(
@@ -42,7 +51,11 @@ class Elastic extends StatelessWidget {
       theme: theme,
       home: DashboardPage(
         connectionStream: nt4Connection.connectionStatus(),
-        preferences: preferences,
+        preferences: widget.preferences,
+        onColorChanged: (color) => setState(() {
+          teamColor = color;
+          widget.preferences.setInt('team_color', color.value);
+        }),
       ),
     );
   }

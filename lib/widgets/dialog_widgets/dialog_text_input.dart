@@ -7,6 +7,7 @@ class DialogTextInput extends StatelessWidget {
   final String? label;
   final String? initialText;
   final bool allowEmptySubmission;
+  final bool enabled;
 
   TextEditingController? textEditingController;
 
@@ -16,6 +17,7 @@ class DialogTextInput extends StatelessWidget {
       this.label,
       this.initialText,
       this.allowEmptySubmission = false,
+      this.enabled = true,
       this.formatter,
       this.textEditingController}) {
     textEditingController ??= TextEditingController(text: initialText);
@@ -37,6 +39,7 @@ class DialogTextInput extends StatelessWidget {
           }
         },
         child: TextField(
+          enabled: enabled,
           onSubmitted: (value) {
             if (value.isNotEmpty) {
               onSubmit.call(value);

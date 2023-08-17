@@ -10,7 +10,7 @@ import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class NT4Client {
-  final String serverBaseAddress;
+  String serverBaseAddress;
   final VoidCallback? onConnect;
   final VoidCallback? onDisconnect;
 
@@ -38,6 +38,11 @@ class NT4Client {
     });
 
     wsConnect();
+  }
+
+  void setServerBaseAddreess(String serverBaseAddress) {
+    this.serverBaseAddress = serverBaseAddress;
+    _wsOnClose();
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
@@ -250,6 +255,10 @@ class NT4Client {
   }
 
   void wsConnect() async {
+    if (_ws != null) {
+      return;
+    }
+
     _clientId = Random().nextInt(99999999);
 
     String serverAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
@@ -267,7 +276,9 @@ class NT4Client {
 
     _ws!.stream.listen(
       (data) {
-        if (!_serverConnectionActive) {
+        // Prevents repeated calls to onConnect and reconnecting after changing ip addresses
+        if (!_serverConnectionActive &&
+            serverAddr.contains(serverBaseAddress)) {
           _serverConnectionActive = true;
           onConnect?.call();
         }
@@ -302,6 +313,8 @@ class NT4Client {
   }
 
   void _wsOnClose() {
+    _ws?.sink.close();
+
     _ws = null;
     _serverConnectionActive = false;
 

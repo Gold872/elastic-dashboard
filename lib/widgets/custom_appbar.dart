@@ -4,13 +4,18 @@ import 'package:window_manager/window_manager.dart';
 
 class CustomAppBar extends AppBar {
   final String titleText;
+  final Color? appBarColor;
   final MenuBar menuBar;
   static const ThemeType buttonType = ThemeType.auto;
 
-  CustomAppBar({super.key, this.titleText = 'Elastic', required this.menuBar})
+  CustomAppBar(
+      {super.key,
+      this.titleText = 'Elastic',
+      this.appBarColor,
+      required this.menuBar})
       : super(
           toolbarHeight: 40,
-          backgroundColor: const Color.fromARGB(255, 35, 35, 35),
+          backgroundColor: appBarColor ?? const Color.fromARGB(255, 35, 35, 35),
           leading: menuBar,
           leadingWidth: menuBar.children.length * 55,
           actions: [

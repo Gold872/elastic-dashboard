@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
@@ -8,6 +9,7 @@ import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
+import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,8 +19,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DashboardPage extends StatefulWidget {
   final Stream<dynamic> connectionStream;
   final SharedPreferences preferences;
+  final Function(Color color)? onColorChanged;
 
-  const DashboardPage({super.key, required this.connectionStream, required this.preferences});
+  const DashboardPage({
+    super.key,
+    required this.connectionStream,
+    required this.preferences,
+    this.onColorChanged,
+  });
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -229,6 +237,71 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  void displaySettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => SettingsDialog(
+          preferences: widget.preferences,
+          onTeamNumberChanged: (String? data) async {
+            if (data == null) {
+              return;
+            }
+
+            int? newTeamNumber = int.tryParse(data);
+
+            if (newTeamNumber == null) {
+              return;
+            }
+
+            await widget.preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
+
+            bool determineAddressFromTeamNumber =
+                widget.preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
+
+            if (determineAddressFromTeamNumber) {
+              String ipAddress = IPAddressUtil.teamNumberToIP(newTeamNumber);
+
+              widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
+
+              nt4Connection.changeIPAddress(ipAddress);
+            }
+          },
+          onUseTeamNumberToggle: (value) {
+            widget.preferences.setBool(PrefKeys.useTeamNumberForIP, value);
+
+            if (value) {
+              int? teamNumber = widget.preferences.getInt(PrefKeys.teamNumber);
+
+              if (teamNumber != null) {
+                String ipAddress = IPAddressUtil.teamNumberToIP(teamNumber);
+
+                widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
+
+                nt4Connection.changeIPAddress(ipAddress);
+              }
+            }
+          },
+          onIPAddressChanged: (String? data) {
+            if (data == null) {
+              return;
+            }
+
+            String ipAddress = data;
+
+            bool isTeamNumber = IPAddressUtil.isTeamNumber(data);
+
+            if (isTeamNumber) {
+              ipAddress = IPAddressUtil.teamNumberToIP(int.parse(data));
+            }
+
+            widget.preferences.setString(PrefKeys.ipAddress, ipAddress);
+
+            nt4Connection.changeIPAddress(ipAddress);
+          },
+          onColorChanged: widget.onColorChanged),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle? menuStyle = Theme.of(context).textTheme.bodySmall;
@@ -320,6 +393,13 @@ class _DashboardPageState extends State<DashboardPage> {
           child: const Text(
             'Help',
           ),
+        ),
+        // Settings
+        MenuItemButton(
+          onPressed: () {
+            displaySettingsDialog(context);
+          },
+          child: const Icon(Icons.settings),
         ),
       ],
     );
