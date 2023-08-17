@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Dart
+name: Flutter
 
 on:
   push:
@@ -17,6 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2.10.0
 
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
