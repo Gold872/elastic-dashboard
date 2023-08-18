@@ -7,7 +7,10 @@ class IPAddressUtil {
   }
 
   static String teamNumberToIP(int teamNumber) {
-    return '10.${teamNumber ~/ 100}.${teamNumber % 100}.2';
+    String te = (teamNumber ~/ 100).toString();
+    String am = (teamNumber % 100).toString().padLeft(2, '0');
+
+    return '10.$te.$am.2';
   }
 
   static String getIpFromInt32Value(int value) =>
