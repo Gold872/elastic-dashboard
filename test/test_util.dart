@@ -42,6 +42,19 @@ void setupMockOnlineNT4() {
   final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
+  when(mockNT4Client.announcedTopics).thenReturn({
+    1: NT4Topic(
+      name: '/SmartDashboard/Test Value 1',
+      type: NT4TypeStr.kInt,
+      properties: {},
+    ),
+    2: NT4Topic(
+      name: '/SmartDashboard/Test Value 2',
+      type: NT4TypeStr.kFloat32,
+      properties: {},
+    ),
+  });
+
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
   when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);

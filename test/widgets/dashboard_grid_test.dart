@@ -63,8 +63,8 @@ void main() {
 
     // await widgetTester.pumpAndSettle();
 
-    expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(6));
-    expect(find.bySubtype<NT4Widget>(), findsNWidgets(6));
+    expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(9));
+    expect(find.bySubtype<NT4Widget>(), findsNWidgets(9));
 
     expect(find.bySubtype<TextDisplay>(), findsOneWidget);
     expect(find.bySubtype<BooleanBox>(), findsOneWidget);
