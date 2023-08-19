@@ -4,11 +4,13 @@ import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -200,5 +202,100 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(3));
+  });
+
+  testWidgets('Closing tab', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(2));
+
+    expect(find.byType(EditableTabBar), findsOneWidget);
+
+    final closeTabButton = find
+        .descendant(
+            of: find.byType(EditableTabBar), matching: find.byIcon(Icons.close))
+        .last;
+
+    expect(closeTabButton, findsOneWidget);
+
+    await widgetTester.tap(closeTabButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
+
+    final confirmButton =
+        find.widgetWithText(TextButton, 'OK', skipOffstage: false);
+
+    expect(confirmButton, findsOneWidget);
+
+    await widgetTester.tap(confirmButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(1));
+  });
+
+  testWidgets('Renaming tab', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final teleopTab = find.widgetWithText(AnimatedContainer, 'Teleoperated');
+
+    expect(teleopTab, findsOneWidget);
+
+    await widgetTester.tap(teleopTab, buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    final renameButton =
+        find.widgetWithText(ListTile, 'Rename', skipOffstage: false);
+
+    expect(renameButton, findsOneWidget);
+
+    await widgetTester.tap(renameButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Rename Tab'), findsOneWidget);
+
+    final nameTextField = find.widgetWithText(DialogTextInput, 'Name');
+
+    expect(nameTextField, findsOneWidget);
+
+    await widgetTester.enterText(nameTextField, 'New Tab Name!');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pump();
+
+    final saveButton = find.widgetWithText(TextButton, 'Save');
+
+    expect(saveButton, findsOneWidget);
+
+    await widgetTester.tap(saveButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(
+        find.widgetWithText(AnimatedContainer, 'Teleoperated'), findsNothing);
+    expect(find.widgetWithText(AnimatedContainer, 'New Tab Name!'),
+        findsOneWidget);
   });
 }
