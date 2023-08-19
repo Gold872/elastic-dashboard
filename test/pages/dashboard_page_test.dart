@@ -56,7 +56,7 @@ void main() async {
     setupMockOnlineNT4();
 
     SharedPreferences.setMockInitialValues({
-      'layout': jsonString,
+      PrefKeys.layout: jsonString,
       PrefKeys.teamNumber: 353,
       PrefKeys.ipAddress: '10.3.53.2',
     });

@@ -112,7 +112,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     ScaffoldMessengerState messengerState = ScaffoldMessenger.of(context);
 
-    await _preferences.setString('layout', jsonEncode(jsonData));
+    await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
     messengerState.showSnackBar(savedMessage);
   }
@@ -161,13 +161,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
     String jsonString = await file.readAsString();
 
-    await _preferences.setString('layout', jsonString);
+    await _preferences.setString(PrefKeys.layout, jsonString);
 
     setState(() => loadLayoutFromJsonData(jsonString));
   }
 
   void loadLayout() async {
-    String? jsonString = _preferences.getString('layout');
+    String? jsonString = _preferences.getString(PrefKeys.layout);
 
     if (jsonString == null) {
       return;

@@ -10,6 +10,7 @@ class Globals {
 }
 
 class PrefKeys {
+  static String layout = 'layout';
   static String ipAddress = 'ip_address';
   static String useTeamNumberForIP = 'ip_from_team_number';
   static String teamNumber = 'team_number';
