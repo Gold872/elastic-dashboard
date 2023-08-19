@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -83,5 +85,51 @@ void main() {
     expect(
         find.text('Test Number', skipOffstage: false), findsAtLeastNWidgets(2));
     expect(find.text('Edit Properties', skipOffstage: false), findsOneWidget);
+
+    await widgetTester.tap(find.text('Edit Properties'));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(
+        find.text('Container Settings', skipOffstage: false), findsOneWidget);
+    expect(find.text('Network Tables Settings (Advanced)', skipOffstage: false),
+        findsOneWidget);
+
+    final titleText =
+        find.widgetWithText(DialogTextInput, 'Title', skipOffstage: false);
+
+    expect(titleText, findsOneWidget);
+
+    await widgetTester.enterText(titleText, 'Editing Title Test');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pump(Duration.zero);
+
+    expect(find.text('Editing Title Test', skipOffstage: false),
+        findsAtLeastNWidgets(2));
+
+    final widgetTypeSelection = find.widgetWithText(
+        DialogDropdownChooser<String>, 'Text Display',
+        skipOffstage: false);
+
+    expect(widgetTypeSelection, findsOneWidget);
+
+    await widgetTester.tap(widgetTypeSelection);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Text Display', skipOffstage: false),
+        findsAtLeastNWidgets(2));
+    expect(find.text('Graph', skipOffstage: false), findsNothing);
+
+    await widgetTester
+        .tap(find.text('Text Display', skipOffstage: false).first);
+    await widgetTester.pumpAndSettle();
+
+    final closeButton =
+        find.widgetWithText(TextButton, 'Close', skipOffstage: false);
+
+    expect(closeButton, findsOneWidget);
+
+    await widgetTester.tap(closeButton);
+    await widgetTester.pumpAndSettle();
   });
 }
