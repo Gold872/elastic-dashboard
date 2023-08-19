@@ -3,11 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i5;
-import 'dart:ui' as _i4;
+import 'dart:async' as _i6;
+import 'dart:ui' as _i5;
 
+import 'package:elastic_dashboard/services/ds_interop.dart' as _i3;
 import 'package:elastic_dashboard/services/nt4.dart' as _i2;
-import 'package:elastic_dashboard/services/nt4_connection.dart' as _i3;
+import 'package:elastic_dashboard/services/nt4_connection.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -42,8 +43,9 @@ class _FakeNT4Client_1 extends _i1.SmartFake implements _i2.NT4Client {
         );
 }
 
-class _FakeNT4Topic_2 extends _i1.SmartFake implements _i2.NT4Topic {
-  _FakeNT4Topic_2(
+class _FakeDSInteropClient_2 extends _i1.SmartFake
+    implements _i3.DSInteropClient {
+  _FakeDSInteropClient_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -52,9 +54,19 @@ class _FakeNT4Topic_2 extends _i1.SmartFake implements _i2.NT4Topic {
         );
 }
 
-class _FakeNT4SubscriptionOptions_3 extends _i1.SmartFake
+class _FakeNT4Topic_3 extends _i1.SmartFake implements _i2.NT4Topic {
+  _FakeNT4Topic_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeNT4SubscriptionOptions_4 extends _i1.SmartFake
     implements _i2.NT4SubscriptionOptions {
-  _FakeNT4SubscriptionOptions_3(
+  _FakeNT4SubscriptionOptions_4(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -66,7 +78,7 @@ class _FakeNT4SubscriptionOptions_3 extends _i1.SmartFake
 /// A class which mocks [NT4Connection].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
+class MockNT4Connection extends _i1.Mock implements _i4.NT4Connection {
   @override
   _i2.NT4Subscription get allTopicsSubscription => (super.noSuchMethod(
         Invocation.getter(#allTopicsSubscription),
@@ -89,13 +101,13 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValueForMissingStub: null,
       );
   @override
-  List<_i4.VoidCallback> get onConnectedListeners => (super.noSuchMethod(
+  List<_i5.VoidCallback> get onConnectedListeners => (super.noSuchMethod(
         Invocation.getter(#onConnectedListeners),
-        returnValue: <_i4.VoidCallback>[],
-        returnValueForMissingStub: <_i4.VoidCallback>[],
-      ) as List<_i4.VoidCallback>);
+        returnValue: <_i5.VoidCallback>[],
+        returnValueForMissingStub: <_i5.VoidCallback>[],
+      ) as List<_i5.VoidCallback>);
   @override
-  set onConnectedListeners(List<_i4.VoidCallback>? _onConnectedListeners) =>
+  set onConnectedListeners(List<_i5.VoidCallback>? _onConnectedListeners) =>
       super.noSuchMethod(
         Invocation.setter(
           #onConnectedListeners,
@@ -104,14 +116,14 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValueForMissingStub: null,
       );
   @override
-  List<_i4.VoidCallback> get onDisconnectedListeners => (super.noSuchMethod(
+  List<_i5.VoidCallback> get onDisconnectedListeners => (super.noSuchMethod(
         Invocation.getter(#onDisconnectedListeners),
-        returnValue: <_i4.VoidCallback>[],
-        returnValueForMissingStub: <_i4.VoidCallback>[],
-      ) as List<_i4.VoidCallback>);
+        returnValue: <_i5.VoidCallback>[],
+        returnValueForMissingStub: <_i5.VoidCallback>[],
+      ) as List<_i5.VoidCallback>);
   @override
   set onDisconnectedListeners(
-          List<_i4.VoidCallback>? _onDisconnectedListeners) =>
+          List<_i5.VoidCallback>? _onDisconnectedListeners) =>
       super.noSuchMethod(
         Invocation.setter(
           #onDisconnectedListeners,
@@ -121,7 +133,7 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
       );
   @override
   bool get isNT4Connected => (super.noSuchMethod(
-        Invocation.getter(#isConnected),
+        Invocation.getter(#isNT4Connected),
         returnValue: false,
         returnValueForMissingStub: false,
       ) as bool);
@@ -138,15 +150,42 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         ),
       ) as _i2.NT4Client);
   @override
+  bool get isDSConnected => (super.noSuchMethod(
+        Invocation.getter(#isDSConnected),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+  @override
+  _i3.DSInteropClient get dsClient => (super.noSuchMethod(
+        Invocation.getter(#dsClient),
+        returnValue: _FakeDSInteropClient_2(
+          this,
+          Invocation.getter(#dsClient),
+        ),
+        returnValueForMissingStub: _FakeDSInteropClient_2(
+          this,
+          Invocation.getter(#dsClient),
+        ),
+      ) as _i3.DSInteropClient);
+  @override
   void nt4Connect(String? ipAddress) => super.noSuchMethod(
         Invocation.method(
-          #connect,
+          #nt4Connect,
           [ipAddress],
         ),
         returnValueForMissingStub: null,
       );
   @override
-  void addConnectedListener(_i4.VoidCallback? callback) => super.noSuchMethod(
+  void dsClientConnect(dynamic Function(String)? onIPAnnounced) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #dsClientConnect,
+          [onIPAnnounced],
+        ),
+        returnValueForMissingStub: null,
+      );
+  @override
+  void addConnectedListener(_i5.VoidCallback? callback) => super.noSuchMethod(
         Invocation.method(
           #addConnectedListener,
           [callback],
@@ -154,7 +193,7 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValueForMissingStub: null,
       );
   @override
-  void addDisconnectedListener(_i4.VoidCallback? callback) =>
+  void addDisconnectedListener(_i5.VoidCallback? callback) =>
       super.noSuchMethod(
         Invocation.method(
           #addDisconnectedListener,
@@ -163,14 +202,14 @@ class MockNT4Connection extends _i1.Mock implements _i3.NT4Connection {
         returnValueForMissingStub: null,
       );
   @override
-  _i5.Stream<bool> connectionStatus() => (super.noSuchMethod(
+  _i6.Stream<bool> connectionStatus() => (super.noSuchMethod(
         Invocation.method(
           #connectionStatus,
           [],
         ),
-        returnValue: _i5.Stream<bool>.empty(),
-        returnValueForMissingStub: _i5.Stream<bool>.empty(),
-      ) as _i5.Stream<bool>);
+        returnValue: _i6.Stream<bool>.empty(),
+        returnValueForMissingStub: _i6.Stream<bool>.empty(),
+      ) as _i6.Stream<bool>);
   @override
   void changeIPAddress(String? ipAddress) => super.noSuchMethod(
         Invocation.method(
@@ -454,7 +493,7 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
             type,
           ],
         ),
-        returnValue: _FakeNT4Topic_2(
+        returnValue: _FakeNT4Topic_3(
           this,
           Invocation.method(
             #publishNewTopic,
@@ -464,7 +503,7 @@ class MockNT4Client extends _i1.Mock implements _i2.NT4Client {
             ],
           ),
         ),
-        returnValueForMissingStub: _FakeNT4Topic_2(
+        returnValueForMissingStub: _FakeNT4Topic_3(
           this,
           Invocation.method(
             #publishNewTopic,
@@ -566,11 +605,11 @@ class MockNT4Subscription extends _i1.Mock implements _i2.NT4Subscription {
   @override
   _i2.NT4SubscriptionOptions get options => (super.noSuchMethod(
         Invocation.getter(#options),
-        returnValue: _FakeNT4SubscriptionOptions_3(
+        returnValue: _FakeNT4SubscriptionOptions_4(
           this,
           Invocation.getter(#options),
         ),
-        returnValueForMissingStub: _FakeNT4SubscriptionOptions_3(
+        returnValueForMissingStub: _FakeNT4SubscriptionOptions_4(
           this,
           Invocation.getter(#options),
         ),
@@ -612,14 +651,14 @@ class MockNT4Subscription extends _i1.Mock implements _i2.NT4Subscription {
         returnValueForMissingStub: null,
       );
   @override
-  _i5.Stream<Object?> periodicStream() => (super.noSuchMethod(
+  _i6.Stream<Object?> periodicStream() => (super.noSuchMethod(
         Invocation.method(
           #periodicStream,
           [],
         ),
-        returnValue: _i5.Stream<Object?>.empty(),
-        returnValueForMissingStub: _i5.Stream<Object?>.empty(),
-      ) as _i5.Stream<Object?>);
+        returnValue: _i6.Stream<Object?>.empty(),
+        returnValueForMissingStub: _i6.Stream<Object?>.empty(),
+      ) as _i6.Stream<Object?>);
   @override
   void updateValue(Object? value) => super.noSuchMethod(
         Invocation.method(
