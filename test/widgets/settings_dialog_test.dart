@@ -93,6 +93,13 @@ void main() {
     expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('Use Team # for IP'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
+
+    final closeButton = find.widgetWithText(TextButton, 'Close');
+
+    expect(closeButton, findsOneWidget);
+
+    await widgetTester.tap(closeButton);
+    await widgetTester.pumpAndSettle();
   });
 
   testWidgets('Change team number', (widgetTester) async {
