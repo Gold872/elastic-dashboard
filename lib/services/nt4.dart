@@ -28,6 +28,9 @@ class NT4Client {
 
   WebSocketChannel? _ws;
 
+  Map<int, NT4Subscription> get subscriptions => _subscriptions;
+  Set<NT4Subscription> get subscribedTopics => _subscribedTopics;
+
   NT4Client({
     required this.serverBaseAddress,
     this.onConnect,
