@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
@@ -10,10 +11,12 @@ import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import '../test_util.dart';
 
@@ -297,5 +300,110 @@ void main() {
         find.widgetWithText(AnimatedContainer, 'Teleoperated'), findsNothing);
     expect(find.widgetWithText(AnimatedContainer, 'New Tab Name!'),
         findsOneWidget);
+  });
+
+  testWidgets('Minimizing window', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final minimizeButton = find.byType(DecoratedMinimizeButton);
+
+    expect(minimizeButton, findsOneWidget);
+
+    await widgetTester.tap(minimizeButton);
+  });
+
+  testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final appBar = find.byType(CustomAppBar);
+
+    expect(appBar, findsOneWidget);
+
+    await widgetTester.tap(appBar);
+    await widgetTester.pump(kDoubleTapMinTime);
+    await widgetTester.tap(appBar);
+
+    await widgetTester.pumpAndSettle();
+
+    final maximizeButton = find.byType(DecoratedMaximizeButton);
+
+    expect(maximizeButton, findsOneWidget);
+
+    await widgetTester.tap(maximizeButton);
+  });
+
+  testWidgets('Closing window', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final closeButton = find.byType(DecoratedCloseButton);
+
+    expect(closeButton, findsOneWidget);
+
+    await widgetTester.tap(closeButton);
+  });
+
+  testWidgets('Opening settings', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final settingsButton = find.widgetWithIcon(MenuItemButton, Icons.settings);
+
+    expect(settingsButton, findsOneWidget);
+
+    final settingsButtonWidget =
+        settingsButton.evaluate().first.widget as MenuItemButton;
+
+    settingsButtonWidget.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(SettingsDialog), findsOneWidget);
   });
 }

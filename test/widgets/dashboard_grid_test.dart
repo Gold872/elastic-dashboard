@@ -20,24 +20,28 @@ import 'package:provider/provider.dart';
 
 import '../test_util.dart';
 
-void main() {
+void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setupMockOfflineNT4();
+
+  late String jsonString;
+  late Map<String, dynamic> jsonData;
+
+  setUpAll(() async {
+    setupMockOfflineNT4();
+    await FieldImages.loadFields('assets/fields/');
+
+    String filePath =
+        '${Directory.current.path}/test_resources/test-layout.json';
+
+    jsonString = File(filePath).readAsStringSync();
+    jsonData = jsonDecode(jsonString);
+  });
 
   testWidgets('Dashboard grid loading', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);
     widgetTester.view.devicePixelRatio = 1.0;
     // WidgetController.hitTestWarningShouldBeFatal = true;
-
-    await FieldImages.loadFields('assets/fields/');
-
-    String filePath =
-        '${Directory.current.path}/test_resources/test-layout.json';
-
-    String jsonString = File(filePath).readAsStringSync();
-
-    Map<String, dynamic> jsonData = jsonDecode(jsonString);
 
     expect(jsonData.containsKey('tabs'), true);
 
@@ -72,6 +76,28 @@ void main() {
     expect(find.bySubtype<PowerDistribution>(), findsOneWidget);
     expect(find.bySubtype<Gyro>(), findsOneWidget);
     expect(find.bySubtype<PIDControllerWidget>(), findsOneWidget);
+  });
+
+  testWidgets('Editing properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider(
+            create: (context) => DashboardGridModel(),
+            child: DashboardGrid.fromJson(
+              key: GlobalKey(),
+              jsonData: jsonData['tabs'][0]['grid_layout'],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pump(Duration.zero);
 
     await widgetTester.ensureVisible(find.text('Test Number'));
 
@@ -131,5 +157,52 @@ void main() {
 
     await widgetTester.tap(closeButton);
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('Dragging widgets', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider(
+            create: (context) => DashboardGridModel(),
+            child: DashboardGrid.fromJson(
+              key: GlobalKey(),
+              jsonData: jsonData['tabs'][0]['grid_layout'],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pump(Duration.zero);
+
+    final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
+
+    expect(gyroWidget, findsOneWidget);
+
+    // Drag to a valid location
+    await widgetTester.drag(gyroWidget, const Offset(256, -128));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(gyroWidget, findsOneWidget);
+
+    // Drag back to its original location
+    await widgetTester.drag(gyroWidget, const Offset(-256, 128));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(gyroWidget, findsOneWidget);
+
+    // Drag to an invalid location
+    await widgetTester.drag(gyroWidget, const Offset(0, -128));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(gyroWidget, findsOneWidget);
   });
 }
