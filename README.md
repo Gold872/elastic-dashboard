@@ -1,21 +1,33 @@
 # ![Elastic Logo](assets/logos/logo_full.png)
 
+[![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
+
 A simple, modern dashboard for FRC teams.
 
 ## About
 
-Elastic is a simple and modern Shuffleboard alternative made by Team 353. The main features include
+Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. The main features include
 
 - Draggable and resizable card widgets
 - Adding widgets from different NT topics
-- Customizable color scheme for your team
+- Customizable color scheme
+- Automatic IP retrieval from the FRC Driver Station
+
+![Example Layout](/screenshots/example_layout.png)
+
+## Documentation
+View the online documentation [here](https://github.com/Gold872/elastic-dashboard/wiki)
 
 ## Roadmap
 
-Elastic is not complete, there are still more features in the works, such as:
+Elastic is not complete, there are still more features in the works
 
+High Priority (estimated to be released before the start of the 2024 season):
 * All command and subsystem widgets
-* Creating layouts with code on a robot program
+* List layouts
+
+Lower Priority
+* API to manage layout with code on a robot program
 
 ## Special Thanks
 
