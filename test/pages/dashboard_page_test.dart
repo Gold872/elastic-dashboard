@@ -92,6 +92,38 @@ void main() {
     expect(find.text('Autonomous'), findsOneWidget);
   });
 
+  testWidgets('Save layout (button)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final fileButton = find.widgetWithText(SubmenuButton, 'File');
+
+    expect(fileButton, findsOneWidget);
+
+    await widgetTester.tap(fileButton);
+    await widgetTester.pumpAndSettle();
+
+    final saveButton = find.widgetWithText(MenuItemButton, 'Save');
+
+    expect(saveButton, findsOneWidget);
+
+    await widgetTester.tap(saveButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(jsonString, preferences.getString(PrefKeys.layout));
+  });
+
   testWidgets('Add widget dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     setupMockOnlineNT4();
@@ -146,6 +178,38 @@ void main() {
 
     await widgetTester.drag(dialogDragHandle, const Offset(100, 0));
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('About dialog', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final helpButton = find.widgetWithText(SubmenuButton, 'Help');
+
+    expect(helpButton, findsOneWidget);
+
+    await widgetTester.tap(helpButton);
+    await widgetTester.pumpAndSettle();
+
+    final showAboutDialogButton = find.widgetWithText(MenuItemButton, 'About');
+
+    expect(showAboutDialogButton, findsOneWidget);
+
+    await widgetTester.tap(showAboutDialogButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(AboutDialog), findsOneWidget);
   });
 
   testWidgets('Changing tabs', (widgetTester) async {
