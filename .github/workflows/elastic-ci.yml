@@ -7,9 +7,9 @@ name: Elastic
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   formatting-analysis:
@@ -55,5 +55,9 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Run tests
-        run: flutter test
-        
+        run: flutter test --coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
