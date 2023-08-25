@@ -236,7 +236,7 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
-  void clearWidgets(DashboardGridModel model) {
+  void clearWidgets() {
     _widgetContainers.clear();
     refresh();
   }
@@ -413,7 +413,7 @@ class DashboardGrid extends StatelessWidget {
             title: const Text('Clear Layout'),
             onTap: () {
               Navigator.of(context).pop();
-              clearWidgets(model!);
+              clearWidgets();
             },
           ),
         ];

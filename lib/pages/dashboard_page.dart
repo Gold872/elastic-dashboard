@@ -400,20 +400,25 @@ class _DashboardPageState extends State<DashboardPage> {
         SubmenuButton(
             style: buttonStyle,
             menuChildren: [
-              // Show Grid
+              // Clear layout
               MenuItemButton(
                 style: buttonStyle,
                 onPressed: () {
                   setState(() {
-                    Globals.showGrid = !Globals.showGrid;
-
-                    Future(() async {
-                      await _preferences.setBool(
-                          PrefKeys.showGrid, Globals.showGrid);
-                    });
+                    grids[currentTabIndex].clearWidgets();
                   });
                 },
-                child: const Text('Toggle Grid'),
+                child: const Text('Clear Layout'),
+              ),
+              // Add widget
+              MenuItemButton(
+                style: buttonStyle,
+                onPressed: () {
+                  setState(() {
+                    displayAddWidgetDialog();
+                  });
+                },
+                child: const Text('Add Widget'),
               ),
             ],
             child: const Text(
