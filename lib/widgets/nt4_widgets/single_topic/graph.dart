@@ -1,5 +1,7 @@
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +12,14 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   @override
   String type = 'Graph';
 
-  final Color color;
   late double timeDisplayed;
   double? minValue;
   double? maxValue;
+  late bool showFillBelowLine;
+  late bool showLineGradient;
+  late Color mainColor;
+  late Color secondaryColor;
+
   late final List<double> _graphData;
 
   GraphWidget({
@@ -23,7 +29,9 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,
-    this.color = Colors.lightBlue,
+    this.showFillBelowLine = true,
+    this.showLineGradient = true,
+    this.mainColor = Colors.cyan,
   }) {
     super.topic = topic;
     super.period = period;
@@ -31,13 +39,15 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     init();
   }
 
-  GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : color = Colors.lightBlue {
+  GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = jsonData['topic'] ?? '';
     period = jsonData['period'] ?? Globals.defaultPeriod;
     timeDisplayed = jsonData['time_displayed'] ?? 5.0;
     minValue = jsonData['min_value'];
     maxValue = jsonData['max_value'];
+    showFillBelowLine = jsonData['fill_below_line'] ?? true;
+    showLineGradient = jsonData['line_gradient'] ?? true;
+    mainColor = Color(jsonData['color'] ?? Colors.cyan.value);
 
     init();
   }
@@ -48,9 +58,9 @@ class GraphWidget extends StatelessWidget with NT4Widget {
 
     _graphData = [];
 
-    for (int i = 0; i < 5 ~/ period; i++) {
-      _graphData.add(0.0);
-    }
+    resetGraphData();
+
+    initColors();
   }
 
   @override
@@ -64,8 +74,29 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     _graphData.clear();
 
     for (int i = 0; i < timeDisplayed ~/ period; i++) {
-      _graphData.add(0.0);
+      _graphData.add((minValue != null && minValue! > 0.0) ? minValue! : 0.0);
     }
+  }
+
+  double wrapHue(double hue) {
+    if (hue < 0) {
+      return ((hue % 360) + 360) % 360;
+    } else {
+      return hue % 360;
+    }
+  }
+
+  void initColors() {
+    HSLColor baseColor = HSLColor.fromColor(mainColor);
+
+    HSLColor lightColor = HSLColor.fromAHSL(
+      baseColor.alpha,
+      wrapHue(baseColor.hue + 20),
+      baseColor.saturation,
+      baseColor.lightness,
+    );
+
+    secondaryColor = lightColor.toColor();
   }
 
   @override
@@ -76,26 +107,49 @@ class GraphWidget extends StatelessWidget with NT4Widget {
       'time_displayed': timeDisplayed,
       'min_value': minValue,
       'max_value': maxValue,
+      'fill_below_line': showFillBelowLine,
+      'line_gradient': showLineGradient,
+      'color': mainColor.value,
     };
   }
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
     return [
-      DialogTextInput(
-        onSubmit: (value) {
-          double? newTime = double.tryParse(value);
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: DialogColorPicker(
+                onColorPicked: (color) {
+                  mainColor = color;
 
-          if (newTime == null) {
-            return;
-          }
-          timeDisplayed = newTime;
-          resetGraphData();
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
-        label: 'Time Displayed (Seconds)',
-        initialText: timeDisplayed.toString(),
+                  initColors();
+
+                  refresh();
+                },
+                label: 'Graph Color',
+                initialColor: mainColor),
+          ),
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newTime = double.tryParse(value);
+
+                if (newTime == null) {
+                  return;
+                }
+                timeDisplayed = newTime;
+                resetGraphData();
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
+              label: 'Time Displayed (Seconds)',
+              initialText: timeDisplayed.toString(),
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: 5),
       Row(
@@ -136,6 +190,34 @@ class GraphWidget extends StatelessWidget with NT4Widget {
               label: 'Maximum',
               initialText: maxValue?.toString(),
               allowEmptySubmission: true,
+            ),
+          ),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: showFillBelowLine,
+              label: 'Show Fill Below Line',
+              onToggle: (value) {
+                showFillBelowLine = value;
+
+                refresh();
+              },
+            ),
+          ),
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: showLineGradient,
+              label: 'Show Line Gradient',
+              onToggle: (value) {
+                showLineGradient = value;
+
+                refresh();
+              },
             ),
           ),
         ],
@@ -203,15 +285,25 @@ class GraphWidget extends StatelessWidget with NT4Widget {
             lineBarsData: [
               LineChartBarData(
                 spots: data,
-                isStrokeCapRound: false,
+                isStrokeCapRound: true,
                 dotData: const FlDotData(show: false),
-                color: Colors.cyan,
+                color: (!showLineGradient) ? mainColor : null,
+                gradient: (showLineGradient)
+                    ? LinearGradient(colors: [
+                        mainColor,
+                        secondaryColor,
+                      ])
+                    : null,
                 belowBarData: BarAreaData(
-                  show: true,
-                  gradient: LinearGradient(colors: [
-                    Colors.blue.withOpacity(0.3),
-                    Colors.lightBlueAccent.withOpacity(0.3)
-                  ]),
+                  show: showFillBelowLine,
+                  color:
+                      (!showLineGradient) ? mainColor.withOpacity(0.3) : null,
+                  gradient: (showLineGradient)
+                      ? LinearGradient(colors: [
+                          mainColor.withOpacity(0.3),
+                          secondaryColor.withOpacity(0.3)
+                        ])
+                      : null,
                 ),
               ),
             ],

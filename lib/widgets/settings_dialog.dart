@@ -77,26 +77,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        constraints: const BoxConstraints(maxWidth: 75),
-                        child: const Text('Use Team # for IP',
-                            textAlign: TextAlign.center),
-                      ),
-                      const SizedBox(width: 5),
-                      DialogToggleSwitch(
-                          key: const ValueKey('Use Team # for IP'),
-                          onToggle: (value) {
-                            setState(() {
-                              widget.onUseTeamNumberToggle?.call(value);
-                            });
-                          },
-                          initialValue: widget.preferences
-                                  .getBool(PrefKeys.useTeamNumberForIP) ??
-                              false),
-                    ],
+                  child: DialogToggleSwitch(
+                    initialValue: widget.preferences
+                            .getBool(PrefKeys.useTeamNumberForIP) ??
+                        false,
+                    label: 'Use Team # for IP',
+                    onToggle: (value) {
+                      setState(() {
+                        widget.onUseTeamNumberToggle?.call(value);
+                      });
+                    },
                   ),
                 ),
                 Flexible(
@@ -121,23 +111,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('Show Grid'),
-                      const SizedBox(width: 5),
-                      DialogToggleSwitch(
-                        key: const ValueKey('Show Grid'),
-                        initialValue:
-                            widget.preferences.getBool(PrefKeys.showGrid) ??
-                                false,
-                        onToggle: (value) {
-                          setState(() {
-                            widget.onGridToggle?.call(value);
-                          });
-                        },
-                      ),
-                    ],
+                  child: DialogToggleSwitch(
+                    initialValue:
+                        widget.preferences.getBool(PrefKeys.showGrid) ?? false,
+                    label: 'Show Grid',
+                    onToggle: (value) {
+                      setState(() {
+                        widget.onGridToggle?.call(value);
+                      });
+                    },
                   ),
                 ),
                 Flexible(

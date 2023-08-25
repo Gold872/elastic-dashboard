@@ -2,6 +2,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -71,11 +72,8 @@ void main() {
     expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('Use Team # for IP'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
-    expect(find.text('Show Grid'), findsOneWidget);
-    expect(find.text('Grid Size'), findsOneWidget);
-
-    expect(find.byKey(const ValueKey('Use Team # for IP')), findsOneWidget);
-    expect(find.byKey(const ValueKey('Show Grid')), findsOneWidget);
+    expect(find.text('Show Grid'), findsWidgets);
+    expect(find.text('Grid Size'), findsWidgets);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -198,7 +196,9 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ipSwitch = find.byKey(const ValueKey('Use Team # for IP'));
+    final ipSwitch = find.descendant(
+        of: find.widgetWithText(DialogToggleSwitch, 'Use Team # for IP'),
+        matching: find.byType(Switch));
 
     expect(ipSwitch, findsOneWidget);
 
@@ -265,7 +265,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final gridSwitch = find.byKey(const ValueKey('Show Grid'));
+    final gridSwitch = find.widgetWithText(DialogToggleSwitch, 'Show Grid');
 
     expect(gridSwitch, findsOneWidget);
 

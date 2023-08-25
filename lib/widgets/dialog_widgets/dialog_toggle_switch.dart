@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 class DialogToggleSwitch extends StatefulWidget {
   final Function(bool value) onToggle;
   final bool initialValue;
+  final String? label;
 
   const DialogToggleSwitch(
-      {super.key, this.initialValue = false, required this.onToggle});
+      {super.key,
+      this.initialValue = false,
+      this.label,
+      required this.onToggle});
 
   @override
   State<DialogToggleSwitch> createState() => _DialogToggleSwitchState();
@@ -23,13 +27,23 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return Switch(
-      onChanged: (value) {
-        widget.onToggle.call(value);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 75),
+          child: Text(widget.label ?? '', textAlign: TextAlign.center),
+        ),
+        const SizedBox(width: 5),
+        Switch(
+          onChanged: (value) {
+            widget.onToggle.call(value);
 
-        setState(() => this.value = value);
-      },
-      value: value,
+            setState(() => this.value = value);
+          },
+          value: value,
+        ),
+      ],
     );
   }
 }
