@@ -194,6 +194,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
           ),
         ],
       ),
+      const SizedBox(height: 5),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.max,
