@@ -289,6 +289,28 @@ class _DashboardPageState extends State<DashboardPage> {
 
             _updateIPAddress(newIPAddress: data);
           },
+          onGridToggle: (value) async {
+            setState(() {
+              Globals.showGrid = value;
+            });
+
+            await _preferences.setBool(PrefKeys.showGrid, value);
+          },
+          onGridSizeChanged: (gridSize) async {
+            if (gridSize == null) {
+              return;
+            }
+
+            int? newGridSize = int.tryParse(gridSize);
+
+            if (newGridSize == null) {
+              return;
+            }
+
+            setState(() => Globals.gridSize = newGridSize);
+
+            await _preferences.setInt(PrefKeys.gridSize, newGridSize);
+          },
           onColorChanged: widget.onColorChanged),
     );
   }
@@ -385,7 +407,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   setState(() {
                     Globals.showGrid = !Globals.showGrid;
 
-                    _preferences.setBool('show_grid', Globals.showGrid);
+                    Future(() async {
+                      await _preferences.setBool(
+                          PrefKeys.showGrid, Globals.showGrid);
+                    });
                   });
                 },
                 child: const Text('Toggle Grid'),

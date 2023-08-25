@@ -2,7 +2,6 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -23,6 +22,10 @@ class FakeSettingsMethods {
   void changeTeamNumber() {}
 
   void changeAutoTeamIP() {}
+
+  void changeShowGrid() {}
+
+  void changeGridSize() {}
 }
 
 void main() {
@@ -37,6 +40,8 @@ void main() {
       PrefKeys.teamNumber: 353,
       PrefKeys.useTeamNumberForIP: false,
       PrefKeys.teamColor: Colors.blueAccent.value,
+      PrefKeys.showGrid: false,
+      PrefKeys.gridSize: 128,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -54,33 +59,6 @@ void main() {
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
-
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
-
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
-
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
-          onUseTeamNumberToggle: (value) async {
-            fakeSettings.changeAutoTeamIP();
-
-            await preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (value) {
-              await preferences.setString(
-                  PrefKeys.ipAddress,
-                  IPAddressUtil.teamNumberToIP(
-                      preferences.getInt(PrefKeys.teamNumber)!));
-            }
-          },
           preferences: preferences,
         ),
       ),
@@ -93,6 +71,11 @@ void main() {
     expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('Use Team # for IP'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
+    expect(find.text('Show Grid'), findsOneWidget);
+    expect(find.text('Grid Size'), findsOneWidget);
+
+    expect(find.byKey(const ValueKey('Use Team # for IP')), findsOneWidget);
+    expect(find.byKey(const ValueKey('Show Grid')), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -108,32 +91,10 @@ void main() {
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
-
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
-
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
           onTeamNumberChanged: (data) async {
             fakeSettings.changeTeamNumber();
 
             await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
-          onUseTeamNumberToggle: (value) async {
-            fakeSettings.changeAutoTeamIP();
-
-            await preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (value) {
-              await preferences.setString(
-                  PrefKeys.ipAddress,
-                  IPAddressUtil.teamNumberToIP(
-                      preferences.getInt(PrefKeys.teamNumber)!));
-            }
           },
           preferences: preferences,
         ),
@@ -167,28 +128,6 @@ void main() {
             fakeSettings.changeColor();
 
             await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
-
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
-
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
-          onUseTeamNumberToggle: (value) async {
-            fakeSettings.changeAutoTeamIP();
-
-            await preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (value) {
-              await preferences.setString(
-                  PrefKeys.ipAddress,
-                  IPAddressUtil.teamNumberToIP(
-                      preferences.getInt(PrefKeys.teamNumber)!));
-            }
           },
           preferences: preferences,
         ),
@@ -240,21 +179,6 @@ void main() {
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
-
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
-
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
-
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
           onUseTeamNumberToggle: (value) async {
             fakeSettings.changeAutoTeamIP();
 
@@ -274,18 +198,17 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ipSwitch = find.byType(DialogToggleSwitch);
+    final ipSwitch = find.byKey(const ValueKey('Use Team # for IP'));
 
     expect(ipSwitch, findsOneWidget);
 
     await widgetTester.tap(ipSwitch);
-
     await widgetTester.pumpAndSettle();
 
     expect(preferences.getBool(PrefKeys.useTeamNumberForIP), true);
     expect(preferences.getString(PrefKeys.ipAddress), '10.26.01.2');
 
-    await widgetTester.tap(find.byType(DialogToggleSwitch));
+    await widgetTester.tap(ipSwitch);
 
     await widgetTester.pumpAndSettle();
 
@@ -300,32 +223,10 @@ void main() {
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
-
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
           onIPAddressChanged: (data) async {
             fakeSettings.changeIPAddress();
 
             await preferences.setString(PrefKeys.ipAddress, data!);
-          },
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
-
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
-          onUseTeamNumberToggle: (value) async {
-            fakeSettings.changeAutoTeamIP();
-
-            await preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (value) {
-              await preferences.setString(
-                  PrefKeys.ipAddress,
-                  IPAddressUtil.teamNumberToIP(
-                      preferences.getInt(PrefKeys.teamNumber)!));
-            }
           },
           preferences: preferences,
         ),
@@ -344,5 +245,76 @@ void main() {
 
     expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
     verify(fakeSettings.changeIPAddress()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Toggle grid', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onGridToggle: (value) async {
+            fakeSettings.changeShowGrid();
+
+            await preferences.setBool(PrefKeys.showGrid, value);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final gridSwitch = find.byKey(const ValueKey('Show Grid'));
+
+    expect(gridSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: gridSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.showGrid), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.showGrid), false);
+    verify(fakeSettings.changeShowGrid()).called(2);
+  });
+
+  testWidgets('Change grid size', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onGridSizeChanged: (gridSize) async {
+            fakeSettings.changeGridSize();
+
+            await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final gridSizeField = find.widgetWithText(DialogTextInput, 'Grid Size');
+
+    expect(gridSizeField, findsOneWidget);
+
+    await widgetTester.enterText(gridSizeField, '64');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.gridSize), 64);
+    verify(fakeSettings.changeGridSize()).called(greaterThanOrEqualTo(1));
   });
 }

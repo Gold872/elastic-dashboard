@@ -9,18 +9,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsDialog extends StatefulWidget {
   final SharedPreferences preferences;
 
-  final Function(String? data) onIPAddressChanged;
-  final Function(String? data) onTeamNumberChanged;
-  final Function(bool value) onUseTeamNumberToggle;
+  final Function(String? data)? onIPAddressChanged;
+  final Function(String? data)? onTeamNumberChanged;
+  final Function(bool value)? onUseTeamNumberToggle;
   final Function(Color color)? onColorChanged;
+  final Function(bool value)? onGridToggle;
+  final Function(String? gridSize)? onGridSizeChanged;
 
   const SettingsDialog({
     super.key,
     required this.preferences,
-    required this.onTeamNumberChanged,
-    required this.onUseTeamNumberToggle,
-    required this.onIPAddressChanged,
-    required this.onColorChanged,
+    this.onTeamNumberChanged,
+    this.onUseTeamNumberToggle,
+    this.onIPAddressChanged,
+    this.onColorChanged,
+    this.onGridToggle,
+    this.onGridSizeChanged,
   });
 
   @override
@@ -51,7 +55,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     label: 'Team Number',
                     onSubmit: (data) {
                       setState(() {
-                        widget.onTeamNumberChanged.call(data);
+                        widget.onTeamNumberChanged?.call(data);
                       });
                     },
                     formatter:
@@ -83,9 +87,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ),
                       const SizedBox(width: 5),
                       DialogToggleSwitch(
+                          key: const ValueKey('Use Team # for IP'),
                           onToggle: (value) {
                             setState(() {
-                              widget.onUseTeamNumberToggle.call(value);
+                              widget.onUseTeamNumberToggle?.call(value);
                             });
                           },
                           initialValue: widget.preferences
@@ -104,13 +109,55 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     label: 'IP Address',
                     onSubmit: (String? data) {
                       setState(() {
-                        widget.onIPAddressChanged.call(data);
+                        widget.onIPAddressChanged?.call(data);
                       });
                     },
                   ),
                 ),
               ],
             ),
+            const Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Show Grid'),
+                      const SizedBox(width: 5),
+                      DialogToggleSwitch(
+                        key: const ValueKey('Show Grid'),
+                        initialValue:
+                            widget.preferences.getBool(PrefKeys.showGrid) ??
+                                false,
+                        onToggle: (value) {
+                          setState(() {
+                            widget.onGridToggle?.call(value);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: DialogTextInput(
+                    initialText: widget.preferences
+                            .getInt(PrefKeys.gridSize)
+                            ?.toString() ??
+                        Globals.gridSize.toString(),
+                    label: 'Grid Size',
+                    onSubmit: (value) {
+                      setState(() {
+                        widget.onGridSizeChanged?.call(value);
+                      });
+                    },
+                    formatter:
+                        FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+                  ),
+                )
+              ],
+            )
           ],
         ),
       ),
