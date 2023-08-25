@@ -420,7 +420,7 @@ void main() {
     await widgetTester.tap(maximizeButton);
   });
 
-  testWidgets('Closing window', (widgetTester) async {
+  testWidgets('Closing window (All changes saved)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     setupMockOfflineNT4();
 
@@ -435,11 +435,67 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
+    final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
+
+    expect(gyroWidget, findsOneWidget);
+
+    // Drag to a location
+    await widgetTester.drag(gyroWidget, const Offset(256, -128));
+    await widgetTester.pumpAndSettle();
+
+    // Drag back to its original location
+    await widgetTester.drag(gyroWidget, const Offset(-256, 128));
+    await widgetTester.pumpAndSettle();
+
     final closeButton = find.byType(DecoratedCloseButton);
 
     expect(closeButton, findsOneWidget);
 
     await widgetTester.tap(closeButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsNothing);
+  });
+
+  testWidgets('Closing window (Unsaved changes)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
+
+    expect(gyroWidget, findsOneWidget);
+
+    // Drag to a location
+    await widgetTester.drag(gyroWidget, const Offset(256, -128));
+
+    await widgetTester.pumpAndSettle();
+
+    final closeButton = find.byType(DecoratedCloseButton);
+
+    expect(closeButton, findsOneWidget);
+
+    await widgetTester.tap(closeButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsOneWidget);
+
+    final discardButton = find.widgetWithText(TextButton, 'Discard');
+
+    expect(discardButton, findsOneWidget);
+
+    await widgetTester.tap(discardButton);
+    await widgetTester.pumpAndSettle();
   });
 
   testWidgets('Opening settings', (widgetTester) async {

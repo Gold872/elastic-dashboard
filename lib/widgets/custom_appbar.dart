@@ -6,12 +6,15 @@ class CustomAppBar extends AppBar {
   final String titleText;
   final Color? appBarColor;
   final MenuBar menuBar;
+  final VoidCallback? onWindowClose;
+
   static const ThemeType buttonType = ThemeType.auto;
 
   CustomAppBar(
       {super.key,
       this.titleText = 'Elastic',
       this.appBarColor,
+      this.onWindowClose,
       required this.menuBar})
       : super(
           toolbarHeight: 40,
@@ -35,7 +38,13 @@ class CustomAppBar extends AppBar {
             ),
             DecoratedCloseButton(
               type: buttonType,
-              onPressed: () async => await windowManager.close(),
+              onPressed: () async {
+                if (onWindowClose == null) {
+                  await windowManager.close();
+                } else {
+                  onWindowClose.call();
+                }
+              },
             ),
           ],
           title: _WindowDragArea(

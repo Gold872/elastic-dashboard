@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 class DashboardPage extends StatefulWidget {
   final Stream<dynamic> connectionStream;
@@ -98,7 +100,7 @@ class _DashboardPageState extends State<DashboardPage> {
     };
   }
 
-  void saveLayout() async {
+  Future<void> saveLayout() async {
     Map<String, dynamic> jsonData = toJson();
 
     SnackBar savedMessage = SnackBar(
@@ -342,6 +344,38 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() {});
   }
 
+  void showCloseConfirmation(BuildContext context) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Unsaved Changes'),
+        content: const Text(
+            'You have unsaved changes, are you sure you want to continue? All unsaved changes will be lost!'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await saveLayout();
+
+              await windowManager.close();
+            },
+            child: const Text('Save'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await windowManager.close();
+            },
+            child: const Text('Discard'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle? menuStyle = Theme.of(context).textTheme.bodySmall;
@@ -453,7 +487,23 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     return Scaffold(
-      appBar: CustomAppBar(menuBar: menuBar),
+      appBar: CustomAppBar(
+        onWindowClose: () async {
+          Map<String, dynamic> savedJson =
+              jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
+          Map<String, dynamic> currentJson = toJson();
+
+          bool showConfirmation =
+              !const DeepCollectionEquality().equals(savedJson, currentJson);
+
+          if (showConfirmation) {
+            showCloseConfirmation(context);
+          } else {
+            await windowManager.close();
+          }
+        },
+        menuBar: menuBar,
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: displayAddWidgetDialog,
         label: const Text('Add Widget'),
