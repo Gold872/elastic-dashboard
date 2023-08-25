@@ -37,7 +37,7 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(widget.label),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
         ElevatedButton(
           onPressed: () {
             showDialog(
