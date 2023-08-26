@@ -108,7 +108,7 @@ class DashboardGrid extends StatelessWidget {
 
   /// Returns weather `location` will overlap with widgets already on the dashboard
   bool isValidLocation(Rect location) {
-    for (DraggableNT4WidgetContainer container in _widgetContainers) {
+    for (DraggableWidgetContainer container in _widgetContainers) {
       if (container.displayRect.overlaps(location)) {
         return false;
       }
@@ -117,7 +117,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void onNTConnect() {
-    for (DraggableNT4WidgetContainer container in _widgetContainers) {
+    for (DraggableWidgetContainer container in _widgetContainers) {
       container.enabled = true;
 
       container.refresh();
@@ -127,7 +127,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void onNTDisconnect() {
-    for (DraggableNT4WidgetContainer container in _widgetContainers) {
+    for (DraggableWidgetContainer container in _widgetContainers) {
       container.enabled = false;
 
       container.refresh();
@@ -367,10 +367,8 @@ class DashboardGrid extends StatelessWidget {
         ),
       );
 
-      double previewX =
-          DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY =
-          DraggableWidgetContainer.snapToGrid(localPosition.dy);
+      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
+      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
 
       Rect previewLocation =
           Rect.fromLTWH(previewX, previewY, container.width, container.height);
