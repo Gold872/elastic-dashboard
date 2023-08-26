@@ -367,10 +367,8 @@ class DashboardGrid extends StatelessWidget {
         ),
       );
 
-      double previewX =
-          DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY =
-          DraggableWidgetContainer.snapToGrid(localPosition.dy);
+      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
+      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
 
       Rect previewLocation =
           Rect.fromLTWH(previewX, previewY, container.width, container.height);
