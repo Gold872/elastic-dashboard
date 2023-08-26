@@ -1,6 +1,6 @@
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';

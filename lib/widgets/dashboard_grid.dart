@@ -1,7 +1,7 @@
 import 'package:contextmenu/contextmenu.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/widgets/draggable_nt4_widget_container.dart';
-import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

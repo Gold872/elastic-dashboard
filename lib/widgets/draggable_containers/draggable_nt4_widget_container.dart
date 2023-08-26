@@ -1,5 +1,5 @@
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
-import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
@@ -16,11 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'dialog_widgets/dialog_text_input.dart';
-import 'nt4_widgets/single_topic/boolean_box.dart';
-import 'nt4_widgets/single_topic/graph.dart';
-import 'nt4_widgets/nt4_widget.dart';
-import 'nt4_widgets/single_topic/number_bar.dart';
+import '../dialog_widgets/dialog_text_input.dart';
+import '../nt4_widgets/single_topic/boolean_box.dart';
+import '../nt4_widgets/single_topic/graph.dart';
+import '../nt4_widgets/nt4_widget.dart';
+import '../nt4_widgets/single_topic/number_bar.dart';
 
 class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   NT4Widget? child;
