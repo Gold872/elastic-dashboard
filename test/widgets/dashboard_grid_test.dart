@@ -5,6 +5,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -67,7 +68,7 @@ void main() async {
 
     // await widgetTester.pumpAndSettle();
 
-    expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(9));
+    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(9));
     expect(find.bySubtype<NT4Widget>(), findsNWidgets(9));
 
     expect(find.bySubtype<TextDisplay>(), findsOneWidget);
