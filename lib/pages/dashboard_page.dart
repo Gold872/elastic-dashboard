@@ -357,7 +357,10 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: () async {
               await saveLayout();
 
-              await windowManager.close();
+              Future.delayed(
+                const Duration(milliseconds: 250),
+                () async => await windowManager.close(),
+              );
             },
             child: const Text('Save'),
           ),
