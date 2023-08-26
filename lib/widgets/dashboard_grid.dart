@@ -1,5 +1,6 @@
 import 'package:contextmenu/contextmenu.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,8 @@ class DashboardGridModel extends ChangeNotifier {
 class DashboardGrid extends StatelessWidget {
   final Map<String, dynamic>? jsonData;
 
-  final List<DraggableWidgetContainer> _widgetContainers = [];
-  final List<DraggableWidgetContainer> _draggingContainers = [];
+  final List<DraggableNT4WidgetContainer> _widgetContainers = [];
+  final List<DraggableNT4WidgetContainer> _draggingContainers = [];
 
   MapEntry<WidgetContainer, Offset>? _containerDraggingIn;
 
@@ -42,7 +43,7 @@ class DashboardGrid extends StatelessWidget {
 
   void loadFromJson(Map<String, dynamic> jsonData) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
-      _widgetContainers.add(DraggableWidgetContainer.fromJson(
+      _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
         key: UniqueKey(),
         enabled: nt4Connection.isNT4Connected,
         validMoveLocation: isValidMoveLocation,
@@ -74,7 +75,7 @@ class DashboardGrid extends StatelessWidget {
 
   Map<String, dynamic> toJson() {
     var containers = [];
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       containers.add(container.toJson());
     }
 
@@ -93,7 +94,7 @@ class DashboardGrid extends StatelessWidget {
       gridSize = MediaQuery.of(context).size;
     }
 
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       if (container.displayRect.overlaps(location) && widget != container) {
         return false;
       } else if (gridSize != null &&
@@ -107,7 +108,7 @@ class DashboardGrid extends StatelessWidget {
 
   /// Returns weather `location` will overlap with widgets already on the dashboard
   bool isValidLocation(Rect location) {
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       if (container.displayRect.overlaps(location)) {
         return false;
       }
@@ -116,7 +117,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void onNTConnect() {
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       container.enabled = true;
 
       container.refresh();
@@ -126,7 +127,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void onNTDisconnect() {
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       container.enabled = false;
 
       container.refresh();
@@ -201,7 +202,7 @@ class DashboardGrid extends StatelessWidget {
 
   void addWidget(WidgetContainer widget, Rect initialPosition,
       {bool enabled = true}) {
-    _widgetContainers.add(DraggableWidgetContainer(
+    _widgetContainers.add(DraggableNT4WidgetContainer(
         key: UniqueKey(),
         title: widget.title,
         initialPosition: initialPosition,
@@ -229,7 +230,7 @@ class DashboardGrid extends StatelessWidget {
         child: widget.child! as NT4Widget));
   }
 
-  void removeWidget(DraggableWidgetContainer widget) {
+  void removeWidget(DraggableNT4WidgetContainer widget) {
     _widgetContainers.remove(widget);
     widget.child?.dispose();
     widget.child?.unSubscribe();
@@ -256,7 +257,7 @@ class DashboardGrid extends StatelessWidget {
     List<Widget> draggingInWidgets = [];
     List<Widget> previewOutlines = [];
 
-    for (DraggableWidgetContainer container in _draggingContainers) {
+    for (DraggableNT4WidgetContainer container in _draggingContainers) {
       // Add the widget container above the others
       draggingWidgets.add(
         Positioned(
@@ -299,7 +300,7 @@ class DashboardGrid extends StatelessWidget {
       );
     }
 
-    for (DraggableWidgetContainer container in _widgetContainers) {
+    for (DraggableNT4WidgetContainer container in _widgetContainers) {
       dashboardWidgets.add(
         ContextMenuArea(
           builder: (context) => [
@@ -366,8 +367,10 @@ class DashboardGrid extends StatelessWidget {
         ),
       );
 
-      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
+      double previewX =
+          DraggableWidgetContainer.snapToGrid(localPosition.dx);
+      double previewY =
+          DraggableWidgetContainer.snapToGrid(localPosition.dy);
 
       Rect previewLocation =
           Rect.fromLTWH(previewX, previewY, container.width, container.height);
