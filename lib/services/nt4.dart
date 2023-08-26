@@ -327,6 +327,10 @@ class NT4Client {
 
     lastAnnouncedValues.clear();
 
+    for (NT4Subscription sub in _subscriptions.values) {
+      sub.currentValue = null;
+    }
+
     if (kDebugMode) {
       print('[NT4] Connection closed. Attempting to reconnect in 1s');
     }
