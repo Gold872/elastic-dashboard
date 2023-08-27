@@ -136,7 +136,6 @@ class DashboardGrid extends StatelessWidget {
       if (container is DraggableNT4WidgetContainer) {
         containers.add(container.toJson());
       } else {
-        print(container.toJson());
         layouts.add(container.toJson());
       }
     }
