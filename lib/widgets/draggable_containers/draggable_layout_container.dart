@@ -36,5 +36,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     };
   }
 
+  bool willAcceptWidget(DraggableWidgetContainer widget);
+
   void addWidget(WidgetContainer widget);
 }

@@ -1,13 +1,13 @@
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
   @override
   String type = 'List Layout';
 
-  List<NT4Widget> children = [];
+  List<DraggableNT4WidgetContainer> children = [];
 
   DraggableListLayout({
     super.key,
@@ -35,13 +35,38 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }) : super.fromJson();
 
   @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      ...getChildrenJson(),
+    };
+  }
+
+  Map<String, dynamic> getChildrenJson() {
+    var childrenJson = [];
+
+    for (DraggableWidgetContainer childContainer in children) {
+      childrenJson.add(childContainer.toJson());
+    }
+
+    return {
+      'children': childrenJson,
+    };
+  }
+
+  @override
+  bool willAcceptWidget(DraggableWidgetContainer widget) {
+    return widget is DraggableNT4WidgetContainer;
+  }
+
+  @override
   void addWidget(WidgetContainer widget) {}
 
   List<Widget> getListColumn() {
     List<Widget> column = [];
 
-    for (NT4Widget widget in children) {
-      column.add(widget);
+    for (DraggableNT4WidgetContainer widget in children) {
+      column.add(widget.child!);
       column.add(const SizedBox(height: 5));
     }
 
