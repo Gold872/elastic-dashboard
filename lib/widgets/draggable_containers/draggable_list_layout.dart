@@ -4,6 +4,9 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
+  @override
+  String type = 'List Layout';
+
   List<NT4Widget> children = [];
 
   DraggableListLayout({
@@ -18,6 +21,18 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super();
+
+  DraggableListLayout.fromJson({
+    super.key,
+    required super.validMoveLocation,
+    required super.jsonData,
+    super.enabled = false,
+    super.onUpdate,
+    super.onDragBegin,
+    super.onDragEnd,
+    super.onResizeBegin,
+    super.onResizeEnd,
+  }) : super.fromJson();
 
   @override
   void addWidget(WidgetContainer widget) {}

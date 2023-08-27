@@ -41,12 +41,20 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void init() {
-    if (jsonData != null && jsonData!['containers'] != null) {
-      loadFromJson(jsonData!);
+    if (jsonData == null) {
+      return;
+    }
+
+    if (jsonData!['containers'] != null) {
+      loadContainersFromJson(jsonData!);
+    }
+
+    if (jsonData!['layouts'] != null) {
+      loadLayoutsFromJson(jsonData!);
     }
   }
 
-  void loadFromJson(Map<String, dynamic> jsonData) {
+  void loadContainersFromJson(Map<String, dynamic> jsonData) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
         key: UniqueKey(),
@@ -78,13 +86,63 @@ class DashboardGrid extends StatelessWidget {
     }
   }
 
+  void loadLayoutsFromJson(Map<String, dynamic> jsonData) {
+    for (Map<String, dynamic> layoutData in jsonData['layouts']) {
+      if (layoutData['type'] == null) {
+        continue;
+      }
+
+      late DraggableWidgetContainer widget;
+
+      switch (layoutData['type']) {
+        case 'List Layout':
+          widget = DraggableListLayout.fromJson(
+            key: UniqueKey(),
+            enabled: nt4Connection.isNT4Connected,
+            validMoveLocation: isValidMoveLocation,
+            jsonData: layoutData,
+            onUpdate: (widget) {
+              refresh();
+            },
+            onDragBegin: (widget) {
+              _layoutDraggingContainers.add(widget);
+              refresh();
+            },
+            onDragEnd: (widget) {
+              _layoutDraggingContainers.remove(widget);
+              refresh();
+            },
+            onResizeBegin: (widget) {
+              _layoutDraggingContainers.add(widget);
+              refresh();
+            },
+            onResizeEnd: (widget) {
+              _layoutDraggingContainers.remove(widget);
+              refresh();
+            },
+          );
+        default:
+          continue;
+      }
+
+      _widgetContainers.add(widget);
+    }
+  }
+
   Map<String, dynamic> toJson() {
     var containers = [];
+    var layouts = [];
     for (DraggableWidgetContainer container in _widgetContainers) {
-      containers.add(container.toJson());
+      if (container is DraggableNT4WidgetContainer) {
+        containers.add(container.toJson());
+      } else {
+        print(container.toJson());
+        layouts.add(container.toJson());
+      }
     }
 
     return {
+      'layouts': layouts,
       'containers': containers,
     };
   }
