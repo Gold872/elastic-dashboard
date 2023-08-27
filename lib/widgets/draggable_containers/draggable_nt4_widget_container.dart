@@ -325,6 +325,37 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
+  WidgetContainer getDraggingWidgetContainer() {
+    return WidgetContainer(
+      title: title,
+      width: draggablePositionRect.width,
+      height: draggablePositionRect.height,
+      opacity: 0.80,
+      child: child,
+    );
+  }
+
+  @override
+  WidgetContainer getWidgetContainer() {
+    return WidgetContainer(
+      title: title,
+      width: displayRect.width,
+      height: displayRect.height,
+      opacity: (model?.previewVisible ?? true) ? 0.25 : 1.00,
+      child: Opacity(
+        opacity: (enabled) ? 1.00 : 0.50,
+        child: AbsorbPointer(
+          absorbing: !enabled,
+          child: ChangeNotifierProvider(
+            create: (context) => NT4WidgetNotifier(),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
 
@@ -333,22 +364,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         Positioned(
           left: displayRect.left,
           top: displayRect.top,
-          child: WidgetContainer(
-            title: title,
-            width: displayRect.width,
-            height: displayRect.height,
-            opacity: (model!.previewVisible) ? 0.25 : 1.00,
-            child: Opacity(
-              opacity: (enabled) ? 1.00 : 0.50,
-              child: AbsorbPointer(
-                absorbing: !enabled,
-                child: ChangeNotifierProvider(
-                  create: (context) => NT4WidgetNotifier(),
-                  child: child,
-                ),
-              ),
-            ),
-          ),
+          child: getWidgetContainer(),
         ),
         ...super.getStackChildren(model!),
       ],

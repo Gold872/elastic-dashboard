@@ -1,8 +1,9 @@
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 
-class DraggableListLayout extends DraggableWidgetContainer {
+class DraggableListLayout extends DraggableLayoutContainer {
   List<NT4Widget> children = [];
 
   DraggableListLayout({
@@ -18,6 +19,9 @@ class DraggableListLayout extends DraggableWidgetContainer {
     super.onResizeEnd,
   }) : super();
 
+  @override
+  void addWidget(WidgetContainer widget) {}
+
   List<Widget> getListColumn() {
     List<Widget> column = [];
 
@@ -26,9 +30,36 @@ class DraggableListLayout extends DraggableWidgetContainer {
       column.add(const SizedBox(height: 5));
     }
 
-    column.removeLast();
+    if (column.isNotEmpty) {
+      column.removeLast();
+    }
 
     return column;
+  }
+
+  @override
+  WidgetContainer getWidgetContainer() {
+    return WidgetContainer(
+      title: title,
+      width: displayRect.width,
+      height: displayRect.height,
+      opacity: (model?.previewVisible ?? false) ? 0.25 : 1.00,
+      child: Opacity(
+        opacity: (enabled) ? 1.00 : 0.50,
+        child: AbsorbPointer(
+          absorbing: !enabled,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...getListColumn(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -40,27 +71,7 @@ class DraggableListLayout extends DraggableWidgetContainer {
         Positioned(
           left: displayRect.left,
           top: displayRect.top,
-          child: WidgetContainer(
-            title: title,
-            width: displayRect.width,
-            height: displayRect.height,
-            opacity: (model!.previewVisible) ? 0.25 : 1.00,
-            child: Opacity(
-              opacity: (enabled) ? 1.00 : 0.50,
-              child: AbsorbPointer(
-                absorbing: !enabled,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...getListColumn(),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: getWidgetContainer(),
         ),
         ...super.getStackChildren(model!),
       ],

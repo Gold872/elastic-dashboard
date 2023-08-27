@@ -185,6 +185,25 @@ class DraggableWidgetContainer extends StatelessWidget {
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
 
+  WidgetContainer getDraggingWidgetContainer() {
+    return WidgetContainer(
+      title: title,
+      width: draggablePositionRect.width,
+      height: draggablePositionRect.height,
+      opacity: 0.80,
+      child: Container(),
+    );
+  }
+
+  WidgetContainer getWidgetContainer() {
+    return WidgetContainer(
+      title: title,
+      width: displayRect.width,
+      height: displayRect.height,
+      child: Container(),
+    );
+  }
+
   List<Widget> getStackChildren(WidgetContainerModel model) {
     return [
       TransformableBox(
@@ -306,6 +325,31 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
       ),
     ];
+  }
+
+  Widget getPreview() {
+    return Positioned(
+      left: model?.preview.left,
+      top: model?.preview.top,
+      width: model?.preview.width,
+      height: model?.preview.height,
+      child: Visibility(
+        visible: model?.previewVisible ?? false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: (model?.validLocation ?? false)
+                ? Colors.white.withOpacity(0.25)
+                : Colors.black.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(25.0),
+            border: Border.all(
+                color: (model?.validLocation ?? false)
+                    ? Colors.lightGreenAccent.shade400
+                    : Colors.red,
+                width: 5.0),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
