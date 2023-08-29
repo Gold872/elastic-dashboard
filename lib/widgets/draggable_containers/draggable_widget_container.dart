@@ -59,7 +59,7 @@ class DraggableWidgetContainer extends StatelessWidget {
       validMoveLocation;
   Function(dynamic widget)? onUpdate;
   Function(dynamic widget)? onDragBegin;
-  Function(dynamic widget)? onDragEnd;
+  Function(dynamic widget, {Offset? localPosition})? onDragEnd;
   Function(dynamic widget)? onResizeBegin;
   Function(dynamic widget)? onResizeEnd;
 

@@ -68,7 +68,7 @@ class DashboardGrid extends StatelessWidget {
           _nt4DraggingContainers.add(widget);
           refresh();
         },
-        onDragEnd: (widget) {
+        onDragEnd: (widget, {localPosition}) {
           _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
           _nt4DraggingContainers.remove(widget);
           refresh();
@@ -108,7 +108,7 @@ class DashboardGrid extends StatelessWidget {
               _layoutDraggingContainers.add(widget);
               refresh();
             },
-            onDragEnd: (widget) {
+            onDragEnd: (widget, {localPosition}) {
               _layoutDraggingContainers.remove(widget);
               refresh();
             },
@@ -337,7 +337,7 @@ class DashboardGrid extends StatelessWidget {
         _layoutDraggingContainers.add(widget);
         refresh();
       },
-      onDragEnd: (widget) {
+      onDragEnd: (widget, {localPosition}) {
         _layoutDraggingContainers.remove(widget);
         refresh();
       },
@@ -371,7 +371,7 @@ class DashboardGrid extends StatelessWidget {
           _nt4DraggingContainers.add(widget);
           refresh();
         },
-        onDragEnd: (widget) {
+        onDragEnd: (widget, {localPosition}) {
           _nt4DraggingContainers.remove(widget);
           refresh();
         },
