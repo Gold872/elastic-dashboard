@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -303,6 +304,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Split Button Chooser':
         return SplitButtonChooser.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Command':
+        return CommandWidget.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );

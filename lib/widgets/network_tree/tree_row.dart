@@ -2,6 +2,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -168,6 +169,8 @@ class TreeRow {
         return PIDControllerWidget(key: UniqueKey(), topic: topic);
       case 'String Chooser':
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
+      case 'Command':
+        return CommandWidget(key: UniqueKey(), topic: topic);
       case 'FMSInfo':
         return FMSInfo(key: UniqueKey(), topic: topic);
     }
@@ -199,6 +202,8 @@ class TreeRow {
     } else if (primary is PIDControllerWidget) {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
+    } else if (primary is CommandWidget) {
+      width = normalGridSize * 2;
     } else if (primary is FMSInfo) {
       width = normalGridSize * 3;
     }
