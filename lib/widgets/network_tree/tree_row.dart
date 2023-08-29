@@ -2,6 +2,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
@@ -171,6 +172,8 @@ class TreeRow {
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
       case 'Command':
         return CommandWidget(key: UniqueKey(), topic: topic);
+      case 'Scheduler':
+        return CommandSchedulerWidget(key: UniqueKey(), topic: topic);
       case 'FMSInfo':
         return FMSInfo(key: UniqueKey(), topic: topic);
     }
@@ -204,6 +207,9 @@ class TreeRow {
       height = normalGridSize * 3;
     } else if (primary is CommandWidget) {
       width = normalGridSize * 2;
+    } else if (primary is CommandSchedulerWidget) {
+      width = normalGridSize * 2;
+      height = normalGridSize * 3;
     } else if (primary is FMSInfo) {
       width = normalGridSize * 3;
     }
