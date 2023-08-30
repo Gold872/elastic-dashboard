@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
@@ -170,6 +171,8 @@ class TreeRow {
         return PIDControllerWidget(key: UniqueKey(), topic: topic);
       case 'String Chooser':
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
+      case 'Subsystem':
+        return SubsystemWidget(key: UniqueKey(), topic: topic);
       case 'Command':
         return CommandWidget(key: UniqueKey(), topic: topic);
       case 'Scheduler':
@@ -205,6 +208,8 @@ class TreeRow {
     } else if (primary is PIDControllerWidget) {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
+    } else if (primary is SubsystemWidget) {
+      width = normalGridSize * 2;
     } else if (primary is CommandWidget) {
       width = normalGridSize * 2;
     } else if (primary is CommandSchedulerWidget) {

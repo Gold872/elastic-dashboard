@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
@@ -305,6 +306,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Split Button Chooser':
         return SplitButtonChooser.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Subsystem':
+        return SubsystemWidget.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
