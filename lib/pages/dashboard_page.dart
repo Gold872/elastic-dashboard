@@ -107,6 +107,18 @@ class _DashboardPageState extends State<DashboardPage> {
           currentTabIndex = tabIndex;
         });
       },
+      onWidgetAdded: (widgetData) {
+        List<String> tabNamesList = tabData.map((data) => data.name).toList();
+
+        String tabName = widgetData['tab'];
+
+        if (!tabNamesList.contains(tabName)) {
+          tabData.add(TabData(name: tabName));
+          grids.add(DashboardGrid(key: GlobalKey(), jsonData: const {}));
+        }
+
+        setState(() {});
+      },
     )
       ..initializeSubscriptions()
       ..initializeListeners();
