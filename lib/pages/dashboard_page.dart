@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
@@ -80,6 +81,66 @@ class _DashboardPageState extends State<DashboardPage> {
         }
       });
     });
+
+    ShuffleboardNTListener(
+      onTabChanged: (tab) {
+        int? parsedTabIndex = int.tryParse(tab);
+
+        bool isIndex = parsedTabIndex != null;
+
+        List<String> tabNamesList = tabData.map((data) => data.name).toList();
+
+        // Prevent the program from switching to a non-existent tab
+        if (!isIndex && !tabNamesList.contains(tab)) {
+          return;
+        } else if (isIndex && parsedTabIndex >= tabData.length) {
+          return;
+        }
+
+        int tabIndex = (isIndex) ? parsedTabIndex : tabNamesList.indexOf(tab);
+
+        if (tabIndex == currentTabIndex) {
+          return;
+        }
+
+        setState(() {
+          currentTabIndex = tabIndex;
+        });
+      },
+      onWidgetAdded: (widgetData) {
+        // Needs to be done in case if widget data gets erased by the listener
+        Map<String, dynamic> widgetDataCopy = {};
+
+        widgetData.forEach(
+            (key, value) => widgetDataCopy.putIfAbsent(key, () => value));
+
+        List<String> tabNamesList = tabData.map((data) => data.name).toList();
+
+        String tabName = widgetDataCopy['tab'];
+
+        if (!tabNamesList.contains(tabName)) {
+          tabData.add(TabData(name: tabName));
+          grids.add(DashboardGrid(key: GlobalKey(), jsonData: const {}));
+
+          tabNamesList.add(tabName);
+        }
+
+        int tabIndex = tabNamesList.indexOf(tabName);
+
+        if (tabIndex == -1) {
+          return;
+        }
+
+        grids[tabIndex].addWidgetFromTabJson(widgetDataCopy);
+
+        setState(() {});
+      },
+    )
+      ..initializeSubscriptions()
+      ..initializeListeners();
+
+    // nt4Connection.nt4Client.addTopicAnnounceListener(
+    //     (topic) => print('Name: ${topic.name}\tType: ${topic.type}'));
   }
 
   Map<String, dynamic> toJson() {

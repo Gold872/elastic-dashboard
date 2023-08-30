@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -30,6 +32,8 @@ void main() {
 
   late SharedPreferences preferences;
 
+  late NT4Connection originalInstance;
+
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
 
@@ -42,6 +46,8 @@ void main() {
     });
 
     preferences = await SharedPreferences.getInstance();
+
+    originalInstance = NT4Connection.instance;
   });
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {
@@ -178,6 +184,70 @@ void main() {
 
     await widgetTester.drag(dialogDragHandle, const Offset(100, 0));
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('Adding widgets from code', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NT4Connection.instance = originalInstance;
+
+    await widgetTester.runAsync(() async {
+      nt4Connection.nt4Connect('0.0.0.0');
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: DashboardPage(
+            connectionStream: Stream.value(true),
+            preferences: preferences,
+          ),
+        ),
+      );
+
+      nt4Connection.nt4Client.lastAnnouncedValues.addAll({
+        '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position': [
+          1.0,
+          1.0
+        ],
+        '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size': [
+          2.0,
+          2.0
+        ],
+      });
+
+      for (final callback in nt4Connection.nt4Client.topicAnnounceListeners) {
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name: '/Shuffleboard/Test-Tab/Shuffleboard Test Number',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ));
+      }
+
+      // Gives enough time for the widgets to be placed automatically
+      // It has to be done this way since the listener runs the functions asynchronously
+      await widgetTester.pumpAndSettle();
+
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+      await widgetTester.pumpAndSettle();
+    });
+
+    expect(find.widgetWithText(AnimatedContainer, 'Test-Tab'), findsOneWidget);
+    expect(
+        find.widgetWithText(WidgetContainer, 'Shuffleboard Test Number',
+            skipOffstage: false),
+        findsOneWidget);
   });
 
   testWidgets('About dialog', (widgetTester) async {

@@ -87,6 +87,30 @@ class TreeRow {
     }
   }
 
+  static NT4Widget? getNT4WidgetFromTopic(NT4Topic nt4Topic) {
+    switch (nt4Topic.type) {
+      case NT4TypeStr.kFloat64:
+      case NT4TypeStr.kInt:
+      case NT4TypeStr.kFloat32:
+      case NT4TypeStr.kBoolArr:
+      case NT4TypeStr.kFloat64Arr:
+      case NT4TypeStr.kFloat32Arr:
+      case NT4TypeStr.kIntArr:
+      case NT4TypeStr.kString:
+      case NT4TypeStr.kStringArr:
+        return TextDisplay(
+          key: UniqueKey(),
+          topic: nt4Topic.name,
+        );
+      case NT4TypeStr.kBool:
+        return BooleanBox(
+          key: UniqueKey(),
+          topic: nt4Topic.name,
+        );
+    }
+    return null;
+  }
+
   Future<NT4Widget?>? getPrimaryWidget() async {
     if (nt4Topic == null) {
       if (hasRow('.type')) {
@@ -112,27 +136,7 @@ class TreeRow {
       return null;
     }
 
-    switch (nt4Topic!.type) {
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kIntArr:
-      case NT4TypeStr.kString:
-      case NT4TypeStr.kStringArr:
-        return TextDisplay(
-          key: UniqueKey(),
-          topic: nt4Topic!.name,
-        );
-      case NT4TypeStr.kBool:
-        return BooleanBox(
-          key: UniqueKey(),
-          topic: nt4Topic!.name,
-        );
-    }
-    return null;
+    return getNT4WidgetFromTopic(nt4Topic!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
