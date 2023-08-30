@@ -165,7 +165,7 @@ class ShuffleboardNTListener {
 
     String jsonTopic = '$tabName/$widgetName';
 
-    Future.delayed(const Duration(seconds: 1), () {
+    await Future.delayed(const Duration(seconds: 1), () {
       currentJsonData.putIfAbsent(jsonTopic, () => {});
 
       currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
