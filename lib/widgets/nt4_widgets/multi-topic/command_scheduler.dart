@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
   @override
@@ -68,6 +69,8 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
 
   @override
   Widget build(BuildContext context) {
+    notifier = context.watch<NT4WidgetNotifier?>();
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
