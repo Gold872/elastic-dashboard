@@ -115,7 +115,17 @@ class _DashboardPageState extends State<DashboardPage> {
         if (!tabNamesList.contains(tabName)) {
           tabData.add(TabData(name: tabName));
           grids.add(DashboardGrid(key: GlobalKey(), jsonData: const {}));
+
+          tabNamesList.add(tabName);
         }
+
+        int tabIndex = tabNamesList.indexOf(tabName);
+
+        if (tabIndex == -1) {
+          return;
+        }
+
+        grids[tabIndex].addWidgetFromTabJson(widgetData);
 
         setState(() {});
       },

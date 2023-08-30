@@ -108,6 +108,16 @@ class ShuffleboardNTListener {
         currentJsonData[jsonTopic]!
             .putIfAbsent('y', () => position[1] * Globals.gridSize);
         break;
+      case 'PreferredComponent':
+        String? component =
+            await nt4Connection.subscribeAndRetrieveData(topic.name);
+
+        if (component == null) {
+          break;
+        }
+
+        currentJsonData[jsonTopic]!.putIfAbsent('type', () => component);
+        break;
     }
   }
 
