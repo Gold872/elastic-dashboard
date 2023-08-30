@@ -13,7 +13,7 @@ class NT4Client {
   String serverBaseAddress;
   final VoidCallback? onConnect;
   final VoidCallback? onDisconnect;
-  final List<Function(NT4Topic topic)> onTopicAnnounceListeners = [];
+  final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
 
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
@@ -31,6 +31,7 @@ class NT4Client {
 
   Map<int, NT4Subscription> get subscriptions => _subscriptions;
   Set<NT4Subscription> get subscribedTopics => _subscribedTopics;
+  List<Function(NT4Topic topic)> get topicAnnounceListeners => _topicAnnounceListeners;
 
   NT4Client({
     required this.serverBaseAddress,
@@ -50,7 +51,7 @@ class NT4Client {
   }
 
   void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
-    onTopicAnnounceListeners.add(onAnnounce);
+    _topicAnnounceListeners.add(onAnnounce);
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
@@ -393,7 +394,7 @@ class NT4Client {
               properties: params['properties']);
           announcedTopics[newTopic.id] = newTopic;
 
-          for (final listener in onTopicAnnounceListeners) {
+          for (final listener in _topicAnnounceListeners) {
             listener.call(newTopic);
           }
         } else if (method == 'unannounce') {
