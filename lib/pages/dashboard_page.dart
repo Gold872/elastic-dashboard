@@ -108,9 +108,15 @@ class _DashboardPageState extends State<DashboardPage> {
         });
       },
       onWidgetAdded: (widgetData) {
+        // Needs to be done in case if widget data gets erased by the listener
+        Map<String, dynamic> widgetDataCopy = {};
+
+        widgetData.forEach(
+            (key, value) => widgetDataCopy.putIfAbsent(key, () => value));
+
         List<String> tabNamesList = tabData.map((data) => data.name).toList();
 
-        String tabName = widgetData['tab'];
+        String tabName = widgetDataCopy['tab'];
 
         if (!tabNamesList.contains(tabName)) {
           tabData.add(TabData(name: tabName));
@@ -125,7 +131,7 @@ class _DashboardPageState extends State<DashboardPage> {
           return;
         }
 
-        grids[tabIndex].addWidgetFromTabJson(widgetData);
+        grids[tabIndex].addWidgetFromTabJson(widgetDataCopy);
 
         setState(() {});
       },

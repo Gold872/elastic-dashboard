@@ -31,7 +31,8 @@ class NT4Client {
 
   Map<int, NT4Subscription> get subscriptions => _subscriptions;
   Set<NT4Subscription> get subscribedTopics => _subscribedTopics;
-  List<Function(NT4Topic topic)> get topicAnnounceListeners => _topicAnnounceListeners;
+  List<Function(NT4Topic topic)> get topicAnnounceListeners =>
+      _topicAnnounceListeners;
 
   NT4Client({
     required this.serverBaseAddress,
