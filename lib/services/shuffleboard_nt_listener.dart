@@ -89,9 +89,9 @@ class ShuffleboardNTListener {
         }
 
         currentJsonData[jsonTopic]!
-            .putIfAbsent('width', () => size[0] * Globals.gridSize);
+            .putIfAbsent('width', () => size[0] * Globals.gridSize.toDouble());
         currentJsonData[jsonTopic]!
-            .putIfAbsent('height', () => size[1] * Globals.gridSize);
+            .putIfAbsent('height', () => size[1] * Globals.gridSize.toDouble());
         break;
       case 'Position':
         List<Object?> rawPosition =
@@ -161,11 +161,14 @@ class ShuffleboardNTListener {
       currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
       currentJsonData[jsonTopic]!.putIfAbsent('x', () => 0.0);
       currentJsonData[jsonTopic]!.putIfAbsent('y', () => 0.0);
-      currentJsonData[jsonTopic]!.putIfAbsent('width', () => Globals.gridSize);
-      currentJsonData[jsonTopic]!.putIfAbsent('height', () => Globals.gridSize);
+      currentJsonData[jsonTopic]!
+          .putIfAbsent('width', () => Globals.gridSize.toDouble());
+      currentJsonData[jsonTopic]!
+          .putIfAbsent('height', () => Globals.gridSize.toDouble());
       currentJsonData[jsonTopic]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonTopic]!.putIfAbsent('type', () => widget.type);
-      currentJsonData[jsonTopic]!.putIfAbsent('properties', () => {});
+      currentJsonData[jsonTopic]!
+          .putIfAbsent('properties', () => <String, dynamic>{});
       currentJsonData[jsonTopic]!['properties'].putIfAbsent(
           'topic', () => '$shuffleboardTableRoot/$tabName/$widgetName');
       currentJsonData[jsonTopic]!['properties']
