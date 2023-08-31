@@ -1,18 +1,19 @@
 {
   "game": "Destination: Deep Space",
-  "field-image": "assets/fields/2019-field.jpg",
+  "source-url": "https://www.chiefdelphi.com/t/8k-2019-top-down-orthographic-field-views/337019",
+  "field-image": "assets/fields/2019-field.png",
   "field-corners": {
     "top-left": [
-      217,
-      40
+      496,
+      78
     ],
     "bottom-right": [
-      1372,
-      615
+      3204,
+      1421
     ]
   },
   "field-size": [
-    16.54,
-    8.01
+    16.4592,
+    8.2296
   ]
 }
