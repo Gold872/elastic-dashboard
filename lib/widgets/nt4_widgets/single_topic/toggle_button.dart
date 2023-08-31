@@ -40,7 +40,7 @@ class ToggleButton extends StatelessWidget with NT4Widget {
           ThemeData theme = Theme.of(context);
 
           return GestureDetector(
-            onTapDown: (_) {
+            onTapUp: (_) {
               bool publishTopic = nt4Topic == null;
 
               createTopicIfNull();

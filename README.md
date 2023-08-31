@@ -8,6 +8,7 @@ A simple, modern dashboard for FRC teams.
 
 Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. The main features include
 
+- Compatibility with WPILib's Shuffleboard API
 - Draggable and resizable card widgets
 - Adding widgets from different NT topics
 - Customizable color scheme
@@ -23,11 +24,11 @@ View the online documentation [here](https://github.com/Gold872/elastic-dashboar
 Elastic is not complete, there are still more features in the works
 
 High Priority (estimated to be released before the start of the 2024 season):
-* All command and subsystem widgets
+* All widgets from Shuffleboard
 * List layouts
 
-Lower Priority
-* API to manage layout with code on a robot program
+Lower Priority:
+* Custom API to manage dashboard settings from robot program
 
 ## Special Thanks
 

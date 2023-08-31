@@ -2,12 +2,15 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
@@ -84,6 +87,30 @@ class TreeRow {
     }
   }
 
+  static NT4Widget? getNT4WidgetFromTopic(NT4Topic nt4Topic) {
+    switch (nt4Topic.type) {
+      case NT4TypeStr.kFloat64:
+      case NT4TypeStr.kInt:
+      case NT4TypeStr.kFloat32:
+      case NT4TypeStr.kBoolArr:
+      case NT4TypeStr.kFloat64Arr:
+      case NT4TypeStr.kFloat32Arr:
+      case NT4TypeStr.kIntArr:
+      case NT4TypeStr.kString:
+      case NT4TypeStr.kStringArr:
+        return TextDisplay(
+          key: UniqueKey(),
+          topic: nt4Topic.name,
+        );
+      case NT4TypeStr.kBool:
+        return BooleanBox(
+          key: UniqueKey(),
+          topic: nt4Topic.name,
+        );
+    }
+    return null;
+  }
+
   Future<NT4Widget?>? getPrimaryWidget() async {
     if (nt4Topic == null) {
       if (hasRow('.type')) {
@@ -109,27 +136,7 @@ class TreeRow {
       return null;
     }
 
-    switch (nt4Topic!.type) {
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kIntArr:
-      case NT4TypeStr.kString:
-      case NT4TypeStr.kStringArr:
-        return TextDisplay(
-          key: UniqueKey(),
-          topic: nt4Topic!.name,
-        );
-      case NT4TypeStr.kBool:
-        return BooleanBox(
-          key: UniqueKey(),
-          topic: nt4Topic!.name,
-        );
-    }
-    return null;
+    return getNT4WidgetFromTopic(nt4Topic!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
@@ -168,6 +175,12 @@ class TreeRow {
         return PIDControllerWidget(key: UniqueKey(), topic: topic);
       case 'String Chooser':
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
+      case 'Subsystem':
+        return SubsystemWidget(key: UniqueKey(), topic: topic);
+      case 'Command':
+        return CommandWidget(key: UniqueKey(), topic: topic);
+      case 'Scheduler':
+        return CommandSchedulerWidget(key: UniqueKey(), topic: topic);
       case 'FMSInfo':
         return FMSInfo(key: UniqueKey(), topic: topic);
     }
@@ -197,6 +210,13 @@ class TreeRow {
       width = normalGridSize * 3;
       height = normalGridSize * 4;
     } else if (primary is PIDControllerWidget) {
+      width = normalGridSize * 2;
+      height = normalGridSize * 3;
+    } else if (primary is SubsystemWidget) {
+      width = normalGridSize * 2;
+    } else if (primary is CommandWidget) {
+      width = normalGridSize * 2;
+    } else if (primary is CommandSchedulerWidget) {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
     } else if (primary is FMSInfo) {

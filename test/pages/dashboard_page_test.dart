@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -15,10 +17,12 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import '../test_util.dart';
+import '../test_util.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +33,8 @@ void main() {
   late String jsonString;
 
   late SharedPreferences preferences;
+
+  late NT4Connection originalInstance;
 
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
@@ -42,6 +48,8 @@ void main() {
     });
 
     preferences = await SharedPreferences.getInstance();
+
+    originalInstance = NT4Connection.instance;
   });
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {
@@ -178,6 +186,86 @@ void main() {
 
     await widgetTester.drag(dialogDragHandle, const Offset(100, 0));
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('Adding widgets from shuffleboard api', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    List<Function(NT4Topic topic)> fakeAnnounceCallbacks = [];
+
+    // A custom mock is set up to reproduce behavior when actually running
+    final mockNT4Connection = MockNT4Connection();
+    final mockNT4Client = MockNT4Client();
+    final mockSubscription = MockNT4Subscription();
+
+    when(mockSubscription.periodicStream())
+        .thenAnswer((_) => Stream.value(null));
+
+    when(mockNT4Client.addTopicAnnounceListener(any))
+        .thenAnswer((realInvocation) {
+      fakeAnnounceCallbacks.add(realInvocation.positionalArguments[0]);
+    });
+
+    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
+
+    when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
+
+    when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))
+        .thenAnswer((realInvocation) => Future.value([1.0, 1.0]));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size'))
+        .thenAnswer((realInvocation) => Future.value([2.0, 2.0]));
+
+    NT4Connection.instance = mockNT4Connection;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(true),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.runAsync(() async {
+      for (final callback in fakeAnnounceCallbacks) {
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name: '/Shuffleboard/Test-Tab/Shuffleboard Test Number',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ));
+      }
+
+      // Gives enough time for the widgets to be placed automatically
+      // It has to be done this way since the listener runs the functions asynchronously
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    });
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(AnimatedContainer, 'Test-Tab'), findsOneWidget);
+    expect(
+        find.widgetWithText(WidgetContainer, 'Shuffleboard Test Number',
+            skipOffstage: false),
+        findsOneWidget);
   });
 
   testWidgets('About dialog', (widgetTester) async {

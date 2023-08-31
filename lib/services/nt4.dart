@@ -13,6 +13,7 @@ class NT4Client {
   String serverBaseAddress;
   final VoidCallback? onConnect;
   final VoidCallback? onDisconnect;
+  final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
 
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
@@ -30,6 +31,8 @@ class NT4Client {
 
   Map<int, NT4Subscription> get subscriptions => _subscriptions;
   Set<NT4Subscription> get subscribedTopics => _subscribedTopics;
+  List<Function(NT4Topic topic)> get topicAnnounceListeners =>
+      _topicAnnounceListeners;
 
   NT4Client({
     required this.serverBaseAddress,
@@ -46,6 +49,10 @@ class NT4Client {
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
     _wsOnClose();
+  }
+
+  void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
+    _topicAnnounceListeners.add(onAnnounce);
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
@@ -327,6 +334,10 @@ class NT4Client {
 
     lastAnnouncedValues.clear();
 
+    for (NT4Subscription sub in _subscriptions.values) {
+      sub.currentValue = null;
+    }
+
     if (kDebugMode) {
       print('[NT4] Connection closed. Attempting to reconnect in 1s');
     }
@@ -383,6 +394,10 @@ class NT4Client {
               pubUID: params['pubid'] ?? (currentTopic?.pubUID ?? 0),
               properties: params['properties']);
           announcedTopics[newTopic.id] = newTopic;
+
+          for (final listener in _topicAnnounceListeners) {
+            listener.call(newTopic);
+          }
         } else if (method == 'unannounce') {
           NT4Topic? removedTopic = announcedTopics[params['id']];
           if (removedTopic == null) {

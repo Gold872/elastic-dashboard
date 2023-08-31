@@ -386,6 +386,59 @@ class DashboardGrid extends StatelessWidget {
         child: widget.child! as NT4Widget));
   }
 
+  void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
+    // If the widget is already in the tab, don't add it
+    for (DraggableNT4WidgetContainer container
+        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+      String? title = container.title;
+      String? type = container.child?.type;
+      String? topic = container.child?.topic;
+
+      if (title == null || type == null || topic == null) {
+        continue;
+      }
+
+      if (title == widgetData['title'] &&
+          type == widgetData['type'] &&
+          topic == widgetData['properties']['topic']) {
+        return;
+      }
+    }
+
+    _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
+      key: UniqueKey(),
+      enabled: nt4Connection.isNT4Connected,
+      validMoveLocation: isValidMoveLocation,
+      jsonData: widgetData,
+      onUpdate: (widget) {
+        refresh();
+      },
+      onDragBegin: (widget) {
+        _nt4DraggingContainers.add(widget);
+        refresh();
+      },
+      onDragEnd: (widget, {Offset? localPosition}) {
+        _nt4DraggingContainers
+            .whereType<DraggableNT4WidgetContainer>()
+            .toSet()
+            .lookup(widget)
+            ?.child
+            ?.dispose();
+        _nt4DraggingContainers.remove(widget);
+        refresh();
+      },
+      onResizeBegin: (widget) {
+        _nt4DraggingContainers.add(widget);
+        refresh();
+      },
+      onResizeEnd: (widget) {
+        _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
+        _nt4DraggingContainers.remove(widget);
+        refresh();
+      },
+    ));
+  }
+
   void removeWidget(DraggableWidgetContainer widget) {
     _widgetContainers.remove(widget);
     if (widget is DraggableNT4WidgetContainer) {
