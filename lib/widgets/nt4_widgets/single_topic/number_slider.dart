@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class NumberBar extends StatelessWidget with NT4Widget {
+class NumberSlider extends StatelessWidget with NT4Widget {
   @override
-  final String type = 'Number Bar';
+  final String type = 'Number Slider';
 
   double minValue;
   double maxValue;
@@ -17,7 +17,7 @@ class NumberBar extends StatelessWidget with NT4Widget {
   double _currentValue = 0.0;
   double _previousValue = 0.0;
 
-  NumberBar({
+  NumberSlider({
     super.key,
     required topic,
     this.minValue = -1.0,
@@ -31,7 +31,7 @@ class NumberBar extends StatelessWidget with NT4Widget {
     init();
   }
 
-  NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData})
+  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
       : minValue = jsonData['min_value'] ?? -1.0,
         maxValue = jsonData['max_value'] ?? 1.0,
         divisions = jsonData['divisions'] ?? 5 {
