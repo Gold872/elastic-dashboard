@@ -45,6 +45,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Install dconf
+        run: sudo apt install dconf-cli
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.10.0
         with:
