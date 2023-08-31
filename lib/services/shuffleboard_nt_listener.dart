@@ -50,14 +50,14 @@ class ShuffleboardNTListener {
       createRows(topic);
 
       if (topic.name.contains(metadataTable)) {
-        await _handleMetadata(topic);
+        Future(() async => _handleMetadata(topic));
       }
 
       if (!topic.name.contains(metadataTable) &&
           !topic.name.contains('$shuffleboardTableRoot/.recording') &&
           !topic.name.contains(RegExp(
               '${r'\'}$shuffleboardTableRoot${r'\/([^\/]+\/){1}\.type'}'))) {
-        _handleWidgetTopicAnnounced(topic);
+        Future(() async => _handleWidgetTopicAnnounced(topic));
       }
     });
   }
@@ -126,10 +126,6 @@ class ShuffleboardNTListener {
       return;
     }
 
-    if (tables.length == 4 && !topic.name.contains('/.type')) {
-      return;
-    }
-
     String tabName = tables[1];
     String widgetName = tables[2];
 
@@ -149,21 +145,46 @@ class ShuffleboardNTListener {
     }
     TreeRow widgetRow = tabRow.getRow(widgetName);
 
+    bool isCameraStream = topic.name.endsWith('/.ShuffleboardURI');
+
     // If there's a topic like .controllable that gets published before the
     // type topic, don't delay everything else from being processed
-    if (widgetRow.children.isNotEmpty && !widgetRow.hasRow('.type')) {
+    if (widgetRow.children.isNotEmpty &&
+        !topic.name.endsWith('/.type') &&
+        !isCameraStream) {
       return;
     }
 
-    NT4Widget? widget = await widgetRow.getPrimaryWidget();
+    NT4Widget? widget;
 
-    if (widget == null) {
-      return;
+    if (!isCameraStream) {
+      widget = await widgetRow.getPrimaryWidget();
+
+      if (widget == null) {
+        return;
+      }
     }
 
     String jsonTopic = '$tabName/$widgetName';
 
-    await Future.delayed(const Duration(seconds: 3, milliseconds: 500), () {
+    if (isCameraStream) {
+      String? cameraStream =
+          await nt4Connection.subscribeAndRetrieveData(topic.name);
+
+      if (cameraStream == null) {
+        return;
+      }
+
+      String cameraName = cameraStream.substring(16);
+
+      currentJsonData.putIfAbsent(jsonTopic, () => {});
+      currentJsonData[jsonTopic]!
+          .putIfAbsent('properties', () => <String, dynamic>{});
+      currentJsonData[jsonTopic]!['properties']['topic'] =
+          '/CameraPublisher/$cameraName';
+    }
+
+    await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
       currentJsonData.putIfAbsent(jsonTopic, () => {});
 
       currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
@@ -174,7 +195,8 @@ class ShuffleboardNTListener {
       currentJsonData[jsonTopic]!
           .putIfAbsent('height', () => Globals.gridSize.toDouble());
       currentJsonData[jsonTopic]!.putIfAbsent('tab', () => tabName);
-      currentJsonData[jsonTopic]!.putIfAbsent('type', () => widget.type);
+      currentJsonData[jsonTopic]!.putIfAbsent(
+          'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
       currentJsonData[jsonTopic]!
           .putIfAbsent('properties', () => <String, dynamic>{});
       currentJsonData[jsonTopic]!['properties'].putIfAbsent(

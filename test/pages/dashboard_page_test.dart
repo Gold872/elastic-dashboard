@@ -256,7 +256,7 @@ void main() {
 
       // Gives enough time for the widgets to be placed automatically
       // It has to be done this way since the listener runs the functions asynchronously
-      await Future.delayed(const Duration(seconds: 4));
+      await Future.delayed(const Duration(seconds: 3));
     });
 
     await widgetTester.pumpAndSettle();

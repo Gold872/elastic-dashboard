@@ -44,10 +44,12 @@ void main() {
       ));
     }
 
+    await Future(() async {});
+
     expect(
         ntListener.currentJsonData.containsKey('Test-Tab/Test Number'), true);
 
-    await Future.delayed(const Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 3));
 
     expect(announcedWidgetData.containsKey('x'), true);
     expect(announcedWidgetData.containsKey('y'), true);

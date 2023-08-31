@@ -276,6 +276,8 @@ class DashboardGrid extends StatelessWidget {
         refresh();
       },
     ));
+
+    refresh();
   }
 
   void removeWidget(DraggableNT4WidgetContainer widget) {
