@@ -76,7 +76,7 @@ class NT4Connection {
       value = await subscription
           .periodicStream()
           .firstWhere((element) => element != null && element is T)
-          .timeout(const Duration(seconds: 2, milliseconds: 500)) as T?;
+          .timeout(const Duration(seconds: 3, milliseconds: 500)) as T?;
     } catch (e) {
       value = null;
     }

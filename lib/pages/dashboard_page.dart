@@ -82,7 +82,7 @@ class _DashboardPageState extends State<DashboardPage> {
       });
     });
 
-    ShuffleboardNTListener(
+    ShuffleboardNTListener apiListener = ShuffleboardNTListener(
       onTabChanged: (tab) {
         int? parsedTabIndex = int.tryParse(tab);
 
@@ -135,12 +135,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
         setState(() {});
       },
-    )
-      ..initializeSubscriptions()
-      ..initializeListeners();
+    );
 
-    // nt4Connection.nt4Client.addTopicAnnounceListener(
-    //     (topic) => print('Name: ${topic.name}\tType: ${topic.type}'));
+    Future.sync(() {
+      apiListener.initializeSubscriptions();
+      apiListener.initializeListeners();
+      nt4Connection.nt4Client.recallAnnounceListeners();
+    });
   }
 
   Map<String, dynamic> toJson() {

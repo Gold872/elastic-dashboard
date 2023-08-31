@@ -88,10 +88,10 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('width', () => size[0] * Globals.gridSize.toDouble());
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('height', () => size[1] * Globals.gridSize.toDouble());
+        currentJsonData[jsonTopic]!['width'] =
+            size[0] * Globals.gridSize.toDouble();
+        currentJsonData[jsonTopic]!['height'] =
+            size[1] * Globals.gridSize.toDouble();
         break;
       case 'Position':
         List<Object?> rawPosition =
@@ -103,10 +103,8 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('x', () => position[0] * Globals.gridSize);
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('y', () => position[1] * Globals.gridSize);
+        currentJsonData[jsonTopic]!['x'] = position[0] * Globals.gridSize;
+        currentJsonData[jsonTopic]!['y'] = position[1] * Globals.gridSize;
         break;
       case 'PreferredComponent':
         String? component =
@@ -116,7 +114,7 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!.putIfAbsent('type', () => component);
+        currentJsonData[jsonTopic]!['type'] = component;
         break;
     }
   }
@@ -165,7 +163,7 @@ class ShuffleboardNTListener {
 
     String jsonTopic = '$tabName/$widgetName';
 
-    await Future.delayed(const Duration(seconds: 1), () {
+    await Future.delayed(const Duration(seconds: 3, milliseconds: 500), () {
       currentJsonData.putIfAbsent(jsonTopic, () => {});
 
       currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
@@ -186,7 +184,7 @@ class ShuffleboardNTListener {
 
       onWidgetAdded?.call(currentJsonData[jsonTopic]!);
 
-      currentJsonData[jsonTopic]!.clear();
+      // currentJsonData[jsonTopic]!.clear();
     });
   }
 

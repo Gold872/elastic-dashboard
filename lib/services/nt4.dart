@@ -55,6 +55,14 @@ class NT4Client {
     _topicAnnounceListeners.add(onAnnounce);
   }
 
+  void recallAnnounceListeners() {
+    for (NT4Topic topic in announcedTopics.values) {
+      for (var callback in _topicAnnounceListeners) {
+        callback.call(topic);
+      }
+    }
+  }
+
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
