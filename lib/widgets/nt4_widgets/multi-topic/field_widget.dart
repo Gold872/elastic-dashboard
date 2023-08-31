@@ -57,6 +57,14 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     robotTopicName = '$topic/Robot';
 
     field = FieldImages.getFieldFromGame(fieldGame);
+
+    if (field == null) {
+      return;
+    }
+
+    if (!field!.fieldImageLoaded) {
+      field!.loadFieldImage();
+    }
   }
 
   @override

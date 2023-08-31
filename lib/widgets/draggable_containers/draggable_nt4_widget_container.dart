@@ -112,6 +112,14 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     refresh();
   }
 
+  void dispose() {
+    child?.dispose();
+  }
+
+  void unSubscribe() {
+    child?.unSubscribe();
+  }
+
   @override
   void showEditProperties(BuildContext context) {
     showDialog(

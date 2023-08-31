@@ -281,15 +281,29 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void removeWidget(DraggableNT4WidgetContainer widget) {
+    widget.dispose();
+    widget.unSubscribe();
     _widgetContainers.remove(widget);
-    widget.child?.dispose();
-    widget.child?.unSubscribe();
     refresh();
   }
 
   void clearWidgets() {
+    for (DraggableNT4WidgetContainer container
+        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+      container.dispose();
+      container.unSubscribe();
+    }
     _widgetContainers.clear();
     refresh();
+  }
+
+  void onDestroy() {
+    for (DraggableNT4WidgetContainer container
+        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+      container.dispose();
+      container.unSubscribe();
+    }
+    _widgetContainers.clear();
   }
 
   void refresh() {

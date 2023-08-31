@@ -621,6 +621,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         if (currentTabIndex == tabData.length) {
                           currentTabIndex--;
                         }
+
+                        grid.onDestroy();
+
                         setState(() {
                           tabData.remove(tab);
                           grids.remove(grid);

@@ -55,6 +55,8 @@ class Field {
 
   late Image fieldImage;
 
+  bool fieldImageLoaded = false;
+
   late int pixelsPerMeterHorizontal;
   late int pixelsPerMeterVertical;
 
@@ -63,16 +65,8 @@ class Field {
   }
 
   void init() {
-    fieldImage = Image.asset(jsonData['field-image']);
-    fieldImage.image
-        .resolve(const ImageConfiguration())
-        .addListener(ImageStreamListener((image, synchronousCall) {
-      fieldImageWidth = image.image.width;
-      fieldImageHeight = image.image.height;
-    }));
-
-    // fieldImageWidth = 100;
-    // fieldImageHeight = 100;
+    fieldImageWidth = 3600;
+    fieldImageHeight = 1400;
 
     game = jsonData['game'];
 
@@ -92,5 +86,17 @@ class Field {
 
     pixelsPerMeterHorizontal = (fieldWidthPixels / fieldWidthMeters).round();
     pixelsPerMeterVertical = (fieldHeightPixels / fieldHeightMeters).round();
+  }
+
+  void loadFieldImage() {
+    fieldImage = Image.asset(jsonData['field-image']);
+    fieldImage.image
+        .resolve(const ImageConfiguration())
+        .addListener(ImageStreamListener((image, synchronousCall) {
+      fieldImageWidth = image.image.width;
+      fieldImageHeight = image.image.height;
+    }));
+
+    fieldImageLoaded = true;
   }
 }
