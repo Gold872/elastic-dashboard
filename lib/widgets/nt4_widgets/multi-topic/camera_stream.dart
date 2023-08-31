@@ -107,14 +107,18 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
           }
           streamWidget = Mjpeg(
             fit: BoxFit.contain,
-            width: MediaQuery.of(context).size.width,
             httpClient: httpClient,
             isLive: true,
             stream: streams[0],
           );
         }
 
-        return streamWidget!;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            streamWidget!,
+          ],
+        );
       },
     );
   }
