@@ -21,7 +21,9 @@ class FieldImages {
         .where((String key) => key.contains(directory) && key.contains('.json'))
         .toList();
 
-    for (String file in filePaths) {
+    filePaths.sort();
+
+    for (String file in filePaths.reversed) {
       await loadField(file);
     }
   }

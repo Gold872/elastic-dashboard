@@ -1,14 +1,14 @@
 {
-  "game": "Charged Up",
-  "field-image": "assets/fields/2023-field.png",
+  "game": "Rapid React",
+  "field-image": "assets/fields/2022-field.png",
   "field-corners": {
     "top-left": [
-      46,
-      36
+      74,
+      50
     ],
     "bottom-right": [
-      1088,
-      544
+      1774,
+      900
     ]
   },
   "field-size": [
