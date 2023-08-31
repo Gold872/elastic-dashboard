@@ -34,6 +34,13 @@ class BooleanBox extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void init() {
+    super.init();
+
+    subscription?.yieldAll = false;
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     return {
       'topic': topic,

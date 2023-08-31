@@ -21,6 +21,13 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
     init();
   }
 
+  @override
+  void init() {
+    super.init();
+
+    subscription?.yieldAll = false;
+  }
+
   Color _getTimeColor(double time) {
     if (time <= 15.0) {
       return Colors.red;

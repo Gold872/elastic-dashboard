@@ -556,6 +556,7 @@ class NT4Subscription {
   int useCount = 0;
 
   Object? currentValue;
+  bool yieldAll = true;
   final List<Function(Object?)> _listeners = [];
 
   NT4Subscription({
@@ -569,8 +570,14 @@ class NT4Subscription {
   }
 
   Stream<Object?> periodicStream() async* {
+    yield currentValue;
+    Object? lastYielded = currentValue;
+
     while (true) {
-      yield currentValue;
+      if (currentValue != lastYielded || yieldAll) {
+        yield currentValue;
+        lastYielded = currentValue;
+      }
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
     }
@@ -600,12 +607,13 @@ class NT4Subscription {
   @override
   bool operator ==(Object other) =>
       other is NT4Subscription &&
+      other.yieldAll == yieldAll &&
       other.runtimeType == runtimeType &&
       other.topic == topic &&
       other.options == options;
 
   @override
-  int get hashCode => Object.hashAllUnordered([topic, options]);
+  int get hashCode => Object.hashAllUnordered([topic, options, yieldAll]);
 }
 
 class NT4ValueReq {

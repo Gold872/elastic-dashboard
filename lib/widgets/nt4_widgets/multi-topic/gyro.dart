@@ -40,7 +40,8 @@ class Gyro extends StatelessWidget with NT4Widget {
   void init() {
     super.init();
 
-    valueSubscription = nt4Connection.subscribe(valueTopic, super.period);
+    valueSubscription = nt4Connection.subscribe(valueTopic, super.period)
+      ..yieldAll = false;
   }
 
   @override
