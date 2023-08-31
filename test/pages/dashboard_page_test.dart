@@ -17,10 +17,12 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import '../test_util.dart';
+import '../test_util.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -186,67 +188,85 @@ void main() {
     await widgetTester.pumpAndSettle();
   });
 
-  // testWidgets('Adding widgets from code', (widgetTester) async {
-  //   FlutterError.onError = ignoreOverflowErrors;
+  testWidgets('Adding widgets from shuffleboard api', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
 
-  //   NT4Connection.instance = originalInstance;
+    List<Function(NT4Topic topic)> fakeAnnounceCallbacks = [];
 
-  //   await widgetTester.runAsync(() async {
-  //     nt4Connection.nt4Connect('0.0.0.0');
+    // A custom mock is set up to reproduce behavior when actually running
+    final mockNT4Connection = MockNT4Connection();
+    final mockNT4Client = MockNT4Client();
+    final mockSubscription = MockNT4Subscription();
 
-  //     await widgetTester.pumpWidget(
-  //       MaterialApp(
-  //         home: DashboardPage(
-  //           connectionStream: Stream.value(true),
-  //           preferences: preferences,
-  //         ),
-  //       ),
-  //     );
+    when(mockSubscription.periodicStream())
+        .thenAnswer((_) => Stream.value(null));
 
-  //     nt4Connection.nt4Client.lastAnnouncedValues.addAll({
-  //       '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position': [
-  //         1.0,
-  //         1.0
-  //       ],
-  //       '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size': [
-  //         2.0,
-  //         2.0
-  //       ],
-  //     });
+    when(mockNT4Client.addTopicAnnounceListener(any))
+        .thenAnswer((realInvocation) {
+      fakeAnnounceCallbacks.add(realInvocation.positionalArguments[0]);
+    });
 
-  //     for (final callback in nt4Connection.nt4Client.topicAnnounceListeners) {
-  //       callback.call(NT4Topic(
-  //         name:
-  //             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position',
-  //         type: NT4TypeStr.kFloat32Arr,
-  //         properties: {},
-  //       ));
-  //       callback.call(NT4Topic(
-  //         name:
-  //             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size',
-  //         type: NT4TypeStr.kFloat32Arr,
-  //         properties: {},
-  //       ));
-  //       callback.call(NT4Topic(
-  //         name: '/Shuffleboard/Test-Tab/Shuffleboard Test Number',
-  //         type: NT4TypeStr.kInt,
-  //         properties: {},
-  //       ));
-  //     }
+    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
 
-  //     // Gives enough time for the widgets to be placed automatically
-  //     // It has to be done this way since the listener runs the functions asynchronously
-  //     await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
-  //     await widgetTester.pumpAndSettle();
-  //   });
+    when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
-  //   expect(find.widgetWithText(AnimatedContainer, 'Test-Tab'), findsOneWidget);
-  //   expect(
-  //       find.widgetWithText(WidgetContainer, 'Shuffleboard Test Number',
-  //           skipOffstage: false),
-  //       findsOneWidget);
-  // });
+    when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))
+        .thenAnswer((realInvocation) => Future.value([1.0, 1.0]));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size'))
+        .thenAnswer((realInvocation) => Future.value([2.0, 2.0]));
+
+    NT4Connection.instance = mockNT4Connection;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(true),
+          preferences: preferences,
+        ),
+      ),
+    );
+
+    await widgetTester.runAsync(() async {
+      for (final callback in fakeAnnounceCallbacks) {
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name: '/Shuffleboard/Test-Tab/Shuffleboard Test Number',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ));
+      }
+
+      // Gives enough time for the widgets to be placed automatically
+      // It has to be done this way since the listener runs the functions asynchronously
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    });
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(AnimatedContainer, 'Test-Tab'), findsOneWidget);
+    expect(
+        find.widgetWithText(WidgetContainer, 'Shuffleboard Test Number',
+            skipOffstage: false),
+        findsOneWidget);
+  });
 
   testWidgets('About dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
