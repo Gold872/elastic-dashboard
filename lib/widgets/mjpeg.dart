@@ -101,7 +101,7 @@ class Mjpeg extends HookWidget {
 
     useEffect(() {
       errorState.value = null;
-      manager.updateStream(context, image, errorState);
+      manager.updateStream(image, errorState);
       return manager.dispose;
     }, [manager]);
 
@@ -184,7 +184,7 @@ class _StreamManager {
     // _httpClient.close();
   }
 
-  void _sendImage(BuildContext context, ValueNotifier<MemoryImage?> image,
+  void _sendImage(ValueNotifier<MemoryImage?> image,
       ValueNotifier<dynamic> errorState, List<int> chunks) async {
     // pass image through preprocessor sending to [Image] for rendering
     final List<int>? imageData = _preprocessor.process(chunks);
@@ -197,7 +197,7 @@ class _StreamManager {
     }
   }
 
-  void updateStream(BuildContext context, ValueNotifier<MemoryImage?> image,
+  void updateStream(ValueNotifier<MemoryImage?> image,
       ValueNotifier<List<dynamic>?> errorState) async {
     try {
       final request = Request("GET", Uri.parse(stream));
@@ -211,10 +211,10 @@ class _StreamManager {
           if (carry.isNotEmpty && carry.last == _trigger) {
             if (chunk.first == _eoi) {
               carry.add(chunk.first);
-              _sendImage(context, image, errorState, carry);
+              _sendImage(image, errorState, carry);
               carry = [];
               if (!isLive) {
-                dispose();
+                await dispose();
               }
             }
           }
@@ -230,10 +230,10 @@ class _StreamManager {
               carry.add(d);
               carry.add(d1);
 
-              _sendImage(context, image, errorState, carry);
+              _sendImage(image, errorState, carry);
               carry = [];
               if (!isLive) {
-                dispose();
+                await dispose();
               }
             } else if (carry.isNotEmpty) {
               carry.add(d);
