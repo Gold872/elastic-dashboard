@@ -21,6 +21,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   late Color secondaryColor;
 
   late final List<double> _graphData;
+  late final List<FlSpot> _spotData;
 
   GraphWidget({
     super.key,
@@ -57,10 +58,19 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     super.init();
 
     _graphData = [];
+    _spotData = [];
 
     resetGraphData();
 
     initColors();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _graphData.clear();
+    _spotData.clear();
   }
 
   @override
@@ -239,9 +249,9 @@ class GraphWidget extends StatelessWidget with NT4Widget {
           _graphData.removeAt(0);
         }
 
-        List<FlSpot> data = [];
+        _spotData.clear();
         for (int i = 0; i < _graphData.length; i++) {
-          data.add(FlSpot(period * i, _graphData[i]));
+          _spotData.add(FlSpot(period * i, _graphData[i]));
         }
 
         return LineChart(
@@ -285,7 +295,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
             minX: 0,
             lineBarsData: [
               LineChartBarData(
-                spots: data,
+                spots: _spotData,
                 isStrokeCapRound: true,
                 dotData: const FlDotData(show: false),
                 color: (!showLineGradient) ? mainColor : null,
