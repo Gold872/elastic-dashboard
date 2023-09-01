@@ -57,14 +57,13 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     robotTopicName = '$topic/Robot';
 
     field = FieldImages.getFieldFromGame(fieldGame);
+  }
 
-    if (field == null) {
-      return;
-    }
+  @override
+  void dispose() {
+    super.dispose();
 
-    if (!field!.fieldImageLoaded) {
-      field!.loadFieldImage();
-    }
+    field?.dispose();
   }
 
   @override
@@ -95,6 +94,9 @@ class FieldWidget extends StatelessWidget with NT4Widget {
           }
 
           fieldGame = value;
+
+          field?.dispose();
+
           field = newField;
 
           refresh();

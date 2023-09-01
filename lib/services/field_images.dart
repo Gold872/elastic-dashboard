@@ -11,7 +11,13 @@ class FieldImages {
       return null;
     }
 
-    return fields.firstWhere((element) => element.game == game);
+    Field field = fields.firstWhere((element) => element.game == game);
+
+    field.instanceCounter++;
+    if (!field.fieldImageLoaded) {
+      field.loadFieldImage();
+    }
+    return field;
   }
 
   static Future loadFields(String directory) async {
@@ -55,6 +61,7 @@ class Field {
 
   late Image fieldImage;
 
+  int instanceCounter = 0;
   bool fieldImageLoaded = false;
 
   late int pixelsPerMeterHorizontal;
@@ -98,5 +105,14 @@ class Field {
     }));
 
     fieldImageLoaded = true;
+  }
+
+  void dispose() {
+    instanceCounter--;
+    if (instanceCounter <= 0) {
+      fieldImage.image.evict();
+      PaintingBinding.instance.imageCache.clear();
+      fieldImageLoaded = false;
+    }
   }
 }
