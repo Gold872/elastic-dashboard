@@ -43,6 +43,20 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
     currentTopic = '$topic/TotalCurrent';
   }
 
+  @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    channelTopics.clear();
+
+    for (int channel = 0; channel <= numberOfChannels; channel++) {
+      channelTopics.add('$topic/Chan$channel');
+    }
+
+    voltageTopic = '$topic/Voltage';
+    currentTopic = '$topic/TotalCurrent';
+  }
+
   Widget _getChannelsColumn(BuildContext context, int start, int end) {
     List<Widget> channels = [];
 

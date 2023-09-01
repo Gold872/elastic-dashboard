@@ -51,6 +51,19 @@ class FMSInfo extends StatelessWidget with NT4Widget {
     stationNumberTopic = '$topic/StationNumber';
   }
 
+  @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    eventNameTopic = '$topic/EventName';
+    controlDataTopic = '$topic/FMSControlData';
+    allianceTopic = '$topic/IsRedAlliance';
+    matchNumberTopic = '$topic/MatchNumber';
+    matchTypeTopic = '$topic/MatchType';
+    replayNumberTopic = '$topic/ReplayNumber';
+    stationNumberTopic = '$topic/StationNumber';
+  }
+
   String _getMatchTypeString(int matchType) {
     switch (matchType) {
       case 1:

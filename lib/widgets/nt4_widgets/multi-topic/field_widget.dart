@@ -63,6 +63,13 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    robotTopicName = '$topic/Robot';
+  }
+
+  @override
   void dispose() {
     super.dispose();
 
@@ -250,14 +257,16 @@ class FieldWidget extends StatelessWidget with NT4Widget {
           ),
         );
 
-        return Stack(children: [
-          field!.fieldImage,
-          Transform(
-            origin: Offset(robotLength, robotWidth) / 2,
-            transform: transform,
-            child: robot,
-          ),
-        ]);
+        return Stack(
+          children: [
+            field!.fieldImage,
+            Transform(
+              origin: Offset(robotLength, robotWidth) / 2,
+              transform: transform,
+              child: robot,
+            ),
+          ],
+        );
       },
     );
   }

@@ -45,6 +45,18 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
     defaultTopicName = '$topic/default';
   }
 
+  @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    optionsTopicName = '$topic/options';
+    selectedTopicName = '$topic/selected';
+    activeTopicName = '$topic/active';
+    defaultTopicName = '$topic/default';
+
+    selectedTopic = null;
+  }
+
   void publishSelectedValue(String? selected) {
     if (selected == null || !nt4Connection.isNT4Connected) {
       return;

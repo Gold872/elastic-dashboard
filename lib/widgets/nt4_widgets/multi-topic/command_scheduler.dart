@@ -40,6 +40,17 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
     cancelTopicName = '$topic/Cancel';
   }
 
+  @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    namesTopicName = '$topic/Names';
+    idsTopicName = '$topic/Ids';
+    cancelTopicName = '$topic/Cancel';
+
+    cancelTopic = null;
+  }
+
   void cancelCommand(int id) {
     List<Object?> currentCancellationsRaw = nt4Connection
             .getLastAnnouncedValue(cancelTopicName) as List<Object?>? ??

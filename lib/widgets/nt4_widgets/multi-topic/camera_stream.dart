@@ -50,6 +50,18 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    closeClient();
+
+    nt4Connection.unSubscribe(streamsSubscription);
+
+    streamsTopic = '$topic/streams';
+    streamsSubscription = nt4Connection.subscribe(streamsTopic, super.period);
+  }
+
+  @override
   void dispose() {
     Future(() async {
       await streamWidget?.cancelSubscription();
@@ -71,6 +83,13 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     nt4Connection.unSubscribe(streamsSubscription);
   }
 
+  void closeClient() {
+    lastDisplayedImage = streamWidget?.previousImage;
+    streamWidget = null;
+    httpClient.close();
+    clientOpen = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
@@ -80,10 +99,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
       initialData: nt4Connection.getLastAnnouncedValue(streamsTopic),
       builder: (context, snapshot) {
         if (!nt4Connection.isNT4Connected && clientOpen) {
-          lastDisplayedImage = streamWidget?.previousImage;
-          streamWidget = null;
-          httpClient.close();
-          clientOpen = false;
+          closeClient();
         }
         Object? value = snapshot.data;
 

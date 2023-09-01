@@ -35,6 +35,14 @@ class SubsystemWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    defaultCommandTopic = '$topic/.default';
+    currentCommandTopic = '$topic/.command';
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 

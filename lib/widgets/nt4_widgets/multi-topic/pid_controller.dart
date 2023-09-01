@@ -63,6 +63,21 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    kpTopicName = '$topic/p';
+    kiTopicName = '$topic/i';
+    kdTopicName = '$topic/d';
+    setpointTopicName = '$topic/setpoint';
+
+    kpTopic = null;
+    kiTopic = null;
+    kdTopic = null;
+    setpointTopic = null;
+  }
+
+  @override
   Map<String, dynamic>? toJson() {
     return {
       'topic': topic,
