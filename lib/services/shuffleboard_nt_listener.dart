@@ -206,6 +206,9 @@ class ShuffleboardNTListener {
 
       onWidgetAdded?.call(currentJsonData[jsonTopic]!);
 
+      widget?.unSubscribe();
+      widget?.dispose();
+
       // currentJsonData[jsonTopic]!.clear();
     });
   }
