@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart';
@@ -105,7 +106,7 @@ class Mjpeg extends HookWidget {
       return manager.dispose;
     }, [manager]);
 
-    if (errorState.value != null) {
+    if (errorState.value != null && kDebugMode) {
       return SizedBox(
         width: width,
         height: height,
@@ -124,7 +125,7 @@ class Mjpeg extends HookWidget {
       );
     }
 
-    if (image.value == null) {
+    if (image.value == null || errorState.value == null) {
       return SizedBox(
           width: width,
           height: height,
