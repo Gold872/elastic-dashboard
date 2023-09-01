@@ -140,21 +140,7 @@ class TreeRow {
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    NT4Subscription typeSubscription = nt4Connection.subscribe(typeTopic);
-
-    Object? type;
-    try {
-      type = await typeSubscription
-          .periodicStream()
-          .firstWhere((element) => element != null && element is String)
-          .timeout(const Duration(seconds: 2, milliseconds: 500));
-    } catch (e) {
-      type = null;
-    }
-
-    nt4Connection.unSubscribe(typeSubscription);
-
-    return type as String?;
+    return nt4Connection.subscribeAndRetrieveData(typeTopic);
   }
 
   Future<NT4Widget?>? getTypedWidget(String typeTopic) async {
