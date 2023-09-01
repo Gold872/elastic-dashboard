@@ -107,6 +107,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     }
 
     child!.dispose();
+    child!.unSubscribe();
     child = newWidget;
 
     refresh();
