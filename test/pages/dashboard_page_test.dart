@@ -34,8 +34,6 @@ void main() {
 
   late SharedPreferences preferences;
 
-  late NT4Connection originalInstance;
-
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
 
@@ -48,8 +46,6 @@ void main() {
     });
 
     preferences = await SharedPreferences.getInstance();
-
-    originalInstance = NT4Connection.instance;
   });
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {

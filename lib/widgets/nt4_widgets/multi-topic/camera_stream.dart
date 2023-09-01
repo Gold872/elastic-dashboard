@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(),
+                  CustomLoadingIndicator(),
                   const SizedBox(height: 10),
                   Text((nt4Connection.isNT4Connected)
                       ? 'Waiting for Camera Stream connection...'
