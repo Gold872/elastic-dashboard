@@ -40,8 +40,7 @@ class Gyro extends StatelessWidget with NT4Widget {
   void init() {
     super.init();
 
-    valueSubscription = nt4Connection.subscribe(valueTopic, super.period)
-      ..yieldAll = false;
+    valueSubscription = nt4Connection.subscribe(valueTopic, super.period);
   }
 
   @override
@@ -74,6 +73,7 @@ class Gyro extends StatelessWidget with NT4Widget {
 
     return StreamBuilder(
       stream: valueSubscription.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
         double value = (snapshot.data as double?) ?? 0.0;
 

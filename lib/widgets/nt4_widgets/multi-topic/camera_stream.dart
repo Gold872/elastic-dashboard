@@ -15,6 +15,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
   Object? rawStreams;
   Mjpeg? streamWidget;
+  MemoryImage? lastDisplayedImage;
 
   late NT4Subscription streamsSubscription;
   late Client httpClient;
@@ -54,6 +55,9 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
       httpClient.close();
       clientOpen = false;
+
+      lastDisplayedImage?.evict();
+      streamWidget?.previousImage?.evict();
     });
 
     super.dispose();
@@ -72,8 +76,11 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
     return StreamBuilder(
       stream: streamsSubscription.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(streamsTopic),
       builder: (context, snapshot) {
         if (!nt4Connection.isNT4Connected && clientOpen) {
+          lastDisplayedImage = streamWidget?.previousImage;
+          streamWidget = null;
           httpClient.close();
           clientOpen = false;
         }
@@ -97,7 +104,30 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
         }
 
         if (streams.isEmpty) {
-          return Container();
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              if (lastDisplayedImage != null)
+                Opacity(
+                  opacity: 0.50,
+                  child: Image(
+                    image: lastDisplayedImage!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 10),
+                  Text((nt4Connection.isNT4Connected)
+                      ? 'Waiting for Camera Stream connection...'
+                      : 'Waiting for Network Tables Connection...'),
+                ],
+              ),
+            ],
+          );
         }
 
         if (createNewWidget) {
@@ -105,6 +135,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
             httpClient = Client();
             clientOpen = true;
           }
+          lastDisplayedImage?.evict();
           streamWidget = Mjpeg(
             fit: BoxFit.contain,
             httpClient: httpClient,

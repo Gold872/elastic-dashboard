@@ -51,6 +51,8 @@ class Mjpeg extends HookWidget {
   final Map<String, String> headers;
   final MjpegPreprocessor? preprocessor;
 
+  MemoryImage? previousImage;
+
   late _StreamManager _manager;
 
   Mjpeg({
@@ -125,7 +127,8 @@ class Mjpeg extends HookWidget {
       );
     }
 
-    if (image.value == null || errorState.value == null) {
+    if ((image.value == null && previousImage == null) ||
+        errorState.value != null) {
       return SizedBox(
           width: width,
           height: height,
@@ -134,10 +137,15 @@ class Mjpeg extends HookWidget {
               : loading!(context));
     }
 
+    if (image.value != null) {
+      previousImage?.evict();
+      previousImage = image.value!;
+    }
+
     return VisibilityDetector(
       key: key,
       child: Image(
-        image: image.value!,
+        image: image.value ?? previousImage!,
         width: width,
         height: height,
         gaplessPlayback: true,

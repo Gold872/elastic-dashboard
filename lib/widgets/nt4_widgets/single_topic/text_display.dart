@@ -33,6 +33,7 @@ class TextDisplay extends StatelessWidget with NT4Widget {
 
     return StreamBuilder(
       stream: subscription?.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
         Object data = snapshot.data ?? '';
 

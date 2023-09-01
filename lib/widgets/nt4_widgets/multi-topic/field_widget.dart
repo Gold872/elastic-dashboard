@@ -18,10 +18,13 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   String fieldGame = 'Charged Up';
   late Field? field;
+
   double robotSize = 50.0;
 
   double robotWidthMeters = 0.82;
   double robotLengthMeters = 1.00;
+
+  Size? widgetSize;
 
   late String robotTopicName;
 
@@ -185,8 +188,12 @@ class FieldWidget extends StatelessWidget with NT4Widget {
             context.findAncestorRenderObjectOfType<RenderBox>();
 
         Size size = (renderBox == null || !renderBox.hasSize)
-            ? const Size(0, 0)
+            ? widgetSize ?? const Size(0, 0)
             : renderBox.size;
+
+        if (size != const Size(0, 0)) {
+          widgetSize = size;
+        }
 
         Offset center = Offset(size.width / 2, size.height / 2);
         Offset fieldCenter = Offset((field!.fieldImageWidth?.toDouble() ?? 0.0),

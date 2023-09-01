@@ -23,18 +23,12 @@ class ToggleSwitch extends StatelessWidget with NT4Widget {
   }
 
   @override
-  void init() {
-    super.init();
-
-    subscription?.yieldAll = false;
-  }
-
-  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
       stream: subscription?.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
         Object data = snapshot.data ?? false;
 
