@@ -25,6 +25,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       onDragUpdate;
   late final Function(WidgetContainer widget)? onDragEnd;
 
+  late final Function(NT4Topic topic) onNewTopicAnnounced;
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,20 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     onDragUpdate = widget.onDragUpdate;
     onDragEnd = widget.onDragEnd;
+
+    nt4Connection.nt4Client
+        .addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
+      setState(() {
+        treeController.rebuild();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    nt4Connection.nt4Client.removeTopicAnnounceListener(onNewTopicAnnounced);
+
+    super.dispose();
   }
 
   void createRows(NT4Topic nt4Topic) {

@@ -55,6 +55,10 @@ class NT4Client {
     _topicAnnounceListeners.add(onAnnounce);
   }
 
+  void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
+    _topicAnnounceListeners.remove(onAnnounce);
+  }
+
   void recallAnnounceListeners() {
     for (NT4Topic topic in announcedTopics.values) {
       for (var callback in _topicAnnounceListeners) {
