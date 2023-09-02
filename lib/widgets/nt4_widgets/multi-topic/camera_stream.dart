@@ -84,6 +84,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   }
 
   void closeClient() {
+    lastDisplayedImage?.evict();
     lastDisplayedImage = streamWidget?.previousImage;
     streamWidget = null;
     httpClient.close();
@@ -126,7 +127,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
             children: [
               if (lastDisplayedImage != null)
                 Opacity(
-                  opacity: 0.50,
+                  opacity: 0.35,
                   child: Image(
                     image: lastDisplayedImage!,
                     fit: BoxFit.contain,
