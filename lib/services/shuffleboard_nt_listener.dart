@@ -25,8 +25,6 @@ class ShuffleboardNTListener {
 
   void initializeSubscriptions() {
     selectedSubscription = nt4Connection.subscribe(selectedEntry);
-
-    nt4Connection.subscribe(shuffleboardTableRoot);
   }
 
   void initializeListeners() {
