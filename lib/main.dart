@@ -30,7 +30,9 @@ void main() async {
 
   await FieldImages.loadFields('assets/fields/');
 
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  await windowManager.setMinimumSize(const Size(1280, 720));
+  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+      windowButtonVisibility: false);
 
   runApp(Elastic(preferences: preferences));
 }
