@@ -12,6 +12,8 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
+import 'package:elegant_notification/elegant_notification.dart';
+import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -165,20 +167,47 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> saveLayout() async {
     Map<String, dynamic> jsonData = toJson();
 
-    SnackBar savedMessage = SnackBar(
-      content: const Text('Layout Saved Successfully!'),
-      behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      width: 500,
-      showCloseIcon: true,
-    );
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
 
-    ScaffoldMessengerState messengerState = ScaffoldMessenger.of(context);
+    bool successful =
+        await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
-    await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
-
-    messengerState.showSnackBar(savedMessage);
+    if (successful) {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xff01CB67),
+        enableShadow: false,
+        width: 150,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
+        title: Text('Saved',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: const Text('Layout saved successfully!'),
+      ).show(context);
+    } else {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xffFE355C),
+        enableShadow: false,
+        width: 150,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        title: Text('Error',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: const Text('Failed to save layout, please try again!'),
+      ).show(context);
+    }
   }
 
   void exportLayout() async {
