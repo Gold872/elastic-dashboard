@@ -45,7 +45,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     super.topic = jsonData['topic'] ?? '';
     super.period = jsonData['period'] ?? Globals.defaultPeriod;
 
-    fieldGame = jsonData['field_name'] ?? fieldGame;
+    fieldGame = jsonData['field_game'] ?? fieldGame;
 
     robotWidthMeters = jsonData['robot_width'] ?? 0.82;
     robotLengthMeters = jsonData['robot_length'] ?? 1.00;
@@ -81,7 +81,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     return {
       'topic': topic,
       'period': period,
-      'field_name': fieldGame,
+      'field_game': fieldGame,
       'robot_width': robotWidthMeters,
       'robot_length': robotLengthMeters,
     };
