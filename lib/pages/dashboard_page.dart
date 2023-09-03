@@ -16,6 +16,7 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -360,6 +361,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void displayAboutDialog(BuildContext context) {
     IconThemeData iconTheme = IconTheme.of(context);
+
     showAboutDialog(
       context: context,
       applicationName: 'Elastic',
@@ -371,28 +373,43 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       children: [
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'Elastic was created by Team 353, the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'The goal of Elastic is to have the essential features of Shuffleboard, but with a more elegant and modern display, and offer more customizability and performance.\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'Elastic is an ongoing project, if you have any ideas, feedback, or found any bugs, feel free to share them on the Github page!\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was built with some inspiration from Michael Jansen\'s projects and his Dart NT4 library, along with significant help from Jason and Peter from WPILib.',
+            'Elastic was built with some inspiration from Michael Jansen\'s projects and his Dart NT4 library, along with significant help from Jason and Peter from WPILib.\n',
           ),
+        ),
+        Row(
+          children: [
+            TextButton(
+              onPressed: () async {
+                Uri url = Uri.parse(Globals.repositoryLink);
+
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                }
+              },
+              child: const Text('View Repository'),
+            ),
+            const Spacer(),
+          ],
         ),
       ],
     );

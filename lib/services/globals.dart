@@ -1,7 +1,7 @@
 class Globals {
-  static const String respositoryLink =
+  static const String repositoryLink =
       'https://github.com/Gold872/elastic-dashboard';
-  static const String releasesLink = '$respositoryLink/releases/latest';
+  static const String releasesLink = '$repositoryLink/releases/latest';
 
   static String ipAddress = '127.0.0.1';
   static int teamNumber = 353;
