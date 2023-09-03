@@ -19,6 +19,8 @@ class CustomAppBar extends AppBar {
       : super(
           toolbarHeight: 40,
           backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
+          elevation: 0.0,
+          scrolledUnderElevation: 0.0,
           leading: menuBar,
           leadingWidth: 460,
           centerTitle: true,
