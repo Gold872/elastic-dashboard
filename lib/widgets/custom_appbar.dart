@@ -18,9 +18,12 @@ class CustomAppBar extends AppBar {
       required this.menuBar})
       : super(
           toolbarHeight: 40,
-          backgroundColor: appBarColor ?? const Color.fromARGB(255, 35, 35, 35),
+          backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
+          elevation: 0.0,
+          scrolledUnderElevation: 0.0,
           leading: menuBar,
-          leadingWidth: menuBar.children.length * 55,
+          leadingWidth: 460,
+          centerTitle: true,
           actions: [
             DecoratedMinimizeButton(
               type: buttonType,
@@ -51,10 +54,10 @@ class CustomAppBar extends AppBar {
             child: Row(
               children: [
                 Expanded(child: Center(child: Text(titleText))),
+                const SizedBox(width: 365),
               ],
             ),
           ),
-          centerTitle: true,
         );
 }
 

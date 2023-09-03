@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:path/path.dart';
 
 class ShuffleboardNTListener {
   static const String shuffleboardTableRoot = '/Shuffleboard';
@@ -25,8 +26,6 @@ class ShuffleboardNTListener {
 
   void initializeSubscriptions() {
     selectedSubscription = nt4Connection.subscribe(selectedEntry);
-
-    nt4Connection.subscribe(shuffleboardTableRoot);
   }
 
   void initializeListeners() {
@@ -50,14 +49,14 @@ class ShuffleboardNTListener {
       createRows(topic);
 
       if (topic.name.contains(metadataTable)) {
-        await _handleMetadata(topic);
+        Future(() async => _handleMetadata(topic));
       }
 
       if (!topic.name.contains(metadataTable) &&
           !topic.name.contains('$shuffleboardTableRoot/.recording') &&
           !topic.name.contains(RegExp(
               '${r'\'}$shuffleboardTableRoot${r'\/([^\/]+\/){1}\.type'}'))) {
-        _handleWidgetTopicAnnounced(topic);
+        Future(() async => _handleWidgetTopicAnnounced(topic));
       }
     });
   }
@@ -88,10 +87,10 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('width', () => size[0] * Globals.gridSize.toDouble());
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('height', () => size[1] * Globals.gridSize.toDouble());
+        currentJsonData[jsonTopic]!['width'] =
+            size[0] * Globals.gridSize.toDouble();
+        currentJsonData[jsonTopic]!['height'] =
+            size[1] * Globals.gridSize.toDouble();
         break;
       case 'Position':
         List<Object?> rawPosition =
@@ -103,10 +102,8 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('x', () => position[0] * Globals.gridSize);
-        currentJsonData[jsonTopic]!
-            .putIfAbsent('y', () => position[1] * Globals.gridSize);
+        currentJsonData[jsonTopic]!['x'] = position[0] * Globals.gridSize;
+        currentJsonData[jsonTopic]!['y'] = position[1] * Globals.gridSize;
         break;
       case 'PreferredComponent':
         String? component =
@@ -116,7 +113,22 @@ class ShuffleboardNTListener {
           break;
         }
 
-        currentJsonData[jsonTopic]!.putIfAbsent('type', () => component);
+        currentJsonData[jsonTopic]!['type'] = component;
+        break;
+      case 'Properties':
+        String subPropertyName = tables[5];
+        Object? subProperty =
+            await nt4Connection.subscribeAndRetrieveData(topic.name);
+
+        if (subProperty == null) {
+          break;
+        }
+
+        currentJsonData[jsonTopic]!
+            .putIfAbsent('properties', () => <String, dynamic>{});
+
+        currentJsonData[jsonTopic]!['properties'][subPropertyName] =
+            subProperty;
         break;
     }
   }
@@ -125,10 +137,6 @@ class ShuffleboardNTListener {
     List<String> tables = topic.name.substring(1).split('/');
 
     if (tables.length < 3) {
-      return;
-    }
-
-    if (tables.length == 4 && !topic.name.contains('/.type')) {
       return;
     }
 
@@ -151,21 +159,46 @@ class ShuffleboardNTListener {
     }
     TreeRow widgetRow = tabRow.getRow(widgetName);
 
+    bool isCameraStream = topic.name.endsWith('/.ShuffleboardURI');
+
     // If there's a topic like .controllable that gets published before the
     // type topic, don't delay everything else from being processed
-    if (widgetRow.children.isNotEmpty && !widgetRow.hasRow('.type')) {
+    if (widgetRow.children.isNotEmpty &&
+        !topic.name.endsWith('/.type') &&
+        !isCameraStream) {
       return;
     }
 
-    NT4Widget? widget = await widgetRow.getPrimaryWidget();
+    NT4Widget? widget;
 
-    if (widget == null) {
-      return;
+    if (!isCameraStream) {
+      widget = await widgetRow.getPrimaryWidget();
+
+      if (widget == null) {
+        return;
+      }
     }
 
     String jsonTopic = '$tabName/$widgetName';
 
-    await Future.delayed(const Duration(seconds: 1), () {
+    if (isCameraStream) {
+      String? cameraStream =
+          await nt4Connection.subscribeAndRetrieveData(topic.name);
+
+      if (cameraStream == null) {
+        return;
+      }
+
+      String cameraName = cameraStream.substring(16);
+
+      currentJsonData.putIfAbsent(jsonTopic, () => {});
+      currentJsonData[jsonTopic]!
+          .putIfAbsent('properties', () => <String, dynamic>{});
+      currentJsonData[jsonTopic]!['properties']['topic'] =
+          '/CameraPublisher/$cameraName';
+    }
+
+    await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
       currentJsonData.putIfAbsent(jsonTopic, () => {});
 
       currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
@@ -176,7 +209,8 @@ class ShuffleboardNTListener {
       currentJsonData[jsonTopic]!
           .putIfAbsent('height', () => Globals.gridSize.toDouble());
       currentJsonData[jsonTopic]!.putIfAbsent('tab', () => tabName);
-      currentJsonData[jsonTopic]!.putIfAbsent('type', () => widget.type);
+      currentJsonData[jsonTopic]!.putIfAbsent(
+          'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
       currentJsonData[jsonTopic]!
           .putIfAbsent('properties', () => <String, dynamic>{});
       currentJsonData[jsonTopic]!['properties'].putIfAbsent(
@@ -186,7 +220,10 @@ class ShuffleboardNTListener {
 
       onWidgetAdded?.call(currentJsonData[jsonTopic]!);
 
-      currentJsonData[jsonTopic]!.clear();
+      widget?.unSubscribe();
+      widget?.dispose();
+
+      // currentJsonData[jsonTopic]!.clear();
     });
   }
 

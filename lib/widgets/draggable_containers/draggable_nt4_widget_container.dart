@@ -23,7 +23,7 @@ import '../dialog_widgets/dialog_text_input.dart';
 import '../nt4_widgets/single_topic/boolean_box.dart';
 import '../nt4_widgets/single_topic/graph.dart';
 import '../nt4_widgets/nt4_widget.dart';
-import '../nt4_widgets/single_topic/number_bar.dart';
+import '../nt4_widgets/single_topic/number_slider.dart';
 
 class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   NT4Widget? child;
@@ -82,8 +82,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         newWidget = GraphWidget(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
-      case 'Number Bar':
-        newWidget = NumberBar(
+      case 'Number Slider':
+        newWidget = NumberSlider(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
       case 'Text Display':
@@ -107,9 +107,18 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     }
 
     child!.dispose();
+    child!.unSubscribe();
     child = newWidget;
 
     refresh();
+  }
+
+  void dispose() {
+    child?.dispose();
+  }
+
+  void unSubscribe() {
+    child?.unSubscribe();
   }
 
   @override
@@ -269,8 +278,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
-      case 'Number Bar':
-        return NumberBar.fromJson(
+      case 'Number Slider':
+        return NumberSlider.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
@@ -334,8 +343,12 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
+      default:
+        return TextDisplay.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
     }
-    return null;
   }
 
   Map<String, dynamic>? getChildJson() {

@@ -11,7 +11,13 @@ class FieldImages {
       return null;
     }
 
-    return fields.firstWhere((element) => element.game == game);
+    Field field = fields.firstWhere((element) => element.game == game);
+
+    field.instanceCounter++;
+    if (!field.fieldImageLoaded) {
+      field.loadFieldImage();
+    }
+    return field;
   }
 
   static Future loadFields(String directory) async {
@@ -21,7 +27,9 @@ class FieldImages {
         .where((String key) => key.contains(directory) && key.contains('.json'))
         .toList();
 
-    for (String file in filePaths) {
+    filePaths.sort();
+
+    for (String file in filePaths.reversed) {
       await loadField(file);
     }
   }
@@ -53,6 +61,9 @@ class Field {
 
   late Image fieldImage;
 
+  int instanceCounter = 0;
+  bool fieldImageLoaded = false;
+
   late int pixelsPerMeterHorizontal;
   late int pixelsPerMeterVertical;
 
@@ -61,16 +72,8 @@ class Field {
   }
 
   void init() {
-    fieldImage = Image.asset(jsonData['field-image']);
-    fieldImage.image
-        .resolve(const ImageConfiguration())
-        .addListener(ImageStreamListener((image, synchronousCall) {
-      fieldImageWidth = image.image.width;
-      fieldImageHeight = image.image.height;
-    }));
-
-    // fieldImageWidth = 100;
-    // fieldImageHeight = 100;
+    fieldImageWidth = 3600;
+    fieldImageHeight = 1400;
 
     game = jsonData['game'];
 
@@ -90,5 +93,26 @@ class Field {
 
     pixelsPerMeterHorizontal = (fieldWidthPixels / fieldWidthMeters).round();
     pixelsPerMeterVertical = (fieldHeightPixels / fieldHeightMeters).round();
+  }
+
+  void loadFieldImage() {
+    fieldImage = Image.asset(jsonData['field-image']);
+    fieldImage.image
+        .resolve(const ImageConfiguration())
+        .addListener(ImageStreamListener((image, synchronousCall) {
+      fieldImageWidth = image.image.width;
+      fieldImageHeight = image.image.height;
+    }));
+
+    fieldImageLoaded = true;
+  }
+
+  void dispose() {
+    instanceCounter--;
+    if (instanceCounter <= 0) {
+      fieldImage.image.evict();
+      PaintingBinding.instance.imageCache.clear();
+      fieldImageLoaded = false;
+    }
   }
 }

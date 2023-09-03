@@ -32,6 +32,7 @@ void main() {
 
     await widgetTester.pumpWidget(
       Elastic(
+        version: '0.0.0.0',
         preferences: preferences,
       ),
     );

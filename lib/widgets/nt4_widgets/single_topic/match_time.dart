@@ -1,4 +1,5 @@
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +38,7 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
         double time = snapshot.data as double? ?? -1.0;
 

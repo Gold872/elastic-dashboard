@@ -1,7 +1,7 @@
 name: elastic_dashboard
 description: A modern customizable dashboard for FRC teams.
 publish_to: 'none'
-version: 2023.1.0
+version: 2023.0.0-beta
 
 environment:
   sdk: '>=3.0.2 <4.0.0'
@@ -10,8 +10,8 @@ dependencies:
   animations: ^2.0.7
   collection: ^1.17.1
   contextmenu: ^3.0.0
+  elegant_notification: ^1.11.0
   file_selector: ^0.9.3
-  fl_chart: ^0.63.0
   flutter:
     sdk: flutter
   flutter_box_transform: ^0.4.2
@@ -19,18 +19,23 @@ dependencies:
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
   flutter_mjpeg: ^2.0.4
+  github: ^9.17.0
   http: ^0.13.6
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
+  package_info_plus: ^4.1.0
   path: ^1.8.3
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
   provider: ^6.0.5
   shared_preferences: ^2.1.2
+  syncfusion_flutter_charts: ^22.2.11
   syncfusion_flutter_gauges: ^22.2.7
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
+  url_launcher: ^6.1.14
   vector_math: ^2.1.4
+  version: ^3.0.2
   visibility_detector: ^0.4.0+2
   web_socket_channel: ^2.4.0
   window_manager: ^0.3.5

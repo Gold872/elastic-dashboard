@@ -3,12 +3,16 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final SharedPreferences preferences = await SharedPreferences.getInstance();
+
   await windowManager.ensureInitialized();
 
   Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? 128;
@@ -30,15 +34,18 @@ void main() async {
 
   await FieldImages.loadFields('assets/fields/');
 
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  await windowManager.setMinimumSize(const Size(1280, 720));
+  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+      windowButtonVisibility: false);
 
-  runApp(Elastic(preferences: preferences));
+  runApp(Elastic(version: packageInfo.version, preferences: preferences));
 }
 
 class Elastic extends StatefulWidget {
   final SharedPreferences preferences;
+  final String version;
 
-  const Elastic({super.key, required this.preferences});
+  const Elastic({super.key, required this.version, required this.preferences});
 
   @override
   State<Elastic> createState() => _ElasticState();
@@ -62,6 +69,7 @@ class _ElasticState extends State<Elastic> {
       home: DashboardPage(
         connectionStream: nt4Connection.connectionStatus(),
         preferences: widget.preferences,
+        version: widget.version,
         onColorChanged: (color) => setState(() {
           teamColor = color;
           widget.preferences.setInt('team_color', color.value);

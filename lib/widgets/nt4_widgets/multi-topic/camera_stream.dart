@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
   Object? rawStreams;
   Mjpeg? streamWidget;
+  MemoryImage? lastDisplayedImage;
 
   late NT4Subscription streamsSubscription;
   late Client httpClient;
@@ -48,12 +50,27 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    closeClient();
+
+    nt4Connection.unSubscribe(streamsSubscription);
+
+    streamsTopic = '$topic/streams';
+    streamsSubscription = nt4Connection.subscribe(streamsTopic, super.period);
+  }
+
+  @override
   void dispose() {
     Future(() async {
       await streamWidget?.cancelSubscription();
 
       httpClient.close();
       clientOpen = false;
+
+      lastDisplayedImage?.evict();
+      streamWidget?.previousImage?.evict();
     });
 
     super.dispose();
@@ -66,16 +83,24 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     nt4Connection.unSubscribe(streamsSubscription);
   }
 
+  void closeClient() {
+    lastDisplayedImage?.evict();
+    lastDisplayedImage = streamWidget?.previousImage;
+    streamWidget = null;
+    httpClient.close();
+    clientOpen = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
       stream: streamsSubscription.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(streamsTopic),
       builder: (context, snapshot) {
         if (!nt4Connection.isNT4Connected && clientOpen) {
-          httpClient.close();
-          clientOpen = false;
+          closeClient();
         }
         Object? value = snapshot.data;
 
@@ -97,7 +122,30 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
         }
 
         if (streams.isEmpty) {
-          return Container();
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              if (lastDisplayedImage != null)
+                Opacity(
+                  opacity: 0.35,
+                  child: Image(
+                    image: lastDisplayedImage!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CustomLoadingIndicator(),
+                  const SizedBox(height: 10),
+                  Text((nt4Connection.isNT4Connected)
+                      ? 'Waiting for Camera Stream connection...'
+                      : 'Waiting for Network Tables Connection...'),
+                ],
+              ),
+            ],
+          );
         }
 
         if (createNewWidget) {
@@ -105,14 +153,21 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
             httpClient = Client();
             clientOpen = true;
           }
+          lastDisplayedImage?.evict();
           streamWidget = Mjpeg(
+            fit: BoxFit.contain,
             httpClient: httpClient,
             isLive: true,
             stream: streams[0],
           );
         }
 
-        return streamWidget!;
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            streamWidget!,
+          ],
+        );
       },
     );
   }

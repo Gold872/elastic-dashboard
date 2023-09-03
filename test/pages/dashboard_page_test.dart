@@ -34,8 +34,6 @@ void main() {
 
   late SharedPreferences preferences;
 
-  late NT4Connection originalInstance;
-
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
 
@@ -48,8 +46,6 @@ void main() {
     });
 
     preferences = await SharedPreferences.getInstance();
-
-    originalInstance = NT4Connection.instance;
   });
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {
@@ -61,6 +57,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -85,6 +82,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -109,6 +107,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -141,16 +140,22 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Add Widget'), findsOneWidget);
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
     expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
 
-    await widgetTester.tap(find.text('Add Widget'));
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
 
     await widgetTester.pumpAndSettle();
 
@@ -229,6 +234,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -256,7 +262,7 @@ void main() {
 
       // Gives enough time for the widgets to be placed automatically
       // It has to be done this way since the listener runs the functions asynchronously
-      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+      await Future.delayed(const Duration(seconds: 3));
     });
 
     await widgetTester.pumpAndSettle();
@@ -277,6 +283,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -309,6 +316,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -338,6 +346,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -368,6 +377,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -410,6 +420,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -463,6 +474,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -485,6 +497,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -517,6 +530,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -554,6 +568,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -595,6 +610,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );

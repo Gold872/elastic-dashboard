@@ -65,7 +65,7 @@ mixin NT4Widget on StatelessWidget {
       case NT4TypeStr.kInt:
         return [
           'Text Display',
-          'Number Bar',
+          'Number Slider',
           'Graph',
           'Match Time',
         ];
@@ -101,6 +101,8 @@ mixin NT4Widget on StatelessWidget {
   void resetSubscription() {
     if (subscription == null) {
       subscription = nt4Connection.subscribe(topic, period);
+
+      nt4Topic = null;
       return;
     }
 

@@ -55,6 +55,18 @@ class NT4Client {
     _topicAnnounceListeners.add(onAnnounce);
   }
 
+  void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
+    _topicAnnounceListeners.remove(onAnnounce);
+  }
+
+  void recallAnnounceListeners() {
+    for (NT4Topic topic in announcedTopics.values) {
+      for (var callback in _topicAnnounceListeners) {
+        callback.call(topic);
+      }
+    }
+  }
+
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
@@ -139,6 +151,7 @@ class NT4Client {
       sub.useCount = 0;
       unSubscribe(sub);
     }
+    _subscriptions.clear();
   }
 
   void setProperties(NT4Topic topic, bool isPersistent, bool isRetained) {
@@ -592,6 +605,7 @@ class NT4Subscription {
   @override
   bool operator ==(Object other) =>
       other is NT4Subscription &&
+      // other.yieldAll == yieldAll &&
       other.runtimeType == runtimeType &&
       other.topic == topic &&
       other.options == options;

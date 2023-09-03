@@ -1,4 +1,5 @@
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +79,7 @@ class BooleanBox extends StatelessWidget with NT4Widget {
 
     return StreamBuilder(
       stream: subscription?.periodicStream(),
+      initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
         Object data = snapshot.data ?? false;
 

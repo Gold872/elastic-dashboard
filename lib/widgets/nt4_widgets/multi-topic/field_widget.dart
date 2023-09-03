@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -18,12 +19,19 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   String fieldGame = 'Charged Up';
   late Field? field;
+
   double robotSize = 50.0;
 
   double robotWidthMeters = 0.82;
   double robotLengthMeters = 1.00;
 
+  final double otherObjectSize = 0.55;
+  final double trajectoryPointSize = 0.10;
+
+  Size? widgetSize;
+
   late String robotTopicName;
+  List<String> otherObjectTopics = [];
 
   FieldWidget(
       {super.key,
@@ -42,7 +50,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     super.topic = jsonData['topic'] ?? '';
     super.period = jsonData['period'] ?? Globals.defaultPeriod;
 
-    fieldGame = jsonData['field_name'] ?? fieldGame;
+    fieldGame = jsonData['field_game'] ?? fieldGame;
 
     robotWidthMeters = jsonData['robot_width'] ?? 0.82;
     robotLengthMeters = jsonData['robot_length'] ?? 1.00;
@@ -60,11 +68,25 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  void resetSubscription() {
+    super.resetSubscription();
+
+    robotTopicName = '$topic/Robot';
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    field?.dispose();
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     return {
       'topic': topic,
       'period': period,
-      'field_name': fieldGame,
+      'field_game': fieldGame,
       'robot_width': robotWidthMeters,
       'robot_length': robotLengthMeters,
     };
@@ -87,6 +109,9 @@ class FieldWidget extends StatelessWidget with NT4Widget {
           }
 
           fieldGame = value;
+
+          field?.dispose();
+
           field = newField;
 
           refresh();
@@ -147,6 +172,96 @@ class FieldWidget extends StatelessWidget with NT4Widget {
             ((field!.fieldImageHeight ?? 0) / (field!.fieldImageWidth ?? 1)));
   }
 
+  Widget getTransformedFieldObject(List<double> objectPosition, Offset center,
+      Offset fieldCenter, double scaleReduction,
+      {Size? objectSize}) {
+    double xFromCenter =
+        (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
+
+    double yFromCenter =
+        fieldCenter.dy - (objectPosition[1]) * field!.pixelsPerMeterVertical;
+
+    Offset positionOffset = center +
+        (Offset(xFromCenter + field!.topLeftCorner.dx,
+                yFromCenter - field!.topLeftCorner.dy)) *
+            scaleReduction;
+
+    double width = (objectSize?.width ?? otherObjectSize) *
+        field!.pixelsPerMeterHorizontal *
+        scaleReduction;
+
+    double length = (objectSize?.height ?? otherObjectSize) *
+        field!.pixelsPerMeterVertical *
+        scaleReduction;
+
+    Matrix4 transform = Matrix4.compose(
+      Vector3(positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0),
+      Quaternion.fromRotation(Matrix3.rotationZ(-radians(objectPosition[2]))),
+      Vector3(1, 1, 1),
+    );
+
+    Widget otherObject = Container(
+      alignment: Alignment.center,
+      constraints: const BoxConstraints(
+        minWidth: 4.0,
+        minHeight: 4.0,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.35),
+        border: Border.all(
+          color: Colors.red,
+          width: 4.0,
+        ),
+      ),
+      width: length,
+      height: width,
+      child: CustomPaint(
+        size: Size(width * 0.25, width * 0.25),
+        painter:
+            TrianglePainter(strokeColor: const Color.fromARGB(255, 0, 255, 0)),
+      ),
+    );
+
+    return Transform(
+      origin: Offset(length, width) / 2,
+      transform: transform,
+      child: otherObject,
+    );
+  }
+
+  Widget getTrajectoryPoint(List<double> objectPosition, Offset center,
+      Offset fieldCenter, double scaleReduction) {
+    double xFromCenter =
+        (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
+
+    double yFromCenter =
+        fieldCenter.dy - (objectPosition[1]) * field!.pixelsPerMeterVertical;
+
+    Offset positionOffset = center +
+        (Offset(xFromCenter + field!.topLeftCorner.dx,
+                yFromCenter - field!.topLeftCorner.dy)) *
+            scaleReduction;
+
+    double size =
+        trajectoryPointSize * field!.pixelsPerMeterHorizontal * scaleReduction;
+
+    Widget otherObject = Container(
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+      ),
+      width: size,
+      height: size,
+    );
+
+    return Positioned(
+      left: positionOffset.dx - size / 2,
+      top: positionOffset.dy - size / 2,
+      child: otherObject,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
@@ -154,29 +269,37 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
+        for (NT4Topic nt4Topic
+            in nt4Connection.nt4Client.announcedTopics.values) {
+          if (nt4Topic.name.contains(topic) &&
+              !nt4Topic.name.contains('Robot') &&
+              !nt4Topic.name.contains('.') &&
+              !otherObjectTopics.contains(nt4Topic.name)) {
+            otherObjectTopics.add(nt4Topic.name);
+          }
+        }
+
         List<Object?> robotPositionRaw = nt4Connection
                 .getLastAnnouncedValue(robotTopicName) as List<Object?>? ??
             [];
 
         List<double>? robotPosition = [];
-        for (Object? object in robotPositionRaw) {
-          if (object == null || object is! double) {
-            robotPosition = null;
-            break;
-          }
-
-          robotPosition?.add(object);
-        }
         if (robotPositionRaw.isEmpty) {
           robotPosition = null;
+        } else {
+          robotPosition = robotPositionRaw.whereType<double>().toList();
         }
 
         RenderBox? renderBox =
             context.findAncestorRenderObjectOfType<RenderBox>();
 
         Size size = (renderBox == null || !renderBox.hasSize)
-            ? const Size(0, 0)
+            ? widgetSize ?? const Size(0, 0)
             : renderBox.size;
+
+        if (size != const Size(0, 0)) {
+          widgetSize = size;
+        }
 
         Offset center = Offset(size.width / 2, size.height / 2);
         Offset fieldCenter = Offset((field!.fieldImageWidth?.toDouble() ?? 0.0),
@@ -186,61 +309,52 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         double scaleReduction =
             (getBackgroundFitWidth(size)) / (field!.fieldImageWidth ?? 1);
 
-        double xFromCenter =
-            (robotPosition?[0] ?? 0) * field!.pixelsPerMeterHorizontal -
-                fieldCenter.dx;
+        Widget robot = getTransformedFieldObject(
+            robotPosition ?? [0.0, 0.0, 0.0],
+            center,
+            fieldCenter,
+            scaleReduction,
+            objectSize: Size(robotWidthMeters, robotLengthMeters));
 
-        double yFromCenter = fieldCenter.dy -
-            (robotPosition?[1] ?? 0) * field!.pixelsPerMeterVertical;
+        List<Widget> otherObjects = [];
+        List<Widget> trajectoryPoints = [];
 
-        Offset robotPositionOffset = center +
-            (Offset(xFromCenter + field!.topLeftCorner.dx,
-                    yFromCenter - field!.topLeftCorner.dy)) *
-                scaleReduction;
+        for (String objectTopic in otherObjectTopics) {
+          List<Object?>? objectPositionRaw = nt4Connection
+              .getLastAnnouncedValue(objectTopic) as List<Object?>?;
 
-        double robotWidth =
-            robotWidthMeters * field!.pixelsPerMeterHorizontal * scaleReduction;
-        double robotLength =
-            robotLengthMeters * field!.pixelsPerMeterVertical * scaleReduction;
+          if (objectPositionRaw == null) {
+            continue;
+          }
 
-        Matrix4 transform = Matrix4.compose(
-          Vector3(robotPositionOffset.dx - robotLength / 2,
-              robotPositionOffset.dy - robotWidth / 2, 0),
-          Quaternion.fromRotation(
-              Matrix3.rotationZ(-radians(robotPosition?[2] ?? 0.0))),
-          Vector3(1, 1, 1),
+          List<double> objectPosition =
+              objectPositionRaw.whereType<double>().toList();
+
+          for (int i = 0; i < objectPosition.length - 2; i += 3) {
+            if (objectPosition.length > 12) {
+              trajectoryPoints.add(getTrajectoryPoint(
+                  objectPosition.sublist(i, i + 3),
+                  center,
+                  fieldCenter,
+                  scaleReduction));
+            } else {
+              otherObjects.add(getTransformedFieldObject(
+                  objectPosition.sublist(i, i + 3),
+                  center,
+                  fieldCenter,
+                  scaleReduction));
+            }
+          }
+        }
+
+        return Stack(
+          children: [
+            field!.fieldImage,
+            ...trajectoryPoints,
+            robot,
+            ...otherObjects,
+          ],
         );
-
-        Widget robot = Container(
-          alignment: Alignment.center,
-          constraints: const BoxConstraints(
-            minWidth: 4.0,
-            minHeight: 4.0,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.35),
-            border: Border.all(
-              color: Colors.red,
-              width: 4.0,
-            ),
-          ),
-          width: robotLength,
-          height: robotWidth,
-          child: CustomPaint(
-            size: Size(robotLength * 0.25, robotWidth * 0.25),
-            painter: TrianglePainter(
-                strokeColor: const Color.fromARGB(255, 0, 255, 0)),
-          ),
-        );
-
-        return Stack(children: [
-          field!.fieldImage,
-          Transform(
-            origin: Offset(robotLength, robotWidth) / 2,
-            transform: transform,
-            child: robot,
-          ),
-        ]);
       },
     );
   }

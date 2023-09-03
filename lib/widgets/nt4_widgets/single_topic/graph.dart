@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class GraphWidget extends StatelessWidget with NT4Widget {
   @override
@@ -15,10 +17,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   late double timeDisplayed;
   double? minValue;
   double? maxValue;
-  late bool showFillBelowLine;
-  late bool showLineGradient;
   late Color mainColor;
-  late Color secondaryColor;
 
   late final List<double> _graphData;
 
@@ -29,8 +28,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,
-    this.showFillBelowLine = true,
-    this.showLineGradient = true,
     this.mainColor = Colors.cyan,
   }) {
     super.topic = topic;
@@ -45,8 +42,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     timeDisplayed = jsonData['time_displayed'] ?? 5.0;
     minValue = jsonData['min_value'];
     maxValue = jsonData['max_value'];
-    showFillBelowLine = jsonData['fill_below_line'] ?? true;
-    showLineGradient = jsonData['line_gradient'] ?? true;
     mainColor = Color(jsonData['color'] ?? Colors.cyan.value);
 
     init();
@@ -59,8 +54,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
     _graphData = [];
 
     resetGraphData();
-
-    initColors();
   }
 
   @override
@@ -73,30 +66,11 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   void resetGraphData() {
     _graphData.clear();
 
-    for (int i = 0; i < timeDisplayed ~/ period; i++) {
+    int graphSize = timeDisplayed ~/ period;
+
+    for (int i = 0; i < graphSize; i++) {
       _graphData.add((minValue != null && minValue! > 0.0) ? minValue! : 0.0);
     }
-  }
-
-  double wrapHue(double hue) {
-    if (hue < 0) {
-      return ((hue % 360) + 360) % 360;
-    } else {
-      return hue % 360;
-    }
-  }
-
-  void initColors() {
-    HSLColor baseColor = HSLColor.fromColor(mainColor);
-
-    HSLColor lightColor = HSLColor.fromAHSL(
-      baseColor.alpha,
-      wrapHue(baseColor.hue + 20),
-      baseColor.saturation,
-      baseColor.lightness,
-    );
-
-    secondaryColor = lightColor.toColor();
   }
 
   @override
@@ -107,8 +81,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
       'time_displayed': timeDisplayed,
       'min_value': minValue,
       'max_value': maxValue,
-      'fill_below_line': showFillBelowLine,
-      'line_gradient': showLineGradient,
       'color': mainColor.value,
     };
   }
@@ -124,8 +96,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
             child: DialogColorPicker(
                 onColorPicked: (color) {
                   mainColor = color;
-
-                  initColors();
 
                   refresh();
                 },
@@ -194,35 +164,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
           ),
         ],
       ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: DialogToggleSwitch(
-              initialValue: showFillBelowLine,
-              label: 'Show Fill Below Line',
-              onToggle: (value) {
-                showFillBelowLine = value;
-
-                refresh();
-              },
-            ),
-          ),
-          Flexible(
-            child: DialogToggleSwitch(
-              initialValue: showLineGradient,
-              label: 'Show Line Gradient',
-              onToggle: (value) {
-                showLineGradient = value;
-
-                refresh();
-              },
-            ),
-          ),
-        ],
-      ),
     ];
   }
 
@@ -230,88 +171,129 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
-    return StreamBuilder(
-      stream: subscription?.periodicStream(),
-      builder: (context, snapshot) {
-        if (snapshot.data != null) {
-          double value = snapshot.data as double;
-          _graphData.add(value);
-          _graphData.removeAt(0);
-        }
-
-        List<FlSpot> data = [];
-        for (int i = 0; i < _graphData.length; i++) {
-          data.add(FlSpot(period * i, _graphData[i]));
-        }
-
-        return LineChart(
-          LineChartData(
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: true,
-              drawHorizontalLine: true,
-              getDrawingHorizontalLine: (value) {
-                return FlLine(
-                  color: Colors.grey.withOpacity(0.3),
-                  strokeWidth: 1,
-                );
-              },
-              getDrawingVerticalLine: (value) {
-                return FlLine(
-                  color: Colors.grey.withOpacity(0.3),
-                  strokeWidth: 1,
-                );
-              },
-            ),
-            lineTouchData: const LineTouchData(
-              enabled: false,
-            ),
-            titlesData: const FlTitlesData(
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              bottomTitles: AxisTitles(
-                axisNameWidget: Text('Time (Seconds)'),
-                axisNameSize: 20,
-                drawBelowEverything: true,
-                sideTitles: SideTitles(showTitles: false, reservedSize: 26),
-              ),
-            ),
-            minY: minValue,
-            maxY: maxValue,
-            minX: 0,
-            lineBarsData: [
-              LineChartBarData(
-                spots: data,
-                isStrokeCapRound: true,
-                dotData: const FlDotData(show: false),
-                color: (!showLineGradient) ? mainColor : null,
-                gradient: (showLineGradient)
-                    ? LinearGradient(colors: [
-                        mainColor,
-                        secondaryColor,
-                      ])
-                    : null,
-                belowBarData: BarAreaData(
-                  show: showFillBelowLine,
-                  color:
-                      (!showLineGradient) ? mainColor.withOpacity(0.3) : null,
-                  gradient: (showLineGradient)
-                      ? LinearGradient(colors: [
-                          mainColor.withOpacity(0.3),
-                          secondaryColor.withOpacity(0.3)
-                        ])
-                      : null,
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(milliseconds: 0),
-        );
-      },
+    return GraphWidgetGraph(
+      initialData: _graphData,
+      subscription: subscription,
+      mainColor: mainColor,
+      minValue: minValue,
+      maxValue: maxValue,
     );
   }
+}
+
+class GraphWidgetGraph extends StatefulWidget {
+  final NT4Subscription? subscription;
+  final double? minValue;
+  final double? maxValue;
+  final Color mainColor;
+
+  final List<double> initialData;
+
+  const GraphWidgetGraph({
+    super.key,
+    required this.initialData,
+    required this.subscription,
+    required this.mainColor,
+    this.minValue,
+    this.maxValue,
+  });
+
+  @override
+  State<GraphWidgetGraph> createState() => _GraphWidgetGraphState();
+}
+
+class _GraphWidgetGraphState extends State<GraphWidgetGraph> {
+  ChartSeriesController? seriesController;
+  late List<_GraphPoint> graphData;
+  late StreamSubscription<Object?>? subscriptionListener;
+
+  int fakeXIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    graphData = [];
+
+    for (double y in widget.initialData) {
+      graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: y));
+      fakeXIndex++;
+    }
+
+    subscriptionListener = widget.subscription?.periodicStream().listen((data) {
+      if (data != null && data is double) {
+        graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: data));
+        graphData.removeAt(0);
+
+        fakeXIndex++;
+
+        seriesController?.updateDataSource(
+          addedDataIndex: graphData.length - 1,
+          removedDataIndex: 0,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    seriesController = null;
+    subscriptionListener?.cancel();
+    graphData.clear();
+
+    super.dispose();
+  }
+
+  void resetGraphData() {
+    graphData.clear();
+
+    for (double y in widget.initialData) {
+      graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: y));
+      fakeXIndex++;
+    }
+  }
+
+  List<FastLineSeries<_GraphPoint, num>> getChartData() {
+    return <FastLineSeries<_GraphPoint, num>>[
+      FastLineSeries<_GraphPoint, num>(
+        onRendererCreated: (controller) => seriesController = controller,
+        color: widget.mainColor,
+        width: 2.0,
+        dataSource: graphData,
+        xValueMapper: (value, index) {
+          return value.x;
+        },
+        yValueMapper: (value, index) {
+          return value.y;
+        },
+        animationDuration: 0.0,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.initialData.length != graphData.length) {
+      resetGraphData();
+    }
+    return SfCartesianChart(
+      series: getChartData(),
+      margin: const EdgeInsets.only(top: 8.0),
+      primaryXAxis: NumericAxis(
+        labelStyle: const TextStyle(color: Colors.transparent),
+        desiredIntervals: 5,
+      ),
+      primaryYAxis: NumericAxis(
+        minimum: widget.minValue,
+        maximum: widget.maxValue,
+      ),
+    );
+  }
+}
+
+class _GraphPoint {
+  final double x;
+  final double y;
+
+  const _GraphPoint({required this.x, required this.y});
 }

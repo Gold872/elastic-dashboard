@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart';
@@ -49,6 +50,8 @@ class Mjpeg extends HookWidget {
       error;
   final Map<String, String> headers;
   final MjpegPreprocessor? preprocessor;
+
+  MemoryImage? previousImage;
 
   late _StreamManager _manager;
 
@@ -101,11 +104,11 @@ class Mjpeg extends HookWidget {
 
     useEffect(() {
       errorState.value = null;
-      manager.updateStream(context, image, errorState);
+      manager.updateStream(image, errorState);
       return manager.dispose;
     }, [manager]);
 
-    if (errorState.value != null) {
+    if (errorState.value != null && kDebugMode) {
       return SizedBox(
         width: width,
         height: height,
@@ -124,7 +127,8 @@ class Mjpeg extends HookWidget {
       );
     }
 
-    if (image.value == null) {
+    if ((image.value == null && previousImage == null) ||
+        errorState.value != null) {
       return SizedBox(
           width: width,
           height: height,
@@ -133,10 +137,15 @@ class Mjpeg extends HookWidget {
               : loading!(context));
     }
 
+    if (image.value != null) {
+      previousImage?.evict();
+      previousImage = image.value!;
+    }
+
     return VisibilityDetector(
       key: key,
       child: Image(
-        image: image.value!,
+        image: image.value ?? previousImage!,
         width: width,
         height: height,
         gaplessPlayback: true,
@@ -184,7 +193,7 @@ class _StreamManager {
     // _httpClient.close();
   }
 
-  void _sendImage(BuildContext context, ValueNotifier<MemoryImage?> image,
+  void _sendImage(ValueNotifier<MemoryImage?> image,
       ValueNotifier<dynamic> errorState, List<int> chunks) async {
     // pass image through preprocessor sending to [Image] for rendering
     final List<int>? imageData = _preprocessor.process(chunks);
@@ -197,7 +206,7 @@ class _StreamManager {
     }
   }
 
-  void updateStream(BuildContext context, ValueNotifier<MemoryImage?> image,
+  void updateStream(ValueNotifier<MemoryImage?> image,
       ValueNotifier<List<dynamic>?> errorState) async {
     try {
       final request = Request("GET", Uri.parse(stream));
@@ -211,10 +220,10 @@ class _StreamManager {
           if (carry.isNotEmpty && carry.last == _trigger) {
             if (chunk.first == _eoi) {
               carry.add(chunk.first);
-              _sendImage(context, image, errorState, carry);
+              _sendImage(image, errorState, carry);
               carry = [];
               if (!isLive) {
-                dispose();
+                await dispose();
               }
             }
           }
@@ -230,10 +239,10 @@ class _StreamManager {
               carry.add(d);
               carry.add(d1);
 
-              _sendImage(context, image, errorState, carry);
+              _sendImage(image, errorState, carry);
               carry = [];
               if (!isLive) {
-                dispose();
+                await dispose();
               }
             } else if (carry.isNotEmpty) {
               carry.add(d);

@@ -1,5 +1,8 @@
 class Globals {
-  static String version = '2023.1.0 Beta';
+  static const String repositoryLink =
+      'https://github.com/Gold872/elastic-dashboard';
+  static const String releasesLink = '$repositoryLink/releases/latest';
+
   static String ipAddress = '127.0.0.1';
   static int teamNumber = 353;
   static int gridSize = 128;

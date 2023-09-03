@@ -5,6 +5,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
@@ -14,22 +15,28 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
+import 'package:elegant_notification/elegant_notification.dart';
+import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardPage extends StatefulWidget {
   final Stream<dynamic> connectionStream;
   final SharedPreferences preferences;
+  final String version;
   final Function(Color color)? onColorChanged;
 
   const DashboardPage({
     super.key,
     required this.connectionStream,
     required this.preferences,
+    required this.version,
     this.onColorChanged,
   });
 
@@ -39,6 +46,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late final SharedPreferences _preferences;
+  late final UpdateChecker updateChecker;
 
   final List<DashboardGrid> grids = [];
 
@@ -53,6 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
 
     _preferences = widget.preferences;
+    updateChecker = UpdateChecker(currentVersion: widget.version);
 
     loadLayout();
 
@@ -84,7 +93,7 @@ class _DashboardPageState extends State<DashboardPage> {
       });
     });
 
-    ShuffleboardNTListener(
+    ShuffleboardNTListener apiListener = ShuffleboardNTListener(
       onTabChanged: (tab) {
         int? parsedTabIndex = int.tryParse(tab);
 
@@ -137,12 +146,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
         setState(() {});
       },
-    )
-      ..initializeSubscriptions()
-      ..initializeListeners();
+    );
 
-    // nt4Connection.nt4Client.addTopicAnnounceListener(
-    //     (topic) => print('Name: ${topic.name}\tType: ${topic.type}'));
+    Future.sync(() {
+      apiListener.initializeSubscriptions();
+      apiListener.initializeListeners();
+      nt4Connection.nt4Client.recallAnnounceListeners();
+    });
   }
 
   Map<String, dynamic> toJson() {
@@ -166,20 +176,109 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> saveLayout() async {
     Map<String, dynamic> jsonData = toJson();
 
-    SnackBar savedMessage = SnackBar(
-      content: const Text('Layout Saved Successfully!'),
-      behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      width: 500,
-      showCloseIcon: true,
-    );
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
 
-    ScaffoldMessengerState messengerState = ScaffoldMessenger.of(context);
+    bool successful =
+        await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
-    await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    if (successful) {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xff01CB67),
+        enableShadow: false,
+        width: 150,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
+        title: Text('Saved',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: const Text('Layout saved successfully!'),
+      ).show(context);
+    } else {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xffFE355C),
+        enableShadow: false,
+        width: 150,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        title: Text('Error',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: const Text('Failed to save layout, please try again!'),
+      ).show(context);
+    }
+  }
 
-    messengerState.showSnackBar(savedMessage);
+  void checkForUpdates() async {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
+    ButtonThemeData buttonTheme = ButtonTheme.of(context);
+
+    bool updateAvailable = await updateChecker.isUpdateAvailable();
+
+    if (updateAvailable) {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        autoDismiss: false,
+        showProgressIndicator: false,
+        background: colorScheme.background,
+        enableShadow: false,
+        width: 150,
+        height: 100,
+        notificationPosition: NotificationPosition.bottomRight,
+        title: Text(
+          'Update Available',
+          style: textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        icon: const Icon(Icons.info, color: Color(0xff0066FF)),
+        description: const Text('A new update is available!'),
+        action: Text(
+          'Update',
+          style: textTheme.bodyMedium!.copyWith(
+            color: buttonTheme.colorScheme?.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onActionPressed: () async {
+          Uri url = Uri.parse(Globals.releasesLink);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+      ).show(context);
+    } else {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xff01CB67),
+        enableShadow: false,
+        width: 150,
+        height: 100,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
+        title: Text('No Updates Available',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description:
+            const Text('You are running on the latest version of Elastic'),
+      ).show(context);
+    }
   }
 
   void exportLayout() async {
@@ -264,10 +363,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void displayAboutDialog(BuildContext context) {
     IconThemeData iconTheme = IconTheme.of(context);
+
     showAboutDialog(
       context: context,
       applicationName: 'Elastic',
-      applicationVersion: Globals.version,
+      applicationVersion: widget.version,
       applicationIcon: Image.asset(
         'assets/logos/logo.png',
         width: iconTheme.size,
@@ -275,28 +375,43 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       children: [
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'Elastic was created by Team 353, the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'The goal of Elastic is to have the essential features of Shuffleboard, but with a more elegant and modern display, and offer more customizability and performance.\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
             'Elastic is an ongoing project, if you have any ideas, feedback, or found any bugs, feel free to share them on the Github page!\n',
           ),
         ),
         Container(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was built with some inspiration from Michael Jansen\'s projects and his Dart NT4 library, along with significant help from Jason and Peter from WPILib.',
+            'Elastic was built with some inspiration from Michael Jansen\'s projects and his Dart NT4 library, along with significant help from Jason and Peter from WPILib.\n',
           ),
+        ),
+        Row(
+          children: [
+            TextButton(
+              onPressed: () async {
+                Uri url = Uri.parse(Globals.repositoryLink);
+
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                }
+              },
+              child: const Text('View Repository'),
+            ),
+            const Spacer(),
+          ],
         ),
       ],
     );
@@ -444,20 +559,36 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle? menuStyle = Theme.of(context).textTheme.bodySmall;
+    TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
-    ButtonStyle buttonStyle =
-        ButtonStyle(textStyle: MaterialStateProperty.all(menuStyle));
+    ButtonStyle menuButtonStyle = ButtonStyle(
+      textStyle: MaterialStateProperty.all(menuTextStyle),
+      backgroundColor:
+          const MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+    );
 
     MenuBar menuBar = MenuBar(
+      style: const MenuStyle(
+        backgroundColor:
+            MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        elevation: MaterialStatePropertyAll(0),
+      ),
       children: [
+        Center(
+          child: Image.asset(
+            'assets/logos/logo.png',
+            width: 24.0,
+            height: 24.0,
+          ),
+        ),
+        const SizedBox(width: 10),
         // File
         SubmenuButton(
-          style: buttonStyle,
+          style: menuButtonStyle,
           menuChildren: [
             // Open Layout
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 importLayout();
               },
@@ -469,7 +600,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             // Save
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 saveLayout();
               },
@@ -481,7 +612,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             // Export layout
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 exportLayout();
               },
@@ -498,11 +629,11 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         // Edit
         SubmenuButton(
-            style: buttonStyle,
+            style: menuButtonStyle,
             menuChildren: [
               // Clear layout
               MenuItemButton(
-                style: buttonStyle,
+                style: menuButtonStyle,
                 onPressed: () {
                   setState(() {
                     grids[currentTabIndex].clearWidgets();
@@ -510,26 +641,17 @@ class _DashboardPageState extends State<DashboardPage> {
                 },
                 child: const Text('Clear Layout'),
               ),
-              // Add widget
-              MenuItemButton(
-                style: buttonStyle,
-                onPressed: () {
-                  setState(() {
-                    displayAddWidgetDialog();
-                  });
-                },
-                child: const Text('Add Widget'),
-              ),
             ],
             child: const Text(
               'Edit',
             )),
         // Help
         SubmenuButton(
-          style: buttonStyle,
+          style: menuButtonStyle,
           menuChildren: [
+            // About
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 displayAboutDialog(context);
               },
@@ -537,18 +659,41 @@ class _DashboardPageState extends State<DashboardPage> {
                 'About',
               ),
             ),
+            // Check for Updates
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: () {
+                checkForUpdates();
+              },
+              child: const Text(
+                'Check for Updates',
+              ),
+            ),
           ],
           child: const Text(
             'Help',
           ),
         ),
+        const VerticalDivider(),
         // Settings
         MenuItemButton(
+          style: menuButtonStyle,
+          leadingIcon: const Icon(Icons.settings),
           onPressed: () {
             displaySettingsDialog(context);
           },
-          child: const Icon(Icons.settings),
+          child: const Text('Settings'),
         ),
+        const VerticalDivider(),
+        // Add Widget
+        MenuItemButton(
+          style: menuButtonStyle,
+          leadingIcon: const Icon(Icons.add),
+          onPressed: () {
+            displayAddWidgetDialog();
+          },
+          child: const Text('Add Widget'),
+        )
       ],
     );
 
@@ -569,11 +714,6 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         },
         menuBar: menuBar,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: displayAddWidgetDialog,
-        label: const Text('Add Widget'),
-        icon: const Icon(Icons.add),
       ),
       body: CallbackShortcuts(
         bindings: {
@@ -622,6 +762,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         if (currentTabIndex == tabData.length) {
                           currentTabIndex--;
                         }
+
+                        grid.onDestroy();
+
                         setState(() {
                           tabData.remove(tab);
                           grids.remove(grid);
