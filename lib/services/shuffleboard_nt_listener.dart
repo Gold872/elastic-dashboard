@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:path/path.dart';
 
 class ShuffleboardNTListener {
   static const String shuffleboardTableRoot = '/Shuffleboard';
@@ -113,6 +114,21 @@ class ShuffleboardNTListener {
         }
 
         currentJsonData[jsonTopic]!['type'] = component;
+        break;
+      case 'Properties':
+        String subPropertyName = tables[5];
+        Object? subProperty =
+            await nt4Connection.subscribeAndRetrieveData(topic.name);
+
+        if (subProperty == null) {
+          break;
+        }
+
+        currentJsonData[jsonTopic]!
+            .putIfAbsent('properties', () => <String, dynamic>{});
+
+        currentJsonData[jsonTopic]!['properties'][subPropertyName] =
+            subProperty;
         break;
     }
   }
