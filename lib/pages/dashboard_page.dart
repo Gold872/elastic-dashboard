@@ -5,6 +5,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
@@ -19,17 +20,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardPage extends StatefulWidget {
   final Stream<dynamic> connectionStream;
   final SharedPreferences preferences;
+  final String version;
   final Function(Color color)? onColorChanged;
 
   const DashboardPage({
     super.key,
     required this.connectionStream,
     required this.preferences,
+    required this.version,
     this.onColorChanged,
   });
 
@@ -39,6 +43,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late final SharedPreferences _preferences;
+  late final UpdateChecker updateChecker;
 
   final List<DashboardGrid> grids = [];
 
@@ -53,6 +58,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
 
     _preferences = widget.preferences;
+    updateChecker = UpdateChecker(currentVersion: widget.version);
 
     loadLayout();
 
@@ -210,6 +216,68 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void checkForUpdates() async {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
+    ButtonThemeData buttonTheme = ButtonTheme.of(context);
+
+    bool updateAvailable = await updateChecker.isUpdateAvailable();
+
+    if (updateAvailable) {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        autoDismiss: false,
+        showProgressIndicator: false,
+        background: colorScheme.background,
+        enableShadow: false,
+        width: 150,
+        height: 100,
+        notificationPosition: NotificationPosition.bottomRight,
+        title: Text(
+          'Update Available',
+          style: textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        icon: const Icon(Icons.info, color: Color(0xff0066FF)),
+        description: const Text('A new update is available!'),
+        action: Text(
+          'Update',
+          style: textTheme.bodyMedium!.copyWith(
+            color: buttonTheme.colorScheme?.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onActionPressed: () async {
+          Uri url = Uri.parse(Globals.releasesLink);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+      ).show(context);
+    } else {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xff01CB67),
+        enableShadow: false,
+        width: 150,
+        height: 100,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
+        title: Text('No Updates Available',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description:
+            const Text('You are running on the latest version of Elastic'),
+      ).show(context);
+    }
+  }
+
   void exportLayout() async {
     String initialDirectory = (await getApplicationDocumentsDirectory()).path;
 
@@ -295,7 +363,7 @@ class _DashboardPageState extends State<DashboardPage> {
     showAboutDialog(
       context: context,
       applicationName: 'Elastic',
-      applicationVersion: Globals.version,
+      applicationVersion: widget.version,
       applicationIcon: Image.asset(
         'assets/logos/logo.png',
         width: iconTheme.size,
@@ -562,6 +630,7 @@ class _DashboardPageState extends State<DashboardPage> {
         SubmenuButton(
           style: menuButtonStyle,
           menuChildren: [
+            // About
             MenuItemButton(
               style: menuButtonStyle,
               onPressed: () {
@@ -569,6 +638,16 @@ class _DashboardPageState extends State<DashboardPage> {
               },
               child: const Text(
                 'About',
+              ),
+            ),
+            // Check for Updates
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: () {
+                checkForUpdates();
+              },
+              child: const Text(
+                'Check for Updates',
               ),
             ),
           ],

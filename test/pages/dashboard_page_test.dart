@@ -57,6 +57,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -81,6 +82,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -105,6 +107,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -137,6 +140,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -230,6 +234,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(true),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -278,6 +283,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -310,6 +316,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -339,6 +346,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -369,6 +377,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -411,6 +420,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -464,6 +474,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -486,6 +497,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -518,6 +530,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -555,6 +568,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
@@ -596,6 +610,7 @@ void main() {
         home: DashboardPage(
           connectionStream: Stream.value(false),
           preferences: preferences,
+          version: '0.0.0.0',
         ),
       ),
     );
