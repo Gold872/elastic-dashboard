@@ -443,20 +443,36 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle? menuStyle = Theme.of(context).textTheme.bodySmall;
+    TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
-    ButtonStyle buttonStyle =
-        ButtonStyle(textStyle: MaterialStateProperty.all(menuStyle));
+    ButtonStyle menuButtonStyle = ButtonStyle(
+      textStyle: MaterialStateProperty.all(menuTextStyle),
+      backgroundColor:
+          const MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+    );
 
     MenuBar menuBar = MenuBar(
+      style: const MenuStyle(
+        backgroundColor:
+            MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        elevation: MaterialStatePropertyAll(0),
+      ),
       children: [
+        Center(
+          child: Image.asset(
+            'assets/logos/logo.png',
+            width: 24.0,
+            height: 24.0,
+          ),
+        ),
+        const SizedBox(width: 10),
         // File
         SubmenuButton(
-          style: buttonStyle,
+          style: menuButtonStyle,
           menuChildren: [
             // Open Layout
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 importLayout();
               },
@@ -468,7 +484,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             // Save
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 saveLayout();
               },
@@ -480,7 +496,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             // Export layout
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 exportLayout();
               },
@@ -497,11 +513,11 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         // Edit
         SubmenuButton(
-            style: buttonStyle,
+            style: menuButtonStyle,
             menuChildren: [
               // Clear layout
               MenuItemButton(
-                style: buttonStyle,
+                style: menuButtonStyle,
                 onPressed: () {
                   setState(() {
                     grids[currentTabIndex].clearWidgets();
@@ -509,26 +525,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 },
                 child: const Text('Clear Layout'),
               ),
-              // Add widget
-              MenuItemButton(
-                style: buttonStyle,
-                onPressed: () {
-                  setState(() {
-                    displayAddWidgetDialog();
-                  });
-                },
-                child: const Text('Add Widget'),
-              ),
             ],
             child: const Text(
               'Edit',
             )),
         // Help
         SubmenuButton(
-          style: buttonStyle,
+          style: menuButtonStyle,
           menuChildren: [
             MenuItemButton(
-              style: buttonStyle,
+              style: menuButtonStyle,
               onPressed: () {
                 displayAboutDialog(context);
               },
@@ -541,13 +547,26 @@ class _DashboardPageState extends State<DashboardPage> {
             'Help',
           ),
         ),
+        const VerticalDivider(),
         // Settings
         MenuItemButton(
+          style: menuButtonStyle,
+          leadingIcon: const Icon(Icons.settings),
           onPressed: () {
             displaySettingsDialog(context);
           },
-          child: const Icon(Icons.settings),
+          child: const Text('Settings'),
         ),
+        const VerticalDivider(),
+        // Add Widget
+        MenuItemButton(
+          style: menuButtonStyle,
+          leadingIcon: const Icon(Icons.add),
+          onPressed: () {
+            displayAddWidgetDialog();
+          },
+          child: const Text('Add Widget'),
+        )
       ],
     );
 
@@ -568,11 +587,6 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         },
         menuBar: menuBar,
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: displayAddWidgetDialog,
-        label: const Text('Add Widget'),
-        icon: const Icon(Icons.add),
       ),
       body: CallbackShortcuts(
         bindings: {
