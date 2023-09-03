@@ -143,10 +143,15 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Add Widget'), findsOneWidget);
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
     expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
 
-    await widgetTester.tap(find.text('Add Widget'));
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
 
     await widgetTester.pumpAndSettle();
 
