@@ -146,7 +146,7 @@ class _DashboardPageState extends State<DashboardPage> {
       },
     );
 
-    Future(() {
+    Future.sync(() {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
       nt4Connection.nt4Client.recallAnnounceListeners();

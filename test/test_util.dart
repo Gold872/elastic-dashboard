@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,8 @@ import 'test_util.mocks.dart';
   MockSpec<NT4Subscription>()
 ])
 void setupMockOfflineNT4() {
+  HttpOverrides.global = null;
+
   final mockNT4Connection = MockNT4Connection();
   final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
@@ -38,6 +42,8 @@ void setupMockOfflineNT4() {
 }
 
 void setupMockOnlineNT4() {
+  HttpOverrides.global = null;
+
   final mockNT4Connection = MockNT4Connection();
   final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
