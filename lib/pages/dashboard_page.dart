@@ -146,11 +146,13 @@ class _DashboardPageState extends State<DashboardPage> {
       },
     );
 
-    Future.sync(() {
+    Future(() {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
       nt4Connection.nt4Client.recallAnnounceListeners();
     });
+
+    Future(() => checkForUpdates(notifyIfLatest: false));
   }
 
   Map<String, dynamic> toJson() {
@@ -217,7 +219,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  void checkForUpdates() async {
+  void checkForUpdates({bool notifyIfLatest = true}) async {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     TextTheme textTheme = Theme.of(context).textTheme;
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
@@ -257,7 +259,7 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         },
       ).show(context);
-    } else {
+    } else if (notifyIfLatest) {
       // ignore: use_build_context_synchronously
       ElegantNotification(
         background: colorScheme.background,
