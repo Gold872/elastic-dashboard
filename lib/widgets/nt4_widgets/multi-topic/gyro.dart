@@ -127,7 +127,7 @@ class Gyro extends StatelessWidget with NT4Widget {
                 ],
               ),
             ),
-            Text(value.toStringAsFixed(3),
+            Text(value.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge),
           ],
         );
