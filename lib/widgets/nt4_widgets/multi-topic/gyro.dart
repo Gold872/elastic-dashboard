@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,20 +11,20 @@ class Gyro extends StatelessWidget with NT4Widget {
   @override
   String type = 'Gyro';
 
+  bool counterClockwisePositive = false;
+
   late String valueTopic;
 
   late NT4Subscription valueSubscription;
 
-  Gyro(
-      {super.key, required topic, valueTopic, period = Globals.defaultPeriod}) {
+  Gyro({
+    super.key,
+    required topic,
+    counterClockwisePositive,
+    period = Globals.defaultPeriod,
+  }) {
     super.topic = topic;
     super.period = period;
-
-    if (valueTopic == null) {
-      this.valueTopic = topic + '/Value';
-    } else {
-      this.valueTopic = valueTopic!;
-    }
 
     init();
   }
@@ -31,7 +32,7 @@ class Gyro extends StatelessWidget with NT4Widget {
   Gyro.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     super.topic = jsonData['topic'] ?? '';
     super.period = jsonData['period'] ?? Globals.defaultPeriod;
-    valueTopic = jsonData['value_topic'] ?? '${super.topic}/Value';
+    counterClockwisePositive = jsonData['counter_clockwise_positive'] ?? false;
 
     init();
   }
@@ -39,6 +40,8 @@ class Gyro extends StatelessWidget with NT4Widget {
   @override
   void init() {
     super.init();
+
+    valueTopic = '$topic/Value';
 
     valueSubscription = nt4Connection.subscribe(valueTopic, super.period);
   }
@@ -65,8 +68,31 @@ class Gyro extends StatelessWidget with NT4Widget {
     return {
       'topic': topic,
       'period': period,
-      'value_topic': valueTopic,
+      'counter_clockwise_positive': counterClockwisePositive,
     };
+  }
+
+  @override
+  List<Widget> getEditProperties(BuildContext context) {
+    return [
+      Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Counter Clockwise Positive'),
+            const SizedBox(width: 5),
+            DialogToggleSwitch(
+              initialValue: counterClockwisePositive,
+              onToggle: (value) {
+                counterClockwisePositive = value;
+
+                refresh();
+              },
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   double _wrapAngle(double angle) {
@@ -83,9 +109,13 @@ class Gyro extends StatelessWidget with NT4Widget {
 
     return StreamBuilder(
       stream: valueSubscription.periodicStream(),
-      initialData: nt4Connection.getLastAnnouncedValue(topic),
+      initialData: nt4Connection.getLastAnnouncedValue(valueTopic),
       builder: (context, snapshot) {
         double value = (snapshot.data as double?) ?? 0.0;
+
+        if (counterClockwisePositive) {
+          value *= -1;
+        }
 
         double angle = _wrapAngle(value);
 
@@ -127,7 +157,7 @@ class Gyro extends StatelessWidget with NT4Widget {
                 ],
               ),
             ),
-            Text(value.toStringAsFixed(2),
+            Text(angle.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge),
           ],
         );
