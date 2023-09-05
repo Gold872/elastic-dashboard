@@ -26,6 +26,10 @@ class Gyro extends StatelessWidget with NT4Widget {
     super.topic = topic;
     super.period = period;
 
+    if (counterClockwisePositive != null) {
+      this.counterClockwisePositive = counterClockwisePositive;
+    }
+
     init();
   }
 
