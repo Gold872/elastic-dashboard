@@ -4,6 +4,10 @@
 
 A simple, modern dashboard for FRC teams.
 
+Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, and Linux.
+
+_NOTE: Your code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets!_
+
 ## About
 
 Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. Some features include
