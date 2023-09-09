@@ -4,15 +4,19 @@
 
 A simple, modern dashboard for FRC teams.
 
+Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, and Linux.
+
+_NOTE: Your code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets!_
+
 ## About
 
-Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. The main features include
+Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. Some features include
 
-- Compatibility with WPILib's Shuffleboard API
+- Viewing data from different NT4 topics and widgets
 - Draggable and resizable card widgets
-- Adding widgets from different NT topics
 - Customizable color scheme
 - Automatic IP retrieval from the FRC Driver Station
+- Compatibility with WPILib's Shuffleboard API
 
 ![Example Layout](/screenshots/example_layout.png)
 
@@ -23,7 +27,7 @@ View the online documentation [here](https://github.com/Gold872/elastic-dashboar
 
 Elastic is not complete, there are still more features in the works
 
-High Priority (estimated to be released before the start of the 2024 season):
+High Priority (estimated to be completed by the start of the 2024 season):
 * All widgets from Shuffleboard
 * List layouts
 
@@ -32,7 +36,7 @@ Lower Priority:
 
 ## Special Thanks
 
-This dashboard wouldn't have been made without the help and support from the following people
+This dashboard wouldn't have been made without the help and inspiration from the following people
 
 * [Michael Jansen](https://github.com/mjansen4857) from Team 3015
     * Created the Network Tables library, along with PathPlanner, which inspired many parts of the UI and structure
