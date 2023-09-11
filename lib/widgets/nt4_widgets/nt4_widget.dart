@@ -65,6 +65,7 @@ mixin NT4Widget on StatelessWidget {
       case NT4TypeStr.kInt:
         return [
           'Text Display',
+          'Number Bar',
           'Number Slider',
           'Graph',
           'Match Time',

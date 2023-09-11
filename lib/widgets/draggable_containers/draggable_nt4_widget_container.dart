@@ -12,6 +12,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_choo
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
@@ -80,6 +81,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         break;
       case 'Graph':
         newWidget = GraphWidget(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Number Bar':
+        newWidget = NumberBar(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
       case 'Number Slider':
@@ -275,6 +280,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Match Time':
         return MatchTimeWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Number Bar':
+        return NumberBar.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
