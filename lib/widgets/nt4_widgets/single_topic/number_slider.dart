@@ -34,7 +34,7 @@ class NumberSlider extends StatelessWidget with NT4Widget {
   NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
       : minValue = jsonData['min_value'] ?? -1.0,
         maxValue = jsonData['max_value'] ?? 1.0,
-        divisions = jsonData['divisions'] ?? 5 {
+        divisions = jsonData['divisions'] {
     topic = jsonData['topic'] ?? '';
     period = jsonData['period'] ?? Globals.defaultPeriod;
 
@@ -119,23 +119,15 @@ class NumberSlider extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        Object data = snapshot.data ?? 0.0;
+        double value = snapshot.data as double? ?? 0.0;
 
-        double value = (data is double) ? data : 0.0;
+        double clampedValue = value.clamp(minValue, maxValue);
 
-        if (value < minValue) {
-          value = minValue;
+        if (clampedValue != _previousValue) {
+          _currentValue = clampedValue;
         }
 
-        if (value > maxValue) {
-          value = maxValue;
-        }
-
-        if (value != _previousValue) {
-          _currentValue = value;
-        }
-
-        _previousValue = value;
+        _previousValue = clampedValue;
 
         double divisionSeparation = (maxValue - minValue) / (divisions - 1);
 
