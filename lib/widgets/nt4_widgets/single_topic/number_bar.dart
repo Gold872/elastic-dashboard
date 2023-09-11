@@ -132,7 +132,7 @@ class NumberBar extends StatelessWidget with NT4Widget {
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 5),
+            const Spacer(),
             SfLinearGauge(
               key: UniqueKey(),
               maximum: maxValue,
@@ -141,9 +141,14 @@ class NumberBar extends StatelessWidget with NT4Widget {
                 LinearBarPointer(
                   value: clampedValue,
                   animationDuration: 0,
+                  thickness: 7.5,
+                  edgeStyle: LinearEdgeStyle.bothCurve,
                 ),
               ],
-              minorTicksPerInterval: 0,
+              axisTrackStyle: const LinearAxisTrackStyle(
+                thickness: 7.5,
+                edgeStyle: LinearEdgeStyle.bothCurve,
+              ),
               interval: divisionInterval,
             ),
           ],
