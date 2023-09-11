@@ -135,7 +135,7 @@ class NumberSlider extends StatelessWidget with NT4Widget {
           children: [
             Expanded(
               child: Text(
-                _currentValue.toStringAsFixed(4),
+                _currentValue.toStringAsFixed(2),
                 style: Theme.of(context).textTheme.bodyLarge,
                 overflow: TextOverflow.ellipsis,
               ),

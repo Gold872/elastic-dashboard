@@ -128,7 +128,7 @@ class NumberBar extends StatelessWidget with NT4Widget {
         return Column(
           children: [
             Text(
-              value.toStringAsFixed(4),
+              value.toStringAsFixed(2),
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),
