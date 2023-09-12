@@ -158,7 +158,7 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
                 child: ToggleButtons(
                   onPressed: (index) {
                     selectedChoice = options[index];
-              
+
                     publishSelectedValue(selectedChoice!);
                   },
                   isSelected: options.map((String option) {
