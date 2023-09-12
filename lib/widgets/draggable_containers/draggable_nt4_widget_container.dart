@@ -16,6 +16,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.da
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -89,6 +90,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         break;
       case 'Number Slider':
         newWidget = NumberSlider(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Voltage View':
+        newWidget = VoltageView(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
       case 'Text Display':
@@ -290,6 +295,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Number Slider':
         return NumberSlider.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Voltage View':
+        return VoltageView.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );

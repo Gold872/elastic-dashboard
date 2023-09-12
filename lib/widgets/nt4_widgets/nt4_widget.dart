@@ -67,6 +67,7 @@ mixin NT4Widget on StatelessWidget {
           'Text Display',
           'Number Bar',
           'Number Slider',
+          'Voltage View',
           'Graph',
           'Match Time',
         ];
