@@ -119,11 +119,6 @@ class TreeRow {
 
       // If it's a camera stream
       if (hasRows([
-        'Property',
-        'PropertyInfo',
-        'RawProperty',
-        'RawPropertyInfo',
-        'connected',
         'description',
         'mode',
         'modes',
