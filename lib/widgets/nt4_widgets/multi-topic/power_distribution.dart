@@ -76,7 +76,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
               ),
               padding:
                   const EdgeInsets.symmetric(horizontal: 32.0, vertical: 4.0),
-              child: Text('$current A',
+              child: Text('${current.toStringAsFixed(2)} A',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface)),
             ),
@@ -116,7 +116,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
               ),
               padding:
                   const EdgeInsets.symmetric(horizontal: 32.0, vertical: 4.0),
-              child: Text('$current A',
+              child: Text('${current.toStringAsFixed(2)} A',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface)),
             ),
@@ -161,7 +161,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '$voltage V',
+                        '${voltage.toStringAsFixed(2)} V',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -181,7 +181,7 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '$totalCurrent A',
+                        '${totalCurrent.toStringAsFixed(2)} A',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
