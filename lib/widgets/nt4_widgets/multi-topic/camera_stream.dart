@@ -121,7 +121,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
           streams.add(stream.substring(5));
         }
 
-        if (streams.isEmpty) {
+        if (streams.isEmpty || !nt4Connection.isNT4Connected) {
           return Stack(
             fit: StackFit.expand,
             children: [
