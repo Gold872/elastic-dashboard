@@ -1,9 +1,11 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
@@ -147,15 +149,11 @@ class TreeTile extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: GestureDetector(
+            supportedDevices: PointerDeviceKind.values
+                .whereNot((element) => element == PointerDeviceKind.trackpad)
+                .toSet(),
             onPanStart: (details) async {
               if (draggingWidget != null) {
-                return;
-              }
-
-              // Prevents 2 finger drags from dragging a widget
-              if (details.kind != null &&
-                  details.kind! == PointerDeviceKind.trackpad) {
-                draggingWidget = null;
                 return;
               }
 
@@ -180,14 +178,11 @@ class TreeTile extends StatelessWidget {
 
               draggingWidget = null;
             },
-            // onPanDown: (details) {},
-            // onPanCancel: () {},
             child: Padding(
               padding: EdgeInsetsDirectional.only(start: entry.level * 16.0),
               child: Column(
                 children: [
                   ListTile(
-                    style: ListTileStyle.drawer,
                     dense: true,
                     contentPadding: const EdgeInsets.only(right: 20.0),
                     leading: (entry.hasChildren)
@@ -203,14 +198,13 @@ class TreeTile extends StatelessWidget {
                     trailing: (entry.node.nt4Topic != null)
                         ? Text(entry.node.nt4Topic!.type, style: trailingStyle)
                         : null,
-                    // subtitle:
                   ),
                 ],
               ),
             ),
           ),
         ),
-        const Divider(),
+        const Divider(height: 0),
       ],
     );
   }
