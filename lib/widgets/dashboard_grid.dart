@@ -312,6 +312,14 @@ class DashboardGrid extends StatelessWidget {
     });
   }
 
+  void refreshAllContainers() {
+    Future(() async {
+      for (DraggableWidgetContainer widget in _widgetContainers) {
+        widget.refresh();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     model = context.watch<DashboardGridModel?>();

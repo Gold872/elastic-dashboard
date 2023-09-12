@@ -349,7 +349,7 @@ class WidgetContainer extends StatelessWidget {
           opacity: opacity,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25.0),
+              borderRadius: BorderRadius.circular(Globals.cornerRadius),
               color: const Color.fromARGB(255, 40, 40, 40),
               boxShadow: const [
                 BoxShadow(
@@ -367,9 +367,9 @@ class WidgetContainer extends StatelessWidget {
                   LayoutBuilder(builder: (context, constraints) {
                     return Container(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(25.0),
-                          topRight: Radius.circular(25.0),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(Globals.cornerRadius),
+                          topRight: Radius.circular(Globals.cornerRadius),
                         ),
                         color: theme.colorScheme.primaryContainer,
                       ),

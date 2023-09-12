@@ -6,6 +6,7 @@ class Globals {
   static String ipAddress = '127.0.0.1';
   static int teamNumber = 353;
   static int gridSize = 128;
+  static double cornerRadius = 15.0;
   static bool snapToGrid = true;
   static bool showGrid = false;
 
@@ -19,6 +20,7 @@ class PrefKeys {
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
   static String gridSize = 'grid_size';
+  static String cornerRadius = 'corner_radius';
   static String snapToGrid = 'snap_to_grid';
   static String showGrid = 'show_grid';
 }
