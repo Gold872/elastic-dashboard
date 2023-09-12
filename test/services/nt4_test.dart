@@ -55,6 +55,6 @@ void main() {
     expect(client.serverBaseAddress, '10.26.01.2');
 
     expect(client.announcedTopics.isEmpty, true);
-    expect(client.lastAnnouncedValues.isEmpty, true);
+    expect(client.lastAnnouncedValues.isEmpty, false);
   });
 }
