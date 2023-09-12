@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -12,6 +13,8 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
   late String selectedTopicName;
   late String activeTopicName;
   late String defaultTopicName;
+
+  TextEditingController searchController = TextEditingController();
 
   String? selectedChoice;
 
@@ -169,14 +172,17 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _StringChooserDropdown(
-              selected: selectedChoice,
-              options: options,
-              onValueChanged: (String? value) {
-                publishSelectedValue(value);
+            Flexible(
+              child: _StringChooserDropdown(
+                selected: selectedChoice,
+                options: options,
+                textController: searchController,
+                onValueChanged: (String? value) {
+                  publishSelectedValue(value);
 
-                selectedChoice = value;
-              },
+                  selectedChoice = value;
+                },
+              ),
             ),
             const SizedBox(width: 5),
             (showWarning)
@@ -227,25 +233,94 @@ class _StringChooserDropdown extends StatelessWidget {
   final List<String> options;
   final String? selected;
   final Function(String? value) onValueChanged;
+  final TextEditingController textController;
 
   const _StringChooserDropdown({
     required this.options,
     required this.onValueChanged,
+    required this.textController,
     this.selected,
   });
 
   @override
   Widget build(BuildContext context) {
     return ExcludeFocus(
-      child: DropdownButton(
+      child: Tooltip(
+        message: selected ?? '',
+        waitDuration: const Duration(milliseconds: 250),
+        child: DropdownButton2<String>(
+          isExpanded: true,
           value: selected,
+          selectedItemBuilder: (context) => [
+            ...options.map((String option) {
+              return Container(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  option,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+          ],
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            maxHeight: 250,
+            width: 250,
+          ),
+          dropdownSearchData: DropdownSearchData(
+            searchController: textController,
+            searchMatchFn: (item, searchValue) {
+              return item.value
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchValue.toLowerCase());
+            },
+            searchInnerWidgetHeight: 50,
+            searchInnerWidget: Container(
+              color: Theme.of(context).colorScheme.surface,
+              height: 50,
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 4,
+                right: 8,
+                left: 8,
+              ),
+              child: TextFormField(
+                expands: true,
+                maxLines: null,
+                controller: textController,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  label: const Text('Search'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
           items: options.map((String option) {
             return DropdownMenuItem(
               value: option,
-              child: Text(option),
+              child:
+                  Text(option, style: Theme.of(context).textTheme.bodyMedium),
             );
           }).toList(),
-          onChanged: onValueChanged),
+          onMenuStateChange: (isOpen) {
+            if (!isOpen) {
+              textController.clear();
+            }
+          },
+          onChanged: onValueChanged,
+        ),
+      ),
     );
   }
 }

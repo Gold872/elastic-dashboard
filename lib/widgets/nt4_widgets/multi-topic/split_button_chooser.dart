@@ -151,21 +151,27 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ToggleButtons(
-              onPressed: (index) {
-                selectedChoice = options[index];
-
-                publishSelectedValue(selectedChoice!);
-              },
-              isSelected: options.map((String option) {
-                if (option == selectedChoice) {
-                  return true;
-                }
-                return false;
-              }).toList(),
-              children: options.map((String option) {
-                return Text(option);
-              }).toList(),
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ToggleButtons(
+                  onPressed: (index) {
+                    selectedChoice = options[index];
+              
+                    publishSelectedValue(selectedChoice!);
+                  },
+                  isSelected: options.map((String option) {
+                    if (option == selectedChoice) {
+                      return true;
+                    }
+                    return false;
+                  }).toList(),
+                  children: options.map((String option) {
+                    return Text(option);
+                  }).toList(),
+                ),
+              ),
             ),
             const SizedBox(width: 5),
             (showWarning)
