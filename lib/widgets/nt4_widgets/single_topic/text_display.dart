@@ -75,6 +75,37 @@ class TextDisplay extends StatelessWidget with NT4Widget {
               case NT4TypeStr.kString:
                 formattedData = value;
                 break;
+              case NT4TypeStr.kFloat32Arr:
+              case NT4TypeStr.kFloat64Arr:
+                formattedData = List<double>.of(value
+                    .substring(1)
+                    .substring(value.length - 1)
+                    .split(',')
+                    .map((e) => double.tryParse(e.trim()) ?? 0.0));
+                break;
+              case NT4TypeStr.kIntArr:
+                formattedData = List<int>.of(value
+                    .substring(1)
+                    .substring(1)
+                    .substring(value.length - 1)
+                    .split(',')
+                    .map((e) => int.tryParse(e.trim()) ?? 0));
+                break;
+              case NT4TypeStr.kBoolArr:
+                formattedData = List<bool>.of(value
+                    .substring(1)
+                    .substring(1)
+                    .substring(value.length - 1)
+                    .split(',')
+                    .map((e) => bool.tryParse(e.trim()) ?? false));
+                break;
+              case NT4TypeStr.kStringArr:
+                formattedData = List<String>.of(value
+                    .substring(1)
+                    .substring(value.length - 1)
+                    .split(',')
+                    .map((e) => e.replaceAll(']', '').trim()));
+                break;
               default:
                 break;
             }
