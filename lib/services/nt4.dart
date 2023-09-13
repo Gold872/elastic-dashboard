@@ -143,6 +143,10 @@ class NT4Client {
       _subscriptions.remove(sub.uid);
       _subscribedTopics.remove(sub);
       _wsUnsubscribe(sub);
+
+      if (_clientPublishedTopics.containsKey(sub.topic)) {
+        unpublishTopic(_clientPublishedTopics[sub.topic]!);
+      }
     }
   }
 
