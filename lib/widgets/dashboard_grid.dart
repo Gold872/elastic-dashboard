@@ -1,4 +1,5 @@
 import 'package:contextmenu/contextmenu.dart';
+import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -359,7 +360,7 @@ class DashboardGrid extends StatelessWidget {
                 color: (container.model?.validLocation ?? false)
                     ? Colors.white.withOpacity(0.25)
                     : Colors.black.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(25.0),
+                borderRadius: BorderRadius.circular(Globals.cornerRadius),
                 border: Border.all(
                     color: (container.model?.validLocation ?? false)
                         ? Colors.lightGreenAccent.shade400
@@ -456,7 +457,7 @@ class DashboardGrid extends StatelessWidget {
               color: (isValidLocation(previewLocation))
                   ? Colors.white.withOpacity(0.25)
                   : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(25.0),
+              borderRadius: BorderRadius.circular(Globals.cornerRadius),
               border: Border.all(
                   color: (isValidLocation(previewLocation))
                       ? Colors.lightGreenAccent.shade400
