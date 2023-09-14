@@ -808,6 +808,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.6"
+  searchable_listview:
+    dependency: "direct main"
+    description:
+      name: searchable_listview
+      sha256: "5de53276af125e5889e9b1d10128f90a0ad0db56c877c2664d8dd3b1aeab5379"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   shared_preferences:
     dependency: "direct main"
     description:

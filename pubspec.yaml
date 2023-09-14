@@ -29,6 +29,7 @@ dependencies:
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
   provider: ^6.0.5
+  searchable_listview: ^2.7.0
   shared_preferences: ^2.1.2
   syncfusion_flutter_charts: ^22.2.11
   syncfusion_flutter_gauges: ^22.2.7

@@ -9,6 +9,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
@@ -360,6 +361,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Camera Stream':
         return CameraStreamWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'RobotPreferences':
+        return RobotPreferences.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
