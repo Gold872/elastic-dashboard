@@ -143,6 +143,10 @@ class NT4Client {
       _subscriptions.remove(sub.uid);
       _subscribedTopics.remove(sub);
       _wsUnsubscribe(sub);
+
+      if (_clientPublishedTopics.containsKey(sub.topic)) {
+        unpublishTopic(_clientPublishedTopics[sub.topic]!);
+      }
     }
   }
 
@@ -302,7 +306,14 @@ class NT4Client {
         // Prevents repeated calls to onConnect and reconnecting after changing ip addresses
         if (!_serverConnectionActive &&
             serverAddr.contains(serverBaseAddress)) {
+          lastAnnouncedValues.clear();
+
+          for (NT4Subscription sub in _subscriptions.values) {
+            sub.currentValue = null;
+          }
+
           _serverConnectionActive = true;
+
           onConnect?.call();
         }
         _wsOnMessage(data);
@@ -344,12 +355,6 @@ class NT4Client {
     onDisconnect?.call();
 
     announcedTopics.clear();
-
-    lastAnnouncedValues.clear();
-
-    for (NT4Subscription sub in _subscriptions.values) {
-      sub.currentValue = null;
-    }
 
     if (kDebugMode) {
       print('[NT4] Connection closed. Attempting to reconnect in 1s');

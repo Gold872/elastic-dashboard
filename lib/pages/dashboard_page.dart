@@ -18,7 +18,6 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -423,77 +422,99 @@ class _DashboardPageState extends State<DashboardPage> {
     showDialog(
       context: context,
       builder: (context) => SettingsDialog(
-          preferences: widget.preferences,
-          onTeamNumberChanged: (String? data) async {
-            if (data == null) {
-              return;
-            }
+        preferences: widget.preferences,
+        onTeamNumberChanged: (String? data) async {
+          if (data == null) {
+            return;
+          }
 
-            int? newTeamNumber = int.tryParse(data);
+          int? newTeamNumber = int.tryParse(data);
 
-            if (newTeamNumber == null) {
-              return;
-            }
+          if (newTeamNumber == null) {
+            return;
+          }
 
-            await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
+          await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-            if (nt4Connection.isDSConnected) {
-              setState(() {});
-              return;
-            }
+          if (nt4Connection.isDSConnected) {
+            setState(() {});
+            return;
+          }
 
-            bool determineAddressFromTeamNumber =
-                _preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
+          bool determineAddressFromTeamNumber =
+              _preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
 
-            if (determineAddressFromTeamNumber) {
-              _updateIPAddress(newIPAddress: data);
-            }
-          },
-          onUseTeamNumberToggle: (value) async {
-            await _preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (nt4Connection.isDSConnected) {
-              return;
-            }
-
-            if (value) {
-              _updateIPAddress();
-            }
-          },
-          onIPAddressChanged: (String? data) async {
-            if (data == null) {
-              return;
-            }
-
-            if (nt4Connection.isDSConnected) {
-              return;
-            }
-
+          if (determineAddressFromTeamNumber) {
             _updateIPAddress(newIPAddress: data);
-          },
-          onGridToggle: (value) async {
-            setState(() {
-              Globals.showGrid = value;
-            });
+          }
+        },
+        onUseTeamNumberToggle: (value) async {
+          await _preferences.setBool(PrefKeys.useTeamNumberForIP, value);
 
-            await _preferences.setBool(PrefKeys.showGrid, value);
-          },
-          onGridSizeChanged: (gridSize) async {
-            if (gridSize == null) {
-              return;
+          if (nt4Connection.isDSConnected) {
+            return;
+          }
+
+          if (value) {
+            _updateIPAddress();
+          }
+        },
+        onIPAddressChanged: (String? data) async {
+          if (data == null) {
+            return;
+          }
+
+          if (nt4Connection.isDSConnected) {
+            return;
+          }
+
+          _updateIPAddress(newIPAddress: data);
+        },
+        onGridToggle: (value) async {
+          setState(() {
+            Globals.showGrid = value;
+          });
+
+          await _preferences.setBool(PrefKeys.showGrid, value);
+        },
+        onGridSizeChanged: (gridSize) async {
+          if (gridSize == null) {
+            return;
+          }
+
+          int? newGridSize = int.tryParse(gridSize);
+
+          if (newGridSize == null) {
+            return;
+          }
+
+          setState(() => Globals.gridSize = newGridSize);
+
+          await _preferences.setInt(PrefKeys.gridSize, newGridSize);
+        },
+        onCornerRadiusChanged: (radius) async {
+          if (radius == null) {
+            return;
+          }
+
+          double? newRadius = double.tryParse(radius);
+
+          if (newRadius == null) {
+            return;
+          }
+
+          setState(() {
+            Globals.cornerRadius = newRadius;
+
+            for (DashboardGrid grid in grids) {
+              grid.refreshAllContainers();
             }
+          });
 
-            int? newGridSize = int.tryParse(gridSize);
-
-            if (newGridSize == null) {
-              return;
-            }
-
-            setState(() => Globals.gridSize = newGridSize);
-
-            await _preferences.setInt(PrefKeys.gridSize, newGridSize);
-          },
-          onColorChanged: widget.onColorChanged),
+          await _preferences.setDouble(PrefKeys.cornerRadius, newRadius);
+        },
+        onColorChanged: widget.onColorChanged,
+      ),
     );
   }
 

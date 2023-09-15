@@ -15,6 +15,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(Color color)? onColorChanged;
   final Function(bool value)? onGridToggle;
   final Function(String? gridSize)? onGridSizeChanged;
+  final Function(String? radius)? onCornerRadiusChanged;
 
   const SettingsDialog({
     super.key,
@@ -25,6 +26,7 @@ class SettingsDialog extends StatefulWidget {
     this.onColorChanged,
     this.onGridToggle,
     this.onGridSizeChanged,
+    this.onCornerRadiusChanged,
   });
 
   @override
@@ -139,7 +141,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ),
                 )
               ],
-            )
+            ),
+            const Divider(),
+            DialogTextInput(
+              initialText: widget.preferences
+                      .getDouble(PrefKeys.cornerRadius)
+                      ?.toString() ??
+                  Globals.cornerRadius.toString(),
+              label: 'Corner Radius',
+              onSubmit: (value) {
+                setState(() {
+                  widget.onCornerRadiusChanged?.call(value);
+                });
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+            ),
           ],
         ),
       ),

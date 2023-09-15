@@ -481,6 +481,14 @@ class DashboardGrid extends StatelessWidget {
     });
   }
 
+  void refreshAllContainers() {
+    Future(() async {
+      for (DraggableWidgetContainer widget in _widgetContainers) {
+        widget.refresh();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     model = context.watch<DashboardGridModel?>();
@@ -525,7 +533,7 @@ class DashboardGrid extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(25.0),
+                    borderRadius: BorderRadius.circular(Globals.cornerRadius),
                     border: Border.all(color: Colors.yellow, width: 5.0),
                   ),
                 ),
@@ -636,7 +644,60 @@ class DashboardGrid extends StatelessWidget {
               color: (isValidLocation(previewLocation))
                   ? Colors.white.withOpacity(0.25)
                   : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(25.0),
+              borderRadius: BorderRadius.circular(Globals.cornerRadius),
+              border: Border.all(
+                  color: (isValidLocation(previewLocation))
+                      ? Colors.lightGreenAccent.shade400
+                      : Colors.red,
+                  width: 5.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_layoutContainerDraggingIn != null) {
+      DraggableWidgetContainer container = _layoutContainerDraggingIn!.key;
+      Offset globalOffset = _layoutContainerDraggingIn!.value;
+
+      RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
+
+      Offset localPosition = ancestor!.globalToLocal(globalOffset);
+
+      if (localPosition.dx < 0) {
+        localPosition = Offset(0, localPosition.dy);
+      }
+
+      if (localPosition.dy < 0) {
+        localPosition = Offset(localPosition.dx, 0);
+      }
+
+      draggingInWidgets.add(
+        Positioned(
+          left: localPosition.dx,
+          top: localPosition.dy,
+          child: container.getWidgetContainer(),
+        ),
+      );
+
+      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
+      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
+
+      Rect previewLocation = Rect.fromLTWH(previewX, previewY,
+          container.displayRect.width, container.displayRect.height);
+
+      previewOutlines.add(
+        Positioned(
+          left: previewLocation.left,
+          top: previewLocation.top,
+          width: previewLocation.width,
+          height: previewLocation.height,
+          child: Container(
+            decoration: BoxDecoration(
+              color: (isValidLocation(previewLocation))
+                  ? Colors.white.withOpacity(0.25)
+                  : Colors.black.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(Globals.cornerRadius),
               border: Border.all(
                   color: (isValidLocation(previewLocation))
                       ? Colors.lightGreenAccent.shade400

@@ -121,7 +121,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
           streams.add(stream.substring(5));
         }
 
-        if (streams.isEmpty) {
+        if (streams.isEmpty || !nt4Connection.isNT4Connected) {
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -154,11 +154,14 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
             clientOpen = true;
           }
           lastDisplayedImage?.evict();
+
+          String stream = (streams.length > 1) ? streams[1] : streams[0];
+
           streamWidget = Mjpeg(
             fit: BoxFit.contain,
             httpClient: httpClient,
             isLive: true,
-            stream: streams[0],
+            stream: stream,
           );
         }
 

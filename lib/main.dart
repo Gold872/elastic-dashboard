@@ -15,9 +15,12 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
-  Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? 128;
-  Globals.snapToGrid = preferences.getBool(PrefKeys.snapToGrid) ?? true;
-  Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? false;
+  Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? Globals.gridSize;
+  Globals.snapToGrid =
+      preferences.getBool(PrefKeys.snapToGrid) ?? Globals.snapToGrid;
+  Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? Globals.showGrid;
+  Globals.cornerRadius =
+      preferences.getDouble(PrefKeys.cornerRadius) ?? Globals.cornerRadius;
 
   nt4Connection
       .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');

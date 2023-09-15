@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -119,11 +120,6 @@ class TreeRow {
 
       // If it's a camera stream
       if (hasRows([
-        'Property',
-        'PropertyInfo',
-        'RawProperty',
-        'RawPropertyInfo',
-        'connected',
         'description',
         'mode',
         'modes',
@@ -169,6 +165,8 @@ class TreeRow {
         return CommandSchedulerWidget(key: UniqueKey(), topic: topic);
       case 'FMSInfo':
         return FMSInfo(key: UniqueKey(), topic: topic);
+      case 'RobotPreferences':
+        return RobotPreferences(key: UniqueKey(), topic: topic);
     }
 
     return null;
@@ -207,6 +205,9 @@ class TreeRow {
       height = normalGridSize * 3;
     } else if (primary is FMSInfo) {
       width = normalGridSize * 3;
+    } else if (primary is RobotPreferences) {
+      width = normalGridSize * 2;
+      height = normalGridSize * 3;
     }
 
     return WidgetContainer(

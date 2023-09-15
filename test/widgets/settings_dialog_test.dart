@@ -27,6 +27,8 @@ class FakeSettingsMethods {
   void changeShowGrid() {}
 
   void changeGridSize() {}
+
+  void changeCornerRadius() {}
 }
 
 void main() {
@@ -43,6 +45,7 @@ void main() {
       PrefKeys.teamColor: Colors.blueAccent.value,
       PrefKeys.showGrid: false,
       PrefKeys.gridSize: 128,
+      PrefKeys.cornerRadius: 15.0,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -74,6 +77,7 @@ void main() {
     expect(find.text('IP Address'), findsOneWidget);
     expect(find.text('Show Grid'), findsWidgets);
     expect(find.text('Grid Size'), findsWidgets);
+    expect(find.text('Corner Radius'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -316,5 +320,37 @@ void main() {
 
     expect(preferences.getInt(PrefKeys.gridSize), 64);
     verify(fakeSettings.changeGridSize()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change corner radius', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onCornerRadiusChanged: (radius) async {
+            fakeSettings.changeCornerRadius();
+
+            await preferences.setDouble(
+                PrefKeys.cornerRadius, double.parse(radius!));
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final cornerRadiusField =
+        find.widgetWithText(DialogTextInput, 'Corner Radius');
+
+    expect(cornerRadiusField, findsOneWidget);
+
+    await widgetTester.enterText(cornerRadiusField, '25.0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getDouble(PrefKeys.cornerRadius), 25.0);
+    verify(fakeSettings.changeCornerRadius()).called(greaterThanOrEqualTo(1));
   });
 }

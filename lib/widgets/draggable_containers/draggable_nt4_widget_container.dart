@@ -9,12 +9,15 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -84,8 +87,16 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         newWidget = GraphWidget(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
+      case 'Number Bar':
+        newWidget = NumberBar(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
       case 'Number Slider':
         newWidget = NumberSlider(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Voltage View':
+        newWidget = VoltageView(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
       case 'Text Display':
@@ -280,8 +291,18 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
+      case 'Number Bar':
+        return NumberBar.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
       case 'Number Slider':
         return NumberSlider.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Voltage View':
+        return VoltageView.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
@@ -342,6 +363,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Camera Stream':
         return CameraStreamWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'RobotPreferences':
+        return RobotPreferences.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
