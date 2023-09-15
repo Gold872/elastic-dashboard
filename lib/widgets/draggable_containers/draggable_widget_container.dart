@@ -45,6 +45,8 @@ class DraggableWidgetContainer extends StatelessWidget {
   Rect draggablePositionRect = Rect.fromLTWH(
       0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
 
+  Offset cursorLocation = const Offset(double.nan, double.nan);
+
   Rect displayRect = Rect.fromLTWH(
       0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
 
@@ -52,11 +54,15 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   bool enabled = false;
   bool dragging = false;
+  bool draggingIntoLayout = false;
 
   Map<String, dynamic>? jsonData = {};
 
   bool Function(DraggableWidgetContainer widget, Rect location)
       validMoveLocation;
+  bool Function(
+          DraggableWidgetContainer widget, Rect location, Offset localPosition)?
+      validLayoutLocation = (widget, location, globalPosition) => false;
   Function(dynamic widget)? onUpdate;
   Function(dynamic widget)? onDragBegin;
   Function(dynamic widget, {Offset? localPosition})? onDragEnd;
@@ -69,6 +75,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     super.key,
     required this.title,
     required this.validMoveLocation,
+    this.validLayoutLocation,
     this.enabled = false,
     this.initialPosition,
     this.onUpdate,
@@ -83,6 +90,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   DraggableWidgetContainer.fromJson({
     super.key,
     required this.validMoveLocation,
+    this.validLayoutLocation,
     required this.jsonData,
     this.enabled = false,
     this.onUpdate,
@@ -255,7 +263,24 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreview(preview);
           model.setDraggableRect(draggablePositionRect);
           model.setPreviewVisible(true);
-          model.setValidLocation(validMoveLocation.call(this, preview));
+
+          cursorLocation = event.localPosition;
+
+          bool validLocation = validMoveLocation.call(this, preview);
+
+          if (validLocation) {
+            model.setValidLocation(validLocation);
+
+            draggingIntoLayout = false;
+          } else {
+            validLocation =
+                validLayoutLocation?.call(this, preview, event.localPosition) ??
+                    false;
+
+            draggingIntoLayout = validLocation;
+
+            model.setValidLocation(validLocation);
+          }
 
           onUpdate?.call(this);
         },
@@ -327,7 +352,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     ];
   }
 
-  Widget getPreview() {
+  Widget getDefaultPreview() {
     return Positioned(
       left: model?.preview.left,
       top: model?.preview.top,

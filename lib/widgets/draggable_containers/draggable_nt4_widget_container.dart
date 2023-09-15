@@ -33,6 +33,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     required super.title,
     required this.child,
     required super.validMoveLocation,
+    super.validLayoutLocation,
     super.enabled = false,
     super.initialPosition,
     super.onUpdate,
@@ -45,6 +46,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   DraggableNT4WidgetContainer.fromJson({
     super.key,
     required super.validMoveLocation,
+    super.validLayoutLocation,
     required super.jsonData,
     super.enabled = false,
     super.onUpdate,
