@@ -40,6 +40,7 @@ void main() async {
   await windowManager.setMinimumSize(const Size(1280, 720));
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
+  await windowManager.focus();
 
   runApp(Elastic(version: packageInfo.version, preferences: preferences));
 }
