@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 
 abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
@@ -38,5 +41,5 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
 
   bool willAcceptWidget(DraggableWidgetContainer widget);
 
-  void addWidget(WidgetContainer widget);
+  void addWidget(DraggableNT4WidgetContainer widget, {Offset? localPosition});
 }

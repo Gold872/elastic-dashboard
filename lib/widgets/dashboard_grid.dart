@@ -86,25 +86,11 @@ class DashboardGrid extends StatelessWidget {
             enabled: nt4Connection.isNT4Connected,
             validMoveLocation: isValidMoveLocation,
             jsonData: layoutData,
-            onUpdate: (widget) {
-              refresh();
-            },
-            onDragBegin: (widget) {
-              _layoutDraggingContainers.add(widget);
-              refresh();
-            },
-            onDragEnd: (widget, {localPosition}) {
-              _layoutDraggingContainers.remove(widget);
-              refresh();
-            },
-            onResizeBegin: (widget) {
-              _layoutDraggingContainers.add(widget);
-              refresh();
-            },
-            onResizeEnd: (widget) {
-              _layoutDraggingContainers.remove(widget);
-              refresh();
-            },
+            onUpdate: layoutContainerOnUpdate,
+            onDragBegin: layoutContainerOnDragBegin,
+            onDragEnd: layoutContainerOnDragEnd,
+            onResizeBegin: layoutContainerOnResizeBegin,
+            onResizeEnd: layoutContainerOnResizeEnd,
           );
         default:
           continue;
@@ -155,16 +141,7 @@ class DashboardGrid extends StatelessWidget {
 
   bool isValidLayoutLocation(
       DraggableWidgetContainer widget, Rect location, Offset localPosition) {
-    for (DraggableLayoutContainer container
-        in _widgetContainers.whereType<DraggableLayoutContainer>()) {
-      if (container.displayRect.contains(localPosition +
-              Offset(widget.displayRect.left, widget.displayRect.top)) &&
-          container.willAcceptWidget(widget)) {
-        return true;
-      }
-    }
-
-    return false;
+    return getLayoutAtLocation(location, localPosition) != null;
   }
 
   /// Returns weather `location` will overlap with widgets already on the dashboard
@@ -178,12 +155,10 @@ class DashboardGrid extends StatelessWidget {
   }
 
   DraggableLayoutContainer? getLayoutAtLocation(
-      DraggableNT4WidgetContainer widget, Offset localPosition) {
+      Rect location, Offset localPosition) {
     for (DraggableLayoutContainer container
         in _widgetContainers.whereType<DraggableLayoutContainer>()) {
-      if (container.displayRect.contains(localPosition +
-              Offset(widget.displayRect.left, widget.displayRect.top)) &&
-          container.willAcceptWidget(widget)) {
+      if (container.displayRect.contains(location.topLeft + localPosition)) {
         return container;
       }
     }
@@ -200,8 +175,22 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
-  void nt4ContainerOnDragEnd(dynamic widget, {Offset? localPosition}) {
-    _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
+  void nt4ContainerOnDragEnd(dynamic widget, Rect releaseRect,
+      {Offset? localPosition}) {
+    DraggableNT4WidgetContainer nt4Container =
+        widget as DraggableNT4WidgetContainer;
+
+    if (widget.draggingIntoLayout && localPosition != null) {
+      DraggableLayoutContainer? layoutContainer =
+          getLayoutAtLocation(releaseRect, localPosition);
+
+      if (layoutContainer != null) {
+        layoutContainer.addWidget(nt4Container, localPosition: localPosition);
+        _widgetContainers.remove(nt4Container);
+      }
+    } else {
+      _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
+    }
     _nt4DraggingContainers.remove(widget);
     refresh();
   }
@@ -211,9 +200,34 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
-  void nt4ContainerOnResizeEnd(dynamic widget) {
+  void nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
     _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
     _nt4DraggingContainers.remove(widget);
+    refresh();
+  }
+
+  void layoutContainerOnUpdate(dynamic widget) {
+    refresh();
+  }
+
+  void layoutContainerOnDragBegin(dynamic widget) {
+    _layoutDraggingContainers.add(widget);
+    refresh();
+  }
+
+  void layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
+      {Offset? localPosition}) {
+    _layoutDraggingContainers.remove(widget);
+    refresh();
+  }
+
+  void layoutContainerOnResizeBegin(dynamic widget) {
+    _layoutDraggingContainers.add(widget);
+    refresh();
+  }
+
+  void layoutContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+    _layoutDraggingContainers.remove(widget);
     refresh();
   }
 
@@ -368,26 +382,13 @@ class DashboardGrid extends StatelessWidget {
         Globals.gridSize.toDouble(),
         Globals.gridSize.toDouble(),
       ),
+      enabled: nt4Connection.isNT4Connected,
       validMoveLocation: isValidMoveLocation,
-      onUpdate: (widget) {
-        refresh();
-      },
-      onDragBegin: (widget) {
-        _layoutDraggingContainers.add(widget);
-        refresh();
-      },
-      onDragEnd: (widget, {localPosition}) {
-        _layoutDraggingContainers.remove(widget);
-        refresh();
-      },
-      onResizeBegin: (widget) {
-        _layoutDraggingContainers.add(widget);
-        refresh();
-      },
-      onResizeEnd: (widget) {
-        _layoutDraggingContainers.remove(widget);
-        refresh();
-      },
+      onUpdate: layoutContainerOnUpdate,
+      onDragBegin: layoutContainerOnDragBegin,
+      onDragEnd: layoutContainerOnDragEnd,
+      onResizeBegin: layoutContainerOnResizeBegin,
+      onResizeEnd: layoutContainerOnResizeEnd,
     );
   }
 
@@ -504,7 +505,7 @@ class DashboardGrid extends StatelessWidget {
         Positioned(
           left: container.draggablePositionRect.left,
           top: container.draggablePositionRect.top,
-          child: container.getDraggingWidgetContainer(),
+          child: container.getDraggingWidgetContainer(context),
         ),
       );
 
@@ -514,8 +515,8 @@ class DashboardGrid extends StatelessWidget {
           container.getDefaultPreview(),
         );
       } else {
-        DraggableLayoutContainer? layoutContainer =
-            getLayoutAtLocation(container, container.cursorLocation);
+        DraggableLayoutContainer? layoutContainer = getLayoutAtLocation(
+            container.draggablePositionRect, container.cursorLocation);
 
         if (layoutContainer == null) {
           previewOutlines.add(
@@ -550,7 +551,7 @@ class DashboardGrid extends StatelessWidget {
         Positioned(
           left: container.draggablePositionRect.left,
           top: container.draggablePositionRect.top,
-          child: container.getDraggingWidgetContainer(),
+          child: container.getDraggingWidgetContainer(context),
         ),
       );
 
@@ -676,7 +677,7 @@ class DashboardGrid extends StatelessWidget {
         Positioned(
           left: localPosition.dx,
           top: localPosition.dy,
-          child: container.getWidgetContainer(),
+          child: container.getWidgetContainer(context),
         ),
       );
 
@@ -729,7 +730,7 @@ class DashboardGrid extends StatelessWidget {
         Positioned(
           left: localPosition.dx,
           top: localPosition.dy,
-          child: container.getWidgetContainer(),
+          child: container.getWidgetContainer(context),
         ),
       );
 

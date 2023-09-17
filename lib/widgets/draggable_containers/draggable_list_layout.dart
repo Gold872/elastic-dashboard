@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -60,14 +61,54 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  void addWidget(WidgetContainer widget) {}
+  void addWidget(DraggableNT4WidgetContainer widget, {Offset? localPosition}) {
+    children.add(widget);
+
+    refresh();
+  }
 
   List<Widget> getListColumn() {
     List<Widget> column = [];
 
     for (DraggableNT4WidgetContainer widget in children) {
-      column.add(widget.child!);
-      column.add(const SizedBox(height: 5));
+      column.add(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            constraints: BoxConstraints(
+              minHeight: 96,
+              // maxWidth: widget.displayRect.width,
+              maxHeight: widget.displayRect.height - 32,
+            ),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 45, 45, 45),
+              borderRadius: BorderRadius.circular(Globals.cornerRadius),
+              boxShadow: const [
+                BoxShadow(
+                  offset: Offset(2, 2),
+                  blurRadius: 10.5,
+                  spreadRadius: 0,
+                  color: Colors.black,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(widget.title ?? ''),
+                ),
+                const SizedBox(height: 5),
+                Flexible(
+                  child: widget.child!,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      column.add(const Divider(height: 5));
     }
 
     if (column.isNotEmpty) {
@@ -78,7 +119,24 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  WidgetContainer getWidgetContainer() {
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
+    return WidgetContainer(
+      title: title,
+      width: draggablePositionRect.width,
+      height: draggablePositionRect.height,
+      opacity: 0.80,
+      child: ClipRRect(
+        child: Wrap(
+          children: [
+            ...getListColumn(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  WidgetContainer getWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
       width: displayRect.width,
@@ -89,12 +147,12 @@ class DraggableListLayout extends DraggableLayoutContainer {
         child: AbsorbPointer(
           absorbing: !enabled,
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...getListColumn(),
-              ],
+            child: ClipRRect(
+              child: Wrap(
+                children: [
+                  ...getListColumn(),
+                ],
+              ),
             ),
           ),
         ),
@@ -111,7 +169,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
         Positioned(
           left: displayRect.left,
           top: displayRect.top,
-          child: getWidgetContainer(),
+          child: getWidgetContainer(context),
         ),
         ...super.getStackChildren(model!),
       ],

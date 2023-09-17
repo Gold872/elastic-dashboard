@@ -65,9 +65,10 @@ class DraggableWidgetContainer extends StatelessWidget {
       validLayoutLocation = (widget, location, globalPosition) => false;
   Function(dynamic widget)? onUpdate;
   Function(dynamic widget)? onDragBegin;
-  Function(dynamic widget, {Offset? localPosition})? onDragEnd;
+  Function(dynamic widget, Rect releaseRect, {Offset? localPosition})?
+      onDragEnd;
   Function(dynamic widget)? onResizeBegin;
-  Function(dynamic widget)? onResizeEnd;
+  Function(dynamic widget, Rect releaseRect)? onResizeEnd;
 
   WidgetContainerModel? model;
 
@@ -193,7 +194,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
 
-  WidgetContainer getDraggingWidgetContainer() {
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
       width: draggablePositionRect.width,
@@ -203,7 +204,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     );
   }
 
-  WidgetContainer getWidgetContainer() {
+  WidgetContainer getWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
       width: displayRect.width,
@@ -264,7 +265,8 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setDraggableRect(draggablePositionRect);
           model.setPreviewVisible(true);
 
-          cursorLocation = event.localPosition;
+          cursorLocation =
+              event.localPosition + result.oldPosition - result.position;
 
           bool validLocation = validMoveLocation.call(this, preview);
 
@@ -273,9 +275,9 @@ class DraggableWidgetContainer extends StatelessWidget {
 
             draggingIntoLayout = false;
           } else {
-            validLocation =
-                validLayoutLocation?.call(this, preview, event.localPosition) ??
-                    false;
+            validLocation = validLayoutLocation?.call(
+                    this, draggablePositionRect, cursorLocation) ??
+                false;
 
             draggingIntoLayout = validLocation;
 
@@ -286,6 +288,9 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onDragEnd: (event) {
           dragging = false;
+
+          Rect releaseRect = draggablePositionRect;
+
           if (model.validLocation) {
             draggablePositionRect = model.preview;
           } else {
@@ -298,10 +303,13 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewVisible(false);
           model.setValidLocation(true);
 
-          onDragEnd?.call(this);
+          onDragEnd?.call(this, releaseRect, localPosition: cursorLocation);
         },
         onDragCancel: () {
           dragging = false;
+
+          Rect releaseRect = draggablePositionRect;
+
           if (model.validLocation) {
             draggablePositionRect = model.preview;
           } else {
@@ -314,10 +322,13 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewVisible(false);
           model.setValidLocation(true);
 
-          onDragEnd?.call(this);
+          onDragEnd?.call(this, releaseRect, localPosition: cursorLocation);
         },
         onResizeEnd: (handle, event) {
           dragging = false;
+
+          Rect releaseRect = draggablePositionRect;
+
           if (model.validLocation) {
             draggablePositionRect = model.preview;
           } else {
@@ -330,10 +341,13 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewVisible(false);
           model.setValidLocation(true);
 
-          onResizeEnd?.call(this);
+          onResizeEnd?.call(this, releaseRect);
         },
         onResizeCancel: (handle) {
           dragging = false;
+
+          Rect releaseRect = draggablePositionRect;
+
           if (model.validLocation) {
             draggablePositionRect = model.preview;
           } else {
@@ -346,7 +360,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewVisible(false);
           model.setValidLocation(true);
 
-          onResizeEnd?.call(this);
+          onResizeEnd?.call(this, releaseRect);
         },
       ),
     ];

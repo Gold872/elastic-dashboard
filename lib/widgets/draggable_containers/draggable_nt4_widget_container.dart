@@ -384,7 +384,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
-  WidgetContainer getDraggingWidgetContainer() {
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
       width: draggablePositionRect.width,
@@ -395,7 +395,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
-  WidgetContainer getWidgetContainer() {
+  WidgetContainer getWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
       width: displayRect.width,
@@ -423,7 +423,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         Positioned(
           left: displayRect.left,
           top: displayRect.top,
-          child: getWidgetContainer(),
+          child: getWidgetContainer(context),
         ),
         ...super.getStackChildren(model!),
       ],
