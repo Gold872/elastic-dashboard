@@ -932,7 +932,7 @@ class AddWidgetDialog extends StatelessWidget {
                         ListView(
                           children: [
                             LayoutDragTile(
-                              title: 'List View',
+                              title: 'List Layout',
                               layoutBuilder: () => grid.createListLayout(),
                               onDragUpdate: onLayoutDragUpdate,
                               onDragEnd: onLayoutDragEnd,
