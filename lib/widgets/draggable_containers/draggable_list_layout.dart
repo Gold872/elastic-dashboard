@@ -43,6 +43,18 @@ class DraggableListLayout extends DraggableLayoutContainer {
     };
   }
 
+  @override
+  void fromJson(Map<String, dynamic> jsonData) {
+    super.fromJson(jsonData);
+
+    for (Map<String, dynamic> childData in jsonData['children']) {
+      children.add(DraggableNT4WidgetContainer.fromJson(
+        validMoveLocation: validMoveLocation,
+        jsonData: childData,
+      ));
+    }
+  }
+
   Map<String, dynamic> getChildrenJson() {
     var childrenJson = [];
 
