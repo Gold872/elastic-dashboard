@@ -200,6 +200,24 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+
+    for (var child in children) {
+      child.dispose();
+    }
+  }
+
+  @override
+  void unSubscribe() {
+    super.unSubscribe();
+
+    for (var child in children) {
+      child.unSubscribe();
+    }
+  }
+
+  @override
   bool willAcceptWidget(DraggableWidgetContainer widget) {
     return widget is DraggableNT4WidgetContainer;
   }

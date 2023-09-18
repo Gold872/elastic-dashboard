@@ -126,11 +126,17 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     refresh();
   }
 
+  @override
   void dispose() {
+    super.dispose();
+
     child?.dispose();
   }
 
+  @override
   void unSubscribe() {
+    super.unSubscribe();
+
     child?.unSubscribe();
   }
 

@@ -201,6 +201,10 @@ class DraggableWidgetContainer extends StatelessWidget {
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
 
+  void dispose() {}
+
+  void unSubscribe() {}
+
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,

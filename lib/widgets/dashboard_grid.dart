@@ -204,7 +204,7 @@ class DashboardGrid extends StatelessWidget {
         _widgetContainers.remove(nt4Container);
       }
     } else {
-      _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
+      _nt4DraggingContainers.toSet().lookup(widget)?.dispose();
     }
     _nt4DraggingContainers.remove(widget);
     refresh();
@@ -216,7 +216,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void _nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
-    _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
+    _nt4DraggingContainers.toSet().lookup(widget)?.dispose();
     _nt4DraggingContainers.remove(widget);
     refresh();
   }
@@ -511,17 +511,14 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void removeWidget(DraggableWidgetContainer widget) {
-    if (widget is DraggableNT4WidgetContainer) {
-      widget.child?.dispose();
-      widget.child?.unSubscribe();
-    }
+    widget.dispose();
+    widget.unSubscribe();
     _widgetContainers.remove(widget);
     refresh();
   }
 
   void clearWidgets() {
-    for (DraggableNT4WidgetContainer container
-        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+    for (DraggableWidgetContainer container in _widgetContainers) {
       container.dispose();
       container.unSubscribe();
     }
@@ -530,8 +527,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void onDestroy() {
-    for (DraggableNT4WidgetContainer container
-        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+    for (DraggableWidgetContainer container in _widgetContainers) {
       container.dispose();
       container.unSubscribe();
     }
