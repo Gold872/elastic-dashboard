@@ -24,8 +24,7 @@ class DashboardGrid extends StatelessWidget {
   final List<DraggableNT4WidgetContainer> _nt4DraggingContainers = [];
   final List<DraggableLayoutContainer> _layoutDraggingContainers = [];
 
-  MapEntry<WidgetContainer, Offset>? _nt4ContainerDraggingIn;
-  MapEntry<DraggableWidgetContainer, Offset>? _layoutContainerDraggingIn;
+  MapEntry<DraggableWidgetContainer, Offset>? _containerDraggingIn;
 
   final VoidCallback? onAddWidgetPressed;
 
@@ -62,11 +61,11 @@ class DashboardGrid extends StatelessWidget {
         validMoveLocation: isValidMoveLocation,
         validLayoutLocation: isValidLayoutLocation,
         jsonData: containerData,
-        onUpdate: nt4ContainerOnUpdate,
-        onDragBegin: nt4ContainerOnDragBegin,
-        onDragEnd: nt4ContainerOnDragEnd,
-        onResizeBegin: nt4ContainerOnResizeBegin,
-        onResizeEnd: nt4ContainerOnResizeEnd,
+        onUpdate: _nt4ContainerOnUpdate,
+        onDragBegin: _nt4ContainerOnDragBegin,
+        onDragEnd: _nt4ContainerOnDragEnd,
+        onResizeBegin: _nt4ContainerOnResizeBegin,
+        onResizeEnd: _nt4ContainerOnResizeEnd,
       ));
     }
   }
@@ -86,11 +85,27 @@ class DashboardGrid extends StatelessWidget {
             enabled: nt4Connection.isNT4Connected,
             validMoveLocation: isValidMoveLocation,
             jsonData: layoutData,
-            onUpdate: layoutContainerOnUpdate,
-            onDragBegin: layoutContainerOnDragBegin,
-            onDragEnd: layoutContainerOnDragEnd,
-            onResizeBegin: layoutContainerOnResizeBegin,
-            onResizeEnd: layoutContainerOnResizeEnd,
+            nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
+              return DraggableNT4WidgetContainer.fromJson(
+                key: UniqueKey(),
+                enabled: nt4Connection.isNT4Connected,
+                validMoveLocation: isValidMoveLocation,
+                validLayoutLocation: isValidLayoutLocation,
+                jsonData: jsonData,
+                onUpdate: _nt4ContainerOnUpdate,
+                onDragBegin: _nt4ContainerOnDragBegin,
+                onDragEnd: _nt4ContainerOnDragEnd,
+                onResizeBegin: _nt4ContainerOnResizeBegin,
+                onResizeEnd: _nt4ContainerOnResizeEnd,
+              );
+            },
+            onDragOutUpdate: _layoutOnDragOutUpdate,
+            onDragOutEnd: _layoutOnDragOutEnd,
+            onUpdate: _layoutContainerOnUpdate,
+            onDragBegin: _layoutContainerOnDragBegin,
+            onDragEnd: _layoutContainerOnDragEnd,
+            onResizeBegin: _layoutContainerOnResizeBegin,
+            onResizeEnd: _layoutContainerOnResizeEnd,
           );
         default:
           continue;
@@ -166,16 +181,16 @@ class DashboardGrid extends StatelessWidget {
     return null;
   }
 
-  void nt4ContainerOnUpdate(dynamic widget) {
+  void _nt4ContainerOnUpdate(dynamic widget) {
     refresh();
   }
 
-  void nt4ContainerOnDragBegin(dynamic widget) {
+  void _nt4ContainerOnDragBegin(dynamic widget) {
     _nt4DraggingContainers.add(widget);
     refresh();
   }
 
-  void nt4ContainerOnDragEnd(dynamic widget, Rect releaseRect,
+  void _nt4ContainerOnDragEnd(dynamic widget, Rect releaseRect,
       {Offset? localPosition}) {
     DraggableNT4WidgetContainer nt4Container =
         widget as DraggableNT4WidgetContainer;
@@ -195,39 +210,51 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
-  void nt4ContainerOnResizeBegin(dynamic widget) {
+  void _nt4ContainerOnResizeBegin(dynamic widget) {
     _nt4DraggingContainers.add(widget);
     refresh();
   }
 
-  void nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+  void _nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
     _nt4DraggingContainers.toSet().lookup(widget)?.child?.dispose();
     _nt4DraggingContainers.remove(widget);
     refresh();
   }
 
-  void layoutContainerOnUpdate(dynamic widget) {
+  void _layoutContainerOnUpdate(dynamic widget) {
     refresh();
   }
 
-  void layoutContainerOnDragBegin(dynamic widget) {
+  void _layoutContainerOnDragBegin(dynamic widget) {
     _layoutDraggingContainers.add(widget);
     refresh();
   }
 
-  void layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
+  void _layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
       {Offset? localPosition}) {
     _layoutDraggingContainers.remove(widget);
     refresh();
   }
 
-  void layoutContainerOnResizeBegin(dynamic widget) {
+  void _layoutContainerOnResizeBegin(dynamic widget) {
     _layoutDraggingContainers.add(widget);
     refresh();
   }
 
-  void layoutContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+  void _layoutContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
     _layoutDraggingContainers.remove(widget);
+    refresh();
+  }
+
+  void _layoutOnDragOutEnd(DraggableWidgetContainer widget) {
+    if (widget is DraggableNT4WidgetContainer) {
+      placeNT4DragInWidget(widget);
+    }
+  }
+
+  void _layoutOnDragOutUpdate(
+      DraggableWidgetContainer widget, Offset location) {
+    _containerDraggingIn = MapEntry(widget, location);
     refresh();
   }
 
@@ -253,16 +280,16 @@ class DashboardGrid extends StatelessWidget {
 
   void addLayoutDragInWidget(
       DraggableLayoutContainer widget, Offset globalOffset) {
-    _layoutContainerDraggingIn = MapEntry(widget, globalOffset);
+    _containerDraggingIn = MapEntry(widget, globalOffset);
     refresh();
   }
 
   void placeLayoutDragInWidget(DraggableLayoutContainer widget) {
-    if (_layoutContainerDraggingIn == null) {
+    if (_containerDraggingIn == null) {
       return;
     }
 
-    Offset globalPosition = _layoutContainerDraggingIn!.value;
+    Offset globalPosition = _containerDraggingIn!.value;
 
     BuildContext? context = (key as GlobalKey).currentContext;
 
@@ -289,7 +316,7 @@ class DashboardGrid extends StatelessWidget {
         widget.displayRect.width, widget.displayRect.height);
 
     if (!isValidLocation(previewLocation)) {
-      _layoutContainerDraggingIn = null;
+      _containerDraggingIn = null;
 
       refresh();
       return;
@@ -303,22 +330,23 @@ class DashboardGrid extends StatelessWidget {
         Rect.fromLTWH(previewX, previewY, width, height);
 
     addWidget(widget);
-    _layoutContainerDraggingIn = null;
+    _containerDraggingIn = null;
 
     refresh();
   }
 
-  void addNT4DragInWidget(WidgetContainer widget, Offset globalOffset) {
-    _nt4ContainerDraggingIn = MapEntry(widget, globalOffset);
+  void addNT4DragInWidget(
+      DraggableNT4WidgetContainer widget, Offset globalOffset) {
+    _containerDraggingIn = MapEntry(widget, globalOffset);
     refresh();
   }
 
-  void placeNT4DragInWidget(WidgetContainer widget) {
-    if (_nt4ContainerDraggingIn == null) {
+  void placeNT4DragInWidget(DraggableNT4WidgetContainer widget) {
+    if (_containerDraggingIn == null) {
       return;
     }
 
-    Offset globalPosition = _nt4ContainerDraggingIn!.value;
+    Offset globalPosition = _containerDraggingIn!.value;
 
     BuildContext? context = (key as GlobalKey).currentContext;
 
@@ -341,11 +369,20 @@ class DashboardGrid extends StatelessWidget {
     double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
     double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
 
-    Rect previewLocation =
-        Rect.fromLTWH(previewX, previewY, widget.width, widget.height);
+    double width = widget.displayRect.width;
+    double height = widget.displayRect.height;
 
-    if (!isValidLocation(previewLocation)) {
-      _nt4ContainerDraggingIn = null;
+    Rect previewLocation = Rect.fromLTWH(previewX, previewY, width, height);
+
+    if (isValidLayoutLocation(widget, previewLocation, widget.cursorLocation)) {
+      DraggableLayoutContainer layoutContainer =
+          getLayoutAtLocation(previewLocation, widget.cursorLocation)!;
+
+      if (layoutContainer.willAcceptWidget(widget)) {
+        layoutContainer.addWidget(widget, localPosition: widget.cursorLocation);
+      }
+    } else if (!isValidLocation(previewLocation)) {
+      _containerDraggingIn = null;
 
       if (widget.child is NT4Widget) {
         (widget.child as NT4Widget)
@@ -355,21 +392,56 @@ class DashboardGrid extends StatelessWidget {
 
       refresh();
       return;
+    } else {
+      widget.displayRect = previewLocation;
+      widget.draggablePositionRect =
+          Rect.fromLTWH(previewX, previewY, width, height);
+
+      addNT4Widget(
+          widget,
+          Rect.fromLTWH(previewLocation.left, previewLocation.top,
+              previewLocation.width, previewLocation.height),
+          enabled: nt4Connection.isNT4Connected);
     }
 
-    addNT4Widget(
-        widget,
-        Rect.fromLTWH(previewLocation.left, previewLocation.top,
-            previewLocation.width, previewLocation.height),
-        enabled: nt4Connection.isNT4Connected);
-
-    _nt4ContainerDraggingIn = null;
+    _containerDraggingIn = null;
 
     if (widget.child is NT4Widget) {
       (widget.child as NT4Widget).dispose();
     }
 
     refresh();
+  }
+
+  DraggableNT4WidgetContainer? createNT4WidgetContainer(
+      WidgetContainer? widget) {
+    if (widget == null || widget.child == null) {
+      return null;
+    }
+
+    if (widget.child is! NT4Widget) {
+      return null;
+    }
+
+    return DraggableNT4WidgetContainer(
+      key: UniqueKey(),
+      title: widget.title,
+      validMoveLocation: isValidMoveLocation,
+      validLayoutLocation: isValidLayoutLocation,
+      enabled: nt4Connection.isNT4Connected,
+      initialPosition: Rect.fromLTWH(
+        0.0,
+        0.0,
+        Globals.gridSize.toDouble(),
+        Globals.gridSize.toDouble(),
+      ),
+      onUpdate: _nt4ContainerOnUpdate,
+      onDragBegin: _nt4ContainerOnDragBegin,
+      onDragEnd: _nt4ContainerOnDragEnd,
+      onResizeBegin: _nt4ContainerOnResizeBegin,
+      onResizeEnd: _nt4ContainerOnResizeEnd,
+      child: widget.child as NT4Widget,
+    );
   }
 
   DraggableListLayout createListLayout() {
@@ -384,11 +456,13 @@ class DashboardGrid extends StatelessWidget {
       ),
       enabled: nt4Connection.isNT4Connected,
       validMoveLocation: isValidMoveLocation,
-      onUpdate: layoutContainerOnUpdate,
-      onDragBegin: layoutContainerOnDragBegin,
-      onDragEnd: layoutContainerOnDragEnd,
-      onResizeBegin: layoutContainerOnResizeBegin,
-      onResizeEnd: layoutContainerOnResizeEnd,
+      onDragOutUpdate: _layoutOnDragOutUpdate,
+      onDragOutEnd: _layoutOnDragOutEnd,
+      onUpdate: _layoutContainerOnUpdate,
+      onDragBegin: _layoutContainerOnDragBegin,
+      onDragEnd: _layoutContainerOnDragEnd,
+      onResizeBegin: _layoutContainerOnResizeBegin,
+      onResizeEnd: _layoutContainerOnResizeEnd,
     );
   }
 
@@ -396,21 +470,9 @@ class DashboardGrid extends StatelessWidget {
     _widgetContainers.add(widget);
   }
 
-  void addNT4Widget(WidgetContainer widget, Rect initialPosition,
+  void addNT4Widget(DraggableNT4WidgetContainer widget, Rect initialPosition,
       {bool enabled = true}) {
-    _widgetContainers.add(DraggableNT4WidgetContainer(
-        key: UniqueKey(),
-        title: widget.title,
-        initialPosition: initialPosition,
-        validMoveLocation: isValidMoveLocation,
-        validLayoutLocation: isValidLayoutLocation,
-        enabled: enabled,
-        onUpdate: nt4ContainerOnUpdate,
-        onDragBegin: nt4ContainerOnDragBegin,
-        onDragEnd: nt4ContainerOnDragEnd,
-        onResizeBegin: nt4ContainerOnResizeBegin,
-        onResizeEnd: nt4ContainerOnResizeEnd,
-        child: widget.child! as NT4Widget));
+    _widgetContainers.add(widget);
   }
 
   void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
@@ -438,11 +500,11 @@ class DashboardGrid extends StatelessWidget {
       validMoveLocation: isValidMoveLocation,
       validLayoutLocation: isValidLayoutLocation,
       jsonData: widgetData,
-      onUpdate: nt4ContainerOnUpdate,
-      onDragBegin: nt4ContainerOnDragBegin,
-      onDragEnd: nt4ContainerOnDragEnd,
-      onResizeBegin: nt4ContainerOnResizeBegin,
-      onResizeEnd: nt4ContainerOnResizeEnd,
+      onUpdate: _nt4ContainerOnUpdate,
+      onDragBegin: _nt4ContainerOnDragBegin,
+      onDragEnd: _nt4ContainerOnDragEnd,
+      onResizeBegin: _nt4ContainerOnResizeBegin,
+      onResizeEnd: _nt4ContainerOnResizeEnd,
     ));
 
     refresh();
@@ -604,62 +666,9 @@ class DashboardGrid extends StatelessWidget {
     }
 
     // Also render any containers that are being dragged into the grid
-    if (_nt4ContainerDraggingIn != null) {
-      WidgetContainer container = _nt4ContainerDraggingIn!.key;
-      Offset globalOffset = _nt4ContainerDraggingIn!.value;
-
-      RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
-
-      Offset localPosition = ancestor!.globalToLocal(globalOffset);
-
-      if (localPosition.dx < 0) {
-        localPosition = Offset(0, localPosition.dy);
-      }
-
-      if (localPosition.dy < 0) {
-        localPosition = Offset(localPosition.dx, 0);
-      }
-
-      draggingInWidgets.add(
-        Positioned(
-          left: localPosition.dx,
-          top: localPosition.dy,
-          child: container,
-        ),
-      );
-
-      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
-
-      Rect previewLocation =
-          Rect.fromLTWH(previewX, previewY, container.width, container.height);
-
-      previewOutlines.add(
-        Positioned(
-          left: previewLocation.left,
-          top: previewLocation.top,
-          width: previewLocation.width,
-          height: previewLocation.height,
-          child: Container(
-            decoration: BoxDecoration(
-              color: (isValidLocation(previewLocation))
-                  ? Colors.white.withOpacity(0.25)
-                  : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(Globals.cornerRadius),
-              border: Border.all(
-                  color: (isValidLocation(previewLocation))
-                      ? Colors.lightGreenAccent.shade400
-                      : Colors.red,
-                  width: 5.0),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (_layoutContainerDraggingIn != null) {
-      DraggableWidgetContainer container = _layoutContainerDraggingIn!.key;
-      Offset globalOffset = _layoutContainerDraggingIn!.value;
+    if (_containerDraggingIn != null) {
+      DraggableWidgetContainer container = _containerDraggingIn!.key;
+      Offset globalOffset = _containerDraggingIn!.value;
 
       RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
 
@@ -687,6 +696,23 @@ class DashboardGrid extends StatelessWidget {
       Rect previewLocation = Rect.fromLTWH(previewX, previewY,
           container.displayRect.width, container.displayRect.height);
 
+      bool validLocation = isValidLocation(previewLocation) ||
+          isValidLayoutLocation(
+              container, previewLocation, container.cursorLocation);
+
+      Color borderColor =
+          (validLocation) ? Colors.lightGreenAccent.shade400 : Colors.red;
+
+      if (isValidLayoutLocation(
+          container, previewLocation, container.cursorLocation)) {
+        DraggableLayoutContainer layoutContainer =
+            getLayoutAtLocation(previewLocation, container.cursorLocation)!;
+
+        previewLocation = layoutContainer.displayRect;
+
+        borderColor = Colors.yellow;
+      }
+
       previewOutlines.add(
         Positioned(
           left: previewLocation.left,
@@ -695,68 +721,11 @@ class DashboardGrid extends StatelessWidget {
           height: previewLocation.height,
           child: Container(
             decoration: BoxDecoration(
-              color: (isValidLocation(previewLocation))
+              color: (validLocation)
                   ? Colors.white.withOpacity(0.25)
                   : Colors.black.withOpacity(0.1),
               borderRadius: BorderRadius.circular(Globals.cornerRadius),
-              border: Border.all(
-                  color: (isValidLocation(previewLocation))
-                      ? Colors.lightGreenAccent.shade400
-                      : Colors.red,
-                  width: 5.0),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (_layoutContainerDraggingIn != null) {
-      DraggableWidgetContainer container = _layoutContainerDraggingIn!.key;
-      Offset globalOffset = _layoutContainerDraggingIn!.value;
-
-      RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
-
-      Offset localPosition = ancestor!.globalToLocal(globalOffset);
-
-      if (localPosition.dx < 0) {
-        localPosition = Offset(0, localPosition.dy);
-      }
-
-      if (localPosition.dy < 0) {
-        localPosition = Offset(localPosition.dx, 0);
-      }
-
-      draggingInWidgets.add(
-        Positioned(
-          left: localPosition.dx,
-          top: localPosition.dy,
-          child: container.getWidgetContainer(context),
-        ),
-      );
-
-      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
-
-      Rect previewLocation = Rect.fromLTWH(previewX, previewY,
-          container.displayRect.width, container.displayRect.height);
-
-      previewOutlines.add(
-        Positioned(
-          left: previewLocation.left,
-          top: previewLocation.top,
-          width: previewLocation.width,
-          height: previewLocation.height,
-          child: Container(
-            decoration: BoxDecoration(
-              color: (isValidLocation(previewLocation))
-                  ? Colors.white.withOpacity(0.25)
-                  : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(25.0),
-              border: Border.all(
-                  color: (isValidLocation(previewLocation))
-                      ? Colors.lightGreenAccent.shade400
-                      : Colors.red,
-                  width: 5.0),
+              border: Border.all(color: borderColor, width: 5.0),
             ),
           ),
         ),

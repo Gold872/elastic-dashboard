@@ -6,10 +6,18 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   String get type;
 
+  DraggableNT4WidgetContainer Function(Map<String, dynamic> jsonData)?
+      nt4ContainerBuilder;
+  final Function(DraggableWidgetContainer widget, Offset globalPosition)?
+      onDragOutUpdate;
+  final Function(DraggableWidgetContainer widget)? onDragOutEnd;
+
   DraggableLayoutContainer({
     super.key,
     required super.title,
     required super.validMoveLocation,
+    this.onDragOutUpdate,
+    this.onDragOutEnd,
     super.enabled = false,
     super.initialPosition,
     super.onUpdate,
@@ -23,6 +31,9 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     super.key,
     required super.validMoveLocation,
     required super.jsonData,
+    required this.nt4ContainerBuilder,
+    this.onDragOutUpdate,
+    this.onDragOutEnd,
     super.enabled = false,
     super.onUpdate,
     super.onDragBegin,

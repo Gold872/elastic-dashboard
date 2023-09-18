@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
@@ -870,9 +871,9 @@ class AddWidgetDialog extends StatelessWidget {
   final DashboardGrid grid;
   final bool visible;
 
-  final Function(Offset globalPosition, WidgetContainer widget)?
+  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
       onNT4DragUpdate;
-  final Function(WidgetContainer widget)? onNT4DragEnd;
+  final Function(DraggableNT4WidgetContainer widget)? onNT4DragEnd;
 
   final Function(Offset globalPosition, DraggableLayoutContainer widget)?
       onLayoutDragUpdate;
@@ -928,6 +929,7 @@ class AddWidgetDialog extends StatelessWidget {
                         NetworkTableTree(
                           onDragUpdate: onNT4DragUpdate,
                           onDragEnd: onNT4DragEnd,
+                          widgetContainerBuilder: grid.createNT4WidgetContainer,
                         ),
                         ListView(
                           children: [

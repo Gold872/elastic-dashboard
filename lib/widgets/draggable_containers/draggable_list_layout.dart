@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:elastic_dashboard/services/globals.dart';
@@ -20,6 +20,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
     required super.validMoveLocation,
     super.enabled = false,
     super.initialPosition,
+    super.onDragOutUpdate,
+    super.onDragOutEnd,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -31,7 +33,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.key,
     required super.validMoveLocation,
     required super.jsonData,
+    required super.nt4ContainerBuilder,
     super.enabled = false,
+    super.onDragOutUpdate,
+    super.onDragOutEnd,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -174,10 +179,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.fromJson(jsonData);
 
     for (Map<String, dynamic> childData in jsonData['children']) {
-      children.add(DraggableNT4WidgetContainer.fromJson(
-        validMoveLocation: validMoveLocation,
-        jsonData: childData,
-      ));
+      children.add(nt4ContainerBuilder?.call(childData) ??
+          DraggableNT4WidgetContainer.fromJson(
+            validMoveLocation: validMoveLocation,
+            jsonData: childData,
+          ));
     }
   }
 
@@ -210,38 +216,67 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
     for (DraggableNT4WidgetContainer widget in children) {
       column.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
+        GestureDetector(
+          supportedDevices: PointerDeviceKind.values
+              .whereNot((element) => element == PointerDeviceKind.trackpad)
+              .toSet(),
+          onPanDown: (details) {
+            Future.delayed(Duration.zero, () => model?.setDraggable(false));
+            widget.cursorLocation =
+                Offset(widget.displayRect.width, widget.displayRect.height) / 2;
+          },
+          onPanUpdate: (details) {
+            Offset location = details.globalPosition - widget.cursorLocation;
+            onDragOutUpdate?.call(widget, location);
+          },
+          onPanEnd: (details) {
+            Future.delayed(Duration.zero, () => model?.setDraggable(true));
+            children.remove(widget);
+            onDragOutEnd?.call(widget);
+
+            refresh();
+          },
+          onPanCancel: () {
+            Future.delayed(Duration.zero, () => model?.setDraggable(true));
+
+            refresh();
+          },
+          child: Padding(
             padding: const EdgeInsets.all(8.0),
-            constraints: BoxConstraints(
-              minHeight: 96,
-              // maxWidth: widget.displayRect.width,
-              maxHeight: widget.displayRect.height - 32,
-            ),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 45, 45, 45),
-              borderRadius: BorderRadius.circular(Globals.cornerRadius),
-              boxShadow: const [
-                BoxShadow(
-                  offset: Offset(2, 2),
-                  blurRadius: 10.5,
-                  spreadRadius: 0,
-                  color: Colors.black,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(widget.title ?? ''),
-                ),
-                const SizedBox(height: 5),
-                Flexible(
-                  child: widget.child!,
-                ),
-              ],
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              constraints: BoxConstraints(
+                minHeight: 96,
+                // maxWidth: widget.displayRect.width,
+                maxHeight: widget.displayRect.height - 32,
+              ),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 45, 45, 45),
+                borderRadius: BorderRadius.circular(Globals.cornerRadius),
+                boxShadow: const [
+                  BoxShadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10.5,
+                    spreadRadius: 0,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(widget.title ?? ''),
+                  ),
+                  const SizedBox(height: 5),
+                  Flexible(
+                    child: AbsorbPointer(
+                      absorbing: !enabled,
+                      child: widget.child!,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -282,15 +317,12 @@ class DraggableListLayout extends DraggableLayoutContainer {
       opacity: (model?.previewVisible ?? false) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
-        child: AbsorbPointer(
-          absorbing: !enabled,
-          child: SingleChildScrollView(
-            child: ClipRRect(
-              child: Wrap(
-                children: [
-                  ...getListColumn(),
-                ],
-              ),
+        child: SingleChildScrollView(
+          child: ClipRRect(
+            child: Wrap(
+              children: [
+                ...getListColumn(),
+              ],
             ),
           ),
         ),

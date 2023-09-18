@@ -405,7 +405,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
-      opacity: (model?.previewVisible ?? true) ? 0.25 : 1.00,
+      opacity: (model?.previewVisible ?? false) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
         child: AbsorbPointer(

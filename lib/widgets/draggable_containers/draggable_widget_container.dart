@@ -12,8 +12,15 @@ class WidgetContainerModel extends ChangeNotifier {
   bool previewVisible = false;
   bool validLocation = true;
 
+  bool draggable = true;
+
   void setDraggableRect(Rect newRect) {
     rect = newRect;
+    notifyListeners();
+  }
+
+  void setDraggable(bool draggable) {
+    this.draggable = draggable;
     notifyListeners();
   }
 
@@ -228,6 +235,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
         visibleHandles: const {},
+        draggable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
           return Container();
         },
