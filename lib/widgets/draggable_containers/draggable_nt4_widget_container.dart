@@ -192,44 +192,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                     const Divider(),
                   ],
                   // Settings for the NT4 Connection
-                  const Text('Network Tables Settings (Advanced)'),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      // Topic
-                      Flexible(
-                        child: DialogTextInput(
-                          onSubmit: (value) {
-                            child?.topic = value;
-                            child?.resetSubscription();
-                          },
-                          label: 'Topic',
-                          initialText: child?.topic,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      // Period
-                      Flexible(
-                        child: DialogTextInput(
-                          onSubmit: (value) {
-                            double? newPeriod = double.tryParse(value);
-                            if (newPeriod == null) {
-                              return;
-                            }
-
-                            child?.period = newPeriod;
-                            child?.resetSubscription();
-                          },
-                          formatter: FilteringTextInputFormatter.allow(
-                              RegExp(r"[0-9.]")),
-                          label: 'Period',
-                          initialText: child!.period.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ...getNT4EditProperties(),
                 ],
               ),
             ),
@@ -246,6 +209,48 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       },
     );
+  }
+
+  List<Widget> getNT4EditProperties() {
+    return [
+      const Text('Network Tables Settings (Advanced)'),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Topic
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                child?.topic = value;
+                child?.resetSubscription();
+              },
+              label: 'Topic',
+              initialText: child?.topic,
+            ),
+          ),
+          const SizedBox(width: 5),
+          // Period
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newPeriod = double.tryParse(value);
+                if (newPeriod == null) {
+                  return;
+                }
+
+                child!.period = newPeriod;
+                child!.resetSubscription();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Period',
+              initialText: child!.period.toString(),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 
   @override
