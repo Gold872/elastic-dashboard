@@ -226,6 +226,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         rect: draggablePositionRect,
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
+        handleTapSize: 12,
         visibleHandles: const {},
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
           return Container();
