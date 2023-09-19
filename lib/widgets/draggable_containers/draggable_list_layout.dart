@@ -239,6 +239,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
+            widget.onDragEnd?.call(widget, widget.draggablePositionRect);
             Future.delayed(Duration.zero, () => model?.setDraggable(false));
             widget.cursorLocation =
                 Offset(widget.displayRect.width, widget.displayRect.height) / 2;
