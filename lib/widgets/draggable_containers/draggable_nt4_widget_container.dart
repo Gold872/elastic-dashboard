@@ -14,6 +14,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_c
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/single_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
@@ -103,6 +104,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         break;
       case 'Match Time':
         newWidget = MatchTimeWidget(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Single Color View':
+        newWidget = SingleColorView(
             key: UniqueKey(), topic: child!.topic, period: child!.period);
         break;
       case 'ComboBox Chooser':
@@ -286,6 +291,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Match Time':
         return MatchTimeWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Single Color View':
+        return SingleColorView.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
