@@ -8,7 +8,7 @@ class CustomAppBar extends AppBar {
   final MenuBar menuBar;
   final VoidCallback? onWindowClose;
 
-  static const ThemeType buttonType = ThemeType.auto;
+  static const ThemeType buttonType = ThemeType.materia;
 
   CustomAppBar(
       {super.key,
@@ -46,6 +46,7 @@ class CustomAppBar extends AppBar {
               ),
             ),
             InkWell(
+              hoverColor: Colors.red,
               onTap: () {},
               child: DecoratedCloseButton(
                 type: buttonType,
