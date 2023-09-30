@@ -41,7 +41,7 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences _preferences;
   late final UpdateChecker updateChecker;
 
@@ -59,6 +59,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
     _preferences = widget.preferences;
     updateChecker = UpdateChecker(currentVersion: widget.version);
+
+    windowManager.addListener(this);
+    Future(() async => await windowManager.setPreventClose(true));
 
     loadLayout();
 
@@ -152,6 +155,29 @@ class _DashboardPageState extends State<DashboardPage> {
     });
 
     Future(() => checkForUpdates(notifyIfLatest: false));
+  }
+
+  @override
+  void onWindowClose() async {
+    Map<String, dynamic> savedJson =
+        jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
+    Map<String, dynamic> currentJson = toJson();
+
+    bool showConfirmation =
+        !const DeepCollectionEquality().equals(savedJson, currentJson);
+
+    if (showConfirmation) {
+      showCloseConfirmation(context);
+      await windowManager.focus();
+    } else {
+      await windowManager.destroy();
+    }
+  }
+
+  @override
+  void dispose() async {
+    windowManager.removeListener(this);
+    super.dispose();
   }
 
   Map<String, dynamic> toJson() {
@@ -558,14 +584,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
               Future.delayed(
                 const Duration(milliseconds: 250),
-                () async => await windowManager.close(),
+                () async => await windowManager.destroy(),
               );
             },
             child: const Text('Save'),
           ),
           TextButton(
             onPressed: () async {
-              await windowManager.close();
+              await windowManager.destroy();
             },
             child: const Text('Discard'),
           ),
@@ -720,20 +746,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        onWindowClose: () async {
-          Map<String, dynamic> savedJson =
-              jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
-          Map<String, dynamic> currentJson = toJson();
-
-          bool showConfirmation =
-              !const DeepCollectionEquality().equals(savedJson, currentJson);
-
-          if (showConfirmation) {
-            showCloseConfirmation(context);
-          } else {
-            await windowManager.close();
-          }
-        },
+        onWindowClose: onWindowClose,
         menuBar: menuBar,
       ),
       body: CallbackShortcuts(
