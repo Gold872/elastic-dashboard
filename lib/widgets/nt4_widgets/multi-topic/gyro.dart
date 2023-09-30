@@ -80,20 +80,14 @@ class Gyro extends StatelessWidget with NT4Widget {
   List<Widget> getEditProperties(BuildContext context) {
     return [
       Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Counter Clockwise Positive'),
-            const SizedBox(width: 5),
-            DialogToggleSwitch(
-              initialValue: counterClockwisePositive,
-              onToggle: (value) {
-                counterClockwisePositive = value;
+        child: DialogToggleSwitch(
+          initialValue: counterClockwisePositive,
+          label: 'Counter Clockwise Positive',
+          onToggle: (value) {
+            counterClockwisePositive = value;
 
-                refresh();
-              },
-            ),
-          ],
+            refresh();
+          },
         ),
       ),
     ];
