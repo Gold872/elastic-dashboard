@@ -130,42 +130,52 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         initialValue: field!.game,
       ),
       const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          double? newWidth = double.tryParse(value);
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newWidth = double.tryParse(value);
 
-          if (newWidth == null) {
-            return;
-          }
-          robotWidthMeters = newWidth;
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-        label: 'Robot Width (meters)',
-        initialText: robotWidthMeters.toString(),
-      ),
-      const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          double? newLength = double.tryParse(value);
+                if (newWidth == null) {
+                  return;
+                }
+                robotWidthMeters = newWidth;
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Robot Width (meters)',
+              initialText: robotWidthMeters.toString(),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newLength = double.tryParse(value);
 
-          if (newLength == null) {
-            return;
-          }
-          robotLengthMeters = newLength;
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-        label: 'Robot Length (meters)',
-        initialText: robotLengthMeters.toString(),
+                if (newLength == null) {
+                  return;
+                }
+                robotLengthMeters = newLength;
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Robot Length (meters)',
+              initialText: robotLengthMeters.toString(),
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: 5),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Flexible(
             child: DialogToggleSwitch(
-              maxWidth: 95,
               label: 'Show Non-Robot Objects',
               initialValue: showOtherObjects,
               onToggle: (value) {

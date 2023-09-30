@@ -4,12 +4,10 @@ class DialogToggleSwitch extends StatefulWidget {
   final Function(bool value) onToggle;
   final bool initialValue;
   final String? label;
-  final double maxWidth;
 
   const DialogToggleSwitch({
     super.key,
     this.initialValue = false,
-    this.maxWidth = 75,
     this.label,
     required this.onToggle,
   });
@@ -31,19 +29,19 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5.0),
         border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
-            constraints: BoxConstraints(maxWidth: widget.maxWidth),
+          Flexible(
             child: Text(widget.label ?? '', textAlign: TextAlign.center),
           ),
+          const SizedBox(width: 5),
           Switch(
             onChanged: (value) {
               widget.onToggle.call(value);
