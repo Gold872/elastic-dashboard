@@ -30,23 +30,30 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          constraints: BoxConstraints(maxWidth: widget.maxWidth),
-          child: Text(widget.label ?? '', textAlign: TextAlign.center),
-        ),
-        const SizedBox(width: 5),
-        Switch(
-          onChanged: (value) {
-            widget.onToggle.call(value);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5.0),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            constraints: BoxConstraints(maxWidth: widget.maxWidth),
+            child: Text(widget.label ?? '', textAlign: TextAlign.center),
+          ),
+          Switch(
+            onChanged: (value) {
+              widget.onToggle.call(value);
 
-            setState(() => this.value = value);
-          },
-          value: value,
-        ),
-      ],
+              setState(() => this.value = value);
+            },
+            value: value,
+          ),
+        ],
+      ),
     );
   }
 }

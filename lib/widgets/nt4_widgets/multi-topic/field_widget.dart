@@ -165,8 +165,8 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         children: [
           Flexible(
             child: DialogToggleSwitch(
-              maxWidth: 100,
-              label: "Show Non-Robot Objects",
+              maxWidth: 95,
+              label: 'Show Non-Robot Objects',
               initialValue: showOtherObjects,
               onToggle: (value) {
                 showOtherObjects = value;
@@ -178,8 +178,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
           const SizedBox(width: 5),
           Flexible(
             child: DialogToggleSwitch(
-              maxWidth: 100,
-              label: "Show Trajectories",
+              label: 'Show Trajectories',
               initialValue: showTrajectories,
               onToggle: (value) {
                 showTrajectories = value;
