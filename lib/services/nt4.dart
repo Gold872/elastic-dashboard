@@ -144,8 +144,16 @@ class NT4Client {
       _subscribedTopics.remove(sub);
       _wsUnsubscribe(sub);
 
-      if (_clientPublishedTopics.containsKey(sub.topic)) {
-        unpublishTopic(_clientPublishedTopics[sub.topic]!);
+      // If there are no other subscriptions that are in the same table/tree
+      if (!_subscribedTopics.any((element) =>
+          element.topic.startsWith('${sub.topic}/') ||
+          '${sub.topic}/'.startsWith(element.topic))) {
+        // If there are any topics associated with the table/tree, unpublish them
+        for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
+            element.name.startsWith('${sub.topic}/') ||
+            '${sub.topic}/'.startsWith(element.name))) {
+          Future(() => unpublishTopic(topic));
+        }
       }
     }
   }
