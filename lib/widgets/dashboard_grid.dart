@@ -132,6 +132,28 @@ class DashboardGrid extends StatelessWidget {
     };
   }
 
+  Offset getLocalPosition(Offset globalPosition) {
+    BuildContext? context = (key as GlobalKey).currentContext;
+
+    if (context == null) {
+      return Offset.zero;
+    }
+
+    RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
+
+    Offset localPosition = ancestor!.globalToLocal(globalPosition);
+
+    if (localPosition.dy < 0) {
+      localPosition = Offset(localPosition.dx, 0);
+    }
+
+    if (localPosition.dx < 0) {
+      localPosition = Offset(0, localPosition.dy);
+    }
+
+    return localPosition;
+  }
+
   /// Returns weather `widget` is able to be moved to `location` without overlapping anything else.
   ///
   /// This only applies to widgets that already have a place on the grid
@@ -254,6 +276,13 @@ class DashboardGrid extends StatelessWidget {
 
   void _layoutOnDragOutUpdate(
       DraggableWidgetContainer widget, Offset location) {
+    Offset localPosition = getLocalPosition(location);
+    widget.draggablePositionRect = Rect.fromLTWH(
+      localPosition.dx,
+      localPosition.dy,
+      widget.draggablePositionRect.width,
+      widget.draggablePositionRect.height,
+    );
     _containerDraggingIn = MapEntry(widget, location);
     refresh();
   }
@@ -280,6 +309,13 @@ class DashboardGrid extends StatelessWidget {
 
   void addLayoutDragInWidget(
       DraggableLayoutContainer widget, Offset globalOffset) {
+    Offset localPosition = getLocalPosition(globalOffset);
+    widget.draggablePositionRect = Rect.fromLTWH(
+      localPosition.dx,
+      localPosition.dy,
+      widget.draggablePositionRect.width,
+      widget.draggablePositionRect.height,
+    );
     _containerDraggingIn = MapEntry(widget, globalOffset);
     refresh();
   }
@@ -291,23 +327,7 @@ class DashboardGrid extends StatelessWidget {
 
     Offset globalPosition = _containerDraggingIn!.value;
 
-    BuildContext? context = (key as GlobalKey).currentContext;
-
-    if (context == null) {
-      return;
-    }
-
-    RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
-
-    Offset localPosition = ancestor!.globalToLocal(globalPosition);
-
-    if (localPosition.dy < 0) {
-      localPosition = Offset(localPosition.dx, 0);
-    }
-
-    if (localPosition.dx < 0) {
-      localPosition = Offset(0, localPosition.dy);
-    }
+    Offset localPosition = getLocalPosition(globalPosition);
 
     double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
     double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
@@ -337,6 +357,13 @@ class DashboardGrid extends StatelessWidget {
 
   void addNT4DragInWidget(
       DraggableNT4WidgetContainer widget, Offset globalOffset) {
+    Offset localPosition = getLocalPosition(globalOffset);
+    widget.draggablePositionRect = Rect.fromLTWH(
+      localPosition.dx,
+      localPosition.dy,
+      widget.draggablePositionRect.width,
+      widget.draggablePositionRect.height,
+    );
     _containerDraggingIn = MapEntry(widget, globalOffset);
     refresh();
   }
@@ -348,23 +375,7 @@ class DashboardGrid extends StatelessWidget {
 
     Offset globalPosition = _containerDraggingIn!.value;
 
-    BuildContext? context = (key as GlobalKey).currentContext;
-
-    if (context == null) {
-      return;
-    }
-
-    RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
-
-    Offset localPosition = ancestor!.globalToLocal(globalPosition);
-
-    if (localPosition.dy < 0) {
-      localPosition = Offset(localPosition.dx, 0);
-    }
-
-    if (localPosition.dx < 0) {
-      localPosition = Offset(0, localPosition.dy);
-    }
+    Offset localPosition = getLocalPosition(globalPosition);
 
     double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
     double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
@@ -664,30 +675,19 @@ class DashboardGrid extends StatelessWidget {
     // Also render any containers that are being dragged into the grid
     if (_containerDraggingIn != null) {
       DraggableWidgetContainer container = _containerDraggingIn!.key;
-      Offset globalOffset = _containerDraggingIn!.value;
-
-      RenderBox? ancestor = context.findAncestorRenderObjectOfType<RenderBox>();
-
-      Offset localPosition = ancestor!.globalToLocal(globalOffset);
-
-      if (localPosition.dx < 0) {
-        localPosition = Offset(0, localPosition.dy);
-      }
-
-      if (localPosition.dy < 0) {
-        localPosition = Offset(localPosition.dx, 0);
-      }
 
       draggingInWidgets.add(
         Positioned(
-          left: localPosition.dx,
-          top: localPosition.dy,
+          left: container.draggablePositionRect.left,
+          top: container.draggablePositionRect.top,
           child: container.getWidgetContainer(context),
         ),
       );
 
-      double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-      double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
+      double previewX = DraggableWidgetContainer.snapToGrid(
+          container.draggablePositionRect.left);
+      double previewY = DraggableWidgetContainer.snapToGrid(
+          container.draggablePositionRect.top);
 
       Rect previewLocation = Rect.fromLTWH(previewX, previewY,
           container.displayRect.width, container.displayRect.height);
