@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,10 +21,11 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   String fieldGame = 'Charged Up';
   late Field? field;
 
-  double robotSize = 50.0;
-
   double robotWidthMeters = 0.82;
   double robotLengthMeters = 1.00;
+
+  bool showOtherObjects = true;
+  bool showTrajectories = true;
 
   final double otherObjectSize = 0.55;
   final double trajectoryPointSize = 0.10;
@@ -33,11 +35,14 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   late String robotTopicName;
   List<String> otherObjectTopics = [];
 
-  FieldWidget(
-      {super.key,
-      required topic,
-      String? fieldName,
-      period = Globals.defaultPeriod}) {
+  FieldWidget({
+    super.key,
+    required topic,
+    String? fieldName,
+    this.showOtherObjects = true,
+    this.showTrajectories = true,
+    period = Globals.defaultPeriod,
+  }) {
     super.topic = topic;
     super.period = period;
 
@@ -54,6 +59,9 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
     robotWidthMeters = jsonData['robot_width'] ?? 0.82;
     robotLengthMeters = jsonData['robot_length'] ?? 1.00;
+
+    showOtherObjects = jsonData['show_other_objects'] ?? true;
+    showTrajectories = jsonData['show_trajectories'] ?? true;
 
     init();
   }
@@ -89,6 +97,8 @@ class FieldWidget extends StatelessWidget with NT4Widget {
       'field_game': fieldGame,
       'robot_width': robotWidthMeters,
       'robot_length': robotLengthMeters,
+      'show_other_objects': showOtherObjects,
+      'show_trajectories': showTrajectories,
     };
   }
 
@@ -120,34 +130,74 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         initialValue: field!.game,
       ),
       const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          double? newWidth = double.tryParse(value);
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newWidth = double.tryParse(value);
 
-          if (newWidth == null) {
-            return;
-          }
-          robotWidthMeters = newWidth;
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-        label: 'Robot Width (meters)',
-        initialText: robotWidthMeters.toString(),
+                if (newWidth == null) {
+                  return;
+                }
+                robotWidthMeters = newWidth;
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Robot Width (meters)',
+              initialText: robotWidthMeters.toString(),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newLength = double.tryParse(value);
+
+                if (newLength == null) {
+                  return;
+                }
+                robotLengthMeters = newLength;
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Robot Length (meters)',
+              initialText: robotLengthMeters.toString(),
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          double? newLength = double.tryParse(value);
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: DialogToggleSwitch(
+              label: 'Show Non-Robot Objects',
+              initialValue: showOtherObjects,
+              onToggle: (value) {
+                showOtherObjects = value;
 
-          if (newLength == null) {
-            return;
-          }
-          robotLengthMeters = newLength;
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-        label: 'Robot Length (meters)',
-        initialText: robotLengthMeters.toString(),
+                refresh();
+              },
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogToggleSwitch(
+              label: 'Show Trajectories',
+              initialValue: showTrajectories,
+              onToggle: (value) {
+                showTrajectories = value;
+
+                refresh();
+              },
+            ),
+          ),
+        ],
       ),
     ];
   }
@@ -269,13 +319,15 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        for (NT4Topic nt4Topic
-            in nt4Connection.nt4Client.announcedTopics.values) {
-          if (nt4Topic.name.contains(topic) &&
-              !nt4Topic.name.contains('Robot') &&
-              !nt4Topic.name.contains('.') &&
-              !otherObjectTopics.contains(nt4Topic.name)) {
-            otherObjectTopics.add(nt4Topic.name);
+        if (showOtherObjects || showTrajectories) {
+          for (NT4Topic nt4Topic
+              in nt4Connection.nt4Client.announcedTopics.values) {
+            if (nt4Topic.name.contains(topic) &&
+                !nt4Topic.name.contains('Robot') &&
+                !nt4Topic.name.contains('.') &&
+                !otherObjectTopics.contains(nt4Topic.name)) {
+              otherObjectTopics.add(nt4Topic.name);
+            }
           }
         }
 
@@ -319,30 +371,34 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         List<Widget> otherObjects = [];
         List<Widget> trajectoryPoints = [];
 
-        for (String objectTopic in otherObjectTopics) {
-          List<Object?>? objectPositionRaw = nt4Connection
-              .getLastAnnouncedValue(objectTopic) as List<Object?>?;
+        if (showOtherObjects || showTrajectories) {
+          for (String objectTopic in otherObjectTopics) {
+            List<Object?>? objectPositionRaw = nt4Connection
+                .getLastAnnouncedValue(objectTopic) as List<Object?>?;
 
-          if (objectPositionRaw == null) {
-            continue;
-          }
+            if (objectPositionRaw == null) {
+              continue;
+            }
 
-          List<double> objectPosition =
-              objectPositionRaw.whereType<double>().toList();
+            List<double> objectPosition =
+                objectPositionRaw.whereType<double>().toList();
 
-          for (int i = 0; i < objectPosition.length - 2; i += 3) {
-            if (objectPosition.length > 12) {
-              trajectoryPoints.add(getTrajectoryPoint(
-                  objectPosition.sublist(i, i + 3),
-                  center,
-                  fieldCenter,
-                  scaleReduction));
-            } else {
-              otherObjects.add(getTransformedFieldObject(
-                  objectPosition.sublist(i, i + 3),
-                  center,
-                  fieldCenter,
-                  scaleReduction));
+            for (int i = 0; i < objectPosition.length - 2; i += 3) {
+              if (objectPosition.length > 12) {
+                if (showTrajectories) {
+                  trajectoryPoints.add(getTrajectoryPoint(
+                      objectPosition.sublist(i, i + 3),
+                      center,
+                      fieldCenter,
+                      scaleReduction));
+                }
+              } else if (showOtherObjects) {
+                otherObjects.add(getTransformedFieldObject(
+                    objectPosition.sublist(i, i + 3),
+                    center,
+                    fieldCenter,
+                    scaleReduction));
+              }
             }
           }
         }

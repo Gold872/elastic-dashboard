@@ -126,6 +126,9 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
                 itemCount: names.length,
                 itemBuilder: (context, index) {
                   return ListTile(
+                    dense: true,
+                    contentPadding:
+                        const EdgeInsets.only(left: 16.0, right: 8.0),
                     visualDensity: const VisualDensity(
                         vertical: VisualDensity.minimumDensity),
                     title: Text(names[index], overflow: TextOverflow.ellipsis),

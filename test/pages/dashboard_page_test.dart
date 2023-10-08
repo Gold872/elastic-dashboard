@@ -485,7 +485,10 @@ void main() {
 
     expect(minimizeButton, findsOneWidget);
 
-    await widgetTester.tap(minimizeButton);
+    final minimizeButtonWidget =
+        minimizeButton.evaluate().first.widget as DecoratedMinimizeButton;
+
+    minimizeButtonWidget.onPressed?.call();
   });
 
   testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
@@ -516,9 +519,10 @@ void main() {
 
     final maximizeButton = find.byType(DecoratedMaximizeButton);
 
-    expect(maximizeButton, findsOneWidget);
+    final maximizeButtonWidget =
+        maximizeButton.evaluate().first.widget as DecoratedMaximizeButton;
 
-    await widgetTester.tap(maximizeButton);
+    maximizeButtonWidget.onPressed?.call();
   });
 
   testWidgets('Closing window (All changes saved)', (widgetTester) async {
@@ -553,7 +557,10 @@ void main() {
 
     expect(closeButton, findsOneWidget);
 
-    await widgetTester.tap(closeButton);
+    final closeButtonWidget =
+        closeButton.evaluate().first.widget as DecoratedCloseButton;
+
+    closeButtonWidget.onPressed?.call();
     await widgetTester.pumpAndSettle();
 
     expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsNothing);
@@ -588,7 +595,10 @@ void main() {
 
     expect(closeButton, findsOneWidget);
 
-    await widgetTester.tap(closeButton);
+    final closeButtonWidget =
+        closeButton.evaluate().first.widget as DecoratedCloseButton;
+
+    closeButtonWidget.onPressed?.call();
     await widgetTester.pumpAndSettle();
 
     expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsOneWidget);

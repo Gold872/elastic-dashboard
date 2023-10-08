@@ -72,12 +72,13 @@ mixin NT4Widget on StatelessWidget {
           'Match Time',
         ];
       case NT4TypeStr.kString:
-        return ['Text Display'];
+        return ['Text Display', 'Single Color View'];
+      case NT4TypeStr.kStringArr:
+        return ['Text Display', 'Multi Color View'];
       case NT4TypeStr.kBoolArr:
       case NT4TypeStr.kFloat32Arr:
       case NT4TypeStr.kFloat64Arr:
       case NT4TypeStr.kIntArr:
-      case NT4TypeStr.kStringArr:
         return ['Text Display'];
     }
 
