@@ -218,7 +218,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  bool willAcceptWidget(DraggableWidgetContainer widget) {
+  bool willAcceptWidget(DraggableWidgetContainer widget,
+      {Offset? localPosition}) {
     return widget is DraggableNT4WidgetContainer;
   }
 

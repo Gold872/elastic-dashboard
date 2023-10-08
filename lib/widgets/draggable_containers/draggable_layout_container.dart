@@ -50,7 +50,8 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     };
   }
 
-  bool willAcceptWidget(DraggableWidgetContainer widget);
+  bool willAcceptWidget(DraggableWidgetContainer widget,
+      {Offset? localPosition});
 
   void addWidget(DraggableNT4WidgetContainer widget, {Offset? localPosition});
 }
