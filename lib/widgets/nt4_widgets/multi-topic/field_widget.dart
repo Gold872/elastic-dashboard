@@ -380,19 +380,23 @@ class FieldWidget extends StatelessWidget with NT4Widget {
               continue;
             }
 
+            if (objectPositionRaw.length > 24 && !showTrajectories) {
+              continue;
+            } else if (!showOtherObjects) {
+              continue;
+            }
+
             List<double> objectPosition =
                 objectPositionRaw.whereType<double>().toList();
 
             for (int i = 0; i < objectPosition.length - 2; i += 3) {
-              if (objectPosition.length > 12) {
-                if (showTrajectories) {
-                  trajectoryPoints.add(getTrajectoryPoint(
-                      objectPosition.sublist(i, i + 3),
-                      center,
-                      fieldCenter,
-                      scaleReduction));
-                }
-              } else if (showOtherObjects) {
+              if (objectPosition.length > 24) {
+                trajectoryPoints.add(getTrajectoryPoint(
+                    objectPosition.sublist(i, i + 3),
+                    center,
+                    fieldCenter,
+                    scaleReduction));
+              } else {
                 otherObjects.add(getTransformedFieldObject(
                     objectPosition.sublist(i, i + 3),
                     center,
