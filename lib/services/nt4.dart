@@ -354,7 +354,7 @@ class NT4Client {
         }
         _wsOnMessage(data);
       },
-      // onDone: _wsOnClose,
+      onDone: _wsOnClose,
       onError: (err) {
         if (kDebugMode) {
           print('NT4 ERR: $err');
