@@ -73,14 +73,12 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        double leftSpeed = nt4Connection
-                .getLastAnnouncedValue(leftSpeedTopicName)
-                ?.tryCast<double>() ??
-            0.0;
-        double rightSpeed = nt4Connection
-                .getLastAnnouncedValue(rightSpeedTopicName)
-                ?.tryCast<double>() ??
-            0.0;
+        double leftSpeed =
+            tryCast(nt4Connection.getLastAnnouncedValue(leftSpeedTopicName)) ??
+                0.0;
+        double rightSpeed =
+            tryCast(nt4Connection.getLastAnnouncedValue(rightSpeedTopicName)) ??
+                0.0;
 
         if (leftSpeed != leftSpeedPreviousValue) {
           leftSpeedCurrentValue = leftSpeed;
@@ -156,8 +154,8 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
                     height: sideLength,
                     child: CustomPaint(
                       painter: DifferentialDrivePainter(
-                        leftSpeed: leftSpeed.clamp(-1.0, 1.0),
-                        rightSpeed: rightSpeed.clamp(-1.0, 1.0),
+                        leftSpeed: leftSpeedCurrentValue.clamp(-1.0, 1.0),
+                        rightSpeed: rightSpeedCurrentValue.clamp(-1.0, 1.0),
                       ),
                     ),
                   );
@@ -305,7 +303,6 @@ class DifferentialDrivePainter extends CustomPainter {
 
     const double arrowSize = 16.0;
     const double arrowAngle = 40 * pi / 180;
-    // 150, 200
     final double maxRadius = min(size.width, size.height) / 2 - arrowSize;
 
     final double moment = (rightSpeed - leftSpeed) / 2;
@@ -369,7 +366,7 @@ class DifferentialDrivePainter extends CustomPainter {
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
         final double scaleFactor =
-            (7.50 * angle.abs() * radius / maxRadius).clamp(0.0, 1.1);
+            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1);
 
         final double base = scaleFactor * arrowSize / 2;
 
@@ -390,12 +387,12 @@ class DifferentialDrivePainter extends CustomPainter {
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
         final double scaleFactor =
-            (7.50 * angle.abs() * radius / maxRadius).clamp(0.0, 1.1);
+            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1);
 
         final double base = scaleFactor * arrowSize / 2;
 
-        double tipX = base * cos(angle + startAngle);
-        double tipY = base * sin(angle + startAngle);
+        double tipX = 0.5 * scaleFactor * radius * cos(angle + startAngle);
+        double tipY = 0.5 * scaleFactor * radius * sin(angle + startAngle);
 
         double arrowRotation = angle + startAngle + (pi / 2) * turnSign;
 
