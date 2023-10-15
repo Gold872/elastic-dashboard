@@ -4,6 +4,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -155,6 +156,8 @@ class TreeRow {
         return PowerDistribution(key: UniqueKey(), topic: topic);
       case 'PIDController':
         return PIDControllerWidget(key: UniqueKey(), topic: topic);
+      case 'DifferentialDrive':
+        return DifferentialDrive(key: UniqueKey(), topic: topic);
       case 'String Chooser':
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
       case 'Subsystem':
@@ -196,6 +199,9 @@ class TreeRow {
     } else if (primary is PIDControllerWidget) {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
+    } else if (primary is DifferentialDrive) {
+      width = normalGridSize * 3;
+      height = normalGridSize * 2;
     } else if (primary is SubsystemWidget) {
       width = normalGridSize * 2;
     } else if (primary is CommandWidget) {
