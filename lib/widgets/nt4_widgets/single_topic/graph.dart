@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -37,12 +38,12 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   }
 
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
-    timeDisplayed = jsonData['time_displayed'] ?? 5.0;
-    minValue = jsonData['min_value'];
-    maxValue = jsonData['max_value'];
-    mainColor = Color(jsonData['color'] ?? Colors.cyan.value);
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+    timeDisplayed = tryCast(jsonData['time_displayed']) ?? 5.0;
+    minValue = tryCast(jsonData['min_value']);
+    maxValue = tryCast(jsonData['max_value']);
+    mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
 
     init();
   }
@@ -221,8 +222,9 @@ class _GraphWidgetGraphState extends State<GraphWidgetGraph> {
     }
 
     subscriptionListener = widget.subscription?.periodicStream().listen((data) {
-      if (data != null && data is double) {
-        graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: data));
+      if (data != null) {
+        graphData.add(
+            _GraphPoint(x: fakeXIndex.toDouble(), y: tryCast(data) ?? 0.0));
         graphData.removeAt(0);
 
         fakeXIndex++;

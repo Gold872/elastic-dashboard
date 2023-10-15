@@ -249,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.8"
+  dot_cast:
+    dependency: "direct main"
+    description:
+      name: dot_cast
+      sha256: e653eb81bcd7e11e457792e80bc54ce22ff49b18568d34c479a70c2879584b9c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   dropdown_button2:
     dependency: "direct main"
     description:

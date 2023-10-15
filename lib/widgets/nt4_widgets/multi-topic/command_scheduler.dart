@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -25,8 +26,8 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
 
   CommandSchedulerWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -53,18 +54,12 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
 
   void cancelCommand(int id) {
     List<Object?> currentCancellationsRaw = nt4Connection
-            .getLastAnnouncedValue(cancelTopicName) as List<Object?>? ??
+            .getLastAnnouncedValue(cancelTopicName)
+            ?.tryCast<List<Object?>>() ??
         [];
 
-    List<int> currentCancellations = [];
-
-    for (Object? cancelID in currentCancellationsRaw) {
-      if (cancelID == null || cancelID is! int) {
-        continue;
-      }
-
-      currentCancellations.add(cancelID);
-    }
+    List<int> currentCancellations =
+        currentCancellationsRaw.whereType<int>().toList();
 
     currentCancellations.add(id);
 
@@ -86,30 +81,17 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         List<Object?> rawNames = nt4Connection
-                .getLastAnnouncedValue(namesTopicName) as List<Object?>? ??
-            [];
-        List<Object?> rawIds = nt4Connection.getLastAnnouncedValue(idsTopicName)
-                as List<Object?>? ??
+                .getLastAnnouncedValue(namesTopicName)
+                ?.tryCast<List<Object?>>() ??
             [];
 
-        List<String> names = [];
-        List<int> ids = [];
+        List<Object?> rawIds = nt4Connection
+                .getLastAnnouncedValue(idsTopicName)
+                ?.tryCast<List<Object?>>() ??
+            [];
 
-        for (Object? name in rawNames) {
-          if (name == null || name is! String) {
-            continue;
-          }
-
-          names.add(name);
-        }
-
-        for (Object? id in rawIds) {
-          if (id == null || id is! int) {
-            continue;
-          }
-
-          ids.add(id);
-        }
+        List<String> names = rawNames.whereType<String>().toList();
+        List<int> ids = rawIds.whereType<int>().toList();
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,

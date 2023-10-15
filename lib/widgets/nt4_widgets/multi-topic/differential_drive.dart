@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -36,8 +37,8 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
 
   DifferentialDrive.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -73,10 +74,12 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         double leftSpeed = nt4Connection
-                .getLastAnnouncedValue(leftSpeedTopicName) as double? ??
+                .getLastAnnouncedValue(leftSpeedTopicName)
+                ?.tryCast<double>() ??
             0.0;
         double rightSpeed = nt4Connection
-                .getLastAnnouncedValue(rightSpeedTopicName) as double? ??
+                .getLastAnnouncedValue(rightSpeedTopicName)
+                ?.tryCast<double>() ??
             0.0;
 
         if (leftSpeed != leftSpeedPreviousValue) {

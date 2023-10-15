@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -25,8 +26,8 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
 
   PowerDistribution.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -61,8 +62,8 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current = nt4Connection
-              .getLastAnnouncedValue(channelTopics[channel]) as double? ??
+      double current = tryCast(
+              nt4Connection.getLastAnnouncedValue(channelTopics[channel])) ??
           0.0;
 
       channels.add(
@@ -98,8 +99,8 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current = nt4Connection
-              .getLastAnnouncedValue(channelTopics[channel]) as double? ??
+      double current = tryCast(
+              nt4Connection.getLastAnnouncedValue(channelTopics[channel])) ??
           0.0;
 
       channels.add(
@@ -140,9 +141,9 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         double voltage =
-            nt4Connection.getLastAnnouncedValue(voltageTopic) as double? ?? 0.0;
+            tryCast(nt4Connection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
         double totalCurrent =
-            nt4Connection.getLastAnnouncedValue(currentTopic) as double? ?? 0.0;
+            tryCast(nt4Connection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
 
         return Column(
           children: [

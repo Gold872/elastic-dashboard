@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -16,8 +17,8 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
 
   MatchTimeWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -40,7 +41,7 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        double time = snapshot.data as double? ?? -1.0;
+        double time = tryCast(snapshot.data) ?? -1.0;
 
         return Text('${time.ceil()}',
             style: Theme.of(context).textTheme.displaySmall!.copyWith(
