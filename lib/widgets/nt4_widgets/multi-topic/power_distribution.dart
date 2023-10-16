@@ -76,13 +76,13 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 4.0),
-              child: Text('${current.toStringAsFixed(2)} A',
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+              child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface)),
             ),
-            const SizedBox(width: 5),
-            Text('Ch. $channel'),
+            const SizedBox(width: 10),
+            Text('Ch. ${channel.toString().padRight(2)}'),
           ],
         ),
       );
@@ -109,15 +109,15 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Ch. $channel'),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(10.0),
               ),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 4.0),
-              child: Text('${current.toStringAsFixed(2)} A',
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+              child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface)),
             ),
@@ -154,15 +154,16 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
                 Column(
                   children: [
                     const Text('Voltage'),
+                    const SizedBox(height: 2.5),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 64.0, vertical: 4.0),
+                          horizontal: 48.0, vertical: 4.0),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '${voltage.toStringAsFixed(2)} V',
+                        '${voltage.toStringAsFixed(2).padLeft(5, '0')} V',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -174,15 +175,16 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
                 Column(
                   children: [
                     const Text('Total Current'),
+                    const SizedBox(height: 2.5),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 64.0, vertical: 4.0),
+                          horizontal: 48.0, vertical: 4.0),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        '${totalCurrent.toStringAsFixed(2)} A',
+                        '${totalCurrent.toStringAsFixed(2).padLeft(5, '0')} A',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
