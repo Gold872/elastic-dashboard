@@ -8,6 +8,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_d
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
@@ -170,6 +171,8 @@ class TreeRow {
         return FMSInfo(key: UniqueKey(), topic: topic);
       case 'RobotPreferences':
         return RobotPreferences(key: UniqueKey(), topic: topic);
+      case 'Alerts':
+        return NetworkAlerts(key: UniqueKey(), topic: topic);
     }
 
     return null;
@@ -214,6 +217,9 @@ class TreeRow {
     } else if (primary is RobotPreferences) {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
+    } else if (primary is NetworkAlerts) {
+      width = normalGridSize * 3;
+      height = normalGridSize * 2;
     }
 
     return WidgetContainer(
