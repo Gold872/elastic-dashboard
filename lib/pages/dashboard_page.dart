@@ -380,6 +380,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           jsonData: data['grid_layout'],
           onAddWidgetPressed: displayAddWidgetDialog));
     }
+
+    if (tabData.isEmpty || grids.isEmpty) {
+      tabData.add(TabData(name: 'Tab 0'));
+      grids.add(DashboardGrid.fromJson(
+        key: GlobalKey(),
+        jsonData: const {},
+        onAddWidgetPressed: displayAddWidgetDialog,
+      ));
+    }
+
+    if (currentTabIndex >= grids.length) {
+      currentTabIndex = grids.length - 1;
+    }
   }
 
   void displayAddWidgetDialog() {
