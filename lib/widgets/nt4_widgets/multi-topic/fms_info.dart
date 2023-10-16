@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -32,8 +33,8 @@ class FMSInfo extends StatelessWidget with NT4Widget {
   }
 
   FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '/FMSInfo';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -89,18 +90,19 @@ class FMSInfo extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         String eventName =
-            nt4Connection.getLastAnnouncedValue(eventNameTopic) as String? ??
-                '';
+            tryCast(nt4Connection.getLastAnnouncedValue(eventNameTopic)) ?? '';
         int controlData =
-            nt4Connection.getLastAnnouncedValue(controlDataTopic) as int? ?? 32;
+            tryCast(nt4Connection.getLastAnnouncedValue(controlDataTopic)) ??
+                32;
         bool redAlliance =
-            nt4Connection.getLastAnnouncedValue(allianceTopic) as bool? ?? true;
+            tryCast(nt4Connection.getLastAnnouncedValue(allianceTopic)) ?? true;
         int matchNumber =
-            nt4Connection.getLastAnnouncedValue(matchNumberTopic) as int? ?? 0;
+            tryCast(nt4Connection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
         int matchType =
-            nt4Connection.getLastAnnouncedValue(matchTypeTopic) as int? ?? 0;
+            tryCast(nt4Connection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
         int replayNumber =
-            nt4Connection.getLastAnnouncedValue(replayNumberTopic) as int? ?? 0;
+            tryCast(nt4Connection.getLastAnnouncedValue(replayNumberTopic)) ??
+                0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);

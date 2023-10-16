@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -51,13 +52,14 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
 
   PIDControllerWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
-    kpTopicName = jsonData['kp_topic'] ?? '$topic/p';
-    kiTopicName = jsonData['ki_topic'] ?? '$topic/i';
-    kdTopicName = jsonData['kd_topic'] ?? '$topic/d';
-    setpointTopicName = jsonData['setpoint_topic'] ?? '$topic/setpoint';
+    kpTopicName = tryCast(jsonData['kp_topic']) ?? '$topic/p';
+    kiTopicName = tryCast(jsonData['ki_topic']) ?? '$topic/i';
+    kdTopicName = tryCast(jsonData['kd_topic']) ?? '$topic/d';
+    setpointTopicName =
+        tryCast(jsonData['setpoint_topic']) ?? '$topic/setpoint';
 
     init();
   }
@@ -97,17 +99,14 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
         stream: subscription?.periodicStream(),
         builder: (context, snapshot) {
           double kP =
-              nt4Connection.getLastAnnouncedValue(kpTopicName) as double? ??
-                  0.0;
+              tryCast(nt4Connection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
           double kI =
-              nt4Connection.getLastAnnouncedValue(kiTopicName) as double? ??
-                  0.0;
+              tryCast(nt4Connection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
           double kD =
-              nt4Connection.getLastAnnouncedValue(kdTopicName) as double? ??
+              tryCast(nt4Connection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+          double setpoint =
+              tryCast(nt4Connection.getLastAnnouncedValue(setpointTopicName)) ??
                   0.0;
-          double setpoint = nt4Connection
-                  .getLastAnnouncedValue(setpointTopicName) as double? ??
-              0.0;
 
           // Creates the text editing controllers if they are null
           kpTextController ??= TextEditingController(text: kP.toString());

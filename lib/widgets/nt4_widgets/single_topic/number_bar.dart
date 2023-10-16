@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -36,14 +37,14 @@ class NumberBar extends StatelessWidget with NT4Widget {
   }
 
   NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
-    minValue = jsonData['min_value'] ?? -1.0;
-    maxValue = jsonData['max_value'] ?? 1.0;
-    divisions = jsonData['divisions'];
-    inverted = jsonData['inverted'] ?? false;
-    orientation = jsonData['orientation'] ?? 'horizontal';
+    minValue = tryCast(jsonData['min_value']) ?? -1.0;
+    maxValue = tryCast(jsonData['max_value']) ?? 1.0;
+    divisions = tryCast(jsonData['divisions']);
+    inverted = tryCast(jsonData['inverted']) ?? false;
+    orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
 
     init();
   }
@@ -170,7 +171,7 @@ class NumberBar extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        double value = snapshot.data as double? ?? 0.0;
+        double value = tryCast(snapshot.data) ?? 0.0;
 
         double clampedValue = value.clamp(minValue, maxValue);
 

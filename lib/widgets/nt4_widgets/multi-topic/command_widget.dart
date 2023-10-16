@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -22,8 +23,8 @@ class CommandWidget extends StatelessWidget with NT4Widget {
   }
 
   CommandWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? '';
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -53,12 +54,14 @@ class CommandWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        bool running =
-            nt4Connection.getLastAnnouncedValue(runningTopicName) as bool? ??
-                false;
-        String name =
-            nt4Connection.getLastAnnouncedValue(nameTopicName) as String? ??
-                'Unknown';
+        bool running = nt4Connection
+                .getLastAnnouncedValue(runningTopicName)
+                ?.tryCast<bool>() ??
+            false;
+        String name = nt4Connection
+                .getLastAnnouncedValue(nameTopicName)
+                ?.tryCast<String>() ??
+            'Unknown';
 
         String buttonText = topic.substring(topic.lastIndexOf('/') + 1);
 

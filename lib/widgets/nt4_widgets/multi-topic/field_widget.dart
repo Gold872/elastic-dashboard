@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
@@ -52,16 +53,16 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   }
 
   FieldWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
-    fieldGame = jsonData['field_game'] ?? fieldGame;
+    fieldGame = tryCast(jsonData['field_game']) ?? fieldGame;
 
-    robotWidthMeters = jsonData['robot_width'] ?? 0.82;
-    robotLengthMeters = jsonData['robot_length'] ?? 1.00;
+    robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.82;
+    robotLengthMeters = tryCast(jsonData['robot_length']) ?? 1.00;
 
-    showOtherObjects = jsonData['show_other_objects'] ?? true;
-    showTrajectories = jsonData['show_trajectories'] ?? true;
+    showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
+    showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
 
     init();
   }
@@ -332,7 +333,8 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         }
 
         List<Object?> robotPositionRaw = nt4Connection
-                .getLastAnnouncedValue(robotTopicName) as List<Object?>? ??
+                .getLastAnnouncedValue(robotTopicName)
+                ?.tryCast<List<Object?>>() ??
             [];
 
         List<double>? robotPosition = [];
@@ -374,9 +376,16 @@ class FieldWidget extends StatelessWidget with NT4Widget {
         if (showOtherObjects || showTrajectories) {
           for (String objectTopic in otherObjectTopics) {
             List<Object?>? objectPositionRaw = nt4Connection
-                .getLastAnnouncedValue(objectTopic) as List<Object?>?;
+                .getLastAnnouncedValue(objectTopic)
+                ?.tryCast<List<Object?>>();
 
             if (objectPositionRaw == null) {
+              continue;
+            }
+
+            if (objectPositionRaw.length > 24 && !showTrajectories) {
+              continue;
+            } else if (!showOtherObjects) {
               continue;
             }
 
@@ -384,15 +393,13 @@ class FieldWidget extends StatelessWidget with NT4Widget {
                 objectPositionRaw.whereType<double>().toList();
 
             for (int i = 0; i < objectPosition.length - 2; i += 3) {
-              if (objectPosition.length > 12) {
-                if (showTrajectories) {
-                  trajectoryPoints.add(getTrajectoryPoint(
-                      objectPosition.sublist(i, i + 3),
-                      center,
-                      fieldCenter,
-                      scaleReduction));
-                }
-              } else if (showOtherObjects) {
+              if (objectPosition.length > 24) {
+                trajectoryPoints.add(getTrajectoryPoint(
+                    objectPosition.sublist(i, i + 3),
+                    center,
+                    fieldCenter,
+                    scaleReduction));
+              } else {
                 otherObjects.add(getTransformedFieldObject(
                     objectPosition.sublist(i, i + 3),
                     center,

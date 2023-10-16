@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -20,8 +21,8 @@ class SubsystemWidget extends StatelessWidget with NT4Widget {
 
   SubsystemWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -49,12 +50,12 @@ class SubsystemWidget extends StatelessWidget with NT4Widget {
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
-        String defaultCommand = nt4Connection
-                .getLastAnnouncedValue(defaultCommandTopic) as String? ??
-            'none';
-        String currentCommand = nt4Connection
-                .getLastAnnouncedValue(currentCommandTopic) as String? ??
-            'none';
+        String defaultCommand =
+            tryCast(nt4Connection.getLastAnnouncedValue(defaultCommandTopic)) ??
+                'none';
+        String currentCommand =
+            tryCast(nt4Connection.getLastAnnouncedValue(currentCommandTopic)) ??
+                'none';
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,

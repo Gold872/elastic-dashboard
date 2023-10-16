@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -26,10 +27,12 @@ class BooleanBox extends StatelessWidget with NT4Widget {
   }
 
   BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : trueColor = Color(jsonData['true_color'] ?? Colors.green.value),
-        falseColor = Color(jsonData['false_color'] ?? Colors.red.value) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
+      : trueColor =
+            Color(tryCast(jsonData['true_color']) ?? Colors.green.value),
+        falseColor =
+            Color(tryCast(jsonData['false_color']) ?? Colors.red.value) {
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -81,9 +84,7 @@ class BooleanBox extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        Object data = snapshot.data ?? false;
-
-        bool value = (data is bool) ? data : false;
+        bool value = tryCast(snapshot.data) ?? false;
 
         return Container(
           decoration: BoxDecoration(

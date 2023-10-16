@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -34,9 +35,10 @@ class Gyro extends StatelessWidget with NT4Widget {
   }
 
   Gyro.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
-    counterClockwisePositive = jsonData['counter_clockwise_positive'] ?? false;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+    counterClockwisePositive =
+        tryCast(jsonData['counter_clockwise_positive']) ?? false;
 
     init();
   }
@@ -109,7 +111,7 @@ class Gyro extends StatelessWidget with NT4Widget {
       stream: valueSubscription.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(valueTopic),
       builder: (context, snapshot) {
-        double value = (snapshot.data as double?) ?? 0.0;
+        double value = tryCast(snapshot.data) ?? 0.0;
 
         if (counterClockwisePositive) {
           value *= -1;

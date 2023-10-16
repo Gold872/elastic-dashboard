@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -15,8 +16,8 @@ class MultiColorView extends StatelessWidget with NT4Widget {
   }
 
   MultiColorView.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -27,17 +28,13 @@ class MultiColorView extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        List<String?> hexStrings =
-            (snapshot.data as List<Object?>?)?.whereType<String?>().toList() ??
-                [];
+        List<Object?> hexStringsRaw =
+            snapshot.data?.tryCast<List<Object?>>() ?? [];
+        List<String> hexStrings = hexStringsRaw.whereType<String>().toList();
 
         List<Color> colors = [];
 
-        for (String? hexString in hexStrings) {
-          if (hexString == null) {
-            continue;
-          }
-
+        for (String hexString in hexStrings) {
           hexString = hexString.toUpperCase().replaceAll('#', '');
 
           if (hexString.length == 6) {

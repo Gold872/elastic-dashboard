@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -16,8 +17,8 @@ class ToggleSwitch extends StatelessWidget with NT4Widget {
   }
 
   ToggleSwitch.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -30,9 +31,7 @@ class ToggleSwitch extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        Object data = snapshot.data ?? false;
-
-        bool value = (data is bool) ? data : false;
+        bool value = tryCast(snapshot.data) ?? false;
 
         return Switch(
           value: value,

@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -359,6 +360,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'PIDController':
         return PIDControllerWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'DifferentialDrive':
+        return DifferentialDrive.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );

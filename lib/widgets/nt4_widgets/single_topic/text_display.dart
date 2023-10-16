@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -21,8 +22,8 @@ class TextDisplay extends StatelessWidget with NT4Widget {
   }
 
   TextDisplay.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }

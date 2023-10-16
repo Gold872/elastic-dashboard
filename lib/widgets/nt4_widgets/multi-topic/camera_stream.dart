@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -32,8 +33,8 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
   CameraStreamWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    topic = jsonData['topic'] ?? '';
-    period = jsonData['period'] ?? Globals.defaultPeriod;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -110,7 +111,8 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
         rawStreams = value;
 
-        List<Object?> rawStreamsList = rawStreams as List<Object?>? ?? [];
+        List<Object?> rawStreamsList =
+            rawStreams?.tryCast<List<Object?>>() ?? [];
 
         List<String> streams = [];
         for (Object? stream in rawStreamsList) {

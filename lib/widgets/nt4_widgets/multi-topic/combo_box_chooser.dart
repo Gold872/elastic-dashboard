@@ -1,4 +1,6 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
@@ -32,8 +34,8 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
 
   ComboBoxChooser.fromJson(
       {super.key, required Map<String, dynamic> jsonData}) {
-    super.topic = jsonData['topic'] ?? '';
-    super.period = jsonData['period'] ?? 0.033;
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
     init();
   }
@@ -99,34 +101,26 @@ class ComboBoxChooser extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
         List<Object?> rawOptions = nt4Connection
-                .getLastAnnouncedValue(optionsTopicName) as List<Object?>? ??
+                .getLastAnnouncedValue(optionsTopicName)
+                ?.tryCast<List<Object?>>() ??
             [];
 
-        List<String> options = [];
-
-        for (Object? option in rawOptions) {
-          if (option == null || option is! String) {
-            continue;
-          }
-
-          options.add(option);
-        }
+        List<String> options = rawOptions.whereType<String>().toList();
 
         String? active =
-            nt4Connection.getLastAnnouncedValue(activeTopicName) as String?;
+            tryCast(nt4Connection.getLastAnnouncedValue(activeTopicName));
         if (active != null && active == '') {
           active = null;
         }
 
         String? selected =
-            nt4Connection.getLastAnnouncedValue(selectedTopicName) as String?;
+            tryCast(nt4Connection.getLastAnnouncedValue(selectedTopicName));
         if (selected != null && selected == '') {
           selected = null;
         }
 
         String? defaultOption =
-            nt4Connection.getLastAnnouncedValue(defaultTopicName) as String?;
-
+            tryCast(nt4Connection.getLastAnnouncedValue(defaultTopicName));
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
