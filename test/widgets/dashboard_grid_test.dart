@@ -7,13 +7,30 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/single_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,11 +55,10 @@ void main() async {
     jsonData = jsonDecode(jsonString);
   });
 
-  testWidgets('Dashboard grid loading', (widgetTester) async {
+  testWidgets('Dashboard grid loading (Tab 1)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);
     widgetTester.view.devicePixelRatio = 1.0;
-    // WidgetController.hitTestWarningShouldBeFatal = true;
 
     expect(jsonData.containsKey('tabs'), true);
 
@@ -66,8 +82,6 @@ void main() async {
 
     await widgetTester.pump(Duration.zero);
 
-    // await widgetTester.pumpAndSettle();
-
     expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(9));
     expect(find.bySubtype<NT4Widget>(), findsNWidgets(9));
 
@@ -75,8 +89,57 @@ void main() async {
     expect(find.bySubtype<BooleanBox>(), findsOneWidget);
     expect(find.bySubtype<FieldWidget>(), findsOneWidget);
     expect(find.bySubtype<PowerDistribution>(), findsOneWidget);
+    expect(find.bySubtype<FMSInfo>(), findsOneWidget);
     expect(find.bySubtype<Gyro>(), findsOneWidget);
+    expect(find.bySubtype<CameraStreamWidget>(), findsOneWidget);
+    expect(find.bySubtype<MatchTimeWidget>(), findsOneWidget);
     expect(find.bySubtype<PIDControllerWidget>(), findsOneWidget);
+  });
+
+  testWidgets('Dashboard grid loading (2nd Tab)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    expect(jsonData.containsKey('tabs'), true);
+
+    expect(jsonData['tabs'][0].containsValue('Teleoperated'), true);
+    expect(jsonData['tabs'][0].containsKey('grid_layout'), true);
+
+    expect(jsonData['tabs'][1].containsValue('Autonomous'), true);
+    expect(jsonData['tabs'][1].containsKey('grid_layout'), true);
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider(
+            create: (context) => DashboardGridModel(),
+            child: DashboardGrid.fromJson(
+                jsonData: jsonData['tabs'][1]['grid_layout']),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pump(Duration.zero);
+
+    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(14));
+    expect(find.bySubtype<NT4Widget>(), findsNWidgets(14));
+
+    expect(find.bySubtype<ToggleButton>(), findsOneWidget);
+    expect(find.bySubtype<ToggleSwitch>(), findsOneWidget);
+    expect(find.bySubtype<ComboBoxChooser>(), findsOneWidget);
+    expect(find.bySubtype<SplitButtonChooser>(), findsOneWidget);
+    expect(find.bySubtype<SingleColorView>(), findsOneWidget);
+    expect(find.bySubtype<MultiColorView>(), findsOneWidget);
+    expect(find.bySubtype<VoltageView>(), findsOneWidget);
+    expect(find.bySubtype<NumberBar>(), findsOneWidget);
+    expect(find.bySubtype<NumberSlider>(), findsOneWidget);
+    expect(find.bySubtype<GraphWidget>(), findsOneWidget);
+    expect(find.bySubtype<CommandSchedulerWidget>(), findsOneWidget);
+    expect(find.bySubtype<CommandWidget>(), findsOneWidget);
+    expect(find.bySubtype<SubsystemWidget>(), findsOneWidget);
+    expect(find.bySubtype<RobotPreferences>(), findsOneWidget);
   });
 
   testWidgets('Editing properties', (widgetTester) async {
