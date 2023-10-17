@@ -16,10 +16,12 @@ class EditableTabBar extends StatelessWidget {
   final List<DashboardGrid> tabViews;
   final List<TabData> tabData;
 
-  final Function(TabData tab, DashboardGrid grid) onTabCreate;
-  final Function(TabData tab, DashboardGrid grid) onTabDestroy;
+  final Function(TabData tab) onTabCreate;
+  final Function(int index) onTabDestroy;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
+
+  final DashboardGrid Function() newDashboardGridBuilder;
 
   final int currentIndex;
 
@@ -32,6 +34,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabDestroy,
     required this.onTabRename,
     required this.onTabChanged,
+    required this.newDashboardGridBuilder,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -64,9 +67,8 @@ class EditableTabBar extends StatelessWidget {
   void createTab() {
     String tabName = 'Tab ${tabData.length + 1}';
     TabData data = TabData(name: tabName);
-    DashboardGrid grid = DashboardGrid(key: GlobalKey());
 
-    onTabCreate.call(data, grid);
+    onTabCreate.call(data);
   }
 
   void closeTab(int index) {
@@ -74,43 +76,7 @@ class EditableTabBar extends StatelessWidget {
       return;
     }
 
-    TabData data = tabData[index];
-    DashboardGrid grid = tabViews[index];
-
-    tabData.removeAt(index);
-    tabViews.removeAt(index);
-
-    // if (currentIndex > 0) {
-    //   currentIndex--;
-    // }
-
-    onTabDestroy.call(data, grid);
-  }
-
-  void showTabCloseConfirmation(
-      BuildContext context, String tabName, Function() onClose) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onClose.call();
-                },
-                child: const Text('OK')),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel')),
-          ],
-          content: Text('Do you want to close the tab "$tabName"?'),
-          title: const Text('Confirm Tab Close'),
-        );
-      },
-    );
+    onTabDestroy.call(index);
   }
 
   @override
@@ -166,10 +132,7 @@ class EditableTabBar extends StatelessWidget {
                             title: const Text('Close'),
                             onTap: () {
                               Navigator.of(context).pop();
-                              showTabCloseConfirmation(
-                                  context, tabData[index].name, () {
-                                closeTab(index);
-                              });
+                              closeTab(index);
                             },
                           ),
                         ],
@@ -210,10 +173,7 @@ class EditableTabBar extends StatelessWidget {
                                   const SizedBox(width: 10),
                                   IconButton(
                                     onPressed: () {
-                                      showTabCloseConfirmation(
-                                          context, tabData[index].name, () {
-                                        closeTab(index);
-                                      });
+                                      closeTab(index);
                                     },
                                     padding: const EdgeInsets.all(0.0),
                                     alignment: Alignment.center,
