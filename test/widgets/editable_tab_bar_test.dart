@@ -44,8 +44,9 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            onTabCreate: (tab, grid) {},
-            onTabDestroy: (tab, grid) {},
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {},
+            onTabDestroy: (index) {},
             onTabRename: (tab, grid) {},
             onTabChanged: (index) {},
           ),
@@ -80,10 +81,11 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            onTabCreate: (tab, grid) {
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
-            onTabDestroy: (tab, grid) {
+            onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
             },
             onTabRename: (tab, grid) {
@@ -125,10 +127,11 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            onTabCreate: (tab, grid) {
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
-            onTabDestroy: (tab, grid) {
+            onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
             },
             onTabRename: (tab, grid) {
@@ -151,16 +154,6 @@ void main() {
     await widgetTester.tap(closeTabButton);
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
-
-    final confirmButton =
-        find.widgetWithText(TextButton, 'OK', skipOffstage: false);
-
-    expect(confirmButton, findsOneWidget);
-
-    await widgetTester.tap(confirmButton);
-    await widgetTester.pumpAndSettle();
-
     verify(tabBarFunctions.onTabDestroy()).called(1);
   });
 
@@ -180,10 +173,11 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            onTabCreate: (tab, grid) {
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
-            onTabDestroy: (tab, grid) {
+            onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
             },
             onTabRename: (tab, grid) {
@@ -250,10 +244,11 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            onTabCreate: (tab, grid) {
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
-            onTabDestroy: (tab, grid) {
+            onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
             },
             onTabRename: (tab, grid) {
