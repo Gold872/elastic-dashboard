@@ -80,7 +80,7 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
-  Map<String, dynamic>? toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'topic': topic,
       'period': period,
