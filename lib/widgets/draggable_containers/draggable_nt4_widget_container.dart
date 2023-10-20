@@ -7,12 +7,14 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_d
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
@@ -368,6 +370,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );
+      case 'SwerveDrive':
+        return SwerveDriveWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
       case 'ComboBox Chooser':
         return ComboBoxChooser.fromJson(
           key: UniqueKey(),
@@ -405,6 +412,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'RobotPreferences':
         return RobotPreferences.fromJson(
+          key: UniqueKey(),
+          jsonData: jsonData['properties'],
+        );
+      case 'Alerts':
+        return NetworkAlerts.fromJson(
           key: UniqueKey(),
           jsonData: jsonData['properties'],
         );

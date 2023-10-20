@@ -30,7 +30,7 @@ mixin NT4Widget on StatelessWidget {
   NT4WidgetNotifier? notifier;
   NT4Topic? nt4Topic;
 
-  Map<String, dynamic>? toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'topic': topic,
       'period': period,

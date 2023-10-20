@@ -16,10 +16,12 @@ class EditableTabBar extends StatelessWidget {
   final List<DashboardGrid> tabViews;
   final List<TabData> tabData;
 
-  final Function(TabData tab, DashboardGrid grid) onTabCreate;
-  final Function(TabData tab, DashboardGrid grid) onTabDestroy;
+  final Function(TabData tab) onTabCreate;
+  final Function(int index) onTabDestroy;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
+
+  final DashboardGrid Function() newDashboardGridBuilder;
 
   final int currentIndex;
 
@@ -32,6 +34,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabDestroy,
     required this.onTabRename,
     required this.onTabChanged,
+    required this.newDashboardGridBuilder,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -64,9 +67,8 @@ class EditableTabBar extends StatelessWidget {
   void createTab() {
     String tabName = 'Tab ${tabData.length + 1}';
     TabData data = TabData(name: tabName);
-    DashboardGrid grid = DashboardGrid(key: GlobalKey());
 
-    onTabCreate.call(data, grid);
+    onTabCreate.call(data);
   }
 
   void closeTab(int index) {
@@ -74,43 +76,7 @@ class EditableTabBar extends StatelessWidget {
       return;
     }
 
-    TabData data = tabData[index];
-    DashboardGrid grid = tabViews[index];
-
-    tabData.removeAt(index);
-    tabViews.removeAt(index);
-
-    // if (currentIndex > 0) {
-    //   currentIndex--;
-    // }
-
-    onTabDestroy.call(data, grid);
-  }
-
-  void showTabCloseConfirmation(
-      BuildContext context, String tabName, Function() onClose) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onClose.call();
-                },
-                child: const Text('OK')),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel')),
-          ],
-          content: Text('Do you want to close the tab "$tabName"?'),
-          title: const Text('Confirm Tab Close'),
-        );
-      },
-    );
+    onTabDestroy.call(index);
   }
 
   @override
@@ -121,127 +87,124 @@ class EditableTabBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // Tab bar
-        Container(
-          width: double.infinity,
-          height: 36,
-          color: theme.colorScheme.primaryContainer,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  itemCount: tabData.length,
-                  itemBuilder: (context, index) {
-                    return ContextMenuArea(
-                      builder: (context) => [
-                        ListTile(
-                          enabled: false,
-                          dense: true,
-                          visualDensity: const VisualDensity(
-                              horizontal: 0.0, vertical: -4.0),
-                          title: Center(child: Text(tabData[index].name)),
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: const VisualDensity(
-                              horizontal: 0.0, vertical: -4.0),
-                          leading: const Icon(
-                              Icons.drive_file_rename_outline_outlined),
-                          title: const Text('Rename'),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            renameTab(context, index);
-                          },
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: const VisualDensity(
-                              horizontal: 0.0, vertical: -4.0),
-                          leading: const Icon(Icons.close),
-                          title: const Text('Close'),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            showTabCloseConfirmation(
-                                context, tabData[index].name, () {
-                              closeTab(index);
-                            });
-                          },
-                        ),
-                      ],
-                      child: GestureDetector(
-                        onTap: () {
-                          onTabChanged.call(index);
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutExpo,
-                          margin: const EdgeInsets.only(
-                              left: 5.0, right: 5.0, top: 5.0),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 5.0),
-                          decoration: BoxDecoration(
-                            color: (currentIndex == index)
-                                ? theme.colorScheme.onPrimaryContainer
-                                : Colors.transparent,
-                            borderRadius: (currentIndex == index)
-                                ? const BorderRadius.only(
-                                    topLeft: Radius.circular(10.0),
-                                    topRight: Radius.circular(10.0),
-                                  )
-                                : BorderRadius.zero,
+        ExcludeFocus(
+          child: Container(
+            width: double.infinity,
+            height: 36,
+            color: theme.colorScheme.primaryContainer,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    itemCount: tabData.length,
+                    itemBuilder: (context, index) {
+                      return ContextMenuArea(
+                        builder: (context) => [
+                          ListTile(
+                            enabled: false,
+                            dense: true,
+                            visualDensity: const VisualDensity(
+                                horizontal: 0.0, vertical: -4.0),
+                            title: Center(child: Text(tabData[index].name)),
                           ),
-                          child: Center(
-                            child: Row(
-                              children: [
-                                Text(
-                                  tabData[index].name,
-                                  style: theme.textTheme.bodyMedium!.copyWith(
+                          ListTile(
+                            dense: true,
+                            visualDensity: const VisualDensity(
+                                horizontal: 0.0, vertical: -4.0),
+                            leading: const Icon(
+                                Icons.drive_file_rename_outline_outlined),
+                            title: const Text('Rename'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              renameTab(context, index);
+                            },
+                          ),
+                          ListTile(
+                            dense: true,
+                            visualDensity: const VisualDensity(
+                                horizontal: 0.0, vertical: -4.0),
+                            leading: const Icon(Icons.close),
+                            title: const Text('Close'),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              closeTab(index);
+                            },
+                          ),
+                        ],
+                        child: GestureDetector(
+                          onTap: () {
+                            onTabChanged.call(index);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOutExpo,
+                            margin: const EdgeInsets.only(
+                                left: 5.0, right: 5.0, top: 5.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 5.0),
+                            decoration: BoxDecoration(
+                              color: (currentIndex == index)
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : Colors.transparent,
+                              borderRadius: (currentIndex == index)
+                                  ? const BorderRadius.only(
+                                      topLeft: Radius.circular(10.0),
+                                      topRight: Radius.circular(10.0),
+                                    )
+                                  : BorderRadius.zero,
+                            ),
+                            child: Center(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    tabData[index].name,
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      color: (currentIndex == index)
+                                          ? theme.colorScheme.primaryContainer
+                                          : theme
+                                              .colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  IconButton(
+                                    onPressed: () {
+                                      closeTab(index);
+                                    },
+                                    padding: const EdgeInsets.all(0.0),
+                                    alignment: Alignment.center,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 15.0,
+                                      minHeight: 15.0,
+                                    ),
+                                    iconSize: 14,
                                     color: (currentIndex == index)
                                         ? theme.colorScheme.primaryContainer
                                         : theme.colorScheme.onPrimaryContainer,
+                                    icon: const Icon(Icons.close),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                IconButton(
-                                  onPressed: () {
-                                    showTabCloseConfirmation(
-                                        context, tabData[index].name, () {
-                                      closeTab(index);
-                                    });
-                                  },
-                                  padding: const EdgeInsets.all(0.0),
-                                  alignment: Alignment.center,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 15.0,
-                                    minHeight: 15.0,
-                                  ),
-                                  iconSize: 14,
-                                  color: (currentIndex == index)
-                                      ? theme.colorScheme.primaryContainer
-                                      : theme.colorScheme.onPrimaryContainer,
-                                  icon: const Icon(Icons.close),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: () {
-                  createTab();
-                },
-                alignment: Alignment.center,
-                icon: const Icon(Icons.add),
-              )
-            ],
+                IconButton(
+                  onPressed: () {
+                    createTab();
+                  },
+                  alignment: Alignment.center,
+                  icon: const Icon(Icons.add),
+                )
+              ],
+            ),
           ),
         ),
         // Dashboard grid area

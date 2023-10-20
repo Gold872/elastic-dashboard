@@ -25,38 +25,44 @@ class CustomAppBar extends AppBar {
           leadingWidth: 460,
           centerTitle: true,
           actions: [
-            InkWell(
-              onTap: () {},
-              child: DecoratedMinimizeButton(
-                type: buttonType,
-                onPressed: () async => await windowManager.minimize(),
+            ExcludeFocus(
+              child: InkWell(
+                onTap: () {},
+                child: DecoratedMinimizeButton(
+                  type: buttonType,
+                  onPressed: () async => await windowManager.minimize(),
+                ),
               ),
             ),
-            InkWell(
-              onTap: () {},
-              child: DecoratedMaximizeButton(
-                type: buttonType,
-                onPressed: () async {
-                  if (await windowManager.isMaximized()) {
-                    windowManager.unmaximize();
-                  } else {
-                    windowManager.maximize();
-                  }
-                },
+            ExcludeFocus(
+              child: InkWell(
+                onTap: () {},
+                child: DecoratedMaximizeButton(
+                  type: buttonType,
+                  onPressed: () async {
+                    if (await windowManager.isMaximized()) {
+                      windowManager.unmaximize();
+                    } else {
+                      windowManager.maximize();
+                    }
+                  },
+                ),
               ),
             ),
-            InkWell(
-              hoverColor: Colors.red,
-              onTap: () {},
-              child: DecoratedCloseButton(
-                type: buttonType,
-                onPressed: () async {
-                  if (onWindowClose == null) {
-                    await windowManager.close();
-                  } else {
-                    onWindowClose.call();
-                  }
-                },
+            ExcludeFocus(
+              child: InkWell(
+                hoverColor: Colors.red,
+                onTap: () {},
+                child: DecoratedCloseButton(
+                  type: buttonType,
+                  onPressed: () async {
+                    if (onWindowClose == null) {
+                      await windowManager.close();
+                    } else {
+                      onWindowClose.call();
+                    }
+                  },
+                ),
               ),
             ),
           ],

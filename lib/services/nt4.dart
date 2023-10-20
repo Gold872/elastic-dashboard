@@ -334,8 +334,9 @@ class NT4Client {
     pingTimer ??= Timer.periodic(const Duration(milliseconds: 200), (timer) {
       _rttSendTimestamp();
     });
-    pongTimer ??=
-        Timer.periodic(const Duration(milliseconds: 1000), _checkPingStatus);
+    // TODO: Uncomment for 2024 NT4.1 updates
+    // pongTimer ??=
+    //     Timer.periodic(const Duration(milliseconds: 1000), _checkPingStatus);
 
     _mainWebsocket!.stream.listen(
       (data) {

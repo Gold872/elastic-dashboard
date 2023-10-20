@@ -170,7 +170,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         !const DeepCollectionEquality().equals(savedJson, currentJson);
 
     if (showConfirmation) {
-      showCloseConfirmation(context);
+      showWindowCloseConfirmation(context);
       await windowManager.focus();
     } else {
       await windowManager.destroy();
@@ -383,6 +383,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           jsonData: data['grid_layout'],
           onAddWidgetPressed: displayAddWidgetDialog));
     }
+
+    if (tabData.isEmpty || grids.isEmpty) {
+      tabData.add(TabData(name: 'Tab 0'));
+      grids.add(DashboardGrid.fromJson(
+        key: GlobalKey(),
+        jsonData: const {},
+        onAddWidgetPressed: displayAddWidgetDialog,
+      ));
+    }
+
+    if (currentTabIndex >= grids.length) {
+      currentTabIndex = grids.length - 1;
+    }
   }
 
   void displayAddWidgetDialog() {
@@ -572,7 +585,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     setState(() {});
   }
 
-  void showCloseConfirmation(BuildContext context) {
+  void showWindowCloseConfirmation(BuildContext context) {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -604,6 +617,32 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           ),
         ],
       ),
+    );
+  }
+
+  void showTabCloseConfirmation(
+      BuildContext context, String tabName, Function() onClose) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onClose.call();
+                },
+                child: const Text('OK')),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel')),
+          ],
+          content: Text('Do you want to close the tab "$tabName"?'),
+          title: const Text('Confirm Tab Close'),
+        );
+      },
     );
   }
 
@@ -766,6 +805,42 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 setState(() => currentTabIndex = i - 1);
               }
             },
+          const SingleActivator(LogicalKeyboardKey.keyT, control: true): () {
+            String newTabName = 'Tab ${tabData.length + 1}';
+            int newTabIndex = tabData.length;
+
+            tabData.add(TabData(name: newTabName));
+            grids.add(
+              DashboardGrid(
+                key: GlobalKey(),
+                onAddWidgetPressed: displayAddWidgetDialog,
+              ),
+            );
+
+            setState(() => currentTabIndex = newTabIndex);
+          },
+          const SingleActivator(LogicalKeyboardKey.keyW, control: true): () {
+            if (tabData.length <= 1) {
+              return;
+            }
+
+            TabData currentTab = tabData[currentTabIndex];
+
+            showTabCloseConfirmation(context, currentTab.name, () {
+              int oldTabIndex = currentTabIndex;
+
+              if (currentTabIndex == tabData.length - 1) {
+                currentTabIndex--;
+              }
+
+              grids[oldTabIndex].onDestroy();
+
+              setState(() {
+                tabData.removeAt(oldTabIndex);
+                grids.removeAt(oldTabIndex);
+              });
+            });
+          },
         },
         child: Focus(
           autofocus: true,
@@ -776,35 +851,46 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               Expanded(
                 child: Stack(
                   children: [
-                    // Image.asset(
-                    //   "assets/first-background.png",
-                    //   width: MediaQuery.of(context).size.width,
-                    //   height: MediaQuery.of(context).size.height,
-                    //   fit: BoxFit.cover,
-                    // ),
                     EditableTabBar(
                       currentIndex: currentTabIndex,
+                      newDashboardGridBuilder: () {
+                        return DashboardGrid(
+                          key: GlobalKey(),
+                          onAddWidgetPressed: displayAddWidgetDialog,
+                        );
+                      },
                       onTabRename: (index, newData) {
                         setState(() {
                           tabData[index] = newData;
                         });
                       },
-                      onTabCreate: (tab, grid) {
+                      onTabCreate: (tab) {
                         setState(() {
                           tabData.add(tab);
-                          grids.add(grid);
+                          grids.add(DashboardGrid(
+                            key: GlobalKey(),
+                            onAddWidgetPressed: displayAddWidgetDialog,
+                          ));
                         });
                       },
-                      onTabDestroy: (tab, grid) {
-                        if (currentTabIndex == tabData.length) {
-                          currentTabIndex--;
+                      onTabDestroy: (index) {
+                        if (tabData.length <= 1) {
+                          return;
                         }
 
-                        grid.onDestroy();
+                        TabData currentTab = tabData[index];
 
-                        setState(() {
-                          tabData.remove(tab);
-                          grids.remove(grid);
+                        showTabCloseConfirmation(context, currentTab.name, () {
+                          if (currentTabIndex == tabData.length - 1) {
+                            currentTabIndex--;
+                          }
+
+                          grids[index].onDestroy();
+
+                          setState(() {
+                            tabData.removeAt(index);
+                            grids.removeAt(index);
+                          });
                         });
                       },
                       onTabChanged: (index) {
