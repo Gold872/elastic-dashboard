@@ -343,9 +343,7 @@ class DashboardGrid extends StatelessWidget {
 
   void onNTConnect() {
     for (DraggableWidgetContainer container in _widgetContainers) {
-      container.enabled = true;
-
-      container.refresh();
+      container.setEnabled(true);
     }
 
     refresh();
@@ -353,9 +351,7 @@ class DashboardGrid extends StatelessWidget {
 
   void onNTDisconnect() {
     for (DraggableWidgetContainer container in _widgetContainers) {
-      container.enabled = false;
-
-      container.refresh();
+      container.setEnabled(false);
     }
 
     refresh();

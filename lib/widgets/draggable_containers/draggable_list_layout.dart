@@ -214,6 +214,15 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
+  void setEnabled(bool enabled) {
+    for (DraggableNT4WidgetContainer container in children) {
+      container.setEnabled(enabled);
+    }
+
+    super.setEnabled(enabled);
+  }
+
+  @override
   bool willAcceptWidget(DraggableWidgetContainer widget,
       {Offset? globalPosition}) {
     return widget is DraggableNT4WidgetContainer;

@@ -175,6 +175,13 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   void unSubscribe() {}
 
+  @mustCallSuper
+  void setEnabled(bool enabled) {
+    this.enabled = enabled;
+
+    refresh();
+  }
+
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
