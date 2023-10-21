@@ -248,6 +248,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
     for (DraggableNT4WidgetContainer widget in children) {
       column.add(
+        // Detectors for dragging so widgets can be dragged out of list layout
         GestureDetector(
           supportedDevices: PointerDeviceKind.values
               .whereNot((element) => element == PointerDeviceKind.trackpad)
@@ -259,8 +260,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             }
             Future.delayed(Duration.zero, () => model?.setDraggable(false));
 
-            widget.cursorGlobalLocation = details.globalPosition -
-                Offset(widget.displayRect.width, widget.displayRect.height) / 2;
+            widget.cursorGlobalLocation = details.globalPosition;
           },
           onPanUpdate: (details) {
             widget.cursorGlobalLocation = details.globalPosition;
@@ -272,16 +272,26 @@ class DraggableListLayout extends DraggableLayoutContainer {
           },
           onPanEnd: (details) {
             Future.delayed(Duration.zero, () => model?.setDraggable(true));
-            children.remove(widget);
+
+            Rect previewLocation = Rect.fromLTWH(
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggablePositionRect.left),
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggablePositionRect.top),
+              widget.draggablePositionRect.width,
+              widget.draggablePositionRect.height,
+            );
+
+            if (dashboardGrid.isValidLocation(previewLocation) ||
+                dashboardGrid
+                    .isValidLayoutLocation(widget.cursorGlobalLocation)) {
+              children.remove(widget);
+            }
 
             dashboardGrid.layoutDragOutEnd(widget);
-
-            refresh();
           },
           onPanCancel: () {
             Future.delayed(Duration.zero, () => model?.setDraggable(true));
-
-            refresh();
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),

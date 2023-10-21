@@ -324,7 +324,7 @@ class DashboardGrid extends StatelessWidget {
 
   void layoutDragOutEnd(DraggableWidgetContainer widget) {
     if (widget is DraggableNT4WidgetContainer) {
-      placeNT4DragInWidget(widget);
+      placeNT4DragInWidget(widget, true);
     }
   }
 
@@ -418,7 +418,8 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
-  void placeNT4DragInWidget(DraggableNT4WidgetContainer widget) {
+  void placeNT4DragInWidget(DraggableNT4WidgetContainer widget,
+      [bool fromLayout = false]) {
     if (_containerDraggingIn == null) {
       return;
     }
@@ -445,10 +446,12 @@ class DashboardGrid extends StatelessWidget {
     } else if (!isValidLocation(previewLocation)) {
       _containerDraggingIn = null;
 
-      if (widget.child is NT4Widget) {
-        (widget.child as NT4Widget)
-          ..dispose()
-          ..unSubscribe();
+      if (!fromLayout) {
+        if (widget.child is NT4Widget) {
+          (widget.child as NT4Widget)
+            ..dispose()
+            ..unSubscribe();
+        }
       }
 
       refresh();
