@@ -111,20 +111,7 @@ class DraggableWidgetContainer extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Settings for the widget container
-                  const Text('Container Settings'),
-                  const SizedBox(height: 5),
-                  DialogTextInput(
-                    onSubmit: (value) {
-                      title = value;
-
-                      refresh();
-                    },
-                    label: 'Title',
-                    initialText: title,
-                  ),
-                ],
+                children: getContainerEditProperties(),
               ),
             ),
           ),
@@ -139,6 +126,23 @@ class DraggableWidgetContainer extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<Widget> getContainerEditProperties() {
+    return [
+      // Settings for the widget container
+      const Text('Container Settings'),
+      const SizedBox(height: 5),
+      DialogTextInput(
+        onSubmit: (value) {
+          title = value;
+
+          refresh();
+        },
+        label: 'Title',
+        initialText: title,
+      ),
+    ];
   }
 
   Map<String, dynamic> toJson() {

@@ -167,18 +167,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Settings for the widget container
-                  const Text('Container Settings'),
-                  const SizedBox(height: 5),
-                  DialogTextInput(
-                    onSubmit: (value) {
-                      title = value;
-
-                      refresh();
-                    },
-                    label: 'Title',
-                    initialText: title,
-                  ),
+                  ...getContainerEditProperties(),
                   const SizedBox(height: 5),
                   Column(
                     mainAxisSize: MainAxisSize.min,

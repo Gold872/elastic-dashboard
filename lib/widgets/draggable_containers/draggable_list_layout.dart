@@ -54,18 +54,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Settings for the widget container
-                  const Text('Container Settings'),
-                  const SizedBox(height: 5),
-                  DialogTextInput(
-                    onSubmit: (value) {
-                      title = value;
-
-                      refresh();
-                    },
-                    label: 'Title',
-                    initialText: title,
-                  ),
+                  ...getContainerEditProperties(),
                   const Divider(),
                   if (children.isNotEmpty)
                     Container(
@@ -150,16 +139,35 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   List<Widget> getChildEditProperties(
       BuildContext context, DraggableNT4WidgetContainer container) {
-    if (container.child?.getEditProperties(context) != null) {
-      return [
-        ...container.child!.getEditProperties(context),
-        if (container.child!.getEditProperties(context).isNotEmpty)
-          const Divider(),
-        ...container.getNT4EditProperties(),
-      ];
-    } else {
-      return [const Text('No editable properties for this widget')];
-    }
+    List<Widget> containerEditProperties = [
+      // Settings for the widget container
+      const Text('Container Settings'),
+      const SizedBox(height: 5),
+      DialogTextInput(
+        onSubmit: (value) {
+          container.title = value;
+
+          container.refresh();
+
+          refresh();
+        },
+        label: 'Title',
+        initialText: container.title,
+      ),
+    ];
+
+    List<Widget> childEditProperties =
+        container.child!.getEditProperties(context);
+
+    return [
+      ...containerEditProperties,
+      const Divider(),
+      if (childEditProperties.isNotEmpty) ...[
+        ...childEditProperties,
+        const Divider()
+      ],
+      ...container.getNT4EditProperties(),
+    ];
   }
 
   @override
