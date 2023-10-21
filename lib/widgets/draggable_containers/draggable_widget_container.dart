@@ -39,6 +39,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   bool enabled = false;
   bool dragging = false;
+  bool resizing = false;
   bool draggingIntoLayout = false;
   bool previewVisible = false;
   bool validLocation = true;
@@ -231,6 +232,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onResizeStart: (handle, event) {
           dragging = true;
+          resizing = true;
           dragStartLocation = displayRect;
           onResizeBegin?.call(this);
         },
@@ -259,6 +261,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onResizeEnd: (handle, event) {
           dragging = false;
+          resizing = false;
 
           onResizeEnd?.call(this, draggablePositionRect);
 
@@ -266,6 +269,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onResizeCancel: (handle) {
           dragging = false;
+          resizing = false;
 
           onResizeEnd?.call(this, draggablePositionRect);
 

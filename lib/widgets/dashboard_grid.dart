@@ -246,8 +246,9 @@ class DashboardGrid extends StatelessWidget {
 
       widget.draggingIntoLayout = false;
     } else {
-      validLocation = widget is! DraggableLayoutContainer &&
-          isValidLayoutLocation(widget.cursorGlobalLocation);
+      validLocation = isValidLayoutLocation(widget.cursorGlobalLocation) &&
+          widget is! DraggableLayoutContainer &&
+          !widget.resizing;
 
       widget.draggingIntoLayout = validLocation;
 
