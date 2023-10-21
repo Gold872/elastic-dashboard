@@ -8,18 +8,13 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer Function(Map<String, dynamic> jsonData)?
       nt4ContainerBuilder;
-  final Function(DraggableWidgetContainer widget, Offset globalPosition)?
-      onDragOutUpdate;
-  final Function(DraggableWidgetContainer widget)? onDragOutEnd;
 
   DraggableLayoutContainer({
     super.key,
+    required super.dashboardGrid,
     required super.title,
-    required super.validMoveLocation,
-    this.onDragOutUpdate,
-    this.onDragOutEnd,
+    required super.initialPosition,
     super.enabled = false,
-    super.initialPosition,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -29,11 +24,9 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
 
   DraggableLayoutContainer.fromJson({
     super.key,
-    required super.validMoveLocation,
+    required super.dashboardGrid,
     required super.jsonData,
     required this.nt4ContainerBuilder,
-    this.onDragOutUpdate,
-    this.onDragOutEnd,
     super.enabled = false,
     super.onUpdate,
     super.onDragBegin,
@@ -51,7 +44,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   }
 
   bool willAcceptWidget(DraggableWidgetContainer widget,
-      {Offset? localPosition});
+      {Offset? globalPosition});
 
-  void addWidget(DraggableNT4WidgetContainer widget, {Offset? localPosition});
+  void addWidget(DraggableNT4WidgetContainer widget);
 }

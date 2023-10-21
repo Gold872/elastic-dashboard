@@ -178,15 +178,16 @@ class TreeTile extends StatelessWidget {
                 return;
               }
 
-              draggingWidget!.cursorLocation = Offset(
-                    draggingWidget!.displayRect.width,
-                    draggingWidget!.displayRect.height,
-                  ) /
-                  2;
+              draggingWidget!.cursorGlobalLocation = details.globalPosition;
 
-              onDragUpdate?.call(
-                  details.globalPosition - draggingWidget!.cursorLocation,
-                  draggingWidget!);
+              Offset position = details.globalPosition -
+                  Offset(
+                        draggingWidget!.displayRect.width,
+                        draggingWidget!.displayRect.height,
+                      ) /
+                      2;
+
+              onDragUpdate?.call(position, draggingWidget!);
             },
             onPanEnd: (details) {
               if (draggingWidget == null) {

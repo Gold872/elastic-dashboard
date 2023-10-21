@@ -16,12 +16,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   DraggableListLayout({
     super.key,
+    required super.dashboardGrid,
     required super.title,
-    required super.validMoveLocation,
+    required super.initialPosition,
     super.enabled = false,
-    super.initialPosition,
-    super.onDragOutUpdate,
-    super.onDragOutEnd,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -31,12 +29,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   DraggableListLayout.fromJson({
     super.key,
-    required super.validMoveLocation,
+    required super.dashboardGrid,
     required super.jsonData,
     required super.nt4ContainerBuilder,
     super.enabled = false,
-    super.onDragOutUpdate,
-    super.onDragOutEnd,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -181,7 +177,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     for (Map<String, dynamic> childData in jsonData['children']) {
       children.add(nt4ContainerBuilder?.call(childData) ??
           DraggableNT4WidgetContainer.fromJson(
-            validMoveLocation: validMoveLocation,
+            dashboardGrid: dashboardGrid,
             jsonData: childData,
           ));
     }
@@ -219,12 +215,12 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   @override
   bool willAcceptWidget(DraggableWidgetContainer widget,
-      {Offset? localPosition}) {
+      {Offset? globalPosition}) {
     return widget is DraggableNT4WidgetContainer;
   }
 
   @override
-  void addWidget(DraggableNT4WidgetContainer widget, {Offset? localPosition}) {
+  void addWidget(DraggableNT4WidgetContainer widget) {
     children.add(widget);
 
     refresh();
@@ -240,19 +236,28 @@ class DraggableListLayout extends DraggableLayoutContainer {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
-            widget.onDragEnd?.call(widget, widget.draggablePositionRect);
+            if (dragging) {
+              dragging = false;
+              refresh();
+            }
             Future.delayed(Duration.zero, () => model?.setDraggable(false));
-            widget.cursorLocation =
+
+            widget.cursorGlobalLocation = details.globalPosition -
                 Offset(widget.displayRect.width, widget.displayRect.height) / 2;
           },
           onPanUpdate: (details) {
-            Offset location = details.globalPosition - widget.cursorLocation;
-            onDragOutUpdate?.call(widget, location);
+            widget.cursorGlobalLocation = details.globalPosition;
+
+            Offset location = details.globalPosition -
+                Offset(widget.displayRect.width, widget.displayRect.height) / 2;
+
+            dashboardGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
             Future.delayed(Duration.zero, () => model?.setDraggable(true));
             children.remove(widget);
-            onDragOutEnd?.call(widget);
+
+            dashboardGrid.layoutDragOutEnd(widget);
 
             refresh();
           },
@@ -334,7 +339,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
-      opacity: (model?.previewVisible ?? false) ? 0.25 : 1.00,
+      opacity: (previewVisible) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
         child: SingleChildScrollView(

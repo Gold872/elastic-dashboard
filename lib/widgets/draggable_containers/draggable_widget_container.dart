@@ -1,41 +1,16 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:provider/provider.dart';
 
 class WidgetContainerModel extends ChangeNotifier {
-  Rect rect = Rect.fromLTWH(
-      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
-  Rect preview = Rect.fromLTWH(
-      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
-  bool previewVisible = false;
-  bool validLocation = true;
-
   bool draggable = true;
-
-  void setDraggableRect(Rect newRect) {
-    rect = newRect;
-    notifyListeners();
-  }
 
   void setDraggable(bool draggable) {
     this.draggable = draggable;
-    notifyListeners();
-  }
-
-  void setPreview(Rect newPreview) {
-    preview = newPreview;
-    notifyListeners();
-  }
-
-  void setPreviewVisible(bool visible) {
-    previewVisible = visible;
-    notifyListeners();
-  }
-
-  void setValidLocation(bool valid) {
-    validLocation = valid;
     notifyListeners();
   }
 
@@ -45,16 +20,19 @@ class WidgetContainerModel extends ChangeNotifier {
 }
 
 class DraggableWidgetContainer extends StatelessWidget {
-  String? title;
+  final DashboardGrid dashboardGrid;
 
-  Rect? initialPosition;
+  String? title;
 
   Rect draggablePositionRect = Rect.fromLTWH(
       0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
 
-  Offset cursorLocation = const Offset(double.nan, double.nan);
+  Offset cursorGlobalLocation = const Offset(double.nan, double.nan);
 
   Rect displayRect = Rect.fromLTWH(
+      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
+
+  Rect previewRect = Rect.fromLTWH(
       0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
 
   late Rect dragStartLocation;
@@ -62,17 +40,12 @@ class DraggableWidgetContainer extends StatelessWidget {
   bool enabled = false;
   bool dragging = false;
   bool draggingIntoLayout = false;
+  bool previewVisible = false;
+  bool validLocation = true;
 
-  Map<String, dynamic>? jsonData = {};
-
-  bool Function(DraggableWidgetContainer widget, Rect location)
-      validMoveLocation;
-  bool Function(
-          DraggableWidgetContainer widget, Rect location, Offset localPosition)?
-      validLayoutLocation = (widget, location, globalPosition) => false;
-  Function(dynamic widget)? onUpdate;
+  Function(dynamic widget, Rect newRect)? onUpdate;
   Function(dynamic widget)? onDragBegin;
-  Function(dynamic widget, Rect releaseRect, {Offset? localPosition})?
+  Function(dynamic widget, Rect releaseRect, {Offset? globalPosition})?
       onDragEnd;
   Function(dynamic widget)? onResizeBegin;
   Function(dynamic widget, Rect releaseRect)? onResizeEnd;
@@ -81,25 +54,25 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   DraggableWidgetContainer({
     super.key,
+    required this.dashboardGrid,
     required this.title,
-    required this.validMoveLocation,
-    this.validLayoutLocation,
+    required Rect initialPosition,
     this.enabled = false,
-    this.initialPosition,
     this.onUpdate,
     this.onDragBegin,
     this.onDragEnd,
     this.onResizeBegin,
     this.onResizeEnd,
   }) {
+    displayRect = initialPosition;
+
     init();
   }
 
   DraggableWidgetContainer.fromJson({
     super.key,
-    required this.validMoveLocation,
-    this.validLayoutLocation,
-    required this.jsonData,
+    required this.dashboardGrid,
+    required Map<String, dynamic> jsonData,
     this.enabled = false,
     this.onUpdate,
     this.onDragBegin,
@@ -107,6 +80,8 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.onResizeBegin,
     this.onResizeEnd,
   }) {
+    fromJson(jsonData);
+
     init();
   }
 
@@ -177,26 +152,21 @@ class DraggableWidgetContainer extends StatelessWidget {
   }
 
   void init() {
-    if (title == null) {
-      fromJson(jsonData!);
-    } else {
-      displayRect = initialPosition!;
-    }
-
     draggablePositionRect = displayRect;
     dragStartLocation = displayRect;
   }
 
+  @mustCallSuper
   void fromJson(Map<String, dynamic> jsonData) {
-    title = jsonData['title'];
+    title = tryCast(jsonData['title']) ?? '';
 
-    double x = jsonData['x'];
+    double x = tryCast(jsonData['x']) ?? 0.0;
 
-    double y = jsonData['y'];
+    double y = tryCast(jsonData['y']) ?? 0.0;
 
-    double width = jsonData['width'];
+    double width = tryCast(jsonData['width']) ?? Globals.gridSize.toDouble();
 
-    double height = jsonData['height'];
+    double height = tryCast(jsonData['height']) ?? Globals.gridSize.toDouble();
 
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
@@ -254,126 +224,41 @@ class DraggableWidgetContainer extends StatelessWidget {
           onResizeBegin?.call(this);
         },
         onChanged: (result, event) {
-          Rect newRect = result.rect;
+          cursorGlobalLocation = event.globalPosition;
 
-          double newX = snapToGrid(newRect.left);
-          double newY = snapToGrid(newRect.top);
+          onUpdate?.call(this, result.rect);
 
-          double newWidth = snapToGrid(newRect.width);
-          double newHeight = snapToGrid(newRect.height);
-
-          if (newWidth < Globals.gridSize) {
-            newWidth = Globals.gridSize.toDouble();
-          }
-
-          if (newHeight < Globals.gridSize) {
-            newHeight = Globals.gridSize.toDouble();
-          }
-
-          Rect preview = Rect.fromLTWH(
-              newX, newY, newWidth.toDouble(), newHeight.toDouble());
-          draggablePositionRect = result.rect;
-
-          model.setPreview(preview);
-          model.setDraggableRect(draggablePositionRect);
-          model.setPreviewVisible(true);
-
-          cursorLocation =
-              event.localPosition + result.oldPosition - result.position;
-
-          bool validLocation = validMoveLocation.call(this, preview);
-
-          if (validLocation) {
-            model.setValidLocation(validLocation);
-
-            draggingIntoLayout = false;
-          } else {
-            validLocation = validLayoutLocation?.call(
-                    this, draggablePositionRect, cursorLocation) ??
-                false;
-
-            draggingIntoLayout = validLocation;
-
-            model.setValidLocation(validLocation);
-          }
-
-          onUpdate?.call(this);
+          refresh();
         },
         onDragEnd: (event) {
           dragging = false;
 
-          Rect releaseRect = draggablePositionRect;
+          onDragEnd?.call(this, draggablePositionRect,
+              globalPosition: cursorGlobalLocation);
 
-          if (model.validLocation) {
-            draggablePositionRect = model.preview;
-          } else {
-            draggablePositionRect = dragStartLocation;
-          }
-
-          displayRect = draggablePositionRect;
-
-          model.setPreview(draggablePositionRect);
-          model.setPreviewVisible(false);
-          model.setValidLocation(true);
-
-          onDragEnd?.call(this, releaseRect, localPosition: cursorLocation);
+          refresh();
         },
         onDragCancel: () {
           dragging = false;
 
-          Rect releaseRect = draggablePositionRect;
+          onDragEnd?.call(this, draggablePositionRect,
+              globalPosition: cursorGlobalLocation);
 
-          if (model.validLocation) {
-            draggablePositionRect = model.preview;
-          } else {
-            draggablePositionRect = dragStartLocation;
-          }
-
-          displayRect = draggablePositionRect;
-
-          model.setPreview(draggablePositionRect);
-          model.setPreviewVisible(false);
-          model.setValidLocation(true);
-
-          onDragEnd?.call(this, releaseRect, localPosition: cursorLocation);
+          refresh();
         },
         onResizeEnd: (handle, event) {
           dragging = false;
 
-          Rect releaseRect = draggablePositionRect;
+          onResizeEnd?.call(this, draggablePositionRect);
 
-          if (model.validLocation) {
-            draggablePositionRect = model.preview;
-          } else {
-            draggablePositionRect = dragStartLocation;
-          }
-
-          displayRect = draggablePositionRect;
-
-          model.setPreview(draggablePositionRect);
-          model.setPreviewVisible(false);
-          model.setValidLocation(true);
-
-          onResizeEnd?.call(this, releaseRect);
+          refresh();
         },
         onResizeCancel: (handle) {
           dragging = false;
 
-          Rect releaseRect = draggablePositionRect;
+          onResizeEnd?.call(this, draggablePositionRect);
 
-          if (model.validLocation) {
-            draggablePositionRect = model.preview;
-          } else {
-            draggablePositionRect = dragStartLocation;
-          }
-
-          displayRect = draggablePositionRect;
-
-          model.setPreview(draggablePositionRect);
-          model.setPreviewVisible(false);
-          model.setValidLocation(true);
-
-          onResizeEnd?.call(this, releaseRect);
+          refresh();
         },
       ),
     ];
@@ -381,20 +266,20 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   Widget getDefaultPreview() {
     return Positioned(
-      left: model?.preview.left,
-      top: model?.preview.top,
-      width: model?.preview.width,
-      height: model?.preview.height,
+      left: previewRect.left,
+      top: previewRect.top,
+      width: previewRect.width,
+      height: previewRect.height,
       child: Visibility(
-        visible: model?.previewVisible ?? false,
+        visible: previewVisible,
         child: Container(
           decoration: BoxDecoration(
-            color: (model?.validLocation ?? false)
+            color: (validLocation)
                 ? Colors.white.withOpacity(0.25)
                 : Colors.black.withOpacity(0.1),
             borderRadius: BorderRadius.circular(25.0),
             border: Border.all(
-                color: (model?.validLocation ?? false)
+                color: (validLocation)
                     ? Colors.lightGreenAccent.shade400
                     : Colors.red,
                 width: 5.0),

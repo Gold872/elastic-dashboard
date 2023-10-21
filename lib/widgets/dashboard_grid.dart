@@ -18,11 +18,7 @@ class DashboardGridModel extends ChangeNotifier {
 }
 
 class DashboardGrid extends StatelessWidget {
-  final Map<String, dynamic>? jsonData;
-
   final List<DraggableWidgetContainer> _widgetContainers = [];
-  final List<DraggableNT4WidgetContainer> _nt4DraggingContainers = [];
-  final List<DraggableLayoutContainer> _layoutDraggingContainers = [];
 
   MapEntry<DraggableWidgetContainer, Offset>? _containerDraggingIn;
 
@@ -30,43 +26,37 @@ class DashboardGrid extends StatelessWidget {
 
   DashboardGridModel? model;
 
-  DashboardGrid({super.key, this.jsonData, this.onAddWidgetPressed}) {
-    init();
-  }
+  DashboardGrid({super.key, this.onAddWidgetPressed});
 
-  DashboardGrid.fromJson(
-      {super.key, required this.jsonData, this.onAddWidgetPressed}) {
-    init();
-  }
-
-  void init() {
-    if (jsonData == null) {
-      return;
+  DashboardGrid.fromJson({
+    super.key,
+    required Map<String, dynamic> jsonData,
+    this.onAddWidgetPressed,
+  }) {
+    if (jsonData['containers'] != null) {
+      loadContainersFromJson(jsonData);
     }
 
-    if (jsonData!['containers'] != null) {
-      loadContainersFromJson(jsonData!);
-    }
-
-    if (jsonData!['layouts'] != null) {
-      loadLayoutsFromJson(jsonData!);
+    if (jsonData['layouts'] != null) {
+      loadLayoutsFromJson(jsonData);
     }
   }
 
   void loadContainersFromJson(Map<String, dynamic> jsonData) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
-      _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
-        key: UniqueKey(),
-        enabled: nt4Connection.isNT4Connected,
-        validMoveLocation: isValidMoveLocation,
-        validLayoutLocation: isValidLayoutLocation,
-        jsonData: containerData,
-        onUpdate: _nt4ContainerOnUpdate,
-        onDragBegin: _nt4ContainerOnDragBegin,
-        onDragEnd: _nt4ContainerOnDragEnd,
-        onResizeBegin: _nt4ContainerOnResizeBegin,
-        onResizeEnd: _nt4ContainerOnResizeEnd,
-      ));
+      _widgetContainers.add(
+        DraggableNT4WidgetContainer.fromJson(
+          key: UniqueKey(),
+          dashboardGrid: this,
+          enabled: nt4Connection.isNT4Connected,
+          jsonData: containerData,
+          onUpdate: _nt4ContainerOnUpdate,
+          onDragBegin: _nt4ContainerOnDragBegin,
+          onDragEnd: _nt4ContainerOnDragEnd,
+          onResizeBegin: _nt4ContainerOnResizeBegin,
+          onResizeEnd: _nt4ContainerOnResizeEnd,
+        ),
+      );
     }
   }
 
@@ -82,15 +72,14 @@ class DashboardGrid extends StatelessWidget {
         case 'List Layout':
           widget = DraggableListLayout.fromJson(
             key: UniqueKey(),
+            dashboardGrid: this,
             enabled: nt4Connection.isNT4Connected,
-            validMoveLocation: isValidMoveLocation,
             jsonData: layoutData,
             nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
               return DraggableNT4WidgetContainer.fromJson(
                 key: UniqueKey(),
+                dashboardGrid: this,
                 enabled: nt4Connection.isNT4Connected,
-                validMoveLocation: isValidMoveLocation,
-                validLayoutLocation: isValidLayoutLocation,
                 jsonData: jsonData,
                 onUpdate: _nt4ContainerOnUpdate,
                 onDragBegin: _nt4ContainerOnDragBegin,
@@ -99,8 +88,6 @@ class DashboardGrid extends StatelessWidget {
                 onResizeEnd: _nt4ContainerOnResizeEnd,
               );
             },
-            onDragOutUpdate: _layoutOnDragOutUpdate,
-            onDragOutEnd: _layoutOnDragOutEnd,
             onUpdate: _layoutContainerOnUpdate,
             onDragBegin: _layoutContainerOnDragBegin,
             onDragEnd: _layoutContainerOnDragEnd,
@@ -176,9 +163,8 @@ class DashboardGrid extends StatelessWidget {
     return true;
   }
 
-  bool isValidLayoutLocation(
-      DraggableWidgetContainer widget, Rect location, Offset localPosition) {
-    return getLayoutAtLocation(location, localPosition) != null;
+  bool isValidLayoutLocation(Offset globalPosition) {
+    return getLayoutAtLocation(globalPosition) != null;
   }
 
   /// Returns weather `location` will overlap with widgets already on the dashboard
@@ -191,11 +177,11 @@ class DashboardGrid extends StatelessWidget {
     return true;
   }
 
-  DraggableLayoutContainer? getLayoutAtLocation(
-      Rect location, Offset localPosition) {
+  DraggableLayoutContainer? getLayoutAtLocation(Offset globalPosition) {
+    Offset localPosition = getLocalPosition(globalPosition);
     for (DraggableLayoutContainer container
         in _widgetContainers.whereType<DraggableLayoutContainer>()) {
-      if (container.displayRect.contains(location.topLeft + localPosition)) {
+      if (container.displayRect.contains(localPosition)) {
         return container;
       }
     }
@@ -203,87 +189,155 @@ class DashboardGrid extends StatelessWidget {
     return null;
   }
 
-  void _nt4ContainerOnUpdate(dynamic widget) {
+  void onWidgetResizeEnd(DraggableWidgetContainer widget) {
+    if (widget.validLocation) {
+      widget.draggablePositionRect = widget.previewRect;
+    } else {
+      widget.draggablePositionRect = widget.dragStartLocation;
+    }
+
+    widget.displayRect = widget.draggablePositionRect;
+
+    widget.previewRect = widget.draggablePositionRect;
+    widget.previewVisible = false;
+    widget.validLocation = true;
+  }
+
+  void onWidgetDragEnd(DraggableWidgetContainer widget) {
+    if (widget.validLocation) {
+      widget.draggablePositionRect = widget.previewRect;
+    } else {
+      widget.draggablePositionRect = widget.dragStartLocation;
+    }
+
+    widget.displayRect = widget.draggablePositionRect;
+
+    widget.previewRect = widget.draggablePositionRect;
+    widget.previewVisible = false;
+    widget.validLocation = true;
+  }
+
+  void onWidgetUpdate(DraggableWidgetContainer widget, Rect newRect) {
+    double newX = DraggableWidgetContainer.snapToGrid(newRect.left);
+    double newY = DraggableWidgetContainer.snapToGrid(newRect.top);
+
+    double newWidth = DraggableWidgetContainer.snapToGrid(newRect.width);
+    double newHeight = DraggableWidgetContainer.snapToGrid(newRect.height);
+
+    if (newWidth < Globals.gridSize) {
+      newWidth = Globals.gridSize.toDouble();
+    }
+
+    if (newHeight < Globals.gridSize) {
+      newHeight = Globals.gridSize.toDouble();
+    }
+
+    Rect preview =
+        Rect.fromLTWH(newX, newY, newWidth.toDouble(), newHeight.toDouble());
+    widget.draggablePositionRect = newRect;
+
+    widget.previewRect = preview;
+    widget.previewVisible = true;
+
+    bool validLocation = isValidMoveLocation(widget, preview);
+
+    if (validLocation) {
+      widget.validLocation = true;
+
+      widget.draggingIntoLayout = false;
+    } else {
+      validLocation = widget is! DraggableLayoutContainer &&
+          isValidLayoutLocation(widget.cursorGlobalLocation);
+
+      widget.draggingIntoLayout = validLocation;
+
+      widget.validLocation = validLocation;
+    }
+  }
+
+  void _nt4ContainerOnUpdate(dynamic widget, Rect newRect) {
+    onWidgetUpdate(widget, newRect);
+
     refresh();
   }
 
   void _nt4ContainerOnDragBegin(dynamic widget) {
-    _nt4DraggingContainers.add(widget);
     refresh();
   }
 
   void _nt4ContainerOnDragEnd(dynamic widget, Rect releaseRect,
-      {Offset? localPosition}) {
+      {Offset? globalPosition}) {
+    onWidgetDragEnd(widget);
+
     DraggableNT4WidgetContainer nt4Container =
         widget as DraggableNT4WidgetContainer;
 
-    if (widget.draggingIntoLayout && localPosition != null) {
+    if (widget.draggingIntoLayout && globalPosition != null) {
       DraggableLayoutContainer? layoutContainer =
-          getLayoutAtLocation(releaseRect, localPosition);
+          getLayoutAtLocation(globalPosition);
 
       if (layoutContainer != null) {
-        layoutContainer.addWidget(nt4Container, localPosition: localPosition);
+        layoutContainer.addWidget(nt4Container);
         _widgetContainers.remove(nt4Container);
       }
-    } else {
-      _nt4DraggingContainers.toSet().lookup(widget)?.dispose();
     }
-    _nt4DraggingContainers.remove(widget);
+
     refresh();
   }
 
   void _nt4ContainerOnResizeBegin(dynamic widget) {
-    _nt4DraggingContainers.add(widget);
     refresh();
   }
 
   void _nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
-    _nt4DraggingContainers.toSet().lookup(widget)?.dispose();
-    _nt4DraggingContainers.remove(widget);
+    onWidgetResizeEnd(widget);
+
     refresh();
   }
 
-  void _layoutContainerOnUpdate(dynamic widget) {
+  void _layoutContainerOnUpdate(dynamic widget, Rect newRect) {
+    onWidgetUpdate(widget, newRect);
+
     refresh();
   }
 
   void _layoutContainerOnDragBegin(dynamic widget) {
-    _layoutDraggingContainers.add(widget);
     refresh();
   }
 
   void _layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
-      {Offset? localPosition}) {
-    _layoutDraggingContainers.remove(widget);
+      {Offset? globalPosition}) {
+    onWidgetDragEnd(widget);
+
     refresh();
   }
 
   void _layoutContainerOnResizeBegin(dynamic widget) {
-    _layoutDraggingContainers.add(widget);
     refresh();
   }
 
   void _layoutContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
-    _layoutDraggingContainers.remove(widget);
+    onWidgetResizeEnd(widget);
+
     refresh();
   }
 
-  void _layoutOnDragOutEnd(DraggableWidgetContainer widget) {
+  void layoutDragOutEnd(DraggableWidgetContainer widget) {
     if (widget is DraggableNT4WidgetContainer) {
       placeNT4DragInWidget(widget);
     }
   }
 
-  void _layoutOnDragOutUpdate(
-      DraggableWidgetContainer widget, Offset location) {
-    Offset localPosition = getLocalPosition(location);
+  void layoutDragOutUpdate(
+      DraggableWidgetContainer widget, Offset globalPosition) {
+    Offset localPosition = getLocalPosition(globalPosition);
     widget.draggablePositionRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
       widget.draggablePositionRect.width,
       widget.draggablePositionRect.height,
     );
-    _containerDraggingIn = MapEntry(widget, location);
+    _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
 
@@ -308,15 +362,15 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void addLayoutDragInWidget(
-      DraggableLayoutContainer widget, Offset globalOffset) {
-    Offset localPosition = getLocalPosition(globalOffset);
+      DraggableLayoutContainer widget, Offset globalPosition) {
+    Offset localPosition = getLocalPosition(globalPosition);
     widget.draggablePositionRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
       widget.draggablePositionRect.width,
       widget.draggablePositionRect.height,
     );
-    _containerDraggingIn = MapEntry(widget, globalOffset);
+    _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
 
@@ -356,15 +410,15 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void addNT4DragInWidget(
-      DraggableNT4WidgetContainer widget, Offset globalOffset) {
-    Offset localPosition = getLocalPosition(globalOffset);
+      DraggableNT4WidgetContainer widget, Offset globalPosition) {
+    Offset localPosition = getLocalPosition(globalPosition);
     widget.draggablePositionRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
       widget.draggablePositionRect.width,
       widget.draggablePositionRect.height,
     );
-    _containerDraggingIn = MapEntry(widget, globalOffset);
+    _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
 
@@ -385,12 +439,12 @@ class DashboardGrid extends StatelessWidget {
 
     Rect previewLocation = Rect.fromLTWH(previewX, previewY, width, height);
 
-    if (isValidLayoutLocation(widget, previewLocation, widget.cursorLocation)) {
+    if (isValidLayoutLocation(widget.cursorGlobalLocation)) {
       DraggableLayoutContainer layoutContainer =
-          getLayoutAtLocation(previewLocation, widget.cursorLocation)!;
+          getLayoutAtLocation(widget.cursorGlobalLocation)!;
 
       if (layoutContainer.willAcceptWidget(widget)) {
-        layoutContainer.addWidget(widget, localPosition: widget.cursorLocation);
+        layoutContainer.addWidget(widget);
       }
     } else if (!isValidLocation(previewLocation)) {
       _containerDraggingIn = null;
@@ -436,9 +490,8 @@ class DashboardGrid extends StatelessWidget {
 
     return DraggableNT4WidgetContainer(
       key: UniqueKey(),
+      dashboardGrid: this,
       title: widget.title,
-      validMoveLocation: isValidMoveLocation,
-      validLayoutLocation: isValidLayoutLocation,
       enabled: nt4Connection.isNT4Connected,
       initialPosition: Rect.fromLTWH(
         0.0,
@@ -458,6 +511,7 @@ class DashboardGrid extends StatelessWidget {
   DraggableListLayout createListLayout() {
     return DraggableListLayout(
       key: UniqueKey(),
+      dashboardGrid: this,
       title: 'List Layout',
       initialPosition: Rect.fromLTWH(
         0.0,
@@ -466,9 +520,6 @@ class DashboardGrid extends StatelessWidget {
         Globals.gridSize.toDouble(),
       ),
       enabled: nt4Connection.isNT4Connected,
-      validMoveLocation: isValidMoveLocation,
-      onDragOutUpdate: _layoutOnDragOutUpdate,
-      onDragOutEnd: _layoutOnDragOutEnd,
       onUpdate: _layoutContainerOnUpdate,
       onDragBegin: _layoutContainerOnDragBegin,
       onDragEnd: _layoutContainerOnDragEnd,
@@ -507,9 +558,8 @@ class DashboardGrid extends StatelessWidget {
 
     _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
       key: UniqueKey(),
+      dashboardGrid: this,
       enabled: nt4Connection.isNT4Connected,
-      validMoveLocation: isValidMoveLocation,
-      validLayoutLocation: isValidLayoutLocation,
       jsonData: widgetData,
       onUpdate: _nt4ContainerOnUpdate,
       onDragBegin: _nt4ContainerOnDragBegin,
@@ -568,69 +618,51 @@ class DashboardGrid extends StatelessWidget {
     List<Widget> draggingInWidgets = [];
     List<Widget> previewOutlines = [];
 
-    for (DraggableNT4WidgetContainer container in _nt4DraggingContainers) {
-      // Add the widget container above the others
-      draggingWidgets.add(
-        Positioned(
-          left: container.draggablePositionRect.left,
-          top: container.draggablePositionRect.top,
-          child: container.getDraggingWidgetContainer(context),
-        ),
-      );
-
-      // Display the outline so it doesn't get covered
-      if (!container.draggingIntoLayout) {
-        previewOutlines.add(
-          container.getDefaultPreview(),
+    for (DraggableWidgetContainer container in _widgetContainers) {
+      if (container.dragging) {
+        draggingWidgets.add(
+          Positioned(
+            left: container.draggablePositionRect.left,
+            top: container.draggablePositionRect.top,
+            child: container.getDraggingWidgetContainer(context),
+          ),
         );
-      } else {
-        DraggableLayoutContainer? layoutContainer = getLayoutAtLocation(
-            container.draggablePositionRect, container.cursorLocation);
 
-        if (layoutContainer == null) {
+        if (!container.draggingIntoLayout) {
           previewOutlines.add(
             container.getDefaultPreview(),
           );
         } else {
-          previewOutlines.add(
-            Positioned(
-              left: layoutContainer.displayRect.left,
-              top: layoutContainer.displayRect.top,
-              width: layoutContainer.displayRect.width,
-              height: layoutContainer.displayRect.height,
-              child: Visibility(
-                visible: container.model?.previewVisible ?? false,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(Globals.cornerRadius),
-                    border: Border.all(color: Colors.yellow, width: 5.0),
+          DraggableLayoutContainer? layoutContainer =
+              getLayoutAtLocation(container.cursorGlobalLocation);
+
+          if (layoutContainer == null) {
+            previewOutlines.add(
+              container.getDefaultPreview(),
+            );
+          } else {
+            previewOutlines.add(
+              Positioned(
+                left: layoutContainer.displayRect.left,
+                top: layoutContainer.displayRect.top,
+                width: layoutContainer.displayRect.width,
+                height: layoutContainer.displayRect.height,
+                child: Visibility(
+                  visible: container.previewVisible,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(Globals.cornerRadius),
+                      border: Border.all(color: Colors.yellow, width: 5.0),
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
+            );
+          }
         }
       }
-    }
 
-    for (DraggableWidgetContainer container in _layoutDraggingContainers) {
-      // Add the widget container above the others
-      draggingWidgets.add(
-        Positioned(
-          left: container.draggablePositionRect.left,
-          top: container.draggablePositionRect.top,
-          child: container.getDraggingWidgetContainer(context),
-        ),
-      );
-
-      // Display the outline so it doesn't get covered
-      previewOutlines.add(
-        container.getDefaultPreview(),
-      );
-    }
-
-    for (DraggableWidgetContainer container in _widgetContainers) {
       dashboardWidgets.add(
         ContextMenuArea(
           builder: (context) => [
@@ -676,7 +708,7 @@ class DashboardGrid extends StatelessWidget {
     if (_containerDraggingIn != null) {
       DraggableWidgetContainer container = _containerDraggingIn!.key;
 
-      draggingInWidgets.add(
+      draggingWidgets.add(
         Positioned(
           left: container.draggablePositionRect.left,
           top: container.draggablePositionRect.top,
@@ -693,16 +725,14 @@ class DashboardGrid extends StatelessWidget {
           container.displayRect.width, container.displayRect.height);
 
       bool validLocation = isValidLocation(previewLocation) ||
-          isValidLayoutLocation(
-              container, previewLocation, container.cursorLocation);
+          isValidLayoutLocation(container.cursorGlobalLocation);
 
       Color borderColor =
           (validLocation) ? Colors.lightGreenAccent.shade400 : Colors.red;
 
-      if (isValidLayoutLocation(
-          container, previewLocation, container.cursorLocation)) {
+      if (isValidLayoutLocation(container.cursorGlobalLocation)) {
         DraggableLayoutContainer layoutContainer =
-            getLayoutAtLocation(previewLocation, container.cursorLocation)!;
+            getLayoutAtLocation(container.cursorGlobalLocation)!;
 
         previewLocation = layoutContainer.displayRect;
 

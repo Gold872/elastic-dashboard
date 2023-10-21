@@ -38,12 +38,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer({
     super.key,
+    required super.dashboardGrid,
     required super.title,
+    required super.initialPosition,
     required this.child,
-    required super.validMoveLocation,
-    super.validLayoutLocation,
     super.enabled = false,
-    super.initialPosition,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -53,8 +52,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer.fromJson({
     super.key,
-    required super.validMoveLocation,
-    super.validLayoutLocation,
+    required super.dashboardGrid,
     required super.jsonData,
     super.enabled = false,
     super.onUpdate,
@@ -288,7 +286,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     child = createChildFromJson(jsonData);
   }
 
-  NT4Widget? createChildFromJson(Map<String, dynamic> jsonData) {
+  NT4Widget createChildFromJson(Map<String, dynamic> jsonData) {
     switch (jsonData['type']) {
       case 'Boolean Box':
         return BooleanBox.fromJson(
@@ -449,7 +447,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
-      opacity: (model?.previewVisible ?? false) ? 0.25 : 1.00,
+      opacity: (previewVisible) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
         child: AbsorbPointer(

@@ -12,7 +12,6 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
@@ -75,8 +74,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ]);
 
       grids.addAll([
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
       ]);
     }
 
@@ -134,7 +139,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         if (!tabNamesList.contains(tabName)) {
           tabData.add(TabData(name: tabName));
-          grids.add(DashboardGrid(key: GlobalKey(), jsonData: const {}));
+          grids.add(DashboardGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ));
 
           tabNamesList.add(tabName);
         }
