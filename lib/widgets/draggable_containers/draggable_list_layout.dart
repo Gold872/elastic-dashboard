@@ -69,7 +69,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                 .map(
                                   (container) => Padding(
                                     key: UniqueKey(),
-                                    padding: const EdgeInsets.only(right: 8.0),
+                                    padding: EdgeInsets.zero,
                                     child: ExpansionTile(
                                       title: Text(container.title ?? ''),
                                       subtitle: Text(
@@ -77,7 +77,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                       controlAffinity:
                                           ListTileControlAffinity.leading,
                                       trailing: IconButton(
-                                          icon: const Icon(Icons.clear),
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          ),
                                           onPressed: () {
                                             setState(() {
                                               children.remove(container);
@@ -88,6 +91,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                               refresh();
                                             });
                                           }),
+                                      tilePadding:
+                                          const EdgeInsets.only(right: 40.0),
                                       childrenPadding: const EdgeInsets.only(
                                         left: 16.0,
                                         top: 8.0,
@@ -147,7 +152,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             container.title = value;
 
             container.refresh();
-            
+
             refresh();
           });
         },
