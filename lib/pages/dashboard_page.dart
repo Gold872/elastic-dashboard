@@ -47,6 +47,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences _preferences;
   late final UpdateChecker updateChecker;
 
+  late final FocusNode dashboardFocusNode;
+
   final List<DashboardGrid> grids = [];
 
   final List<TabData> tabData = [];
@@ -61,6 +63,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _preferences = widget.preferences;
     updateChecker = UpdateChecker(currentVersion: widget.version);
+
+    dashboardFocusNode = FocusNode();
 
     windowManager.addListener(this);
     Future(() async => await windowManager.setPreventClose(true));
@@ -187,6 +191,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   @override
   void dispose() async {
+    dashboardFocusNode.dispose();
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -851,7 +856,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           },
         },
         child: Focus(
+          focusNode: dashboardFocusNode,
           autofocus: true,
+          canRequestFocus: true,
+          onFocusChange: (value) {
+            if (!value) {
+              dashboardFocusNode.requestFocus();
+            }
+          },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
