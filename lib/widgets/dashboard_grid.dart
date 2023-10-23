@@ -539,34 +539,83 @@ class DashboardGrid extends StatelessWidget {
 
   void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
     // If the widget is already in the tab, don't add it
-    for (DraggableNT4WidgetContainer container
-        in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
-      String? title = container.title;
-      String? type = container.child?.type;
-      String? topic = container.child?.topic;
+    if (!widgetData['layout']) {
+      for (DraggableNT4WidgetContainer container
+          in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+        String? title = container.title;
+        String? type = container.child?.type;
+        String? topic = container.child?.topic;
 
-      if (title == null || type == null || topic == null) {
-        continue;
+        if (title == null || type == null || topic == null) {
+          continue;
+        }
+
+        if (title == widgetData['title'] &&
+            type == widgetData['type'] &&
+            topic == widgetData['properties']['topic']) {
+          return;
+        }
       }
+    } else {
+      for (DraggableLayoutContainer container
+          in _widgetContainers.whereType<DraggableLayoutContainer>()) {
+        String? title = container.title;
+        String type = container.type;
 
-      if (title == widgetData['title'] &&
-          type == widgetData['type'] &&
-          topic == widgetData['properties']['topic']) {
-        return;
+        if (title == null) {
+          continue;
+        }
+
+        if (title == widgetData['title'] && type == widgetData['type']) {
+          return;
+        }
       }
     }
 
-    _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
-      key: UniqueKey(),
-      dashboardGrid: this,
-      enabled: nt4Connection.isNT4Connected,
-      jsonData: widgetData,
-      onUpdate: _nt4ContainerOnUpdate,
-      onDragBegin: _nt4ContainerOnDragBegin,
-      onDragEnd: _nt4ContainerOnDragEnd,
-      onResizeBegin: _nt4ContainerOnResizeBegin,
-      onResizeEnd: _nt4ContainerOnResizeEnd,
-    ));
+    if (widgetData['layout']) {
+      switch (widgetData['type']) {
+        case 'List Layout':
+          _widgetContainers.add(
+            DraggableListLayout.fromJson(
+              key: UniqueKey(),
+              dashboardGrid: this,
+              enabled: nt4Connection.isNT4Connected,
+              nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
+                return DraggableNT4WidgetContainer.fromJson(
+                  key: UniqueKey(),
+                  dashboardGrid: this,
+                  enabled: nt4Connection.isNT4Connected,
+                  jsonData: jsonData,
+                  onUpdate: _nt4ContainerOnUpdate,
+                  onDragBegin: _nt4ContainerOnDragBegin,
+                  onDragEnd: _nt4ContainerOnDragEnd,
+                  onResizeBegin: _nt4ContainerOnResizeBegin,
+                  onResizeEnd: _nt4ContainerOnResizeEnd,
+                );
+              },
+              jsonData: widgetData,
+              onUpdate: _layoutContainerOnUpdate,
+              onDragBegin: _layoutContainerOnDragBegin,
+              onDragEnd: _layoutContainerOnDragEnd,
+              onResizeBegin: _layoutContainerOnResizeBegin,
+              onResizeEnd: _layoutContainerOnResizeEnd,
+            ),
+          );
+          break;
+      }
+    } else {
+      _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
+        key: UniqueKey(),
+        dashboardGrid: this,
+        enabled: nt4Connection.isNT4Connected,
+        jsonData: widgetData,
+        onUpdate: _nt4ContainerOnUpdate,
+        onDragBegin: _nt4ContainerOnDragBegin,
+        onDragEnd: _nt4ContainerOnDragEnd,
+        onResizeBegin: _nt4ContainerOnResizeBegin,
+        onResizeEnd: _nt4ContainerOnResizeEnd,
+      ));
+    }
 
     refresh();
   }
