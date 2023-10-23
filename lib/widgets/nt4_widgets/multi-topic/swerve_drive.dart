@@ -7,7 +7,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.da
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vector_math/vector_math_64.dart' show radians, degrees;
+import 'package:vector_math/vector_math_64.dart' show radians;
 
 class SwerveDriveWidget extends StatelessWidget with NT4Widget {
   @override
@@ -156,7 +156,7 @@ class SwerveDriveWidget extends StatelessWidget with NT4Widget {
         return LayoutBuilder(builder: (context, constraints) {
           double sideLength = min(constraints.maxWidth, constraints.maxHeight);
           return Transform.rotate(
-            angle: (showRobotRotation) ? radians(-robotAngle - 90) : 0.0,
+            angle: (showRobotRotation) ? radians(-robotAngle) : 0.0,
             child: SizedBox(
               width: sideLength,
               height: sideLength,
@@ -310,14 +310,14 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(frontLeftWheel, radians(-(frontLeftAngle - 90 - 22.5)),
-        radians(-45), false, anglePaint);
+    canvas.drawArc(frontLeftWheel, radians(-(frontLeftAngle + 22.5) - 90),
+        radians(45), false, anglePaint);
 
     // Front left vector arrow
-    if (frontLeftVelocity.abs() >= 0.25) {
+    if (frontLeftVelocity.abs() >= 0.05) {
       double frontLeftAngle = this.frontLeftAngle;
 
-      frontLeftAngle -= 90;
+      frontLeftAngle += 90;
       frontLeftAngle *= -1;
 
       if (frontLeftVelocity < 0) {
@@ -359,14 +359,14 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(frontRightWheel, radians(-(frontRightAngle - 90 - 22.5)),
-        radians(-45), false, anglePaint);
+    canvas.drawArc(frontRightWheel, radians(-(frontRightAngle + 22.5) - 90),
+        radians(45), false, anglePaint);
 
     // Front right vector arrow
-    if (frontRightVelocity.abs() >= 0.25) {
+    if (frontRightVelocity.abs() >= 0.05) {
       double frontRightAngle = this.frontRightAngle;
 
-      frontRightAngle -= 90;
+      frontRightAngle += 90;
       frontRightAngle *= -1;
 
       if (frontRightVelocity < 0) {
@@ -408,14 +408,14 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(backLeftWheel, radians(-(backLeftAngle - 90 - 22.5)),
-        radians(-45), false, anglePaint);
+    canvas.drawArc(backLeftWheel, radians(-(backLeftAngle + 22.5) - 90),
+        radians(45), false, anglePaint);
 
     // Back left vector arrow
-    if (backLeftVelocity.abs() >= 0.25) {
+    if (backLeftVelocity.abs() >= 0.05) {
       double backLeftAngle = this.backLeftAngle;
 
-      backLeftAngle -= 90;
+      backLeftAngle += 90;
       backLeftAngle *= -1;
 
       if (backLeftVelocity < 0) {
@@ -458,14 +458,14 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(backRightWheel, radians(-(backRightAngle - 90 - 22.5)),
-        radians(-45), false, anglePaint);
+    canvas.drawArc(backRightWheel, radians(-(backRightAngle + 22.5) - 90),
+        radians(45), false, anglePaint);
 
     // Back right vector arrow
-    if (backRightVelocity.abs() >= 0.25) {
+    if (backRightVelocity.abs() >= 0.05) {
       double backRightAngle = this.backRightAngle;
 
-      backRightAngle -= 90;
+      backRightAngle += 90;
       backRightAngle *= -1;
 
       if (backRightVelocity < 0) {
