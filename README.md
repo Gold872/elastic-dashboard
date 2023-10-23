@@ -2,11 +2,15 @@
 
 [![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
 
-A simple, modern dashboard for FRC teams.
+A simple and modern dashboard for FRC teams.
 
 Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, and Linux.
 
-_NOTE: Your code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets!_
+_Important Notes/Warnings:_ 
+* _Your code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets._
+    * _WPILib v2023.3.1 fixed a bug in Network Tables where values wouldn't be sent to a client after subscribing topics only. Since the program subscribes topics only to everything, any widget that is built using a sendable will not be possible to add since the program will not be able to retrieve the widget's type. See https://github.com/wpilibsuite/allwpilib/pull/4991 for more info._
+* _When the first stable version of WPILib 2024 is released after kickoff, Elastic will not properly work with any WPILib version from pre-2024._
+    * _Elastic 2024 will be using the RTT Network Tables protocol added in NT4.1 to periodically ping the server to update the program's connection status. The RTT protocol does not exist in NT4, which will make it incompatible with any WPILib version from before 2024._
 
 ## About
 
@@ -22,17 +26,6 @@ Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is 
 
 ## Documentation
 View the online documentation [here](https://github.com/Gold872/elastic-dashboard/wiki)
-
-## Roadmap
-
-Elastic is not complete, there are still more features in the works
-
-High Priority (estimated to be completed by the start of the 2024 season):
-* All widgets from Shuffleboard
-* List layouts
-
-Lower Priority:
-* Custom API to manage dashboard settings from robot program
 
 ## Special Thanks
 
