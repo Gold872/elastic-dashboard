@@ -303,8 +303,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
             child: Container(
               padding: const EdgeInsets.all(8.0),
               constraints: BoxConstraints(
-                minHeight: 96,
-                maxHeight: widget.displayRect.height - 32,
+                minHeight: (Globals.gridSize.toDouble() - 32)
+                    .clamp(0, double.infinity),
+                maxHeight:
+                    (widget.displayRect.height - 24).clamp(96, double.infinity),
               ),
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 45, 45, 45),
