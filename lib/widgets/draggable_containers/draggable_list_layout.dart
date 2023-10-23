@@ -278,8 +278,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
                   widget.draggablePositionRect.left),
               DraggableWidgetContainer.snapToGrid(
                   widget.draggablePositionRect.top),
-              widget.draggablePositionRect.width,
-              widget.draggablePositionRect.height,
+              widget.displayRect.width,
+              widget.displayRect.height,
             );
 
             if (dashboardGrid.isValidLocation(previewLocation) ||
