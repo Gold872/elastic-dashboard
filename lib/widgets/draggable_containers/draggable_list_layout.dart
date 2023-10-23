@@ -47,82 +47,80 @@ class DraggableListLayout extends DraggableLayoutContainer {
       builder: (context) {
         return AlertDialog(
           title: const Text('Edit Properties'),
-          content: SizedBox(
-            width: 353,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...getContainerEditProperties(),
-                  const Divider(),
-                  if (children.isNotEmpty)
-                    Container(
-                      constraints: const BoxConstraints(
-                        maxHeight: 350,
-                      ),
-                      child: ReorderableListView(
-                        header: const Text('Children Order & Properties'),
-                        children: children
-                            .map(
-                              (container) => Padding(
-                                key: UniqueKey(),
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: ExpansionTile(
-                                  title: Text(container.title ?? ''),
-                                  subtitle: Text(
-                                      container.child?.type ?? 'NT4Widget'),
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  trailing: IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () {
-                                        children.remove(container);
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SizedBox(
+                width: 353,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...getContainerEditProperties(),
+                      const Divider(),
+                      if (children.isNotEmpty)
+                        Container(
+                          constraints: const BoxConstraints(
+                            maxHeight: 350,
+                          ),
+                          child: ReorderableListView(
+                            header: const Text('Children Order & Properties'),
+                            children: children
+                                .map(
+                                  (container) => Padding(
+                                    key: UniqueKey(),
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: ExpansionTile(
+                                      title: Text(container.title ?? ''),
+                                      subtitle: Text(
+                                          container.child?.type ?? 'NT4Widget'),
+                                      controlAffinity:
+                                          ListTileControlAffinity.leading,
+                                      trailing: IconButton(
+                                          icon: const Icon(Icons.clear),
+                                          onPressed: () {
+                                            setState(() {
+                                              children.remove(container);
 
-                                        container.unSubscribe();
-                                        container.dispose();
+                                              container.unSubscribe();
+                                              container.dispose();
 
-                                        Future(() async {
-                                          Navigator.of(context).pop();
-                                          showEditProperties(context);
-
-                                          refresh();
-                                        });
-                                      }),
-                                  childrenPadding: const EdgeInsets.only(
-                                    left: 16.0,
-                                    top: 8.0,
-                                    right: 32.0,
-                                    bottom: 8.0,
+                                              refresh();
+                                            });
+                                          }),
+                                      childrenPadding: const EdgeInsets.only(
+                                        left: 16.0,
+                                        top: 8.0,
+                                        right: 32.0,
+                                        bottom: 8.0,
+                                      ),
+                                      expandedCrossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: getChildEditProperties(
+                                          context, container, setState),
+                                    ),
                                   ),
-                                  expandedCrossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: getChildEditProperties(
-                                      context, container),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onReorder: (oldIndex, newIndex) {
-                          if (newIndex > oldIndex) {
-                            newIndex--;
-                          }
-                          var temp = children[newIndex];
-                          children[newIndex] = children[oldIndex];
-                          children[oldIndex] = temp;
+                                )
+                                .toList(),
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+                                if (newIndex > oldIndex) {
+                                  newIndex--;
+                                }
+                                var temp = children[newIndex];
+                                children[newIndex] = children[oldIndex];
+                                children[oldIndex] = temp;
 
-                          Future(() async {
-                            Navigator.of(context).pop();
-                            showEditProperties(context);
-
-                            refresh();
-                          });
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ),
+                                refresh();
+                              });
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           actions: [
             TextButton(
@@ -137,19 +135,21 @@ class DraggableListLayout extends DraggableLayoutContainer {
     );
   }
 
-  List<Widget> getChildEditProperties(
-      BuildContext context, DraggableNT4WidgetContainer container) {
+  List<Widget> getChildEditProperties(BuildContext context,
+      DraggableNT4WidgetContainer container, StateSetter setState) {
     List<Widget> containerEditProperties = [
       // Settings for the widget container
       const Text('Container Settings'),
       const SizedBox(height: 5),
       DialogTextInput(
         onSubmit: (value) {
-          container.title = value;
+          setState(() {
+            container.title = value;
 
-          container.refresh();
-
-          refresh();
+            container.refresh();
+            
+            refresh();
+          });
         },
         label: 'Title',
         initialText: container.title,

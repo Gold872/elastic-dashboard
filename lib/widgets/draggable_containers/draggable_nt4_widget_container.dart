@@ -156,50 +156,52 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     showDialog(
       context: context,
       builder: (context) {
-        List<Widget>? childProperties = child?.getEditProperties(context);
-
         return AlertDialog(
           title: const Text('Edit Properties'),
           content: SizedBox(
             width: 353,
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...getContainerEditProperties(),
-                  const SizedBox(height: 5),
-                  Column(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  List<Widget>? childProperties =
+                      child?.getEditProperties(context);
+                  return Column(
                     mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Center(child: Text('Widget Type')),
-                      DialogDropdownChooser<String>(
-                        choices: child!.getAvailableDisplayTypes(),
-                        initialValue: child!.type,
-                        onSelectionChanged: (String? value) {
-                          Navigator.of(context).pop();
-
-                          changeChildToType(value);
-
-                          showEditProperties(context);
-                        },
+                      ...getContainerEditProperties(),
+                      const SizedBox(height: 5),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(child: Text('Widget Type')),
+                          DialogDropdownChooser<String>(
+                            choices: child!.getAvailableDisplayTypes(),
+                            initialValue: child!.type,
+                            onSelectionChanged: (String? value) {
+                              setState(() {
+                                changeChildToType(value);
+                              });
+                            },
+                          ),
+                        ],
                       ),
+                      const Divider(),
+                      // Settings for the widget inside (only if there are properties)
+                      if (childProperties != null &&
+                          childProperties.isNotEmpty) ...[
+                        Text('${child?.type} Widget Settings'),
+                        const SizedBox(height: 5),
+                        ...childProperties,
+                        const Divider(),
+                      ],
+                      // Settings for the NT4 Connection
+                      ...getNT4EditProperties(),
                     ],
-                  ),
-                  const Divider(),
-                  // Settings for the widget inside (only if there are properties)
-                  if (childProperties != null &&
-                      childProperties.isNotEmpty) ...[
-                    Text('${child?.type} Widget Settings'),
-                    const SizedBox(height: 5),
-                    ...childProperties,
-                    const Divider(),
-                  ],
-                  // Settings for the NT4 Connection
-                  ...getNT4EditProperties(),
-                ],
+                  );
+                },
               ),
             ),
           ),
