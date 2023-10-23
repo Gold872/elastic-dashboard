@@ -5,6 +5,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
@@ -19,6 +20,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribu
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/graph.dart';
@@ -82,11 +84,12 @@ void main() async {
 
     await widgetTester.pump(Duration.zero);
 
-    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(9));
-    expect(find.bySubtype<NT4Widget>(), findsNWidgets(9));
+    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(10));
+    expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(11));
+    expect(find.bySubtype<NT4Widget>(), findsNWidgets(12));
 
     expect(find.bySubtype<TextDisplay>(), findsOneWidget);
-    expect(find.bySubtype<BooleanBox>(), findsOneWidget);
+    expect(find.bySubtype<BooleanBox>(), findsNWidgets(2));
     expect(find.bySubtype<FieldWidget>(), findsOneWidget);
     expect(find.bySubtype<PowerDistribution>(), findsOneWidget);
     expect(find.bySubtype<FMSInfo>(), findsOneWidget);
@@ -94,6 +97,9 @@ void main() async {
     expect(find.bySubtype<CameraStreamWidget>(), findsOneWidget);
     expect(find.bySubtype<MatchTimeWidget>(), findsOneWidget);
     expect(find.bySubtype<PIDControllerWidget>(), findsOneWidget);
+    expect(find.bySubtype<SwerveDriveWidget>(), findsOneWidget);
+
+    expect(find.bySubtype<DraggableListLayout>(), findsOneWidget);
   });
 
   testWidgets('Dashboard grid loading (2nd Tab)', (widgetTester) async {
