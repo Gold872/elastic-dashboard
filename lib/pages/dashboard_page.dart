@@ -8,8 +8,10 @@ import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
@@ -72,8 +74,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ]);
 
       grids.addAll([
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
-        DashboardGrid(key: GlobalKey(), jsonData: const {}),
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
       ]);
     }
 
@@ -131,7 +139,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         if (!tabNamesList.contains(tabName)) {
           tabData.add(TabData(name: tabName));
-          grids.add(DashboardGrid(key: GlobalKey(), jsonData: const {}));
+          grids.add(DashboardGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ));
 
           tabNamesList.add(tabName);
         }
@@ -897,13 +908,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       tabViews: grids,
                     ),
                     AddWidgetDialog(
+                      grid: grids[currentTabIndex],
                       visible: addWidgetDialogVisible,
-                      onDragUpdate: (globalPosition, widget) {
+                      onNT4DragUpdate: (globalPosition, widget) {
                         grids[currentTabIndex]
-                            .addDragInWidget(widget, globalPosition);
+                            .addNT4DragInWidget(widget, globalPosition);
                       },
-                      onDragEnd: (widget) {
-                        grids[currentTabIndex].placeDragInWidget(widget);
+                      onNT4DragEnd: (widget) {
+                        grids[currentTabIndex].placeNT4DragInWidget(widget);
+                      },
+                      onLayoutDragUpdate: (globalPosition, widget) {
+                        grids[currentTabIndex]
+                            .addLayoutDragInWidget(widget, globalPosition);
+                      },
+                      onLayoutDragEnd: (widget) {
+                        grids[currentTabIndex].placeLayoutDragInWidget(widget);
                       },
                       onClose: () {
                         setState(() => addWidgetDialogVisible = false);
@@ -956,17 +975,27 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 }
 
 class AddWidgetDialog extends StatelessWidget {
+  final DashboardGrid grid;
   final bool visible;
-  final Function(Offset globalPosition, WidgetContainer widget)? onDragUpdate;
-  final Function(WidgetContainer widget)? onDragEnd;
+
+  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
+      onNT4DragUpdate;
+  final Function(DraggableNT4WidgetContainer widget)? onNT4DragEnd;
+
+  final Function(Offset globalPosition, DraggableLayoutContainer widget)?
+      onLayoutDragUpdate;
+  final Function(DraggableLayoutContainer widget)? onLayoutDragEnd;
 
   final Function()? onClose;
 
   const AddWidgetDialog({
     super.key,
+    required this.grid,
     required this.visible,
-    this.onDragUpdate,
-    this.onDragEnd,
+    this.onNT4DragUpdate,
+    this.onNT4DragEnd,
+    this.onLayoutDragUpdate,
+    this.onLayoutDragEnd,
     this.onClose,
   });
 
@@ -986,31 +1015,55 @@ class AddWidgetDialog extends StatelessWidget {
           ]),
           child: Card(
             margin: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                const Icon(Icons.drag_handle, color: Colors.grey),
-                const SizedBox(height: 10),
-                Text('Add Widget',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const Divider(),
-                Expanded(
-                  child: NetworkTableTree(
-                    onDragUpdate: onDragUpdate,
-                    onDragEnd: onDragEnd,
+            child: DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  const Icon(Icons.drag_handle, color: Colors.grey),
+                  const SizedBox(height: 10),
+                  Text('Add Widget',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const TabBar(
+                    tabs: [
+                      Tab(text: 'Network Tables'),
+                      Tab(text: 'Layouts'),
+                    ],
                   ),
-                ),
-                Row(
-                  children: [
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () {
-                        onClose?.call();
-                      },
-                      child: const Text('Close'),
+                  const SizedBox(height: 5),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        NetworkTableTree(
+                          onDragUpdate: onNT4DragUpdate,
+                          onDragEnd: onNT4DragEnd,
+                          widgetContainerBuilder: grid.createNT4WidgetContainer,
+                        ),
+                        ListView(
+                          children: [
+                            LayoutDragTile(
+                              title: 'List Layout',
+                              layoutBuilder: () => grid.createListLayout(),
+                              onDragUpdate: onLayoutDragUpdate,
+                              onDragEnd: onLayoutDragEnd,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  Row(
+                    children: [
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () {
+                          onClose?.call();
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

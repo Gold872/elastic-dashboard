@@ -68,7 +68,9 @@ class NT4Connection {
     onDisconnectedListeners.add(callback);
   }
 
-  Future<T?>? subscribeAndRetrieveData<T>(String topic, [period = 0.1]) async {
+  Future<T?>? subscribeAndRetrieveData<T>(String topic,
+      {period = 0.1,
+      timeout = const Duration(seconds: 2, milliseconds: 500)}) async {
     NT4Subscription subscription = subscribe(topic, period);
 
     T? value;
@@ -76,7 +78,7 @@ class NT4Connection {
       value = await subscription
           .periodicStream()
           .firstWhere((element) => element != null && element is T)
-          .timeout(const Duration(seconds: 2, milliseconds: 500)) as T?;
+          .timeout(timeout) as T?;
     } catch (e) {
       value = null;
     }

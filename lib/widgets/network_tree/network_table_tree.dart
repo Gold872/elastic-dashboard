@@ -3,16 +3,24 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
 class NetworkTableTree extends StatefulWidget {
-  final Function(Offset globalPosition, WidgetContainer widget)? onDragUpdate;
-  final Function(WidgetContainer widget)? onDragEnd;
+  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
+      onDragUpdate;
+  final Function(DraggableNT4WidgetContainer widget)? onDragEnd;
+  final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+      widgetContainerBuilder;
 
-  const NetworkTableTree({super.key, this.onDragUpdate, this.onDragEnd});
+  const NetworkTableTree(
+      {super.key,
+      this.onDragUpdate,
+      this.onDragEnd,
+      this.widgetContainerBuilder});
 
   @override
   State<NetworkTableTree> createState() => _NetworkTableTreeState();
@@ -22,9 +30,13 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   final TreeRow root = TreeRow(topic: '/', rowName: '');
   late final TreeController<TreeRow> treeController;
 
-  late final Function(Offset globalPosition, WidgetContainer widget)?
-      onDragUpdate;
-  late final Function(WidgetContainer widget)? onDragEnd;
+  late final Function(
+          Offset globalPosition, DraggableNT4WidgetContainer widget)?
+      onDragUpdate = widget.onDragUpdate;
+  late final Function(DraggableNT4WidgetContainer widget)? onDragEnd =
+      widget.onDragEnd;
+  late final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+      widgetContainerBuilder = widget.widgetContainerBuilder;
 
   late final Function(NT4Topic topic) onNewTopicAnnounced;
 
@@ -34,9 +46,6 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     treeController = TreeController<TreeRow>(
         roots: root.children, childrenProvider: (node) => node.children);
-
-    onDragUpdate = widget.onDragUpdate;
-    onDragEnd = widget.onDragEnd;
 
     nt4Connection.nt4Client
         .addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
@@ -113,6 +122,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           entry: entry,
           onDragUpdate: onDragUpdate,
           onDragEnd: onDragEnd,
+          widgetContainerBuilder: widgetContainerBuilder,
           onTap: () {
             setState(() => treeController.toggleExpansion(entry.node));
           },
@@ -129,14 +139,18 @@ class TreeTile extends StatelessWidget {
     required this.onTap,
     this.onDragUpdate,
     this.onDragEnd,
+    this.widgetContainerBuilder,
   });
 
   final TreeEntry<TreeRow> entry;
   final VoidCallback onTap;
-  final Function(Offset globalPosition, WidgetContainer widget)? onDragUpdate;
-  final Function(WidgetContainer widget)? onDragEnd;
+  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
+      onDragUpdate;
+  final Function(DraggableNT4WidgetContainer widget)? onDragEnd;
+  final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+      widgetContainerBuilder;
 
-  WidgetContainer? draggingWidget;
+  DraggableNT4WidgetContainer? draggingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -156,17 +170,24 @@ class TreeTile extends StatelessWidget {
                 return;
               }
 
-              draggingWidget = await entry.node.toWidgetContainer();
+              draggingWidget = widgetContainerBuilder
+                  ?.call(await entry.node.toWidgetContainer());
             },
             onPanUpdate: (details) {
               if (draggingWidget == null) {
                 return;
               }
 
-              onDragUpdate?.call(
-                  details.globalPosition -
-                      Offset(draggingWidget!.width, draggingWidget!.height) / 2,
-                  draggingWidget!);
+              draggingWidget!.cursorGlobalLocation = details.globalPosition;
+
+              Offset position = details.globalPosition -
+                  Offset(
+                        draggingWidget!.displayRect.width,
+                        draggingWidget!.displayRect.height,
+                      ) /
+                      2;
+
+              onDragUpdate?.call(position, draggingWidget!);
             },
             onPanEnd: (details) {
               if (draggingWidget == null) {

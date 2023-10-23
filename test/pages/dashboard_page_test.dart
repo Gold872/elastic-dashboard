@@ -8,6 +8,7 @@ import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
@@ -175,13 +176,15 @@ void main() {
     expect(testValueTile, findsOneWidget);
     expect(find.widgetWithText(TreeTile, 'Test Value 2'), findsOneWidget);
 
-    await widgetTester.drag(testValueTile, const Offset(100, 100));
+    await widgetTester.drag(testValueTile, const Offset(100, 100),
+        kind: PointerDeviceKind.mouse);
     await widgetTester.pumpAndSettle();
 
     expect(testValueContainer, findsNothing);
 
-    await widgetTester.drag(testValueTile, const Offset(300, -150));
-    await widgetTester.pumpAndSettle(const Duration(seconds: 5));
+    await widgetTester.drag(testValueTile, const Offset(300, -150),
+        kind: PointerDeviceKind.mouse);
+    await widgetTester.pumpAndSettle();
 
     expect(testValueContainer, findsOneWidget);
 
@@ -221,11 +224,27 @@ void main() {
 
     when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))
-        .thenAnswer((realInvocation) => Future.value([1.0, 1.0]));
+        .thenAnswer((realInvocation) => Future.value([2.0, 0.0]));
 
     when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Size'))
         .thenAnswer((realInvocation) => Future.value([2.0, 2.0]));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/Position'))
+        .thenAnswer((realInvocation) => Future.value([0.0, 0.0]));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/Size'))
+        .thenAnswer((realInvocation) => Future.value([2.0, 3.0]));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<String?>(
+            '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/PreferredComponent'))
+        .thenAnswer((realInvocation) => Future.value('List Layout'));
+
+    when(mockNT4Connection.subscribeAndRetrieveData<String?>(
+            '/Shuffleboard/Test-Tab/Shuffleboard Test Layout/.type'))
+        .thenAnswer((realInvocation) => Future.value('ShuffleboardLayout'));
 
     NT4Connection.instance = mockNT4Connection;
 
@@ -258,6 +277,30 @@ void main() {
           type: NT4TypeStr.kInt,
           properties: {},
         ));
+
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/Position',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/Size',
+          type: NT4TypeStr.kFloat32Arr,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name:
+              '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Layout/PreferredComponent',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ));
+        callback.call(NT4Topic(
+          name: '/Shuffleboard/Test-Tab/Shuffleboard Test Layout',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ));
       }
 
       // Gives enough time for the widgets to be placed automatically
@@ -271,6 +314,12 @@ void main() {
     expect(
         find.widgetWithText(WidgetContainer, 'Shuffleboard Test Number',
             skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.widgetWithText(WidgetContainer, 'Shuffleboard Test Layout',
+            skipOffstage: false),
+        findsOneWidget);
+    expect(find.bySubtype<DraggableListLayout>(skipOffstage: false),
         findsOneWidget);
   });
 

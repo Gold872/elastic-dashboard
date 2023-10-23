@@ -38,11 +38,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer({
     super.key,
+    required super.dashboardGrid,
     required super.title,
+    required super.initialPosition,
     required this.child,
-    required super.validMoveLocation,
     super.enabled = false,
-    super.initialPosition,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -52,7 +52,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer.fromJson({
     super.key,
-    required super.validMoveLocation,
+    required super.dashboardGrid,
     required super.jsonData,
     super.enabled = false,
     super.onUpdate,
@@ -137,11 +137,17 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     refresh();
   }
 
+  @override
   void dispose() {
+    super.dispose();
+
     child?.dispose();
   }
 
+  @override
   void unSubscribe() {
+    super.unSubscribe();
+
     child?.unSubscribe();
   }
 
@@ -161,18 +167,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Settings for the widget container
-                  const Text('Container Settings'),
-                  const SizedBox(height: 5),
-                  DialogTextInput(
-                    onSubmit: (value) {
-                      title = value;
-
-                      refresh();
-                    },
-                    label: 'Title',
-                    initialText: title,
-                  ),
+                  ...getContainerEditProperties(),
                   const SizedBox(height: 5),
                   Column(
                     mainAxisSize: MainAxisSize.min,
@@ -203,44 +198,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                     const Divider(),
                   ],
                   // Settings for the NT4 Connection
-                  const Text('Network Tables Settings (Advanced)'),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      // Topic
-                      Flexible(
-                        child: DialogTextInput(
-                          onSubmit: (value) {
-                            child?.topic = value;
-                            child?.resetSubscription();
-                          },
-                          label: 'Topic',
-                          initialText: child?.topic,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      // Period
-                      Flexible(
-                        child: DialogTextInput(
-                          onSubmit: (value) {
-                            double? newPeriod = double.tryParse(value);
-                            if (newPeriod == null) {
-                              return;
-                            }
-
-                            child?.period = newPeriod;
-                            child?.resetSubscription();
-                          },
-                          formatter: FilteringTextInputFormatter.allow(
-                              RegExp(r"[0-9.]")),
-                          label: 'Period',
-                          initialText: child!.period.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ...getNT4EditProperties(),
                 ],
               ),
             ),
@@ -259,6 +217,48 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     );
   }
 
+  List<Widget> getNT4EditProperties() {
+    return [
+      const Text('Network Tables Settings (Advanced)'),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Topic
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                child?.topic = value;
+                child?.resetSubscription();
+              },
+              label: 'Topic',
+              initialText: child?.topic,
+            ),
+          ),
+          const SizedBox(width: 5),
+          // Period
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newPeriod = double.tryParse(value);
+                if (newPeriod == null) {
+                  return;
+                }
+
+                child!.period = newPeriod;
+                child!.resetSubscription();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Period',
+              initialText: child!.period.toString(),
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
   @override
   Map<String, dynamic> toJson() {
     return {
@@ -275,7 +275,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     child = createChildFromJson(jsonData);
   }
 
-  NT4Widget? createChildFromJson(Map<String, dynamic> jsonData) {
+  NT4Widget createChildFromJson(Map<String, dynamic> jsonData) {
     switch (jsonData['type']) {
       case 'Boolean Box':
         return BooleanBox.fromJson(
@@ -420,6 +420,37 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
+    return WidgetContainer(
+      title: title,
+      width: draggablePositionRect.width,
+      height: draggablePositionRect.height,
+      opacity: 0.80,
+      child: child,
+    );
+  }
+
+  @override
+  WidgetContainer getWidgetContainer(BuildContext context) {
+    return WidgetContainer(
+      title: title,
+      width: displayRect.width,
+      height: displayRect.height,
+      opacity: (previewVisible) ? 0.25 : 1.00,
+      child: Opacity(
+        opacity: (enabled) ? 1.00 : 0.50,
+        child: AbsorbPointer(
+          absorbing: !enabled,
+          child: ChangeNotifierProvider(
+            create: (context) => NT4WidgetNotifier(),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
 
@@ -428,22 +459,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         Positioned(
           left: displayRect.left,
           top: displayRect.top,
-          child: WidgetContainer(
-            title: title,
-            width: displayRect.width,
-            height: displayRect.height,
-            opacity: (model!.previewVisible) ? 0.25 : 1.00,
-            child: Opacity(
-              opacity: (enabled) ? 1.00 : 0.50,
-              child: AbsorbPointer(
-                absorbing: !enabled,
-                child: ChangeNotifierProvider(
-                  create: (context) => NT4WidgetNotifier(),
-                  child: child,
-                ),
-              ),
-            ),
-          ),
+          child: getWidgetContainer(context),
         ),
         ...super.getStackChildren(model!),
       ],

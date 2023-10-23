@@ -1,6 +1,8 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 
@@ -48,99 +50,207 @@ class ShuffleboardNTListener {
       createRows(topic);
 
       if (topic.name.contains(metadataTable)) {
-        Future(() async => _handleMetadata(topic));
+        Future(() async => _metadataChanged(topic));
       }
 
       if (!topic.name.contains(metadataTable) &&
           !topic.name.contains('$shuffleboardTableRoot/.recording') &&
           !topic.name.contains(RegExp(
               '${r'\'}$shuffleboardTableRoot${r'\/([^\/]+\/){1}\.type'}'))) {
-        Future(() async => _handleWidgetTopicAnnounced(topic));
+        Future(() async => _topicAnnounced(topic));
       }
     });
   }
 
-  Future<void> _handleMetadata(NT4Topic topic) async {
-    List<String> tables = topic.name.substring(1).split('/');
+  Future<void> _metadataChanged(NT4Topic topic) async {
+    String name = topic.name;
 
-    if (tables.length < 5) {
+    List<String> metaHierarchy = getHierarchy(name);
+
+    if (metaHierarchy.length < 5) {
       return;
     }
 
-    String tabName = tables[2];
-    String widgetName = tables[3];
-    String property = tables[4];
+    List<String> realHierarchy = getHierarchy(_realPath(name));
 
-    String jsonTopic = '$tabName/$widgetName';
+    // Properties
+    if (name.contains('/Properties')) {
+      String propertyTopic = metaHierarchy[metaHierarchy.length - 1];
 
-    currentJsonData.putIfAbsent(jsonTopic, () => {});
+      Object? subProperty =
+          await nt4Connection.subscribeAndRetrieveData(propertyTopic);
 
-    switch (property) {
-      case 'Size':
-        List<Object?> rawSize =
-            await nt4Connection.subscribeAndRetrieveData(topic.name) ?? [];
+      if (subProperty == null) {
+        return;
+      }
 
-        List<double> size = rawSize.whereType<double>().toList();
+      String real = realHierarchy[realHierarchy.length - 1];
+      List<String> realTopics = real.split('/');
+      bool inLayout = real.split('/').length > 6;
 
-        if (size.length != 2) {
-          break;
-        }
+      String tabName = (inLayout)
+          ? realTopics[realTopics.length - 5]
+          : realTopics[realTopics.length - 4];
+      String componentName = (inLayout)
+          ? realTopics[realTopics.length - 4]
+          : realTopics[realTopics.length - 3];
+      String widgetName =
+          (inLayout) ? realTopics[realTopics.length - 3] : componentName;
+      String propertyName = realTopics[realTopics.length - 1];
+      String jsonKey = '$tabName/$componentName';
 
-        currentJsonData[jsonTopic]!['width'] =
-            size[0] * Globals.gridSize.toDouble();
-        currentJsonData[jsonTopic]!['height'] =
-            size[1] * Globals.gridSize.toDouble();
-        break;
-      case 'Position':
-        List<Object?> rawPosition =
-            await nt4Connection.subscribeAndRetrieveData(topic.name) ?? [];
+      if (inLayout) {
+        currentJsonData[jsonKey]!['layout'] = true;
 
-        List<double> position = rawPosition.whereType<double>().toList();
+        currentJsonData[jsonKey]!
+            .putIfAbsent('children', () => <Map<String, dynamic>>[]);
 
-        if (position.length != 2) {
-          break;
-        }
+        Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
-        currentJsonData[jsonTopic]!['x'] = position[0] * Globals.gridSize;
-        currentJsonData[jsonTopic]!['y'] = position[1] * Globals.gridSize;
-        break;
-      case 'PreferredComponent':
-        String? component =
-            await nt4Connection.subscribeAndRetrieveData(topic.name);
+        child.putIfAbsent('properties', () => <String, dynamic>{});
+        child['properties']!.putIfAbsent(propertyName, () => subProperty);
+      } else {
+        currentJsonData[jsonKey]!.putIfAbsent('layout', () => false);
 
-        if (component == null) {
-          break;
-        }
+        currentJsonData[jsonKey]!.putIfAbsent('title', () => widgetName);
 
-        currentJsonData[jsonTopic]!['type'] = component;
-        break;
-      case 'Properties':
-        String subPropertyName = tables[5];
-        Object? subProperty =
-            await nt4Connection.subscribeAndRetrieveData(topic.name);
-
-        if (subProperty == null) {
-          break;
-        }
-
-        currentJsonData[jsonTopic]!
+        currentJsonData[jsonKey]!
             .putIfAbsent('properties', () => <String, dynamic>{});
+        currentJsonData[jsonKey]!['properties']
+            .putIfAbsent(propertyName, () => subProperty);
+      }
 
-        currentJsonData[jsonTopic]!['properties'][subPropertyName] =
-            subProperty;
-        break;
+      return;
+    }
+
+    String real = realHierarchy[realHierarchy.length - 2];
+    List<String> realTopics = real.split('/');
+    bool inLayout = real.split('/').length > 4;
+
+    String tabName = (inLayout)
+        ? realTopics[realTopics.length - 3]
+        : realTopics[realTopics.length - 2];
+    String componentName = (inLayout)
+        ? realTopics[realTopics.length - 2]
+        : realTopics[realTopics.length - 1];
+    String widgetName =
+        (inLayout) ? realTopics[realTopics.length - 1] : componentName;
+    String jsonKey = '$tabName/$componentName';
+
+    currentJsonData.putIfAbsent(jsonKey, () => <String, dynamic>{});
+
+    if (inLayout) {
+      currentJsonData[jsonKey]!['layout'] = true;
+
+      currentJsonData[jsonKey]!
+          .putIfAbsent('children', () => <Map<String, dynamic>>[]);
+
+      _createOrGetChild(jsonKey, widgetName);
+    } else {
+      currentJsonData[jsonKey]!.putIfAbsent('layout', () => false);
+
+      currentJsonData[jsonKey]!.putIfAbsent('title', () => widgetName);
+    }
+
+    // Type
+    if (name.endsWith('/PreferredComponent')) {
+      String componentTopic = metaHierarchy[metaHierarchy.length - 1];
+
+      String? type =
+          await nt4Connection.subscribeAndRetrieveData(componentTopic);
+
+      if (type == null) {
+        return;
+      }
+
+      if (inLayout) {
+        Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
+
+        child.putIfAbsent('type', () => type);
+      } else {
+        currentJsonData[jsonKey]!.putIfAbsent('type', () => type);
+      }
+    }
+
+    // Size
+    if (name.endsWith('/Size')) {
+      String sizeTopic = metaHierarchy[metaHierarchy.length - 1];
+
+      List<Object?> sizeRaw =
+          await nt4Connection.subscribeAndRetrieveData(sizeTopic) ?? [];
+      List<double> size = sizeRaw.whereType<double>().toList();
+
+      if (size.length < 2) {
+        return;
+      }
+
+      if (inLayout) {
+        Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
+
+        child.putIfAbsent('width', () => size[0] * Globals.gridSize);
+        child.putIfAbsent('height', () => size[1] * Globals.gridSize);
+      } else {
+        currentJsonData[jsonKey]!
+            .putIfAbsent('width', () => size[0] * Globals.gridSize);
+        currentJsonData[jsonKey]!
+            .putIfAbsent('height', () => size[1] * Globals.gridSize);
+      }
+    }
+
+    // Position
+    if (name.endsWith('/Position')) {
+      String positionTopic = metaHierarchy[metaHierarchy.length - 1];
+
+      List<Object?> positionRaw =
+          await nt4Connection.subscribeAndRetrieveData(positionTopic) ?? [];
+      List<double> position = positionRaw.whereType<double>().toList();
+
+      if (position.length < 2) {
+        return;
+      }
+
+      if (inLayout) {
+        Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
+
+        child.putIfAbsent('x', () => position[0] * Globals.gridSize);
+        child.putIfAbsent('y', () => position[1] * Globals.gridSize);
+      } else {
+        currentJsonData[jsonKey]!
+            .putIfAbsent('x', () => position[0] * Globals.gridSize);
+        currentJsonData[jsonKey]!
+            .putIfAbsent('y', () => position[1] * Globals.gridSize);
+      }
     }
   }
 
-  void _handleWidgetTopicAnnounced(NT4Topic topic) async {
-    List<String> tables = topic.name.substring(1).split('/');
+  Map<String, dynamic> _createOrGetChild(String jsonKey, String title) {
+    List<Map<String, dynamic>> children = currentJsonData[jsonKey]!['children'];
 
-    if (tables.length < 3) {
+    return children.firstWhere(
+      (element) => element.containsKey('title') && element['title'] == title,
+      orElse: () {
+        final newMap = <String, dynamic>{'title': title};
+        children.add(newMap);
+
+        return newMap;
+      },
+    );
+  }
+
+  Future<void> _topicAnnounced(NT4Topic topic) async {
+    String name = topic.name;
+
+    List<String> hierarchy = getHierarchy(name);
+    List<String> tables = name.substring(1).split('/');
+
+    if (hierarchy.length < 3) {
       return;
     }
 
     String tabName = tables[1];
-    String widgetName = tables[2];
+    String componentName = tables[2];
+
+    String jsonKey = '$tabName/$componentName';
 
     if (!shuffleboardTreeRoot.hasRow(shuffleboardTableRoot.substring(1))) {
       return;
@@ -153,32 +263,55 @@ class ShuffleboardNTListener {
     }
     TreeRow tabRow = shuffleboardRootRow.getRow(tabName);
 
-    if (!tabRow.hasRow(widgetName)) {
+    if (!tabRow.hasRow(componentName)) {
       return;
     }
-    TreeRow widgetRow = tabRow.getRow(widgetName);
+    TreeRow widgetRow = tabRow.getRow(componentName);
 
     bool isCameraStream = topic.name.endsWith('/.ShuffleboardURI');
 
+    if (widgetRow.hasRow('.type')) {
+      String typeTopic = widgetRow.getRow('.type').topic;
+
+      String? type = await nt4Connection.subscribeAndRetrieveData(typeTopic,
+          timeout: const Duration(seconds: 3));
+
+      if (type == null) {
+        return;
+      }
+
+      if (type == 'ShuffleboardLayout') {
+        currentJsonData[jsonKey]!['layout'] = true;
+      }
+    }
+
+    // Prevents multi-topic widgets from being published twice
     // If there's a topic like .controllable that gets published before the
     // type topic, don't delay everything else from being processed
     if (widgetRow.children.isNotEmpty &&
-        !topic.name.endsWith('/.type') &&
+        !name.endsWith('/.type') &&
         !isCameraStream) {
       return;
     }
 
+    bool isLayout = currentJsonData[jsonKey]!['layout'];
+
+    if (isLayout) {
+      handleLayoutTopicAnnounce(topic, widgetRow);
+      return;
+    }
+
+    WidgetContainer? widgetContainer;
     NT4Widget? widget;
 
     if (!isCameraStream) {
-      widget = await widgetRow.getPrimaryWidget();
+      widgetContainer = await widgetRow.toWidgetContainer();
+      widget = tryCast(widgetContainer?.child);
 
-      if (widget == null) {
+      if (widgetContainer == null || widget == null) {
         return;
       }
     }
-
-    String jsonTopic = '$tabName/$widgetName';
 
     if (isCameraStream) {
       String? cameraStream =
@@ -190,44 +323,163 @@ class ShuffleboardNTListener {
 
       String cameraName = cameraStream.substring(16);
 
-      currentJsonData.putIfAbsent(jsonTopic, () => {});
-      currentJsonData[jsonTopic]!
+      currentJsonData.putIfAbsent(jsonKey, () => {});
+      currentJsonData[jsonKey]!
           .putIfAbsent('properties', () => <String, dynamic>{});
-      currentJsonData[jsonTopic]!['properties']['topic'] =
+      currentJsonData[jsonKey]!['properties']['topic'] =
           '/CameraPublisher/$cameraName';
     }
 
     await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
-      currentJsonData.putIfAbsent(jsonTopic, () => {});
+      currentJsonData.putIfAbsent(jsonKey, () => {});
 
-      currentJsonData[jsonTopic]!.putIfAbsent('title', () => widgetName);
-      currentJsonData[jsonTopic]!.putIfAbsent('x', () => 0.0);
-      currentJsonData[jsonTopic]!.putIfAbsent('y', () => 0.0);
-      currentJsonData[jsonTopic]!
-          .putIfAbsent('width', () => Globals.gridSize.toDouble());
-      currentJsonData[jsonTopic]!
-          .putIfAbsent('height', () => Globals.gridSize.toDouble());
-      currentJsonData[jsonTopic]!.putIfAbsent('tab', () => tabName);
-      currentJsonData[jsonTopic]!.putIfAbsent(
+      currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
+      currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
+      currentJsonData[jsonKey]!.putIfAbsent('y', () => 0.0);
+      currentJsonData[jsonKey]!.putIfAbsent(
+          'width',
+          () => (!isCameraStream)
+              ? widgetContainer!.width
+              : Globals.gridSize * 2);
+      currentJsonData[jsonKey]!.putIfAbsent(
+          'height',
+          () => (!isCameraStream)
+              ? widgetContainer!.height
+              : Globals.gridSize * 2);
+      currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
+      currentJsonData[jsonKey]!.putIfAbsent(
           'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
-      currentJsonData[jsonTopic]!
+      currentJsonData[jsonKey]!
           .putIfAbsent('properties', () => <String, dynamic>{});
-      currentJsonData[jsonTopic]!['properties'].putIfAbsent(
-          'topic', () => '$shuffleboardTableRoot/$tabName/$widgetName');
-      currentJsonData[jsonTopic]!['properties']
+      currentJsonData[jsonKey]!['properties']
+          .putIfAbsent('topic', () => widgetRow.topic);
+      currentJsonData[jsonKey]!['properties']
           .putIfAbsent('period', () => Globals.defaultPeriod);
 
-      onWidgetAdded?.call(currentJsonData[jsonTopic]!);
+      onWidgetAdded?.call(currentJsonData[jsonKey]!);
 
       widget?.unSubscribe();
       widget?.dispose();
+    });
+  }
 
-      // currentJsonData[jsonTopic]!.clear();
+  Future<void> handleLayoutTopicAnnounce(
+      NT4Topic topic, TreeRow widgetRow) async {
+    String name = topic.name;
+
+    List<String> tables = name.substring(1).split('/');
+
+    String tabName = tables[1];
+    String componentName = tables[2];
+
+    String jsonKey = '$tabName/$componentName';
+
+    await Future.delayed(const Duration(seconds: 2, milliseconds: 750),
+        () async {
+      currentJsonData.putIfAbsent(jsonKey, () => {});
+
+      currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
+      currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
+      currentJsonData[jsonKey]!.putIfAbsent('y', () => 0.0);
+      currentJsonData[jsonKey]!
+          .putIfAbsent('width', () => Globals.gridSize.toDouble());
+      currentJsonData[jsonKey]!
+          .putIfAbsent('height', () => Globals.gridSize.toDouble());
+      currentJsonData[jsonKey]!.putIfAbsent('type', () => 'List Layout');
+      currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
+      currentJsonData[jsonKey]!
+          .putIfAbsent('children', () => <Map<String, dynamic>>[]);
+
+      Iterable<String> childrenNames = widgetRow.children
+          .where((element) => !element.rowName.startsWith('.'))
+          .map((e) => e.rowName);
+
+      for (String childName in childrenNames) {
+        _createOrGetChild(jsonKey, childName);
+      }
+
+      for (Map<String, dynamic> child
+          in currentJsonData[jsonKey]!['children']) {
+        child.putIfAbsent('properties', () => <String, dynamic>{});
+
+        if (!widgetRow.hasRow(child['title'])) {
+          continue;
+        }
+        TreeRow childRow = widgetRow.getRow(child['title']);
+
+        WidgetContainer? widgetContainer = await childRow.toWidgetContainer();
+        NT4Widget? widget = tryCast(widgetContainer?.child);
+
+        bool isCameraStream = childRow.hasRow('.ShuffleboardURI');
+
+        if (!isCameraStream && (widget == null || widgetContainer == null)) {
+          continue;
+        }
+
+        if (isCameraStream) {
+          String? cameraStream = await nt4Connection.subscribeAndRetrieveData(
+              childRow.getRow('.ShuffleboardURI').topic);
+
+          if (cameraStream == null) {
+            continue;
+          }
+
+          String cameraName = cameraStream.substring(16);
+
+          child['properties']['topic'] = '/CameraPublisher/$cameraName';
+        }
+
+        child.putIfAbsent(
+            'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
+        child.putIfAbsent('x', () => 0.0);
+        child.putIfAbsent('y', () => 0.0);
+        child.putIfAbsent(
+            'width',
+            () => (!isCameraStream)
+                ? widgetContainer!.width
+                : Globals.gridSize * 2);
+        child.putIfAbsent(
+            'height',
+            () => (!isCameraStream)
+                ? widgetContainer!.height
+                : Globals.gridSize * 2);
+
+        child['properties']!.putIfAbsent('topic', () => childRow.topic);
+        child['properties']!.putIfAbsent('period', () => Globals.defaultPeriod);
+
+        widget?.unSubscribe();
+        widget?.dispose();
+      }
+
+      onWidgetAdded?.call(currentJsonData[jsonKey]!);
     });
   }
 
   void _handleTabChange(String newTab) {
     onTabChanged?.call(newTab);
+  }
+
+  String _realPath(String path) {
+    return path.replaceFirst('/Shuffleboard/.metadata/', '/Shuffleboard/');
+  }
+
+  List<String> getHierarchy(String path) {
+    final String normal = path;
+    List<String> hierarchy = [];
+    if (normal.length == 1) {
+      hierarchy.add(normal);
+      return hierarchy;
+    }
+
+    for (int i = 1;; i = normal.indexOf('/', i + 1)) {
+      if (i == -1) {
+        hierarchy.add(normal);
+        break;
+      } else {
+        hierarchy.add(normal.substring(0, i));
+      }
+    }
+    return hierarchy;
   }
 
   void createRows(NT4Topic nt4Topic) {
