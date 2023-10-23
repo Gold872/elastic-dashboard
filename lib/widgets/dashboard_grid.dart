@@ -516,8 +516,8 @@ class DashboardGrid extends StatelessWidget {
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
-        Globals.gridSize.toDouble(),
-        Globals.gridSize.toDouble(),
+        Globals.gridSize.toDouble() * 2,
+        Globals.gridSize.toDouble() * 2,
       ),
       enabled: nt4Connection.isNT4Connected,
       onUpdate: _layoutContainerOnUpdate,
