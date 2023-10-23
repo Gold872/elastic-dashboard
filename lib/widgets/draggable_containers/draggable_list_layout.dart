@@ -243,7 +243,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     refresh();
   }
 
-  List<Widget> getListColumn() {
+  List<Widget> _getListColumn() {
     List<Widget> column = [];
 
     for (DraggableNT4WidgetContainer widget in children) {
@@ -294,12 +294,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Future.delayed(Duration.zero, () => model?.setDraggable(true));
           },
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 5.5),
             child: Container(
               padding: const EdgeInsets.all(8.0),
               constraints: BoxConstraints(
                 minHeight: 96,
-                // maxWidth: widget.displayRect.width,
                 maxHeight: widget.displayRect.height - 32,
               ),
               decoration: BoxDecoration(
@@ -308,7 +307,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                 boxShadow: const [
                   BoxShadow(
                     offset: Offset(2, 2),
-                    blurRadius: 10.5,
+                    blurRadius: 8.0,
                     spreadRadius: 0,
                     color: Colors.black,
                   ),
@@ -333,11 +332,6 @@ class DraggableListLayout extends DraggableLayoutContainer {
           ),
         ),
       );
-      column.add(const Divider(height: 5));
-    }
-
-    if (column.isNotEmpty) {
-      column.removeLast();
     }
 
     return column;
@@ -350,12 +344,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
       width: draggablePositionRect.width,
       height: draggablePositionRect.height,
       opacity: 0.80,
-      child: ClipRRect(
-        child: Wrap(
-          children: [
-            ...getListColumn(),
-          ],
-        ),
+      child: Wrap(
+        children: [
+          ..._getListColumn(),
+        ],
       ),
     );
   }
@@ -370,12 +362,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
         child: SingleChildScrollView(
-          child: ClipRRect(
-            child: Wrap(
-              children: [
-                ...getListColumn(),
-              ],
-            ),
+          child: Wrap(
+            children: [
+              ..._getListColumn(),
+            ],
           ),
         ),
       ),
