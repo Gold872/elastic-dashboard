@@ -259,8 +259,12 @@ class DraggableListLayout extends DraggableLayoutContainer {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
-            if (dragging) {
+            if (dragging || resizing) {
               dragging = false;
+              resizing = false;
+              draggablePositionRect = dragStartLocation;
+              previewRect = draggablePositionRect;
+              displayRect = draggablePositionRect;
               refresh();
             }
             Future.delayed(Duration.zero, () => model?.setDraggable(false));
@@ -351,10 +355,12 @@ class DraggableListLayout extends DraggableLayoutContainer {
       width: draggablePositionRect.width,
       height: draggablePositionRect.height,
       opacity: 0.80,
-      child: Wrap(
-        children: [
-          ..._getListColumn(),
-        ],
+      child: SingleChildScrollView(
+        child: Wrap(
+          children: [
+            ..._getListColumn(),
+          ],
+        ),
       ),
     );
   }
