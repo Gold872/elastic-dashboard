@@ -47,8 +47,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences _preferences;
   late final UpdateChecker updateChecker;
 
-  late final FocusNode dashboardFocusNode;
-
   final List<DashboardGrid> grids = [];
 
   final List<TabData> tabData = [];
@@ -63,8 +61,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _preferences = widget.preferences;
     updateChecker = UpdateChecker(currentVersion: widget.version);
-
-    dashboardFocusNode = FocusNode();
 
     windowManager.addListener(this);
     Future(() async => await windowManager.setPreventClose(true));
@@ -191,7 +187,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   @override
   void dispose() async {
-    dashboardFocusNode.dispose();
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -804,21 +799,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onWindowClose: onWindowClose,
         menuBar: menuBar,
       ),
-      body: CallbackShortcuts(
-        bindings: {
+      body: Shortcuts(
+        shortcuts: {
           const SingleActivator(LogicalKeyboardKey.keyO, control: true):
-              importLayout,
+              VoidCallbackIntent(importLayout),
           const SingleActivator(LogicalKeyboardKey.keyS, control: true):
-              saveLayout,
+              VoidCallbackIntent(saveLayout),
           const SingleActivator(LogicalKeyboardKey.keyS,
-              shift: true, control: true): exportLayout,
+              shift: true, control: true): VoidCallbackIntent(exportLayout),
           for (int i = 1; i <= 9; i++)
-            SingleActivator(LogicalKeyboardKey(48 + i), control: true): () {
+            SingleActivator(LogicalKeyboardKey(48 + i), control: true):
+                VoidCallbackIntent(() {
               if (i - 1 < tabData.length) {
                 setState(() => currentTabIndex = i - 1);
               }
-            },
-          const SingleActivator(LogicalKeyboardKey.keyT, control: true): () {
+            }),
+          const SingleActivator(LogicalKeyboardKey.keyT, control: true):
+              VoidCallbackIntent(() {
             String newTabName = 'Tab ${tabData.length + 1}';
             int newTabIndex = tabData.length;
 
@@ -831,8 +828,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             );
 
             setState(() => currentTabIndex = newTabIndex);
-          },
-          const SingleActivator(LogicalKeyboardKey.keyW, control: true): () {
+          }),
+          const SingleActivator(LogicalKeyboardKey.keyW, control: true):
+              VoidCallbackIntent(() {
             if (tabData.length <= 1) {
               return;
             }
@@ -853,17 +851,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 grids.removeAt(oldTabIndex);
               });
             });
-          },
+          }),
         },
         child: Focus(
-          focusNode: dashboardFocusNode,
           autofocus: true,
-          canRequestFocus: true,
-          onFocusChange: (value) {
-            if (!value) {
-              dashboardFocusNode.requestFocus();
-            }
-          },
+          descendantsAreTraversable: false,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
