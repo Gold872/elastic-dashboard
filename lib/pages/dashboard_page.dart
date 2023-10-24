@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -165,7 +166,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       nt4Connection.nt4Client.recallAnnounceListeners();
     });
 
-    Future(() => checkForUpdates(notifyIfLatest: false));
+    Future(() => checkForUpdates(notifyIfLatest: false, notifyIfError: false));
   }
 
   @override
@@ -255,14 +256,36 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
-  void checkForUpdates({bool notifyIfLatest = true}) async {
+  void checkForUpdates(
+      {bool notifyIfLatest = true, bool notifyIfError = true}) async {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     TextTheme textTheme = Theme.of(context).textTheme;
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
-    bool updateAvailable = await updateChecker.isUpdateAvailable();
+    Object? updateAvailable = await updateChecker.isUpdateAvailable();
 
-    if (updateAvailable) {
+    if (updateAvailable is String && notifyIfError) {
+      // ignore: use_build_context_synchronously
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xffFE355C),
+        enableShadow: false,
+        width: 350,
+        height: 100,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        title: Text('Failed to check for updates',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: Text(updateAvailable),
+      ).show(context);
+      return;
+    }
+
+    if (tryCast(updateAvailable) ?? false) {
       // ignore: use_build_context_synchronously
       ElegantNotification(
         autoDismiss: false,

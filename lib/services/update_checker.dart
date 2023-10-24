@@ -7,7 +7,7 @@ class UpdateChecker {
 
   UpdateChecker({required this.currentVersion}) : _github = GitHub();
 
-  Future<bool> isUpdateAvailable() async {
+  Future<Object?> isUpdateAvailable() async {
     try {
       Release latestRelease = await _github.repositories
           .getLatestRelease(RepositorySlug('Gold872', 'elastic-dashboard'));
@@ -15,10 +15,10 @@ class UpdateChecker {
       String? tagName = latestRelease.tagName;
 
       if (tagName == null) {
-        return false;
+        return 'Release tag not found';
       }
       if (!tagName.startsWith('v')) {
-        return false;
+        return 'Invalid version name: \'$tagName\'';
       }
 
       String versionName = tagName.substring(1);
@@ -27,8 +27,8 @@ class UpdateChecker {
       Version latest = Version.parse(versionName);
 
       return current < latest;
-    } catch (_) {
-      return false;
+    } catch (error) {
+      return error.toString();
     }
   }
 }
