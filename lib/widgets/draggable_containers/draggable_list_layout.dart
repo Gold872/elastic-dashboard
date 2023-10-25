@@ -305,12 +305,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 5.5),
             child: Container(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(6.0),
               constraints: BoxConstraints(
-                minHeight: (Globals.gridSize.toDouble() - 32)
-                    .clamp(0, double.infinity),
+                minHeight: 96,
                 maxHeight:
-                    (widget.displayRect.height - 24).clamp(96, double.infinity),
+                    (widget.displayRect.height - 32).clamp(96, double.infinity),
               ),
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 45, 45, 45),
@@ -328,9 +327,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(widget.title ?? ''),
+                    child: Text(widget.title ?? '',
+                        overflow: TextOverflow.ellipsis),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 3.5),
                   Flexible(
                     child: AbsorbPointer(
                       absorbing: !enabled,
@@ -355,12 +355,17 @@ class DraggableListLayout extends DraggableLayoutContainer {
       width: draggablePositionRect.width,
       height: draggablePositionRect.height,
       opacity: 0.80,
-      child: SingleChildScrollView(
-        child: Wrap(
-          children: [
-            ..._getListColumn(),
-          ],
-        ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          SingleChildScrollView(
+            child: Wrap(
+              children: [
+                ..._getListColumn(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -374,12 +379,17 @@ class DraggableListLayout extends DraggableLayoutContainer {
       opacity: (previewVisible) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
-        child: SingleChildScrollView(
-          child: Wrap(
-            children: [
-              ..._getListColumn(),
-            ],
-          ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SingleChildScrollView(
+              child: Wrap(
+                children: [
+                  ..._getListColumn(),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
