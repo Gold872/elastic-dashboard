@@ -121,14 +121,16 @@ class TreeRow {
         return await getTypedWidget('$topic/.type');
       }
 
+      bool isCameraStream = hasRows([
+            'mode',
+            'modes',
+            'source',
+            'streams',
+          ]) &&
+          (hasRow('description') || hasRow('connected'));
+
       // If it's a camera stream
-      if (hasRows([
-        'description',
-        'mode',
-        'modes',
-        'source',
-        'streams',
-      ])) {
+      if (isCameraStream) {
         return CameraStreamWidget(key: UniqueKey(), topic: topic);
       }
 
