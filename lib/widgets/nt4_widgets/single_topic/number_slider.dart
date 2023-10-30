@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class NumberSlider extends StatelessWidget with NT4Widget {
   @override
@@ -134,51 +135,92 @@ class NumberSlider extends StatelessWidget with NT4Widget {
 
         return Column(
           children: [
+            Text(
+              _currentValue.toStringAsFixed(2),
+              style: Theme.of(context).textTheme.bodyLarge,
+              overflow: TextOverflow.ellipsis,
+            ),
             Expanded(
-              child: Text(
-                _currentValue.toStringAsFixed(2),
-                style: Theme.of(context).textTheme.bodyLarge,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Flexible(
-              child: Slider(
-                value: _currentValue,
-                min: minValue,
-                max: maxValue,
-                focusNode: FocusNode(
-                  canRequestFocus: false,
+              child: SfLinearGauge(
+                key: UniqueKey(),
+                minimum: minValue,
+                maximum: maxValue,
+                labelPosition: LinearLabelPosition.inside,
+                tickPosition: LinearElementPosition.cross,
+                interval: divisionSeparation,
+                axisTrackStyle: const LinearAxisTrackStyle(
+                  edgeStyle: LinearEdgeStyle.bothCurve,
                 ),
-                onChanged: (value) {
-                  _currentValue = value;
-                },
-                onChangeEnd: (value) {
-                  bool publishTopic = nt4Topic == null;
+                markerPointers: [
+                  LinearShapePointer(
+                    value: _currentValue,
+                    color: Theme.of(context).colorScheme.primary,
+                    height: 15.0,
+                    width: 15.0,
+                    animationDuration: 0,
+                    shapeType: LinearShapePointerType.circle,
+                    position: LinearElementPosition.cross,
+                    dragBehavior: LinearMarkerDragBehavior.free,
+                    onChanged: (value) {
+                      _currentValue = value;
+                    },
+                    onChangeEnd: (value) {
+                      bool publishTopic = nt4Topic == null;
 
-                  createTopicIfNull();
+                      createTopicIfNull();
 
-                  if (nt4Topic == null) {
-                    return;
-                  }
+                      if (nt4Topic == null) {
+                        return;
+                      }
 
-                  if (publishTopic) {
-                    nt4Connection.nt4Client.publishTopic(nt4Topic!);
-                  }
+                      if (publishTopic) {
+                        nt4Connection.nt4Client.publishTopic(nt4Topic!);
+                      }
 
-                  nt4Connection.updateDataFromTopic(nt4Topic!, value);
+                      nt4Connection.updateDataFromTopic(nt4Topic!, value);
 
-                  _previousValue = value;
-                },
+                      _previousValue = value;
+                    },
+                  ),
+                ],
               ),
+              // child: Slider(
+              //   value: _currentValue,
+              //   min: minValue,
+              //   max: maxValue,
+              //   focusNode: FocusNode(
+              //     canRequestFocus: false,
+              //   ),
+              //   onChanged: (value) {
+              //     _currentValue = value;
+              //   },
+              //   onChangeEnd: (value) {
+              //     bool publishTopic = nt4Topic == null;
+
+              //     createTopicIfNull();
+
+              //     if (nt4Topic == null) {
+              //       return;
+              //     }
+
+              //     if (publishTopic) {
+              //       nt4Connection.nt4Client.publishTopic(nt4Topic!);
+              //     }
+
+              //     nt4Connection.updateDataFromTopic(nt4Topic!, value);
+
+              //     _previousValue = value;
+              //   },
+              // ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                for (int i = 0; i < divisions; i++)
-                  Text((minValue + divisionSeparation * i).toStringAsFixed(2)),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   mainAxisSize: MainAxisSize.max,
+            //   children: [
+            //     for (int i = 0; i < divisions; i++)
+            //       Text((minValue + divisionSeparation * i).toStringAsFixed(2)),
+            //   ],
+            // ),
           ],
         );
       },
