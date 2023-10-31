@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +40,10 @@ void main() async {
 
   await FieldImages.loadFields('assets/fields/');
 
-  await windowManager.setMinimumSize(const Size(1280, 720));
+  FlutterView screenView = PlatformDispatcher.instance.views.first;
+  Size screenSize = screenView.physicalSize * screenView.devicePixelRatio;
+
+  await windowManager.setMinimumSize(screenSize * 0.55);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
 
