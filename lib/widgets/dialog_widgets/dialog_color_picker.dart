@@ -57,7 +57,6 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                           hexInputBar: true,
                           hexInputController: hexInputController,
                           onColorChanged: (Color color) {
-                            widget.onColorPicked.call(color);
                             setState(() {
                               selectedColor = color;
                             });
@@ -96,7 +95,7 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(false);
                         widget.onColorPicked.call(initialColor);
 
                         setState(() {
@@ -107,7 +106,10 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(false);
+                        widget.onColorPicked
+                            .call(selectedColor ?? initialColor);
+
                         setState(() {
                           initialColor = selectedColor ?? initialColor;
                         });
@@ -117,7 +119,16 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                   ],
                 );
               },
-            );
+            ).then((value) {
+              bool dismissed = value ?? true;
+              if (dismissed) {
+                widget.onColorPicked.call(initialColor);
+
+                setState(() {
+                  selectedColor = initialColor;
+                });
+              }
+            });
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: selectedColor ?? initialColor,
