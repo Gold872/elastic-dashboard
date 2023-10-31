@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
@@ -43,13 +44,19 @@ class EditableTabBar extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: const Text('Rename Tab'),
-          content: DialogTextInput(
-            onSubmit: (value) {
-              tabData[index].name = value;
-              onTabRename.call(index, tabData[index]);
-            },
-            initialText: tabData[index].name,
-            label: 'Name',
+          content: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+            ),
+            child: DialogTextInput(
+              onSubmit: (value) {
+                tabData[index].name = value;
+                onTabRename.call(index, tabData[index]);
+              },
+              initialText: tabData[index].name,
+              label: 'Name',
+              formatter: LengthLimitingTextInputFormatter(50),
+            ),
           ),
           actions: [
             TextButton(
