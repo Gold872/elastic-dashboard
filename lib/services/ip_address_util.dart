@@ -7,10 +7,7 @@ class IPAddressUtil {
   }
 
   static String teamNumberToIP(int teamNumber) {
-    String te = (teamNumber ~/ 100).toString();
-    String am = (teamNumber % 100).toString().padLeft(2, '0');
-
-    return '10.$te.$am.2';
+    return 'roboRIO-$teamNumber-FRC.local';
   }
 
   static String getIpFromInt32Value(int value) =>

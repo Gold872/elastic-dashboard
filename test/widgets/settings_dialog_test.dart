@@ -210,7 +210,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(preferences.getBool(PrefKeys.useTeamNumberForIP), true);
-    expect(preferences.getString(PrefKeys.ipAddress), '10.26.01.2');
+    expect(preferences.getString(PrefKeys.ipAddress), 'roboRIO-2601-FRC.local');
 
     await widgetTester.tap(ipSwitch);
 
@@ -218,7 +218,7 @@ void main() {
 
     verify(fakeSettings.changeAutoTeamIP()).called(2);
     expect(preferences.getBool(PrefKeys.useTeamNumberForIP), false);
-    expect(preferences.getString(PrefKeys.ipAddress), '10.26.01.2');
+    expect(preferences.getString(PrefKeys.ipAddress), 'roboRIO-2601-FRC.local');
   });
 
   testWidgets('Change IP address', (widgetTester) async {
