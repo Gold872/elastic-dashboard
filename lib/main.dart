@@ -1,12 +1,13 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -14,7 +15,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
+
+  final String appFolderPath = (await getApplicationSupportDirectory()).path;
+
+  // Prevents data loss if shared_preferences.json gets corrupted
+  // More info and original implementation: https://github.com/flutter/flutter/issues/89211#issuecomment-915096452
+  SharedPreferences preferences;
+  try {
+    preferences = await SharedPreferences.getInstance();
+
+    // Store a copy of user's preferences on the disk
+    await _backupPreferences(appFolderPath);
+  } catch (error) {
+    // Remove broken preferences files and restore previous settings
+    await _restorePreferencesFromBackup(appFolderPath);
+    preferences = await SharedPreferences.getInstance();
+  }
 
   await windowManager.ensureInitialized();
 
@@ -51,6 +67,41 @@ void main() async {
   await windowManager.focus();
 
   runApp(Elastic(version: packageInfo.version, preferences: preferences));
+}
+
+/// Makes a backup copy of the current shared preferences file.
+Future<void> _backupPreferences(String appFolderPath) async {
+  try {
+    final String original = '$appFolderPath\\shared_preferences.json';
+    final String backup = '$appFolderPath\\shared_preferences_backup.json';
+
+    if (await File(backup).exists()) await File(backup).delete(recursive: true);
+    await File(original).copy(backup);
+  } catch (_) {
+    /* Do nothing */
+  }
+}
+
+/// Removes current version of shared_preferences file and restores previous
+/// user settings from a backup file (if it exists).
+Future<void> _restorePreferencesFromBackup(String appFolderPath) async {
+  try {
+    final String original = '$appFolderPath\\shared_preferences.json';
+    final String backup = '$appFolderPath\\shared_preferences_backup.json';
+
+    await File(original).delete(recursive: true);
+
+    if (await File(backup).exists()) {
+      // Check if current backup copy is not broken by looking for letters and "
+      // symbol in it to replace it as an original Settings file
+      final String preferences = await File(backup).readAsString();
+      if (preferences.contains('"') && preferences.contains(RegExp('[A-z]'))) {
+        await File(backup).copy(original);
+      }
+    }
+  } catch (_) {
+    /* Do nothing */
+  }
 }
 
 class Elastic extends StatefulWidget {
