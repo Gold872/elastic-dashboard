@@ -292,7 +292,7 @@ class DraggableWidgetContainer extends StatelessWidget {
             color: (validLocation)
                 ? Colors.white.withOpacity(0.25)
                 : Colors.black.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(25.0),
+            borderRadius: BorderRadius.circular(Globals.cornerRadius),
             border: Border.all(
                 color: (validLocation)
                     ? Colors.lightGreenAccent.shade400
