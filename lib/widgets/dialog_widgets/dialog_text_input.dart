@@ -41,7 +41,7 @@ class DialogTextInput extends StatelessWidget {
         child: TextField(
           enabled: enabled,
           onSubmitted: (value) {
-            if (value.isNotEmpty) {
+            if (value.isNotEmpty || allowEmptySubmission) {
               onSubmit.call(value);
             }
           },
