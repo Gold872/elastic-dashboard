@@ -935,7 +935,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       tabViews: grids,
                     ),
                     AddWidgetDialog(
-                      grid: grids[currentTabIndex],
+                      grid: () => grids[currentTabIndex],
                       visible: addWidgetDialogVisible,
                       onNT4DragUpdate: (globalPosition, widget) {
                         grids[currentTabIndex]
@@ -1002,7 +1002,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 }
 
 class AddWidgetDialog extends StatelessWidget {
-  final DashboardGrid grid;
+  final DashboardGrid Function() grid;
   final bool visible;
 
   final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
@@ -1063,13 +1063,14 @@ class AddWidgetDialog extends StatelessWidget {
                         NetworkTableTree(
                           onDragUpdate: onNT4DragUpdate,
                           onDragEnd: onNT4DragEnd,
-                          widgetContainerBuilder: grid.createNT4WidgetContainer,
+                          widgetContainerBuilder: (widgetContainer) =>
+                              grid().createNT4WidgetContainer(widgetContainer),
                         ),
                         ListView(
                           children: [
                             LayoutDragTile(
                               title: 'List Layout',
-                              layoutBuilder: () => grid.createListLayout(),
+                              layoutBuilder: () => grid().createListLayout(),
                               onDragUpdate: onLayoutDragUpdate,
                               onDragEnd: onLayoutDragEnd,
                             ),
