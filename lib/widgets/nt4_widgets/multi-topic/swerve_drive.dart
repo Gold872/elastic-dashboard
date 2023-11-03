@@ -474,7 +474,7 @@ class SwerveDrivePainter extends CustomPainter {
 
       backRightAngle = radians(backRightAngle);
 
-      double backRightArrowLength = backLeftVelocity.abs() * pixelsPerMPS;
+      double backRightArrowLength = backRightVelocity.abs() * pixelsPerMPS;
       double backRightArrowBase =
           (backRightArrowLength / 3.0).clamp(minArrowBase, maxArrowBase);
 
