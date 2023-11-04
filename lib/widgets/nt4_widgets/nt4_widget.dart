@@ -93,7 +93,7 @@ mixin NT4Widget on StatelessWidget {
     nt4Topic ??= nt4Connection.getTopicFromName(topic);
   }
 
-  void dispose() {}
+  void dispose({bool deleting = false}) {}
 
   void unSubscribe() {
     if (subscription != null) {

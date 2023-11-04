@@ -63,18 +63,20 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
-  void dispose() {
+  void dispose({bool deleting = false}) {
     Future(() async {
       await streamWidget?.cancelSubscription();
 
       httpClient.close();
       clientOpen = false;
 
-      lastDisplayedImage?.evict();
-      streamWidget?.previousImage?.evict();
+      if (deleting) {
+        lastDisplayedImage?.evict();
+        streamWidget?.previousImage?.evict();
+      }
     });
 
-    super.dispose();
+    super.dispose(deleting: deleting);
   }
 
   @override

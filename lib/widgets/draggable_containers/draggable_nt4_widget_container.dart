@@ -130,7 +130,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       return;
     }
 
-    child!.dispose();
+    child!.dispose(deleting: true);
     child!.unSubscribe();
     child = newWidget;
 
@@ -138,10 +138,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void dispose({bool deleting = false}) {
+    super.dispose(deleting: deleting);
 
-    child?.dispose();
+    child?.dispose(deleting: deleting);
   }
 
   @override

@@ -215,6 +215,8 @@ class DashboardGrid extends StatelessWidget {
     widget.previewRect = widget.draggablePositionRect;
     widget.previewVisible = false;
     widget.validLocation = true;
+
+    widget.dispose();
   }
 
   void onWidgetUpdate(DraggableWidgetContainer widget, Rect newRect) {
@@ -282,7 +284,6 @@ class DashboardGrid extends StatelessWidget {
         _widgetContainers.remove(nt4Container);
       }
     }
-
     refresh();
   }
 
@@ -447,11 +448,10 @@ class DashboardGrid extends StatelessWidget {
     } else if (!isValidLocation(previewLocation)) {
       _containerDraggingIn = null;
 
-      if (!fromLayout) {
-        if (widget.child is NT4Widget) {
-          (widget.child as NT4Widget)
-            ..dispose()
-            ..unSubscribe();
+      if (widget.child is NT4Widget) {
+        widget.child?.dispose(deleting: !fromLayout);
+        if (!fromLayout) {
+          widget.child?.unSubscribe();
         }
       }
 
@@ -471,9 +471,7 @@ class DashboardGrid extends StatelessWidget {
 
     _containerDraggingIn = null;
 
-    if (widget.child is NT4Widget) {
-      (widget.child as NT4Widget).dispose();
-    }
+    widget.child?.dispose();
 
     refresh();
   }
@@ -621,7 +619,7 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void removeWidget(DraggableWidgetContainer widget) {
-    widget.dispose();
+    widget.dispose(deleting: true);
     widget.unSubscribe();
     _widgetContainers.remove(widget);
     refresh();
@@ -629,7 +627,7 @@ class DashboardGrid extends StatelessWidget {
 
   void clearWidgets() {
     for (DraggableWidgetContainer container in _widgetContainers) {
-      container.dispose();
+      container.dispose(deleting: true);
       container.unSubscribe();
     }
     _widgetContainers.clear();
@@ -638,7 +636,7 @@ class DashboardGrid extends StatelessWidget {
 
   void onDestroy() {
     for (DraggableWidgetContainer container in _widgetContainers) {
-      container.dispose();
+      container.dispose(deleting: true);
       container.unSubscribe();
     }
     _widgetContainers.clear();

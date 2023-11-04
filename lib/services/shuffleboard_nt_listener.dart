@@ -359,7 +359,7 @@ class ShuffleboardNTListener {
       onWidgetAdded?.call(currentJsonData[jsonKey]!);
 
       widget?.unSubscribe();
-      widget?.dispose();
+      widget?.dispose(deleting: true);
     });
   }
 
@@ -448,7 +448,7 @@ class ShuffleboardNTListener {
         child['properties']!.putIfAbsent('period', () => Globals.defaultPeriod);
 
         widget?.unSubscribe();
-        widget?.dispose();
+        widget?.dispose(deleting: true);
       }
 
       onWidgetAdded?.call(currentJsonData[jsonKey]!);

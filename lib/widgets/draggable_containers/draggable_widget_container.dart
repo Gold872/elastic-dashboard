@@ -176,7 +176,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
 
-  void dispose() {}
+  void dispose({bool deleting = false}) {}
 
   void unSubscribe() {}
 

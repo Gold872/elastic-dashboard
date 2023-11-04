@@ -86,7 +86,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                               children.remove(container);
 
                                               container.unSubscribe();
-                                              container.dispose();
+                                              container.dispose(deleting: true);
 
                                               refresh();
                                             });
@@ -209,11 +209,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void dispose({bool deleting = false}) {
+    super.dispose(deleting: deleting);
 
     for (var child in children) {
-      child.dispose();
+      child.dispose(deleting: deleting);
     }
   }
 

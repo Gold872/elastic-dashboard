@@ -84,10 +84,12 @@ class FieldWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  void dispose({bool deleting = false}) {
+    super.dispose(deleting: deleting);
 
-    field?.dispose();
+    if (deleting) {
+      field?.dispose();
+    }
   }
 
   @override
