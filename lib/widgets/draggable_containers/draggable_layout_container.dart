@@ -18,6 +18,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super();
@@ -31,6 +32,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super.fromJson();

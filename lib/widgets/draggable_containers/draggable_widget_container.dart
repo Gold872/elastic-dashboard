@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 class WidgetContainerModel extends ChangeNotifier {
   bool draggable = true;
+  bool _disposed = false;
 
   void setDraggable(bool draggable) {
     this.draggable = draggable;
@@ -16,6 +17,19 @@ class WidgetContainerModel extends ChangeNotifier {
 
   void refresh() {
     notifyListeners();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
 
@@ -37,6 +51,8 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   late Rect dragStartLocation;
 
+  TransformableBoxController? controller;
+
   bool enabled = false;
   bool dragging = false;
   bool resizing = false;
@@ -48,6 +64,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   Function(dynamic widget)? onDragBegin;
   Function(dynamic widget, Rect releaseRect, {Offset? globalPosition})?
       onDragEnd;
+  Function(dynamic widget)? onDragCancel;
   Function(dynamic widget)? onResizeBegin;
   Function(dynamic widget, Rect releaseRect)? onResizeEnd;
 
@@ -62,6 +79,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.onUpdate,
     this.onDragBegin,
     this.onDragEnd,
+    this.onDragCancel,
     this.onResizeBegin,
     this.onResizeEnd,
   }) {
@@ -78,6 +96,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.onUpdate,
     this.onDragBegin,
     this.onDragEnd,
+    this.onDragCancel,
     this.onResizeBegin,
     this.onResizeEnd,
   }) {
@@ -210,69 +229,98 @@ class DraggableWidgetContainer extends StatelessWidget {
     return [
       TransformableBox(
         handleAlignment: HandleAlignment.inside,
+        rect: draggablePositionRect,
+        clampingRect:
+            const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
         constraints: BoxConstraints(
           minWidth: Globals.gridSize.toDouble(),
           minHeight: Globals.gridSize.toDouble(),
         ),
-        clampingRect:
-            const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
-        rect: draggablePositionRect,
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
         visibleHandles: const {},
         draggable: model.draggable,
+        resizable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Container();
+          return Builder(builder: (context) {
+            controller = TransformableBox.controllerOf(context);
+
+            return Container();
+          });
         },
         onDragStart: (event) {
           dragging = true;
           dragStartLocation = displayRect;
           onDragBegin?.call(this);
+
+          controller?.setRect(draggablePositionRect);
+          refresh();
         },
         onResizeStart: (handle, event) {
           dragging = true;
           resizing = true;
           dragStartLocation = displayRect;
           onResizeBegin?.call(this);
+
+          controller?.setRect(draggablePositionRect);
+          refresh();
         },
         onChanged: (result, event) {
+          if (!dragging && !resizing) {
+            onDragCancel?.call(this);
+
+            controller?.setRect(draggablePositionRect);
+            refresh();
+            return;
+          }
+
           cursorGlobalLocation = event.globalPosition;
 
           onUpdate?.call(this, result.rect);
 
+          controller?.setRect(draggablePositionRect);
           refresh();
         },
         onDragEnd: (event) {
+          if (!dragging) {
+            return;
+          }
           dragging = false;
 
           onDragEnd?.call(this, draggablePositionRect,
               globalPosition: cursorGlobalLocation);
 
+          controller?.setRect(draggablePositionRect);
           refresh();
         },
         onDragCancel: () {
           dragging = false;
 
-          onDragEnd?.call(this, draggablePositionRect,
-              globalPosition: cursorGlobalLocation);
+          onDragCancel?.call(this);
 
+          controller?.setRect(draggablePositionRect);
           refresh();
         },
         onResizeEnd: (handle, event) {
+          if (!dragging && !resizing) {
+            return;
+          }
           dragging = false;
           resizing = false;
 
           onResizeEnd?.call(this, draggablePositionRect);
 
+          controller?.setRect(draggablePositionRect);
           refresh();
         },
         onResizeCancel: (handle) {
           dragging = false;
           resizing = false;
 
-          onResizeEnd?.call(this, draggablePositionRect);
+          onDragCancel?.call(this);
 
+          controller?.setRect(draggablePositionRect);
           refresh();
         },
       ),

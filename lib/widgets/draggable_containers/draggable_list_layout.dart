@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
@@ -23,6 +24,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super();
@@ -36,6 +38,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super.fromJson();
@@ -259,15 +262,15 @@ class DraggableListLayout extends DraggableLayoutContainer {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
-            if (dragging || resizing) {
-              dragging = false;
-              resizing = false;
-              draggablePositionRect = dragStartLocation;
-              previewRect = draggablePositionRect;
-              displayRect = draggablePositionRect;
-              refresh();
-            }
-            Future.delayed(Duration.zero, () => model?.setDraggable(false));
+            Future(() {
+              onDragCancel?.call(this);
+              if (dragging || resizing) {
+                onDragCancel?.call(this);
+                controller?.setRect(draggablePositionRect);
+              }
+
+              model?.setDraggable(false);
+            });
 
             widget.cursorGlobalLocation = details.globalPosition;
           },
@@ -280,7 +283,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             dashboardGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
-            Future.delayed(Duration.zero, () => model?.setDraggable(true));
+            Future(() => model?.setDraggable(true));
 
             Rect previewLocation = Rect.fromLTWH(
               DraggableWidgetContainer.snapToGrid(
@@ -300,7 +303,14 @@ class DraggableListLayout extends DraggableLayoutContainer {
             dashboardGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
-            Future.delayed(Duration.zero, () => model?.setDraggable(true));
+            Future(() {
+              if (dragging || resizing) {
+                onDragCancel?.call(this);
+                controller?.setRect(draggablePositionRect);
+              }
+
+              model?.setDraggable(true);
+            });
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 5.5),

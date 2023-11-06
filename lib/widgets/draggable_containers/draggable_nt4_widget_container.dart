@@ -46,6 +46,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super();
@@ -58,6 +59,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
+    super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
   }) : super.fromJson();

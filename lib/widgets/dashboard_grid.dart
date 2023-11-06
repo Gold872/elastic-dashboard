@@ -53,6 +53,7 @@ class DashboardGrid extends StatelessWidget {
           onUpdate: _nt4ContainerOnUpdate,
           onDragBegin: _nt4ContainerOnDragBegin,
           onDragEnd: _nt4ContainerOnDragEnd,
+          onDragCancel: _nt4ContainerOnDragCancel,
           onResizeBegin: _nt4ContainerOnResizeBegin,
           onResizeEnd: _nt4ContainerOnResizeEnd,
         ),
@@ -84,6 +85,7 @@ class DashboardGrid extends StatelessWidget {
                 onUpdate: _nt4ContainerOnUpdate,
                 onDragBegin: _nt4ContainerOnDragBegin,
                 onDragEnd: _nt4ContainerOnDragEnd,
+                onDragCancel: _nt4ContainerOnDragCancel,
                 onResizeBegin: _nt4ContainerOnResizeBegin,
                 onResizeEnd: _nt4ContainerOnResizeEnd,
               );
@@ -91,6 +93,7 @@ class DashboardGrid extends StatelessWidget {
             onUpdate: _layoutContainerOnUpdate,
             onDragBegin: _layoutContainerOnDragBegin,
             onDragEnd: _layoutContainerOnDragEnd,
+            onDragCancel: _layoutContainerOnDragCancel,
             onResizeBegin: _layoutContainerOnResizeBegin,
             onResizeEnd: _layoutContainerOnResizeEnd,
           );
@@ -219,6 +222,25 @@ class DashboardGrid extends StatelessWidget {
     widget.dispose();
   }
 
+  void onWidgetDragCancel(DraggableWidgetContainer widget) {
+    if (!widget.dragging && !widget.resizing) {
+      return;
+    }
+
+    widget.draggablePositionRect = widget.dragStartLocation;
+    widget.displayRect = widget.draggablePositionRect;
+    widget.previewRect = widget.draggablePositionRect;
+
+    widget.previewVisible = false;
+    widget.validLocation = true;
+
+    widget.dragging = false;
+    widget.resizing = false;
+    widget.draggingIntoLayout = false;
+
+    widget.dispose();
+  }
+
   void onWidgetUpdate(DraggableWidgetContainer widget, Rect newRect) {
     double newX = DraggableWidgetContainer.snapToGrid(newRect.left);
     double newY = DraggableWidgetContainer.snapToGrid(newRect.top);
@@ -287,6 +309,12 @@ class DashboardGrid extends StatelessWidget {
     refresh();
   }
 
+  void _nt4ContainerOnDragCancel(dynamic widget) {
+    onWidgetDragCancel(widget);
+
+    refresh();
+  }
+
   void _nt4ContainerOnResizeBegin(dynamic widget) {
     refresh();
   }
@@ -310,6 +338,12 @@ class DashboardGrid extends StatelessWidget {
   void _layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
       {Offset? globalPosition}) {
     onWidgetDragEnd(widget);
+
+    refresh();
+  }
+
+  void _layoutContainerOnDragCancel(dynamic widget) {
+    onWidgetDragCancel(widget);
 
     refresh();
   }
@@ -400,6 +434,7 @@ class DashboardGrid extends StatelessWidget {
     widget.displayRect = Rect.fromLTWH(previewX, previewY, width, height);
     widget.draggablePositionRect =
         Rect.fromLTWH(previewX, previewY, width, height);
+    widget.dragStartLocation = Rect.fromLTWH(previewX, previewY, width, height);
 
     addWidget(widget);
     _containerDraggingIn = null;
@@ -437,6 +472,7 @@ class DashboardGrid extends StatelessWidget {
     double height = widget.displayRect.height;
 
     Rect previewLocation = Rect.fromLTWH(previewX, previewY, width, height);
+    widget.previewRect = previewLocation;
 
     if (isValidLayoutLocation(widget.cursorGlobalLocation)) {
       DraggableLayoutContainer layoutContainer =
@@ -462,11 +498,7 @@ class DashboardGrid extends StatelessWidget {
       widget.draggablePositionRect =
           Rect.fromLTWH(previewX, previewY, width, height);
 
-      addNT4Widget(
-          widget,
-          Rect.fromLTWH(previewLocation.left, previewLocation.top,
-              previewLocation.width, previewLocation.height),
-          enabled: nt4Connection.isNT4Connected);
+      addWidget(widget);
     }
 
     _containerDraggingIn = null;
@@ -500,6 +532,7 @@ class DashboardGrid extends StatelessWidget {
       onUpdate: _nt4ContainerOnUpdate,
       onDragBegin: _nt4ContainerOnDragBegin,
       onDragEnd: _nt4ContainerOnDragEnd,
+      onDragCancel: _nt4ContainerOnDragCancel,
       onResizeBegin: _nt4ContainerOnResizeBegin,
       onResizeEnd: _nt4ContainerOnResizeEnd,
       child: widget.child as NT4Widget,
@@ -521,17 +554,13 @@ class DashboardGrid extends StatelessWidget {
       onUpdate: _layoutContainerOnUpdate,
       onDragBegin: _layoutContainerOnDragBegin,
       onDragEnd: _layoutContainerOnDragEnd,
+      onDragCancel: _layoutContainerOnDragCancel,
       onResizeBegin: _layoutContainerOnResizeBegin,
       onResizeEnd: _layoutContainerOnResizeEnd,
     );
   }
 
   void addWidget(DraggableWidgetContainer widget) {
-    _widgetContainers.add(widget);
-  }
-
-  void addNT4Widget(DraggableNT4WidgetContainer widget, Rect initialPosition,
-      {bool enabled = true}) {
     _widgetContainers.add(widget);
   }
 
@@ -587,6 +616,7 @@ class DashboardGrid extends StatelessWidget {
                   onUpdate: _nt4ContainerOnUpdate,
                   onDragBegin: _nt4ContainerOnDragBegin,
                   onDragEnd: _nt4ContainerOnDragEnd,
+                  onDragCancel: _nt4ContainerOnDragCancel,
                   onResizeBegin: _nt4ContainerOnResizeBegin,
                   onResizeEnd: _nt4ContainerOnResizeEnd,
                 );
@@ -595,6 +625,7 @@ class DashboardGrid extends StatelessWidget {
               onUpdate: _layoutContainerOnUpdate,
               onDragBegin: _layoutContainerOnDragBegin,
               onDragEnd: _layoutContainerOnDragEnd,
+              onDragCancel: _layoutContainerOnDragCancel,
               onResizeBegin: _layoutContainerOnResizeBegin,
               onResizeEnd: _layoutContainerOnResizeEnd,
             ),
@@ -610,6 +641,7 @@ class DashboardGrid extends StatelessWidget {
         onUpdate: _nt4ContainerOnUpdate,
         onDragBegin: _nt4ContainerOnDragBegin,
         onDragEnd: _nt4ContainerOnDragEnd,
+        onDragCancel: _nt4ContainerOnDragCancel,
         onResizeBegin: _nt4ContainerOnResizeBegin,
         onResizeEnd: _nt4ContainerOnResizeEnd,
       ));
