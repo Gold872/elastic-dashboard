@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
@@ -178,21 +177,17 @@ void main() async {
 
     await widgetTester.pumpAndSettle();
 
-    expect(
-        find.text('Test Number', skipOffstage: false), findsAtLeastNWidgets(2));
-    expect(find.text('Edit Properties', skipOffstage: false), findsOneWidget);
+    expect(find.text('Test Number'), findsAtLeastNWidgets(2));
+    expect(find.text('Edit Properties'), findsOneWidget);
 
     await widgetTester.tap(find.text('Edit Properties'));
 
     await widgetTester.pumpAndSettle();
 
-    expect(
-        find.text('Container Settings', skipOffstage: false), findsOneWidget);
-    expect(find.text('Network Tables Settings (Advanced)', skipOffstage: false),
-        findsOneWidget);
+    expect(find.text('Container Settings'), findsOneWidget);
+    expect(find.text('Network Tables Settings (Advanced)'), findsOneWidget);
 
-    final titleText =
-        find.widgetWithText(DialogTextInput, 'Title', skipOffstage: false);
+    final titleText = find.widgetWithText(DialogTextInput, 'Title');
 
     expect(titleText, findsOneWidget);
 
@@ -200,28 +195,26 @@ void main() async {
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
     await widgetTester.pump(Duration.zero);
 
-    expect(find.text('Editing Title Test', skipOffstage: false),
-        findsAtLeastNWidgets(2));
+    expect(find.text('Editing Title Test'), findsAtLeastNWidgets(2));
 
-    final widgetTypeSelection = find.widgetWithText(
-        DialogDropdownChooser<String>, 'Text Display',
-        skipOffstage: false);
+    final widgetTypeSelection =
+        find.widgetWithText(DropdownMenuItem<String>, 'Text Display');
 
     expect(widgetTypeSelection, findsOneWidget);
 
     await widgetTester.tap(widgetTypeSelection);
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Text Display', skipOffstage: false),
+    expect(find.widgetWithText(DropdownMenuItem<String>, 'Text Display'),
         findsAtLeastNWidgets(2));
-    expect(find.text('Graph', skipOffstage: false), findsNothing);
+    expect(
+        find.widgetWithText(DropdownMenuItem<String>, 'Graph'), findsNothing);
 
-    await widgetTester
-        .tap(find.text('Text Display', skipOffstage: false).first);
+    await widgetTester.tap(
+        find.widgetWithText(DropdownMenuItem<String>, 'Text Display').last);
     await widgetTester.pumpAndSettle();
 
-    final closeButton =
-        find.widgetWithText(TextButton, 'Close', skipOffstage: false);
+    final closeButton = find.widgetWithText(TextButton, 'Close');
 
     expect(closeButton, findsOneWidget);
 

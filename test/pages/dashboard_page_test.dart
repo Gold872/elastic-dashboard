@@ -703,9 +703,9 @@ void main() {
 
     expect(appBar, findsOneWidget);
 
-    await widgetTester.tap(appBar);
+    await widgetTester.tapAt(const Offset(250, 0));
     await widgetTester.pump(kDoubleTapMinTime);
-    await widgetTester.tap(appBar);
+    await widgetTester.tapAt(const Offset(250, 0));
 
     await widgetTester.pumpAndSettle();
 
