@@ -8,12 +8,14 @@ import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +134,7 @@ void main() {
     expect(jsonString, preferences.getString(PrefKeys.layout));
   });
 
-  testWidgets('Add widget dialog', (widgetTester) async {
+  testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     setupMockOnlineNT4();
 
@@ -194,6 +196,147 @@ void main() {
 
     await widgetTester.drag(dialogDragHandle, const Offset(100, 0));
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('Add widget dialog (layouts)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOnlineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(true),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final layoutsTab = find.text('Layouts');
+    expect(layoutsTab, findsOneWidget);
+
+    await widgetTester.tap(layoutsTab);
+    await widgetTester.pumpAndSettle();
+
+    final listLayoutContainer =
+        find.widgetWithText(WidgetContainer, 'List Layout');
+    expect(listLayoutContainer, findsNothing);
+
+    final listLayoutTile = find.widgetWithText(LayoutDragTile, 'List Layout');
+    expect(listLayoutTile, findsOneWidget);
+
+    await widgetTester.drag(listLayoutTile, const Offset(100, 100),
+        kind: PointerDeviceKind.mouse);
+    await widgetTester.pumpAndSettle();
+
+    expect(listLayoutContainer, findsNothing);
+
+    await widgetTester.drag(listLayoutTile, const Offset(300, -150),
+        kind: PointerDeviceKind.mouse);
+    await widgetTester.pumpAndSettle();
+
+    expect(listLayoutContainer, findsOneWidget);
+  });
+
+  testWidgets('List Layouts', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOnlineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(true),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final layoutsTab = find.text('Layouts');
+    expect(layoutsTab, findsOneWidget);
+
+    await widgetTester.tap(layoutsTab);
+    await widgetTester.pumpAndSettle();
+
+    final listLayoutContainer =
+        find.widgetWithText(WidgetContainer, 'List Layout');
+    expect(listLayoutContainer, findsNothing);
+
+    final listLayoutTile = find.widgetWithText(LayoutDragTile, 'List Layout');
+    expect(listLayoutTile, findsOneWidget);
+
+    await widgetTester.drag(listLayoutTile, const Offset(100, 100),
+        kind: PointerDeviceKind.mouse);
+    await widgetTester.pumpAndSettle();
+
+    expect(listLayoutContainer, findsNothing);
+
+    await widgetTester.drag(listLayoutTile, const Offset(300, -150),
+        kind: PointerDeviceKind.mouse);
+    await widgetTester.pumpAndSettle();
+
+    expect(listLayoutContainer, findsOneWidget);
+
+    final closeButton = find.widgetWithText(TextButton, 'Close');
+    expect(closeButton, findsOneWidget);
+
+    await widgetTester.tap(closeButton);
+    await widgetTester.pumpAndSettle();
+
+    final testBooleanContainer =
+        find.widgetWithText(WidgetContainer, 'Test Boolean');
+    expect(testBooleanContainer, findsOneWidget);
+
+    final testBooleanInLayout = find.descendant(
+        of: find.widgetWithText(WidgetContainer, 'List Layout'),
+        matching: find.byType(BooleanBox));
+    expect(testBooleanInLayout, findsNothing);
+
+    // Drag into layout
+    await widgetTester.timedDrag(testBooleanContainer, const Offset(256, 32),
+        const Duration(milliseconds: 500));
+    await widgetTester.pumpAndSettle();
+
+    expect(testBooleanInLayout, findsOneWidget);
+
+    // Drag out of layout
+    await widgetTester.timedDrag(testBooleanContainer, const Offset(-256, -32),
+        const Duration(milliseconds: 500));
+    await widgetTester.pumpAndSettle();
+
+    expect(testBooleanInLayout, findsNothing);
   });
 
   testWidgets('Adding widgets from shuffleboard api', (widgetTester) async {
