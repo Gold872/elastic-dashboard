@@ -226,7 +226,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
           'TOP';
     }
 
-    for (Map<String, dynamic> childData in jsonData['children']) {
+    for (Map<String, dynamic>? childData in jsonData['children']) {
+      if (childData == null) {
+        continue;
+      }
+
       children.add(nt4ContainerBuilder?.call(childData) ??
           DraggableNT4WidgetContainer.fromJson(
             dashboardGrid: dashboardGrid,
