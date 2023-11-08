@@ -91,6 +91,10 @@ class TreeRow {
     }
   }
 
+  void clearRows() {
+    children.clear();
+  }
+
   static NT4Widget? getNT4WidgetFromTopic(NT4Topic nt4Topic) {
     switch (nt4Topic.type) {
       case NT4TypeStr.kFloat64:

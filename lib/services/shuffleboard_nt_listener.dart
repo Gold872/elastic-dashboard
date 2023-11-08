@@ -42,6 +42,12 @@ class ShuffleboardNTListener {
       previousSelection = data;
     });
 
+    nt4Connection.addDisconnectedListener(() {
+      currentJsonData.clear();
+      shuffleboardTreeRoot.clearRows();
+      previousSelection = null;
+    });
+
     nt4Connection.nt4Client.addTopicAnnounceListener((topic) async {
       if (!topic.name.contains(shuffleboardTableRoot)) {
         return;
@@ -146,6 +152,8 @@ class ShuffleboardNTListener {
           .putIfAbsent('children', () => <Map<String, dynamic>>[]);
 
       _createOrGetChild(jsonKey, widgetName);
+
+      print('Adding child: $widgetName');
     } else {
       currentJsonData[jsonKey]!.putIfAbsent('layout', () => false);
 
