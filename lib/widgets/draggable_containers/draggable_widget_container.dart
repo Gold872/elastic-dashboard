@@ -53,6 +53,9 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   TransformableBoxController? controller;
 
+  double? minWidth;
+  double? minHeight;
+
   bool enabled = false;
   bool dragging = false;
   bool resizing = false;
@@ -76,6 +79,8 @@ class DraggableWidgetContainer extends StatelessWidget {
     required this.title,
     required Rect initialPosition,
     this.enabled = false,
+    this.minWidth = 128,
+    this.minHeight = 128,
     this.onUpdate,
     this.onDragBegin,
     this.onDragEnd,
@@ -165,6 +170,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     ];
   }
 
+  @mustCallSuper
   Map<String, dynamic> toJson() {
     return {
       'title': title,
@@ -175,6 +181,7 @@ class DraggableWidgetContainer extends StatelessWidget {
     };
   }
 
+  @mustCallSuper
   void init() {
     draggablePositionRect = displayRect;
     dragStartLocation = displayRect;
@@ -233,8 +240,8 @@ class DraggableWidgetContainer extends StatelessWidget {
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
         constraints: BoxConstraints(
-          minWidth: Globals.gridSize.toDouble(),
-          minHeight: Globals.gridSize.toDouble(),
+          minWidth: minWidth ?? Globals.gridSize.toDouble(),
+          minHeight: minHeight ?? Globals.gridSize.toDouble(),
         ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,

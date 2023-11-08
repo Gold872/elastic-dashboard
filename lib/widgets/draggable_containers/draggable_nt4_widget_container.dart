@@ -43,6 +43,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     required super.initialPosition,
     required this.child,
     super.enabled = false,
+    super.minWidth,
+    super.minHeight,
     super.onUpdate,
     super.onDragBegin,
     super.onDragEnd,
@@ -64,203 +66,76 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     super.onResizeEnd,
   }) : super.fromJson();
 
-  void changeChildToType(String? type) {
-    if (type == null) {
-      return;
+  static double getMinimumWidth(NT4Widget? widget) {
+    double normalSize = 128.0;
+
+    switch (widget?.type) {
+      case 'Gyro':
+        return normalSize * 2;
+      case 'Camera Stream':
+        return normalSize * 2;
+      case 'Field':
+        return normalSize * 3;
+      case 'PowerDistribution':
+        return normalSize * 3;
+      case 'PIDController':
+        return normalSize * 2;
+      case 'DifferentialDrive':
+        return normalSize * 2;
+      case 'SwerveDrive':
+        return normalSize * 2;
+      case 'Subsystem':
+        return normalSize * 2;
+      case 'Command':
+        return normalSize * 2;
+      case 'Scheduler':
+        return normalSize * 2;
+      case 'FMSInfo':
+        return normalSize * 3;
+      case 'RobotPreferences':
+        return normalSize * 2;
+      case 'Alerts':
+        return normalSize * 2;
     }
 
-    if (type == child!.type) {
-      return;
+    return normalSize;
+  }
+
+  static double getMinimumHeight(NT4Widget? widget) {
+    double normalSize = 128.0;
+
+    switch (widget?.type) {
+      case 'Gyro':
+        return normalSize * 2;
+      case 'Camera Stream':
+        return normalSize * 2;
+      case 'Field':
+        return normalSize * 2;
+      case 'PowerDistribution':
+        return normalSize * 4;
+      case 'PIDController':
+        return normalSize * 3;
+      case 'DifferentialDrive':
+        return normalSize * 2;
+      case 'SwerveDrive':
+        return normalSize * 2;
+      case 'Scheduler':
+        return normalSize * 2;
+      case 'RobotPreferences':
+        return normalSize * 2;
+      case 'Alerts':
+        return normalSize * 2;
     }
 
-    NT4Widget? newWidget;
-
-    switch (type) {
-      case 'Boolean Box':
-        newWidget = BooleanBox(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Toggle Switch':
-        newWidget = ToggleSwitch(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Toggle Button':
-        newWidget = ToggleButton(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Graph':
-        newWidget = GraphWidget(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Number Bar':
-        newWidget = NumberBar(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Number Slider':
-        newWidget = NumberSlider(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Voltage View':
-        newWidget = VoltageView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Text Display':
-        newWidget = TextDisplay(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Match Time':
-        newWidget = MatchTimeWidget(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Single Color View':
-        newWidget = SingleColorView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Multi Color View':
-        newWidget = MultiColorView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'ComboBox Chooser':
-        newWidget = ComboBoxChooser(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-      case 'Split Button Chooser':
-        newWidget = SplitButtonChooser(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-    }
-
-    if (newWidget == null) {
-      return;
-    }
-
-    child!.dispose(deleting: true);
-    child!.unSubscribe();
-    child = newWidget;
-
-    refresh();
+    return normalSize;
   }
 
   @override
-  void dispose({bool deleting = false}) {
-    super.dispose(deleting: deleting);
+  void init() {
+    super.init();
 
-    child?.dispose(deleting: deleting);
-  }
-
-  @override
-  void unSubscribe() {
-    super.unSubscribe();
-
-    child?.unSubscribe();
-  }
-
-  @override
-  void showEditProperties(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Properties'),
-          content: SizedBox(
-            width: 353,
-            child: SingleChildScrollView(
-              child: StatefulBuilder(
-                builder: (context, setState) {
-                  List<Widget>? childProperties =
-                      child?.getEditProperties(context);
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...getContainerEditProperties(),
-                      const SizedBox(height: 5),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Center(child: Text('Widget Type')),
-                          DialogDropdownChooser<String>(
-                            choices: child!.getAvailableDisplayTypes(),
-                            initialValue: child!.type,
-                            onSelectionChanged: (String? value) {
-                              setState(() {
-                                changeChildToType(value);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      // Settings for the widget inside (only if there are properties)
-                      if (childProperties != null &&
-                          childProperties.isNotEmpty) ...[
-                        Text('${child?.type} Widget Settings'),
-                        const SizedBox(height: 5),
-                        ...childProperties,
-                        const Divider(),
-                      ],
-                      // Settings for the NT4 Connection
-                      ...getNT4EditProperties(),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                child?.refresh();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  List<Widget> getNT4EditProperties() {
-    return [
-      const Text('Network Tables Settings (Advanced)'),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          // Topic
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                child?.topic = value;
-                child?.resetSubscription();
-              },
-              label: 'Topic',
-              initialText: child?.topic,
-            ),
-          ),
-          const SizedBox(width: 5),
-          // Period
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newPeriod = double.tryParse(value);
-                if (newPeriod == null) {
-                  return;
-                }
-
-                child!.period = newPeriod;
-                child!.resetSubscription();
-              },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
-              label: 'Period',
-              initialText: child!.period.toString(),
-            ),
-          ),
-        ],
-      ),
-    ];
+    minWidth = DraggableNT4WidgetContainer.getMinimumWidth(child);
+    minHeight = DraggableNT4WidgetContainer.getMinimumHeight(child);
   }
 
   @override
@@ -277,6 +152,20 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     super.fromJson(jsonData);
 
     child = createChildFromJson(jsonData);
+  }
+
+  @override
+  void dispose({bool deleting = false}) {
+    super.dispose(deleting: deleting);
+
+    child?.dispose(deleting: deleting);
+  }
+
+  @override
+  void unSubscribe() {
+    super.unSubscribe();
+
+    child?.unSubscribe();
   }
 
   NT4Widget createChildFromJson(Map<String, dynamic> jsonData) {
@@ -421,6 +310,194 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   Map<String, dynamic>? getChildJson() {
     return child!.toJson();
+  }
+
+  void changeChildToType(String? type) {
+    if (type == null) {
+      return;
+    }
+
+    if (type == child!.type) {
+      return;
+    }
+
+    NT4Widget? newWidget;
+
+    switch (type) {
+      case 'Boolean Box':
+        newWidget = BooleanBox(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Toggle Switch':
+        newWidget = ToggleSwitch(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Toggle Button':
+        newWidget = ToggleButton(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Graph':
+        newWidget = GraphWidget(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Number Bar':
+        newWidget = NumberBar(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Number Slider':
+        newWidget = NumberSlider(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Voltage View':
+        newWidget = VoltageView(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Text Display':
+        newWidget = TextDisplay(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Match Time':
+        newWidget = MatchTimeWidget(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Single Color View':
+        newWidget = SingleColorView(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'Multi Color View':
+        newWidget = MultiColorView(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+        break;
+      case 'ComboBox Chooser':
+        newWidget = ComboBoxChooser(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+      case 'Split Button Chooser':
+        newWidget = SplitButtonChooser(
+            key: UniqueKey(), topic: child!.topic, period: child!.period);
+    }
+
+    if (newWidget == null) {
+      return;
+    }
+
+    child!.dispose(deleting: true);
+    child!.unSubscribe();
+    child = newWidget;
+
+    minWidth = DraggableNT4WidgetContainer.getMinimumWidth(child);
+    minHeight = DraggableNT4WidgetContainer.getMinimumHeight(child);
+
+    refresh();
+  }
+
+  @override
+  void showEditProperties(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Properties'),
+          content: SizedBox(
+            width: 353,
+            child: SingleChildScrollView(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  List<Widget>? childProperties =
+                      child?.getEditProperties(context);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...getContainerEditProperties(),
+                      const SizedBox(height: 5),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(child: Text('Widget Type')),
+                          DialogDropdownChooser<String>(
+                            choices: child!.getAvailableDisplayTypes(),
+                            initialValue: child!.type,
+                            onSelectionChanged: (String? value) {
+                              setState(() {
+                                changeChildToType(value);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      // Settings for the widget inside (only if there are properties)
+                      if (childProperties != null &&
+                          childProperties.isNotEmpty) ...[
+                        Text('${child?.type} Widget Settings'),
+                        const SizedBox(height: 5),
+                        ...childProperties,
+                        const Divider(),
+                      ],
+                      // Settings for the NT4 Connection
+                      ...getNT4EditProperties(),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                child?.refresh();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> getNT4EditProperties() {
+    return [
+      const Text('Network Tables Settings (Advanced)'),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          // Topic
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                child?.topic = value;
+                child?.resetSubscription();
+              },
+              label: 'Topic',
+              initialText: child?.topic,
+            ),
+          ),
+          const SizedBox(width: 5),
+          // Period
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newPeriod = double.tryParse(value);
+                if (newPeriod == null) {
+                  return;
+                }
+
+                child!.period = newPeriod;
+                child!.resetSubscription();
+              },
+              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              label: 'Period',
+              initialText: child!.period.toString(),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 
   @override

@@ -198,6 +198,9 @@ class TreeRow {
     if (primary is Gyro) {
       width = normalGridSize * 2;
       height = normalGridSize * 2;
+    } else if (primary is CameraStreamWidget) {
+      width = normalGridSize * 2;
+      height = normalGridSize * 2;
     } else if (primary is FieldWidget) {
       width = normalGridSize * 3;
       height = normalGridSize * 2;
