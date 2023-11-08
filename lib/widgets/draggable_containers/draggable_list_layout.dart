@@ -324,7 +324,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Flexible(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.5),
+                    const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.0),
                 child: widget.child!,
               ),
             ),
