@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:flutter/foundation.dart';
 
 abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   String get type;
@@ -38,11 +39,17 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   }) : super.fromJson();
 
   @override
+  @mustCallSuper
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
       'type': type,
+      'properties': getProperties(),
     };
+  }
+
+  Map<String, dynamic> getProperties() {
+    return {};
   }
 
   bool willAcceptWidget(DraggableWidgetContainer widget,

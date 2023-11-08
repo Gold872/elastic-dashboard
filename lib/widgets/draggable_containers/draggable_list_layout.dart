@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:dot_cast/dot_cast.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
@@ -12,6 +15,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
   String type = 'List Layout';
 
   List<DraggableNT4WidgetContainer> children = [];
+
+  String labelPosition = 'TOP';
 
   DraggableListLayout({
     super.key,
@@ -25,6 +30,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
+    this.labelPosition = 'TOP',
   }) : super();
 
   DraggableListLayout.fromJson({
@@ -58,6 +64,31 @@ class DraggableListLayout extends DraggableLayoutContainer {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ...getContainerEditProperties(),
+                      const Divider(),
+                      const Center(
+                        child: Text('Label Position'),
+                      ),
+                      DialogDropdownChooser(
+                        onSelectionChanged: (value) {
+                          if (value == null) {
+                            return;
+                          }
+
+                          setState(() {
+                            labelPosition = value.toUpperCase();
+
+                            refresh();
+                          });
+                        },
+                        choices: const [
+                          'Top',
+                          'Left',
+                          'Right',
+                          'Bottom',
+                          'Hidden',
+                        ],
+                        initialValue: labelPosition,
+                      ),
                       const Divider(),
                       if (children.isNotEmpty)
                         Container(
@@ -188,6 +219,13 @@ class DraggableListLayout extends DraggableLayoutContainer {
   void fromJson(Map<String, dynamic> jsonData) {
     super.fromJson(jsonData);
 
+    if (jsonData.containsKey('properties') &&
+        jsonData['properties'] is Map<String, dynamic>) {
+      labelPosition = tryCast(jsonData['properties']['label_position']) ??
+          tryCast(jsonData['properties']['Label position']) ??
+          'TOP';
+    }
+
     for (Map<String, dynamic> childData in jsonData['children']) {
       children.add(nt4ContainerBuilder?.call(childData) ??
           DraggableNT4WidgetContainer.fromJson(
@@ -206,6 +244,13 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
     return {
       'children': childrenJson,
+    };
+  }
+
+  @override
+  Map<String, dynamic> getProperties() {
+    return {
+      'label_position': labelPosition,
     };
   }
 
@@ -253,6 +298,112 @@ class DraggableListLayout extends DraggableLayoutContainer {
     List<Widget> column = [];
 
     for (DraggableNT4WidgetContainer widget in children) {
+      Widget widgetInContainer = Container(
+        constraints: BoxConstraints(
+          maxHeight: (widget.minHeight ?? 128.0) - 64.0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.5),
+                child: widget.child!,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      Widget containerContent;
+
+      switch (labelPosition.toUpperCase()) {
+        case 'LEFT':
+          containerContent = Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: Text(
+                    widget.title ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: widgetInContainer,
+              ),
+            ],
+          );
+          break;
+        case 'RIGHT':
+          containerContent = Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: widgetInContainer,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: Text(
+                    widget.title ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          );
+          break;
+        case 'BOTTOM':
+          containerContent = Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              widgetInContainer,
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: Text(
+                    widget.title ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          );
+          break;
+        case 'HIDDEN':
+          containerContent = widgetInContainer;
+        case 'TOP':
+        default:
+          containerContent = Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2.0),
+                  child: Text(
+                    widget.title ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              widgetInContainer,
+            ],
+          );
+          break;
+      }
+
       column.add(
         GestureDetector(
           supportedDevices: PointerDeviceKind.values
@@ -325,39 +476,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: Text(
-                        widget.title ?? '',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxHeight: (widget.minHeight ?? 128.0) - 64.0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 1.5, vertical: 2.5),
-                            child: widget.child!,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              child: containerContent,
             ),
           ),
         ),
