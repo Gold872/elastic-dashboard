@@ -50,6 +50,12 @@ class TextDisplay extends StatelessWidget with NT4Widget {
         return TextField(
           controller: _controller,
           textAlign: TextAlign.left,
+          textAlignVertical: TextAlignVertical.bottom,
+          decoration: const InputDecoration(
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 0.0, vertical: 10.0),
+            isDense: true,
+          ),
           onSubmitted: (value) {
             bool publishTopic = nt4Topic == null;
 
