@@ -256,7 +256,6 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
     for (DraggableNT4WidgetContainer widget in children) {
       column.add(
-        // Detectors for dragging so widgets can be dragged out of list layout
         GestureDetector(
           supportedDevices: PointerDeviceKind.values
               .whereNot((element) => element == PointerDeviceKind.trackpad)
@@ -313,38 +312,50 @@ class DraggableListLayout extends DraggableLayoutContainer {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 5.5),
+            padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
             child: Container(
-              padding: const EdgeInsets.all(6.0),
-              constraints: BoxConstraints(
-                minHeight: 96,
-                maxHeight:
-                    (widget.displayRect.height - 32).clamp(96, double.infinity),
-              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7.5),
                 color: const Color.fromARGB(255, 45, 45, 45),
-                borderRadius: BorderRadius.circular(Globals.cornerRadius),
                 boxShadow: const [
                   BoxShadow(
-                    offset: Offset(2, 2),
-                    blurRadius: 8.0,
-                    spreadRadius: 0,
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 3.0,
                     color: Colors.black,
                   ),
                 ],
               ),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(widget.title ?? '',
-                        overflow: TextOverflow.ellipsis),
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 2.0),
+                      child: Text(
+                        widget.title ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 3.5),
-                  Flexible(
-                    child: AbsorbPointer(
-                      absorbing: !enabled,
-                      child: widget.child!,
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: (widget.minHeight ?? 128.0) - 64.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 1.5, vertical: 2.5),
+                            child: widget.child!,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -365,14 +376,19 @@ class DraggableListLayout extends DraggableLayoutContainer {
       width: draggablePositionRect.width,
       height: draggablePositionRect.height,
       opacity: 0.80,
+      horizontalPadding: 5.0,
+      verticalPadding: 5.0,
       child: Stack(
         fit: StackFit.expand,
         children: [
           SingleChildScrollView(
-            child: Wrap(
-              children: [
-                ..._getListColumn(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Column(
+                children: [
+                  ..._getListColumn(),
+                ],
+              ),
             ),
           ),
         ],
@@ -387,16 +403,21 @@ class DraggableListLayout extends DraggableLayoutContainer {
       width: displayRect.width,
       height: displayRect.height,
       opacity: (previewVisible) ? 0.25 : 1.00,
+      horizontalPadding: 5.0,
+      verticalPadding: 5.0,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
         child: Stack(
           fit: StackFit.expand,
           children: [
             SingleChildScrollView(
-              child: Wrap(
-                children: [
-                  ..._getListColumn(),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Column(
+                  children: [
+                    ..._getListColumn(),
+                  ],
+                ),
               ),
             ),
           ],

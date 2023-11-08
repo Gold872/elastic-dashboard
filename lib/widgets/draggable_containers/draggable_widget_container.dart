@@ -379,6 +379,8 @@ class WidgetContainer extends StatelessWidget {
     required this.width,
     required this.height,
     this.opacity = 1.0,
+    this.horizontalPadding = 10.0,
+    this.verticalPadding = 10.0,
   });
 
   final double opacity;
@@ -386,6 +388,8 @@ class WidgetContainer extends StatelessWidget {
   final Widget? child;
   final double width;
   final double height;
+  final double horizontalPadding;
+  final double verticalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -415,32 +419,38 @@ class WidgetContainer extends StatelessWidget {
               child: Column(
                 children: [
                   // Title
-                  LayoutBuilder(builder: (context, constraints) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(Globals.cornerRadius),
-                          topRight: Radius.circular(Globals.cornerRadius),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(Globals.cornerRadius),
+                            topRight: Radius.circular(Globals.cornerRadius),
+                          ),
+                          color: theme.colorScheme.primaryContainer,
                         ),
-                        color: theme.colorScheme.primaryContainer,
-                      ),
-                      width: constraints.maxWidth,
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          title!,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall,
+                        width: constraints.maxWidth,
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text(
+                            title!,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall,
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                   // The child widget
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 5.0, left: 10.0, right: 10.0, bottom: 10.0),
+                      padding: EdgeInsets.only(
+                        top: verticalPadding / 2,
+                        left: horizontalPadding,
+                        right: horizontalPadding,
+                        bottom: verticalPadding,
+                      ),
                       child: Container(
                         alignment: Alignment.center,
                         child: child,
