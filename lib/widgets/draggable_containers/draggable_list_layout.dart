@@ -18,6 +18,14 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   String labelPosition = 'TOP';
 
+  List<String> labelPositions = const [
+    'Top',
+    'Left',
+    'Right',
+    'Bottom',
+    'Hidden',
+  ];
+
   DraggableListLayout({
     super.key,
     required super.dashboardGrid,
@@ -74,20 +82,20 @@ class DraggableListLayout extends DraggableLayoutContainer {
                             return;
                           }
 
+                          if (!labelPositions.contains(value)) {
+                            return;
+                          }
+
                           setState(() {
                             labelPosition = value.toUpperCase();
 
                             refresh();
                           });
                         },
-                        choices: const [
-                          'Top',
-                          'Left',
-                          'Right',
-                          'Bottom',
-                          'Hidden',
-                        ],
-                        initialValue: labelPosition,
+                        choices: labelPositions,
+                        initialValue:
+                            labelPosition.substring(0, 1).toUpperCase() +
+                                labelPosition.substring(1).toLowerCase(),
                       ),
                       const Divider(),
                       if (children.isNotEmpty)
@@ -224,6 +232,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
       labelPosition = tryCast(jsonData['properties']['label_position']) ??
           tryCast(jsonData['properties']['Label position']) ??
           'TOP';
+
+      if (!labelPositions.contains(labelPosition)) {
+        labelPosition = 'TOP';
+      }
     }
 
     for (Map<String, dynamic>? childData in jsonData['children']) {
