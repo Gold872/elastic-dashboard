@@ -255,7 +255,7 @@ class _StringChooserDropdown extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               );
-            }).toList(),
+            }),
           ],
           dropdownStyleData: DropdownStyleData(
             decoration: BoxDecoration(

@@ -1,4 +1,4 @@
-/// Written by Michael Jansen from Team 3015, Ranger Robotics
+// Written by Michael Jansen from Team 3015, Ranger Robotics
 
 import 'dart:async';
 import 'dart:convert';

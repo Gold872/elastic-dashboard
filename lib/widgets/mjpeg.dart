@@ -66,8 +66,8 @@ class Mjpeg extends HookWidget {
     this.loading,
     this.headers = const {},
     this.preprocessor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   Future<void> cancelSubscription() async {
     await _manager.cancelSubscription();
