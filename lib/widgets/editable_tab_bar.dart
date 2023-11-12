@@ -19,6 +19,8 @@ class EditableTabBar extends StatelessWidget {
 
   final Function(TabData tab) onTabCreate;
   final Function(int index) onTabDestroy;
+  final Function() onTabMoveLeft;
+  final Function() onTabMoveRight;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
 
@@ -33,6 +35,8 @@ class EditableTabBar extends StatelessWidget {
     required this.tabViews,
     required this.onTabCreate,
     required this.onTabDestroy,
+    required this.onTabMoveLeft,
+    required this.onTabMoveRight,
     required this.onTabRename,
     required this.onTabChanged,
     required this.newDashboardGridBuilder,
@@ -89,6 +93,13 @@ class EditableTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
+    ButtonStyle endButtonStyle = const ButtonStyle(
+      shape: MaterialStatePropertyAll(RoundedRectangleBorder()),
+      maximumSize: MaterialStatePropertyAll(Size.square(34.0)),
+      minimumSize: MaterialStatePropertyAll(Size.zero),
+      padding: MaterialStatePropertyAll(EdgeInsets.all(4.0)),
+      iconSize: MaterialStatePropertyAll(24.0),
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -100,8 +111,7 @@ class EditableTabBar extends StatelessWidget {
             height: 36,
             color: theme.colorScheme.primaryContainer,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
                   child: ListView.builder(
@@ -203,13 +213,36 @@ class EditableTabBar extends StatelessWidget {
                     },
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    createTab();
-                  },
-                  alignment: Alignment.center,
-                  icon: const Icon(Icons.add),
-                )
+                const SizedBox(width: 16),
+                Row(
+                  children: [
+                    IconButton(
+                      style: endButtonStyle,
+                      onPressed: () {
+                        onTabMoveLeft.call();
+                      },
+                      alignment: Alignment.center,
+                      icon: const Icon(Icons.west),
+                    ),
+                    IconButton(
+                      style: endButtonStyle,
+                      onPressed: () {
+                        createTab();
+                      },
+                      alignment: Alignment.center,
+                      icon: const Icon(Icons.add),
+                    ),
+                    IconButton(
+                      style: endButtonStyle,
+                      onPressed: () {
+                        onTabMoveRight.call();
+                      },
+                      alignment: Alignment.center,
+                      icon: const Icon(Icons.east),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
               ],
             ),
           ),

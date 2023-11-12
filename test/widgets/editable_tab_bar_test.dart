@@ -16,6 +16,10 @@ class FakeTabBarFunctions {
 
   void onTabDestroy() {}
 
+  void onTabMoveLeft() {}
+
+  void onTabMoveRight() {}
+
   void onTabRename() {}
 
   void onTabChanged() {}
@@ -47,6 +51,8 @@ void main() {
             newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {},
             onTabDestroy: (index) {},
+            onTabMoveLeft: () {},
+            onTabMoveRight: () {},
             onTabRename: (tab, grid) {},
             onTabChanged: (index) {},
           ),
@@ -63,6 +69,8 @@ void main() {
 
     expect(find.byIcon(Icons.close), findsNWidgets(2));
     expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.byIcon(Icons.west), findsOneWidget);
+    expect(find.byIcon(Icons.east), findsOneWidget);
   });
 
   testWidgets('Open new tab', (widgetTester) async {
@@ -87,6 +95,12 @@ void main() {
             },
             onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
+            },
+            onTabMoveLeft: () {
+              tabBarFunctions.onTabMoveLeft();
+            },
+            onTabMoveRight: () {
+              tabBarFunctions.onTabMoveRight();
             },
             onTabRename: (tab, grid) {
               tabBarFunctions.onTabRename();
@@ -134,6 +148,12 @@ void main() {
             onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
             },
+            onTabMoveLeft: () {
+              tabBarFunctions.onTabMoveLeft();
+            },
+            onTabMoveRight: () {
+              tabBarFunctions.onTabMoveRight();
+            },
             onTabRename: (tab, grid) {
               tabBarFunctions.onTabRename();
             },
@@ -155,6 +175,71 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     verify(tabBarFunctions.onTabDestroy()).called(1);
+  });
+
+  testWidgets('Move tabs', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: EditableTabBar(
+            currentIndex: 0,
+            tabData: [
+              TabData(name: 'Teleoperated'),
+              TabData(name: 'Autonomous'),
+            ],
+            tabViews: [
+              DashboardGrid(),
+              DashboardGrid(),
+            ],
+            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
+            onTabCreate: (tab) {
+              tabBarFunctions.onTabCreate();
+            },
+            onTabDestroy: (index) {
+              tabBarFunctions.onTabDestroy();
+            },
+            onTabMoveLeft: () {
+              tabBarFunctions.onTabMoveLeft();
+            },
+            onTabMoveRight: () {
+              tabBarFunctions.onTabMoveRight();
+            },
+            onTabRename: (tab, grid) {
+              tabBarFunctions.onTabRename();
+            },
+            onTabChanged: (index) {
+              tabBarFunctions.onTabChanged();
+            },
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final tabLeftButton = find.byIcon(Icons.west);
+    final tabRightButton = find.byIcon(Icons.east);
+
+    expect(tabLeftButton, findsOneWidget);
+    expect(tabRightButton, findsOneWidget);
+
+    // Should not change indexes
+    await widgetTester.tap(tabLeftButton);
+    await widgetTester.pumpAndSettle();
+    // Should change indexes
+    await widgetTester.tap(tabRightButton);
+    await widgetTester.pumpAndSettle();
+    // Should not change indexes
+    await widgetTester.tap(tabRightButton);
+    await widgetTester.pumpAndSettle();
+    // Should change indexes
+    await widgetTester.tap(tabLeftButton);
+    await widgetTester.pumpAndSettle();
+
+    verify(tabBarFunctions.onTabMoveLeft()).called(2);
+    verify(tabBarFunctions.onTabMoveRight()).called(2);
   });
 
   testWidgets('Rename tab', (widgetTester) async {
@@ -179,6 +264,12 @@ void main() {
             },
             onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
+            },
+            onTabMoveLeft: () {
+              tabBarFunctions.onTabMoveLeft();
+            },
+            onTabMoveRight: () {
+              tabBarFunctions.onTabMoveRight();
             },
             onTabRename: (tab, grid) {
               tabBarFunctions.onTabRename();
@@ -250,6 +341,12 @@ void main() {
             },
             onTabDestroy: (index) {
               tabBarFunctions.onTabDestroy();
+            },
+            onTabMoveLeft: () {
+              tabBarFunctions.onTabMoveLeft();
+            },
+            onTabMoveRight: () {
+              tabBarFunctions.onTabMoveRight();
             },
             onTabRename: (tab, grid) {
               tabBarFunctions.onTabRename();

@@ -778,6 +778,46 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
   }
 
+  void _moveTabLeft() {
+    if (currentTabIndex <= 0) {
+      return;
+    }
+
+    setState(() {
+      // Swap the tab data
+      TabData tempData = tabData[currentTabIndex - 1];
+      tabData[currentTabIndex - 1] = tabData[currentTabIndex];
+      tabData[currentTabIndex] = tempData;
+
+      // Swap the dashboard grids
+      DashboardGrid tempGrid = grids[currentTabIndex - 1];
+      grids[currentTabIndex - 1] = grids[currentTabIndex];
+      grids[currentTabIndex] = tempGrid;
+
+      currentTabIndex -= 1;
+    });
+  }
+
+  void _moveTabRight() {
+    if (currentTabIndex >= tabData.length - 1) {
+      return;
+    }
+
+    setState(() {
+      // Swap the tab data
+      TabData tempData = tabData[currentTabIndex + 1];
+      tabData[currentTabIndex + 1] = tabData[currentTabIndex];
+      tabData[currentTabIndex] = tempData;
+
+      // Swap the dashboard grids
+      DashboardGrid tempGrid = grids[currentTabIndex + 1];
+      grids[currentTabIndex + 1] = grids[currentTabIndex];
+      grids[currentTabIndex] = tempGrid;
+
+      currentTabIndex += 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
@@ -925,21 +965,54 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ),
       body: Shortcuts(
         shortcuts: {
-          const SingleActivator(LogicalKeyboardKey.keyO, control: true):
-              VoidCallbackIntent(importLayout),
-          const SingleActivator(LogicalKeyboardKey.keyS, control: true):
-              VoidCallbackIntent(saveLayout),
-          const SingleActivator(LogicalKeyboardKey.keyS,
-              shift: true, control: true): VoidCallbackIntent(exportLayout),
+          // Import (Ctrl + O)
+          const SingleActivator(
+            LogicalKeyboardKey.keyO,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(importLayout),
+          // Save (Ctrl + S)
+          const SingleActivator(
+            LogicalKeyboardKey.keyS,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(saveLayout),
+          // Export (Ctrl + Shift + S)
+          const SingleActivator(
+            LogicalKeyboardKey.keyS,
+            shift: true,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(exportLayout),
+          // Switch tab (Ctrl + Tab #)
           for (int i = 1; i <= 9; i++)
-            SingleActivator(LogicalKeyboardKey(48 + i), control: true):
-                VoidCallbackIntent(() {
+            SingleActivator(
+              LogicalKeyboardKey(48 + i),
+              control: true,
+              includeRepeats: false,
+            ): VoidCallbackIntent(() {
               if (i - 1 < tabData.length) {
                 setState(() => currentTabIndex = i - 1);
               }
             }),
-          const SingleActivator(LogicalKeyboardKey.keyT, control: true):
-              VoidCallbackIntent(() {
+          // Move tab left (Ctrl + <-)
+          const SingleActivator(
+            LogicalKeyboardKey.arrowLeft,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(_moveTabLeft),
+          // Move tab right (Ctrl + ->)
+          const SingleActivator(
+            LogicalKeyboardKey.arrowRight,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(_moveTabRight),
+          // New tab (Ctrl + T)
+          const SingleActivator(
+            LogicalKeyboardKey.keyT,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(() {
             String newTabName = 'Tab ${tabData.length + 1}';
             int newTabIndex = tabData.length;
 
@@ -953,8 +1026,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
             setState(() => currentTabIndex = newTabIndex);
           }),
-          const SingleActivator(LogicalKeyboardKey.keyW, control: true):
-              VoidCallbackIntent(() {
+          // Close tab (Ctrl + W)
+          const SingleActivator(
+            LogicalKeyboardKey.keyW,
+            control: true,
+            includeRepeats: false,
+          ): VoidCallbackIntent(() {
             if (tabData.length <= 1) {
               return;
             }
@@ -994,6 +1071,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           key: GlobalKey(),
                           onAddWidgetPressed: displayAddWidgetDialog,
                         );
+                      },
+                      onTabMoveLeft: () {
+                        _moveTabLeft();
+                      },
+                      onTabMoveRight: () {
+                        _moveTabRight();
                       },
                       onTabRename: (index, newData) {
                         setState(() {
