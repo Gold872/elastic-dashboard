@@ -36,6 +36,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
+    super.onJsonLoadingWarning,
   }) : super.fromJson();
 
   @override

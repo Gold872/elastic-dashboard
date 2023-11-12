@@ -152,8 +152,6 @@ class ShuffleboardNTListener {
           .putIfAbsent('children', () => <Map<String, dynamic>>[]);
 
       _createOrGetChild(jsonKey, widgetName);
-
-      print('Adding child: $widgetName');
     } else {
       currentJsonData[jsonKey]!.putIfAbsent('layout', () => false);
 

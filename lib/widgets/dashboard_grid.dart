@@ -32,17 +32,20 @@ class DashboardGrid extends StatelessWidget {
     super.key,
     required Map<String, dynamic> jsonData,
     this.onAddWidgetPressed,
+    Function(String message)? onJsonLoadingWarning,
   }) {
     if (jsonData['containers'] != null) {
-      loadContainersFromJson(jsonData);
+      loadContainersFromJson(jsonData,
+          onJsonLoadingWarning: onJsonLoadingWarning);
     }
 
     if (jsonData['layouts'] != null) {
-      loadLayoutsFromJson(jsonData);
+      loadLayoutsFromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
     }
   }
 
-  void loadContainersFromJson(Map<String, dynamic> jsonData) {
+  void loadContainersFromJson(Map<String, dynamic> jsonData,
+      {Function(String message)? onJsonLoadingWarning}) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetContainers.add(
         DraggableNT4WidgetContainer.fromJson(
@@ -56,14 +59,18 @@ class DashboardGrid extends StatelessWidget {
           onDragCancel: _nt4ContainerOnDragCancel,
           onResizeBegin: _nt4ContainerOnResizeBegin,
           onResizeEnd: _nt4ContainerOnResizeEnd,
+          onJsonLoadingWarning: onJsonLoadingWarning,
         ),
       );
     }
   }
 
-  void loadLayoutsFromJson(Map<String, dynamic> jsonData) {
+  void loadLayoutsFromJson(Map<String, dynamic> jsonData,
+      {Function(String warningMessage)? onJsonLoadingWarning}) {
     for (Map<String, dynamic> layoutData in jsonData['layouts']) {
       if (layoutData['type'] == null) {
+        onJsonLoadingWarning
+            ?.call('Layout widget type not specified, ignoring data.');
         continue;
       }
 
@@ -88,6 +95,7 @@ class DashboardGrid extends StatelessWidget {
                 onDragCancel: _nt4ContainerOnDragCancel,
                 onResizeBegin: _nt4ContainerOnResizeBegin,
                 onResizeEnd: _nt4ContainerOnResizeEnd,
+                onJsonLoadingWarning: onJsonLoadingWarning,
               );
             },
             onUpdate: _layoutContainerOnUpdate,
@@ -96,6 +104,7 @@ class DashboardGrid extends StatelessWidget {
             onDragCancel: _layoutContainerOnDragCancel,
             onResizeBegin: _layoutContainerOnResizeBegin,
             onResizeEnd: _layoutContainerOnResizeEnd,
+            onJsonLoadingWarning: onJsonLoadingWarning,
           );
         default:
           continue;

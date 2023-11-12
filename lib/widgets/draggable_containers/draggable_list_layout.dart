@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -53,6 +52,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
+    super.onJsonLoadingWarning,
   }) : super.fromJson();
 
   @override
@@ -224,8 +224,9 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  void fromJson(Map<String, dynamic> jsonData) {
-    super.fromJson(jsonData);
+  void fromJson(Map<String, dynamic> jsonData,
+      {Function(String errorMessage)? onJsonLoadingWarning}) {
+    super.fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
     if (jsonData.containsKey('properties') &&
         jsonData['properties'] is Map<String, dynamic>) {
@@ -238,15 +239,24 @@ class DraggableListLayout extends DraggableLayoutContainer {
       }
     }
 
-    for (Map<String, dynamic>? childData in jsonData['children']) {
-      if (childData == null) {
-        continue;
-      }
+    if (!jsonData.containsKey('children')) {
+      onJsonLoadingWarning
+          ?.call('List Layout JSON data does not contain any children');
+      return;
+    }
 
+    if (jsonData['children'] is! List<dynamic>) {
+      onJsonLoadingWarning
+          ?.call('List Layout JSON data does not contain any children');
+      return;
+    }
+
+    for (Map<String, dynamic> childData in jsonData['children']) {
       children.add(nt4ContainerBuilder?.call(childData) ??
           DraggableNT4WidgetContainer.fromJson(
             dashboardGrid: dashboardGrid,
             jsonData: childData,
+            onJsonLoadingWarning: onJsonLoadingWarning,
           ));
     }
   }

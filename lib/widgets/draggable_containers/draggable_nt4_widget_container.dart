@@ -1,3 +1,4 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
@@ -64,6 +65,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     super.onDragCancel,
     super.onResizeBegin,
     super.onResizeEnd,
+    super.onJsonLoadingWarning,
   }) : super.fromJson();
 
   static double getMinimumWidth(NT4Widget? widget) {
@@ -148,10 +150,12 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   @override
-  void fromJson(Map<String, dynamic> jsonData) {
-    super.fromJson(jsonData);
+  void fromJson(Map<String, dynamic> jsonData,
+      {Function(String errorMessage)? onJsonLoadingWarning}) {
+    super.fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
-    child = createChildFromJson(jsonData);
+    child = createChildFromJson(jsonData,
+        onJsonLoadingWarning: onJsonLoadingWarning);
   }
 
   @override
@@ -168,142 +172,161 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     child?.unSubscribe();
   }
 
-  NT4Widget createChildFromJson(Map<String, dynamic> jsonData) {
-    switch (jsonData['type']) {
+  NT4Widget createChildFromJson(Map<String, dynamic> jsonData,
+      {Function(String warningMessage)? onJsonLoadingWarning}) {
+    if (!jsonData.containsKey('type')) {
+      onJsonLoadingWarning?.call(
+          'NetworkTables widget does not specify a widget type, defaulting to text display widget');
+    }
+
+    Map<String, dynamic> widgetProperties = {};
+
+    if (jsonData.containsKey('properties')) {
+      widgetProperties = tryCast(jsonData['properties']) ?? {};
+    } else {
+      onJsonLoadingWarning?.call(
+          'Network tables widget does not have any properties, defaulting to an empty properties map.');
+    }
+
+    switch (tryCast(jsonData['type'])) {
       case 'Boolean Box':
         return BooleanBox.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Toggle Switch':
         return ToggleSwitch.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Toggle Button':
         return ToggleButton.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Graph':
         return GraphWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Match Time':
         return MatchTimeWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Single Color View':
         return SingleColorView.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Multi Color View':
         return MultiColorView.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Number Bar':
         return NumberBar.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Number Slider':
         return NumberSlider.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Voltage View':
         return VoltageView.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Text Display':
         return TextDisplay.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Gyro':
         return Gyro.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Field':
         return FieldWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'PowerDistribution':
         return PowerDistribution.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'PIDController':
         return PIDControllerWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'DifferentialDrive':
         return DifferentialDrive.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'SwerveDrive':
         return SwerveDriveWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'ComboBox Chooser':
         return ComboBoxChooser.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Split Button Chooser':
         return SplitButtonChooser.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Subsystem':
         return SubsystemWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Command':
         return CommandWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Scheduler':
         return CommandSchedulerWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'FMSInfo':
         return FMSInfo.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Camera Stream':
         return CameraStreamWidget.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'RobotPreferences':
         return RobotPreferences.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       case 'Alerts':
         return NetworkAlerts.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
       default:
+        if (jsonData['type'] != null) {
+          onJsonLoadingWarning?.call(
+              'Unknown widget type: \'${jsonData['type']}\', defaulting to Text Display widget.');
+        }
         return TextDisplay.fromJson(
           key: UniqueKey(),
-          jsonData: jsonData['properties'],
+          jsonData: widgetProperties,
         );
     }
   }

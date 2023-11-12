@@ -104,8 +104,9 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.onDragCancel,
     this.onResizeBegin,
     this.onResizeEnd,
+    Function(String errorMessage)? onJsonLoadingWarning,
   }) {
-    fromJson(jsonData);
+    fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
     init();
   }
@@ -188,7 +189,8 @@ class DraggableWidgetContainer extends StatelessWidget {
   }
 
   @mustCallSuper
-  void fromJson(Map<String, dynamic> jsonData) {
+  void fromJson(Map<String, dynamic> jsonData,
+      {Function(String warningMessage)? onJsonLoadingWarning}) {
     title = tryCast(jsonData['title']) ?? '';
 
     double x = tryCast(jsonData['x']) ?? 0.0;

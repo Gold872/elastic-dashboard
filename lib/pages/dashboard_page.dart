@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
@@ -20,8 +21,8 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
@@ -67,24 +68,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future(() async => await windowManager.setPreventClose(true));
 
     loadLayout();
-
-    if (tabData.isEmpty) {
-      tabData.addAll([
-        TabData(name: 'Teleoperated'),
-        TabData(name: 'Autonomous'),
-      ]);
-
-      grids.addAll([
-        DashboardGrid(
-          key: GlobalKey(),
-          onAddWidgetPressed: displayAddWidgetDialog,
-        ),
-        DashboardGrid(
-          key: GlobalKey(),
-          onAddWidgetPressed: displayAddWidgetDialog,
-        ),
-      ]);
-    }
 
     nt4Connection.addConnectedListener(() {
       setState(() {
@@ -341,17 +324,20 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void exportLayout() async {
-    String initialDirectory = (await getApplicationDocumentsDirectory()).path;
+    const XTypeGroup jsonTypeGroup = XTypeGroup(
+      label: 'JSON (JavaScript Object Notation)',
+      extensions: ['.json'],
+      mimeTypes: ['application/json'],
+      uniformTypeIdentifiers: ['public.json'],
+    );
 
-    const XTypeGroup typeGroup = XTypeGroup(
-      label: 'Json File',
-      extensions: ['json'],
+    const XTypeGroup anyTypeGroup = XTypeGroup(
+      label: 'All Files',
     );
 
     final FileSaveLocation? saveLocation = await getSaveLocation(
-      initialDirectory: initialDirectory,
       suggestedName: 'elastic-layout.json',
-      acceptedTypeGroups: [typeGroup],
+      acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
     );
 
     if (saveLocation == null) {
@@ -362,27 +348,49 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     String jsonString = jsonEncode(jsonData);
 
     final Uint8List fileData = Uint8List.fromList(jsonString.codeUnits);
-    const String mimeType = 'application/json';
 
     final XFile jsonFile = XFile.fromData(fileData,
-        mimeType: mimeType, name: 'elastic-layout.json');
+        mimeType: 'application/json', name: 'elastic-layout.json');
 
-    jsonFile.saveTo(saveLocation.path);
+    await jsonFile.saveTo(saveLocation.path);
   }
 
   void importLayout() async {
-    const XTypeGroup typeGroup = XTypeGroup(
-      label: 'Json File',
-      extensions: ['json'],
+    const XTypeGroup jsonTypeGroup = XTypeGroup(
+      label: 'JSON (JavaScript Object Notation)',
+      extensions: ['.json'],
+      mimeTypes: ['application/json'],
+      uniformTypeIdentifiers: ['public.json'],
     );
 
-    final XFile? file = await openFile(acceptedTypeGroups: [typeGroup]);
+    const XTypeGroup anyTypeGroup = XTypeGroup(
+      label: 'All Files',
+    );
+
+    final XFile? file = await openFile(acceptedTypeGroups: [
+      jsonTypeGroup,
+      anyTypeGroup,
+    ]);
 
     if (file == null) {
       return;
     }
 
-    String jsonString = await file.readAsString();
+    String jsonString;
+
+    try {
+      jsonString = await file.readAsString();
+    } on FileSystemException catch (e) {
+      showJsonLoadingError(e.message);
+      return;
+    }
+
+    try {
+      jsonDecode(jsonString);
+    } catch (e) {
+      showJsonLoadingError(e.toString());
+      return;
+    }
 
     await _preferences.setString(PrefKeys.layout, jsonString);
 
@@ -402,31 +410,124 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void loadLayoutFromJsonData(String jsonString) {
+    Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
+
+    if (jsonData == null) {
+      showJsonLoadingError('Invalid JSON format, aborting.');
+      createDefaultTabs();
+      return;
+    }
+
+    if (!jsonData.containsKey('tabs')) {
+      showJsonLoadingError('JSON does not contain necessary data, aborting.');
+      createDefaultTabs();
+      return;
+    }
+
     tabData.clear();
     grids.clear();
 
-    Map<String, dynamic> jsonData = jsonDecode(jsonString);
     for (Map<String, dynamic> data in jsonData['tabs']) {
+      if (tryCast(data['name']) == null) {
+        showJsonLoadingWarning('Tab name not specified, ignoring tab data.');
+        continue;
+      }
+
+      if (tryCast<Map>(data['grid_layout']) == null) {
+        showJsonLoadingWarning(
+            'Grid layout not specified for tab \'${data['name']}\', ignoring tab data.');
+        continue;
+      }
+
       tabData.add(TabData(name: data['name']));
 
-      grids.add(DashboardGrid.fromJson(
+      grids.add(
+        DashboardGrid.fromJson(
           key: GlobalKey(),
           jsonData: data['grid_layout'],
-          onAddWidgetPressed: displayAddWidgetDialog));
+          onAddWidgetPressed: displayAddWidgetDialog,
+          onJsonLoadingWarning: showJsonLoadingWarning,
+        ),
+      );
     }
 
-    if (tabData.isEmpty || grids.isEmpty) {
-      tabData.add(TabData(name: 'Tab 0'));
-      grids.add(DashboardGrid.fromJson(
-        key: GlobalKey(),
-        jsonData: const {},
-        onAddWidgetPressed: displayAddWidgetDialog,
-      ));
-    }
+    createDefaultTabs();
 
     if (currentTabIndex >= grids.length) {
       currentTabIndex = grids.length - 1;
     }
+  }
+
+  void createDefaultTabs() {
+    if (tabData.isEmpty || grids.isEmpty) {
+      tabData.addAll([
+        TabData(name: 'Teleoperated'),
+        TabData(name: 'Autonomous'),
+      ]);
+
+      grids.addAll([
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
+      ]);
+    }
+  }
+
+  void showJsonLoadingError(String errorMessage) {
+    Future(() {
+      ColorScheme colorScheme = Theme.of(context).colorScheme;
+      TextTheme textTheme = Theme.of(context).textTheme;
+
+      int lines = '\n'.allMatches(errorMessage).length + 1;
+
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: const Color(0xffFE355C),
+        enableShadow: false,
+        width: 350,
+        height: 100 + (lines - 1) * 10,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        title: Text('Error while loading JSON data',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: Flexible(child: Text(errorMessage)),
+      ).show(context);
+    });
+  }
+
+  void showJsonLoadingWarning(String warningMessage) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      ColorScheme colorScheme = Theme.of(context).colorScheme;
+      TextTheme textTheme = Theme.of(context).textTheme;
+
+      int lines = '\n'.allMatches(warningMessage).length + 1;
+
+      ElegantNotification(
+        background: colorScheme.background,
+        progressIndicatorBackground: colorScheme.background,
+        progressIndicatorColor: Colors.yellow,
+        enableShadow: false,
+        width: 350,
+        height: 100 + (lines - 1) * 10,
+        notificationPosition: NotificationPosition.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.warning, color: Colors.yellow),
+        title: Text('Warning while loading JSON data',
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        description: Flexible(child: Text(warningMessage)),
+      ).show(context);
+    });
   }
 
   void displayAddWidgetDialog() {
