@@ -48,7 +48,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {},
             onTabDestroy: (index) {},
             onTabMoveLeft: () {},
@@ -89,7 +88,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
@@ -141,7 +139,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
@@ -177,7 +174,7 @@ void main() {
     verify(tabBarFunctions.onTabDestroy()).called(1);
   });
 
-  testWidgets('Move tabs', (widgetTester) async {
+  testWidgets('Reordering tabs', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await widgetTester.pumpWidget(
@@ -193,7 +190,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
@@ -258,7 +254,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },
@@ -335,7 +330,6 @@ void main() {
               DashboardGrid(),
               DashboardGrid(),
             ],
-            newDashboardGridBuilder: () => DashboardGrid(key: GlobalKey()),
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
             },

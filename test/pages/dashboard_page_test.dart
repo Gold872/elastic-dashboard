@@ -615,6 +615,65 @@ void main() {
     expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(1));
   });
 
+  testWidgets('Reordering tabs', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          connectionStream: Stream.value(false),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    final tabLeftButton =
+        find.descendant(of: editableTabBar, matching: find.byIcon(Icons.west));
+    final tabRightButton =
+        find.descendant(of: editableTabBar, matching: find.byIcon(Icons.east));
+
+    expect(tabLeftButton, findsOneWidget);
+    expect(tabRightButton, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.tap(tabLeftButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should not change since index is 0');
+
+    await widgetTester.tap(tabRightButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    await widgetTester.tap(tabRightButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should not change since index is equal to number of tabs');
+
+    await widgetTester.tap(tabLeftButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
   testWidgets('Renaming tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     setupMockOfflineNT4();
