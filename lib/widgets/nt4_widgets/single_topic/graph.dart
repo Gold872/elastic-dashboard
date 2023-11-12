@@ -40,7 +40,9 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
     period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-    timeDisplayed = tryCast(jsonData['time_displayed']) ?? tryCast(jsonData['visibleTime']) ?? 5.0;
+    timeDisplayed = tryCast(jsonData['time_displayed']) ??
+        tryCast(jsonData['visibleTime']) ??
+        5.0;
     minValue = tryCast(jsonData['min_value']);
     maxValue = tryCast(jsonData['max_value']);
     mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
