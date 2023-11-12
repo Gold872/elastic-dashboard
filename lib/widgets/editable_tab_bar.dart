@@ -24,8 +24,6 @@ class EditableTabBar extends StatelessWidget {
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
 
-  final DashboardGrid Function() newDashboardGridBuilder;
-
   final int currentIndex;
 
   const EditableTabBar({
@@ -39,7 +37,6 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabMoveRight,
     required this.onTabRename,
     required this.onTabChanged,
-    required this.newDashboardGridBuilder,
   });
 
   void renameTab(BuildContext context, int index) {

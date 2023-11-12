@@ -1066,12 +1066,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   children: [
                     EditableTabBar(
                       currentIndex: currentTabIndex,
-                      newDashboardGridBuilder: () {
-                        return DashboardGrid(
-                          key: GlobalKey(),
-                          onAddWidgetPressed: displayAddWidgetDialog,
-                        );
-                      },
                       onTabMoveLeft: () {
                         _moveTabLeft();
                       },
