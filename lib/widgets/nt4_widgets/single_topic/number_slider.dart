@@ -12,9 +12,9 @@ class NumberSlider extends StatelessWidget with NT4Widget {
   @override
   final String type = 'Number Slider';
 
-  double minValue;
-  double maxValue;
-  int divisions;
+  late double minValue;
+  late double maxValue;
+  late int divisions;
 
   double _currentValue = 0.0;
   double _previousValue = 0.0;
@@ -33,12 +33,17 @@ class NumberSlider extends StatelessWidget with NT4Widget {
     init();
   }
 
-  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : minValue = tryCast(jsonData['min_value']) ?? -1.0,
-        maxValue = tryCast(jsonData['max_value']) ?? 1.0,
-        divisions = tryCast(jsonData['divisions']) ?? 5 {
+  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
     period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+
+    minValue =
+        tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
+    maxValue =
+        tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 1.0;
+    divisions = tryCast(jsonData['divisions']) ??
+        tryCast(jsonData['numOfTickMarks']) ??
+        5;
 
     init();
   }

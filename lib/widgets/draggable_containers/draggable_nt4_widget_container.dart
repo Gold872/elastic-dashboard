@@ -240,6 +240,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           jsonData: widgetProperties,
         );
       case 'Text Display':
+      case 'Text View':
         return TextDisplay.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
@@ -255,16 +256,19 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           jsonData: widgetProperties,
         );
       case 'PowerDistribution':
+      case 'PDP':
         return PowerDistribution.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );
       case 'PIDController':
+      case 'PID Controller':
         return PIDControllerWidget.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );
       case 'DifferentialDrive':
+      case 'Differential Drivebase':
         return DifferentialDrive.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,

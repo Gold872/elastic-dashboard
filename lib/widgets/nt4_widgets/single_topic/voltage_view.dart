@@ -40,9 +40,11 @@ class VoltageView extends StatelessWidget with NT4Widget {
     topic = tryCast(jsonData['topic']) ?? '';
     period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
 
-    minValue = tryCast(jsonData['min_value']) ?? 4;
-    maxValue = tryCast(jsonData['max_value']) ?? 13.0;
-    divisions = tryCast(jsonData['divisions']);
+    minValue = tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? 4;
+    maxValue =
+        tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 13.0;
+    divisions =
+        tryCast(jsonData['divisions']) ?? tryCast(jsonData['numOfTickMarks']);
     inverted = tryCast(jsonData['inverted']) ?? false;
     orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
 

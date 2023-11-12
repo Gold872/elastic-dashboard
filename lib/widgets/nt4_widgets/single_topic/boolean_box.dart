@@ -10,8 +10,8 @@ class BooleanBox extends StatelessWidget with NT4Widget {
   @override
   String type = 'Boolean Box';
 
-  Color trueColor;
-  Color falseColor;
+  late Color trueColor;
+  late Color falseColor;
 
   BooleanBox({
     super.key,
@@ -26,13 +26,45 @@ class BooleanBox extends StatelessWidget with NT4Widget {
     init();
   }
 
-  BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : trueColor =
-            Color(tryCast(jsonData['true_color']) ?? Colors.green.value),
-        falseColor =
-            Color(tryCast(jsonData['false_color']) ?? Colors.red.value) {
+  BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
     period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+
+    int? trueColorValue =
+        tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
+    int? falseColorValue =
+        tryCast(jsonData['false_color']) ?? tryCast(jsonData['colorWhenFalse']);
+
+    if (trueColorValue == null) {
+      String? hexString = tryCast(jsonData['colorWhenTrue']);
+
+      if (hexString != null) {
+        hexString = hexString.toUpperCase().replaceAll('#', '');
+
+        if (hexString.length == 6) {
+          hexString = 'FF$hexString';
+        }
+
+        trueColorValue = int.tryParse(hexString, radix: 16);
+      }
+    }
+
+    if (falseColorValue == null) {
+      String? hexString = tryCast(jsonData['colorWhenFalse']);
+
+      if (hexString != null) {
+        hexString = hexString.toUpperCase().replaceAll('#', '');
+
+        if (hexString.length == 6) {
+          hexString = 'FF$hexString';
+        }
+
+        falseColorValue = int.tryParse(hexString, radix: 16);
+      }
+    }
+
+    trueColor = Color(trueColorValue ?? Colors.green.value);
+    falseColor = Color(falseColorValue ?? Colors.red.value);
 
     init();
   }
