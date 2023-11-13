@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
@@ -68,6 +69,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future(() async => await windowManager.setPreventClose(true));
 
     loadLayout();
+
+    setupShortcuts();
 
     nt4Connection.addConnectedListener(() {
       setState(() {
@@ -335,6 +338,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       label: 'All Files',
     );
 
+    hotKeyManager.resetKeysPressed();
+
     final FileSaveLocation? saveLocation = await getSaveLocation(
       suggestedName: 'elastic-layout.json',
       acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
@@ -366,6 +371,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     const XTypeGroup anyTypeGroup = XTypeGroup(
       label: 'All Files',
     );
+
+    hotKeyManager.resetKeysPressed();
 
     final XFile? file = await openFile(acceptedTypeGroups: [
       jsonTypeGroup,
@@ -527,6 +534,110 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             )),
         description: Flexible(child: Text(warningMessage)),
       ).show(context);
+    });
+  }
+
+  void setupShortcuts() {
+    // Import Layout (Ctrl + O)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyO,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: importLayout,
+    );
+    // Save (Ctrl + S)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyS,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: saveLayout,
+    );
+    // Export (Ctrl + Shift + S)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyS,
+        modifiers: [ModifierKey.controlModifier, ModifierKey.shiftModifier],
+      ),
+      callback: exportLayout,
+    );
+    // Switch to Tab (Ctrl + Tab #)
+    for (int i = 1; i <= 9; i++) {
+      hotKeyManager.register(
+          HotKey(
+            LogicalKeyboardKey(48 + i),
+            modifiers: [ModifierKey.controlModifier],
+          ), callback: () {
+        if (currentTabIndex == i - 1) {
+          return;
+        }
+        if (i - 1 < tabData.length) {
+          setState(() => currentTabIndex = i - 1);
+        }
+      });
+    }
+    // Move Tab Left (Ctrl + <-)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.arrowLeft,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: _moveTabLeft,
+    );
+    // Move Tab Right (Ctrl + ->)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.arrowRight,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: _moveTabRight,
+    );
+    // New Tab (Ctrl + T)
+    hotKeyManager.register(
+        HotKey(
+          LogicalKeyboardKey.keyT,
+          modifiers: [ModifierKey.controlModifier],
+        ), callback: () {
+      String newTabName = 'Tab ${tabData.length + 1}';
+      int newTabIndex = tabData.length;
+
+      tabData.add(TabData(name: newTabName));
+      grids.add(
+        DashboardGrid(
+          key: GlobalKey(),
+          onAddWidgetPressed: displayAddWidgetDialog,
+        ),
+      );
+
+      setState(() => currentTabIndex = newTabIndex);
+    });
+    // Close Tab (Ctrl + W)
+    hotKeyManager.register(
+        HotKey(
+          LogicalKeyboardKey.keyW,
+          modifiers: [ModifierKey.controlModifier],
+        ), callback: () {
+      if (tabData.length <= 1) {
+        return;
+      }
+
+      TabData currentTab = tabData[currentTabIndex];
+
+      showTabCloseConfirmation(context, currentTab.name, () {
+        int oldTabIndex = currentTabIndex;
+
+        if (currentTabIndex == tabData.length - 1) {
+          currentTabIndex--;
+        }
+
+        grids[oldTabIndex].onDestroy();
+
+        setState(() {
+          tabData.removeAt(oldTabIndex);
+          grids.removeAt(oldTabIndex);
+        });
+      });
     });
   }
 
@@ -963,216 +1074,125 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onWindowClose: onWindowClose,
         menuBar: menuBar,
       ),
-      body: Shortcuts(
-        shortcuts: {
-          // Import (Ctrl + O)
-          const SingleActivator(
-            LogicalKeyboardKey.keyO,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(importLayout),
-          // Save (Ctrl + S)
-          const SingleActivator(
-            LogicalKeyboardKey.keyS,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(saveLayout),
-          // Export (Ctrl + Shift + S)
-          const SingleActivator(
-            LogicalKeyboardKey.keyS,
-            shift: true,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(exportLayout),
-          // Switch tab (Ctrl + Tab #)
-          for (int i = 1; i <= 9; i++)
-            SingleActivator(
-              LogicalKeyboardKey(48 + i),
-              control: true,
-              includeRepeats: false,
-            ): VoidCallbackIntent(() {
-              if (i - 1 < tabData.length) {
-                setState(() => currentTabIndex = i - 1);
-              }
-            }),
-          // Move tab left (Ctrl + <-)
-          const SingleActivator(
-            LogicalKeyboardKey.arrowLeft,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(_moveTabLeft),
-          // Move tab right (Ctrl + ->)
-          const SingleActivator(
-            LogicalKeyboardKey.arrowRight,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(_moveTabRight),
-          // New tab (Ctrl + T)
-          const SingleActivator(
-            LogicalKeyboardKey.keyT,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(() {
-            String newTabName = 'Tab ${tabData.length + 1}';
-            int newTabIndex = tabData.length;
+      body: Focus(
+        autofocus: true,
+        canRequestFocus: true,
+        descendantsAreTraversable: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Main dashboard page
+            Expanded(
+              child: Stack(
+                children: [
+                  EditableTabBar(
+                    currentIndex: currentTabIndex,
+                    onTabMoveLeft: () {
+                      _moveTabLeft();
+                    },
+                    onTabMoveRight: () {
+                      _moveTabRight();
+                    },
+                    onTabRename: (index, newData) {
+                      setState(() {
+                        tabData[index] = newData;
+                      });
+                    },
+                    onTabCreate: (tab) {
+                      setState(() {
+                        tabData.add(tab);
+                        grids.add(DashboardGrid(
+                          key: GlobalKey(),
+                          onAddWidgetPressed: displayAddWidgetDialog,
+                        ));
+                      });
+                    },
+                    onTabDestroy: (index) {
+                      if (tabData.length <= 1) {
+                        return;
+                      }
 
-            tabData.add(TabData(name: newTabName));
-            grids.add(
-              DashboardGrid(
-                key: GlobalKey(),
-                onAddWidgetPressed: displayAddWidgetDialog,
-              ),
-            );
+                      TabData currentTab = tabData[index];
 
-            setState(() => currentTabIndex = newTabIndex);
-          }),
-          // Close tab (Ctrl + W)
-          const SingleActivator(
-            LogicalKeyboardKey.keyW,
-            control: true,
-            includeRepeats: false,
-          ): VoidCallbackIntent(() {
-            if (tabData.length <= 1) {
-              return;
-            }
-
-            TabData currentTab = tabData[currentTabIndex];
-
-            showTabCloseConfirmation(context, currentTab.name, () {
-              int oldTabIndex = currentTabIndex;
-
-              if (currentTabIndex == tabData.length - 1) {
-                currentTabIndex--;
-              }
-
-              grids[oldTabIndex].onDestroy();
-
-              setState(() {
-                tabData.removeAt(oldTabIndex);
-                grids.removeAt(oldTabIndex);
-              });
-            });
-          }),
-        },
-        child: Focus(
-          autofocus: true,
-          descendantsAreTraversable: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Main dashboard page
-              Expanded(
-                child: Stack(
-                  children: [
-                    EditableTabBar(
-                      currentIndex: currentTabIndex,
-                      onTabMoveLeft: () {
-                        _moveTabLeft();
-                      },
-                      onTabMoveRight: () {
-                        _moveTabRight();
-                      },
-                      onTabRename: (index, newData) {
-                        setState(() {
-                          tabData[index] = newData;
-                        });
-                      },
-                      onTabCreate: (tab) {
-                        setState(() {
-                          tabData.add(tab);
-                          grids.add(DashboardGrid(
-                            key: GlobalKey(),
-                            onAddWidgetPressed: displayAddWidgetDialog,
-                          ));
-                        });
-                      },
-                      onTabDestroy: (index) {
-                        if (tabData.length <= 1) {
-                          return;
+                      showTabCloseConfirmation(context, currentTab.name, () {
+                        if (currentTabIndex == tabData.length - 1) {
+                          currentTabIndex--;
                         }
 
-                        TabData currentTab = tabData[index];
+                        grids[index].onDestroy();
 
-                        showTabCloseConfirmation(context, currentTab.name, () {
-                          if (currentTabIndex == tabData.length - 1) {
-                            currentTabIndex--;
-                          }
-
-                          grids[index].onDestroy();
-
-                          setState(() {
-                            tabData.removeAt(index);
-                            grids.removeAt(index);
-                          });
+                        setState(() {
+                          tabData.removeAt(index);
+                          grids.removeAt(index);
                         });
-                      },
-                      onTabChanged: (index) {
-                        setState(() => currentTabIndex = index);
-                      },
-                      tabData: tabData,
-                      tabViews: grids,
-                    ),
-                    AddWidgetDialog(
-                      grid: () => grids[currentTabIndex],
-                      visible: addWidgetDialogVisible,
-                      onNT4DragUpdate: (globalPosition, widget) {
-                        grids[currentTabIndex]
-                            .addNT4DragInWidget(widget, globalPosition);
-                      },
-                      onNT4DragEnd: (widget) {
-                        grids[currentTabIndex].placeNT4DragInWidget(widget);
-                      },
-                      onLayoutDragUpdate: (globalPosition, widget) {
-                        grids[currentTabIndex]
-                            .addLayoutDragInWidget(widget, globalPosition);
-                      },
-                      onLayoutDragEnd: (widget) {
-                        grids[currentTabIndex].placeLayoutDragInWidget(widget);
-                      },
-                      onClose: () {
-                        setState(() => addWidgetDialogVisible = false);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              // Bottom bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: SizedBox(
-                  height: 32,
-                  child: StreamBuilder(
-                    stream: widget.connectionStream,
-                    builder: (context, snapshot) {
-                      bool connected = snapshot.data ?? false;
-
-                      Widget connectedText = (connected)
-                          ? Text(
-                              'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})',
-                              style: footerStyle!.copyWith(
-                                color: Colors.green,
-                              ))
-                          : Text('Network Tables: Disconnected',
-                              style: footerStyle!.copyWith(
-                                color: Colors.red,
-                              ));
-
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          connectedText,
-                          Text(
-                            'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
-                          ),
-                          Opacity(opacity: 0.0, child: connectedText),
-                        ],
-                      );
+                      });
+                    },
+                    onTabChanged: (index) {
+                      setState(() => currentTabIndex = index);
+                    },
+                    tabData: tabData,
+                    tabViews: grids,
+                  ),
+                  AddWidgetDialog(
+                    grid: () => grids[currentTabIndex],
+                    visible: addWidgetDialogVisible,
+                    onNT4DragUpdate: (globalPosition, widget) {
+                      grids[currentTabIndex]
+                          .addNT4DragInWidget(widget, globalPosition);
+                    },
+                    onNT4DragEnd: (widget) {
+                      grids[currentTabIndex].placeNT4DragInWidget(widget);
+                    },
+                    onLayoutDragUpdate: (globalPosition, widget) {
+                      grids[currentTabIndex]
+                          .addLayoutDragInWidget(widget, globalPosition);
+                    },
+                    onLayoutDragEnd: (widget) {
+                      grids[currentTabIndex].placeLayoutDragInWidget(widget);
+                    },
+                    onClose: () {
+                      setState(() => addWidgetDialogVisible = false);
                     },
                   ),
+                ],
+              ),
+            ),
+            // Bottom bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SizedBox(
+                height: 32,
+                child: StreamBuilder(
+                  stream: widget.connectionStream,
+                  builder: (context, snapshot) {
+                    bool connected = snapshot.data ?? false;
+
+                    Widget connectedText = (connected)
+                        ? Text(
+                            'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})',
+                            style: footerStyle!.copyWith(
+                              color: Colors.green,
+                            ))
+                        : Text('Network Tables: Disconnected',
+                            style: footerStyle!.copyWith(
+                              color: Colors.red,
+                            ));
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        connectedText,
+                        Text(
+                          'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                        ),
+                        Opacity(opacity: 0.0, child: connectedText),
+                      ],
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
