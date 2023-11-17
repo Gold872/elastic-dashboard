@@ -25,7 +25,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   GraphWidget({
     super.key,
     required topic,
-    period = Globals.defaultPeriod,
+    period = Globals.defaultGraphPeriod,
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,
@@ -39,7 +39,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
 
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+    period = tryCast(jsonData['period']) ?? Globals.defaultGraphPeriod;
     timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
         5.0;

@@ -10,7 +10,8 @@ class Globals {
   static bool snapToGrid = true;
   static bool showGrid = false;
 
-  static const double defaultPeriod = 0.033;
+  static const double defaultPeriod = 0.1;
+  static const double defaultGraphPeriod = 0.033;
 }
 
 class PrefKeys {

@@ -339,6 +339,8 @@ class ShuffleboardNTListener {
     await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
       currentJsonData.putIfAbsent(jsonKey, () => {});
 
+      String type = (!isCameraStream) ? widget!.type : 'Camera Stream';
+
       currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
       currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
       currentJsonData[jsonKey]!.putIfAbsent('y', () => 0.0);
@@ -353,14 +355,16 @@ class ShuffleboardNTListener {
               ? widgetContainer!.height
               : Globals.gridSize * 2);
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
-      currentJsonData[jsonKey]!.putIfAbsent(
-          'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
+      currentJsonData[jsonKey]!.putIfAbsent('type', () => type);
       currentJsonData[jsonKey]!
           .putIfAbsent('properties', () => <String, dynamic>{});
       currentJsonData[jsonKey]!['properties']
           .putIfAbsent('topic', () => widgetRow.topic);
-      currentJsonData[jsonKey]!['properties']
-          .putIfAbsent('period', () => Globals.defaultPeriod);
+      currentJsonData[jsonKey]!['properties'].putIfAbsent(
+          'period',
+          () => (type != 'Graph')
+              ? Globals.defaultPeriod
+              : Globals.defaultGraphPeriod);
 
       onWidgetAdded?.call(currentJsonData[jsonKey]!);
 
@@ -435,8 +439,9 @@ class ShuffleboardNTListener {
           child['properties']['topic'] = '/CameraPublisher/$cameraName';
         }
 
-        child.putIfAbsent(
-            'type', () => (!isCameraStream) ? widget!.type : 'Camera Stream');
+        String type = (!isCameraStream) ? widget!.type : 'Camera Stream';
+
+        child.putIfAbsent('type', () => type);
         child.putIfAbsent('x', () => 0.0);
         child.putIfAbsent('y', () => 0.0);
         child.putIfAbsent(
@@ -451,7 +456,11 @@ class ShuffleboardNTListener {
                 : Globals.gridSize * 2);
 
         child['properties']!.putIfAbsent('topic', () => childRow.topic);
-        child['properties']!.putIfAbsent('period', () => Globals.defaultPeriod);
+        child['properties']!.putIfAbsent(
+            'period',
+            () => (type != 'Graph')
+                ? Globals.defaultPeriod
+                : Globals.defaultGraphPeriod);
 
         widget?.unSubscribe();
         widget?.dispose(deleting: true);
