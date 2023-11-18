@@ -101,6 +101,19 @@ class NT4Connection {
     }
   }
 
+  Stream<bool> dsConnectionStatus() async* {
+    yield _dsConnected;
+    bool lastYielded = _dsConnected;
+
+    while (true) {
+      if (_dsConnected != lastYielded) {
+        yield _dsConnected;
+        lastYielded = _dsConnected;
+      }
+      await Future.delayed(const Duration(seconds: 1));
+    }
+  }
+
   void changeIPAddress(String ipAddress) {
     if (_ntClient.serverBaseAddress == ipAddress) {
       return;

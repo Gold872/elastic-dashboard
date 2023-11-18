@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
@@ -22,7 +23,7 @@ class FakeSettingsMethods {
 
   void changeTeamNumber() {}
 
-  void changeAutoTeamIP() {}
+  void changeIPAddressMode() {}
 
   void changeShowGrid() {}
 
@@ -41,7 +42,7 @@ void main() {
     SharedPreferences.setMockInitialValues({
       PrefKeys.ipAddress: '127.0.0.1',
       PrefKeys.teamNumber: 353,
-      PrefKeys.useTeamNumberForIP: false,
+      PrefKeys.ipAddressMode: IPAddressMode.driverStation.index,
       PrefKeys.teamColor: Colors.blueAccent.value,
       PrefKeys.showGrid: false,
       PrefKeys.gridSize: 128,
@@ -59,6 +60,7 @@ void main() {
 
   testWidgets('Settings Dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -73,7 +75,7 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Team Number'), findsOneWidget);
     expect(find.text('Team Color'), findsOneWidget);
-    expect(find.text('Use Team # for IP'), findsOneWidget);
+    expect(find.text('IP Address Mode'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
     expect(find.text('Show Grid'), findsWidgets);
     expect(find.text('Grid Size'), findsWidgets);
@@ -89,6 +91,7 @@ void main() {
 
   testWidgets('Change team number', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -122,6 +125,7 @@ void main() {
 
   testWidgets('Change team color', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -175,54 +179,54 @@ void main() {
     verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
   });
 
-  testWidgets('Change auto team number IP', (widgetTester) async {
+  testWidgets('Change IP address mode', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
-          onUseTeamNumberToggle: (value) async {
-            fakeSettings.changeAutoTeamIP();
-
-            await preferences.setBool(PrefKeys.useTeamNumberForIP, value);
-
-            if (value) {
-              await preferences.setString(
-                  PrefKeys.ipAddress,
-                  IPAddressUtil.teamNumberToIP(
-                      preferences.getInt(PrefKeys.teamNumber)!));
-            }
-          },
           preferences: preferences,
+          onIPAddressModeChanged: (mode) {
+            fakeSettings.changeIPAddressMode();
+          },
         ),
       ),
     ));
 
     await widgetTester.pumpAndSettle();
 
-    final ipSwitch = find.descendant(
-        of: find.widgetWithText(DialogToggleSwitch, 'Use Team # for IP'),
-        matching: find.byType(Switch));
+    final ipAddressMode = find.byType(DialogDropdownChooser<IPAddressMode>);
 
-    expect(ipSwitch, findsOneWidget);
+    expect(ipAddressMode, findsOneWidget);
 
-    await widgetTester.tap(ipSwitch);
+    expect(find.text('Driver Station'), findsOneWidget);
+
+    await widgetTester.tap(ipAddressMode);
     await widgetTester.pumpAndSettle();
 
-    expect(preferences.getBool(PrefKeys.useTeamNumberForIP), true);
-    expect(preferences.getString(PrefKeys.ipAddress), 'roboRIO-2601-FRC.local');
+    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
 
-    await widgetTester.tap(ipSwitch);
-
+    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
     await widgetTester.pumpAndSettle();
 
-    verify(fakeSettings.changeAutoTeamIP()).called(2);
-    expect(preferences.getBool(PrefKeys.useTeamNumberForIP), false);
-    expect(preferences.getString(PrefKeys.ipAddress), 'roboRIO-2601-FRC.local');
+    expect(find.text('Driver Station'), findsNothing);
+    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Driver Station'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Driver Station'));
+    await widgetTester.pumpAndSettle();
+
+    verify(fakeSettings.changeIPAddressMode()).called(2);
   });
 
   testWidgets('Change IP address', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -253,6 +257,7 @@ void main() {
 
   testWidgets('Toggle grid', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -294,6 +299,7 @@ void main() {
 
   testWidgets('Change grid size', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -324,6 +330,7 @@ void main() {
 
   testWidgets('Change corner radius', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(

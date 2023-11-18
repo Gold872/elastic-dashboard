@@ -1,7 +1,11 @@
+import 'package:elastic_dashboard/services/ip_address_util.dart';
+
 class Globals {
   static const String repositoryLink =
       'https://github.com/Gold872/elastic-dashboard';
   static const String releasesLink = '$repositoryLink/releases/latest';
+
+  static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
 
   static String ipAddress = '127.0.0.1';
   static int teamNumber = 353;
@@ -12,12 +16,14 @@ class Globals {
 
   static const double defaultPeriod = 0.1;
   static const double defaultGraphPeriod = 0.033;
+
+  static const String roboRIODefaultIP = '192.168.7.201';
 }
 
 class PrefKeys {
   static String layout = 'layout';
   static String ipAddress = 'ip_address';
-  static String useTeamNumberForIP = 'ip_from_team_number';
+  static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
   static String gridSize = 'grid_size';

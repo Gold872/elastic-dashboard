@@ -1,5 +1,9 @@
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +15,7 @@ class SettingsDialog extends StatefulWidget {
 
   final Function(String? data)? onIPAddressChanged;
   final Function(String? data)? onTeamNumberChanged;
-  final Function(bool value)? onUseTeamNumberToggle;
+  final Function(IPAddressMode mode)? onIPAddressModeChanged;
   final Function(Color color)? onColorChanged;
   final Function(bool value)? onGridToggle;
   final Function(String? gridSize)? onGridSizeChanged;
@@ -21,7 +25,7 @@ class SettingsDialog extends StatefulWidget {
     super.key,
     required this.preferences,
     this.onTeamNumberChanged,
-    this.onUseTeamNumberToggle,
+    this.onIPAddressModeChanged,
     this.onIPAddressChanged,
     this.onColorChanged,
     this.onGridToggle,
@@ -74,28 +78,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
               ],
             ),
+            const Divider(),
+            const Align(
+              alignment: Alignment.topLeft,
+              child: Text('IP Address Settings'),
+            ),
             const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Flexible(
-                  child: DialogToggleSwitch(
-                    initialValue: widget.preferences
-                            .getBool(PrefKeys.useTeamNumberForIP) ??
-                        false,
-                    label: 'Use Team # for IP',
-                    onToggle: (value) {
-                      setState(() {
-                        widget.onUseTeamNumberToggle?.call(value);
-                      });
-                    },
-                  ),
-                ),
-                Flexible(
-                  child: DialogTextInput(
-                    enabled: !(widget.preferences
-                            .getBool(PrefKeys.useTeamNumberForIP) ??
-                        false),
+            const Text('IP Address Mode'),
+            DialogDropdownChooser<IPAddressMode>(
+              onSelectionChanged: (mode) {
+                if (mode == null) {
+                  return;
+                }
+
+                widget.onIPAddressModeChanged?.call(mode);
+
+                setState(() {});
+              },
+              choices: IPAddressMode.values,
+              initialValue: Globals.ipAddressMode,
+            ),
+            const SizedBox(height: 5),
+            StreamBuilder(
+                stream: nt4Connection.dsConnectionStatus(),
+                initialData: nt4Connection.isDSConnected,
+                builder: (context, snapshot) {
+                  bool dsConnected = tryCast(snapshot.data) ?? false;
+
+                  return DialogTextInput(
+                    enabled: Globals.ipAddressMode == IPAddressMode.custom ||
+                        (Globals.ipAddressMode == IPAddressMode.driverStation &&
+                            !dsConnected),
                     initialText:
                         widget.preferences.getString(PrefKeys.ipAddress),
                     label: 'IP Address',
@@ -104,11 +117,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         widget.onIPAddressChanged?.call(data);
                       });
                     },
-                  ),
-                ),
-              ],
-            ),
+                  );
+                }),
             const Divider(),
+            const Align(
+              alignment: Alignment.topLeft,
+              child: Text('Grid Settings'),
+            ),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

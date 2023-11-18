@@ -29,6 +29,9 @@ void setupMockOfflineNT4() {
   when(mockNT4Connection.connectionStatus())
       .thenAnswer((_) => Stream.value(false));
 
+  when(mockNT4Connection.dsConnectionStatus())
+      .thenAnswer((_) => Stream.value(false));
+
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
@@ -68,6 +71,9 @@ void setupMockOnlineNT4() {
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
   when(mockNT4Connection.connectionStatus())
+      .thenAnswer((_) => Stream.value(true));
+
+  when(mockNT4Connection.dsConnectionStatus())
       .thenAnswer((_) => Stream.value(true));
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);

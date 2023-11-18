@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -34,6 +35,9 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
+  Globals.ipAddressMode =
+      IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
+
   Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? Globals.gridSize;
   Globals.snapToGrid =
       preferences.getBool(PrefKeys.snapToGrid) ?? Globals.snapToGrid;
@@ -45,6 +49,10 @@ void main() async {
       .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
 
   nt4Connection.dsClientConnect((ip) async {
+    if (Globals.ipAddressMode != IPAddressMode.driverStation) {
+      return;
+    }
+
     if (preferences.getString(PrefKeys.ipAddress) != ip) {
       await preferences.setString(PrefKeys.ipAddress, ip);
     } else {

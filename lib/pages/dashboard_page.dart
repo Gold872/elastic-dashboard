@@ -719,27 +719,49 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-          if (nt4Connection.isDSConnected) {
-            setState(() {});
-            return;
-          }
-
-          bool determineAddressFromTeamNumber =
-              _preferences.getBool(PrefKeys.useTeamNumberForIP) ?? true;
-
-          if (determineAddressFromTeamNumber) {
-            _updateIPAddress(newIPAddress: data);
+          switch (Globals.ipAddressMode) {
+            case IPAddressMode.roboRIOmDNS:
+              _updateIPAddress(
+                  IPAddressUtil.teamNumberToRIOmDNS(newTeamNumber));
+              break;
+            case IPAddressMode.teamNumber:
+              _updateIPAddress(IPAddressUtil.teamNumberToIP(newTeamNumber));
+              break;
+            default:
+              setState(() {});
+              break;
           }
         },
-        onUseTeamNumberToggle: (value) async {
-          await _preferences.setBool(PrefKeys.useTeamNumberForIP, value);
+        onIPAddressModeChanged: (mode) async {
+          await _preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
-          if (nt4Connection.isDSConnected) {
-            return;
-          }
+          Globals.ipAddressMode = mode;
 
-          if (value) {
-            _updateIPAddress();
+          switch (mode) {
+            case IPAddressMode.driverStation:
+              String? lastAnnouncedIP = nt4Connection.dsClient.lastAnnouncedIP;
+
+              if (lastAnnouncedIP != null) {
+                _updateIPAddress(lastAnnouncedIP);
+              }
+              break;
+            case IPAddressMode.roboRIOmDNS:
+              _updateIPAddress(
+                  IPAddressUtil.teamNumberToRIOmDNS(Globals.teamNumber));
+              break;
+            case IPAddressMode.teamNumber:
+              _updateIPAddress(
+                  IPAddressUtil.teamNumberToIP(Globals.teamNumber));
+              break;
+            case IPAddressMode.roboRIODefault:
+              _updateIPAddress(Globals.roboRIODefaultIP);
+              break;
+            case IPAddressMode.localhost:
+              _updateIPAddress('localhost');
+              break;
+            default:
+              setState(() {});
+              break;
           }
         },
         onIPAddressChanged: (String? data) async {
@@ -747,11 +769,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             return;
           }
 
-          if (nt4Connection.isDSConnected) {
-            return;
-          }
-
-          _updateIPAddress(newIPAddress: data);
+          _updateIPAddress(data);
         },
         onGridToggle: (value) async {
           setState(() {
@@ -801,31 +819,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
   }
 
-  void _updateIPAddress({String? newIPAddress}) async {
-    String ipAddress =
-        _preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1';
+  void _updateIPAddress(String newIPAddress) async {
+    await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
 
-    if (newIPAddress != null) {
-      bool isTeamNumber = IPAddressUtil.isTeamNumber(newIPAddress);
-
-      if (isTeamNumber) {
-        ipAddress = IPAddressUtil.teamNumberToIP(int.parse(newIPAddress));
-      } else {
-        ipAddress = newIPAddress;
-      }
-    } else {
-      int? teamNumber = _preferences.getInt(PrefKeys.teamNumber);
-
-      if (teamNumber != null) {
-        ipAddress = IPAddressUtil.teamNumberToIP(teamNumber);
-      }
-    }
-
-    await _preferences.setString(PrefKeys.ipAddress, ipAddress);
-
-    nt4Connection.changeIPAddress(ipAddress);
-
-    setState(() {});
+    setState(() {
+      nt4Connection.changeIPAddress(newIPAddress);
+    });
   }
 
   void showWindowCloseConfirmation(BuildContext context) {
