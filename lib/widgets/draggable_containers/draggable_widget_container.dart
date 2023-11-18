@@ -112,11 +112,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   }
 
   static double snapToGrid(double value) {
-    if (Globals.snapToGrid) {
-      return (value / Globals.gridSize).roundToDouble() * Globals.gridSize;
-    } else {
-      return value;
-    }
+    return (value / Globals.gridSize).roundToDouble() * Globals.gridSize;
   }
 
   void refresh() {

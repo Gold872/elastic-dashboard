@@ -39,8 +39,6 @@ void main() async {
       IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
 
   Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? Globals.gridSize;
-  Globals.snapToGrid =
-      preferences.getBool(PrefKeys.snapToGrid) ?? Globals.snapToGrid;
   Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? Globals.showGrid;
   Globals.cornerRadius =
       preferences.getDouble(PrefKeys.cornerRadius) ?? Globals.cornerRadius;
@@ -143,7 +141,7 @@ class _ElasticState extends State<Elastic> {
         version: widget.version,
         onColorChanged: (color) => setState(() {
           teamColor = color;
-          widget.preferences.setInt('team_color', color.value);
+          widget.preferences.setInt(PrefKeys.teamColor, color.value);
         }),
       ),
     );
