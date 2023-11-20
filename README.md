@@ -2,7 +2,7 @@
 
 [![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
 
-A simple and modern dashboard for FRC teams.
+A simple and modern dashboard for FRC.
 
 Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, and Linux.
 
@@ -20,7 +20,7 @@ Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is 
 - Draggable and resizable card widgets
 - Customizable color scheme
 - Automatic IP retrieval from the FRC Driver Station
-- Compatibility with WPILib's Shuffleboard API
+- Compatibility with the WPILib Shuffleboard API
 
 ![Example Layout](/screenshots/example_layout.png)
 
