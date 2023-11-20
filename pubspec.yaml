@@ -1,10 +1,10 @@
 name: elastic_dashboard
 description: A simple and modern dashboard for FRC.
-publish_to: "none"
+publish_to: 'none'
 version: 2024.1.0-beta
 
 environment:
-  sdk: ">=3.0.2 <4.0.0"
+  sdk: '>=3.0.2 <4.0.0'
 
 dependencies:
   animations: ^2.0.7
@@ -20,7 +20,6 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
-  flutter_mjpeg: ^2.0.4
   github: ^9.17.0
   http: ^0.13.6
   messagepack: ^0.2.1
@@ -37,7 +36,7 @@ dependencies:
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
   url_launcher: ^6.1.14
-  uuid: ^3.0.7
+  uuid: ^4.2.1
   vector_math: ^2.1.4
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
