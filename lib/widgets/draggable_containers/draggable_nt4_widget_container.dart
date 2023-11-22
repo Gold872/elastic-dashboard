@@ -158,6 +158,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         onJsonLoadingWarning: onJsonLoadingWarning);
   }
 
+  void refreshChild() {
+    child?.refresh();
+  }
+
   @override
   void dispose({bool deleting = false}) {
     super.dispose(deleting: deleting);
@@ -534,7 +538,10 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       width: draggablePositionRect.width,
       height: draggablePositionRect.height,
       opacity: 0.80,
-      child: child,
+      child: ChangeNotifierProvider(
+        create: (context) => NT4WidgetNotifier(),
+        child: child,
+      ),
     );
   }
 

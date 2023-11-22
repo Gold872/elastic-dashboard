@@ -1,4 +1,5 @@
 import 'package:contextmenu/contextmenu.dart';
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
@@ -229,6 +230,8 @@ class DashboardGrid extends StatelessWidget {
     widget.validLocation = true;
 
     widget.dispose();
+    widget.refresh();
+    widget.tryCast<DraggableNT4WidgetContainer>()?.refreshChild();
   }
 
   void onWidgetDragCancel(DraggableWidgetContainer widget) {
