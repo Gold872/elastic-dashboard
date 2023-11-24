@@ -11,6 +11,8 @@ class DialogTextInput extends StatelessWidget {
 
   TextEditingController? textEditingController;
 
+  bool focused = false;
+
   DialogTextInput(
       {super.key,
       required this.onSubmit,
@@ -29,14 +31,7 @@ class DialogTextInput extends StatelessWidget {
       padding: const EdgeInsets.all(4.0),
       child: Focus(
         onFocusChange: (value) {
-          // Don't consider the text submitted when focus is gained
-          if (value) {
-            return;
-          }
-          String textValue = textEditingController!.text;
-          if (textValue.isNotEmpty || allowEmptySubmission) {
-            onSubmit.call(textValue);
-          }
+          focused = value;
         },
         child: TextField(
           enabled: enabled,
@@ -44,6 +39,18 @@ class DialogTextInput extends StatelessWidget {
             if (value.isNotEmpty || allowEmptySubmission) {
               onSubmit.call(value);
             }
+          },
+          onTapOutside: (_) {
+            if (!focused) {
+              return;
+            }
+
+            String textValue = textEditingController!.text;
+            if (textValue.isNotEmpty || allowEmptySubmission) {
+              onSubmit.call(textValue);
+            }
+
+            FocusManager.instance.primaryFocus?.unfocus();
           },
           controller: textEditingController,
           inputFormatters: (formatter != null) ? [formatter!] : null,
