@@ -36,9 +36,10 @@ class TextDisplay extends StatelessWidget with NT4Widget {
       stream: subscription?.periodicStream(),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        Object data = snapshot.data ?? '';
+        Object data = snapshot.data ?? Object();
 
-        if (data.toString() != _previousValue.toString()) {
+        if (data.toString() != _previousValue.toString() &&
+            !data.isExactType<Object>()) {
           // Needed to prevent errors
           Future(() async {
             _controller.text = data.toString();
