@@ -49,16 +49,13 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: FittedBox(
-                alignment: Alignment.center,
-                fit: BoxFit.contain,
-                child: Text(
-                  '${time.ceil()}',
-                  style: TextStyle(
-                    color: _getTimeColor(time.ceil().toDouble()),
-                  ),
+            FittedBox(
+              fit: BoxFit.contain,
+              child: Text(
+                '${time.ceil()}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _getTimeColor(time.ceil().toDouble()),
                 ),
               ),
             ),
