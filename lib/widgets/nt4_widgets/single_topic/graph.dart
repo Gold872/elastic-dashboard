@@ -182,13 +182,22 @@ class GraphWidget extends StatelessWidget with NT4Widget {
       _graphData = currentGraphData;
     }
 
-    return _graphWidget = _GraphWidgetGraph(
-      key: GlobalKey(),
+    _graphWidget = _GraphWidgetGraph(
       initialData: _graphData,
       subscription: subscription,
       mainColor: mainColor,
       minValue: minValue,
       maxValue: maxValue,
+    );
+
+    // Idk why this works but otherwise it doesn't ever rebuild ¯\_(ツ)_/¯
+    return StreamBuilder(
+      stream: Stream.periodic(const Duration(milliseconds: 500)),
+      builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
+        return _graphWidget!;
+      },
     );
   }
 }
