@@ -3,11 +3,10 @@ import 'dart:typed_data';
 
 enum IPAddressMode {
   driverStation('Driver Station'), // 0
-  roboRIOmDNS('RoboRIO mDNS (roboRIO-###-FRC.local)'), // 1
-  teamNumber('Team Number (10.TE.AM.2)'), // 2
-  roboRIODefault('RoboRIO Default (192.168.7.201)'), // 3
-  localhost('localhost (127.0.0.1)'), // 4
-  custom('Custom'); // 5
+  teamNumber('Team Number (10.TE.AM.2)'), // 1
+  roboRIOmDNS('RoboRIO mDNS (roboRIO-###-FRC.local)'), // 2
+  localhost('localhost (127.0.0.1)'), // 3
+  custom('Custom'); // 4
 
   const IPAddressMode(this.displayName);
 

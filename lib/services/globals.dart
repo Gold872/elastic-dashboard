@@ -15,8 +15,6 @@ class Globals {
 
   static const double defaultPeriod = 0.1;
   static const double defaultGraphPeriod = 0.033;
-
-  static const String roboRIODefaultIP = '192.168.7.201';
 }
 
 class PrefKeys {

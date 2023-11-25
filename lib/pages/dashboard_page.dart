@@ -762,9 +762,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               _updateIPAddress(
                   IPAddressUtil.teamNumberToIP(Globals.teamNumber));
               break;
-            case IPAddressMode.roboRIODefault:
-              _updateIPAddress(Globals.roboRIODefaultIP);
-              break;
             case IPAddressMode.localhost:
               _updateIPAddress('localhost');
               break;
