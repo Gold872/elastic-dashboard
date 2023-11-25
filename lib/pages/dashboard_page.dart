@@ -583,7 +583,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         LogicalKeyboardKey.arrowLeft,
         modifiers: [ModifierKey.controlModifier],
       ),
-      callback: _moveTabLeft,
+      callback: () {
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          _moveTabLeft();
+        }
+      },
     );
     // Move Tab Right (Ctrl + ->)
     hotKeyManager.register(
@@ -591,7 +595,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         LogicalKeyboardKey.arrowRight,
         modifiers: [ModifierKey.controlModifier],
       ),
-      callback: _moveTabRight,
+      callback: () {
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          _moveTabRight();
+        }
+      },
     );
     // New Tab (Ctrl + T)
     hotKeyManager.register(
