@@ -54,6 +54,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   final List<TabData> tabData = [];
 
+  final Function mapEquals = const DeepCollectionEquality().equals;
+
   int currentTabIndex = 0;
 
   bool addWidgetDialogVisible = false;
@@ -161,8 +163,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
     Map<String, dynamic> currentJson = toJson();
 
-    bool showConfirmation =
-        !const DeepCollectionEquality().equals(savedJson, currentJson);
+    bool showConfirmation = !mapEquals(savedJson, currentJson);
 
     if (showConfirmation) {
       showWindowCloseConfirmation(context);
