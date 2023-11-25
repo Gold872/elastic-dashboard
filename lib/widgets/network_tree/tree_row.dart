@@ -233,8 +233,8 @@ class TreeRow {
       width = normalGridSize * 2;
       height = normalGridSize * 3;
     } else if (primary is NetworkAlerts) {
-      width = normalGridSize * 3;
-      height = normalGridSize * 2;
+      width = normalGridSize * 2;
+      height = normalGridSize * 3;
     }
 
     return WidgetContainer(
