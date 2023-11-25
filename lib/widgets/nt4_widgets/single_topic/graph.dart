@@ -218,7 +218,6 @@ class _GraphWidgetGraph extends StatefulWidget {
   }
 
   _GraphWidgetGraph({
-    super.key,
     required this.initialData,
     required this.subscription,
     required this.mainColor,
