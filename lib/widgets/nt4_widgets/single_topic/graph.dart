@@ -20,7 +20,8 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   double? maxValue;
   late Color mainColor;
 
-  late final List<double> _graphData;
+  List<double> _graphData = [];
+  _GraphWidgetGraph? _graphWidget;
 
   GraphWidget({
     super.key,
@@ -53,8 +54,6 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   @override
   void init() {
     super.init();
-
-    _graphData = [];
 
     resetGraphData();
   }
@@ -174,7 +173,17 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
-    return GraphWidgetGraph(
+    resetGraphData();
+
+    List<double>? currentGraphData = _graphWidget?.getCurrentData();
+
+    if (currentGraphData != null &&
+        currentGraphData.length == _graphData.length) {
+      _graphData = currentGraphData;
+    }
+
+    return _graphWidget = _GraphWidgetGraph(
+      key: GlobalKey(),
       initialData: _graphData,
       subscription: subscription,
       mainColor: mainColor,
@@ -184,7 +193,7 @@ class GraphWidget extends StatelessWidget with NT4Widget {
   }
 }
 
-class GraphWidgetGraph extends StatefulWidget {
+class _GraphWidgetGraph extends StatefulWidget {
   final NT4Subscription? subscription;
   final double? minValue;
   final double? maxValue;
@@ -192,7 +201,14 @@ class GraphWidgetGraph extends StatefulWidget {
 
   final List<double> initialData;
 
-  const GraphWidgetGraph({
+  final List<_GraphPoint> _currentData = [];
+
+  set currentData(List<_GraphPoint> data) {
+    _currentData.clear();
+    _currentData.addAll(data);
+  }
+
+  _GraphWidgetGraph({
     super.key,
     required this.initialData,
     required this.subscription,
@@ -201,11 +217,15 @@ class GraphWidgetGraph extends StatefulWidget {
     this.maxValue,
   });
 
+  List<double> getCurrentData() {
+    return _currentData.map((e) => e.y).toList();
+  }
+
   @override
-  State<GraphWidgetGraph> createState() => _GraphWidgetGraphState();
+  State<_GraphWidgetGraph> createState() => _GraphWidgetGraphState();
 }
 
-class _GraphWidgetGraphState extends State<GraphWidgetGraph> {
+class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   ChartSeriesController? seriesController;
   late List<_GraphPoint> graphData;
   late StreamSubscription<Object?>? subscriptionListener;
@@ -223,11 +243,15 @@ class _GraphWidgetGraphState extends State<GraphWidgetGraph> {
       fakeXIndex++;
     }
 
+    widget.currentData = graphData;
+
     subscriptionListener = widget.subscription?.periodicStream().listen((data) {
       if (data != null) {
         graphData.add(
             _GraphPoint(x: fakeXIndex.toDouble(), y: tryCast(data) ?? 0.0));
         graphData.removeAt(0);
+
+        widget.currentData = graphData;
 
         fakeXIndex++;
 
