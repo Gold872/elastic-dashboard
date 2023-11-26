@@ -349,12 +349,12 @@ class DifferentialDrivePainter extends CustomPainter {
 
       final double base = scaleFactor * arrowSize / 2;
 
-      final double arrowRotation = atan2(vectorY, vectorX);
+      final double arrowRotation = atan2(vectorY, vectorX) +
+          forwardSpeedSign * arcSign * arcLength / radius;
 
       drawArrowHead(
           canvas, center, vectorX, vectorY, arrowRotation, arrowAngle, base);
     } else {
-      // Turning from inside the robot
       final double turnSign = (leftSpeed - rightSpeed).sign;
 
       // Turning from the center of the robot
@@ -378,6 +378,7 @@ class DifferentialDrivePainter extends CustomPainter {
         drawArrowHead(canvas, center, turnSign * radius / 2, 0, arrowRotation,
             arrowAngle, base);
       } else {
+        // Turning from inside the robot
         double dominant = turnRadius < 0 ? leftSpeed : rightSpeed;
         double secondary = turnRadius < 0 ? rightSpeed : leftSpeed;
         double radius = dominant.abs() * maxRadius;
@@ -394,8 +395,8 @@ class DifferentialDrivePainter extends CustomPainter {
 
         final double base = scaleFactor * arrowSize / 2;
 
-        double tipX = 0.5 * scaleFactor * radius * cos(angle + startAngle);
-        double tipY = 0.5 * scaleFactor * radius * sin(angle + startAngle);
+        double tipX = 0.5 * radius * cos(angle + startAngle);
+        double tipY = 0.5 * radius * sin(angle + startAngle);
 
         double arrowRotation = angle + startAngle + (pi / 2) * turnSign;
 
