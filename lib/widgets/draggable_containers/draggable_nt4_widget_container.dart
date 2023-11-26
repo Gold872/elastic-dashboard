@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -75,6 +76,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
     switch (widget?.type) {
       case 'Gyro':
+        return normalSize * 2;
+      case 'Encoder':
         return normalSize * 2;
       case 'Camera Stream':
         return normalSize * 2;
@@ -259,6 +262,12 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       case '3-Axis Accelerometer':
       case '3AxisAccelerometer':
         return ThreeAxisAccelerometer.fromJson(
+          key: UniqueKey(),
+          jsonData: widgetProperties,
+        );
+      case 'Encoder':
+      case 'Quadrature Encoder':
+        return EncoderWidget.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );

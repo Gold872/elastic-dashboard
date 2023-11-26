@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
@@ -164,6 +165,9 @@ class TreeRow {
         return ThreeAxisAccelerometer(key: UniqueKey(), topic: topic);
       case 'Accelerometer':
         return AccelerometerWidget(key: UniqueKey(), topic: topic);
+      case 'Encoder':
+      case 'Quadrature Encoder':
+        return EncoderWidget(key: UniqueKey(), topic: topic);
       case 'Field2d':
         return FieldWidget(key: UniqueKey(), topic: topic);
       case 'PowerDistribution':
@@ -208,6 +212,8 @@ class TreeRow {
     if (primary is Gyro) {
       width = normalGridSize * 2;
       height = normalGridSize * 2;
+    } else if (primary is EncoderWidget) {
+      width = normalGridSize * 2;
     } else if (primary is CameraStreamWidget) {
       width = normalGridSize * 2;
       height = normalGridSize * 2;
