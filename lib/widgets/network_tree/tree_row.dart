@@ -15,6 +15,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_choo
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
@@ -158,6 +159,8 @@ class TreeRow {
     switch (type) {
       case 'Gyro':
         return Gyro(key: UniqueKey(), topic: topic);
+      case '3AxisAccelerometer':
+        return ThreeAxisAccelerometer(key: UniqueKey(), topic: topic);
       case 'Field2d':
         return FieldWidget(key: UniqueKey(), topic: topic);
       case 'PowerDistribution':

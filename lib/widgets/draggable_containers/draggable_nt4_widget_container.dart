@@ -16,6 +16,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferen
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
@@ -251,6 +252,12 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Gyro':
         return Gyro.fromJson(
+          key: UniqueKey(),
+          jsonData: widgetProperties,
+        );
+      case '3-Axis Accelerometer':
+      case '3AxisAccelerometer':
+        return ThreeAxisAccelerometer.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );
