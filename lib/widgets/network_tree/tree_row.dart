@@ -1,6 +1,7 @@
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
@@ -161,6 +162,8 @@ class TreeRow {
         return Gyro(key: UniqueKey(), topic: topic);
       case '3AxisAccelerometer':
         return ThreeAxisAccelerometer(key: UniqueKey(), topic: topic);
+      case 'Accelerometer':
+        return AccelerometerWidget(key: UniqueKey(), topic: topic);
       case 'Field2d':
         return FieldWidget(key: UniqueKey(), topic: topic);
       case 'PowerDistribution':

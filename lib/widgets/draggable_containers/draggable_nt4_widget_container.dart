@@ -1,6 +1,7 @@
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
@@ -258,6 +259,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       case '3-Axis Accelerometer':
       case '3AxisAccelerometer':
         return ThreeAxisAccelerometer.fromJson(
+          key: UniqueKey(),
+          jsonData: widgetProperties,
+        );
+      case 'Accelerometer':
+        return AccelerometerWidget.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );
