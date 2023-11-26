@@ -75,6 +75,7 @@ class AccelerometerWidget extends StatelessWidget with NT4Widget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     '${value.toStringAsFixed(2)} g',
+                    style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
                 ),
