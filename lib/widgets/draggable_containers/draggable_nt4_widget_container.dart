@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/motor_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
@@ -197,7 +198,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           'Network tables widget does not have any properties, defaulting to an empty properties map.');
     }
 
-    switch (tryCast(jsonData['type'])) {
+    String type = tryCast(jsonData['type']) ?? '';
+    switch (type) {
       case 'Boolean Box':
         return BooleanBox.fromJson(
           key: UniqueKey(),
@@ -273,6 +275,16 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Accelerometer':
         return AccelerometerWidget.fromJson(
+          key: UniqueKey(),
+          jsonData: widgetProperties,
+        );
+      case 'Motor Controller':
+      case 'Nidec Brushless':
+        if (type == 'Nidec Brushless') {
+          onJsonLoadingWarning
+              ?.call('Easter egg found: Nidec Brushless widget!');
+        }
+        return MotorController.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );

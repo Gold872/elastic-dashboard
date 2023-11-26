@@ -10,6 +10,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/motor_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
@@ -168,6 +169,9 @@ class TreeRow {
       case 'Encoder':
       case 'Quadrature Encoder':
         return EncoderWidget(key: UniqueKey(), topic: topic);
+      case 'Motor Controller':
+      case 'Nidec Brushless':
+        return MotorController(key: UniqueKey(), topic: topic);
       case 'Field2d':
         return FieldWidget(key: UniqueKey(), topic: topic);
       case 'PowerDistribution':
