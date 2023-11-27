@@ -99,9 +99,11 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: streamsSubscription.periodicStream(),
+      stream: streamsSubscription.periodicStream(yieldAll: false),
       initialData: nt4Connection.getLastAnnouncedValue(streamsTopic),
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         if (!nt4Connection.isNT4Connected && clientOpen) {
           closeClient();
         }

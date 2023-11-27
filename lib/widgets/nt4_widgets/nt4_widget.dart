@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
@@ -121,5 +123,30 @@ mixin NT4Widget on StatelessWidget {
     Future(() async {
       notifier?.refresh();
     });
+  }
+
+  @protected
+  List<Object> getCurrentData() {
+    return [];
+  }
+
+  @protected
+  Stream<Object> get multiTopicPeriodicStream async* {
+    List<Object> previousData = getCurrentData();
+
+    while (true) {
+      List<Object> currentData = getCurrentData();
+
+      if (!(const DeepCollectionEquality().equals(previousData, currentData))) {
+        yield Object();
+        previousData = currentData;
+      }
+
+      await Future.delayed(Duration(
+          milliseconds: ((subscription?.options.periodicRateSeconds ??
+                      Globals.defaultPeriod) *
+                  1000)
+              .round()));
+    }
   }
 }

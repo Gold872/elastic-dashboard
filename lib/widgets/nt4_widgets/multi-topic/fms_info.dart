@@ -83,12 +83,39 @@ class FMSInfo extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    String eventName =
+        tryCast(nt4Connection.getLastAnnouncedValue(eventNameTopic)) ?? '';
+    int controlData =
+        tryCast(nt4Connection.getLastAnnouncedValue(controlDataTopic)) ?? 32;
+    bool redAlliance =
+        tryCast(nt4Connection.getLastAnnouncedValue(allianceTopic)) ?? true;
+    int matchNumber =
+        tryCast(nt4Connection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
+    int matchType =
+        tryCast(nt4Connection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
+    int replayNumber =
+        tryCast(nt4Connection.getLastAnnouncedValue(replayNumberTopic)) ?? 0;
+
+    return [
+      eventName,
+      controlData,
+      redAlliance,
+      matchNumber,
+      matchType,
+      replayNumber,
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         String eventName =
             tryCast(nt4Connection.getLastAnnouncedValue(eventNameTopic)) ?? '';
         int controlData =

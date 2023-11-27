@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
@@ -35,6 +36,8 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   late String robotTopicName;
   List<String> otherObjectTopics = [];
+
+  bool rendered = false;
 
   FieldWidget({
     super.key,
@@ -81,6 +84,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     super.resetSubscription();
 
     robotTopicName = '$topic/Robot';
+    otherObjectTopics.clear();
   }
 
   @override
@@ -90,6 +94,9 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     if (deleting) {
       field?.dispose();
     }
+
+    widgetSize = null;
+    rendered = false;
   }
 
   @override
@@ -205,7 +212,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     ];
   }
 
-  double getBackgroundFitWidth(Size size) {
+  double _getBackgroundFitWidth(Size size) {
     double fitWidth = size.width;
     double fitHeight = size.height;
 
@@ -215,7 +222,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
             ((field!.fieldImageHeight ?? 0) / (field!.fieldImageWidth ?? 1)));
   }
 
-  double getBackgroundFitHeight(Size size) {
+  double _getBackgroundFitHeight(Size size) {
     double fitWidth = size.width;
     double fitHeight = size.height;
 
@@ -225,7 +232,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
             ((field!.fieldImageHeight ?? 0) / (field!.fieldImageWidth ?? 1)));
   }
 
-  Widget getTransformedFieldObject(List<double> objectPosition, Offset center,
+  Widget _getTransformedFieldObject(List<double> objectPosition, Offset center,
       Offset fieldCenter, double scaleReduction,
       {Size? objectSize}) {
     double xFromCenter =
@@ -282,7 +289,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     );
   }
 
-  Widget getTrajectoryPoint(List<double> objectPosition, Offset center,
+  Widget _getTrajectoryPoint(List<double> objectPosition, Offset center,
       Offset fieldCenter, double scaleReduction) {
     double xFromCenter =
         (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
@@ -315,23 +322,95 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     );
   }
 
+  void _updateOtherObjectTopics() {
+    for (NT4Topic nt4Topic in nt4Connection.nt4Client.announcedTopics.values) {
+      if (nt4Topic.name.contains(topic) &&
+          !nt4Topic.name.contains('Robot') &&
+          !nt4Topic.name.contains('.') &&
+          !otherObjectTopics.contains(nt4Topic.name)) {
+        otherObjectTopics.add(nt4Topic.name);
+      }
+    }
+  }
+
+  @override
+  List<Object> getCurrentData() {
+    List<Object> data = [];
+
+    List<Object?> robotPositionRaw = nt4Connection
+            .getLastAnnouncedValue(robotTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<double> robotPosition = robotPositionRaw.whereType<double>().toList();
+
+    data.add(robotPosition);
+
+    if (showOtherObjects || showTrajectories) {
+      for (String objectTopic in otherObjectTopics) {
+        List<Object?>? objectPositionRaw = nt4Connection
+            .getLastAnnouncedValue(objectTopic)
+            ?.tryCast<List<Object?>>();
+
+        if (objectPositionRaw == null) {
+          continue;
+        }
+
+        if (objectPositionRaw.length > 24 && !showTrajectories) {
+          continue;
+        } else if (!showOtherObjects) {
+          continue;
+        }
+
+        List<double> objectPosition =
+            objectPositionRaw.whereType<double>().toList();
+
+        data.add(objectPosition);
+      }
+    }
+
+    return data;
+  }
+
+  @override
+  Stream<Object> get multiTopicPeriodicStream async* {
+    yield Object();
+
+    List<Object> previousData = getCurrentData();
+
+    while (true) {
+      _updateOtherObjectTopics();
+
+      List<Object> currentData = getCurrentData();
+
+      if (!(const DeepCollectionEquality().equals(previousData, currentData)) ||
+          !rendered) {
+        yield Object();
+        previousData = currentData;
+      }
+
+      await Future.delayed(Duration(
+          milliseconds: ((subscription?.options.periodicRateSeconds ??
+                      Globals.defaultPeriod) *
+                  1000)
+              .round()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
+    widgetSize = null;
+    rendered = false;
+
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         if (showOtherObjects || showTrajectories) {
-          for (NT4Topic nt4Topic
-              in nt4Connection.nt4Client.announcedTopics.values) {
-            if (nt4Topic.name.contains(topic) &&
-                !nt4Topic.name.contains('Robot') &&
-                !nt4Topic.name.contains('.') &&
-                !otherObjectTopics.contains(nt4Topic.name)) {
-              otherObjectTopics.add(nt4Topic.name);
-            }
-          }
+          _updateOtherObjectTopics();
         }
 
         List<Object?> robotPositionRaw = nt4Connection
@@ -363,9 +442,19 @@ class FieldWidget extends StatelessWidget with NT4Widget {
             2;
 
         double scaleReduction =
-            (getBackgroundFitWidth(size)) / (field!.fieldImageWidth ?? 1);
+            (_getBackgroundFitWidth(size)) / (field!.fieldImageWidth ?? 1);
 
-        Widget robot = getTransformedFieldObject(
+        if (renderBox != null &&
+            widgetSize != null &&
+            size != const Size(0, 0) &&
+            size.width > 100.0 &&
+            scaleReduction != 0.0 &&
+            robotPosition != null &&
+            fieldCenter != const Offset(0.0, 0.0)) {
+          rendered = true;
+        }
+
+        Widget robot = _getTransformedFieldObject(
             robotPosition ?? [0.0, 0.0, 0.0],
             center,
             fieldCenter,
@@ -396,13 +485,13 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
             for (int i = 0; i < objectPosition.length - 2; i += 3) {
               if (objectPosition.length > 24) {
-                trajectoryPoints.add(getTrajectoryPoint(
+                trajectoryPoints.add(_getTrajectoryPoint(
                     objectPosition.sublist(i, i + 3),
                     center,
                     fieldCenter,
                     scaleReduction));
               } else {
-                otherObjects.add(getTransformedFieldObject(
+                otherObjects.add(_getTransformedFieldObject(
                     objectPosition.sublist(i, i + 3),
                     center,
                     fieldCenter,

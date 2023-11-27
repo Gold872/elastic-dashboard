@@ -74,12 +74,32 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    List<Object?> rawNames = nt4Connection
+            .getLastAnnouncedValue(namesTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<Object?> rawIds = nt4Connection
+            .getLastAnnouncedValue(idsTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<String> names = rawNames.whereType<String>().toList();
+    List<int> ids = rawIds.whereType<int>().toList();
+
+    return [names, ids];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         List<Object?> rawNames = nt4Connection
                 .getLastAnnouncedValue(namesTopicName)
                 ?.tryCast<List<Object?>>() ??

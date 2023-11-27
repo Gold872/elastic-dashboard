@@ -48,12 +48,23 @@ class ThreeAxisAccelerometer extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    double xAccel = tryCast(nt4Connection.getLastAnnouncedValue(xTopic)) ?? 0.0;
+    double yAccel = tryCast(nt4Connection.getLastAnnouncedValue(yTopic)) ?? 0.0;
+    double zAccel = tryCast(nt4Connection.getLastAnnouncedValue(zTopic)) ?? 0.0;
+
+    return [xAccel, yAccel, zAccel];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         double xAccel =
             tryCast(nt4Connection.getLastAnnouncedValue(xTopic)) ?? 0.0;
         double yAccel =

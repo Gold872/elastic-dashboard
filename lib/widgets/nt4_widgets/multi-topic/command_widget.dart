@@ -48,12 +48,27 @@ class CommandWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    bool running = nt4Connection
+            .getLastAnnouncedValue(runningTopicName)
+            ?.tryCast<bool>() ??
+        false;
+    String name =
+        nt4Connection.getLastAnnouncedValue(nameTopicName)?.tryCast<String>() ??
+            'Unknown';
+
+    return [running, name];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         bool running = nt4Connection
                 .getLastAnnouncedValue(runningTopicName)
                 ?.tryCast<bool>() ??

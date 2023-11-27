@@ -652,9 +652,14 @@ class NT4Subscription {
     _listeners.add(onChanged);
   }
 
-  Stream<Object?> periodicStream() async* {
+  Stream<Object?> periodicStream({bool yieldAll = true}) async* {
+    Object? lastYielded = currentValue;
+
     while (true) {
-      yield currentValue;
+      if (lastYielded != currentValue || yieldAll) {
+        yield currentValue;
+        lastYielded = currentValue;
+      }
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
     }

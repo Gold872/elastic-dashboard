@@ -46,12 +46,38 @@ class NetworkAlerts extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    List<Object?> errorsRaw = nt4Connection
+            .getLastAnnouncedValue(errorsTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<Object?> warningsRaw = nt4Connection
+            .getLastAnnouncedValue(warningsTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<Object?> infosRaw = nt4Connection
+            .getLastAnnouncedValue(infosTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<String> errors = errorsRaw.whereType<String>().toList();
+    List<String> warnings = warningsRaw.whereType<String>().toList();
+    List<String> infos = infosRaw.whereType<String>().toList();
+
+    return [errors, warnings, infos];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         List<Object?> errorsRaw = nt4Connection
                 .getLastAnnouncedValue(errorsTopicName)
                 ?.tryCast<List<Object?>>() ??

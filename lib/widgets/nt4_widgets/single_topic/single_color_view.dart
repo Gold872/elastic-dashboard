@@ -29,9 +29,11 @@ class SingleColorView extends StatelessWidget with NT4Widget {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: subscription?.periodicStream(yieldAll: false),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         String hexString = tryCast(snapshot.data) ?? '';
 
         hexString = hexString.toUpperCase().replaceAll('#', '');

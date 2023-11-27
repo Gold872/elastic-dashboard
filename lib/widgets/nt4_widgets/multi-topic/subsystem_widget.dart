@@ -44,12 +44,26 @@ class SubsystemWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    String defaultCommand =
+        tryCast(nt4Connection.getLastAnnouncedValue(defaultCommandTopic)) ??
+            'none';
+    String currentCommand =
+        tryCast(nt4Connection.getLastAnnouncedValue(currentCommandTopic)) ??
+            'none';
+
+    return [defaultCommand, currentCommand];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         String defaultCommand =
             tryCast(nt4Connection.getLastAnnouncedValue(defaultCommandTopic)) ??
                 'none';

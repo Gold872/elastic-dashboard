@@ -59,8 +59,10 @@ class MotorController extends StatelessWidget with NT4Widget {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: valueSubscription.periodicStream(),
+      stream: valueSubscription.periodicStream(yieldAll: false),
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         double value = tryCast(snapshot.data) ?? 0.0;
 
         return Column(

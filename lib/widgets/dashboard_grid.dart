@@ -214,6 +214,10 @@ class DashboardGrid extends StatelessWidget {
     widget.previewRect = widget.draggablePositionRect;
     widget.previewVisible = false;
     widget.validLocation = true;
+
+    widget.dispose();
+    widget.refresh();
+    widget.tryCast<DraggableNT4WidgetContainer>()?.refreshChild();
   }
 
   void onWidgetDragEnd(DraggableWidgetContainer widget) {

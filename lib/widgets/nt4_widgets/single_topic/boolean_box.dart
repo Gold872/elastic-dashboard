@@ -113,9 +113,11 @@ class BooleanBox extends StatelessWidget with NT4Widget {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: subscription?.periodicStream(yieldAll: false),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         bool value = tryCast(snapshot.data) ?? false;
 
         return Container(

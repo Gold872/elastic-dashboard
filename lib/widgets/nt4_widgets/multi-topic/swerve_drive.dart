@@ -115,12 +115,59 @@ class SwerveDriveWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    double frontLeftAngle =
+        tryCast(nt4Connection.getLastAnnouncedValue(frontLeftAngleTopic)) ??
+            0.0;
+    double frontLeftVelocity =
+        tryCast(nt4Connection.getLastAnnouncedValue(frontLeftVelocityTopic)) ??
+            0.0;
+
+    double frontRightAngle =
+        tryCast(nt4Connection.getLastAnnouncedValue(frontRightAngleTopic)) ??
+            0.0;
+    double frontRightVelocity =
+        tryCast(nt4Connection.getLastAnnouncedValue(frontRightVelocityTopic)) ??
+            0.0;
+
+    double backLeftAngle =
+        tryCast(nt4Connection.getLastAnnouncedValue(backLeftAngleTopic)) ?? 0.0;
+    double backLeftVelocity =
+        tryCast(nt4Connection.getLastAnnouncedValue(backLeftVelocityTopic)) ??
+            0.0;
+
+    double backRightAngle =
+        tryCast(nt4Connection.getLastAnnouncedValue(backRightAngleTopic)) ??
+            0.0;
+    double backRightVelocity =
+        tryCast(nt4Connection.getLastAnnouncedValue(backRightVelocityTopic)) ??
+            0.0;
+
+    double robotAngle =
+        tryCast(nt4Connection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
+
+    return [
+      frontLeftAngle,
+      frontLeftVelocity,
+      frontRightAngle,
+      frontRightVelocity,
+      backLeftAngle,
+      backLeftVelocity,
+      backRightAngle,
+      backRightVelocity,
+      robotAngle,
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         double frontLeftAngle =
             tryCast(nt4Connection.getLastAnnouncedValue(frontLeftAngleTopic)) ??
                 0.0;

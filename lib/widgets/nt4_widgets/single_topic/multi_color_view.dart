@@ -3,6 +3,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MultiColorView extends StatelessWidget with NT4Widget {
   @override
@@ -24,10 +25,14 @@ class MultiColorView extends StatelessWidget with NT4Widget {
 
   @override
   Widget build(BuildContext context) {
+    notifier = context.watch<NT4WidgetNotifier?>();
+
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: subscription?.periodicStream(yieldAll: false),
       initialData: nt4Connection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         List<Object?> hexStringsRaw =
             snapshot.data?.tryCast<List<Object?>>() ?? [];
         List<String> hexStrings = hexStringsRaw.whereType<String>().toList();

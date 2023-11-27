@@ -43,12 +43,24 @@ class EncoderWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    double distance =
+        tryCast(nt4Connection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
+    double speed =
+        tryCast(nt4Connection.getLastAnnouncedValue(speedTopic)) ?? 0.0;
+
+    return [distance, speed];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         double distance =
             tryCast(nt4Connection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
         double speed =
