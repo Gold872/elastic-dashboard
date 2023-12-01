@@ -22,6 +22,7 @@ dependencies:
   flutter_hooks: ^0.20.0
   github: ^9.17.0
   http: ^0.13.6
+  logger: ^2.0.2+1
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
   package_info_plus: ^4.1.0

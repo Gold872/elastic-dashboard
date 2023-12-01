@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:github/github.dart';
 import 'package:version/version.dart';
 
@@ -8,6 +9,8 @@ class UpdateChecker {
   UpdateChecker({required this.currentVersion}) : _github = GitHub();
 
   Future<Object?> isUpdateAvailable() async {
+    logger.info('Checking for updates');
+
     try {
       Release latestRelease = await _github.repositories
           .getLatestRelease(RepositorySlug('Gold872', 'elastic-dashboard'));
@@ -15,9 +18,11 @@ class UpdateChecker {
       String? tagName = latestRelease.tagName;
 
       if (tagName == null) {
+        logger.error('Release tag not found in git repository');
         return 'Release tag not found';
       }
       if (!tagName.startsWith('v')) {
+        logger.error('Invalid version name: $tagName');
         return 'Invalid version name: \'$tagName\'';
       }
 
@@ -28,6 +33,7 @@ class UpdateChecker {
 
       return current < latest;
     } catch (error) {
+      logger.error('Failed to check for updates', error);
       return error.toString();
     }
   }

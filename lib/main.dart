@@ -5,6 +5,7 @@ import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -17,6 +18,13 @@ void main() async {
 
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
+  await logger.initialize();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    logger.error('Flutter Error', details.exception, details.stack);
+  };
+
   final String appFolderPath = (await getApplicationSupportDirectory()).path;
 
   // Prevents data loss if shared_preferences.json gets corrupted
@@ -28,6 +36,9 @@ void main() async {
     // Store a copy of user's preferences on the disk
     await _backupPreferences(appFolderPath);
   } catch (error) {
+    logger.warning(
+        'Failed to get shared preferences instance, attempting to retrieve from backup',
+        error);
     // Remove broken preferences files and restore previous settings
     await _restorePreferencesFromBackup(appFolderPath);
     preferences = await SharedPreferences.getInstance();
@@ -83,6 +94,8 @@ Future<void> _backupPreferences(String appFolderPath) async {
 
     if (await File(backup).exists()) await File(backup).delete(recursive: true);
     await File(original).copy(backup);
+
+    logger.info('Backup up shared_preferences.json to $backup');
   } catch (_) {
     /* Do nothing */
   }
@@ -102,6 +115,7 @@ Future<void> _restorePreferencesFromBackup(String appFolderPath) async {
       // symbol in it to replace it as an original Settings file
       final String preferences = await File(backup).readAsString();
       if (preferences.contains('"') && preferences.contains(RegExp('[A-z]'))) {
+        logger.info('Restoring shared_preferences from backup file at $backup');
         await File(backup).copy(original);
       }
     }

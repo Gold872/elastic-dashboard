@@ -6,6 +6,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
@@ -207,6 +208,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
     if (successful) {
+      logger.info('Layout saved successfully!');
       // ignore: use_build_context_synchronously
       ElegantNotification(
         background: colorScheme.background,
@@ -224,6 +226,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         description: const Text('Layout saved successfully!'),
       ).show(context);
     } else {
+      logger.error('Could not save layout');
       // ignore: use_build_context_synchronously
       ElegantNotification(
         background: colorScheme.background,
@@ -341,12 +344,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     hotKeyManager.resetKeysPressed();
 
+    logger.info('Exporting layout');
     final FileSaveLocation? saveLocation = await getSaveLocation(
       suggestedName: 'elastic-layout.json',
       acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
     );
 
     if (saveLocation == null) {
+      logger.info('Ignoring layout export, no location was selected');
       return;
     }
 
@@ -358,6 +363,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     final XFile jsonFile = XFile.fromData(fileData,
         mimeType: 'application/json', name: 'elastic-layout.json');
 
+    logger.info('Saving layout data to ${saveLocation.path}');
     await jsonFile.saveTo(saveLocation.path);
   }
 
@@ -375,12 +381,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     hotKeyManager.resetKeysPressed();
 
+    logger.info('Importing layout');
     final XFile? file = await openFile(acceptedTypeGroups: [
       jsonTypeGroup,
       anyTypeGroup,
     ]);
 
     if (file == null) {
+      logger.info('Canceling layout import, no file was selected');
       return;
     }
 
@@ -418,6 +426,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void loadLayoutFromJsonData(String jsonString) {
+    logger.info('Loading layout from json');
     Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
 
     if (jsonData == null) {
@@ -468,6 +477,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void createDefaultTabs() {
     if (tabData.isEmpty || grids.isEmpty) {
+      logger.info('Creating default Teleoperated and Autonomous tabs');
       tabData.addAll([
         TabData(name: 'Teleoperated'),
         TabData(name: 'Autonomous'),
@@ -487,6 +497,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void showJsonLoadingError(String errorMessage) {
+    logger.error(errorMessage);
     Future(() {
       ColorScheme colorScheme = Theme.of(context).colorScheme;
       TextTheme textTheme = Theme.of(context).textTheme;
@@ -513,6 +524,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void showJsonLoadingWarning(String warningMessage) {
+    logger.warning(warningMessage);
     SchedulerBinding.instance.addPostFrameCallback((_) {
       ColorScheme colorScheme = Theme.of(context).colorScheme;
       TextTheme textTheme = Theme.of(context).textTheme;
@@ -539,6 +551,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void setupShortcuts() {
+    logger.info('Setting up shortcuts');
     // Import Layout (Ctrl + O)
     hotKeyManager.register(
       HotKey(
@@ -571,9 +584,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             modifiers: [ModifierKey.controlModifier],
           ), callback: () {
         if (currentTabIndex == i - 1) {
+          logger.debug(
+              'Ignoring switch to tab ${i - 1}, current tab is already $currentTabIndex');
           return;
         }
         if (i - 1 < tabData.length) {
+          logger.info('Switching tab to index ${i - 1} via keyboard shortcut');
           setState(() => currentTabIndex = i - 1);
         }
       });
@@ -651,10 +667,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void displayAddWidgetDialog() {
+    logger.info('Displaying add widget dialog');
     setState(() => addWidgetDialogVisible = true);
   }
 
   void displayAboutDialog(BuildContext context) {
+    logger.info('Displaying about dialog');
     IconThemeData iconTheme = IconTheme.of(context);
 
     showAboutDialog(
@@ -870,6 +888,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void showTabCloseConfirmation(
       BuildContext context, String tabName, Function() onClose) {
+    logger.info('Showing tab close confirmation for tab: $tabName');
     showDialog(
       context: context,
       builder: (context) {
@@ -877,12 +896,15 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           actions: [
             TextButton(
                 onPressed: () {
+                  logger.debug('Closing tab: $tabData');
                   Navigator.of(context).pop();
                   onClose.call();
                 },
                 child: const Text('OK')),
             TextButton(
                 onPressed: () {
+                  logger.debug(
+                      'Ignoring tab close for tab: $tabData, user canceled the request.');
                   Navigator.of(context).pop();
                 },
                 child: const Text('Cancel')),
@@ -896,8 +918,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _moveTabLeft() {
     if (currentTabIndex <= 0) {
+      logger.debug(
+          'Ignoring move tab left, tab index is already $currentTabIndex');
       return;
     }
+
+    logger.info('Moving current tab at index $currentTabIndex to the left');
 
     setState(() {
       // Swap the tab data
@@ -916,8 +942,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _moveTabRight() {
     if (currentTabIndex >= tabData.length - 1) {
+      logger.debug(
+          'Ignoring move tab left, tab index is already $currentTabIndex');
       return;
     }
+
+    logger.info('Moving current tab at index $currentTabIndex to the right');
 
     setState(() {
       // Swap the tab data
