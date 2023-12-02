@@ -161,7 +161,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
           }
           lastDisplayedImage?.evict();
 
-          String stream = (streams.length > 1) ? streams[1] : streams[0];
+          String stream = streams.last;
 
           streamWidget = Mjpeg(
             fit: BoxFit.contain,
