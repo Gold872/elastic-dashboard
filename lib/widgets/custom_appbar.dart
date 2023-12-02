@@ -68,9 +68,19 @@ class CustomAppBar extends AppBar {
           ],
           title: _WindowDragArea(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                Expanded(child: Center(child: Text(titleText))),
-                const SizedBox(width: 365),
+                const Spacer(flex: 5),
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    titleText,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
+                const Spacer(flex: 14),
               ],
             ),
           ),
