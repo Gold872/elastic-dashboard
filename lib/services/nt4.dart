@@ -26,9 +26,9 @@ class NT4Client {
   final Map<String, NT4Topic> _clientPublishedTopics = {};
   final Map<int, NT4Topic> announcedTopics = {};
   int _clientId = 0;
-  final String _serverAddr = '';
   bool _serverConnectionActive = false;
   int _serverTimeOffsetUS = 0;
+  int _latencyMs = 0;
 
   WebSocketChannel? _mainWebsocket;
   // TODO: Uncomment for 2024 NT4.1 updates
@@ -55,6 +55,21 @@ class NT4Client {
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
     _wsOnClose();
+  }
+
+  Stream<int> latencyStream() async* {
+    yield _latencyMs;
+
+    int lastYielded = _latencyMs;
+
+    while (true) {
+      if (_latencyMs != lastYielded) {
+        yield _latencyMs;
+        lastYielded = _latencyMs;
+      }
+
+      await Future.delayed(const Duration(seconds: 1));
+    }
   }
 
   void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
@@ -266,7 +281,9 @@ class NT4Client {
     int serverTimeAtRx = (serverTimestamp - rtt / 2.0).round();
     _serverTimeOffsetUS = serverTimeAtRx - rxTime;
 
-    lastPongTime = DateTime.now().millisecondsSinceEpoch;
+    lastPongTime = rxTime;
+
+    _latencyMs = (rtt / 2) ~/ 1000;
   }
 
   void _wsSubscribe(NT4Subscription sub) {
@@ -413,6 +430,7 @@ class NT4Client {
     _serverConnectionActive = false;
 
     lastPongTime = 0;
+    _latencyMs = 0;
 
     onDisconnect?.call();
 

@@ -30,14 +30,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DashboardPage extends StatefulWidget {
-  final Stream<dynamic> connectionStream;
   final SharedPreferences preferences;
   final String version;
   final Function(Color color)? onColorChanged;
 
   const DashboardPage({
     super.key,
-    required this.connectionStream,
     required this.preferences,
     required this.version,
     this.onColorChanged,
@@ -1193,37 +1191,51 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               ),
             ),
             // Bottom bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SizedBox(
-                height: 32,
-                child: StreamBuilder(
-                  stream: widget.connectionStream,
-                  builder: (context, snapshot) {
-                    bool connected = snapshot.data ?? false;
+            Container(
+              color: const Color.fromARGB(255, 20, 20, 20),
+              height: 32,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: StreamBuilder(
+                          stream: nt4Connection.connectionStatus(),
+                          builder: (context, snapshot) {
+                            bool connected = snapshot.data ?? false;
 
-                    Widget connectedText = (connected)
-                        ? Text(
-                            'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})',
-                            style: footerStyle!.copyWith(
-                              color: Colors.green,
-                            ))
-                        : Text('Network Tables: Disconnected',
-                            style: footerStyle!.copyWith(
-                              color: Colors.red,
-                            ));
+                            String connectedText = (connected)
+                                ? 'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})'
+                                : 'Network Tables: Disconnected';
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        connectedText,
-                        Text(
-                          'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
-                        ),
-                        Opacity(opacity: 0.0, child: connectedText),
-                      ],
-                    );
-                  },
+                            return Text(
+                              connectedText,
+                              style: footerStyle?.copyWith(
+                                color: (connected) ? Colors.green : Colors.red,
+                              ),
+                              textAlign: TextAlign.left,
+                            );
+                          }),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? '9999'}',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: StreamBuilder(
+                          stream: nt4Connection.latencyStream(),
+                          builder: (context, snapshot) {
+                            int latency = snapshot.data ?? 0;
+
+                            return Text(
+                              'Latency: ${latency.toString().padLeft(5)} ms',
+                              textAlign: TextAlign.right,
+                            );
+                          }),
+                    ),
+                  ],
                 ),
               ),
             ),

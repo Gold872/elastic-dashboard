@@ -150,7 +150,6 @@ class _ElasticState extends State<Elastic> {
       title: 'Elastic',
       theme: theme,
       home: DashboardPage(
-        connectionStream: nt4Connection.connectionStatus(),
         preferences: widget.preferences,
         version: widget.version,
         onColorChanged: (color) => setState(() {

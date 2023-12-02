@@ -58,7 +58,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -67,7 +66,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.textContaining('Network Tables: Disconnected'), findsWidgets);
+    expect(find.textContaining('Network Tables: Disconnected'), findsOneWidget);
     expect(find.textContaining('Network Tables: Connected'), findsNothing);
     expect(find.textContaining('(10.3.53.2)'), findsNothing);
     expect(find.text('Team 353'), findsOneWidget);
@@ -83,7 +82,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(true),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -108,7 +106,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -141,7 +138,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(true),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -205,7 +201,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(true),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -261,7 +256,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(true),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -406,7 +400,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(true),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -485,7 +478,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -518,7 +510,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -548,7 +539,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -579,7 +569,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -622,7 +611,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -681,7 +669,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -735,7 +722,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -761,7 +747,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -795,7 +780,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -836,7 +820,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -881,7 +864,6 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
-          connectionStream: Stream.value(false),
           preferences: preferences,
           version: '0.0.0.0',
         ),

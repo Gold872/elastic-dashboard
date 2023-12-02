@@ -114,6 +114,10 @@ class NT4Connection {
     }
   }
 
+  Stream<int> latencyStream() {
+    return nt4Client.latencyStream();
+  }
+
   void changeIPAddress(String ipAddress) {
     if (_ntClient.serverBaseAddress == ipAddress) {
       return;
