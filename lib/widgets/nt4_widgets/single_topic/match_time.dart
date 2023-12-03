@@ -24,7 +24,7 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
     init();
   }
 
-  Color _getTimeColor(double time) {
+  Color _getTimeColor(num time) {
     if (time <= 15.0) {
       return Colors.red;
     } else if (time <= 30.0) {
@@ -54,10 +54,10 @@ class MatchTimeWidget extends StatelessWidget with NT4Widget {
             FittedBox(
               fit: BoxFit.contain,
               child: Text(
-                '${time.ceil()}',
+                '${time.floor()}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _getTimeColor(time.ceil().toDouble()),
+                  color: _getTimeColor(time.floor()),
                 ),
               ),
             ),
