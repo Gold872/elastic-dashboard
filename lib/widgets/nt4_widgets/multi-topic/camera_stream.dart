@@ -48,11 +48,11 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     closeClient();
 
     streamsTopic = '$topic/streams';
+
+    super.resetSubscription();
   }
 
   @override
