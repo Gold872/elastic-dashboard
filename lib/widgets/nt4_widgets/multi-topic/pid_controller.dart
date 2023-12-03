@@ -66,8 +66,6 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     kpTopicName = '$topic/p';
     kiTopicName = '$topic/i';
     kdTopicName = '$topic/d';
@@ -77,6 +75,8 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
     kiTopic = null;
     kdTopic = null;
     setpointTopic = null;
+
+    super.resetSubscription();
   }
 
   @override

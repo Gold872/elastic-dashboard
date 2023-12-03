@@ -71,8 +71,6 @@ class SwerveDriveWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     frontLeftAngleTopic = '$topic/Front Left Angle';
     frontLeftVelocityTopic = '$topic/Front Left Velocity';
 
@@ -86,6 +84,8 @@ class SwerveDriveWidget extends StatelessWidget with NT4Widget {
     backRightVelocityTopic = '$topic/Back Right Velocity';
 
     robotAngleTopic = '$topic/Robot Angle';
+
+    super.resetSubscription();
   }
 
   @override

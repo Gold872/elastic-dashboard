@@ -38,11 +38,11 @@ class NetworkAlerts extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     errorsTopicName = '$topic/errors';
     warningsTopicName = '$topic/warnings';
     infosTopicName = '$topic/infos';
+
+    super.resetSubscription();
   }
 
   @override

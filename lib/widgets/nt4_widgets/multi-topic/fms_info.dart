@@ -54,8 +54,6 @@ class FMSInfo extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     eventNameTopic = '$topic/EventName';
     controlDataTopic = '$topic/FMSControlData';
     allianceTopic = '$topic/IsRedAlliance';
@@ -63,6 +61,8 @@ class FMSInfo extends StatelessWidget with NT4Widget {
     matchTypeTopic = '$topic/MatchType';
     replayNumberTopic = '$topic/ReplayNumber';
     stationNumberTopic = '$topic/StationNumber';
+
+    super.resetSubscription();
   }
 
   String _getMatchTypeString(int matchType) {

@@ -108,6 +108,8 @@ mixin NT4Widget on StatelessWidget {
       subscription = nt4Connection.subscribe(topic, period);
 
       nt4Topic = null;
+
+      refresh();
       return;
     }
 

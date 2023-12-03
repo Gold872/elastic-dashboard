@@ -43,13 +43,13 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     namesTopicName = '$topic/Names';
     idsTopicName = '$topic/Ids';
     cancelTopicName = '$topic/Cancel';
 
     cancelTopic = null;
+
+    super.resetSubscription();
   }
 
   void cancelCommand(int id) {

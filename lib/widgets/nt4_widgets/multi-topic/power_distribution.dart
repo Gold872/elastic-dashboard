@@ -46,8 +46,6 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     channelTopics.clear();
 
     for (int channel = 0; channel <= numberOfChannels; channel++) {
@@ -56,6 +54,8 @@ class PowerDistribution extends StatelessWidget with NT4Widget {
 
     voltageTopic = '$topic/Voltage';
     currentTopic = '$topic/TotalCurrent';
+
+    super.resetSubscription();
   }
 
   Widget _getChannelsColumn(BuildContext context, int start, int end) {

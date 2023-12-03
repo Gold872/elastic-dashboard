@@ -39,12 +39,12 @@ class CommandWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     runningTopicName = '$topic/running';
     nameTopicName = '$topic/.name';
 
     runningTopic = null;
+
+    super.resetSubscription();
   }
 
   @override

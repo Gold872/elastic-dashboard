@@ -40,11 +40,11 @@ class ThreeAxisAccelerometer extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     xTopic = '$topic/X';
     yTopic = '$topic/Y';
     zTopic = '$topic/Z';
+
+    super.resetSubscription();
   }
 
   @override

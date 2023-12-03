@@ -36,10 +36,10 @@ class EncoderWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     distanceTopic = '$topic/Distance';
     speedTopic = '$topic/Speed';
+
+    super.resetSubscription();
   }
 
   @override

@@ -81,10 +81,10 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     robotTopicName = '$topic/Robot';
     otherObjectTopics.clear();
+
+    super.resetSubscription();
   }
 
   @override

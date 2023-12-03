@@ -37,10 +37,10 @@ class SubsystemWidget extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     defaultCommandTopic = '$topic/.default';
     currentCommandTopic = '$topic/.command';
+
+    super.resetSubscription();
   }
 
   @override

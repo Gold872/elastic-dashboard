@@ -50,14 +50,14 @@ class SplitButtonChooser extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     optionsTopicName = '$topic/options';
     selectedTopicName = '$topic/selected';
     activeTopicName = '$topic/active';
     defaultTopicName = '$topic/default';
 
     selectedTopic = null;
+
+    super.resetSubscription();
   }
 
   void publishSelectedValue(String? selected) {

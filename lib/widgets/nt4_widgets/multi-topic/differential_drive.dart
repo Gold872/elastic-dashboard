@@ -54,8 +54,6 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
 
   @override
   void resetSubscription() {
-    super.resetSubscription();
-
     leftSpeedTopicName = '$topic/Left Motor Speed';
     rightSpeedTopicName = '$topic/Right Motor Speed';
 
@@ -67,6 +65,8 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
 
     rightSpeedPreviousValue = 0.0;
     rightSpeedCurrentValue = 0.0;
+
+    super.resetSubscription();
   }
 
   @override
