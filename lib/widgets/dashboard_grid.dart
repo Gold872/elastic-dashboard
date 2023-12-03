@@ -719,7 +719,9 @@ class DashboardGrid extends StatelessWidget {
           Positioned(
             left: container.draggablePositionRect.left,
             top: container.draggablePositionRect.top,
-            child: container.getDraggingWidgetContainer(context),
+            child: IgnorePointer(
+              child: container.getDraggingWidgetContainer(context),
+            ),
           ),
         );
 
@@ -807,7 +809,9 @@ class DashboardGrid extends StatelessWidget {
         Positioned(
           left: container.draggablePositionRect.left,
           top: container.draggablePositionRect.top,
-          child: container.getWidgetContainer(context),
+          child: IgnorePointer(
+            child: container.getWidgetContainer(context),
+          ),
         ),
       );
 
