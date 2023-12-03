@@ -1,6 +1,5 @@
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
-import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
@@ -15,11 +14,9 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
   late String streamsTopic;
 
-  Object? rawStreams;
   Mjpeg? streamWidget;
   MemoryImage? lastDisplayedImage;
 
-  late NT4Subscription streamsSubscription;
   late Client httpClient;
   bool clientOpen = false;
 
@@ -44,7 +41,6 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     super.init();
 
     streamsTopic = '$topic/streams';
-    streamsSubscription = nt4Connection.subscribe(streamsTopic, super.period);
 
     httpClient = Client();
     clientOpen = true;
@@ -56,10 +52,7 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
 
     closeClient();
 
-    nt4Connection.unSubscribe(streamsSubscription);
-
     streamsTopic = '$topic/streams';
-    streamsSubscription = nt4Connection.subscribe(streamsTopic, super.period);
   }
 
   @override
@@ -79,13 +72,6 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
     super.dispose(deleting: deleting);
   }
 
-  @override
-  void unSubscribe() {
-    super.unSubscribe();
-
-    nt4Connection.unSubscribe(streamsSubscription);
-  }
-
   void closeClient() {
     lastDisplayedImage?.evict();
     lastDisplayedImage = streamWidget?.previousImage;
@@ -95,31 +81,39 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    List<Object?> rawStreams =
+        tryCast(nt4Connection.getLastAnnouncedValue(streamsTopic)) ?? [];
+    List<String> streams = rawStreams.whereType<String>().toList();
+
+    return [
+      ...streams,
+      clientOpen,
+      nt4Connection.isNT4Connected,
+    ];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: streamsSubscription.periodicStream(yieldAll: false),
-      initialData: nt4Connection.getLastAnnouncedValue(streamsTopic),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         notifier = context.watch<NT4WidgetNotifier?>();
 
         if (!nt4Connection.isNT4Connected && clientOpen) {
           closeClient();
         }
-        Object? value = snapshot.data;
 
         bool createNewWidget = streamWidget == null ||
-            rawStreams != value ||
             (!clientOpen && nt4Connection.isNT4Connected);
 
-        rawStreams = value;
-
-        List<Object?> rawStreamsList =
-            rawStreams?.tryCast<List<Object?>>() ?? [];
+        List<Object?> rawStreams =
+            tryCast(nt4Connection.getLastAnnouncedValue(streamsTopic)) ?? [];
 
         List<String> streams = [];
-        for (Object? stream in rawStreamsList) {
+        for (Object? stream in rawStreams) {
           if (stream == null || stream is! String) {
             continue;
           }
