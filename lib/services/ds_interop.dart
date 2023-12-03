@@ -79,9 +79,13 @@ class DSInteropClient {
 
     var rawIP = jsonData['robotIP'];
 
-    if (rawIP == null || rawIP == 0) {
+    if (rawIP == null) {
       logger
           .warning('[DS INTEROP] Ignoring Json message, robot IP is not valid');
+      return;
+    }
+
+    if (rawIP == 0) {
       return;
     }
 
