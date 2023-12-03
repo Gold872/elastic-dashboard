@@ -15,6 +15,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/relay_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
@@ -184,6 +185,8 @@ class TreeRow {
         return SwerveDriveWidget(key: UniqueKey(), topic: topic);
       case 'String Chooser':
         return ComboBoxChooser(key: UniqueKey(), topic: topic);
+      case 'Relay':
+        return RelayWidget(key: UniqueKey(), topic: topic);
       case 'Subsystem':
         return SubsystemWidget(key: UniqueKey(), topic: topic);
       case 'Command':
@@ -235,6 +238,8 @@ class TreeRow {
       height = normalGridSize * 2;
     } else if (primary is SwerveDriveWidget) {
       width = normalGridSize * 2;
+      height = normalGridSize * 2;
+    } else if (primary is RelayWidget) {
       height = normalGridSize * 2;
     } else if (primary is SubsystemWidget) {
       width = normalGridSize * 2;

@@ -15,6 +15,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/relay_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
@@ -130,6 +131,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       case 'Scheduler':
         return normalSize * 2;
       case 'RobotPreferences':
+        return normalSize * 2;
+      case 'Relay':
         return normalSize * 2;
       case 'Alerts':
         return normalSize * 2;
@@ -323,6 +326,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
         );
       case 'Split Button Chooser':
         return SplitButtonChooser.fromJson(
+          key: UniqueKey(),
+          jsonData: widgetProperties,
+        );
+      case 'Relay':
+        return RelayWidget.fromJson(
           key: UniqueKey(),
           jsonData: widgetProperties,
         );
