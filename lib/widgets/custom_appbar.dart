@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:window_manager/window_manager.dart';
@@ -40,6 +41,10 @@ class CustomAppBar extends AppBar {
                 child: DecoratedMaximizeButton(
                   type: buttonType,
                   onPressed: () async {
+                    if (!Globals.isWindowMaximizable) {
+                      return;
+                    }
+
                     if (await windowManager.isMaximized()) {
                       windowManager.unmaximize();
                     } else {
@@ -97,13 +102,21 @@ class _WindowDragArea extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
+        if (!Globals.isWindowDraggable) {
+          return;
+        }
+
         windowManager.startDragging();
       },
       onDoubleTap: () async {
+        if (!Globals.isWindowMaximizable) {
+          return;
+        }
+
         if (await windowManager.isMaximized()) {
-          windowManager.unmaximize();
+          await windowManager.unmaximize();
         } else {
-          windowManager.maximize();
+          await windowManager.maximize();
         }
       },
       child: child ?? Container(),

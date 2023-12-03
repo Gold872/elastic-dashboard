@@ -52,9 +52,12 @@ class NT4Connection {
     allTopicsSubscription = _ntClient.subscribeTopicsOnly('/');
   }
 
-  void dsClientConnect(Function(String ip)? onIPAnnounced) {
+  void dsClientConnect(
+      {Function(String ip)? onIPAnnounced,
+      Function(bool isDocked)? onDriverStationDockChanged}) {
     _dsClient = DSInteropClient(
       onNewIPAnnounced: onIPAnnounced,
+      onDriverStationDockChanged: onDriverStationDockChanged,
       onConnect: () => _dsConnected = true,
       onDisconnect: () => _dsConnected = false,
     );

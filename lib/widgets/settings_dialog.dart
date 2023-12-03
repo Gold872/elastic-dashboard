@@ -20,6 +20,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(bool value)? onGridToggle;
   final Function(String? gridSize)? onGridSizeChanged;
   final Function(String? radius)? onCornerRadiusChanged;
+  final Function(bool value)? onResizeToDSChanged;
 
   const SettingsDialog({
     super.key,
@@ -31,6 +32,7 @@ class SettingsDialog extends StatefulWidget {
     this.onGridToggle,
     this.onGridSizeChanged,
     this.onCornerRadiusChanged,
+    this.onResizeToDSChanged,
   });
 
   @override
@@ -131,7 +133,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 Flexible(
                   child: DialogToggleSwitch(
                     initialValue:
-                        widget.preferences.getBool(PrefKeys.showGrid) ?? false,
+                        widget.preferences.getBool(PrefKeys.showGrid) ??
+                            Globals.showGrid,
                     label: 'Show Grid',
                     onToggle: (value) {
                       setState(() {
@@ -159,18 +162,41 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ],
             ),
             const Divider(),
-            DialogTextInput(
-              initialText: widget.preferences
-                      .getDouble(PrefKeys.cornerRadius)
-                      ?.toString() ??
-                  Globals.cornerRadius.toString(),
-              label: 'Corner Radius',
-              onSubmit: (value) {
-                setState(() {
-                  widget.onCornerRadiusChanged?.call(value);
-                });
-              },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Flexible(
+                  flex: 2,
+                  child: DialogTextInput(
+                    initialText: widget.preferences
+                            .getDouble(PrefKeys.cornerRadius)
+                            ?.toString() ??
+                        Globals.cornerRadius.toString(),
+                    label: 'Corner Radius',
+                    onSubmit: (value) {
+                      setState(() {
+                        widget.onCornerRadiusChanged?.call(value);
+                      });
+                    },
+                    formatter:
+                        FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                  ),
+                ),
+                Flexible(
+                  flex: 3,
+                  child: DialogToggleSwitch(
+                    initialValue:
+                        widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
+                            Globals.autoResizeToDS,
+                    label: 'Resize to Driver Station Height',
+                    onToggle: (value) {
+                      setState(() {
+                        widget.onResizeToDSChanged?.call(value);
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),

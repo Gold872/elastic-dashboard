@@ -12,6 +12,12 @@ class Globals {
   static int gridSize = 128;
   static double cornerRadius = 15.0;
   static bool showGrid = false;
+  static bool autoResizeToDS = false;
+
+  // window_manager doesn't support drag disable/maximize
+  // disable on some platforms, this is a dumb workaround for it
+  static bool isWindowDraggable = true;
+  static bool isWindowMaximizable = true;
 
   static const double defaultPeriod = 0.1;
   static const double defaultGraphPeriod = 0.033;
@@ -26,4 +32,5 @@ class PrefKeys {
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';
   static String showGrid = 'show_grid';
+  static String autoResizeToDS = 'auto_resize_to_driver_station';
 }

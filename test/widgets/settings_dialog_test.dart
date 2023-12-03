@@ -30,6 +30,8 @@ class FakeSettingsMethods {
   void changeGridSize() {}
 
   void changeCornerRadius() {}
+
+  void changeDSAutoResize() {}
 }
 
 void main() {
@@ -47,6 +49,7 @@ void main() {
       PrefKeys.showGrid: false,
       PrefKeys.gridSize: 128,
       PrefKeys.cornerRadius: 15.0,
+      PrefKeys.autoResizeToDS: false,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -80,6 +83,7 @@ void main() {
     expect(find.text('Show Grid'), findsWidgets);
     expect(find.text('Grid Size'), findsWidgets);
     expect(find.text('Corner Radius'), findsOneWidget);
+    expect(find.text('Resize to Driver Station Height'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -359,5 +363,48 @@ void main() {
 
     expect(preferences.getDouble(PrefKeys.cornerRadius), 25.0);
     verify(fakeSettings.changeCornerRadius()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Toggle driver station auto resize', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onResizeToDSChanged: (value) async {
+            fakeSettings.changeDSAutoResize();
+
+            await preferences.setBool(PrefKeys.autoResizeToDS, value);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final autoResizeSwitch = find.widgetWithText(
+        DialogToggleSwitch, 'Resize to Driver Station Height');
+
+    expect(autoResizeSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: autoResizeSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoResizeToDS), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoResizeToDS), false);
+    verify(fakeSettings.changeDSAutoResize()).called(2);
   });
 }

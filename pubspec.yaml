@@ -30,6 +30,7 @@ dependencies:
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
   provider: ^6.0.5
+  screen_retriever: ^0.1.9
   searchable_listview: ^2.7.0
   shared_preferences: ^2.1.2
   syncfusion_flutter_charts: ^23.1.44
@@ -42,7 +43,7 @@ dependencies:
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
   web_socket_channel: ^2.4.0
-  window_manager: ^0.3.5
+  window_manager: ^0.3.7
 
 dev_dependencies:
   flutter_test:

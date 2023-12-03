@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
@@ -10,6 +9,7 @@ import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -53,30 +53,19 @@ void main() async {
   Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? Globals.showGrid;
   Globals.cornerRadius =
       preferences.getDouble(PrefKeys.cornerRadius) ?? Globals.cornerRadius;
+  Globals.autoResizeToDS =
+      preferences.getBool(PrefKeys.autoResizeToDS) ?? Globals.autoResizeToDS;
 
   nt4Connection
       .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
 
-  nt4Connection.dsClientConnect((ip) async {
-    if (Globals.ipAddressMode != IPAddressMode.driverStation) {
-      return;
-    }
-
-    if (preferences.getString(PrefKeys.ipAddress) != ip) {
-      await preferences.setString(PrefKeys.ipAddress, ip);
-    } else {
-      return;
-    }
-
-    nt4Connection.changeIPAddress(ip);
-  });
-
   await FieldImages.loadFields('assets/fields/');
 
-  FlutterView screenView = PlatformDispatcher.instance.views.first;
-  Size screenSize = screenView.physicalSize * screenView.devicePixelRatio;
+  Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+  Size screenSize =
+      primaryDisplay.size * (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
 
-  await windowManager.setMinimumSize(screenSize * 0.55);
+  await windowManager.setMinimumSize(screenSize * 0.60);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
 

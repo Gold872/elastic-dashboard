@@ -25,6 +25,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
@@ -72,6 +73,29 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     loadLayout();
 
     setupShortcuts();
+
+    nt4Connection.dsClientConnect(
+      onIPAnnounced: (ip) async {
+        if (Globals.ipAddressMode != IPAddressMode.driverStation) {
+          return;
+        }
+
+        if (_preferences.getString(PrefKeys.ipAddress) != ip) {
+          await _preferences.setString(PrefKeys.ipAddress, ip);
+        } else {
+          return;
+        }
+
+        nt4Connection.changeIPAddress(ip);
+      },
+      onDriverStationDockChanged: (docked) {
+        if (Globals.autoResizeToDS && docked) {
+          _onDriverStationDocked();
+        } else {
+          _onDriverStationUndocked();
+        }
+      },
+    );
 
     nt4Connection.addConnectedListener(() {
       setState(() {
@@ -766,9 +790,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             case IPAddressMode.driverStation:
               String? lastAnnouncedIP = nt4Connection.dsClient.lastAnnouncedIP;
 
-              if (lastAnnouncedIP != null) {
-                _updateIPAddress(lastAnnouncedIP);
+              if (lastAnnouncedIP == null) {
+                break;
               }
+
+              _updateIPAddress(lastAnnouncedIP);
               break;
             case IPAddressMode.roboRIOmDNS:
               _updateIPAddress(
@@ -836,6 +862,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setDouble(PrefKeys.cornerRadius, newRadius);
         },
+        onResizeToDSChanged: (value) async {
+          setState(() {
+            Globals.autoResizeToDS = value;
+
+            if (value && nt4Connection.dsClient.driverStationDocked) {
+              _onDriverStationDocked();
+            } else {
+              _onDriverStationUndocked();
+            }
+          });
+
+          await _preferences.setBool(PrefKeys.autoResizeToDS, value);
+        },
         onColorChanged: widget.onColorChanged,
       ),
     );
@@ -847,6 +886,31 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     setState(() {
       nt4Connection.changeIPAddress(newIPAddress);
     });
+  }
+
+  void _onDriverStationDocked() async {
+    Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+    double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
+    Size screenSize = primaryDisplay.size * pixelRatio;
+
+    await windowManager.unmaximize();
+
+    Size newScreenSize =
+        Size(screenSize.width + 16, (screenSize.height + 8) - 250) / pixelRatio;
+
+    await windowManager.setSize(newScreenSize);
+
+    await windowManager.setAlignment(Alignment.topCenter);
+
+    Globals.isWindowMaximizable = false;
+    Globals.isWindowDraggable = false;
+    await windowManager.setResizable(false);
+  }
+
+  void _onDriverStationUndocked() async {
+    Globals.isWindowMaximizable = true;
+    Globals.isWindowDraggable = true;
+    await windowManager.setResizable(true);
   }
 
   void showWindowCloseConfirmation(BuildContext context) {
