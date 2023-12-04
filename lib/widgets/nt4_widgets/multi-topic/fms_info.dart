@@ -7,8 +7,9 @@ import 'package:patterns_canvas/patterns_canvas.dart';
 import 'package:provider/provider.dart';
 
 class FMSInfo extends NT4Widget {
+  static const String widgetType = 'FMSInfo';
   @override
-  String type = 'FMSInfo';
+  String type = widgetType;
 
   static const int ENABLED_FLAG = 0x01;
   static const int AUTO_FLAG = 0x02;

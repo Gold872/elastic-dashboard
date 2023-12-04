@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PIDControllerWidget extends NT4Widget {
+  static const String widgetType = 'PIDController';
   @override
-  String type = 'PIDController';
+  String type = widgetType;
 
   late String kpTopicName;
   late String kiTopicName;

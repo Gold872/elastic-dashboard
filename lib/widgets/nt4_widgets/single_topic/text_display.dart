@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class TextDisplay extends NT4Widget {
+  static const String widgetType = 'Text Display';
   @override
-  String type = 'Text Display';
+  String type = widgetType;
 
   final TextEditingController _controller = TextEditingController();
 

@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ToggleButton extends NT4Widget {
+  static const String widgetType = 'Toggle Button';
   @override
-  String type = 'Toggle Button';
+  String type = widgetType;
 
   ToggleButton({super.key, required super.topic, super.period}) : super();
 

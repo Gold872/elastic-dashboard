@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ThreeAxisAccelerometer extends NT4Widget {
+  static const String widgetType = '3-Axis Accelerometer';
   @override
-  String type = '3-Axis Accelerometer';
+  String type = widgetType;
 
   late String xTopic;
   late String yTopic;

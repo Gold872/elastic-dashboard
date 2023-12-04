@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ComboBoxChooser extends NT4Widget {
+  static const String widgetType = 'ComboBox Chooser';
   @override
-  String type = 'ComboBox Chooser';
+  String type = widgetType;
 
   late String optionsTopicName;
   late String selectedTopicName;

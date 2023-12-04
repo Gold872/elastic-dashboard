@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CommandWidget extends NT4Widget {
+  static const String widgetType = 'Command';
   @override
-  String type = 'Command';
+  String type = widgetType;
 
   NT4Topic? runningTopic;
 

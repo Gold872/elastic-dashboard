@@ -11,8 +11,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class NumberBar extends NT4Widget {
+  static const String widgetType = 'Number Bar';
   @override
-  String type = 'Number Bar';
+  String type = widgetType;
 
   late double minValue;
   late double maxValue;

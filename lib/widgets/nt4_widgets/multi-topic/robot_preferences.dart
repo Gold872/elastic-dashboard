@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
 class RobotPreferences extends NT4Widget {
+  static const String widgetType = 'RobotPreferences';
   @override
-  String type = 'RobotPreferences';
+  String type = widgetType;
 
   TextEditingController searchTextController = TextEditingController();
 

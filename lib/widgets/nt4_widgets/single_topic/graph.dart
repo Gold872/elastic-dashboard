@@ -12,8 +12,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class GraphWidget extends NT4Widget {
+  static const String widgetType = 'Graph';
   @override
-  String type = 'Graph';
+  String type = widgetType;
 
   late double timeDisplayed;
   double? minValue;

@@ -9,8 +9,9 @@ import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 class CameraStreamWidget extends NT4Widget {
+  static const String widgetType = 'Camera Stream';
   @override
-  String type = 'Camera Stream';
+  String type = widgetType;
 
   late String streamsTopic;
 

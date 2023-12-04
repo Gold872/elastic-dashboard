@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SingleColorView extends NT4Widget {
+  static const String widgetType = 'Single Color View';
   @override
-  String type = 'Single Color View';
+  String type = widgetType;
 
   SingleColorView({super.key, required super.topic, super.period}) : super();
 

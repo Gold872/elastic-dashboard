@@ -8,8 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class MotorController extends NT4Widget {
+  static const String widgetType = 'Motor Controller';
   @override
-  String type = 'Motor Controller';
+  String type = widgetType;
 
   late String valueTopic;
   late NT4Subscription valueSubscription;

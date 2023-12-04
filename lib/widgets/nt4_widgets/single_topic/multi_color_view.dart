@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MultiColorView extends NT4Widget {
+  static const String widgetType = 'Multi Color View';
   @override
-  String type = 'Multi Color View';
+  String type = widgetType;
 
   MultiColorView({super.key, required super.topic, super.period}) : super();
 

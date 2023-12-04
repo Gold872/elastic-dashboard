@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class Gyro extends NT4Widget {
+  static const String widgetType = 'Gyro';
   @override
-  String type = 'Gyro';
+  String type = widgetType;
 
   bool counterClockwisePositive = false;
 

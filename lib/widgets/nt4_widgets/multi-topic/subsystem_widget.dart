@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SubsystemWidget extends NT4Widget {
+  static const String widgetType = 'Subsystem';
   @override
-  String type = 'Subsystem';
+  String type = widgetType;
 
   late String defaultCommandTopic;
   late String currentCommandTopic;

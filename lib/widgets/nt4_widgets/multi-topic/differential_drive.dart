@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class DifferentialDrive extends NT4Widget {
+  static const String widgetType = 'DifferentialDrive';
   @override
-  String type = 'DifferentialDrive';
+  String type = widgetType;
 
   late String leftSpeedTopicName;
   late String rightSpeedTopicName;

@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EncoderWidget extends NT4Widget {
+  static const String widgetType = 'Encoder';
   @override
-  String type = 'Encoder';
+  String type = widgetType;
 
   late String distanceTopic;
   late String speedTopic;

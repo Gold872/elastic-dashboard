@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AccelerometerWidget extends NT4Widget {
+  static const String widgetType = 'Accelerometer';
   @override
-  String type = 'Accelerometer';
+  String type = widgetType;
 
   late String valueTopic;
   late NT4Subscription valueSubscription;

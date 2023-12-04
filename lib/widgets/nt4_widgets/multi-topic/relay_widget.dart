@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RelayWidget extends NT4Widget {
+  static const String widgetType = 'Relay';
   @override
-  String type = 'Relay';
+  String type = widgetType;
 
   late String valueTopicName;
   late NT4Subscription valueSubscription;

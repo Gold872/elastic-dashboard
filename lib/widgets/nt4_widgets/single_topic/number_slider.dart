@@ -9,8 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class NumberSlider extends NT4Widget {
+  static const String widgetType = 'Number Slider';
   @override
-  final String type = 'Number Slider';
+  final String type = widgetType;
 
   late double minValue;
   late double maxValue;

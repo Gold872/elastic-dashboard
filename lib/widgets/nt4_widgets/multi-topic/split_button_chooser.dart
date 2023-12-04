@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SplitButtonChooser extends NT4Widget {
+  static const String widgetType = 'Split Button Chooser';
   @override
-  String type = 'Split Button Chooser';
+  String type = widgetType;
 
   late String optionsTopicName;
   late String selectedTopicName;

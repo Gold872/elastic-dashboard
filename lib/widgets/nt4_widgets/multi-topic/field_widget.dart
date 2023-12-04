@@ -17,8 +17,9 @@ import 'package:vector_math/vector_math_64.dart'
     show Matrix3, Quaternion, Vector3, radians;
 
 class FieldWidget extends NT4Widget {
+  static const String widgetType = 'Field';
   @override
-  String type = 'Field';
+  String type = widgetType;
 
   String fieldGame = 'Charged Up';
   late Field? field;

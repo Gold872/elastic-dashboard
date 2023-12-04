@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class MatchTimeWidget extends NT4Widget {
+  static const String widgetType = 'Match Time';
   @override
-  String type = 'Match Time';
+  String type = widgetType;
 
   MatchTimeWidget({super.key, required super.topic, super.period}) : super();
 

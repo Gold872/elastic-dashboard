@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CommandSchedulerWidget extends NT4Widget {
+  static const String widgetType = 'Scheduler';
   @override
-  String type = 'Scheduler';
+  String type = widgetType;
 
   NT4Topic? cancelTopic;
 

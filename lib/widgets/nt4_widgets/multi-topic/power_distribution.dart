@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PowerDistribution extends NT4Widget {
+  static const String widgetType = 'PowerDistribution';
   @override
-  String type = 'PowerDistribution';
+  String type = widgetType;
 
   static int numberOfChannels = 23;
 

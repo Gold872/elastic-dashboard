@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class BooleanBox extends NT4Widget {
+  static const String widgetType = 'Boolean Box';
   @override
-  String type = 'Boolean Box';
+  String type = widgetType;
 
   late Color trueColor;
   late Color falseColor;

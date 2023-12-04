@@ -11,8 +11,9 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class VoltageView extends NT4Widget {
+  static const String widgetType = 'Voltage View';
   @override
-  String type = 'Voltage View';
+  String type = widgetType;
 
   late double minValue;
   late double maxValue;

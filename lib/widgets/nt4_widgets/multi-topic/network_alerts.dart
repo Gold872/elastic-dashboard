@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class NetworkAlerts extends NT4Widget {
+  static const String widgetType = 'Alerts';
   @override
-  String type = 'Alerts';
+  String type = widgetType;
 
   late String errorsTopicName;
   late String warningsTopicName;

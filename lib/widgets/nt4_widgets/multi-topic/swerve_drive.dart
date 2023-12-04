@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
 class SwerveDriveWidget extends NT4Widget {
+  static const String widgetType = 'SwerveDrive';
   @override
-  String type = 'SwerveDrive';
+  String type = widgetType;
 
   late String frontLeftAngleTopic;
   late String frontLeftVelocityTopic;
