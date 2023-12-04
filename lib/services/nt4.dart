@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
@@ -199,9 +200,7 @@ class NT4Client {
         return t;
       }
     }
-    if (kDebugMode) {
-      print('[NT4] Topic not found: $topic');
-    }
+    logger.debug('[NT4] Topic not found: $topic');
     return null;
   }
 
@@ -248,9 +247,7 @@ class NT4Client {
         return;
       }
     }
-    if (kDebugMode) {
-      print('[NT4] Topic not found: $topic');
-    }
+    logger.debug('[NT4] Topic not found: $topic');
   }
 
   int _getClientTimeUS() {
@@ -374,9 +371,7 @@ class NT4Client {
       },
       onDone: _wsOnClose,
       onError: (err) {
-        if (kDebugMode) {
-          print('NT4 ERR: $err');
-        }
+        logger.error('NT4 Error', err);
       },
     );
 
@@ -436,9 +431,8 @@ class NT4Client {
 
     announcedTopics.clear();
 
-    if (kDebugMode) {
-      print('[NT4] Connection closed. Attempting to reconnect in 1s');
-    }
+    logger.debug('[NT4] Connection closed. Attempting to reconnect in 1s');
+
     Future.delayed(const Duration(seconds: 1), wsConnect);
   }
 
@@ -447,16 +441,12 @@ class NT4Client {
       var rxArr = jsonDecode(data.toString());
 
       if (rxArr is! List) {
-        if (kDebugMode) {
-          print('[NT4] Ignoring text message, not an array');
-        }
+        logger.debug('[NT4] Ignoring text message, not an array');
       }
 
       for (var msg in rxArr) {
         if (msg is! Map) {
-          if (kDebugMode) {
-            print('[NT4] Ignoring text message, not a json object');
-          }
+          logger.debug('[NT4] Ignoring text message, not a json object');
           continue;
         }
 
@@ -464,16 +454,12 @@ class NT4Client {
         var params = msg['params'];
 
         if (method == null || method is! String) {
-          if (kDebugMode) {
-            print('[NT4] Ignoring text message, method not string');
-          }
+          logger.debug('[NT4] Ignoring text message, method not string');
           continue;
         }
 
         if (params == null || params is! Map) {
-          if (kDebugMode) {
-            print('[NT4] Ignoring text message, params not json object');
-          }
+          logger.debug('[NT4] Ignoring text message, params not json object');
           continue;
         }
 
@@ -499,18 +485,14 @@ class NT4Client {
         } else if (method == 'unannounce') {
           NT4Topic? removedTopic = announcedTopics[params['id']];
           if (removedTopic == null) {
-            if (kDebugMode) {
-              print(
-                  '[NT4] Ignorining unannounce, topic was not previously announced');
-            }
+            logger.debug(
+                '[NT4] Ignorining unannounce, topic was not previously announced');
             return;
           }
           announcedTopics.remove(removedTopic.id);
         } else if (method == 'properties') {
         } else {
-          if (kDebugMode) {
-            print('[NT4] Ignoring text message - unknown method $method');
-          }
+          logger.debug('[NT4] Ignoring text message - unknown method $method');
           return;
         }
       }
@@ -538,9 +520,7 @@ class NT4Client {
           } else if (topicID == -1) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);
           } else {
-            if (kDebugMode) {
-              print('[NT4] ignoring binary data, invalid topic ID');
-            }
+            logger.debug('[NT4] ignoring binary data, invalid topic ID');
           }
         } catch (err) {
           done = true;
