@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
