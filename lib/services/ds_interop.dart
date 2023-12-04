@@ -36,6 +36,9 @@ class DSInteropClient {
   }
 
   void _connect() async {
+    if (_serverConnectionActive) {
+      return;
+    }
     try {
       _socket = await Socket.connect(serverBaseAddress, 1742);
       _dbModeServer = await ServerSocket.bind(serverBaseAddress, 1741);
@@ -48,13 +51,17 @@ class DSInteropClient {
 
     _socket!.listen(
       (data) {
-        if (onConnect != null && !_serverConnectionActive) {
+        if (!_serverConnectionActive) {
+          logger.info('Driver Station connected on TCP port 1742');
           _serverConnectionActive = true;
           onConnect?.call();
         }
         _tcpSocketOnMessage(utf8.decode(data));
       },
       onDone: _socketClose,
+      onError: (err) {
+        logger.error('DS Interop Error', err);
+      },
     );
 
     _dbModeServer!.listen(
@@ -63,9 +70,13 @@ class DSInteropClient {
           (data) {
             _tcpServerOnMessage(data);
           },
+          onDone: _socketClose,
         );
       },
       onDone: _socketClose,
+      onError: (err) {
+        logger.error('DS Interop Error', err);
+      },
     );
   }
 
@@ -131,6 +142,10 @@ class DSInteropClient {
   }
 
   void _socketClose() {
+    if (!_serverConnectionActive) {
+      return;
+    }
+
     _socket?.close();
     _socket = null;
 
@@ -143,10 +158,9 @@ class DSInteropClient {
     onDriverStationDockChanged?.call(false);
     onDisconnect?.call();
 
-    if (kDebugMode) {
-      print(
-          '[DS INTEROP] Connection closed, attempting to reconnect in 5 seconds.');
-    }
+    logger.info(
+        'Driver Station connection closed, attempting to reconnect in 5 seconds.');
+
     Future.delayed(const Duration(seconds: 5), _connect);
   }
 }
