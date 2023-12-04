@@ -7,27 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class MotorController extends StatelessWidget with NT4Widget {
+class MotorController extends NT4Widget {
   @override
   String type = 'Motor Controller';
 
   late String valueTopic;
   late NT4Subscription valueSubscription;
 
-  MotorController({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  MotorController({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  MotorController.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  MotorController.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

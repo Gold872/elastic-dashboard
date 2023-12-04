@@ -5,24 +5,14 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SingleColorView extends StatelessWidget with NT4Widget {
+class SingleColorView extends NT4Widget {
   @override
   String type = 'Single Color View';
 
-  SingleColorView({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  SingleColorView({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  SingleColorView.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  SingleColorView.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   Widget build(BuildContext context) {

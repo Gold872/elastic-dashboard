@@ -5,26 +5,17 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class EncoderWidget extends StatelessWidget with NT4Widget {
+class EncoderWidget extends NT4Widget {
   @override
   String type = 'Encoder';
 
   late String distanceTopic;
   late String speedTopic;
 
-  EncoderWidget({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  EncoderWidget({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  EncoderWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  EncoderWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

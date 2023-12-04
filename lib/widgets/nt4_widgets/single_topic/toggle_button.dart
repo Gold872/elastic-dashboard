@@ -5,23 +5,14 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ToggleButton extends StatelessWidget with NT4Widget {
+class ToggleButton extends NT4Widget {
   @override
   String type = 'Toggle Button';
 
-  ToggleButton({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  ToggleButton({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  ToggleButton.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  ToggleButton.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   Widget build(BuildContext context) {

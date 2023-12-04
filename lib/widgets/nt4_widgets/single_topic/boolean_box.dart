@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BooleanBox extends StatelessWidget with NT4Widget {
+class BooleanBox extends NT4Widget {
   @override
   String type = 'Boolean Box';
 
@@ -15,21 +15,14 @@ class BooleanBox extends StatelessWidget with NT4Widget {
 
   BooleanBox({
     super.key,
-    required topic,
+    required super.topic,
     this.trueColor = Colors.green,
     this.falseColor = Colors.red,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
+    super.period,
+  }) : super();
 
-    init();
-  }
-
-  BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =
         tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
     int? falseColorValue =
@@ -65,8 +58,6 @@ class BooleanBox extends StatelessWidget with NT4Widget {
 
     trueColor = Color(trueColorValue ?? Colors.green.value);
     falseColor = Color(falseColorValue ?? Colors.red.value);
-
-    init();
   }
 
   @override

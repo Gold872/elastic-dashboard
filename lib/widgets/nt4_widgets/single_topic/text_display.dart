@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TextDisplay extends StatelessWidget with NT4Widget {
+class TextDisplay extends NT4Widget {
   @override
   String type = 'Text Display';
 
@@ -14,19 +14,9 @@ class TextDisplay extends StatelessWidget with NT4Widget {
 
   Object? _previousValue;
 
-  TextDisplay({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  TextDisplay({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  TextDisplay.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  TextDisplay.fromJson({super.key, required super.jsonData}) : super.fromJson();
 
   @override
   Widget build(BuildContext context) {

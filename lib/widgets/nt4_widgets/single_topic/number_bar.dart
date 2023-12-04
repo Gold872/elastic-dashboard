@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class NumberBar extends StatelessWidget with NT4Widget {
+class NumberBar extends NT4Widget {
   @override
   String type = 'Number Bar';
 
@@ -22,31 +22,22 @@ class NumberBar extends StatelessWidget with NT4Widget {
 
   NumberBar({
     super.key,
-    required topic,
+    required super.topic,
     this.minValue = -1.0,
     this.maxValue = 1.0,
     this.divisions = 5,
     this.inverted = false,
     this.orientation = 'horizontal',
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
+    super.period,
+  }) : super();
 
-    init();
-  }
-
-  NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     minValue = tryCast(jsonData['min_value']) ?? -1.0;
     maxValue = tryCast(jsonData['max_value']) ?? 1.0;
     divisions = tryCast(jsonData['divisions']);
     inverted = tryCast(jsonData['inverted']) ?? false;
     orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
-
-    init();
   }
 
   @override

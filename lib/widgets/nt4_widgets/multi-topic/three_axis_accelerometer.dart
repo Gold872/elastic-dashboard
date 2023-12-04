@@ -5,7 +5,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ThreeAxisAccelerometer extends StatelessWidget with NT4Widget {
+class ThreeAxisAccelerometer extends NT4Widget {
   @override
   String type = '3-Axis Accelerometer';
 
@@ -13,21 +13,10 @@ class ThreeAxisAccelerometer extends StatelessWidget with NT4Widget {
   late String yTopic;
   late String zTopic;
 
-  ThreeAxisAccelerometer(
-      {super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  ThreeAxisAccelerometer({super.key, required super.topic, super.period});
 
-    init();
-  }
-
-  ThreeAxisAccelerometer.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  ThreeAxisAccelerometer.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

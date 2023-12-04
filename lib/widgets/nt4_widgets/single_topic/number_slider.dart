@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class NumberSlider extends StatelessWidget with NT4Widget {
+class NumberSlider extends NT4Widget {
   @override
   final String type = 'Number Slider';
 
@@ -21,22 +21,15 @@ class NumberSlider extends StatelessWidget with NT4Widget {
 
   NumberSlider({
     super.key,
-    required topic,
+    required super.topic,
     this.minValue = -1.0,
     this.maxValue = 1.0,
     this.divisions = 5,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
+    super.period,
+  }) : super();
 
-    init();
-  }
-
-  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     minValue =
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
     maxValue =
@@ -44,8 +37,6 @@ class NumberSlider extends StatelessWidget with NT4Widget {
     divisions = tryCast(jsonData['divisions']) ??
         tryCast(jsonData['numOfTickMarks']) ??
         5;
-
-    init();
   }
 
   @override

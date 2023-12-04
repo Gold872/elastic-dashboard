@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class DifferentialDrive extends StatelessWidget with NT4Widget {
+class DifferentialDrive extends NT4Widget {
   @override
   String type = 'DifferentialDrive';
 
@@ -25,24 +25,10 @@ class DifferentialDrive extends StatelessWidget with NT4Widget {
   double leftSpeedCurrentValue = 0.0;
   double rightSpeedCurrentValue = 0.0;
 
-  DifferentialDrive({
-    super.key,
-    required topic,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
+  DifferentialDrive({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  DifferentialDrive.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  DifferentialDrive.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

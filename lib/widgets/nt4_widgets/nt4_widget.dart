@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -22,7 +23,7 @@ class NT4WidgetNotifier extends ChangeNotifier {
   }
 }
 
-mixin NT4Widget on StatelessWidget {
+abstract class NT4Widget extends StatelessWidget {
   String get type;
 
   late String topic;
@@ -31,6 +32,21 @@ mixin NT4Widget on StatelessWidget {
   NT4Subscription? subscription;
   NT4WidgetNotifier? notifier;
   NT4Topic? nt4Topic;
+
+  NT4Widget({
+    super.key,
+    required this.topic,
+    this.period = Globals.defaultPeriod,
+  }) {
+    init();
+  }
+
+  NT4Widget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
+    topic = tryCast(jsonData['topic']) ?? '';
+    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+
+    init();
+  }
 
   Map<String, dynamic> toJson() {
     return {

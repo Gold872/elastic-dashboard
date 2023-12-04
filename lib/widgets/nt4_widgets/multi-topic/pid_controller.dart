@@ -7,7 +7,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class PIDControllerWidget extends StatelessWidget with NT4Widget {
+class PIDControllerWidget extends NT4Widget {
   @override
   String type = 'PIDController';
 
@@ -31,37 +31,29 @@ class PIDControllerWidget extends StatelessWidget with NT4Widget {
   double kdLastValue = 0.0;
   double setpointLastValue = 0.0;
 
-  PIDControllerWidget(
-      {super.key,
-      required topic,
-      kpTopic,
-      kiTopic,
-      kdTopic,
-      setpointTopic,
-      period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
-
+  PIDControllerWidget({
+    super.key,
+    required super.topic,
+    kpTopic,
+    kiTopic,
+    kdTopic,
+    setpointTopic,
+    super.period,
+  }) : super() {
     kpTopicName = kpTopic ?? '$topic/p';
     kiTopicName = kiTopic ?? '$topic/i';
     kdTopicName = kdTopic ?? '$topic/d';
     setpointTopicName = setpointTopic ?? '$topic/setpoint';
-
-    init();
   }
 
   PIDControllerWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+      {super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     kpTopicName = tryCast(jsonData['kp_topic']) ?? '$topic/p';
     kiTopicName = tryCast(jsonData['ki_topic']) ?? '$topic/i';
     kdTopicName = tryCast(jsonData['kd_topic']) ?? '$topic/d';
     setpointTopicName =
         tryCast(jsonData['setpoint_topic']) ?? '$topic/setpoint';
-
-    init();
   }
 
   @override

@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class GraphWidget extends StatelessWidget with NT4Widget {
+class GraphWidget extends NT4Widget {
   @override
   String type = 'Graph';
 
@@ -25,35 +25,24 @@ class GraphWidget extends StatelessWidget with NT4Widget {
 
   GraphWidget({
     super.key,
-    required topic,
-    period = Globals.defaultGraphPeriod,
+    required super.topic,
+    super.period = Globals.defaultGraphPeriod,
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,
     this.mainColor = Colors.cyan,
-  }) {
-    super.topic = topic;
-    super.period = period;
-
-    init();
+  }) : super() {
+    resetGraphData();
   }
 
-  GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultGraphPeriod;
+  GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
         5.0;
     minValue = tryCast(jsonData['min_value']);
     maxValue = tryCast(jsonData['max_value']);
     mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
-
-    init();
-  }
-
-  @override
-  void init() {
-    super.init();
 
     resetGraphData();
   }

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
-class CameraStreamWidget extends StatelessWidget with NT4Widget {
+class CameraStreamWidget extends NT4Widget {
   @override
   String type = 'Camera Stream';
 
@@ -20,21 +20,10 @@ class CameraStreamWidget extends StatelessWidget with NT4Widget {
   late Client httpClient;
   bool clientOpen = false;
 
-  CameraStreamWidget(
-      {super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  CameraStreamWidget({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  CameraStreamWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  CameraStreamWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommandWidget extends StatelessWidget with NT4Widget {
+class CommandWidget extends NT4Widget {
   @override
   String type = 'Command';
 
@@ -15,19 +15,10 @@ class CommandWidget extends StatelessWidget with NT4Widget {
   late String runningTopicName;
   late String nameTopicName;
 
-  CommandWidget({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  CommandWidget({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  CommandWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  CommandWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

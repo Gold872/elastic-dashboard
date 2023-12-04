@@ -1,5 +1,6 @@
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -8,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class Gyro extends StatelessWidget with NT4Widget {
+class Gyro extends NT4Widget {
   @override
   String type = 'Gyro';
 
@@ -20,27 +21,19 @@ class Gyro extends StatelessWidget with NT4Widget {
 
   Gyro({
     super.key,
-    required topic,
+    required super.topic,
     counterClockwisePositive,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
-
+    super.period,
+  }) : super() {
     if (counterClockwisePositive != null) {
       this.counterClockwisePositive = counterClockwisePositive;
     }
-
-    init();
   }
 
-  Gyro.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+  Gyro.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     counterClockwisePositive =
         tryCast(jsonData['counter_clockwise_positive']) ?? false;
-
-    init();
   }
 
   @override

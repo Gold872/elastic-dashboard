@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class RelayWidget extends StatelessWidget with NT4Widget {
+class RelayWidget extends NT4Widget {
   @override
   String type = 'Relay';
 
@@ -16,19 +16,9 @@ class RelayWidget extends StatelessWidget with NT4Widget {
 
   final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayWidget({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  RelayWidget({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  RelayWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  RelayWidget.fromJson({super.key, required super.jsonData}) : super.fromJson();
 
   @override
   void init() {

@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart'
     show Matrix3, Quaternion, Vector3, radians;
 
-class FieldWidget extends StatelessWidget with NT4Widget {
+class FieldWidget extends NT4Widget {
   @override
   String type = 'Field';
 
@@ -41,24 +41,19 @@ class FieldWidget extends StatelessWidget with NT4Widget {
 
   FieldWidget({
     super.key,
-    required topic,
+    required super.topic,
     String? fieldName,
     this.showOtherObjects = true,
     this.showTrajectories = true,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
-
+    super.period,
+  }) : super() {
     fieldGame = fieldName ?? fieldGame;
 
-    init();
+    field = FieldImages.getFieldFromGame(fieldGame);
   }
 
-  FieldWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  FieldWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     fieldGame = tryCast(jsonData['field_game']) ?? fieldGame;
 
     robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.82;
@@ -67,7 +62,7 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
     showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
 
-    init();
+    field = FieldImages.getFieldFromGame(fieldGame);
   }
 
   @override
@@ -75,8 +70,6 @@ class FieldWidget extends StatelessWidget with NT4Widget {
     super.init();
 
     robotTopicName = '$topic/Robot';
-
-    field = FieldImages.getFieldFromGame(fieldGame);
   }
 
   @override

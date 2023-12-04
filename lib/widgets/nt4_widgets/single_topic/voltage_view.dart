@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-class VoltageView extends StatelessWidget with NT4Widget {
+class VoltageView extends NT4Widget {
   @override
   String type = 'Voltage View';
 
@@ -22,24 +22,17 @@ class VoltageView extends StatelessWidget with NT4Widget {
 
   VoltageView({
     super.key,
-    required topic,
+    required super.topic,
     this.minValue = 4.0,
     this.maxValue = 13.0,
     this.divisions = 5,
     this.inverted = false,
     this.orientation = 'horizontal',
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
+    super.period,
+  }) : super();
 
-    init();
-  }
-
-  VoltageView.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  VoltageView.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     minValue = tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? 4;
     maxValue =
         tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 13.0;
@@ -47,8 +40,6 @@ class VoltageView extends StatelessWidget with NT4Widget {
         tryCast(jsonData['divisions']) ?? tryCast(jsonData['numOfTickMarks']);
     inverted = tryCast(jsonData['inverted']) ?? false;
     orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
-
-    init();
   }
 
   @override

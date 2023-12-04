@@ -6,26 +6,20 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AccelerometerWidget extends StatelessWidget with NT4Widget {
+class AccelerometerWidget extends NT4Widget {
   @override
   String type = 'Accelerometer';
 
   late String valueTopic;
   late NT4Subscription valueSubscription;
 
-  AccelerometerWidget(
-      {super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
-
+  AccelerometerWidget({super.key, required super.topic, super.period})
+      : super() {
     init();
   }
 
-  AccelerometerWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
+  AccelerometerWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson() {
     init();
   }
 

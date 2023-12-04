@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
-class RobotPreferences extends StatelessWidget with NT4Widget {
+class RobotPreferences extends NT4Widget {
   @override
   String type = 'RobotPreferences';
 
@@ -19,20 +19,13 @@ class RobotPreferences extends StatelessWidget with NT4Widget {
 
   PreferenceSearch? searchWidget;
 
-  RobotPreferences(
-      {super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  RobotPreferences({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  RobotPreferences.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '/Preferences';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
+  RobotPreferences.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
+    if (topic == '') {
+      topic = tryCast(jsonData['topic']) ?? '/Preferences';
+    }
   }
 
   @override

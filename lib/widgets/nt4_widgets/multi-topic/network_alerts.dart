@@ -5,7 +5,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class NetworkAlerts extends StatelessWidget with NT4Widget {
+class NetworkAlerts extends NT4Widget {
   @override
   String type = 'Alerts';
 
@@ -13,19 +13,10 @@ class NetworkAlerts extends StatelessWidget with NT4Widget {
   late String warningsTopicName;
   late String infosTopicName;
 
-  NetworkAlerts({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  NetworkAlerts({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  NetworkAlerts.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  NetworkAlerts.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {

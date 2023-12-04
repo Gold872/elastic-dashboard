@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
-class SwerveDriveWidget extends StatelessWidget with NT4Widget {
+class SwerveDriveWidget extends NT4Widget {
   @override
   String type = 'SwerveDrive';
 
@@ -31,23 +31,15 @@ class SwerveDriveWidget extends StatelessWidget with NT4Widget {
 
   SwerveDriveWidget({
     super.key,
-    required topic,
+    required super.topic,
     this.showRobotRotation = true,
-    period = Globals.defaultPeriod,
-  }) {
-    super.topic = topic;
-    super.period = period;
-
-    init();
-  }
+    super.period = Globals.defaultPeriod,
+  }) : super();
 
   SwerveDriveWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+      {super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
     showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
-
-    init();
   }
 
   @override

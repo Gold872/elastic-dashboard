@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 import 'package:provider/provider.dart';
 
-class FMSInfo extends StatelessWidget with NT4Widget {
+class FMSInfo extends NT4Widget {
   @override
   String type = 'FMSInfo';
 
@@ -25,18 +25,14 @@ class FMSInfo extends StatelessWidget with NT4Widget {
   late String replayNumberTopic;
   late String stationNumberTopic;
 
-  FMSInfo({super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  FMSInfo({super.key, required super.topic, super.period}) : super();
 
-    init();
-  }
-
-  FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '/FMSInfo';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
+  FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
+    if (topic == '') {
+      topic = tryCast(jsonData['topic']) ?? '/FMSInfo';
+      init();
+    }
   }
 
   @override

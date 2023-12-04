@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
+class CommandSchedulerWidget extends NT4Widget {
   @override
   String type = 'Scheduler';
 
@@ -16,21 +16,11 @@ class CommandSchedulerWidget extends StatelessWidget with NT4Widget {
   late String idsTopicName;
   late String cancelTopicName;
 
-  CommandSchedulerWidget(
-      {super.key, required topic, period = Globals.defaultPeriod}) {
-    super.topic = topic;
-    super.period = period;
+  CommandSchedulerWidget({super.key, required super.topic, super.period})
+      : super();
 
-    init();
-  }
-
-  CommandSchedulerWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
-
-    init();
-  }
+  CommandSchedulerWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {
