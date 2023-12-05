@@ -895,8 +895,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     await windowManager.unmaximize();
 
-    Size newScreenSize =
-        Size(screenSize.width + 16, (screenSize.height + 8) - 250) / pixelRatio;
+    Size newScreenSize = Size(screenSize.width + 16,
+            (screenSize.height + 8) - (200 * pixelRatio)) /
+        pixelRatio;
 
     await windowManager.setSize(newScreenSize);
 
