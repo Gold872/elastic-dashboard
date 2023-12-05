@@ -895,9 +895,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     await windowManager.unmaximize();
 
-    Size newScreenSize = Size(screenSize.width + 16,
-            (screenSize.height + 8) - (200 * pixelRatio)) /
-        pixelRatio;
+    Size newScreenSize =
+        Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
+            pixelRatio;
 
     await windowManager.setSize(newScreenSize);
 
@@ -906,12 +906,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Globals.isWindowMaximizable = false;
     Globals.isWindowDraggable = false;
     await windowManager.setResizable(false);
+
+    await windowManager.setAsFrameless();
   }
 
   void _onDriverStationUndocked() async {
     Globals.isWindowMaximizable = true;
     Globals.isWindowDraggable = true;
     await windowManager.setResizable(true);
+
+    // Re-adds the window frame, window manager's API for this is weird
+    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+        windowButtonVisibility: false);
   }
 
   void showWindowCloseConfirmation(BuildContext context) {
