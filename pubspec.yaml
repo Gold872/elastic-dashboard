@@ -21,11 +21,11 @@ dependencies:
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
   github: ^9.17.0
-  http: ^0.13.6
+  http: ^1.1.2
   logger: ^2.0.2+1
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
-  package_info_plus: ^4.1.0
+  package_info_plus: ^5.0.1
   path: ^1.8.3
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
