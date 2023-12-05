@@ -1,0 +1,280 @@
+import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/motor_controller.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/relay_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/three_axis_accelerometer.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/single_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
+import 'package:flutter/foundation.dart';
+
+class NT4WidgetBuilder {
+  static final Map<
+      String,
+      NT4Widget Function({
+        Key? key,
+        required Map<String, dynamic> jsonData,
+      })> _widgetJsonBuildMap = {};
+
+  static final Map<
+      String,
+      NT4Widget Function({
+        Key? key,
+        required String topic,
+        double period,
+      })> _widgetNameBuildMap = {};
+
+  static final Map<String, double> _minimumWidthMap = {};
+  static final Map<String, double> _minimumHeightMap = {};
+
+  static final Map<String, double> _defaultWidthMap = {};
+  static final Map<String, double> _defaultHeightMap = {};
+
+  static const double _normalSize = 128.0;
+
+  static bool _initialized = false;
+  static void ensureInitialized() {
+    if (_initialized) {
+      return;
+    }
+
+    // Single-Topic Widgets
+    _widgetJsonBuildMap.addAll({
+      BooleanBox.widgetType: BooleanBox.fromJson,
+      GraphWidget.widgetType: GraphWidget.fromJson,
+      MatchTimeWidget.widgetType: MatchTimeWidget.fromJson,
+      MultiColorView.widgetType: MultiColorView.fromJson,
+      NumberBar.widgetType: NumberBar.fromJson,
+      NumberSlider.widgetType: NumberSlider.fromJson,
+      SingleColorView.widgetType: SingleColorView.fromJson,
+      TextDisplay.widgetType: TextDisplay.fromJson,
+      'Text View': TextDisplay.fromJson,
+      ToggleButton.widgetType: ToggleButton.fromJson,
+      ToggleSwitch.widgetType: ToggleSwitch.fromJson,
+      VoltageView.widgetType: VoltageView.fromJson,
+    });
+
+    // Multi-Topic Widgets
+    _widgetJsonBuildMap.addAll({
+      AccelerometerWidget.widgetType: AccelerometerWidget.fromJson,
+      CameraStreamWidget.widgetType: CameraStreamWidget.fromJson,
+      ComboBoxChooser.widgetType: ComboBoxChooser.fromJson,
+      CommandSchedulerWidget.widgetType: CommandSchedulerWidget.fromJson,
+      CommandWidget.widgetType: CommandWidget.fromJson,
+      DifferentialDrive.widgetType: DifferentialDrive.fromJson,
+      'Differential Drivebase': DifferentialDrive.fromJson,
+      EncoderWidget.widgetType: EncoderWidget.fromJson,
+      'Quadrature Encoder': EncoderWidget.fromJson,
+      FieldWidget.widgetType: FieldWidget.fromJson,
+      'Field2d': FieldWidget.fromJson,
+      FMSInfo.widgetType: FMSInfo.fromJson,
+      Gyro.widgetType: Gyro.fromJson,
+      MotorController.widgetType: MotorController.fromJson,
+      'Nidec Brushless': MotorController.fromJson,
+      NetworkAlerts.widgetType: NetworkAlerts.fromJson,
+      PIDControllerWidget.widgetType: PIDControllerWidget.fromJson,
+      'PID Controller': PIDControllerWidget.fromJson,
+      PowerDistribution.widgetType: PowerDistribution.fromJson,
+      'PDP': PowerDistribution.fromJson,
+      RelayWidget.widgetType: RelayWidget.fromJson,
+      RobotPreferences.widgetType: RobotPreferences.fromJson,
+      SplitButtonChooser.widgetType: SplitButtonChooser.fromJson,
+      SubsystemWidget.widgetType: SubsystemWidget.fromJson,
+      SwerveDriveWidget.widgetType: SwerveDriveWidget.fromJson,
+      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.fromJson,
+      '3AxisAccelerometer': ThreeAxisAccelerometer.fromJson,
+    });
+
+    // Used when building widgets from network tables (drag and drop)
+    _widgetNameBuildMap.addAll({
+      AccelerometerWidget.widgetType: AccelerometerWidget.new,
+      CameraStreamWidget.widgetType: CameraStreamWidget.new,
+      ComboBoxChooser.widgetType: ComboBoxChooser.new,
+      'String Chooser': ComboBoxChooser.new,
+      CommandSchedulerWidget.widgetType: CommandSchedulerWidget.new,
+      CommandWidget.widgetType: CommandWidget.new,
+      DifferentialDrive.widgetType: DifferentialDrive.new,
+      'Differential Drivebase': DifferentialDrive.new,
+      EncoderWidget.widgetType: EncoderWidget.new,
+      'Quadrature Encoder': EncoderWidget.new,
+      FieldWidget.widgetType: FieldWidget.new,
+      'Field2d': FieldWidget.new,
+      FMSInfo.widgetType: FMSInfo.new,
+      Gyro.widgetType: Gyro.new,
+      MotorController.widgetType: MotorController.new,
+      'Nidec Brushless': MotorController.new,
+      NetworkAlerts.widgetType: NetworkAlerts.new,
+      PIDControllerWidget.widgetType: PIDControllerWidget.new,
+      'PID Controller': PIDControllerWidget.new,
+      PowerDistribution.widgetType: PowerDistribution.new,
+      'PDP': PowerDistribution.new,
+      RelayWidget.widgetType: RelayWidget.new,
+      RobotPreferences.widgetType: RobotPreferences.new,
+      SplitButtonChooser.widgetType: SplitButtonChooser.new,
+      SubsystemWidget.widgetType: SubsystemWidget.new,
+      SwerveDriveWidget.widgetType: SwerveDriveWidget.new,
+      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.new,
+      '3AxisAccelerometer': ThreeAxisAccelerometer.new,
+    });
+
+    // Min width and height
+    _minimumWidthMap.addAll({
+      CameraStreamWidget.widgetType: _normalSize * 2,
+      CommandSchedulerWidget.widgetType: _normalSize * 2,
+      CommandWidget.widgetType: _normalSize * 2,
+      DifferentialDrive.widgetType: _normalSize * 2,
+      EncoderWidget.widgetType: _normalSize * 2,
+      FieldWidget.widgetType: _normalSize * 3,
+      FMSInfo.widgetType: _normalSize * 3,
+      Gyro.widgetType: _normalSize * 2,
+      NetworkAlerts.widgetType: _normalSize * 2,
+      PIDControllerWidget.widgetType: _normalSize * 2,
+      PowerDistribution.widgetType: _normalSize * 3,
+      RobotPreferences.widgetType: _normalSize * 2,
+      SubsystemWidget.widgetType: _normalSize * 2,
+      SwerveDriveWidget.widgetType: _normalSize * 2,
+    });
+
+    _minimumHeightMap.addAll({
+      CameraStreamWidget.widgetType: _normalSize * 2,
+      CommandSchedulerWidget.widgetType: _normalSize * 2,
+      DifferentialDrive.widgetType: _normalSize * 2,
+      FieldWidget.widgetType: _normalSize * 2,
+      Gyro.widgetType: _normalSize * 2,
+      NetworkAlerts.widgetType: _normalSize * 2,
+      PIDControllerWidget.widgetType: _normalSize * 3,
+      PowerDistribution.widgetType: _normalSize * 3,
+      RelayWidget.widgetType: _normalSize * 2,
+      RobotPreferences.widgetType: _normalSize * 2,
+      SwerveDriveWidget.widgetType: _normalSize * 2,
+    });
+
+    // Default width and height (when dragging and dropping)
+    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
+        .clamp(128.0, double.infinity);
+
+    _defaultWidthMap.addAll({
+      CameraStreamWidget.widgetType: snappedNormal * 2,
+      CommandSchedulerWidget.widgetType: snappedNormal * 2,
+      CommandWidget.widgetType: snappedNormal * 2,
+      DifferentialDrive.widgetType: snappedNormal * 3,
+      EncoderWidget.widgetType: snappedNormal * 2,
+      FieldWidget.widgetType: snappedNormal * 3,
+      FMSInfo.widgetType: snappedNormal * 3,
+      Gyro.widgetType: snappedNormal * 2,
+      NetworkAlerts.widgetType: snappedNormal * 2,
+      PIDControllerWidget.widgetType: snappedNormal * 2,
+      PowerDistribution.widgetType: snappedNormal * 3,
+      RobotPreferences.widgetType: snappedNormal * 2,
+      SubsystemWidget.widgetType: snappedNormal * 2,
+      SwerveDriveWidget.widgetType: snappedNormal * 2,
+    });
+
+    _defaultHeightMap.addAll({
+      CameraStreamWidget.widgetType: snappedNormal * 2,
+      CommandSchedulerWidget.widgetType: snappedNormal * 3,
+      DifferentialDrive.widgetType: snappedNormal * 2,
+      FieldWidget.widgetType: snappedNormal * 2,
+      Gyro.widgetType: snappedNormal * 2,
+      NetworkAlerts.widgetType: snappedNormal * 3,
+      PIDControllerWidget.widgetType: snappedNormal * 2,
+      PowerDistribution.widgetType: snappedNormal * 4,
+      RelayWidget.widgetType: snappedNormal * 2,
+      RobotPreferences.widgetType: snappedNormal * 3,
+      SwerveDriveWidget.widgetType: snappedNormal * 2,
+    });
+
+    _initialized = true;
+  }
+
+  static NT4Widget buildNT4WidgetFromJson(
+      String type, Map<String, dynamic> jsonData,
+      {Function(String message)? onWidgetTypeNotFound}) {
+    if (!_initialized) {
+      ensureInitialized();
+    }
+
+    if (_widgetJsonBuildMap.containsKey(type)) {
+      return _widgetJsonBuildMap[type]!(
+        key: UniqueKey(),
+        jsonData: jsonData,
+      );
+    } else {
+      onWidgetTypeNotFound?.call(
+          'Unknown widget type: \'$type\', defaulting to Text Display widget.');
+
+      return TextDisplay.fromJson(key: UniqueKey(), jsonData: jsonData);
+    }
+  }
+
+  static NT4Widget? buildNT4WidgetFromType(String type, String topic,
+      {double period = Globals.defaultPeriod}) {
+    if (_widgetNameBuildMap.containsKey(type)) {
+      return _widgetNameBuildMap[type]!(
+        key: UniqueKey(),
+        topic: topic,
+        period: period,
+      );
+    }
+
+    return null;
+  }
+
+  static double getMinimumWidth(NT4Widget? widget) {
+    if (widget != null && _minimumWidthMap.containsKey(widget.type)) {
+      return _minimumWidthMap[widget.type]!;
+    } else {
+      return _normalSize;
+    }
+  }
+
+  static double getMinimumHeight(NT4Widget? widget) {
+    if (widget != null && _minimumHeightMap.containsKey(widget.type)) {
+      return _minimumHeightMap[widget.type]!;
+    } else {
+      return _normalSize;
+    }
+  }
+
+  static double getDefaultWidth(NT4Widget widget) {
+    if (_defaultWidthMap.containsKey(widget.type)) {
+      return _defaultWidthMap[widget.type]!;
+    }
+    return DraggableWidgetContainer.snapToGrid(_normalSize)
+        .clamp(128.0, double.infinity);
+  }
+
+  static double getDefaultHeight(NT4Widget widget) {
+    if (_defaultHeightMap.containsKey(widget.type)) {
+      return _defaultHeightMap[widget.type]!;
+    }
+    return DraggableWidgetContainer.snapToGrid(_normalSize)
+        .clamp(128.0, double.infinity);
+  }
+}

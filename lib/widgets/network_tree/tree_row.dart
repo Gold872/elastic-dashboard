@@ -1,25 +1,8 @@
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/differential_drive.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/encoder_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/motor_controller.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/relay_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
@@ -160,48 +143,7 @@ class TreeRow {
       return null;
     }
 
-    switch (type) {
-      case 'Gyro':
-        return Gyro(key: UniqueKey(), topic: topic);
-      case '3AxisAccelerometer':
-        return ThreeAxisAccelerometer(key: UniqueKey(), topic: topic);
-      case 'Accelerometer':
-        return AccelerometerWidget(key: UniqueKey(), topic: topic);
-      case 'Encoder':
-      case 'Quadrature Encoder':
-        return EncoderWidget(key: UniqueKey(), topic: topic);
-      case 'Motor Controller':
-      case 'Nidec Brushless':
-        return MotorController(key: UniqueKey(), topic: topic);
-      case 'Field2d':
-        return FieldWidget(key: UniqueKey(), topic: topic);
-      case 'PowerDistribution':
-        return PowerDistribution(key: UniqueKey(), topic: topic);
-      case 'PIDController':
-        return PIDControllerWidget(key: UniqueKey(), topic: topic);
-      case 'DifferentialDrive':
-        return DifferentialDrive(key: UniqueKey(), topic: topic);
-      case 'SwerveDrive':
-        return SwerveDriveWidget(key: UniqueKey(), topic: topic);
-      case 'String Chooser':
-        return ComboBoxChooser(key: UniqueKey(), topic: topic);
-      case 'Relay':
-        return RelayWidget(key: UniqueKey(), topic: topic);
-      case 'Subsystem':
-        return SubsystemWidget(key: UniqueKey(), topic: topic);
-      case 'Command':
-        return CommandWidget(key: UniqueKey(), topic: topic);
-      case 'Scheduler':
-        return CommandSchedulerWidget(key: UniqueKey(), topic: topic);
-      case 'FMSInfo':
-        return FMSInfo(key: UniqueKey(), topic: topic);
-      case 'RobotPreferences':
-        return RobotPreferences(key: UniqueKey(), topic: topic);
-      case 'Alerts':
-        return NetworkAlerts(key: UniqueKey(), topic: topic);
-    }
-
-    return null;
+    return NT4WidgetBuilder.buildNT4WidgetFromType(type, topic);
   }
 
   Future<WidgetContainer?> toWidgetContainer() async {
@@ -211,52 +153,8 @@ class TreeRow {
       return null;
     }
 
-    double normalGridSize = DraggableWidgetContainer.snapToGrid(128);
-
-    double width = normalGridSize;
-    double height = normalGridSize;
-
-    if (primary is Gyro) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 2;
-    } else if (primary is EncoderWidget) {
-      width = normalGridSize * 2;
-    } else if (primary is CameraStreamWidget) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 2;
-    } else if (primary is FieldWidget) {
-      width = normalGridSize * 3;
-      height = normalGridSize * 2;
-    } else if (primary is PowerDistribution) {
-      width = normalGridSize * 3;
-      height = normalGridSize * 4;
-    } else if (primary is PIDControllerWidget) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 3;
-    } else if (primary is DifferentialDrive) {
-      width = normalGridSize * 3;
-      height = normalGridSize * 2;
-    } else if (primary is SwerveDriveWidget) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 2;
-    } else if (primary is RelayWidget) {
-      height = normalGridSize * 2;
-    } else if (primary is SubsystemWidget) {
-      width = normalGridSize * 2;
-    } else if (primary is CommandWidget) {
-      width = normalGridSize * 2;
-    } else if (primary is CommandSchedulerWidget) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 3;
-    } else if (primary is FMSInfo) {
-      width = normalGridSize * 3;
-    } else if (primary is RobotPreferences) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 3;
-    } else if (primary is NetworkAlerts) {
-      width = normalGridSize * 2;
-      height = normalGridSize * 3;
-    }
+    double width = NT4WidgetBuilder.getDefaultWidth(primary);
+    double height = NT4WidgetBuilder.getDefaultHeight(primary);
 
     return WidgetContainer(
       title: rowName,
