@@ -176,38 +176,35 @@ class NT4WidgetBuilder {
     });
 
     // Default width and height (when dragging and dropping)
-    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
-        .clamp(128.0, double.infinity);
-
     _defaultWidthMap.addAll({
-      CameraStreamWidget.widgetType: snappedNormal * 2,
-      CommandSchedulerWidget.widgetType: snappedNormal * 2,
-      CommandWidget.widgetType: snappedNormal * 2,
-      DifferentialDrive.widgetType: snappedNormal * 3,
-      EncoderWidget.widgetType: snappedNormal * 2,
-      FieldWidget.widgetType: snappedNormal * 3,
-      FMSInfo.widgetType: snappedNormal * 3,
-      Gyro.widgetType: snappedNormal * 2,
-      NetworkAlerts.widgetType: snappedNormal * 2,
-      PIDControllerWidget.widgetType: snappedNormal * 2,
-      PowerDistribution.widgetType: snappedNormal * 3,
-      RobotPreferences.widgetType: snappedNormal * 2,
-      SubsystemWidget.widgetType: snappedNormal * 2,
-      SwerveDriveWidget.widgetType: snappedNormal * 2,
+      CameraStreamWidget.widgetType: 2,
+      CommandSchedulerWidget.widgetType: 2,
+      CommandWidget.widgetType: 2,
+      DifferentialDrive.widgetType: 3,
+      EncoderWidget.widgetType: 2,
+      FieldWidget.widgetType: 3,
+      FMSInfo.widgetType: 3,
+      Gyro.widgetType: 2,
+      NetworkAlerts.widgetType: 2,
+      PIDControllerWidget.widgetType: 2,
+      PowerDistribution.widgetType: 3,
+      RobotPreferences.widgetType: 2,
+      SubsystemWidget.widgetType: 2,
+      SwerveDriveWidget.widgetType: 2,
     });
 
     _defaultHeightMap.addAll({
-      CameraStreamWidget.widgetType: snappedNormal * 2,
-      CommandSchedulerWidget.widgetType: snappedNormal * 3,
-      DifferentialDrive.widgetType: snappedNormal * 2,
-      FieldWidget.widgetType: snappedNormal * 2,
-      Gyro.widgetType: snappedNormal * 2,
-      NetworkAlerts.widgetType: snappedNormal * 3,
-      PIDControllerWidget.widgetType: snappedNormal * 2,
-      PowerDistribution.widgetType: snappedNormal * 4,
-      RelayWidget.widgetType: snappedNormal * 2,
-      RobotPreferences.widgetType: snappedNormal * 3,
-      SwerveDriveWidget.widgetType: snappedNormal * 2,
+      CameraStreamWidget.widgetType: 2,
+      CommandSchedulerWidget.widgetType: 3,
+      DifferentialDrive.widgetType: 2,
+      FieldWidget.widgetType: 2,
+      Gyro.widgetType: 2,
+      NetworkAlerts.widgetType: 3,
+      PIDControllerWidget.widgetType: 2,
+      PowerDistribution.widgetType: 4,
+      RelayWidget.widgetType: 2,
+      RobotPreferences.widgetType: 3,
+      SwerveDriveWidget.widgetType: 2,
     });
 
     _initialized = true;
@@ -216,9 +213,7 @@ class NT4WidgetBuilder {
   static NT4Widget buildNT4WidgetFromJson(
       String type, Map<String, dynamic> jsonData,
       {Function(String message)? onWidgetTypeNotFound}) {
-    if (!_initialized) {
-      ensureInitialized();
-    }
+    ensureInitialized();
 
     if (_widgetJsonBuildMap.containsKey(type)) {
       return _widgetJsonBuildMap[type]!(
@@ -235,6 +230,8 @@ class NT4WidgetBuilder {
 
   static NT4Widget? buildNT4WidgetFromType(String type, String topic,
       {double period = Globals.defaultPeriod}) {
+    ensureInitialized();
+
     if (_widgetNameBuildMap.containsKey(type)) {
       return _widgetNameBuildMap[type]!(
         key: UniqueKey(),
@@ -247,6 +244,8 @@ class NT4WidgetBuilder {
   }
 
   static double getMinimumWidth(NT4Widget? widget) {
+    ensureInitialized();
+
     if (widget != null && _minimumWidthMap.containsKey(widget.type)) {
       return _minimumWidthMap[widget.type]!;
     } else {
@@ -255,6 +254,8 @@ class NT4WidgetBuilder {
   }
 
   static double getMinimumHeight(NT4Widget? widget) {
+    ensureInitialized();
+
     if (widget != null && _minimumHeightMap.containsKey(widget.type)) {
       return _minimumHeightMap[widget.type]!;
     } else {
@@ -263,18 +264,26 @@ class NT4WidgetBuilder {
   }
 
   static double getDefaultWidth(NT4Widget widget) {
-    if (_defaultWidthMap.containsKey(widget.type)) {
-      return _defaultWidthMap[widget.type]!;
-    }
-    return DraggableWidgetContainer.snapToGrid(_normalSize)
+    ensureInitialized();
+
+    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
         .clamp(128.0, double.infinity);
+
+    if (_defaultWidthMap.containsKey(widget.type)) {
+      return snappedNormal * _defaultWidthMap[widget.type]!;
+    }
+    return snappedNormal;
   }
 
   static double getDefaultHeight(NT4Widget widget) {
-    if (_defaultHeightMap.containsKey(widget.type)) {
-      return _defaultHeightMap[widget.type]!;
-    }
-    return DraggableWidgetContainer.snapToGrid(_normalSize)
+    ensureInitialized();
+
+    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
         .clamp(128.0, double.infinity);
+
+    if (_defaultHeightMap.containsKey(widget.type)) {
+      return snappedNormal * _defaultHeightMap[widget.type]!;
+    }
+    return snappedNormal;
   }
 }

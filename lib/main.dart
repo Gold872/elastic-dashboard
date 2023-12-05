@@ -6,6 +6,7 @@ import 'package:elastic_dashboard/services/globals.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -55,6 +56,8 @@ void main() async {
       preferences.getDouble(PrefKeys.cornerRadius) ?? Globals.cornerRadius;
   Globals.autoResizeToDS =
       preferences.getBool(PrefKeys.autoResizeToDS) ?? Globals.autoResizeToDS;
+
+  NT4WidgetBuilder.ensureInitialized();
 
   nt4Connection
       .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
