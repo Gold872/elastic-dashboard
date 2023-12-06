@@ -504,7 +504,7 @@ class DashboardGrid extends StatelessWidget {
       if (!fromLayout) {
         widget.child.unSubscribe();
       }
-    
+
       refresh();
       return;
     } else {
