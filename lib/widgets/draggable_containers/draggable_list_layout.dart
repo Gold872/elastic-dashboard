@@ -113,7 +113,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                     child: ExpansionTile(
                                       title: Text(container.title ?? ''),
                                       subtitle: Text(
-                                          container.child?.type ?? 'NT4Widget'),
+                                          container.child.type ?? 'NT4Widget'),
                                       controlAffinity:
                                           ListTileControlAffinity.leading,
                                       trailing: IconButton(
@@ -202,7 +202,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     ];
 
     List<Widget> childEditProperties =
-        container.child!.getEditProperties(context);
+        container.child.getEditProperties(context);
 
     return [
       ...containerEditProperties,
@@ -335,7 +335,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.0),
-                child: widget.child!,
+                child: widget.child,
               ),
             ),
           ],

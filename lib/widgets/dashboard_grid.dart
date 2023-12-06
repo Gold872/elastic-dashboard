@@ -500,13 +500,11 @@ class DashboardGrid extends StatelessWidget {
     } else if (!isValidLocation(previewLocation)) {
       _containerDraggingIn = null;
 
-      if (widget.child is NT4Widget) {
-        widget.child?.dispose(deleting: !fromLayout);
-        if (!fromLayout) {
-          widget.child?.unSubscribe();
-        }
+      widget.child.dispose(deleting: !fromLayout);
+      if (!fromLayout) {
+        widget.child.unSubscribe();
       }
-
+    
       refresh();
       return;
     } else {
@@ -519,7 +517,7 @@ class DashboardGrid extends StatelessWidget {
 
     _containerDraggingIn = null;
 
-    widget.child?.dispose();
+    widget.child.dispose();
 
     refresh();
   }
@@ -586,10 +584,10 @@ class DashboardGrid extends StatelessWidget {
       for (DraggableNT4WidgetContainer container
           in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
         String? title = container.title;
-        String? type = container.child?.type;
-        String? topic = container.child?.topic;
+        String? type = container.child.type;
+        String? topic = container.child.topic;
 
-        if (title == null || type == null || topic == null) {
+        if (title == null) {
           continue;
         }
 

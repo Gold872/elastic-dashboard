@@ -10,7 +10,7 @@ import '../dialog_widgets/dialog_text_input.dart';
 import '../nt4_widgets/nt4_widget.dart';
 
 class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
-  NT4Widget? child;
+  late NT4Widget child;
 
   DraggableNT4WidgetContainer({
     super.key,
@@ -55,7 +55,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'type': child?.type,
+      'type': child.type,
       'properties': getChildJson(),
     };
   }
@@ -86,25 +86,25 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   }
 
   void refreshChild() {
-    child?.refresh();
+    child.refresh();
   }
 
   @override
   void dispose({bool deleting = false}) {
     super.dispose(deleting: deleting);
 
-    child?.dispose(deleting: deleting);
+    child.dispose(deleting: deleting);
   }
 
   @override
   void unSubscribe() {
     super.unSubscribe();
 
-    child?.unSubscribe();
+    child.unSubscribe();
   }
 
   Map<String, dynamic>? getChildJson() {
-    return child!.toJson();
+    return child.toJson();
   }
 
   void changeChildToType(String? type) {
@@ -112,22 +112,22 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
       return;
     }
 
-    if (type == child!.type) {
+    if (type == child.type) {
       return;
     }
 
     NT4Widget? newWidget = NT4WidgetBuilder.buildNT4WidgetFromType(
       type,
-      child!.type,
-      period: child!.period,
+      child.type,
+      period: child.period,
     );
 
     if (newWidget == null) {
       return;
     }
 
-    child!.dispose(deleting: true);
-    child!.unSubscribe();
+    child.dispose(deleting: true);
+    child.unSubscribe();
     child = newWidget;
 
     minWidth = NT4WidgetBuilder.getMinimumWidth(child);
@@ -149,7 +149,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
               child: StatefulBuilder(
                 builder: (context, setState) {
                   List<Widget>? childProperties =
-                      child?.getEditProperties(context);
+                      child.getEditProperties(context);
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,8 +163,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                         children: [
                           const Center(child: Text('Widget Type')),
                           DialogDropdownChooser<String>(
-                            choices: child!.getAvailableDisplayTypes(),
-                            initialValue: child!.type,
+                            choices: child.getAvailableDisplayTypes(),
+                            initialValue: child.type,
                             onSelectionChanged: (String? value) {
                               setState(() {
                                 changeChildToType(value);
@@ -175,9 +175,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                       ),
                       const Divider(),
                       // Settings for the widget inside (only if there are properties)
-                      if (childProperties != null &&
-                          childProperties.isNotEmpty) ...[
-                        Text('${child?.type} Widget Settings'),
+                      if (childProperties.isNotEmpty) ...[
+                        Text('${child.type} Widget Settings'),
                         const SizedBox(height: 5),
                         ...childProperties,
                         const Divider(),
@@ -194,7 +193,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                child?.refresh();
+                child.refresh();
               },
               child: const Text('Close'),
             ),
@@ -216,11 +215,11 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
-                child?.topic = value;
-                child?.resetSubscription();
+                child.topic = value;
+                child.resetSubscription();
               },
               label: 'Topic',
-              initialText: child?.topic,
+              initialText: child.topic,
             ),
           ),
           const SizedBox(width: 5),
@@ -233,12 +232,12 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                   return;
                 }
 
-                child!.period = newPeriod;
-                child!.resetSubscription();
+                child.period = newPeriod;
+                child.resetSubscription();
               },
               formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
               label: 'Period',
-              initialText: child!.period.toString(),
+              initialText: child.period.toString(),
             ),
           ),
         ],
