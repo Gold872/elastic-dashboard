@@ -2,25 +2,12 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/single_color_view.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../dialog_widgets/dialog_text_input.dart';
-import '../nt4_widgets/single_topic/boolean_box.dart';
-import '../nt4_widgets/single_topic/graph.dart';
 import '../nt4_widgets/nt4_widget.dart';
-import '../nt4_widgets/single_topic/number_slider.dart';
 
 class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   NT4Widget? child;
@@ -131,58 +118,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
     NT4Widget? newWidget;
 
-    switch (type) {
-      case 'Boolean Box':
-        newWidget = BooleanBox(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Toggle Switch':
-        newWidget = ToggleSwitch(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Toggle Button':
-        newWidget = ToggleButton(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Graph':
-        newWidget = GraphWidget(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Number Bar':
-        newWidget = NumberBar(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Number Slider':
-        newWidget = NumberSlider(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Voltage View':
-        newWidget = VoltageView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Text Display':
-        newWidget = TextDisplay(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Match Time':
-        newWidget = MatchTimeWidget(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Single Color View':
-        newWidget = SingleColorView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'Multi Color View':
-        newWidget = MultiColorView(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-        break;
-      case 'ComboBox Chooser':
-        newWidget = ComboBoxChooser(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-      case 'Split Button Chooser':
-        newWidget = SplitButtonChooser(
-            key: UniqueKey(), topic: child!.topic, period: child!.period);
-    }
+    newWidget = NT4WidgetBuilder.buildNT4WidgetFromType(type, child!.type,
+        period: child!.period);
 
     if (newWidget == null) {
       return;
