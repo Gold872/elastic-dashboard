@@ -228,7 +228,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
             child: DialogTextInput(
               onSubmit: (value) {
                 double? newPeriod = double.tryParse(value);
-                if (newPeriod == null) {
+                if (newPeriod == null || newPeriod <= 0.01) {
                   return;
                 }
 
