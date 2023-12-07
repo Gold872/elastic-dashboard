@@ -833,7 +833,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           int? newGridSize = int.tryParse(gridSize);
 
-          if (newGridSize == null) {
+          if (newGridSize == null || newGridSize == 0) {
             return;
           }
 
