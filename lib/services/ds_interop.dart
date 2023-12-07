@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 class DSInteropClient {
   final String serverBaseAddress = '127.0.0.1';
   bool _serverConnectionActive = false;
+  bool _dbModeConnectionActive = false;
 
   Function()? onConnect;
   Function()? onDisconnect;
@@ -35,17 +36,24 @@ class DSInteropClient {
     _connect();
   }
 
-  void _connect() async {
+  void _connect() {
+    if (_serverConnectionActive) {
+      return;
+    }
+    _tcpSocketConnect();
+    _dbModeServerConnect();
+  }
+
+  void _tcpSocketConnect() async {
     if (_serverConnectionActive) {
       return;
     }
     try {
       _socket = await Socket.connect(serverBaseAddress, 1742);
-      _dbModeServer = await ServerSocket.bind(serverBaseAddress, 1741);
     } catch (e) {
       logger.debug(
-          '[DS INTEROP] Failed to connect, attempting to reconnect in 5 seconds.');
-      Future.delayed(const Duration(seconds: 5), _connect);
+          'Failed to connect to Driver Station on port 1742, attempting to reconnect in 5 seconds.');
+      Future.delayed(const Duration(seconds: 5), _tcpSocketConnect);
       return;
     }
 
@@ -63,17 +71,37 @@ class DSInteropClient {
         logger.error('DS Interop Error', err);
       },
     );
+  }
+
+  void _dbModeServerConnect() async {
+    if (_dbModeConnectionActive) {
+      return;
+    }
+    try {
+      _dbModeServer = await ServerSocket.bind(serverBaseAddress, 1741);
+    } catch (e) {
+      logger.debug(
+          'Failed to start TCP server on port 1741, attempting to reconnect in 5 seconds');
+      Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
+      return;
+    }
 
     _dbModeServer!.listen(
       (socket) {
+        logger.info('Received connection from Driver Station on TCP port 1741');
         socket.listen(
           (data) {
-            _tcpServerOnMessage(data);
+            if (!_dbModeConnectionActive) {
+              _dbModeConnectionActive = true;
+            }
+            _dbModeServerOnMessage(data);
           },
-          onDone: _socketClose,
+          onDone: () {
+            logger.info('Lost connection from Driver Station on TCP port 1741');
+          },
         );
       },
-      onDone: _socketClose,
+      onDone: _dbModeServerClose,
       onError: (err) {
         logger.error('DS Interop Error', err);
       },
@@ -108,7 +136,7 @@ class DSInteropClient {
     _lastAnnouncedIP = ipAddress;
   }
 
-  void _tcpServerOnMessage(Uint8List data) {
+  void _dbModeServerOnMessage(Uint8List data) {
     _tcpBuffer.addAll(data);
     Map<int, Uint8List> mappedData = {};
 
@@ -149,9 +177,6 @@ class DSInteropClient {
     _socket?.close();
     _socket = null;
 
-    _dbModeServer?.close();
-    _dbModeServer = null;
-
     _serverConnectionActive = false;
 
     _driverStationDocked = false;
@@ -159,8 +184,24 @@ class DSInteropClient {
     onDisconnect?.call();
 
     logger.info(
-        'Driver Station connection closed, attempting to reconnect in 5 seconds.');
+        'Driver Station connection on TCP port 1742 closed, attempting to reconnect in 5 seconds.');
 
     Future.delayed(const Duration(seconds: 5), _connect);
+  }
+
+  void _dbModeServerClose() {
+    if (!_dbModeConnectionActive) {
+      return;
+    }
+
+    _dbModeServer?.close();
+    _dbModeServer = null;
+
+    _dbModeConnectionActive = false;
+
+    logger.info(
+        'Driver Station TCP Server on Port 1741 closed, attempting to reconnect in 5 seconds.');
+
+    Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
   }
 }
