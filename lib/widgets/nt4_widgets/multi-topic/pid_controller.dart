@@ -84,11 +84,25 @@ class PIDControllerWidget extends NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    double kP =
+        tryCast(nt4Connection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
+    double kI =
+        tryCast(nt4Connection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
+    double kD =
+        tryCast(nt4Connection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+    double setpoint =
+        tryCast(nt4Connection.getLastAnnouncedValue(setpointTopicName)) ?? 0.0;
+
+    return [kP, kI, kD, setpoint];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-        stream: subscription?.periodicStream(),
+        stream: multiTopicPeriodicStream,
         builder: (context, snapshot) {
           double kP =
               tryCast(nt4Connection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
