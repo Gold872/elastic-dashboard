@@ -200,7 +200,7 @@ class NT4WidgetBuilder {
       FieldWidget.widgetType: 2,
       Gyro.widgetType: 2,
       NetworkAlerts.widgetType: 3,
-      PIDControllerWidget.widgetType: 2,
+      PIDControllerWidget.widgetType: 3,
       PowerDistribution.widgetType: 4,
       RelayWidget.widgetType: 2,
       RobotPreferences.widgetType: 3,
