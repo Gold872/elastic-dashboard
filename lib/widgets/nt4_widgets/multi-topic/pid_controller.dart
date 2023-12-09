@@ -39,21 +39,17 @@ class PIDControllerWidget extends NT4Widget {
     kdTopic,
     setpointTopic,
     super.period,
-  }) : super() {
-    kpTopicName = kpTopic ?? '$topic/p';
-    kiTopicName = kiTopic ?? '$topic/i';
-    kdTopicName = kdTopic ?? '$topic/d';
-    setpointTopicName = setpointTopic ?? '$topic/setpoint';
-  }
+  }) : super();
 
-  PIDControllerWidget.fromJson(
-      {super.key, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
-    kpTopicName = tryCast(jsonData['kp_topic']) ?? '$topic/p';
-    kiTopicName = tryCast(jsonData['ki_topic']) ?? '$topic/i';
-    kdTopicName = tryCast(jsonData['kd_topic']) ?? '$topic/d';
-    setpointTopicName =
-        tryCast(jsonData['setpoint_topic']) ?? '$topic/setpoint';
+  PIDControllerWidget.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
+
+  @override
+  void init() {
+    kpTopicName = '$topic/p';
+    kiTopicName = '$topic/i';
+    kdTopicName = '$topic/d';
+    setpointTopicName = '$topic/setpoint';
   }
 
   @override
@@ -76,10 +72,6 @@ class PIDControllerWidget extends NT4Widget {
     return {
       'topic': topic,
       'period': period,
-      'kp_topic': kpTopicName,
-      'ki_topic': kiTopicName,
-      'kd_topic': kdTopicName,
-      'setpoint_topic': setpointTopicName,
     };
   }
 
