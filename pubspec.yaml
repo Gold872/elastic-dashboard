@@ -61,6 +61,9 @@ flutter:
     - assets/logos/
     - assets/fields/
 
+import_sorter:
+  comments: false
+
 msix_config:
   display_name: Elastic
   publisher_display_name: Gold872
