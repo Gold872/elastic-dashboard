@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -49,22 +49,24 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
-  Globals.ipAddressMode =
+  Settings.ipAddressMode =
       IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
 
-  Globals.gridSize = preferences.getInt(PrefKeys.gridSize) ?? Globals.gridSize;
-  Globals.showGrid = preferences.getBool(PrefKeys.showGrid) ?? Globals.showGrid;
-  Globals.cornerRadius =
-      preferences.getDouble(PrefKeys.cornerRadius) ?? Globals.cornerRadius;
-  Globals.autoResizeToDS =
-      preferences.getBool(PrefKeys.autoResizeToDS) ?? Globals.autoResizeToDS;
+  Settings.gridSize =
+      preferences.getInt(PrefKeys.gridSize) ?? Settings.gridSize;
+  Settings.showGrid =
+      preferences.getBool(PrefKeys.showGrid) ?? Settings.showGrid;
+  Settings.cornerRadius =
+      preferences.getDouble(PrefKeys.cornerRadius) ?? Settings.cornerRadius;
+  Settings.autoResizeToDS =
+      preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
 
   NT4WidgetBuilder.ensureInitialized();
 
-  Globals.ipAddress =
-      preferences.getString(PrefKeys.ipAddress) ?? Globals.ipAddress;
+  Settings.ipAddress =
+      preferences.getString(PrefKeys.ipAddress) ?? Settings.ipAddress;
 
-  nt4Connection.nt4Connect(Globals.ipAddress);
+  nt4Connection.nt4Connect(Settings.ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
 

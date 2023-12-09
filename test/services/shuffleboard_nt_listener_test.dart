@@ -1,4 +1,4 @@
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
@@ -56,9 +56,9 @@ void main() {
     expect(announcedWidgetData.containsKey('width'), true);
     expect(announcedWidgetData.containsKey('height'), true);
 
-    expect(announcedWidgetData['x'], Globals.gridSize.toDouble());
-    expect(announcedWidgetData['y'], Globals.gridSize.toDouble());
-    expect(announcedWidgetData['width'], Globals.gridSize.toDouble() * 2.0);
-    expect(announcedWidgetData['height'], Globals.gridSize.toDouble() * 2.0);
+    expect(announcedWidgetData['x'], Settings.gridSize.toDouble());
+    expect(announcedWidgetData['y'], Settings.gridSize.toDouble());
+    expect(announcedWidgetData['width'], Settings.gridSize.toDouble() * 2.0);
+    expect(announcedWidgetData['height'], Settings.gridSize.toDouble() * 2.0);
   });
 }

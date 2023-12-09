@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:flutter/material.dart';
@@ -36,14 +36,14 @@ abstract class NT4Widget extends StatelessWidget {
   NT4Widget({
     super.key,
     required this.topic,
-    this.period = Globals.defaultPeriod,
+    this.period = Settings.defaultPeriod,
   }) {
     init();
   }
 
   NT4Widget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Globals.defaultPeriod;
+    period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
 
     init();
   }
@@ -163,7 +163,7 @@ abstract class NT4Widget extends StatelessWidget {
 
       await Future.delayed(Duration(
           milliseconds: ((subscription?.options.periodicRateSeconds ??
-                      Globals.defaultPeriod) *
+                      Settings.defaultPeriod) *
                   1000)
               .round()));
     }

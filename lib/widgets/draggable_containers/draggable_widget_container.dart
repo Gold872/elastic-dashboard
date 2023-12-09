@@ -1,5 +1,5 @@
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
@@ -39,15 +39,15 @@ class DraggableWidgetContainer extends StatelessWidget {
   String? title;
 
   Rect draggablePositionRect = Rect.fromLTWH(
-      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
+      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
 
   Offset cursorGlobalLocation = const Offset(double.nan, double.nan);
 
   Rect displayRect = Rect.fromLTWH(
-      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
+      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
 
   Rect previewRect = Rect.fromLTWH(
-      0, 0, Globals.gridSize.toDouble(), Globals.gridSize.toDouble());
+      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
 
   late Rect dragStartLocation;
 
@@ -112,7 +112,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   }
 
   static double snapToGrid(double value) {
-    return (value / Globals.gridSize).roundToDouble() * Globals.gridSize;
+    return (value / Settings.gridSize).roundToDouble() * Settings.gridSize;
   }
 
   void refresh() {
@@ -193,9 +193,9 @@ class DraggableWidgetContainer extends StatelessWidget {
 
     double y = tryCast(jsonData['y']) ?? 0.0;
 
-    double width = tryCast(jsonData['width']) ?? Globals.gridSize.toDouble();
+    double width = tryCast(jsonData['width']) ?? Settings.gridSize.toDouble();
 
-    double height = tryCast(jsonData['height']) ?? Globals.gridSize.toDouble();
+    double height = tryCast(jsonData['height']) ?? Settings.gridSize.toDouble();
 
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
@@ -238,8 +238,8 @@ class DraggableWidgetContainer extends StatelessWidget {
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
         constraints: BoxConstraints(
-          minWidth: minWidth ?? Globals.gridSize.toDouble(),
-          minHeight: minHeight ?? Globals.gridSize.toDouble(),
+          minWidth: minWidth ?? Settings.gridSize.toDouble(),
+          minHeight: minHeight ?? Settings.gridSize.toDouble(),
         ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
@@ -345,7 +345,7 @@ class DraggableWidgetContainer extends StatelessWidget {
             color: (validLocation)
                 ? Colors.white.withOpacity(0.25)
                 : Colors.black.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(Globals.cornerRadius),
+            borderRadius: BorderRadius.circular(Settings.cornerRadius),
             border: Border.all(
                 color: (validLocation)
                     ? Colors.lightGreenAccent.shade400
@@ -402,7 +402,7 @@ class WidgetContainer extends StatelessWidget {
           opacity: opacity,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Globals.cornerRadius),
+              borderRadius: BorderRadius.circular(Settings.cornerRadius),
               color: const Color.fromARGB(255, 40, 40, 40),
               boxShadow: const [
                 BoxShadow(
@@ -422,8 +422,8 @@ class WidgetContainer extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(Globals.cornerRadius),
-                            topRight: Radius.circular(Globals.cornerRadius),
+                            topLeft: Radius.circular(Settings.cornerRadius),
+                            topRight: Radius.circular(Settings.cornerRadius),
                           ),
                           color: theme.colorScheme.primaryContainer,
                         ),

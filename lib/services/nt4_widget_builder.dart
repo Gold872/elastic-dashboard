@@ -1,4 +1,4 @@
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
@@ -240,7 +240,7 @@ class NT4WidgetBuilder {
   }
 
   static NT4Widget? buildNT4WidgetFromType(String type, String topic,
-      {double period = Globals.defaultPeriod}) {
+      {double period = Settings.defaultPeriod}) {
     ensureInitialized();
 
     if (_widgetNameBuildMap.containsKey(type)) {

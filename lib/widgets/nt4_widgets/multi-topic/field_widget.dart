@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -385,7 +385,7 @@ class FieldWidget extends NT4Widget {
 
       await Future.delayed(Duration(
           milliseconds: ((subscription?.options.periodicRateSeconds ??
-                      Globals.defaultPeriod) *
+                      Settings.defaultPeriod) *
                   1000)
               .round()));
     }

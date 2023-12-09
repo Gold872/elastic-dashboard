@@ -1,6 +1,6 @@
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 
-class Globals {
+class Settings {
   static const String repositoryLink =
       'https://github.com/Gold872/elastic-dashboard';
   static const String releasesLink = '$repositoryLink/releases/latest';

@@ -1,4 +1,4 @@
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 
@@ -30,8 +30,8 @@ class _DraggableDialogState extends State<DraggableDialog> {
   Widget build(BuildContext context) {
     return TransformableBox(
       constraints: BoxConstraints(
-          minWidth: Globals.gridSize.toDouble(),
-          minHeight: Globals.gridSize.toDouble(),
+          minWidth: Settings.gridSize.toDouble(),
+          minHeight: Settings.gridSize.toDouble(),
           maxWidth: double.infinity,
           maxHeight: double.infinity),
       clampingRect: const Rect.fromLTWH(0, 0, double.infinity, double.infinity),

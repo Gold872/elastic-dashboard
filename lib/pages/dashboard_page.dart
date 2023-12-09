@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
@@ -76,7 +76,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     nt4Connection.dsClientConnect(
       onIPAnnounced: (ip) async {
-        if (Globals.ipAddressMode != IPAddressMode.driverStation) {
+        if (Settings.ipAddressMode != IPAddressMode.driverStation) {
           return;
         }
 
@@ -89,7 +89,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         nt4Connection.changeIPAddress(ip);
       },
       onDriverStationDockChanged: (docked) {
-        if (Globals.autoResizeToDS && docked) {
+        if (Settings.autoResizeToDS && docked) {
           _onDriverStationDocked();
         } else {
           _onDriverStationUndocked();
@@ -323,7 +323,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           ),
         ),
         onActionPressed: () async {
-          Uri url = Uri.parse(Globals.releasesLink);
+          Uri url = Uri.parse(Settings.releasesLink);
 
           if (await canLaunchUrl(url)) {
             await launchUrl(url);
@@ -735,7 +735,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           children: [
             TextButton(
               onPressed: () async {
-                Uri url = Uri.parse(Globals.repositoryLink);
+                Uri url = Uri.parse(Settings.repositoryLink);
 
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url);
@@ -768,7 +768,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-          switch (Globals.ipAddressMode) {
+          switch (Settings.ipAddressMode) {
             case IPAddressMode.roboRIOmDNS:
               _updateIPAddress(
                   IPAddressUtil.teamNumberToRIOmDNS(newTeamNumber));
@@ -784,7 +784,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onIPAddressModeChanged: (mode) async {
           await _preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
-          Globals.ipAddressMode = mode;
+          Settings.ipAddressMode = mode;
 
           switch (mode) {
             case IPAddressMode.driverStation:
@@ -798,11 +798,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               break;
             case IPAddressMode.roboRIOmDNS:
               _updateIPAddress(
-                  IPAddressUtil.teamNumberToRIOmDNS(Globals.teamNumber));
+                  IPAddressUtil.teamNumberToRIOmDNS(Settings.teamNumber));
               break;
             case IPAddressMode.teamNumber:
               _updateIPAddress(
-                  IPAddressUtil.teamNumberToIP(Globals.teamNumber));
+                  IPAddressUtil.teamNumberToIP(Settings.teamNumber));
               break;
             case IPAddressMode.localhost:
               _updateIPAddress('localhost');
@@ -821,7 +821,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onGridToggle: (value) async {
           setState(() {
-            Globals.showGrid = value;
+            Settings.showGrid = value;
           });
 
           await _preferences.setBool(PrefKeys.showGrid, value);
@@ -837,7 +837,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             return;
           }
 
-          setState(() => Globals.gridSize = newGridSize);
+          setState(() => Settings.gridSize = newGridSize);
 
           await _preferences.setInt(PrefKeys.gridSize, newGridSize);
         },
@@ -853,7 +853,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
 
           setState(() {
-            Globals.cornerRadius = newRadius;
+            Settings.cornerRadius = newRadius;
 
             for (DashboardGrid grid in grids) {
               grid.refreshAllContainers();
@@ -864,7 +864,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onResizeToDSChanged: (value) async {
           setState(() {
-            Globals.autoResizeToDS = value;
+            Settings.autoResizeToDS = value;
 
             if (value && nt4Connection.dsClient.driverStationDocked) {
               _onDriverStationDocked();
@@ -903,16 +903,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     await windowManager.setAlignment(Alignment.topCenter);
 
-    Globals.isWindowMaximizable = false;
-    Globals.isWindowDraggable = false;
+    Settings.isWindowMaximizable = false;
+    Settings.isWindowDraggable = false;
     await windowManager.setResizable(false);
 
     await windowManager.setAsFrameless();
   }
 
   void _onDriverStationUndocked() async {
-    Globals.isWindowMaximizable = true;
-    Globals.isWindowDraggable = true;
+    Settings.isWindowMaximizable = true;
+    Settings.isWindowDraggable = true;
     await windowManager.setResizable(true);
 
     // Re-adds the window frame, window manager's API for this is weird

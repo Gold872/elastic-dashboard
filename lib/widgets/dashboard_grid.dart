@@ -1,6 +1,6 @@
 import 'package:contextmenu/contextmenu.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
@@ -264,12 +264,12 @@ class DashboardGrid extends StatelessWidget {
     double newWidth = DraggableWidgetContainer.snapToGrid(newRect.width);
     double newHeight = DraggableWidgetContainer.snapToGrid(newRect.height);
 
-    if (newWidth < Globals.gridSize) {
-      newWidth = Globals.gridSize.toDouble();
+    if (newWidth < Settings.gridSize) {
+      newWidth = Settings.gridSize.toDouble();
     }
 
-    if (newHeight < Globals.gridSize) {
-      newHeight = Globals.gridSize.toDouble();
+    if (newHeight < Settings.gridSize) {
+      newHeight = Settings.gridSize.toDouble();
     }
 
     Rect preview =
@@ -561,8 +561,8 @@ class DashboardGrid extends StatelessWidget {
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
-        Globals.gridSize.toDouble() * 2,
-        Globals.gridSize.toDouble() * 2,
+        Settings.gridSize.toDouble() * 2,
+        Settings.gridSize.toDouble() * 2,
       ),
       enabled: nt4Connection.isNT4Connected,
       onUpdate: _layoutContainerOnUpdate,
@@ -747,7 +747,8 @@ class DashboardGrid extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(Globals.cornerRadius),
+                      borderRadius:
+                          BorderRadius.circular(Settings.cornerRadius),
                       border: Border.all(color: Colors.yellow, width: 5.0),
                     ),
                   ),
@@ -847,7 +848,7 @@ class DashboardGrid extends StatelessWidget {
               color: (validLocation)
                   ? Colors.white.withOpacity(0.25)
                   : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(Globals.cornerRadius),
+              borderRadius: BorderRadius.circular(Settings.cornerRadius),
               border: Border.all(color: borderColor, width: 5.0),
             ),
           ),

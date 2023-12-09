@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -27,7 +27,7 @@ class GraphWidget extends NT4Widget {
   GraphWidget({
     super.key,
     required super.topic,
-    super.period = Globals.defaultGraphPeriod,
+    super.period = Settings.defaultGraphPeriod,
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,

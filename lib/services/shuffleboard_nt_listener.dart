@@ -1,5 +1,5 @@
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -193,13 +193,13 @@ class ShuffleboardNTListener {
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
-        child.putIfAbsent('width', () => size[0] * Globals.gridSize);
-        child.putIfAbsent('height', () => size[1] * Globals.gridSize);
+        child.putIfAbsent('width', () => size[0] * Settings.gridSize);
+        child.putIfAbsent('height', () => size[1] * Settings.gridSize);
       } else {
         currentJsonData[jsonKey]!
-            .putIfAbsent('width', () => size[0] * Globals.gridSize);
+            .putIfAbsent('width', () => size[0] * Settings.gridSize);
         currentJsonData[jsonKey]!
-            .putIfAbsent('height', () => size[1] * Globals.gridSize);
+            .putIfAbsent('height', () => size[1] * Settings.gridSize);
       }
     }
 
@@ -218,13 +218,13 @@ class ShuffleboardNTListener {
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
-        child.putIfAbsent('x', () => position[0] * Globals.gridSize);
-        child.putIfAbsent('y', () => position[1] * Globals.gridSize);
+        child.putIfAbsent('x', () => position[0] * Settings.gridSize);
+        child.putIfAbsent('y', () => position[1] * Settings.gridSize);
       } else {
         currentJsonData[jsonKey]!
-            .putIfAbsent('x', () => position[0] * Globals.gridSize);
+            .putIfAbsent('x', () => position[0] * Settings.gridSize);
         currentJsonData[jsonKey]!
-            .putIfAbsent('y', () => position[1] * Globals.gridSize);
+            .putIfAbsent('y', () => position[1] * Settings.gridSize);
       }
     }
   }
@@ -348,12 +348,12 @@ class ShuffleboardNTListener {
           'width',
           () => (!isCameraStream)
               ? widgetContainer!.width
-              : Globals.gridSize * 2);
+              : Settings.gridSize * 2);
       currentJsonData[jsonKey]!.putIfAbsent(
           'height',
           () => (!isCameraStream)
               ? widgetContainer!.height
-              : Globals.gridSize * 2);
+              : Settings.gridSize * 2);
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonKey]!.putIfAbsent('type', () => type);
       currentJsonData[jsonKey]!
@@ -363,8 +363,8 @@ class ShuffleboardNTListener {
       currentJsonData[jsonKey]!['properties'].putIfAbsent(
           'period',
           () => (type != 'Graph')
-              ? Globals.defaultPeriod
-              : Globals.defaultGraphPeriod);
+              ? Settings.defaultPeriod
+              : Settings.defaultGraphPeriod);
 
       onWidgetAdded?.call(currentJsonData[jsonKey]!);
 
@@ -392,9 +392,9 @@ class ShuffleboardNTListener {
       currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
       currentJsonData[jsonKey]!.putIfAbsent('y', () => 0.0);
       currentJsonData[jsonKey]!
-          .putIfAbsent('width', () => Globals.gridSize.toDouble());
+          .putIfAbsent('width', () => Settings.gridSize.toDouble());
       currentJsonData[jsonKey]!
-          .putIfAbsent('height', () => Globals.gridSize.toDouble());
+          .putIfAbsent('height', () => Settings.gridSize.toDouble());
       currentJsonData[jsonKey]!.putIfAbsent('type', () => 'List Layout');
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonKey]!
@@ -448,19 +448,19 @@ class ShuffleboardNTListener {
             'width',
             () => (!isCameraStream)
                 ? widgetContainer!.width
-                : Globals.gridSize * 2);
+                : Settings.gridSize * 2);
         child.putIfAbsent(
             'height',
             () => (!isCameraStream)
                 ? widgetContainer!.height
-                : Globals.gridSize * 2);
+                : Settings.gridSize * 2);
 
         child['properties']!.putIfAbsent('topic', () => childRow.topic);
         child['properties']!.putIfAbsent(
             'period',
             () => (type != 'Graph')
-                ? Globals.defaultPeriod
-                : Globals.defaultGraphPeriod);
+                ? Settings.defaultPeriod
+                : Settings.defaultGraphPeriod);
 
         widget?.unSubscribe();
         widget?.dispose(deleting: true);

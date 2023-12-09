@@ -1,5 +1,5 @@
 import 'package:contextmenu/contextmenu.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
@@ -249,10 +249,10 @@ class EditableTabBar extends StatelessWidget {
           child: Stack(
             children: [
               Visibility(
-                visible: Globals.showGrid,
+                visible: Settings.showGrid,
                 child: GridPaper(
                   color: const Color.fromARGB(50, 195, 232, 243),
-                  interval: Globals.gridSize.toDouble(),
+                  interval: Settings.gridSize.toDouble(),
                   divisions: 1,
                   subdivisions: 1,
                   child: Container(),

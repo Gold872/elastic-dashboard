@@ -1,5 +1,5 @@
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -98,7 +98,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 setState(() {});
               },
               choices: IPAddressMode.values,
-              initialValue: Globals.ipAddressMode,
+              initialValue: Settings.ipAddressMode,
             ),
             const SizedBox(height: 5),
             StreamBuilder(
@@ -108,8 +108,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   bool dsConnected = tryCast(snapshot.data) ?? false;
 
                   return DialogTextInput(
-                    enabled: Globals.ipAddressMode == IPAddressMode.custom ||
-                        (Globals.ipAddressMode == IPAddressMode.driverStation &&
+                    enabled: Settings.ipAddressMode == IPAddressMode.custom ||
+                        (Settings.ipAddressMode ==
+                                IPAddressMode.driverStation &&
                             !dsConnected),
                     initialText:
                         widget.preferences.getString(PrefKeys.ipAddress),
@@ -134,7 +135,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   child: DialogToggleSwitch(
                     initialValue:
                         widget.preferences.getBool(PrefKeys.showGrid) ??
-                            Globals.showGrid,
+                            Settings.showGrid,
                     label: 'Show Grid',
                     onToggle: (value) {
                       setState(() {
@@ -148,7 +149,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     initialText: widget.preferences
                             .getInt(PrefKeys.gridSize)
                             ?.toString() ??
-                        Globals.gridSize.toString(),
+                        Settings.gridSize.toString(),
                     label: 'Grid Size',
                     onSubmit: (value) {
                       setState(() {
@@ -171,7 +172,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     initialText: widget.preferences
                             .getDouble(PrefKeys.cornerRadius)
                             ?.toString() ??
-                        Globals.cornerRadius.toString(),
+                        Settings.cornerRadius.toString(),
                     label: 'Corner Radius',
                     onSubmit: (value) {
                       setState(() {
@@ -187,7 +188,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   child: DialogToggleSwitch(
                     initialValue:
                         widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
-                            Globals.autoResizeToDS,
+                            Settings.autoResizeToDS,
                     label: 'Resize to Driver Station Height',
                     onToggle: (value) {
                       setState(() {
