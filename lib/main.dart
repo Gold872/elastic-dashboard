@@ -1,18 +1,20 @@
 import 'dart:io';
 
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
-import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/services/ip_address_util.dart';
-import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
 import 'package:flutter/material.dart';
+
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/field_images.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

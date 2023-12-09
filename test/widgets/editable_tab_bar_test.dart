@@ -1,12 +1,13 @@
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import '../test_util.dart';
 import 'editable_tab_bar_test.mocks.dart';
 

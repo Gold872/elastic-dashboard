@@ -1,7 +1,9 @@
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
+
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'package:elastic_dashboard/services/settings.dart';
 
 class CustomAppBar extends AppBar {
   final String titleText;

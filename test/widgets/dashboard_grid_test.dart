@@ -1,6 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -32,11 +38,6 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-
 import '../test_util.dart';
 
 void main() async {

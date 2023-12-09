@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
+
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:flutter/material.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 
 class NT4WidgetNotifier extends ChangeNotifier {
   // No idea why this is needed, but it was throwing errors ¯\_(ツ)_/¯

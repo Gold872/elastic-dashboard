@@ -1,5 +1,6 @@
-import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:elastic_dashboard/services/nt4.dart';
 
 void main() {
   test('NT4 Client', () {

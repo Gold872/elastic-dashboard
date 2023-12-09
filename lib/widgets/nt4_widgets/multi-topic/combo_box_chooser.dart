@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+
 import 'package:dot_cast/dot_cast.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:provider/provider.dart';
+
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ComboBoxChooser extends NT4Widget {
   static const String widgetType = 'ComboBox Chooser';

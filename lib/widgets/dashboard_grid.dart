@@ -1,14 +1,16 @@
+import 'package:flutter/material.dart';
+
 import 'package:contextmenu/contextmenu.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:provider/provider.dart';
+
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 // Used to refresh the dashboard grid when a widget is added or removed
 // This doesn't use a stateless widget since everything has to be rendered at program startup or data will be lost

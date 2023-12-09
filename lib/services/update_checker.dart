@@ -1,6 +1,7 @@
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:github/github.dart';
 import 'package:version/version.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
 
 class UpdateChecker {
   final GitHub _github;

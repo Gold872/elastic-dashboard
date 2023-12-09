@@ -1,29 +1,30 @@
 import 'dart:io';
 
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
-import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/widgets/custom_appbar.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
-import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
-import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
-import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/field_images.dart';
+import 'package:elastic_dashboard/services/nt4.dart';
+import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/widgets/custom_appbar.dart';
+import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
+import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
+import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 

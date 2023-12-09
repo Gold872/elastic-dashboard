@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:elastic_dashboard/services/ds_interop.dart';
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:flutter/foundation.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 
 NT4Connection get nt4Connection => NT4Connection.instance;
 

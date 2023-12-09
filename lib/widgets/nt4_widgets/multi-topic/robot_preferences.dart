@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
+
 import 'package:dot_cast/dot_cast.dart';
+import 'package:searchable_listview/searchable_listview.dart';
+
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:searchable_listview/searchable_listview.dart';
 
 class RobotPreferences extends NT4Widget {
   static const String widgetType = 'RobotPreferences';

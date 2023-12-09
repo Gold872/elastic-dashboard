@@ -1,11 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:contextmenu/contextmenu.dart';
+import 'package:provider/provider.dart';
+import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
+
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
 class TabData {
   String name;

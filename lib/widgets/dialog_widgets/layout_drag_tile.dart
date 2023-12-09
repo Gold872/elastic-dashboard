@@ -1,6 +1,7 @@
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 
 class LayoutDragTile extends StatelessWidget {
   final String title;

@@ -1,8 +1,9 @@
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Shuffleboard NT listener', () async {

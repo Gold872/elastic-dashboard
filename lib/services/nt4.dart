@@ -4,11 +4,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
+
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
 
 class NT4Client {
   // TODO: Change to 1000 for 2024 NT4.1 updates

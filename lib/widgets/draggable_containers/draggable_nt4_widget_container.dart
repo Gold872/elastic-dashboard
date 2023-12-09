@@ -1,11 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:dot_cast/dot_cast.dart';
+import 'package:provider/provider.dart';
+
 import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-
 import '../dialog_widgets/dialog_text_input.dart';
 import '../nt4_widgets/nt4_widget.dart';
 

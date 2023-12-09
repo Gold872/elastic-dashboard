@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_box_transform/flutter_box_transform.dart';
+import 'package:provider/provider.dart';
+
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_box_transform/flutter_box_transform.dart';
-import 'package:provider/provider.dart';
 
 class WidgetContainerModel extends ChangeNotifier {
   bool draggable = true;

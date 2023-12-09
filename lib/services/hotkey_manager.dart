@@ -1,5 +1,6 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
+
+import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
 class HotKey {

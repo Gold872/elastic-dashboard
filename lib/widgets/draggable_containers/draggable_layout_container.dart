@@ -1,8 +1,9 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:flutter/foundation.dart';
 
 abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   String get type;
