@@ -46,6 +46,8 @@ class PIDControllerWidget extends NT4Widget {
 
   @override
   void init() {
+    super.init();
+
     kpTopicName = '$topic/p';
     kiTopicName = '$topic/i';
     kdTopicName = '$topic/d';

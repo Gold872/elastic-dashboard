@@ -103,6 +103,7 @@ abstract class NT4Widget extends StatelessWidget {
     return [type];
   }
 
+  @mustCallSuper
   void init() async {
     subscription = nt4Connection.subscribe(topic, period);
   }
