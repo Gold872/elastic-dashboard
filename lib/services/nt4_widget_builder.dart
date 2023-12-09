@@ -14,6 +14,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/motor_controll
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/profiled_pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/relay_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
@@ -102,6 +103,8 @@ class NT4WidgetBuilder {
       'PID Controller': PIDControllerWidget.fromJson,
       PowerDistribution.widgetType: PowerDistribution.fromJson,
       'PDP': PowerDistribution.fromJson,
+      ProfiledPIDControllerWidget.widgetType:
+          ProfiledPIDControllerWidget.fromJson,
       RelayWidget.widgetType: RelayWidget.fromJson,
       RobotPreferences.widgetType: RobotPreferences.fromJson,
       SplitButtonChooser.widgetType: SplitButtonChooser.fromJson,
@@ -134,6 +137,7 @@ class NT4WidgetBuilder {
       'PID Controller': PIDControllerWidget.new,
       PowerDistribution.widgetType: PowerDistribution.new,
       'PDP': PowerDistribution.new,
+      ProfiledPIDControllerWidget.widgetType: ProfiledPIDControllerWidget.new,
       RelayWidget.widgetType: RelayWidget.new,
       RobotPreferences.widgetType: RobotPreferences.new,
       SplitButtonChooser.widgetType: SplitButtonChooser.new,
@@ -156,6 +160,7 @@ class NT4WidgetBuilder {
       NetworkAlerts.widgetType: _normalSize * 2,
       PIDControllerWidget.widgetType: _normalSize * 2,
       PowerDistribution.widgetType: _normalSize * 3,
+      ProfiledPIDControllerWidget.widgetType: _normalSize * 2,
       RobotPreferences.widgetType: _normalSize * 2,
       SubsystemWidget.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
@@ -170,6 +175,7 @@ class NT4WidgetBuilder {
       NetworkAlerts.widgetType: _normalSize * 2,
       PIDControllerWidget.widgetType: _normalSize * 3,
       PowerDistribution.widgetType: _normalSize * 3,
+      ProfiledPIDControllerWidget.widgetType: _normalSize * 3,
       RelayWidget.widgetType: _normalSize * 2,
       RobotPreferences.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
@@ -188,6 +194,7 @@ class NT4WidgetBuilder {
       NetworkAlerts.widgetType: 2,
       PIDControllerWidget.widgetType: 2,
       PowerDistribution.widgetType: 3,
+      ProfiledPIDControllerWidget.widgetType: 2,
       RobotPreferences.widgetType: 2,
       SubsystemWidget.widgetType: 2,
       SwerveDriveWidget.widgetType: 2,
@@ -202,6 +209,7 @@ class NT4WidgetBuilder {
       NetworkAlerts.widgetType: 3,
       PIDControllerWidget.widgetType: 3,
       PowerDistribution.widgetType: 4,
+      ProfiledPIDControllerWidget.widgetType: 3,
       RelayWidget.widgetType: 2,
       RobotPreferences.widgetType: 3,
       SwerveDriveWidget.widgetType: 2,
