@@ -1,4 +1,6 @@
 import 'package:elastic_dashboard/services/ds_interop.dart';
+import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:flutter/foundation.dart';
 
@@ -34,6 +36,8 @@ class NT4Connection {
     _ntClient = NT4Client(
         serverBaseAddress: ipAddress,
         onConnect: () {
+          logger.info(
+              'Network Tables connected on IP address ${Globals.ipAddress}');
           _ntConnected = true;
 
           for (VoidCallback callback in onConnectedListeners) {
@@ -41,6 +45,7 @@ class NT4Connection {
           }
         },
         onDisconnect: () {
+          logger.info('Network Tables disconnected');
           _ntConnected = false;
 
           for (VoidCallback callback in onDisconnectedListeners) {

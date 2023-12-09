@@ -21,6 +21,8 @@ void main() async {
 
   await logger.initialize();
 
+  logger.info('[${DateTime.now().toString()}] Starting application');
+
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     logger.error('Flutter Error', details.exception, details.stack);
@@ -59,8 +61,10 @@ void main() async {
 
   NT4WidgetBuilder.ensureInitialized();
 
-  nt4Connection
-      .nt4Connect(preferences.getString(PrefKeys.ipAddress) ?? '127.0.0.1');
+  Globals.ipAddress =
+      preferences.getString(PrefKeys.ipAddress) ?? Globals.ipAddress;
+
+  nt4Connection.nt4Connect(Globals.ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
 

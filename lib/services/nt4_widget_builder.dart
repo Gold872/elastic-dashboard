@@ -1,4 +1,5 @@
 import 'package:elastic_dashboard/services/globals.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
@@ -64,6 +65,8 @@ class NT4WidgetBuilder {
     if (_initialized) {
       return;
     }
+
+    logger.info('Configuring NT4 Widget Builder');
 
     // Single-Topic Widgets
     _widgetJsonBuildMap.addAll({
