@@ -24,6 +24,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_c
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/three_axis_accelerometer.dart';
+import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/ultrasonic.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/graph.dart';
@@ -116,6 +117,7 @@ class NT4WidgetBuilder {
       SwerveDriveWidget.widgetType: SwerveDriveWidget.fromJson,
       ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.fromJson,
       '3AxisAccelerometer': ThreeAxisAccelerometer.fromJson,
+      Ultrasonic.widgetType: Ultrasonic.fromJson,
     });
 
     // Used when building widgets from network tables (drag and drop)
@@ -149,6 +151,7 @@ class NT4WidgetBuilder {
       SwerveDriveWidget.widgetType: SwerveDriveWidget.new,
       ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.new,
       '3AxisAccelerometer': ThreeAxisAccelerometer.new,
+      Ultrasonic.widgetType: Ultrasonic.new,
     });
 
     // Min width and height
@@ -168,6 +171,7 @@ class NT4WidgetBuilder {
       RobotPreferences.widgetType: _normalSize * 2,
       SubsystemWidget.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
+      Ultrasonic.widgetType: _normalSize * 2,
     });
 
     _minimumHeightMap.addAll({
@@ -202,6 +206,7 @@ class NT4WidgetBuilder {
       RobotPreferences.widgetType: 2,
       SubsystemWidget.widgetType: 2,
       SwerveDriveWidget.widgetType: 2,
+      Ultrasonic.widgetType: 2,
     });
 
     _defaultHeightMap.addAll({
