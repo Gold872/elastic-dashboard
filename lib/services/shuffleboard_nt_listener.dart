@@ -4,7 +4,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
+import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 
 class ShuffleboardNTListener {
@@ -22,7 +22,8 @@ class ShuffleboardNTListener {
 
   Map<String, Map<String, dynamic>> currentJsonData = {};
 
-  final TreeRow shuffleboardTreeRoot = TreeRow(topic: '/', rowName: '');
+  final NetworkTableTreeRow shuffleboardTreeRoot =
+      NetworkTableTreeRow(topic: '/', rowName: '');
 
   ShuffleboardNTListener({this.onTabChanged, this.onWidgetAdded});
 
@@ -262,18 +263,18 @@ class ShuffleboardNTListener {
     if (!shuffleboardTreeRoot.hasRow(shuffleboardTableRoot.substring(1))) {
       return;
     }
-    TreeRow shuffleboardRootRow =
+    NetworkTableTreeRow shuffleboardRootRow =
         shuffleboardTreeRoot.getRow(shuffleboardTableRoot.substring(1));
 
     if (!shuffleboardRootRow.hasRow(tabName)) {
       return;
     }
-    TreeRow tabRow = shuffleboardRootRow.getRow(tabName);
+    NetworkTableTreeRow tabRow = shuffleboardRootRow.getRow(tabName);
 
     if (!tabRow.hasRow(componentName)) {
       return;
     }
-    TreeRow widgetRow = tabRow.getRow(componentName);
+    NetworkTableTreeRow widgetRow = tabRow.getRow(componentName);
 
     bool isCameraStream = topic.name.endsWith('/.ShuffleboardURI');
 
@@ -375,7 +376,7 @@ class ShuffleboardNTListener {
   }
 
   Future<void> handleLayoutTopicAnnounce(
-      NT4Topic topic, TreeRow widgetRow) async {
+      NT4Topic topic, NetworkTableTreeRow widgetRow) async {
     String name = topic.name;
 
     List<String> tables = name.substring(1).split('/');
@@ -416,7 +417,7 @@ class ShuffleboardNTListener {
         if (!widgetRow.hasRow(child['title'])) {
           continue;
         }
-        TreeRow childRow = widgetRow.getRow(child['title']);
+        NetworkTableTreeRow childRow = widgetRow.getRow(child['title']);
 
         WidgetContainer? widgetContainer = await childRow.toWidgetContainer();
         NT4Widget? widget = tryCast(widgetContainer?.child);
@@ -502,7 +503,7 @@ class ShuffleboardNTListener {
     String topic = nt4Topic.name;
 
     List<String> rows = topic.substring(1).split('/');
-    TreeRow? current;
+    NetworkTableTreeRow? current;
     String currentTopic = '';
 
     for (String row in rows) {

@@ -9,18 +9,19 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
 
-class TreeRow {
+class NetworkTableTreeRow {
   final String topic;
   final String rowName;
 
   final NT4Topic? nt4Topic;
 
-  List<TreeRow> children = [];
+  List<NetworkTableTreeRow> children = [];
 
-  TreeRow({required this.topic, required this.rowName, this.nt4Topic});
+  NetworkTableTreeRow(
+      {required this.topic, required this.rowName, this.nt4Topic});
 
   bool hasRow(String name) {
-    for (TreeRow child in children) {
+    for (NetworkTableTreeRow child in children) {
       if (child.rowName == name) {
         return true;
       }
@@ -38,7 +39,7 @@ class TreeRow {
     return true;
   }
 
-  void addRow(TreeRow row) {
+  void addRow(NetworkTableTreeRow row) {
     if (hasRow(row.rowName)) {
       return;
     }
@@ -46,8 +47,8 @@ class TreeRow {
     children.add(row);
   }
 
-  TreeRow getRow(String name) {
-    for (TreeRow row in children) {
+  NetworkTableTreeRow getRow(String name) {
+    for (NetworkTableTreeRow row in children) {
       if (row.rowName == name) {
         return row;
       }
@@ -56,9 +57,10 @@ class TreeRow {
     throw Exception("Trying to retrieve a row that doesn't exist");
   }
 
-  TreeRow createNewRow(
+  NetworkTableTreeRow createNewRow(
       {required String topic, required String name, NT4Topic? nt4Topic}) {
-    TreeRow newRow = TreeRow(topic: topic, rowName: name, nt4Topic: nt4Topic);
+    NetworkTableTreeRow newRow =
+        NetworkTableTreeRow(topic: topic, rowName: name, nt4Topic: nt4Topic);
     addRow(newRow);
 
     return newRow;
@@ -75,7 +77,7 @@ class TreeRow {
       return a.rowName.compareTo(b.rowName);
     });
 
-    for (TreeRow child in children) {
+    for (NetworkTableTreeRow child in children) {
       child.sort();
     }
   }

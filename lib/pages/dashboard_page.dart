@@ -29,7 +29,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
-import 'package:elastic_dashboard/widgets/network_tree/network_table_tree.dart';
+import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 
 class DashboardPage extends StatefulWidget {

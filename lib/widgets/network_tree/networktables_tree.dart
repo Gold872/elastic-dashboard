@@ -9,7 +9,7 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/network_tree/tree_row.dart';
+import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
 class NetworkTableTree extends StatefulWidget {
   final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
@@ -29,8 +29,8 @@ class NetworkTableTree extends StatefulWidget {
 }
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
-  final TreeRow root = TreeRow(topic: '/', rowName: '');
-  late final TreeController<TreeRow> treeController;
+  final NetworkTableTreeRow root = NetworkTableTreeRow(topic: '/', rowName: '');
+  late final TreeController<NetworkTableTreeRow> treeController;
 
   late final Function(
           Offset globalPosition, DraggableNT4WidgetContainer widget)?
@@ -46,7 +46,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   void initState() {
     super.initState();
 
-    treeController = TreeController<TreeRow>(
+    treeController = TreeController<NetworkTableTreeRow>(
         roots: root.children, childrenProvider: (node) => node.children);
 
     nt4Connection.nt4Client
@@ -68,7 +68,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     String topic = nt4Topic.name;
 
     List<String> rows = topic.substring(1).split('/');
-    TreeRow? current;
+    NetworkTableTreeRow? current;
     String currentTopic = '';
 
     for (String row in rows) {
@@ -116,9 +116,10 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     root.sort();
 
-    return TreeView<TreeRow>(
+    return TreeView<NetworkTableTreeRow>(
       treeController: treeController,
-      nodeBuilder: (BuildContext context, TreeEntry<TreeRow> entry) {
+      nodeBuilder:
+          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
         return TreeTile(
           key: UniqueKey(),
           entry: entry,
@@ -144,7 +145,7 @@ class TreeTile extends StatelessWidget {
     this.widgetContainerBuilder,
   });
 
-  final TreeEntry<TreeRow> entry;
+  final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
   final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
       onDragUpdate;
