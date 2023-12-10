@@ -86,12 +86,35 @@ class ComboBoxChooser extends NT4Widget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    List<Object?> rawOptions = nt4Connection
+            .getLastAnnouncedValue(optionsTopicName)
+            ?.tryCast<List<Object?>>() ??
+        [];
+
+    List<String> options = rawOptions.whereType<String>().toList();
+
+    String active =
+        tryCast(nt4Connection.getLastAnnouncedValue(activeTopicName)) ?? '';
+
+    String selected =
+        tryCast(nt4Connection.getLastAnnouncedValue(selectedTopicName)) ?? '';
+
+    String defaultOption =
+        tryCast(nt4Connection.getLastAnnouncedValue(defaultTopicName)) ?? '';
+
+    return [options, active, selected, defaultOption];
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NT4WidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NT4WidgetNotifier?>();
+
         List<Object?> rawOptions = nt4Connection
                 .getLastAnnouncedValue(optionsTopicName)
                 ?.tryCast<List<Object?>>() ??
@@ -210,7 +233,6 @@ class StringChooserData {
   }
 
   bool selectedChanged(StringChooserData? other) {
-    // print('$selected\t${other?.selected}');
     return selected != other?.selected;
   }
 }
