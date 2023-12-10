@@ -50,7 +50,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
-  msix: ^3.16.1
   mockito: ^5.4.2
   build_runner: ^2.4.6
 
@@ -63,10 +62,3 @@ flutter:
 
 import_sorter:
   comments: false
-
-msix_config:
-  display_name: Elastic
-  publisher_display_name: Gold872
-  logo_path: windows/logo.png
-  icons_background_color: transparent
-  languages: en-us
