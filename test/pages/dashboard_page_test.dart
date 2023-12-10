@@ -406,6 +406,7 @@ void main() {
         ),
       ),
     );
+    await widgetTester.pumpAndSettle();
 
     await widgetTester.runAsync(() async {
       for (final callback in fakeAnnounceCallbacks) {

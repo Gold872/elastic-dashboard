@@ -70,7 +70,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     updateChecker = UpdateChecker(currentVersion: widget.version);
 
     windowManager.addListener(this);
-    Future(() async => await windowManager.setPreventClose(true));
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      Future(() async => await windowManager.setPreventClose(true));
+    }
 
     loadLayout();
 
