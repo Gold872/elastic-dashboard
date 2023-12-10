@@ -173,7 +173,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       },
     );
 
-    Future.sync(() {
+    Future.delayed(const Duration(seconds: 1), () {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
       nt4Connection.nt4Client.recallAnnounceListeners();
