@@ -32,7 +32,7 @@ class ShuffleboardNTListener {
   }
 
   void initializeListeners() {
-    selectedSubscription.periodicStream().listen((data) {
+    selectedSubscription.periodicStream(yieldAll: false).listen((data) {
       if (data is! String?) {
         return;
       }
