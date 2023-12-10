@@ -175,7 +175,10 @@ class SplitButtonChooser extends NT4Widget {
                     return false;
                   }).toList(),
                   children: options.map((String option) {
-                    return Text(option);
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(option),
+                    );
                   }).toList(),
                 ),
               ),
