@@ -122,6 +122,21 @@ class NT4WidgetBuilder {
 
     // Used when building widgets from network tables (drag and drop)
     _widgetNameBuildMap.addAll({
+      BooleanBox.widgetType: BooleanBox.new,
+      GraphWidget.widgetType: GraphWidget.new,
+      MatchTimeWidget.widgetType: MatchTimeWidget.new,
+      MultiColorView.widgetType: MultiColorView.new,
+      NumberBar.widgetType: NumberBar.new,
+      NumberSlider.widgetType: NumberSlider.new,
+      SingleColorView.widgetType: SingleColorView.new,
+      TextDisplay.widgetType: TextDisplay.new,
+      'Text View': TextDisplay.new,
+      ToggleButton.widgetType: ToggleButton.new,
+      ToggleSwitch.widgetType: ToggleSwitch.new,
+      VoltageView.widgetType: VoltageView.new,
+    });
+
+    _widgetNameBuildMap.addAll({
       AccelerometerWidget.widgetType: AccelerometerWidget.new,
       CameraStreamWidget.widgetType: CameraStreamWidget.new,
       ComboBoxChooser.widgetType: ComboBoxChooser.new,

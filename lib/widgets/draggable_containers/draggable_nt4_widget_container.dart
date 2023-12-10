@@ -119,7 +119,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
     NT4Widget? newWidget = NT4WidgetBuilder.buildNT4WidgetFromType(
       type,
-      child.type,
+      child.topic,
       period: child.period,
     );
 
