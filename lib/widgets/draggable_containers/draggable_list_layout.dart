@@ -438,6 +438,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
+            widget.cursorGlobalLocation = details.globalPosition;
+
             Future(() {
               onDragCancel?.call(this);
               if (dragging || resizing) {
@@ -447,8 +449,6 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
               model?.setDraggable(false);
             });
-
-            widget.cursorGlobalLocation = details.globalPosition;
           },
           onPanUpdate: (details) {
             widget.cursorGlobalLocation = details.globalPosition;
@@ -470,9 +470,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
               widget.displayRect.height,
             );
 
-            if (dashboardGrid.isValidLocation(previewLocation) ||
-                dashboardGrid
-                    .isValidLayoutLocation(widget.cursorGlobalLocation)) {
+            if ((dashboardGrid.isValidLocation(previewLocation) ||
+                    dashboardGrid
+                        .isValidLayoutLocation(widget.cursorGlobalLocation)) &&
+                dashboardGrid.isDraggingInContainer()) {
               children.remove(widget);
             }
 

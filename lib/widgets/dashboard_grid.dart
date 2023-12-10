@@ -156,6 +156,10 @@ class DashboardGrid extends StatelessWidget {
     return localPosition;
   }
 
+  bool isDraggingInContainer() {
+    return _containerDraggingIn != null;
+  }
+
   /// Returns weather `widget` is able to be moved to `location` without overlapping anything else.
   ///
   /// This only applies to widgets that already have a place on the grid
