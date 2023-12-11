@@ -44,6 +44,14 @@ class ShuffleboardNTListener {
       previousSelection = data;
     });
 
+    // Also clear data when connected in case if threads auto populate json after disconnection
+    // Chances are low since the timing has to be just right but you never know
+    nt4Connection.addConnectedListener(() {
+      currentJsonData.clear();
+      shuffleboardTreeRoot.clearRows();
+      previousSelection = null;
+    });
+
     nt4Connection.addDisconnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
@@ -368,7 +376,9 @@ class ShuffleboardNTListener {
               ? Settings.defaultPeriod
               : Settings.defaultGraphPeriod);
 
-      onWidgetAdded?.call(currentJsonData[jsonKey]!);
+      if (nt4Connection.isNT4Connected) {
+        onWidgetAdded?.call(currentJsonData[jsonKey]!);
+      }
 
       widget?.unSubscribe();
       widget?.dispose(deleting: true);
@@ -467,8 +477,9 @@ class ShuffleboardNTListener {
         widget?.unSubscribe();
         widget?.dispose(deleting: true);
       }
-
-      onWidgetAdded?.call(currentJsonData[jsonKey]!);
+      if (nt4Connection.isNT4Connected) {
+        onWidgetAdded?.call(currentJsonData[jsonKey]!);
+      }
     });
   }
 
