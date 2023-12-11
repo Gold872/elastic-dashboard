@@ -13,6 +13,186 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 
+class NT4TypeStr {
+  static final Map<String, int> typeMap = {
+    'boolean': 0,
+    'double': 1,
+    'int': 2,
+    'float': 3,
+    'string': 4,
+    'json': 4,
+    'raw': 5,
+    'rpc': 5,
+    'msgpack': 5,
+    'protobuff': 5,
+    'boolean[]': 16,
+    'double[]': 17,
+    'int[]': 18,
+    'float[]': 19,
+    'string[]': 20,
+  };
+
+  static const kBool = 'boolean';
+  static const kFloat64 = 'double';
+  static const kInt = 'int';
+  static const kFloat32 = 'float';
+  static const kString = 'string';
+  static const kJson = 'json';
+  static const kBinaryRaw = 'raw';
+  static const kBinaryRPC = 'rpc';
+  static const kBinaryMsgpack = 'msgpack';
+  static const kBinaryProtobuf = 'protobuf';
+  static const kBoolArr = 'boolean[]';
+  static const kFloat64Arr = 'double[]';
+  static const kIntArr = 'int[]';
+  static const kFloat32Arr = 'float[]';
+  static const kStringArr = 'string[]';
+}
+
+class NT4Subscription {
+  final String topic;
+  final NT4SubscriptionOptions options;
+  final int uid;
+
+  int useCount = 0;
+
+  Object? currentValue;
+  final List<Function(Object?)> _listeners = [];
+
+  NT4Subscription({
+    required this.topic,
+    this.options = const NT4SubscriptionOptions(),
+    this.uid = -1,
+  });
+
+  void listen(Function(Object?) onChanged) {
+    _listeners.add(onChanged);
+  }
+
+  Stream<Object?> periodicStream({bool yieldAll = true}) async* {
+    Object? lastYielded = currentValue;
+
+    while (true) {
+      if (lastYielded != currentValue || yieldAll) {
+        yield currentValue;
+        lastYielded = currentValue;
+      }
+      await Future.delayed(
+          Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
+    }
+  }
+
+  void updateValue(Object? value) {
+    currentValue = value;
+    for (var listener in _listeners) {
+      listener(currentValue);
+    }
+  }
+
+  Map<String, dynamic> _toSubscribeJson() {
+    return {
+      'topics': [topic],
+      'options': options.toJson(),
+      'subuid': uid,
+    };
+  }
+
+  Map<String, dynamic> _toUnsubscribeJson() {
+    return {
+      'subuid': uid,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NT4Subscription &&
+      // other.yieldAll == yieldAll &&
+      other.runtimeType == runtimeType &&
+      other.topic == topic &&
+      other.options == options;
+
+  @override
+  int get hashCode => Object.hashAllUnordered([topic, options]);
+}
+
+class NT4SubscriptionOptions {
+  final double periodicRateSeconds;
+  final bool all;
+  final bool topicsOnly;
+  final bool prefix;
+
+  const NT4SubscriptionOptions({
+    this.periodicRateSeconds = 0.1,
+    this.all = false,
+    this.topicsOnly = false,
+    this.prefix = true,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'periodic': periodicRateSeconds,
+      'all': all,
+      'topicsonly': topicsOnly,
+      'prefix': prefix,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NT4SubscriptionOptions &&
+      other.runtimeType == runtimeType &&
+      other.periodicRateSeconds == periodicRateSeconds &&
+      other.all == all &&
+      other.topicsOnly == topicsOnly &&
+      other.prefix == prefix;
+
+  @override
+  int get hashCode =>
+      Object.hashAllUnordered([periodicRateSeconds, all, topicsOnly, prefix]);
+}
+
+class NT4Topic {
+  final String name;
+  final String type;
+  int id;
+  int pubUID;
+  final Map<String, dynamic> properties;
+
+  NT4Topic({
+    required this.name,
+    required this.type,
+    this.id = 0,
+    this.pubUID = 0,
+    required this.properties,
+  });
+
+  Map<String, dynamic> toPublishJson() {
+    return {
+      'name': name,
+      'type': type,
+      'pubuid': pubUID,
+    };
+  }
+
+  Map<String, dynamic> toUnpublishJson() {
+    return {
+      'name': name,
+      'pubuid': pubUID,
+    };
+  }
+
+  Map<String, dynamic> toPropertiesJson() {
+    return {
+      'name': name,
+      'update': properties,
+    };
+  }
+
+  int getTypeId() {
+    return NT4TypeStr.typeMap[type]!;
+  }
+}
+
 class NT4Client {
   static const int _pingIntervalMsV40 = 1000;
   static const int _pingIntervalMsV41 = 200;
@@ -627,150 +807,6 @@ class NT4Client {
   }
 }
 
-class NT4SubscriptionOptions {
-  final double periodicRateSeconds;
-  final bool all;
-  final bool topicsOnly;
-  final bool prefix;
-
-  const NT4SubscriptionOptions({
-    this.periodicRateSeconds = 0.1,
-    this.all = false,
-    this.topicsOnly = false,
-    this.prefix = true,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'periodic': periodicRateSeconds,
-      'all': all,
-      'topicsonly': topicsOnly,
-      'prefix': prefix,
-    };
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is NT4SubscriptionOptions &&
-      other.runtimeType == runtimeType &&
-      other.periodicRateSeconds == periodicRateSeconds &&
-      other.all == all &&
-      other.topicsOnly == topicsOnly &&
-      other.prefix == prefix;
-
-  @override
-  int get hashCode =>
-      Object.hashAllUnordered([periodicRateSeconds, all, topicsOnly, prefix]);
-}
-
-class NT4Topic {
-  final String name;
-  final String type;
-  int id;
-  int pubUID;
-  final Map<String, dynamic> properties;
-
-  NT4Topic({
-    required this.name,
-    required this.type,
-    this.id = 0,
-    this.pubUID = 0,
-    required this.properties,
-  });
-
-  Map<String, dynamic> toPublishJson() {
-    return {
-      'name': name,
-      'type': type,
-      'pubuid': pubUID,
-    };
-  }
-
-  Map<String, dynamic> toUnpublishJson() {
-    return {
-      'name': name,
-      'pubuid': pubUID,
-    };
-  }
-
-  Map<String, dynamic> toPropertiesJson() {
-    return {
-      'name': name,
-      'update': properties,
-    };
-  }
-
-  int getTypeId() {
-    return NT4TypeStr.typeMap[type]!;
-  }
-}
-
-class NT4Subscription {
-  final String topic;
-  final NT4SubscriptionOptions options;
-  final int uid;
-
-  int useCount = 0;
-
-  Object? currentValue;
-  final List<Function(Object?)> _listeners = [];
-
-  NT4Subscription({
-    required this.topic,
-    this.options = const NT4SubscriptionOptions(),
-    this.uid = -1,
-  });
-
-  void listen(Function(Object?) onChanged) {
-    _listeners.add(onChanged);
-  }
-
-  Stream<Object?> periodicStream({bool yieldAll = true}) async* {
-    Object? lastYielded = currentValue;
-
-    while (true) {
-      if (lastYielded != currentValue || yieldAll) {
-        yield currentValue;
-        lastYielded = currentValue;
-      }
-      await Future.delayed(
-          Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
-    }
-  }
-
-  void updateValue(Object? value) {
-    currentValue = value;
-    for (var listener in _listeners) {
-      listener(currentValue);
-    }
-  }
-
-  Map<String, dynamic> _toSubscribeJson() {
-    return {
-      'topics': [topic],
-      'options': options.toJson(),
-      'subuid': uid,
-    };
-  }
-
-  Map<String, dynamic> _toUnsubscribeJson() {
-    return {
-      'subuid': uid,
-    };
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is NT4Subscription &&
-      // other.yieldAll == yieldAll &&
-      other.runtimeType == runtimeType &&
-      other.topic == topic &&
-      other.options == options;
-
-  @override
-  int get hashCode => Object.hashAllUnordered([topic, options]);
-}
-
 class NT4ValueReq {
   final List<String> topics;
 
@@ -783,40 +819,4 @@ class NT4ValueReq {
       'topics': topics,
     };
   }
-}
-
-class NT4TypeStr {
-  static final Map<String, int> typeMap = {
-    'boolean': 0,
-    'double': 1,
-    'int': 2,
-    'float': 3,
-    'string': 4,
-    'json': 4,
-    'raw': 5,
-    'rpc': 5,
-    'msgpack': 5,
-    'protobuff': 5,
-    'boolean[]': 16,
-    'double[]': 17,
-    'int[]': 18,
-    'float[]': 19,
-    'string[]': 20,
-  };
-
-  static const kBool = 'boolean';
-  static const kFloat64 = 'double';
-  static const kInt = 'int';
-  static const kFloat32 = 'float';
-  static const kString = 'string';
-  static const kJson = 'json';
-  static const kBinaryRaw = 'raw';
-  static const kBinaryRPC = 'rpc';
-  static const kBinaryMsgpack = 'msgpack';
-  static const kBinaryProtobuf = 'protobuf';
-  static const kBoolArr = 'boolean[]';
-  static const kFloat64Arr = 'double[]';
-  static const kIntArr = 'int[]';
-  static const kFloat32Arr = 'float[]';
-  static const kStringArr = 'string[]';
 }
