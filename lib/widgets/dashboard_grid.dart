@@ -585,6 +585,12 @@ class DashboardGrid extends StatelessWidget {
   }
 
   void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
+    Rect newWidgetLocation = Rect.fromLTWH(
+      tryCast(widgetData['x']) ?? 0.0,
+      tryCast(widgetData['y']) ?? 0.0,
+      tryCast(widgetData['width']) ?? 0.0,
+      tryCast(widgetData['height']) ?? 0.0,
+    );
     // If the widget is already in the tab, don't add it
     if (!widgetData['layout']) {
       for (DraggableNT4WidgetContainer container
@@ -592,6 +598,7 @@ class DashboardGrid extends StatelessWidget {
         String? title = container.title;
         String? type = container.child.type;
         String? topic = container.child.topic;
+        bool validLocation = isValidLocation(newWidgetLocation);
 
         if (title == null) {
           continue;
@@ -599,7 +606,8 @@ class DashboardGrid extends StatelessWidget {
 
         if (title == widgetData['title'] &&
             type == widgetData['type'] &&
-            topic == widgetData['properties']['topic']) {
+            topic == widgetData['properties']['topic'] &&
+            !validLocation) {
           return;
         }
       }
@@ -608,12 +616,15 @@ class DashboardGrid extends StatelessWidget {
           in _widgetContainers.whereType<DraggableLayoutContainer>()) {
         String? title = container.title;
         String type = container.type;
+        bool validLocation = isValidLocation(newWidgetLocation);
 
         if (title == null) {
           continue;
         }
 
-        if (title == widgetData['title'] && type == widgetData['type']) {
+        if (title == widgetData['title'] &&
+            type == widgetData['type'] &&
+            !validLocation) {
           return;
         }
       }
