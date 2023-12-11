@@ -969,7 +969,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           actions: [
             TextButton(
                 onPressed: () {
-                  logger.debug('Closing tab: $tabData');
+                  logger.debug('Closing tab: $tabName');
                   Navigator.of(context).pop();
                   onClose.call();
                 },
@@ -977,7 +977,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             TextButton(
                 onPressed: () {
                   logger.debug(
-                      'Ignoring tab close for tab: $tabData, user canceled the request.');
+                      'Ignoring tab close for tab: $tabName, user canceled the request.');
                   Navigator.of(context).pop();
                 },
                 child: const Text('Cancel')),
