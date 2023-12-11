@@ -15,7 +15,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.title,
     required super.initialPosition,
     required this.child,
@@ -32,7 +32,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
 
   DraggableNT4WidgetContainer.fromJson({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.jsonData,
     super.enabled = false,
     super.onUpdate,

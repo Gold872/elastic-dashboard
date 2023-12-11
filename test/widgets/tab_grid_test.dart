@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
@@ -38,6 +37,7 @@ import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
 
 void main() async {
@@ -57,7 +57,7 @@ void main() async {
     jsonData = jsonDecode(jsonString);
   });
 
-  testWidgets('Dashboard grid loading (Tab 1)', (widgetTester) async {
+  testWidgets('Tab grid loading (Tab 1)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);
     widgetTester.view.devicePixelRatio = 1.0;
@@ -74,9 +74,9 @@ void main() async {
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider(
-            create: (context) => DashboardGridModel(),
-            child: DashboardGrid.fromJson(
-                jsonData: jsonData['tabs'][0]['grid_layout']),
+            create: (context) => TabGridModel(),
+            child:
+                TabGrid.fromJson(jsonData: jsonData['tabs'][0]['grid_layout']),
           ),
         ),
       ),
@@ -102,7 +102,7 @@ void main() async {
     expect(find.bySubtype<DraggableListLayout>(), findsOneWidget);
   });
 
-  testWidgets('Dashboard grid loading (2nd Tab)', (widgetTester) async {
+  testWidgets('Tab grid loading (2nd Tab)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);
     widgetTester.view.devicePixelRatio = 1.0;
@@ -119,9 +119,9 @@ void main() async {
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider(
-            create: (context) => DashboardGridModel(),
-            child: DashboardGrid.fromJson(
-                jsonData: jsonData['tabs'][1]['grid_layout']),
+            create: (context) => TabGridModel(),
+            child:
+                TabGrid.fromJson(jsonData: jsonData['tabs'][1]['grid_layout']),
           ),
         ),
       ),
@@ -157,8 +157,8 @@ void main() async {
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider(
-            create: (context) => DashboardGridModel(),
-            child: DashboardGrid.fromJson(
+            create: (context) => TabGridModel(),
+            child: TabGrid.fromJson(
               key: GlobalKey(),
               jsonData: jsonData['tabs'][0]['grid_layout'],
             ),
@@ -232,8 +232,8 @@ void main() async {
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider(
-            create: (context) => DashboardGridModel(),
-            child: DashboardGrid.fromJson(
+            create: (context) => TabGridModel(),
+            child: TabGrid.fromJson(
               key: GlobalKey(),
               jsonData: jsonData['tabs'][0]['grid_layout'],
             ),

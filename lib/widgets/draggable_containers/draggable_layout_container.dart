@@ -13,7 +13,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
 
   DraggableLayoutContainer({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.title,
     required super.initialPosition,
     super.enabled = false,
@@ -27,7 +27,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
 
   DraggableLayoutContainer.fromJson({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.jsonData,
     required this.nt4ContainerBuilder,
     super.enabled = false,

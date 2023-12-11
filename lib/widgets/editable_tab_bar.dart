@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
 class TabData {
   String name;
@@ -16,7 +16,7 @@ class TabData {
 }
 
 class EditableTabBar extends StatelessWidget {
-  final List<DashboardGrid> tabViews;
+  final List<TabGrid> tabViews;
   final List<TabData> tabData;
 
   final Function(TabData tab) onTabCreate;
@@ -246,7 +246,7 @@ class EditableTabBar extends StatelessWidget {
             ),
           ),
         ),
-        // Dashboard grid area
+        // Tab grid area
         Flexible(
           child: Stack(
             children: [
@@ -265,9 +265,9 @@ class EditableTabBar extends StatelessWidget {
                 endOpacity: 1.0,
                 index: currentIndex,
                 children: [
-                  for (DashboardGrid grid in tabViews)
+                  for (TabGrid grid in tabViews)
                     ChangeNotifierProvider(
-                      create: (context) => DashboardGridModel(),
+                      create: (context) => TabGridModel(),
                       child: grid,
                     ),
                 ],

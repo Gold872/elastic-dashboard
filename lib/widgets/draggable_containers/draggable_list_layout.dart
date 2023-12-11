@@ -29,7 +29,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   DraggableListLayout({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.title,
     required super.initialPosition,
     super.enabled = false,
@@ -44,7 +44,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   DraggableListLayout.fromJson({
     super.key,
-    required super.dashboardGrid,
+    required super.tabGrid,
     required super.jsonData,
     required super.nt4ContainerBuilder,
     super.enabled = false,
@@ -114,8 +114,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                                     padding: EdgeInsets.zero,
                                     child: ExpansionTile(
                                       title: Text(container.title ?? ''),
-                                      subtitle: Text(
-                                          container.child.type ?? 'NT4Widget'),
+                                      subtitle: Text(container.child.type),
                                       controlAffinity:
                                           ListTileControlAffinity.leading,
                                       trailing: IconButton(
@@ -256,7 +255,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     for (Map<String, dynamic> childData in jsonData['children']) {
       children.add(nt4ContainerBuilder?.call(childData) ??
           DraggableNT4WidgetContainer.fromJson(
-            dashboardGrid: dashboardGrid,
+            tabGrid: tabGrid,
             jsonData: childData,
             onJsonLoadingWarning: onJsonLoadingWarning,
           ));
@@ -456,7 +455,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Offset location = details.globalPosition -
                 Offset(widget.displayRect.width, widget.displayRect.height) / 2;
 
-            dashboardGrid.layoutDragOutUpdate(widget, location);
+            tabGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
             Future(() => model?.setDraggable(true));
@@ -470,14 +469,14 @@ class DraggableListLayout extends DraggableLayoutContainer {
               widget.displayRect.height,
             );
 
-            if ((dashboardGrid.isValidLocation(previewLocation) ||
-                    dashboardGrid
+            if ((tabGrid.isValidLocation(previewLocation) ||
+                    tabGrid
                         .isValidLayoutLocation(widget.cursorGlobalLocation)) &&
-                dashboardGrid.isDraggingInContainer()) {
+                tabGrid.isDraggingInContainer()) {
               children.remove(widget);
             }
 
-            dashboardGrid.layoutDragOutEnd(widget);
+            tabGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
             Future(() {

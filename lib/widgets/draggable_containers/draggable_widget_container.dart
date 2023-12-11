@@ -5,8 +5,8 @@ import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
 class WidgetContainerModel extends ChangeNotifier {
   bool draggable = true;
@@ -36,7 +36,7 @@ class WidgetContainerModel extends ChangeNotifier {
 }
 
 class DraggableWidgetContainer extends StatelessWidget {
-  final DashboardGrid dashboardGrid;
+  final TabGrid tabGrid;
 
   String? title;
 
@@ -77,7 +77,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   DraggableWidgetContainer({
     super.key,
-    required this.dashboardGrid,
+    required this.tabGrid,
     required this.title,
     required Rect initialPosition,
     this.enabled = false,
@@ -97,7 +97,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   DraggableWidgetContainer.fromJson({
     super.key,
-    required this.dashboardGrid,
+    required this.tabGrid,
     required Map<String, dynamic> jsonData,
     this.enabled = false,
     this.onUpdate,

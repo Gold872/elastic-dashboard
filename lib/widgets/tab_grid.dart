@@ -12,26 +12,26 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_wid
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
 
-// Used to refresh the dashboard grid when a widget is added or removed
+// Used to refresh the tab grid when a widget is added or removed
 // This doesn't use a stateless widget since everything has to be rendered at program startup or data will be lost
-class DashboardGridModel extends ChangeNotifier {
+class TabGridModel extends ChangeNotifier {
   void onUpdate() {
     notifyListeners();
   }
 }
 
-class DashboardGrid extends StatelessWidget {
+class TabGrid extends StatelessWidget {
   final List<DraggableWidgetContainer> _widgetContainers = [];
 
   MapEntry<DraggableWidgetContainer, Offset>? _containerDraggingIn;
 
   final VoidCallback? onAddWidgetPressed;
 
-  DashboardGridModel? model;
+  TabGridModel? model;
 
-  DashboardGrid({super.key, this.onAddWidgetPressed});
+  TabGrid({super.key, this.onAddWidgetPressed});
 
-  DashboardGrid.fromJson({
+  TabGrid.fromJson({
     super.key,
     required Map<String, dynamic> jsonData,
     this.onAddWidgetPressed,
@@ -53,7 +53,7 @@ class DashboardGrid extends StatelessWidget {
       _widgetContainers.add(
         DraggableNT4WidgetContainer.fromJson(
           key: UniqueKey(),
-          dashboardGrid: this,
+          tabGrid: this,
           enabled: nt4Connection.isNT4Connected,
           jsonData: containerData,
           onUpdate: _nt4ContainerOnUpdate,
@@ -83,13 +83,13 @@ class DashboardGrid extends StatelessWidget {
         case 'List Layout':
           widget = DraggableListLayout.fromJson(
             key: UniqueKey(),
-            dashboardGrid: this,
+            tabGrid: this,
             enabled: nt4Connection.isNT4Connected,
             jsonData: layoutData,
             nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
               return DraggableNT4WidgetContainer.fromJson(
                 key: UniqueKey(),
-                dashboardGrid: this,
+                tabGrid: this,
                 enabled: nt4Connection.isNT4Connected,
                 jsonData: jsonData,
                 onUpdate: _nt4ContainerOnUpdate,
@@ -540,7 +540,7 @@ class DashboardGrid extends StatelessWidget {
 
     return DraggableNT4WidgetContainer(
       key: UniqueKey(),
-      dashboardGrid: this,
+      tabGrid: this,
       title: widget.title,
       enabled: nt4Connection.isNT4Connected,
       initialPosition: Rect.fromLTWH(
@@ -562,7 +562,7 @@ class DashboardGrid extends StatelessWidget {
   DraggableListLayout createListLayout() {
     return DraggableListLayout(
       key: UniqueKey(),
-      dashboardGrid: this,
+      tabGrid: this,
       title: 'List Layout',
       initialPosition: Rect.fromLTWH(
         0.0,
@@ -636,12 +636,12 @@ class DashboardGrid extends StatelessWidget {
           _widgetContainers.add(
             DraggableListLayout.fromJson(
               key: UniqueKey(),
-              dashboardGrid: this,
+              tabGrid: this,
               enabled: nt4Connection.isNT4Connected,
               nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
                 return DraggableNT4WidgetContainer.fromJson(
                   key: UniqueKey(),
-                  dashboardGrid: this,
+                  tabGrid: this,
                   enabled: nt4Connection.isNT4Connected,
                   jsonData: jsonData,
                   onUpdate: _nt4ContainerOnUpdate,
@@ -666,7 +666,7 @@ class DashboardGrid extends StatelessWidget {
     } else {
       _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
         key: UniqueKey(),
-        dashboardGrid: this,
+        tabGrid: this,
         enabled: nt4Connection.isNT4Connected,
         jsonData: widgetData,
         onUpdate: _nt4ContainerOnUpdate,
@@ -721,7 +721,7 @@ class DashboardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    model = context.watch<DashboardGridModel?>();
+    model = context.watch<TabGridModel?>();
 
     List<Widget> dashboardWidgets = [];
     List<Widget> draggingWidgets = [];

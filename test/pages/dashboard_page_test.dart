@@ -14,7 +14,6 @@ import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
@@ -25,6 +24,7 @@ import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 
@@ -554,7 +554,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(2));
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
     expect(find.byType(EditableTabBar), findsOneWidget);
 
@@ -566,7 +566,7 @@ void main() {
     await widgetTester.tap(createNewTabButton);
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(3));
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(3));
   });
 
   testWidgets('Closing tab', (widgetTester) async {
@@ -584,7 +584,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(2));
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
     expect(find.byType(EditableTabBar), findsOneWidget);
 
@@ -608,7 +608,7 @@ void main() {
     await widgetTester.tap(confirmButton);
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(1));
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(1));
   });
 
   testWidgets('Reordering tabs', (widgetTester) async {
@@ -626,7 +626,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(DashboardGrid, skipOffstage: false), findsNWidgets(2));
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
     final editableTabBar = find.byType(EditableTabBar);
 

@@ -23,7 +23,6 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
-import 'package:elastic_dashboard/widgets/dashboard_grid.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
@@ -31,6 +30,7 @@ import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
 class DashboardPage extends StatefulWidget {
   final SharedPreferences preferences;
@@ -52,7 +52,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences _preferences;
   late final UpdateChecker updateChecker;
 
-  final List<DashboardGrid> grids = [];
+  final List<TabGrid> grids = [];
 
   final List<TabData> tabData = [];
 
@@ -103,7 +103,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     nt4Connection.addConnectedListener(() {
       setState(() {
-        for (DashboardGrid grid in grids) {
+        for (TabGrid grid in grids) {
           grid.onNTConnect();
         }
       });
@@ -111,7 +111,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     nt4Connection.addDisconnectedListener(() {
       setState(() {
-        for (DashboardGrid grid in grids) {
+        for (TabGrid grid in grids) {
           grid.onNTDisconnect();
         }
       });
@@ -155,7 +155,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         if (!tabNamesList.contains(tabName)) {
           tabData.add(TabData(name: tabName));
-          grids.add(DashboardGrid(
+          grids.add(TabGrid(
             key: GlobalKey(),
             onAddWidgetPressed: displayAddWidgetDialog,
           ));
@@ -211,7 +211,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     for (int i = 0; i < tabData.length; i++) {
       TabData data = tabData[i];
-      DashboardGrid grid = grids[i];
+      TabGrid grid = grids[i];
 
       gridData.add({
         'name': data.name,
@@ -485,7 +485,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       tabData.add(TabData(name: data['name']));
 
       grids.add(
-        DashboardGrid.fromJson(
+        TabGrid.fromJson(
           key: GlobalKey(),
           jsonData: data['grid_layout'],
           onAddWidgetPressed: displayAddWidgetDialog,
@@ -511,11 +511,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ]);
 
         grids.addAll([
-          DashboardGrid(
+          TabGrid(
             key: GlobalKey(),
             onAddWidgetPressed: displayAddWidgetDialog,
           ),
-          DashboardGrid(
+          TabGrid(
             key: GlobalKey(),
             onAddWidgetPressed: displayAddWidgetDialog,
           ),
@@ -657,7 +657,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
       tabData.add(TabData(name: newTabName));
       grids.add(
-        DashboardGrid(
+        TabGrid(
           key: GlobalKey(),
           onAddWidgetPressed: displayAddWidgetDialog,
         ),
@@ -861,7 +861,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           setState(() {
             Settings.cornerRadius = newRadius;
 
-            for (DashboardGrid grid in grids) {
+            for (TabGrid grid in grids) {
               grid.refreshAllContainers();
             }
           });
@@ -1006,8 +1006,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       tabData[currentTabIndex - 1] = tabData[currentTabIndex];
       tabData[currentTabIndex] = tempData;
 
-      // Swap the dashboard grids
-      DashboardGrid tempGrid = grids[currentTabIndex - 1];
+      // Swap the tab grids
+      TabGrid tempGrid = grids[currentTabIndex - 1];
       grids[currentTabIndex - 1] = grids[currentTabIndex];
       grids[currentTabIndex] = tempGrid;
 
@@ -1030,8 +1030,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       tabData[currentTabIndex + 1] = tabData[currentTabIndex];
       tabData[currentTabIndex] = tempData;
 
-      // Swap the dashboard grids
-      DashboardGrid tempGrid = grids[currentTabIndex + 1];
+      // Swap the tab grids
+      TabGrid tempGrid = grids[currentTabIndex + 1];
       grids[currentTabIndex + 1] = grids[currentTabIndex];
       grids[currentTabIndex] = tempGrid;
 
@@ -1211,7 +1211,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     onTabCreate: (tab) {
                       setState(() {
                         tabData.add(tab);
-                        grids.add(DashboardGrid(
+                        grids.add(TabGrid(
                           key: GlobalKey(),
                           onAddWidgetPressed: displayAddWidgetDialog,
                         ));
@@ -1324,7 +1324,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 }
 
 class AddWidgetDialog extends StatelessWidget {
-  final DashboardGrid Function() grid;
+  final TabGrid Function() grid;
   final bool visible;
 
   final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
