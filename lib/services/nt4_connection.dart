@@ -38,7 +38,7 @@ class NT4Connection {
         serverBaseAddress: ipAddress,
         onConnect: () {
           logger.info(
-              'Network Tables connected on IP address ${Settings.ipAddress}');
+              'Network Tables connected on IP address ${_ntClient.serverBaseAddress}');
           _ntConnected = true;
 
           for (VoidCallback callback in onConnectedListeners) {
