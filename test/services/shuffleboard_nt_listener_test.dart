@@ -1,13 +1,54 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import 'package:elastic_dashboard/services/nt4.dart';
 import 'package:elastic_dashboard/services/nt4_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
+import '../test_util.mocks.dart';
 
 void main() {
   test('Shuffleboard NT listener', () async {
-    nt4Connection.nt4Connect('0.0.0.0');
+    List<Function(NT4Topic topic)> topicAnnounceListeners = [];
+    Map<String, dynamic> lastAnnouncedValues = {
+      '/Shuffleboard/.metadata/Test-Tab/Test Number/Position': [1.0, 1.0],
+      '/Shuffleboard/.metadata/Test-Tab/Test Number/Size': [2.0, 2.0],
+    };
+
+    final mockNT4Connection = MockNT4Connection();
+    final mockNT4Client = MockNT4Client();
+    final mockSubscription = MockNT4Subscription();
+
+    when(mockNT4Client.lastAnnouncedValues).thenReturn(lastAnnouncedValues);
+    when(mockNT4Client.topicAnnounceListeners)
+        .thenReturn(topicAnnounceListeners);
+    when(mockNT4Client.addTopicAnnounceListener(any)).thenAnswer(
+        (realInvocation) =>
+            topicAnnounceListeners.add(realInvocation.positionalArguments[0]));
+
+    when(mockSubscription.periodicStream())
+        .thenAnswer((_) => Stream.value(null));
+
+    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
+
+    when(mockNT4Connection.isNT4Connected).thenReturn(true);
+
+    when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
+
+    when(mockNT4Connection.getLastAnnouncedValue(any)).thenAnswer(
+      (realInvocation) =>
+          lastAnnouncedValues[realInvocation.positionalArguments[0]],
+    );
+
+    when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(any))
+        .thenAnswer((realInvocation) => Future.value(
+            lastAnnouncedValues[realInvocation.positionalArguments[0]]));
+
+    when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    NT4Connection.instance = mockNT4Connection;
 
     Map<String, dynamic> announcedWidgetData = {};
 
@@ -21,11 +62,6 @@ void main() {
       ..initializeListeners();
 
     expect(nt4Connection.nt4Client.topicAnnounceListeners.isNotEmpty, true);
-
-    nt4Connection.nt4Client.lastAnnouncedValues.addAll({
-      '/Shuffleboard/.metadata/Test-Tab/Test Number/Position': [1.0, 1.0],
-      '/Shuffleboard/.metadata/Test-Tab/Test Number/Size': [2.0, 2.0],
-    });
 
     for (final callback in nt4Connection.nt4Client.topicAnnounceListeners) {
       callback.call(NT4Topic(

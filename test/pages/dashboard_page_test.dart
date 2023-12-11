@@ -356,6 +356,11 @@ void main() {
     final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
+    when(mockNT4Connection.isNT4Connected).thenReturn(true);
+    when(mockNT4Connection.connectionStatus())
+        .thenAnswer((_) => Stream.value(true));
+    when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
+
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
 
