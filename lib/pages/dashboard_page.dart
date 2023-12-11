@@ -504,21 +504,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   void createDefaultTabs() {
     if (tabData.isEmpty || grids.isEmpty) {
       logger.info('Creating default Teleoperated and Autonomous tabs');
-      tabData.addAll([
-        TabData(name: 'Teleoperated'),
-        TabData(name: 'Autonomous'),
-      ]);
+      setState(() {
+        tabData.addAll([
+          TabData(name: 'Teleoperated'),
+          TabData(name: 'Autonomous'),
+        ]);
 
-      grids.addAll([
-        DashboardGrid(
-          key: GlobalKey(),
-          onAddWidgetPressed: displayAddWidgetDialog,
-        ),
-        DashboardGrid(
-          key: GlobalKey(),
-          onAddWidgetPressed: displayAddWidgetDialog,
-        ),
-      ]);
+        grids.addAll([
+          DashboardGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ),
+          DashboardGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ),
+        ]);
+      });
     }
   }
 
