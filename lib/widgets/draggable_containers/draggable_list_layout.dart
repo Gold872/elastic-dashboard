@@ -235,7 +235,9 @@ class DraggableListLayout extends DraggableLayoutContainer {
           tryCast(jsonData['properties']['Label position']) ??
           'TOP';
 
-      if (!labelPositions.contains(labelPosition)) {
+      if (!labelPositions
+          .map((e) => e.toUpperCase())
+          .contains(labelPosition.toUpperCase())) {
         labelPosition = 'TOP';
       }
     }
