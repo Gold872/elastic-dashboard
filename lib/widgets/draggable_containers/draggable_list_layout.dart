@@ -68,102 +68,100 @@ class DraggableListLayout extends DraggableLayoutContainer {
             builder: (context, setState) {
               return SizedBox(
                 width: 353,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...getContainerEditProperties(),
-                      const Divider(),
-                      const Center(
-                        child: Text('Label Position'),
-                      ),
-                      DialogDropdownChooser(
-                        onSelectionChanged: (value) {
-                          if (value == null) {
-                            return;
-                          }
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ...getContainerEditProperties(),
+                    const Divider(),
+                    const Center(
+                      child: Text('Label Position'),
+                    ),
+                    DialogDropdownChooser(
+                      onSelectionChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
 
-                          if (!labelPositions.contains(value)) {
-                            return;
-                          }
+                        if (!labelPositions.contains(value)) {
+                          return;
+                        }
 
-                          setState(() {
-                            labelPosition = value.toUpperCase();
+                        setState(() {
+                          labelPosition = value.toUpperCase();
 
-                            refresh();
-                          });
-                        },
-                        choices: labelPositions,
-                        initialValue:
-                            labelPosition.substring(0, 1).toUpperCase() +
-                                labelPosition.substring(1).toLowerCase(),
-                      ),
-                      const Divider(),
-                      if (children.isNotEmpty)
-                        Container(
-                          constraints: const BoxConstraints(
-                            maxHeight: 350,
-                          ),
-                          child: ReorderableListView(
-                            header: const Text('Children Order & Properties'),
-                            children: children
-                                .map(
-                                  (container) => Padding(
-                                    key: UniqueKey(),
-                                    padding: EdgeInsets.zero,
-                                    child: ExpansionTile(
-                                      title: Text(container.title ?? ''),
-                                      subtitle: Text(container.child.type),
-                                      controlAffinity:
-                                          ListTileControlAffinity.leading,
-                                      trailing: IconButton(
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              children.remove(container);
-
-                                              container.unSubscribe();
-                                              container.dispose(deleting: true);
-
-                                              refresh();
-                                            });
-                                          }),
-                                      tilePadding:
-                                          const EdgeInsets.only(right: 40.0),
-                                      childrenPadding: const EdgeInsets.only(
-                                        left: 16.0,
-                                        top: 8.0,
-                                        right: 32.0,
-                                        bottom: 8.0,
-                                      ),
-                                      expandedCrossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: getChildEditProperties(
-                                          context, container, setState),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onReorder: (oldIndex, newIndex) {
-                              setState(() {
-                                if (newIndex > oldIndex) {
-                                  newIndex--;
-                                }
-                                var temp = children[newIndex];
-                                children[newIndex] = children[oldIndex];
-                                children[oldIndex] = temp;
-
-                                refresh();
-                              });
-                            },
-                          ),
+                          refresh();
+                        });
+                      },
+                      choices: labelPositions,
+                      initialValue:
+                          labelPosition.substring(0, 1).toUpperCase() +
+                              labelPosition.substring(1).toLowerCase(),
+                    ),
+                    const Divider(),
+                    if (children.isNotEmpty)
+                      Container(
+                        constraints: const BoxConstraints(
+                          maxHeight: 300,
                         ),
-                    ],
-                  ),
+                        child: ReorderableListView(
+                          header: const Text('Children Order & Properties'),
+                          children: children
+                              .map(
+                                (container) => Padding(
+                                  key: UniqueKey(),
+                                  padding: EdgeInsets.zero,
+                                  child: ExpansionTile(
+                                    title: Text(container.title ?? ''),
+                                    subtitle: Text(container.child.type),
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            children.remove(container);
+
+                                            container.unSubscribe();
+                                            container.dispose(deleting: true);
+
+                                            refresh();
+                                          });
+                                        }),
+                                    tilePadding:
+                                        const EdgeInsets.only(right: 40.0),
+                                    childrenPadding: const EdgeInsets.only(
+                                      left: 16.0,
+                                      top: 8.0,
+                                      right: 32.0,
+                                      bottom: 8.0,
+                                    ),
+                                    expandedCrossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: getChildEditProperties(
+                                        context, container, setState),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onReorder: (oldIndex, newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex--;
+                              }
+                              var temp = children[newIndex];
+                              children[newIndex] = children[oldIndex];
+                              children[oldIndex] = temp;
+
+                              refresh();
+                            });
+                          },
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
@@ -207,12 +205,19 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
     return [
       ...containerEditProperties,
-      const Divider(),
+      container.getWidgetTypeProperties((fn) {
+        setState(fn);
+        refresh();
+      }),
       if (childEditProperties.isNotEmpty) ...[
+        const Divider(),
+        Text('${container.child.type} Widget Settings'),
+        const SizedBox(height: 5),
         ...childEditProperties,
-        const Divider()
       ],
+      const Divider(),
       ...container.getNT4EditProperties(),
+      const SizedBox(height: 5),
     ];
   }
 

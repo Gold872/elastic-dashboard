@@ -157,23 +157,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
                     children: [
                       ...getContainerEditProperties(),
                       const SizedBox(height: 5),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Center(child: Text('Widget Type')),
-                          DialogDropdownChooser<String>(
-                            choices: child.getAvailableDisplayTypes(),
-                            initialValue: child.type,
-                            onSelectionChanged: (String? value) {
-                              setState(() {
-                                changeChildToType(value);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                      getWidgetTypeProperties(setState),
                       const Divider(),
                       // Settings for the widget inside (only if there are properties)
                       if (childProperties.isNotEmpty) ...[
@@ -201,6 +185,26 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
           ],
         );
       },
+    );
+  }
+
+  Widget getWidgetTypeProperties(StateSetter setState) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Center(child: Text('Widget Type')),
+        DialogDropdownChooser<String>(
+          choices: child.getAvailableDisplayTypes(),
+          initialValue: child.type,
+          onSelectionChanged: (String? value) {
+            setState(() {
+              changeChildToType(value);
+            });
+          },
+        ),
+      ],
     );
   }
 
