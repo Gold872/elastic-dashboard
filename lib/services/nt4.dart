@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:messagepack/messagepack.dart';
@@ -696,12 +697,12 @@ class NT4Client {
       var rxArr = jsonDecode(data.toString());
 
       if (rxArr is! List) {
-        logger.debug('[NT4] Ignoring text message, not an array');
+        logger.warning('[NT4] Ignoring text message, not an array');
       }
 
       for (var msg in rxArr) {
         if (msg is! Map) {
-          logger.debug('[NT4] Ignoring text message, not a json object');
+          logger.warning('[NT4] Ignoring text message, not a json object');
           continue;
         }
 
@@ -709,12 +710,12 @@ class NT4Client {
         var params = msg['params'];
 
         if (method == null || method is! String) {
-          logger.debug('[NT4] Ignoring text message, method not string');
+          logger.warning('[NT4] Ignoring text message, method not string');
           continue;
         }
 
         if (params == null || params is! Map) {
-          logger.debug('[NT4] Ignoring text message, params not json object');
+          logger.warning('[NT4] Ignoring text message, params not json object');
           continue;
         }
 
@@ -740,14 +741,31 @@ class NT4Client {
         } else if (method == 'unannounce') {
           NT4Topic? removedTopic = announcedTopics[params['id']];
           if (removedTopic == null) {
-            logger.debug(
+            logger.warning(
                 '[NT4] Ignorining unannounce, topic was not previously announced');
             return;
           }
           announcedTopics.remove(removedTopic.id);
         } else if (method == 'properties') {
+          String topicName = params['name'];
+          NT4Topic? topic = getTopicFromName(topicName);
+          if (topic == null) {
+            logger
+                .warning('[NT4] Ignoring properties, topic was not announced');
+            return;
+          }
+
+          Map<String, dynamic> update = tryCast(params['update']) ?? {};
+          for (MapEntry<String, dynamic> entry in update.entries) {
+            if (entry.value == null) {
+              topic.properties.remove(entry.key);
+            } else {
+              topic.properties[entry.key] = entry.value;
+            }
+          }
         } else {
-          logger.debug('[NT4] Ignoring text message - unknown method $method');
+          logger
+              .warning('[NT4] Ignoring text message - unknown method $method');
           return;
         }
       }
@@ -775,7 +793,7 @@ class NT4Client {
           } else if (topicID == -1 && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);
           } else {
-            logger.debug('[NT4] ignoring binary data, invalid topic ID');
+            logger.warning('[NT4] ignoring binary data, invalid topic ID');
           }
         } catch (err) {
           done = true;
