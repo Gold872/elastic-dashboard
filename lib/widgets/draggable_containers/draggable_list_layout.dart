@@ -368,6 +368,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                   ),
                 ),
               ),
+              const SizedBox(width: 5),
               Flexible(
                 child: widgetInContainer,
               ),
@@ -382,6 +383,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
               Flexible(
                 child: widgetInContainer,
               ),
+              const SizedBox(width: 5),
               Align(
                 alignment: Alignment.centerRight,
                 child: Padding(
