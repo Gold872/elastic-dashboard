@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -691,8 +692,7 @@ void main() {
     await widgetTester.tap(teleopTab, buttons: kSecondaryButton);
     await widgetTester.pumpAndSettle();
 
-    final renameButton =
-        find.widgetWithText(ListTile, 'Rename', skipOffstage: false);
+    final renameButton = find.text('Rename');
 
     expect(renameButton, findsOneWidget);
 
