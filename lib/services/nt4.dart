@@ -5,9 +5,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
