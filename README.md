@@ -9,8 +9,6 @@ Download files can be found [here](https://github.com/Gold872/elastic-dashboard/
 _Important Notes/Warnings:_ 
 * _Your code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets._
     * _WPILib v2023.3.1 fixed a bug in Network Tables where values wouldn't be sent to a client after subscribing topics only. Since the program subscribes topics only to everything, any widget that is built using a sendable will not be possible to add since the program will not be able to retrieve the widget's type. See https://github.com/wpilibsuite/allwpilib/pull/4991 for more info._
-* _When the first stable version of WPILib 2024 is released after kickoff, Elastic will not properly work with any WPILib version from pre-2024._
-    * _Elastic 2024 will be using the RTT Network Tables protocol added in NT4.1 to periodically ping the server to update the program's connection status. The RTT protocol does not exist in NT4, which will make it incompatible with any WPILib version from before 2024._
 
 ## About
 
