@@ -826,7 +826,7 @@ class TabGrid extends StatelessWidget {
           left: container.draggablePositionRect.left,
           top: container.draggablePositionRect.top,
           child: IgnorePointer(
-            child: container.getWidgetContainer(context),
+            child: container.getDraggingWidgetContainer(context),
           ),
         ),
       );
