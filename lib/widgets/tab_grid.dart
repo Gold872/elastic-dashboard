@@ -688,13 +688,36 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void clearWidgets() {
-    for (DraggableWidgetContainer container in _widgetContainers) {
-      container.dispose(deleting: true);
-      container.unSubscribe();
-    }
-    _widgetContainers.clear();
-    refresh();
+  void clearWidgets(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Clear'),
+        content: const Text(
+            'Are you sure you want to remove all widgets from this tab?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+
+              for (DraggableWidgetContainer container in _widgetContainers) {
+                container.dispose(deleting: true);
+                container.unSubscribe();
+              }
+              _widgetContainers.clear();
+              refresh();
+            },
+            child: const Text('Confirm'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
 
   void onDestroy() {
@@ -907,7 +930,7 @@ class TabGrid extends StatelessWidget {
             MenuItem(
               label: 'Clear Layout',
               icon: Icons.clear,
-              onSelected: () => clearWidgets(),
+              onSelected: () => clearWidgets(context),
             ),
           ],
         );
@@ -927,7 +950,7 @@ class TabGrid extends StatelessWidget {
             MenuItem(
               label: 'Clear Layout',
               icon: Icons.clear,
-              onSelected: () => clearWidgets(),
+              onSelected: () => clearWidgets(context),
             ),
           ],
         );

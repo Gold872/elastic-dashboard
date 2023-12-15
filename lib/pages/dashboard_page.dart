@@ -1118,7 +1118,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 style: menuButtonStyle,
                 onPressed: () {
                   setState(() {
-                    grids[currentTabIndex].clearWidgets();
+                    grids[currentTabIndex].clearWidgets(context);
                   });
                 },
                 child: const Text('Clear Layout'),
