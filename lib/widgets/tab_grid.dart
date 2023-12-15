@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:contextmenu/contextmenu.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_connection.dart';
@@ -776,39 +776,57 @@ class TabGrid extends StatelessWidget {
         }
       }
 
+      ContextMenu menu = ContextMenu(
+        borderRadius: BorderRadius.circular(5.0),
+        padding: const EdgeInsets.all(4.0),
+        entries: [
+          MenuHeader(
+            text: container.title ?? '',
+            disableUppercase: true,
+          ),
+          const MenuDivider(),
+          MenuItem(
+            label: 'Edit Properties',
+            icon: Icons.edit_outlined,
+            onSelected: () {
+              print('Edit properties!');
+            },
+          ),
+          MenuItem(
+              label: 'Remove',
+              icon: Icons.delete_outlined,
+              onSelected: () {
+                print('Remove!');
+              }),
+        ],
+      );
+
       dashboardWidgets.add(
-        ContextMenuArea(
-          builder: (context) => [
-            ListTile(
-              enabled: false,
-              dense: true,
-              visualDensity:
-                  const VisualDensity(horizontal: 0.0, vertical: -4.0),
-              title: Center(child: Text(container.title ?? '')),
-            ),
-            ListTile(
-              dense: true,
-              visualDensity:
-                  const VisualDensity(horizontal: 0.0, vertical: -4.0),
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('Edit Properties'),
-              onTap: () {
-                Navigator.of(context).pop();
-                container.showEditProperties(context);
-              },
-            ),
-            ListTile(
-              dense: true,
-              visualDensity:
-                  const VisualDensity(horizontal: 0.0, vertical: -4.0),
-              leading: const Icon(Icons.delete_outlined),
-              title: const Text('Remove'),
-              onTap: () {
-                Navigator.of(context).pop();
-                removeWidget(container);
-              },
-            ),
-          ],
+        ContextMenuRegion(
+          contextMenu: ContextMenu(
+            borderRadius: BorderRadius.circular(5.0),
+            padding: const EdgeInsets.all(4.0),
+            entries: [
+              MenuHeader(
+                text: container.title ?? '',
+                disableUppercase: true,
+              ),
+              const MenuDivider(),
+              MenuItem(
+                label: 'Edit Properties',
+                icon: Icons.edit_outlined,
+                onSelected: () {
+                  container.showEditProperties(context);
+                },
+              ),
+              MenuItem(
+                  label: 'Remove',
+                  icon: Icons.delete_outlined,
+                  onSelected: () {
+                    removeWidget(container);
+                  }),
+            ],
+          ),
           child: ChangeNotifierProvider(
             create: (context) => WidgetContainerModel(),
             child: container,
@@ -873,57 +891,47 @@ class TabGrid extends StatelessWidget {
       );
     }
 
-    defaultMenuBuilder(context) => [
-          ListTile(
-            dense: true,
-            visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
-            leading: const Icon(Icons.add),
-            title: const Text('Add Widget'),
-            onTap: () {
-              Navigator.of(context).pop();
-              onAddWidgetPressed?.call();
-            },
-          ),
-          ListTile(
-            dense: true,
-            visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
-            leading: const Icon(Icons.clear),
-            title: const Text('Clear Layout'),
-            onTap: () {
-              Navigator.of(context).pop();
-              clearWidgets();
-            },
-          ),
-        ];
-
     return GestureDetector(
-      // Needed to prevent 2 context menus from showing at the same time
       behavior: HitTestBehavior.translucent,
       onSecondaryTapDown: (details) {
-        if (!isValidLocation(Rect.fromLTWH(
-            details.localPosition.dx, details.localPosition.dy, 0, 0))) {
-          return;
-        }
-        showContextMenu(
-          details.globalPosition,
-          context,
-          defaultMenuBuilder,
-          8.0,
-          320.0,
+        ContextMenu contextMenu = ContextMenu(
+          position: details.globalPosition,
+          borderRadius: BorderRadius.circular(5.0),
+          padding: const EdgeInsets.all(4.0),
+          entries: [
+            MenuItem(
+              label: 'Add Widget',
+              icon: Icons.add,
+              onSelected: () => onAddWidgetPressed?.call(),
+            ),
+            MenuItem(
+              label: 'Clear Layout',
+              icon: Icons.clear,
+              onSelected: () => clearWidgets(),
+            ),
+          ],
         );
+        contextMenu.show(context);
       },
       onLongPressStart: (details) {
-        if (!isValidLocation(Rect.fromLTWH(
-            details.localPosition.dx, details.localPosition.dy, 0, 0))) {
-          return;
-        }
-        showContextMenu(
-          details.globalPosition,
-          context,
-          defaultMenuBuilder,
-          8.0,
-          320.0,
+        ContextMenu contextMenu = ContextMenu(
+          position: details.globalPosition,
+          borderRadius: BorderRadius.circular(5.0),
+          padding: const EdgeInsets.all(4.0),
+          entries: [
+            MenuItem(
+              label: 'Add Widget',
+              icon: Icons.add,
+              onSelected: () => onAddWidgetPressed?.call(),
+            ),
+            MenuItem(
+              label: 'Clear Layout',
+              icon: Icons.clear,
+              onSelected: () => clearWidgets(),
+            ),
+          ],
         );
+        contextMenu.show(context);
       },
       child: Stack(
         children: [

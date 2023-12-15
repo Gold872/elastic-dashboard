@@ -9,7 +9,6 @@ environment:
 dependencies:
   animations: ^2.0.7
   collection: ^1.17.1
-  contextmenu: ^3.0.0
   dot_cast: ^1.2.0
   dropdown_button2: ^2.3.9
   elegant_notification: ^1.11.0
@@ -18,6 +17,7 @@ dependencies:
     sdk: flutter
   flutter_box_transform: ^0.4.2
   flutter_colorpicker: ^1.0.3
+  flutter_context_menu: ^0.1.3
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
   flutter_launcher_icons: ^0.13.1

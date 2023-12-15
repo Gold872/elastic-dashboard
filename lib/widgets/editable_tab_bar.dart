@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:contextmenu/contextmenu.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
@@ -119,39 +119,28 @@ class EditableTabBar extends StatelessWidget {
                     shrinkWrap: true,
                     itemCount: tabData.length,
                     itemBuilder: (context, index) {
-                      return ContextMenuArea(
-                        builder: (context) => [
-                          ListTile(
-                            enabled: false,
-                            dense: true,
-                            visualDensity: const VisualDensity(
-                                horizontal: 0.0, vertical: -4.0),
-                            title: Center(child: Text(tabData[index].name)),
-                          ),
-                          ListTile(
-                            dense: true,
-                            visualDensity: const VisualDensity(
-                                horizontal: 0.0, vertical: -4.0),
-                            leading: const Icon(
-                                Icons.drive_file_rename_outline_outlined),
-                            title: const Text('Rename'),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              renameTab(context, index);
-                            },
-                          ),
-                          ListTile(
-                            dense: true,
-                            visualDensity: const VisualDensity(
-                                horizontal: 0.0, vertical: -4.0),
-                            leading: const Icon(Icons.close),
-                            title: const Text('Close'),
-                            onTap: () {
-                              Navigator.of(context).pop();
-                              closeTab(index);
-                            },
-                          ),
-                        ],
+                      return ContextMenuRegion(
+                        contextMenu: ContextMenu(
+                          borderRadius: BorderRadius.circular(5.0),
+                          padding: const EdgeInsets.all(4.0),
+                          entries: [
+                            MenuHeader(
+                              text: tabData[index].name,
+                              disableUppercase: true,
+                            ),
+                            const MenuDivider(),
+                            MenuItem(
+                              label: 'Rename',
+                              icon: Icons.drive_file_rename_outline_outlined,
+                              onSelected: () => renameTab(context, index),
+                            ),
+                            MenuItem(
+                              label: 'Close',
+                              icon: Icons.close,
+                              onSelected: () => closeTab(index),
+                            ),
+                          ],
+                        ),
                         child: GestureDetector(
                           onTap: () {
                             onTabChanged.call(index);
