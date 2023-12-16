@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:animations/animations.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
@@ -152,13 +151,13 @@ class EditableTabBar extends StatelessWidget {
                             context,
                             contextMenu: contextMenu,
                             transitionDuration:
-                                const Duration(milliseconds: 200),
+                                const Duration(milliseconds: 100),
                             reverseTransitionDuration: Duration.zero,
                             maintainState: true,
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
-                              return FadeScaleTransition(
-                                animation: animation,
+                              return FadeTransition(
+                                opacity: animation,
                                 child: child,
                               );
                             },

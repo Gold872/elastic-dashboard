@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 

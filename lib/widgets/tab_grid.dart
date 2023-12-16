@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:animations/animations.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
@@ -830,12 +829,12 @@ class TabGrid extends StatelessWidget {
             showContextMenu(
               context,
               contextMenu: contextMenu,
-              transitionDuration: const Duration(milliseconds: 200),
+              transitionDuration: const Duration(milliseconds: 100),
               reverseTransitionDuration: Duration.zero,
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                return FadeScaleTransition(
-                  animation: animation,
+                return FadeTransition(
+                  opacity: animation,
                   child: child,
                 );
               },
@@ -930,11 +929,11 @@ class TabGrid extends StatelessWidget {
         showContextMenu(
           context,
           contextMenu: contextMenu,
-          transitionDuration: const Duration(milliseconds: 200),
+          transitionDuration: const Duration(milliseconds: 100),
           reverseTransitionDuration: Duration.zero,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeScaleTransition(
-              animation: animation,
+            return FadeTransition(
+              opacity: animation,
               child: child,
             );
           },
