@@ -802,6 +802,7 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
+          onTap: () {},
           onSecondaryTapUp: (details) {
             ContextMenu contextMenu = ContextMenu(
               position: details.globalPosition,
@@ -910,6 +911,7 @@ class TabGrid extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
+      onTap: () {},
       onSecondaryTapUp: (details) {
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
