@@ -264,8 +264,7 @@ class EditableTabBar extends StatelessWidget {
                 ),
               ),
               FadeIndexedStack(
-                beginOpacity: 0.0,
-                endOpacity: 1.0,
+                curve: Curves.decelerate,
                 index: currentIndex,
                 children: [
                   for (TabGrid grid in tabViews)
