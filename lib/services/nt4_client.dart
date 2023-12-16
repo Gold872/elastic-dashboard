@@ -60,6 +60,7 @@ class NT4Subscription {
 
   Object? currentValue;
   final List<Function(Object?)> _listeners = [];
+  bool _newValueRequested = false;
 
   NT4Subscription({
     required this.topic,
@@ -72,12 +73,14 @@ class NT4Subscription {
   }
 
   Stream<Object?> periodicStream({bool yieldAll = true}) async* {
+    yield currentValue;
     Object? lastYielded = currentValue;
 
     while (true) {
-      if (lastYielded != currentValue || yieldAll) {
+      if (lastYielded != currentValue || yieldAll || _newValueRequested) {
         yield currentValue;
         lastYielded = currentValue;
+        _newValueRequested = false;
       }
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
@@ -89,6 +92,10 @@ class NT4Subscription {
     for (var listener in _listeners) {
       listener(currentValue);
     }
+  }
+
+  void requestNewValue() {
+    _newValueRequested = true;
   }
 
   Map<String, dynamic> _toSubscribeJson() {
