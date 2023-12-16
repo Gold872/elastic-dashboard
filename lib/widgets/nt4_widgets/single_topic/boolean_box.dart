@@ -66,8 +66,7 @@ class BooleanBox extends NT4Widget {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'topic': topic,
-      'period': period,
+      ...super.toJson(),
       'true_color': trueColor.value,
       'false_color': falseColor.value,
     };

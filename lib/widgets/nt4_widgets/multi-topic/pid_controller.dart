@@ -73,14 +73,6 @@ class PIDControllerWidget extends NT4Widget {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      'topic': topic,
-      'period': period,
-    };
-  }
-
-  @override
   List<Object> getCurrentData() {
     double kP =
         tryCast(nt4Connection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;

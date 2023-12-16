@@ -54,7 +54,12 @@ abstract class NT4Widget extends StatelessWidget {
     init();
   }
 
+  @mustCallSuper
   Map<String, dynamic> toJson() {
+    if (dataType == 'Unknown' && nt4Connection.isNT4Connected) {
+      createTopicIfNull();
+      dataType = nt4Topic?.type ?? dataType;
+    }
     return {
       'topic': topic,
       'period': period,
@@ -72,7 +77,6 @@ abstract class NT4Widget extends StatelessWidget {
     }
 
     createTopicIfNull();
-
     dataType = nt4Topic?.type ?? dataType;
 
     switch (dataType) {

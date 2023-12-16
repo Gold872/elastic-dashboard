@@ -87,8 +87,7 @@ class SwerveDriveWidget extends NT4Widget {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'topic': topic,
-      'period': period,
+      ...super.toJson(),
       'show_robot_rotation': showRobotRotation,
     };
   }

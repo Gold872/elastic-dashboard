@@ -100,8 +100,7 @@ class FieldWidget extends NT4Widget {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'topic': topic,
-      'period': period,
+      ...super.toJson(),
       'field_game': fieldGame,
       'robot_width': robotWidthMeters,
       'robot_length': robotLengthMeters,

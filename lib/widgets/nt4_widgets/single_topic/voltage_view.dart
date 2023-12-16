@@ -48,8 +48,7 @@ class VoltageView extends NT4Widget {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'topic': topic,
-      'period': period,
+      ...super.toJson(),
       'min_value': minValue,
       'max_value': maxValue,
       'divisions': divisions,
