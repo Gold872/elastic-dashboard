@@ -89,6 +89,12 @@ class Gyro extends NTWidget {
     ];
   }
 
+  @override
+  void refresh() {
+    super.refresh();
+    valueSubscription.requestNewValue();
+  }
+
   double _wrapAngle(double angle) {
     if (angle < 0) {
       return ((angle % 360) + 360) % 360;

@@ -148,6 +148,7 @@ class SwerveDriveWidget extends NTWidget {
       backRightAngle,
       backRightVelocity,
       robotAngle,
+      showRobotRotation,
     ];
   }
 

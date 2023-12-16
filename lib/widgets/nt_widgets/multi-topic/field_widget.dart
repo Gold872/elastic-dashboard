@@ -366,6 +366,14 @@ class FieldWidget extends NTWidget {
       }
     }
 
+    data.addAll([
+      showOtherObjects,
+      showTrajectories,
+      robotWidthMeters,
+      robotLengthMeters,
+      fieldGame,
+    ]);
+
     return data;
   }
 

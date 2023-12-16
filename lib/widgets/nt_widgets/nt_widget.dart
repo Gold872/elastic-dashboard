@@ -158,6 +158,7 @@ abstract class NTWidget extends StatelessWidget {
     refresh();
   }
 
+  @mustCallSuper
   void refresh() {
     Future(() async {
       notifier?.refresh();
