@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -119,81 +120,95 @@ class EditableTabBar extends StatelessWidget {
                     shrinkWrap: true,
                     itemCount: tabData.length,
                     itemBuilder: (context, index) {
-                      return ContextMenuRegion(
-                        contextMenu: ContextMenu(
-                          borderRadius: BorderRadius.circular(5.0),
-                          padding: const EdgeInsets.all(4.0),
-                          entries: [
-                            MenuHeader(
-                              text: tabData[index].name,
-                              disableUppercase: true,
+                      return GestureDetector(
+                        onTap: () {
+                          onTabChanged.call(index);
+                        },
+                        onSecondaryTapUp: (details) {
+                          ContextMenu contextMenu = ContextMenu(
+                            position: details.globalPosition,
+                            borderRadius: BorderRadius.circular(5.0),
+                            padding: const EdgeInsets.all(4.0),
+                            entries: [
+                              MenuHeader(
+                                text: tabData[index].name,
+                                disableUppercase: true,
+                              ),
+                              const MenuDivider(),
+                              MenuItem(
+                                label: 'Rename',
+                                icon: Icons.drive_file_rename_outline_outlined,
+                                onSelected: () => renameTab(context, index),
+                              ),
+                              MenuItem(
+                                label: 'Close',
+                                icon: Icons.close,
+                                onSelected: () => closeTab(index),
+                              ),
+                            ],
+                          );
+
+                          showContextMenu(
+                            context,
+                            contextMenu: contextMenu,
+                            transitionDuration:
+                                const Duration(milliseconds: 100),
+                            reverseTransitionDuration: Duration.zero,
+                            maintainState: true,
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              return FadeScaleTransition(
+                                animation: animation,
+                                child: child,
+                              );
+                            },
+                          );
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutExpo,
+                          margin: const EdgeInsets.only(
+                              left: 5.0, right: 5.0, top: 5.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
+                          decoration: BoxDecoration(
+                            color: (currentIndex == index)
+                                ? theme.colorScheme.onPrimaryContainer
+                                : Colors.transparent,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
                             ),
-                            const MenuDivider(),
-                            MenuItem(
-                              label: 'Rename',
-                              icon: Icons.drive_file_rename_outline_outlined,
-                              onSelected: () => renameTab(context, index),
-                            ),
-                            MenuItem(
-                              label: 'Close',
-                              icon: Icons.close,
-                              onSelected: () => closeTab(index),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            onTabChanged.call(index);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOutExpo,
-                            margin: const EdgeInsets.only(
-                                left: 5.0, right: 5.0, top: 5.0),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 5.0),
-                            decoration: BoxDecoration(
-                              color: (currentIndex == index)
-                                  ? theme.colorScheme.onPrimaryContainer
-                                  : Colors.transparent,
-                              borderRadius: (currentIndex == index)
-                                  ? const BorderRadius.only(
-                                      topLeft: Radius.circular(10.0),
-                                      topRight: Radius.circular(10.0),
-                                    )
-                                  : BorderRadius.zero,
-                            ),
-                            child: Center(
-                              child: Row(
-                                children: [
-                                  Text(
-                                    tabData[index].name,
-                                    style: theme.textTheme.bodyMedium!.copyWith(
-                                      color: (currentIndex == index)
-                                          ? theme.colorScheme.primaryContainer
-                                          : theme
-                                              .colorScheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  IconButton(
-                                    onPressed: () {
-                                      closeTab(index);
-                                    },
-                                    padding: const EdgeInsets.all(0.0),
-                                    alignment: Alignment.center,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 15.0,
-                                      minHeight: 15.0,
-                                    ),
-                                    iconSize: 14,
+                          ),
+                          child: Center(
+                            child: Row(
+                              children: [
+                                Text(
+                                  tabData[index].name,
+                                  style: theme.textTheme.bodyMedium!.copyWith(
                                     color: (currentIndex == index)
                                         ? theme.colorScheme.primaryContainer
                                         : theme.colorScheme.onPrimaryContainer,
-                                    icon: const Icon(Icons.close),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 10),
+                                IconButton(
+                                  onPressed: () {
+                                    closeTab(index);
+                                  },
+                                  padding: const EdgeInsets.all(0.0),
+                                  alignment: Alignment.center,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 15.0,
+                                    minHeight: 15.0,
+                                  ),
+                                  iconSize: 14,
+                                  color: (currentIndex == index)
+                                      ? theme.colorScheme.primaryContainer
+                                      : theme.colorScheme.onPrimaryContainer,
+                                  icon: const Icon(Icons.close),
+                                ),
+                              ],
                             ),
                           ),
                         ),
