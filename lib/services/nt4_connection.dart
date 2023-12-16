@@ -32,7 +32,7 @@ class NT4Connection {
     return instance;
   }
 
-  void nt4Connect(String ipAddress) async {
+  void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
         serverBaseAddress: ipAddress,
         onConnect: () {

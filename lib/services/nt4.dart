@@ -244,7 +244,8 @@ class NT4Client {
     this.onConnect,
     this.onDisconnect,
   }) {
-    wsConnect();
+    Future.delayed(
+        const Duration(seconds: 1, milliseconds: 500), () => wsConnect());
   }
 
   void setServerBaseAddreess(String serverBaseAddress) {
