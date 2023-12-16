@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
@@ -246,6 +247,31 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
             ),
           ),
         ],
+      ),
+    ];
+  }
+
+  @override
+  List<ContextMenuEntry> getContextMenuItems() {
+    List<ContextMenuEntry> widgetTypes = [];
+    for (String type in child.getAvailableDisplayTypes()) {
+      widgetTypes.add(
+        MenuItem(
+          label: type,
+          icon: (child.type == type) ? Icons.check : null,
+          onSelected: () {
+            if (child.type != type) {
+              changeChildToType(type);
+            }
+          },
+          value: child.type != type,
+        ),
+      );
+    }
+    return [
+      MenuItem.submenu(
+        label: 'Show As',
+        items: widgetTypes,
       ),
     ];
   }

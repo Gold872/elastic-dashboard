@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
@@ -167,6 +168,10 @@ class DraggableWidgetContainer extends StatelessWidget {
         initialText: title,
       ),
     ];
+  }
+
+  List<ContextMenuEntry> getContextMenuItems() {
+    return [];
   }
 
   @mustCallSuper

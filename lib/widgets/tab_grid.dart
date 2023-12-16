@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:animations/animations.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
@@ -799,57 +800,50 @@ class TabGrid extends StatelessWidget {
         }
       }
 
-      ContextMenu menu = ContextMenu(
-        borderRadius: BorderRadius.circular(5.0),
-        padding: const EdgeInsets.all(4.0),
-        entries: [
-          MenuHeader(
-            text: container.title ?? '',
-            disableUppercase: true,
-          ),
-          const MenuDivider(),
-          MenuItem(
-            label: 'Edit Properties',
-            icon: Icons.edit_outlined,
-            onSelected: () {
-              print('Edit properties!');
-            },
-          ),
-          MenuItem(
-              label: 'Remove',
-              icon: Icons.delete_outlined,
-              onSelected: () {
-                print('Remove!');
-              }),
-        ],
-      );
-
       dashboardWidgets.add(
-        ContextMenuRegion(
-          contextMenu: ContextMenu(
-            borderRadius: BorderRadius.circular(5.0),
-            padding: const EdgeInsets.all(4.0),
-            entries: [
-              MenuHeader(
-                text: container.title ?? '',
-                disableUppercase: true,
-              ),
-              const MenuDivider(),
-              MenuItem(
-                label: 'Edit Properties',
-                icon: Icons.edit_outlined,
-                onSelected: () {
-                  container.showEditProperties(context);
-                },
-              ),
-              MenuItem(
-                  label: 'Remove',
-                  icon: Icons.delete_outlined,
+        GestureDetector(
+          onSecondaryTapUp: (details) {
+            ContextMenu contextMenu = ContextMenu(
+              position: details.globalPosition,
+              borderRadius: BorderRadius.circular(5.0),
+              padding: const EdgeInsets.all(4.0),
+              entries: [
+                MenuHeader(
+                  text: container.title ?? '',
+                  disableUppercase: true,
+                ),
+                const MenuDivider(),
+                MenuItem(
+                  label: 'Edit Properties',
+                  icon: Icons.edit_outlined,
                   onSelected: () {
-                    removeWidget(container);
-                  }),
-            ],
-          ),
+                    container.showEditProperties(context);
+                  },
+                ),
+                ...container.getContextMenuItems(),
+                MenuItem(
+                    label: 'Remove',
+                    icon: Icons.delete_outlined,
+                    onSelected: () {
+                      removeWidget(container);
+                    }),
+              ],
+            );
+
+            showContextMenu(
+              context,
+              contextMenu: contextMenu,
+              transitionDuration: const Duration(milliseconds: 100),
+              reverseTransitionDuration: Duration.zero,
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return FadeScaleTransition(
+                  animation: animation,
+                  child: child,
+                );
+              },
+            );
+          },
           child: ChangeNotifierProvider(
             create: (context) => WidgetContainerModel(),
             child: container,
@@ -916,7 +910,7 @@ class TabGrid extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onSecondaryTapDown: (details) {
+      onSecondaryTapUp: (details) {
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
           borderRadius: BorderRadius.circular(5.0),
@@ -934,27 +928,19 @@ class TabGrid extends StatelessWidget {
             ),
           ],
         );
-        contextMenu.show(context);
-      },
-      onLongPressStart: (details) {
-        ContextMenu contextMenu = ContextMenu(
-          position: details.globalPosition,
-          borderRadius: BorderRadius.circular(5.0),
-          padding: const EdgeInsets.all(4.0),
-          entries: [
-            MenuItem(
-              label: 'Add Widget',
-              icon: Icons.add,
-              onSelected: () => onAddWidgetPressed?.call(),
-            ),
-            MenuItem(
-              label: 'Clear Layout',
-              icon: Icons.clear,
-              onSelected: () => clearWidgets(context),
-            ),
-          ],
+
+        showContextMenu(
+          context,
+          contextMenu: contextMenu,
+          transitionDuration: const Duration(milliseconds: 100),
+          reverseTransitionDuration: Duration.zero,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeScaleTransition(
+              animation: animation,
+              child: child,
+            );
+          },
         );
-        contextMenu.show(context);
       },
       child: Stack(
         children: [

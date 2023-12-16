@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
@@ -393,7 +394,11 @@ class NT4Client {
         return t;
       }
     }
-    logger.debug('[NT4] Topic not found: $topic');
+    if (announcedTopics.values
+            .firstWhereOrNull((e) => e.name.startsWith('/$topic')) !=
+        null) {
+      logger.debug('[NT4] Topic not found: $topic');
+    }
     return null;
   }
 
