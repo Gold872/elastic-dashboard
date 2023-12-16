@@ -41,7 +41,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   String? title;
 
-  Rect draggablePositionRect = Rect.fromLTWH(
+  Rect draggingRect = Rect.fromLTWH(
       0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
 
   Offset cursorGlobalLocation = const Offset(double.nan, double.nan);
@@ -56,8 +56,8 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   TransformableBoxController? controller;
 
-  double? minWidth;
-  double? minHeight;
+  double minWidth = Settings.gridSize.toDouble();
+  double minHeight = Settings.gridSize.toDouble();
 
   bool enabled = false;
   bool dragging = false;
@@ -187,7 +187,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
   @mustCallSuper
   void init() {
-    draggablePositionRect = displayRect;
+    draggingRect = displayRect;
     dragStartLocation = displayRect;
   }
 
@@ -221,8 +221,8 @@ class DraggableWidgetContainer extends StatelessWidget {
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
-      width: draggablePositionRect.width,
-      height: draggablePositionRect.height,
+      width: draggingRect.width,
+      height: draggingRect.height,
       opacity: 0.80,
       child: Container(),
     );
@@ -241,13 +241,9 @@ class DraggableWidgetContainer extends StatelessWidget {
     return [
       TransformableBox(
         handleAlignment: HandleAlignment.inside,
-        rect: draggablePositionRect,
+        rect: draggingRect,
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
-        constraints: BoxConstraints(
-          minWidth: minWidth ?? Settings.gridSize.toDouble(),
-          minHeight: minHeight ?? Settings.gridSize.toDouble(),
-        ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
@@ -266,7 +262,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           dragStartLocation = displayRect;
           onDragBegin?.call(this);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onResizeStart: (handle, event) {
@@ -275,14 +271,14 @@ class DraggableWidgetContainer extends StatelessWidget {
           dragStartLocation = displayRect;
           onResizeBegin?.call(this);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onChanged: (result, event) {
           if (!dragging && !resizing) {
             onDragCancel?.call(this);
 
-            controller?.setRect(draggablePositionRect);
+            controller?.setRect(draggingRect);
             refresh();
             return;
           }
@@ -291,7 +287,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
           onUpdate?.call(this, result.rect);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onDragEnd: (event) {
@@ -300,10 +296,10 @@ class DraggableWidgetContainer extends StatelessWidget {
           }
           dragging = false;
 
-          onDragEnd?.call(this, draggablePositionRect,
+          onDragEnd?.call(this, draggingRect,
               globalPosition: cursorGlobalLocation);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onDragCancel: () {
@@ -311,7 +307,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
           onDragCancel?.call(this);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onResizeEnd: (handle, event) {
@@ -321,9 +317,9 @@ class DraggableWidgetContainer extends StatelessWidget {
           dragging = false;
           resizing = false;
 
-          onResizeEnd?.call(this, draggablePositionRect);
+          onResizeEnd?.call(this, draggingRect);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
         onResizeCancel: (handle) {
@@ -332,7 +328,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
           onDragCancel?.call(this);
 
-          controller?.setRect(draggablePositionRect);
+          controller?.setRect(draggingRect);
           refresh();
         },
       ),

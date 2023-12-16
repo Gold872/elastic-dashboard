@@ -105,7 +105,7 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
     child.unSubscribe();
   }
 
-  Map<String, dynamic>? getChildJson() {
+  Map<String, dynamic> getChildJson() {
     return child.toJson();
   }
 
@@ -280,8 +280,8 @@ class DraggableNT4WidgetContainer extends DraggableWidgetContainer {
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
-      width: draggablePositionRect.width,
-      height: draggablePositionRect.height,
+      width: draggingRect.width,
+      height: draggingRect.height,
       opacity: 0.80,
       child: ChangeNotifierProvider(
         create: (context) => NT4WidgetNotifier(),

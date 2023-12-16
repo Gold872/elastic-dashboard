@@ -211,14 +211,14 @@ class TabGrid extends StatelessWidget {
 
   void onWidgetResizeEnd(DraggableWidgetContainer widget) {
     if (widget.validLocation) {
-      widget.draggablePositionRect = widget.previewRect;
+      widget.draggingRect = widget.previewRect;
     } else {
-      widget.draggablePositionRect = widget.dragStartLocation;
+      widget.draggingRect = widget.dragStartLocation;
     }
 
-    widget.displayRect = widget.draggablePositionRect;
+    widget.displayRect = widget.draggingRect;
 
-    widget.previewRect = widget.draggablePositionRect;
+    widget.previewRect = widget.draggingRect;
     widget.previewVisible = false;
     widget.validLocation = true;
 
@@ -229,14 +229,14 @@ class TabGrid extends StatelessWidget {
 
   void onWidgetDragEnd(DraggableWidgetContainer widget) {
     if (widget.validLocation) {
-      widget.draggablePositionRect = widget.previewRect;
+      widget.draggingRect = widget.previewRect;
     } else {
-      widget.draggablePositionRect = widget.dragStartLocation;
+      widget.draggingRect = widget.dragStartLocation;
     }
 
-    widget.displayRect = widget.draggablePositionRect;
+    widget.displayRect = widget.draggingRect;
 
-    widget.previewRect = widget.draggablePositionRect;
+    widget.previewRect = widget.draggingRect;
     widget.previewVisible = false;
     widget.validLocation = true;
 
@@ -250,9 +250,9 @@ class TabGrid extends StatelessWidget {
       return;
     }
 
-    widget.draggablePositionRect = widget.dragStartLocation;
-    widget.displayRect = widget.draggablePositionRect;
-    widget.previewRect = widget.draggablePositionRect;
+    widget.draggingRect = widget.dragStartLocation;
+    widget.displayRect = widget.draggingRect;
+    widget.previewRect = widget.draggingRect;
 
     widget.previewVisible = false;
     widget.validLocation = true;
@@ -265,23 +265,22 @@ class TabGrid extends StatelessWidget {
   }
 
   void onWidgetUpdate(DraggableWidgetContainer widget, Rect newRect) {
-    double newX = DraggableWidgetContainer.snapToGrid(newRect.left);
-    double newY = DraggableWidgetContainer.snapToGrid(newRect.top);
+    double previewX = DraggableWidgetContainer.snapToGrid(newRect.left);
+    double previewY = DraggableWidgetContainer.snapToGrid(newRect.top);
 
-    double newWidth = DraggableWidgetContainer.snapToGrid(newRect.width);
-    double newHeight = DraggableWidgetContainer.snapToGrid(newRect.height);
+    double previewWidth = DraggableWidgetContainer.snapToGrid(
+        newRect.width.clamp(widget.minWidth, double.infinity));
+    double previewHeight = DraggableWidgetContainer.snapToGrid(
+        newRect.height.clamp(widget.minHeight, double.infinity));
 
-    if (newWidth < Settings.gridSize) {
-      newWidth = Settings.gridSize.toDouble();
-    }
+    Rect preview = Rect.fromLTWH(
+        previewX, previewY, previewWidth.toDouble(), previewHeight.toDouble());
 
-    if (newHeight < Settings.gridSize) {
-      newHeight = Settings.gridSize.toDouble();
-    }
+    double newWidth = newRect.width.clamp(widget.minWidth, double.infinity);
+    double newHeight = newRect.height.clamp(widget.minHeight, double.infinity);
 
-    Rect preview =
-        Rect.fromLTWH(newX, newY, newWidth.toDouble(), newHeight.toDouble());
-    widget.draggablePositionRect = newRect;
+    widget.draggingRect =
+        Rect.fromLTWH(newRect.left, newRect.top, newWidth, newHeight);
 
     widget.previewRect = preview;
     widget.previewVisible = true;
@@ -390,11 +389,11 @@ class TabGrid extends StatelessWidget {
   void layoutDragOutUpdate(
       DraggableWidgetContainer widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
-    widget.draggablePositionRect = Rect.fromLTWH(
+    widget.draggingRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
-      widget.draggablePositionRect.width,
-      widget.draggablePositionRect.height,
+      widget.draggingRect.width,
+      widget.draggingRect.height,
     );
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
@@ -419,11 +418,11 @@ class TabGrid extends StatelessWidget {
   void addLayoutDragInWidget(
       DraggableLayoutContainer widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
-    widget.draggablePositionRect = Rect.fromLTWH(
+    widget.draggingRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
-      widget.draggablePositionRect.width,
-      widget.draggablePositionRect.height,
+      widget.draggingRect.width,
+      widget.draggingRect.height,
     );
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
@@ -455,8 +454,7 @@ class TabGrid extends StatelessWidget {
     double height = widget.displayRect.height;
 
     widget.displayRect = Rect.fromLTWH(previewX, previewY, width, height);
-    widget.draggablePositionRect =
-        Rect.fromLTWH(previewX, previewY, width, height);
+    widget.draggingRect = Rect.fromLTWH(previewX, previewY, width, height);
     widget.dragStartLocation = Rect.fromLTWH(previewX, previewY, width, height);
 
     addWidget(widget);
@@ -468,11 +466,11 @@ class TabGrid extends StatelessWidget {
   void addNT4DragInWidget(
       DraggableNT4WidgetContainer widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
-    widget.draggablePositionRect = Rect.fromLTWH(
+    widget.draggingRect = Rect.fromLTWH(
       localPosition.dx,
       localPosition.dy,
-      widget.draggablePositionRect.width,
-      widget.draggablePositionRect.height,
+      widget.draggingRect.width,
+      widget.draggingRect.height,
     );
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
@@ -516,8 +514,7 @@ class TabGrid extends StatelessWidget {
       return;
     } else {
       widget.displayRect = previewLocation;
-      widget.draggablePositionRect =
-          Rect.fromLTWH(previewX, previewY, width, height);
+      widget.draggingRect = Rect.fromLTWH(previewX, previewY, width, height);
 
       addWidget(widget);
     }
@@ -756,8 +753,8 @@ class TabGrid extends StatelessWidget {
       if (container.dragging) {
         draggingWidgets.add(
           Positioned(
-            left: container.draggablePositionRect.left,
-            top: container.draggablePositionRect.top,
+            left: container.draggingRect.left,
+            top: container.draggingRect.top,
             child: IgnorePointer(
               child: container.getDraggingWidgetContainer(context),
             ),
@@ -859,18 +856,18 @@ class TabGrid extends StatelessWidget {
 
       draggingWidgets.add(
         Positioned(
-          left: container.draggablePositionRect.left,
-          top: container.draggablePositionRect.top,
+          left: container.draggingRect.left,
+          top: container.draggingRect.top,
           child: IgnorePointer(
             child: container.getDraggingWidgetContainer(context),
           ),
         ),
       );
 
-      double previewX = DraggableWidgetContainer.snapToGrid(
-          container.draggablePositionRect.left);
-      double previewY = DraggableWidgetContainer.snapToGrid(
-          container.draggablePositionRect.top);
+      double previewX =
+          DraggableWidgetContainer.snapToGrid(container.draggingRect.left);
+      double previewY =
+          DraggableWidgetContainer.snapToGrid(container.draggingRect.top);
 
       Rect previewLocation = Rect.fromLTWH(previewX, previewY,
           container.displayRect.width, container.displayRect.height);

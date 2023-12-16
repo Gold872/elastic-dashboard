@@ -454,7 +454,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
               onDragCancel?.call(this);
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                controller?.setRect(draggablePositionRect);
+                controller?.setRect(draggingRect);
               }
 
               model?.setDraggable(false);
@@ -472,10 +472,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Future(() => model?.setDraggable(true));
 
             Rect previewLocation = Rect.fromLTWH(
-              DraggableWidgetContainer.snapToGrid(
-                  widget.draggablePositionRect.left),
-              DraggableWidgetContainer.snapToGrid(
-                  widget.draggablePositionRect.top),
+              DraggableWidgetContainer.snapToGrid(widget.draggingRect.left),
+              DraggableWidgetContainer.snapToGrid(widget.draggingRect.top),
               widget.displayRect.width,
               widget.displayRect.height,
             );
@@ -493,7 +491,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Future(() {
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                controller?.setRect(draggablePositionRect);
+                controller?.setRect(draggingRect);
               }
 
               model?.setDraggable(true);
@@ -529,8 +527,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
     return WidgetContainer(
       title: title,
-      width: draggablePositionRect.width,
-      height: draggablePositionRect.height,
+      width: draggingRect.width,
+      height: draggingRect.height,
       opacity: 0.80,
       horizontalPadding: 5.0,
       verticalPadding: 5.0,
