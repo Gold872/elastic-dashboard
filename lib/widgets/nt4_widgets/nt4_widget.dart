@@ -135,16 +135,20 @@ abstract class NT4Widget extends StatelessWidget {
       return;
     }
 
+    bool resetDataType = subscription!.topic != topic;
+
     nt4Connection.unSubscribe(subscription!);
     subscription = nt4Connection.subscribe(topic, period);
 
     nt4Topic = null;
 
     createTopicIfNull();
-    if (nt4Topic == null && nt4Connection.isNT4Connected) {
-      dataType = 'Unknown';
-    } else {
-      dataType = nt4Topic?.type ?? dataType;
+    if (resetDataType) {
+      if (nt4Topic == null && nt4Connection.isNT4Connected) {
+        dataType = 'Unknown';
+      } else {
+        dataType = nt4Topic?.type ?? dataType;
+      }
     }
 
     refresh();
