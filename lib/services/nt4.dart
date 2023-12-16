@@ -245,7 +245,7 @@ class NT4Client {
     this.onDisconnect,
   }) {
     Future.delayed(
-        const Duration(seconds: 1, milliseconds: 500), () => wsConnect());
+        const Duration(seconds: 1, milliseconds: 500), () => _connect());
   }
 
   void setServerBaseAddreess(String serverBaseAddress) {
@@ -518,7 +518,7 @@ class NT4Client {
     _mainWebsocket?.sink.add(data);
   }
 
-  void wsConnect() async {
+  void _connect() async {
     if (_serverConnectionActive) {
       return;
     }
@@ -537,7 +537,7 @@ class NT4Client {
       await _mainWebsocket!.ready;
     } catch (e) {
       // Failed to connect... try again
-      Future.delayed(const Duration(seconds: 1), wsConnect);
+      Future.delayed(const Duration(seconds: 1), _connect);
       return;
     }
 
@@ -695,7 +695,7 @@ class NT4Client {
 
     logger.debug('[NT4] Connection closed. Attempting to reconnect in 1s');
 
-    Future.delayed(const Duration(seconds: 1), wsConnect);
+    Future.delayed(const Duration(seconds: 1), _connect);
   }
 
   void _wsOnMessage(data) {
