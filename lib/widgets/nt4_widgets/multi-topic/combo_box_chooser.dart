@@ -27,7 +27,12 @@ class ComboBoxChooser extends NT4Widget {
   NT4Topic? selectedTopic;
   NT4Topic? activeTopic;
 
-  ComboBoxChooser({super.key, required super.topic, super.period}) : super();
+  ComboBoxChooser({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   ComboBoxChooser.fromJson({super.key, required super.jsonData})
       : super.fromJson();

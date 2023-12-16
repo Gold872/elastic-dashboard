@@ -20,6 +20,7 @@ class BooleanBox extends NT4Widget {
     required super.topic,
     this.trueColor = Colors.green,
     this.falseColor = Colors.red,
+    super.dataType,
     super.period,
   }) : super();
 

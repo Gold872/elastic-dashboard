@@ -16,7 +16,12 @@ class TextDisplay extends NT4Widget {
 
   Object? _previousValue;
 
-  TextDisplay({super.key, required super.topic, super.period}) : super();
+  TextDisplay({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   TextDisplay.fromJson({super.key, required super.jsonData}) : super.fromJson();
 
@@ -50,7 +55,8 @@ class TextDisplay extends NT4Widget {
             isDense: true,
           ),
           onSubmitted: (value) {
-            bool publishTopic = nt4Topic == null;
+            bool publishTopic =
+                nt4Topic == null || !nt4Connection.isTopicPublished(nt4Topic!);
 
             createTopicIfNull();
 

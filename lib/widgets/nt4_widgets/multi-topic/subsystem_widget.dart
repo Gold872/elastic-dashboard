@@ -14,7 +14,12 @@ class SubsystemWidget extends NT4Widget {
   late String defaultCommandTopic;
   late String currentCommandTopic;
 
-  SubsystemWidget({super.key, required super.topic, super.period}) : super();
+  SubsystemWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   SubsystemWidget.fromJson({super.key, required super.jsonData})
       : super.fromJson();

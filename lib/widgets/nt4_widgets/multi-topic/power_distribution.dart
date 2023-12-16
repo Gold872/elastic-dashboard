@@ -18,7 +18,12 @@ class PowerDistribution extends NT4Widget {
   late String voltageTopic;
   late String currentTopic;
 
-  PowerDistribution({super.key, required super.topic, super.period}) : super();
+  PowerDistribution({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   PowerDistribution.fromJson({super.key, required super.jsonData})
       : super.fromJson();

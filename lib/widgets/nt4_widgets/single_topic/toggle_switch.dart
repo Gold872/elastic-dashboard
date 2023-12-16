@@ -11,7 +11,12 @@ class ToggleSwitch extends NT4Widget {
   @override
   String type = widgetType;
 
-  ToggleSwitch({super.key, required super.topic, super.period}) : super();
+  ToggleSwitch({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   ToggleSwitch.fromJson({super.key, required super.jsonData})
       : super.fromJson();
@@ -31,7 +36,8 @@ class ToggleSwitch extends NT4Widget {
         return Switch(
           value: value,
           onChanged: (bool value) {
-            bool publishTopic = nt4Topic == null;
+            bool publishTopic =
+                nt4Topic == null || !nt4Connection.isTopicPublished(nt4Topic);
 
             createTopicIfNull();
 

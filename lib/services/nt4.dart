@@ -403,6 +403,10 @@ class NT4Client {
     return null;
   }
 
+  bool isTopicPublished(NT4Topic? topic) {
+    return _clientPublishedTopics.containsValue(topic);
+  }
+
   NT4Topic publishNewTopic(String name, String type) {
     NT4Topic newTopic = NT4Topic(name: name, type: type, properties: {});
     publishTopic(newTopic);

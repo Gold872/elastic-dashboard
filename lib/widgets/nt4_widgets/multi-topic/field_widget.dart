@@ -49,6 +49,7 @@ class FieldWidget extends NT4Widget {
     String? fieldName,
     this.showOtherObjects = true,
     this.showTrajectories = true,
+    super.dataType,
     super.period,
   }) : super() {
     fieldGame = fieldName ?? fieldGame;

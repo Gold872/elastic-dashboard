@@ -21,7 +21,12 @@ class RobotPreferences extends NT4Widget {
 
   PreferenceSearch? searchWidget;
 
-  RobotPreferences({super.key, required super.topic, super.period}) : super();
+  RobotPreferences({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   RobotPreferences.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {

@@ -29,11 +29,12 @@ class GraphWidget extends NT4Widget {
   GraphWidget({
     super.key,
     required super.topic,
-    super.period = Settings.defaultGraphPeriod,
     this.timeDisplayed = 5.0,
     this.minValue,
     this.maxValue,
     this.mainColor = Colors.cyan,
+    super.dataType,
+    super.period = Settings.defaultGraphPeriod,
   }) : super() {
     resetGraphData();
   }

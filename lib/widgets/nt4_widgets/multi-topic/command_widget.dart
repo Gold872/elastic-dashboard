@@ -17,7 +17,12 @@ class CommandWidget extends NT4Widget {
   late String runningTopicName;
   late String nameTopicName;
 
-  CommandWidget({super.key, required super.topic, super.period}) : super();
+  CommandWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   CommandWidget.fromJson({super.key, required super.jsonData})
       : super.fromJson();

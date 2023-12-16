@@ -22,6 +22,7 @@ class MatchTimeWidget extends NT4Widget {
     super.key,
     required super.topic,
     this.timeDisplayMode = 'Minutes and Seconds',
+    super.dataType,
     super.period,
   }) : super();
 

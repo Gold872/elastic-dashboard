@@ -51,6 +51,7 @@ class NT4WidgetBuilder {
       NT4Widget Function({
         Key? key,
         required String topic,
+        String dataType,
         double period,
       })> _widgetNameBuildMap = {};
 
@@ -262,14 +263,19 @@ class NT4WidgetBuilder {
     }
   }
 
-  static NT4Widget? buildNT4WidgetFromType(String type, String topic,
-      {double period = Settings.defaultPeriod}) {
+  static NT4Widget? buildNT4WidgetFromType(
+    String type,
+    String topic, {
+    String dataType = 'Unknown',
+    double period = Settings.defaultPeriod,
+  }) {
     ensureInitialized();
 
     if (_widgetNameBuildMap.containsKey(type)) {
       return _widgetNameBuildMap[type]!(
         key: UniqueKey(),
         topic: topic,
+        dataType: dataType,
         period: period,
       );
     }

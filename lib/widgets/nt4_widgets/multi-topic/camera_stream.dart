@@ -22,7 +22,12 @@ class CameraStreamWidget extends NT4Widget {
   late Client httpClient;
   bool clientOpen = false;
 
-  CameraStreamWidget({super.key, required super.topic, super.period}) : super();
+  CameraStreamWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   CameraStreamWidget.fromJson({super.key, required super.jsonData})
       : super.fromJson();

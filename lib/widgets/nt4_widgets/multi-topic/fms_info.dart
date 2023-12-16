@@ -27,7 +27,12 @@ class FMSInfo extends NT4Widget {
   late String replayNumberTopic;
   late String stationNumberTopic;
 
-  FMSInfo({super.key, required super.topic, super.period}) : super();
+  FMSInfo({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {

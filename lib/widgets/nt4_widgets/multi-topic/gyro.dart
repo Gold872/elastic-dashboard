@@ -24,6 +24,7 @@ class Gyro extends NT4Widget {
     super.key,
     required super.topic,
     counterClockwisePositive,
+    super.dataType,
     super.period,
   }) : super() {
     if (counterClockwisePositive != null) {

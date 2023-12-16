@@ -150,6 +150,10 @@ class NT4Connection {
     return _ntClient.getTopicFromName(topic);
   }
 
+  bool isTopicPublished(NT4Topic? topic) {
+    return _ntClient.isTopicPublished(topic);
+  }
+
   Object? getLastAnnouncedValue(String topic) {
     if (_ntClient.lastAnnouncedValues.containsKey(topic)) {
       return _ntClient.lastAnnouncedValues[topic];

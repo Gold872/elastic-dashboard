@@ -36,7 +36,8 @@ class SwerveDriveWidget extends NT4Widget {
     super.key,
     required super.topic,
     this.showRobotRotation = true,
-    super.period = Settings.defaultPeriod,
+    super.dataType,
+    super.period,
   }) : super();
 
   SwerveDriveWidget.fromJson(

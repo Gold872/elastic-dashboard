@@ -27,7 +27,12 @@ class DifferentialDrive extends NT4Widget {
   double leftSpeedCurrentValue = 0.0;
   double rightSpeedCurrentValue = 0.0;
 
-  DifferentialDrive({super.key, required super.topic, super.period}) : super();
+  DifferentialDrive({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   DifferentialDrive.fromJson({super.key, required super.jsonData})
       : super.fromJson();

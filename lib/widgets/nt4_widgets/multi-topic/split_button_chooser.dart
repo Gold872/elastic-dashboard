@@ -24,7 +24,12 @@ class SplitButtonChooser extends NT4Widget {
 
   NT4Topic? selectedTopic;
 
-  SplitButtonChooser({super.key, required super.topic, super.period}) : super();
+  SplitButtonChooser({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   SplitButtonChooser.fromJson({super.key, required super.jsonData})
       : super.fromJson();

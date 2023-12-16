@@ -27,6 +27,7 @@ class NumberSlider extends NT4Widget {
     this.minValue = -1.0,
     this.maxValue = 1.0,
     this.divisions = 5,
+    super.dataType,
     super.period,
   }) : super();
 
@@ -163,7 +164,8 @@ class NumberSlider extends NT4Widget {
                       _currentValue = value;
                     },
                     onChangeEnd: (value) {
-                      bool publishTopic = nt4Topic == null;
+                      bool publishTopic = nt4Topic == null ||
+                          !nt4Connection.isTopicPublished(nt4Topic);
 
                       createTopicIfNull();
 
@@ -182,43 +184,7 @@ class NumberSlider extends NT4Widget {
                   ),
                 ],
               ),
-              // child: Slider(
-              //   value: _currentValue,
-              //   min: minValue,
-              //   max: maxValue,
-              //   focusNode: FocusNode(
-              //     canRequestFocus: false,
-              //   ),
-              //   onChanged: (value) {
-              //     _currentValue = value;
-              //   },
-              //   onChangeEnd: (value) {
-              //     bool publishTopic = nt4Topic == null;
-
-              //     createTopicIfNull();
-
-              //     if (nt4Topic == null) {
-              //       return;
-              //     }
-
-              //     if (publishTopic) {
-              //       nt4Connection.nt4Client.publishTopic(nt4Topic!);
-              //     }
-
-              //     nt4Connection.updateDataFromTopic(nt4Topic!, value);
-
-              //     _previousValue = value;
-              //   },
-              // ),
             ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   mainAxisSize: MainAxisSize.max,
-            //   children: [
-            //     for (int i = 0; i < divisions; i++)
-            //       Text((minValue + divisionSeparation * i).toStringAsFixed(2)),
-            //   ],
-            // ),
           ],
         );
       },

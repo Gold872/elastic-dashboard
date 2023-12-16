@@ -14,7 +14,12 @@ class EncoderWidget extends NT4Widget {
   late String distanceTopic;
   late String speedTopic;
 
-  EncoderWidget({super.key, required super.topic, super.period}) : super();
+  EncoderWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   EncoderWidget.fromJson({super.key, required super.jsonData})
       : super.fromJson();

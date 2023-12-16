@@ -15,7 +15,12 @@ class Ultrasonic extends NT4Widget {
   late String valueTopic;
   late NT4Subscription valueSubscription;
 
-  Ultrasonic({super.key, required super.topic, super.period}) : super();
+  Ultrasonic({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   Ultrasonic.fromJson({super.key, required super.jsonData}) : super.fromJson();
 

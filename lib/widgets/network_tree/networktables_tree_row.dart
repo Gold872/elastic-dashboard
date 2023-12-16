@@ -99,11 +99,13 @@ class NetworkTableTreeRow {
       case NT4TypeStr.kStringArr:
         return TextDisplay(
           key: UniqueKey(),
+          dataType: nt4Topic.type,
           topic: nt4Topic.name,
         );
       case NT4TypeStr.kBool:
         return BooleanBox(
           key: UniqueKey(),
+          dataType: nt4Topic.type,
           topic: nt4Topic.name,
         );
     }

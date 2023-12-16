@@ -18,7 +18,12 @@ class RelayWidget extends NT4Widget {
 
   final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayWidget({super.key, required super.topic, super.period}) : super();
+  RelayWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   RelayWidget.fromJson({super.key, required super.jsonData}) : super.fromJson();
 

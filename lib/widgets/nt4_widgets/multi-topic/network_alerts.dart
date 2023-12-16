@@ -15,7 +15,12 @@ class NetworkAlerts extends NT4Widget {
   late String warningsTopicName;
   late String infosTopicName;
 
-  NetworkAlerts({super.key, required super.topic, super.period}) : super();
+  NetworkAlerts({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   NetworkAlerts.fromJson({super.key, required super.jsonData})
       : super.fromJson();

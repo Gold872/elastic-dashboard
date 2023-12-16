@@ -30,6 +30,7 @@ class NumberBar extends NT4Widget {
     this.divisions = 5,
     this.inverted = false,
     this.orientation = 'horizontal',
+    super.dataType,
     super.period,
   }) : super();
 

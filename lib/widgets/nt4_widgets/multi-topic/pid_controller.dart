@@ -40,6 +40,7 @@ class PIDControllerWidget extends NT4Widget {
     kiTopic,
     kdTopic,
     setpointTopic,
+    super.dataType,
     super.period,
   }) : super();
 

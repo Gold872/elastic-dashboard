@@ -18,8 +18,12 @@ class CommandSchedulerWidget extends NT4Widget {
   late String idsTopicName;
   late String cancelTopicName;
 
-  CommandSchedulerWidget({super.key, required super.topic, super.period})
-      : super();
+  CommandSchedulerWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   CommandSchedulerWidget.fromJson({super.key, required super.jsonData})
       : super.fromJson();

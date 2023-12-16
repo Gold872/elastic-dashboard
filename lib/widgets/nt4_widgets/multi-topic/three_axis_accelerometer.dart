@@ -15,7 +15,12 @@ class ThreeAxisAccelerometer extends NT4Widget {
   late String yTopic;
   late String zTopic;
 
-  ThreeAxisAccelerometer({super.key, required super.topic, super.period});
+  ThreeAxisAccelerometer({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  });
 
   ThreeAxisAccelerometer.fromJson({super.key, required super.jsonData})
       : super.fromJson();

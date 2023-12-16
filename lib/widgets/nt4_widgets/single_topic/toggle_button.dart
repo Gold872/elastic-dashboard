@@ -11,7 +11,12 @@ class ToggleButton extends NT4Widget {
   @override
   String type = widgetType;
 
-  ToggleButton({super.key, required super.topic, super.period}) : super();
+  ToggleButton({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   ToggleButton.fromJson({super.key, required super.jsonData})
       : super.fromJson();
@@ -36,7 +41,8 @@ class ToggleButton extends NT4Widget {
 
           return GestureDetector(
             onTapUp: (_) {
-              bool publishTopic = nt4Topic == null;
+              bool publishTopic =
+                  nt4Topic == null || !nt4Connection.isTopicPublished(nt4Topic);
 
               createTopicIfNull();
 

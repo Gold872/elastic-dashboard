@@ -31,6 +31,8 @@ abstract class NT4Widget extends StatelessWidget {
   late String topic;
   late double period;
 
+  String dataType = 'Unknown';
+
   NT4Subscription? subscription;
   NT4WidgetNotifier? notifier;
   NT4Topic? nt4Topic;
@@ -38,6 +40,7 @@ abstract class NT4Widget extends StatelessWidget {
   NT4Widget({
     super.key,
     required this.topic,
+    this.dataType = 'Unknown',
     this.period = Settings.defaultPeriod,
   }) {
     init();
@@ -46,6 +49,7 @@ abstract class NT4Widget extends StatelessWidget {
   NT4Widget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
     topic = tryCast(jsonData['topic']) ?? '';
     period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
+    dataType = tryCast(jsonData['data_type']) ?? dataType;
 
     init();
   }
@@ -54,6 +58,7 @@ abstract class NT4Widget extends StatelessWidget {
     return {
       'topic': topic,
       'period': period,
+      if (dataType != 'Unknown') 'data_type': dataType,
     };
   }
 
@@ -68,11 +73,9 @@ abstract class NT4Widget extends StatelessWidget {
 
     createTopicIfNull();
 
-    if (nt4Topic == null) {
-      return [type];
-    }
+    dataType = nt4Topic?.type ?? dataType;
 
-    switch (nt4Topic!.type) {
+    switch (dataType) {
       case NT4TypeStr.kBool:
         return [
           'Boolean Box',
@@ -136,6 +139,13 @@ abstract class NT4Widget extends StatelessWidget {
     subscription = nt4Connection.subscribe(topic, period);
 
     nt4Topic = null;
+
+    createTopicIfNull();
+    if (nt4Topic == null && nt4Connection.isNT4Connected) {
+      dataType = 'Unknown';
+    } else {
+      dataType = nt4Topic?.type ?? dataType;
+    }
 
     refresh();
   }

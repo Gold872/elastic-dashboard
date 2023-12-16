@@ -16,7 +16,12 @@ class MotorController extends NT4Widget {
   late String valueTopic;
   late NT4Subscription valueSubscription;
 
-  MotorController({super.key, required super.topic, super.period}) : super();
+  MotorController({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   MotorController.fromJson({super.key, required super.jsonData})
       : super.fromJson();

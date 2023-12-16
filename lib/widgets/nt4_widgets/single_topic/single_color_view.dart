@@ -11,7 +11,12 @@ class SingleColorView extends NT4Widget {
   @override
   String type = widgetType;
 
-  SingleColorView({super.key, required super.topic, super.period}) : super();
+  SingleColorView({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   SingleColorView.fromJson({super.key, required super.jsonData})
       : super.fromJson();

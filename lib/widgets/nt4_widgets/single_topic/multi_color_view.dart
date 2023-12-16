@@ -11,7 +11,12 @@ class MultiColorView extends NT4Widget {
   @override
   String type = widgetType;
 
-  MultiColorView({super.key, required super.topic, super.period}) : super();
+  MultiColorView({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
   MultiColorView.fromJson({super.key, required super.jsonData})
       : super.fromJson();

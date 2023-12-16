@@ -15,8 +15,12 @@ class AccelerometerWidget extends NT4Widget {
   late String valueTopic;
   late NT4Subscription valueSubscription;
 
-  AccelerometerWidget({super.key, required super.topic, super.period})
-      : super() {
+  AccelerometerWidget({
+    super.key,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super() {
     init();
   }
 
