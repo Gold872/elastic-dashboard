@@ -152,7 +152,7 @@ class EditableTabBar extends StatelessWidget {
                             context,
                             contextMenu: contextMenu,
                             transitionDuration:
-                                const Duration(milliseconds: 100),
+                                const Duration(milliseconds: 200),
                             reverseTransitionDuration: Duration.zero,
                             maintainState: true,
                             transitionsBuilder: (context, animation,

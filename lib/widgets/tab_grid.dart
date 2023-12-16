@@ -834,7 +834,7 @@ class TabGrid extends StatelessWidget {
             showContextMenu(
               context,
               contextMenu: contextMenu,
-              transitionDuration: const Duration(milliseconds: 100),
+              transitionDuration: const Duration(milliseconds: 200),
               reverseTransitionDuration: Duration.zero,
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
@@ -934,7 +934,7 @@ class TabGrid extends StatelessWidget {
         showContextMenu(
           context,
           contextMenu: contextMenu,
-          transitionDuration: const Duration(milliseconds: 100),
+          transitionDuration: const Duration(milliseconds: 200),
           reverseTransitionDuration: Duration.zero,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeScaleTransition(
