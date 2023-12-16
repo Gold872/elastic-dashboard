@@ -12,8 +12,8 @@ import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 void main() async {
@@ -63,12 +63,12 @@ void main() async {
   Settings.autoResizeToDS =
       preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
 
-  NT4WidgetBuilder.ensureInitialized();
+  NTWidgetBuilder.ensureInitialized();
 
   Settings.ipAddress =
       preferences.getString(PrefKeys.ipAddress) ?? Settings.ipAddress;
 
-  nt4Connection.nt4Connect(Settings.ipAddress);
+  ntConnection.nt4Connect(Settings.ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
 

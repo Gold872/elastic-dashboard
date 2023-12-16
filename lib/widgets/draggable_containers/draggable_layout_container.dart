@@ -2,14 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 
 abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   String get type;
 
-  DraggableNT4WidgetContainer Function(Map<String, dynamic> jsonData)?
-      nt4ContainerBuilder;
+  DraggableNTWidgetContainer Function(Map<String, dynamic> jsonData)?
+      ntContainerBuilder;
 
   DraggableLayoutContainer({
     super.key,
@@ -29,7 +29,7 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     super.key,
     required super.tabGrid,
     required super.jsonData,
-    required this.nt4ContainerBuilder,
+    required this.ntContainerBuilder,
     super.enabled = false,
     super.onUpdate,
     super.onDragBegin,
@@ -57,5 +57,5 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
   bool willAcceptWidget(DraggableWidgetContainer widget,
       {Offset? globalPosition});
 
-  void addWidget(DraggableNT4WidgetContainer widget);
+  void addWidget(DraggableNTWidgetContainer widget);
 }

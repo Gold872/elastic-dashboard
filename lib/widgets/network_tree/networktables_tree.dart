@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
 class NetworkTableTree extends StatefulWidget {
-  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
+  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
       onDragUpdate;
-  final Function(DraggableNT4WidgetContainer widget)? onDragEnd;
-  final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+  final Function(DraggableNTWidgetContainer widget)? onDragEnd;
+  final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
       widgetContainerBuilder;
 
   const NetworkTableTree(
@@ -32,12 +32,11 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   final NetworkTableTreeRow root = NetworkTableTreeRow(topic: '/', rowName: '');
   late final TreeController<NetworkTableTreeRow> treeController;
 
-  late final Function(
-          Offset globalPosition, DraggableNT4WidgetContainer widget)?
+  late final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
       onDragUpdate = widget.onDragUpdate;
-  late final Function(DraggableNT4WidgetContainer widget)? onDragEnd =
+  late final Function(DraggableNTWidgetContainer widget)? onDragEnd =
       widget.onDragEnd;
-  late final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+  late final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
       widgetContainerBuilder = widget.widgetContainerBuilder;
 
   late final Function(NT4Topic topic) onNewTopicAnnounced;
@@ -49,7 +48,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     treeController = TreeController<NetworkTableTreeRow>(
         roots: root.children, childrenProvider: (node) => node.children);
 
-    nt4Connection.nt4Client
+    ntConnection.nt4Client
         .addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
       setState(() {
         treeController.rebuild();
@@ -59,7 +58,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void dispose() {
-    nt4Connection.nt4Client.removeTopicAnnounceListener(onNewTopicAnnounced);
+    ntConnection.nt4Client.removeTopicAnnounceListener(onNewTopicAnnounced);
 
     super.dispose();
   }
@@ -83,7 +82,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = current.createNewRow(
               topic: currentTopic,
               name: row,
-              nt4Topic: (lastElement) ? nt4Topic : null);
+              ntTopic: (lastElement) ? nt4Topic : null);
         }
       } else {
         if (root.hasRow(row)) {
@@ -92,7 +91,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = root.createNewRow(
               topic: currentTopic,
               name: row,
-              nt4Topic: (lastElement) ? nt4Topic : null);
+              ntTopic: (lastElement) ? nt4Topic : null);
         }
       }
     }
@@ -102,7 +101,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   Widget build(BuildContext context) {
     List<NT4Topic> topics = [];
 
-    for (NT4Topic topic in nt4Connection.nt4Client.announcedTopics.values) {
+    for (NT4Topic topic in ntConnection.nt4Client.announcedTopics.values) {
       if (topic.name == 'Time') {
         continue;
       }
@@ -147,13 +146,13 @@ class TreeTile extends StatelessWidget {
 
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
-  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
+  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
       onDragUpdate;
-  final Function(DraggableNT4WidgetContainer widget)? onDragEnd;
-  final DraggableNT4WidgetContainer? Function(WidgetContainer? widget)?
+  final Function(DraggableNTWidgetContainer widget)? onDragEnd;
+  final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
       widgetContainerBuilder;
 
-  DraggableNT4WidgetContainer? draggingWidget;
+  DraggableNTWidgetContainer? draggingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -218,8 +217,8 @@ class TreeTile extends StatelessWidget {
                           )
                         : const SizedBox(width: 8.0),
                     title: Text(entry.node.rowName),
-                    trailing: (entry.node.nt4Topic != null)
-                        ? Text(entry.node.nt4Topic!.type, style: trailingStyle)
+                    trailing: (entry.node.ntTopic != null)
+                        ? Text(entry.node.ntTopic!.type, style: trailingStyle)
                         : null,
                   ),
                 ],

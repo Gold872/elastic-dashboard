@@ -1,11 +1,11 @@
 import 'package:dot_cast/dot_cast.dart';
 
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ShuffleboardNTListener {
   static const String shuffleboardTableRoot = '/Shuffleboard';
@@ -28,7 +28,7 @@ class ShuffleboardNTListener {
   ShuffleboardNTListener({this.onTabChanged, this.onWidgetAdded});
 
   void initializeSubscriptions() {
-    selectedSubscription = nt4Connection.subscribe(selectedEntry);
+    selectedSubscription = ntConnection.subscribe(selectedEntry);
   }
 
   void initializeListeners() {
@@ -46,19 +46,19 @@ class ShuffleboardNTListener {
 
     // Also clear data when connected in case if threads auto populate json after disconnection
     // Chances are low since the timing has to be just right but you never know
-    nt4Connection.addConnectedListener(() {
+    ntConnection.addConnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
       previousSelection = null;
     });
 
-    nt4Connection.addDisconnectedListener(() {
+    ntConnection.addDisconnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
       previousSelection = null;
     });
 
-    nt4Connection.nt4Client.addTopicAnnounceListener((topic) async {
+    ntConnection.nt4Client.addTopicAnnounceListener((topic) async {
       if (!topic.name.contains(shuffleboardTableRoot)) {
         return;
       }
@@ -94,7 +94,7 @@ class ShuffleboardNTListener {
       String propertyTopic = metaHierarchy[metaHierarchy.length - 1];
 
       Object? subProperty =
-          await nt4Connection.subscribeAndRetrieveData(propertyTopic);
+          await ntConnection.subscribeAndRetrieveData(propertyTopic);
 
       if (subProperty == null) {
         return;
@@ -173,7 +173,7 @@ class ShuffleboardNTListener {
       String componentTopic = metaHierarchy[metaHierarchy.length - 1];
 
       String? type =
-          await nt4Connection.subscribeAndRetrieveData(componentTopic);
+          await ntConnection.subscribeAndRetrieveData(componentTopic);
 
       if (type == null) {
         return;
@@ -193,7 +193,7 @@ class ShuffleboardNTListener {
       String sizeTopic = metaHierarchy[metaHierarchy.length - 1];
 
       List<Object?> sizeRaw =
-          await nt4Connection.subscribeAndRetrieveData(sizeTopic) ?? [];
+          await ntConnection.subscribeAndRetrieveData(sizeTopic) ?? [];
       List<double> size = sizeRaw.whereType<double>().toList();
 
       if (size.length < 2) {
@@ -218,7 +218,7 @@ class ShuffleboardNTListener {
       String positionTopic = metaHierarchy[metaHierarchy.length - 1];
 
       List<Object?> positionRaw =
-          await nt4Connection.subscribeAndRetrieveData(positionTopic) ?? [];
+          await ntConnection.subscribeAndRetrieveData(positionTopic) ?? [];
       List<double> position = positionRaw.whereType<double>().toList();
 
       if (position.length < 2) {
@@ -289,7 +289,7 @@ class ShuffleboardNTListener {
     if (widgetRow.hasRow('.type')) {
       String typeTopic = widgetRow.getRow('.type').topic;
 
-      String? type = await nt4Connection.subscribeAndRetrieveData(typeTopic,
+      String? type = await ntConnection.subscribeAndRetrieveData(typeTopic,
           timeout: const Duration(seconds: 3));
 
       if (type == null) {
@@ -318,7 +318,7 @@ class ShuffleboardNTListener {
     }
 
     WidgetContainer? widgetContainer;
-    NT4Widget? widget;
+    NTWidget? widget;
 
     if (!isCameraStream) {
       widgetContainer = await widgetRow.toWidgetContainer();
@@ -331,7 +331,7 @@ class ShuffleboardNTListener {
 
     if (isCameraStream) {
       String? cameraStream =
-          await nt4Connection.subscribeAndRetrieveData(topic.name);
+          await ntConnection.subscribeAndRetrieveData(topic.name);
 
       if (cameraStream == null) {
         return;
@@ -376,7 +376,7 @@ class ShuffleboardNTListener {
               ? Settings.defaultPeriod
               : Settings.defaultGraphPeriod);
 
-      if (nt4Connection.isNT4Connected) {
+      if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
       }
 
@@ -430,7 +430,7 @@ class ShuffleboardNTListener {
         NetworkTableTreeRow childRow = widgetRow.getRow(child['title']);
 
         WidgetContainer? widgetContainer = await childRow.toWidgetContainer();
-        NT4Widget? widget = tryCast(widgetContainer?.child);
+        NTWidget? widget = tryCast(widgetContainer?.child);
 
         bool isCameraStream = childRow.hasRow('.ShuffleboardURI');
 
@@ -439,7 +439,7 @@ class ShuffleboardNTListener {
         }
 
         if (isCameraStream) {
-          String? cameraStream = await nt4Connection.subscribeAndRetrieveData(
+          String? cameraStream = await ntConnection.subscribeAndRetrieveData(
               childRow.getRow('.ShuffleboardURI').topic);
 
           if (cameraStream == null) {
@@ -477,7 +477,7 @@ class ShuffleboardNTListener {
         widget?.unSubscribe();
         widget?.dispose(deleting: true);
       }
-      if (nt4Connection.isNT4Connected) {
+      if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
       }
     });
@@ -529,7 +529,7 @@ class ShuffleboardNTListener {
           current = current.createNewRow(
               topic: currentTopic,
               name: row,
-              nt4Topic: (lastElement) ? nt4Topic : null);
+              ntTopic: (lastElement) ? nt4Topic : null);
         }
       } else {
         if (shuffleboardTreeRoot.hasRow(row)) {
@@ -538,7 +538,7 @@ class ShuffleboardNTListener {
           current = shuffleboardTreeRoot.createNewRow(
               topic: currentTopic,
               name: row,
-              nt4Topic: (lastElement) ? nt4Topic : null);
+              ntTopic: (lastElement) ? nt4Topic : null);
         }
       }
     }

@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
-import 'package:elastic_dashboard/services/nt4_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
 
 class NetworkTableTreeRow {
   final String topic;
   final String rowName;
 
-  final NT4Topic? nt4Topic;
+  final NT4Topic? ntTopic;
 
   List<NetworkTableTreeRow> children = [];
 
-  NetworkTableTreeRow(
-      {required this.topic, required this.rowName, this.nt4Topic});
+  NetworkTableTreeRow({
+    required this.topic,
+    required this.rowName,
+    this.ntTopic,
+  });
 
   bool hasRow(String name) {
     for (NetworkTableTreeRow child in children) {
@@ -58,9 +61,9 @@ class NetworkTableTreeRow {
   }
 
   NetworkTableTreeRow createNewRow(
-      {required String topic, required String name, NT4Topic? nt4Topic}) {
+      {required String topic, required String name, NT4Topic? ntTopic}) {
     NetworkTableTreeRow newRow =
-        NetworkTableTreeRow(topic: topic, rowName: name, nt4Topic: nt4Topic);
+        NetworkTableTreeRow(topic: topic, rowName: name, ntTopic: ntTopic);
     addRow(newRow);
 
     return newRow;
@@ -86,8 +89,8 @@ class NetworkTableTreeRow {
     children.clear();
   }
 
-  static NT4Widget? getNT4WidgetFromTopic(NT4Topic nt4Topic) {
-    switch (nt4Topic.type) {
+  static NTWidget? getNTWidgetFromTopic(NT4Topic ntTopic) {
+    switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
       case NT4TypeStr.kFloat32:
@@ -99,21 +102,21 @@ class NetworkTableTreeRow {
       case NT4TypeStr.kStringArr:
         return TextDisplay(
           key: UniqueKey(),
-          dataType: nt4Topic.type,
-          topic: nt4Topic.name,
+          dataType: ntTopic.type,
+          topic: ntTopic.name,
         );
       case NT4TypeStr.kBool:
         return BooleanBox(
           key: UniqueKey(),
-          dataType: nt4Topic.type,
-          topic: nt4Topic.name,
+          dataType: ntTopic.type,
+          topic: ntTopic.name,
         );
     }
     return null;
   }
 
-  Future<NT4Widget?>? getPrimaryWidget() async {
-    if (nt4Topic == null) {
+  Future<NTWidget?>? getPrimaryWidget() async {
+    if (ntTopic == null) {
       if (hasRow('.type')) {
         return await getTypedWidget('$topic/.type');
       }
@@ -134,32 +137,32 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    return getNT4WidgetFromTopic(nt4Topic!);
+    return getNTWidgetFromTopic(ntTopic!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    return nt4Connection.subscribeAndRetrieveData(typeTopic);
+    return ntConnection.subscribeAndRetrieveData(typeTopic);
   }
 
-  Future<NT4Widget?>? getTypedWidget(String typeTopic) async {
+  Future<NTWidget?>? getTypedWidget(String typeTopic) async {
     String? type = await getTypeString(typeTopic);
 
     if (type == null) {
       return null;
     }
 
-    return NT4WidgetBuilder.buildNT4WidgetFromType(type, topic);
+    return NTWidgetBuilder.buildNTWidgetFromType(type, topic);
   }
 
   Future<WidgetContainer?> toWidgetContainer() async {
-    NT4Widget? primary = await getPrimaryWidget();
+    NTWidget? primary = await getPrimaryWidget();
 
     if (primary == null) {
       return null;
     }
 
-    double width = NT4WidgetBuilder.getDefaultWidth(primary);
-    double height = NT4WidgetBuilder.getDefaultHeight(primary);
+    double width = NTWidgetBuilder.getDefaultWidth(primary);
+    double height = NTWidgetBuilder.getDefaultHeight(primary);
 
     return WidgetContainer(
       title: rowName,

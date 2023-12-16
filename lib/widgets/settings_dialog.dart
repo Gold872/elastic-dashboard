@@ -5,7 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -104,8 +104,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
             const SizedBox(height: 5),
             StreamBuilder(
-                stream: nt4Connection.dsConnectionStatus(),
-                initialData: nt4Connection.isDSConnected,
+                stream: ntConnection.dsConnectionStatus(),
+                initialData: ntConnection.isDSConnected,
                 builder: (context, snapshot) {
                   bool dsConnected = tryCast(snapshot.data) ?? false;
 

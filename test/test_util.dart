@@ -5,19 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'test_util.mocks.dart';
 
 @GenerateNiceMocks([
-  MockSpec<NT4Connection>(),
+  MockSpec<NTConnection>(),
   MockSpec<NT4Client>(),
   MockSpec<NT4Subscription>()
 ])
 void setupMockOfflineNT4() {
   HttpOverrides.global = null;
 
-  final mockNT4Connection = MockNT4Connection();
+  final mockNT4Connection = MockNTConnection();
   final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
@@ -44,13 +44,13 @@ void setupMockOfflineNT4() {
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
 
-  NT4Connection.instance = mockNT4Connection;
+  NTConnection.instance = mockNT4Connection;
 }
 
 void setupMockOnlineNT4() {
   HttpOverrides.global = null;
 
-  final mockNT4Connection = MockNT4Connection();
+  final mockNT4Connection = MockNTConnection();
   final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
@@ -90,7 +90,7 @@ void setupMockOnlineNT4() {
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
 
-  NT4Connection.instance = mockNT4Connection;
+  NTConnection.instance = mockNT4Connection;
 }
 
 void ignoreOverflowErrors(

@@ -18,14 +18,14 @@ import 'package:window_manager/window_manager.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
@@ -78,7 +78,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     setupShortcuts();
 
-    nt4Connection.dsClientConnect(
+    ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
         if (Settings.ipAddressMode != IPAddressMode.driverStation) {
           return;
@@ -90,7 +90,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        nt4Connection.changeIPAddress(ip);
+        ntConnection.changeIPAddress(ip);
       },
       onDriverStationDockChanged: (docked) {
         if (Settings.autoResizeToDS && docked) {
@@ -101,7 +101,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       },
     );
 
-    nt4Connection.addConnectedListener(() {
+    ntConnection.addConnectedListener(() {
       setState(() {
         for (TabGrid grid in grids) {
           grid.onNTConnect();
@@ -109,7 +109,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       });
     });
 
-    nt4Connection.addDisconnectedListener(() {
+    ntConnection.addDisconnectedListener(() {
       setState(() {
         for (TabGrid grid in grids) {
           grid.onNTDisconnect();
@@ -178,7 +178,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future.delayed(const Duration(seconds: 1), () {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
-      nt4Connection.nt4Client.recallAnnounceListeners();
+      ntConnection.nt4Client.recallAnnounceListeners();
     });
 
     Future(() => checkForUpdates(notifyIfLatest: false, notifyIfError: false));
@@ -794,7 +794,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           switch (mode) {
             case IPAddressMode.driverStation:
-              String? lastAnnouncedIP = nt4Connection.dsClient.lastAnnouncedIP;
+              String? lastAnnouncedIP = ntConnection.dsClient.lastAnnouncedIP;
 
               if (lastAnnouncedIP == null) {
                 break;
@@ -872,7 +872,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           setState(() {
             Settings.autoResizeToDS = value;
 
-            if (value && nt4Connection.dsClient.driverStationDocked) {
+            if (value && ntConnection.dsClient.driverStationDocked) {
               _onDriverStationDocked();
             } else {
               _onDriverStationUndocked();
@@ -890,7 +890,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
 
     setState(() {
-      nt4Connection.changeIPAddress(newIPAddress);
+      ntConnection.changeIPAddress(newIPAddress);
     });
   }
 
@@ -1246,12 +1246,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   AddWidgetDialog(
                     grid: () => grids[currentTabIndex],
                     visible: addWidgetDialogVisible,
-                    onNT4DragUpdate: (globalPosition, widget) {
+                    onNTDragUpdate: (globalPosition, widget) {
                       grids[currentTabIndex]
-                          .addNT4DragInWidget(widget, globalPosition);
+                          .addNTDragInWidget(widget, globalPosition);
                     },
-                    onNT4DragEnd: (widget) {
-                      grids[currentTabIndex].placeNT4DragInWidget(widget);
+                    onNTDragEnd: (widget) {
+                      grids[currentTabIndex].placeNTDragInWidget(widget);
                     },
                     onLayoutDragUpdate: (globalPosition, widget) {
                       grids[currentTabIndex]
@@ -1277,7 +1277,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   children: [
                     Expanded(
                       child: StreamBuilder(
-                          stream: nt4Connection.connectionStatus(),
+                          stream: ntConnection.connectionStatus(),
                           builder: (context, snapshot) {
                             bool connected = snapshot.data ?? false;
 
@@ -1302,7 +1302,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: StreamBuilder(
-                          stream: nt4Connection.latencyStream(),
+                          stream: ntConnection.latencyStream(),
                           builder: (context, snapshot) {
                             int latency = snapshot.data ?? 0;
 
@@ -1327,9 +1327,9 @@ class AddWidgetDialog extends StatelessWidget {
   final TabGrid Function() grid;
   final bool visible;
 
-  final Function(Offset globalPosition, DraggableNT4WidgetContainer widget)?
-      onNT4DragUpdate;
-  final Function(DraggableNT4WidgetContainer widget)? onNT4DragEnd;
+  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
+      onNTDragUpdate;
+  final Function(DraggableNTWidgetContainer widget)? onNTDragEnd;
 
   final Function(Offset globalPosition, DraggableLayoutContainer widget)?
       onLayoutDragUpdate;
@@ -1341,8 +1341,8 @@ class AddWidgetDialog extends StatelessWidget {
     super.key,
     required this.grid,
     required this.visible,
-    this.onNT4DragUpdate,
-    this.onNT4DragEnd,
+    this.onNTDragUpdate,
+    this.onNTDragEnd,
     this.onLayoutDragUpdate,
     this.onLayoutDragEnd,
     this.onClose,
@@ -1383,10 +1383,10 @@ class AddWidgetDialog extends StatelessWidget {
                     child: TabBarView(
                       children: [
                         NetworkTableTree(
-                          onDragUpdate: onNT4DragUpdate,
-                          onDragEnd: onNT4DragEnd,
+                          onDragUpdate: onNTDragUpdate,
+                          onDragEnd: onNTDragEnd,
                           widgetContainerBuilder: (widgetContainer) =>
-                              grid().createNT4WidgetContainer(widgetContainer),
+                              grid().createNTWidgetContainer(widgetContainer),
                         ),
                         ListView(
                           children: [

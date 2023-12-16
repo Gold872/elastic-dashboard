@@ -10,8 +10,8 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -21,8 +21,8 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
@@ -352,7 +352,7 @@ void main() {
     List<Function(NT4Topic topic)> fakeAnnounceCallbacks = [];
 
     // A custom mock is set up to reproduce behavior when actually running
-    final mockNT4Connection = MockNT4Connection();
+    final mockNT4Connection = MockNTConnection();
     final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
@@ -401,7 +401,7 @@ void main() {
             '/Shuffleboard/Test-Tab/Shuffleboard Test Layout/.type'))
         .thenAnswer((realInvocation) => Future.value('ShuffleboardLayout'));
 
-    NT4Connection.instance = mockNT4Connection;
+    NTConnection.instance = mockNT4Connection;
 
     await widgetTester.pumpWidget(
       MaterialApp(

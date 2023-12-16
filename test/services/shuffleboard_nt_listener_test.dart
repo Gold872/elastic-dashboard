@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:elastic_dashboard/services/nt4.dart';
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import '../test_util.mocks.dart';
@@ -15,7 +15,7 @@ void main() {
       '/Shuffleboard/.metadata/Test-Tab/Test Number/Size': [2.0, 2.0],
     };
 
-    final mockNT4Connection = MockNT4Connection();
+    final mockNT4Connection = MockNTConnection();
     final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
@@ -48,7 +48,7 @@ void main() {
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
-    NT4Connection.instance = mockNT4Connection;
+    NTConnection.instance = mockNT4Connection;
 
     Map<String, dynamic> announcedWidgetData = {};
 
@@ -61,9 +61,9 @@ void main() {
       ..initializeSubscriptions()
       ..initializeListeners();
 
-    expect(nt4Connection.nt4Client.topicAnnounceListeners.isNotEmpty, true);
+    expect(ntConnection.nt4Client.topicAnnounceListeners.isNotEmpty, true);
 
-    for (final callback in nt4Connection.nt4Client.topicAnnounceListeners) {
+    for (final callback in ntConnection.nt4Client.topicAnnounceListeners) {
       callback.call(NT4Topic(
         name: '/Shuffleboard/.metadata/Test-Tab/Test Number/Position',
         type: NT4TypeStr.kFloat32Arr,

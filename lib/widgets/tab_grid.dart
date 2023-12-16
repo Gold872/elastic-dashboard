@@ -5,13 +5,13 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_connection.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 // Used to refresh the tab grid when a widget is added or removed
 // This doesn't use a stateless widget since everything has to be rendered at program startup or data will be lost
@@ -52,17 +52,17 @@ class TabGrid extends StatelessWidget {
       {Function(String message)? onJsonLoadingWarning}) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetContainers.add(
-        DraggableNT4WidgetContainer.fromJson(
+        DraggableNTWidgetContainer.fromJson(
           key: UniqueKey(),
           tabGrid: this,
-          enabled: nt4Connection.isNT4Connected,
+          enabled: ntConnection.isNT4Connected,
           jsonData: containerData,
-          onUpdate: _nt4ContainerOnUpdate,
-          onDragBegin: _nt4ContainerOnDragBegin,
-          onDragEnd: _nt4ContainerOnDragEnd,
-          onDragCancel: _nt4ContainerOnDragCancel,
-          onResizeBegin: _nt4ContainerOnResizeBegin,
-          onResizeEnd: _nt4ContainerOnResizeEnd,
+          onUpdate: _ntContainerOnUpdate,
+          onDragBegin: _ntContainerOnDragBegin,
+          onDragEnd: _ntContainerOnDragEnd,
+          onDragCancel: _ntContainerOnDragCancel,
+          onResizeBegin: _ntContainerOnResizeBegin,
+          onResizeEnd: _ntContainerOnResizeEnd,
           onJsonLoadingWarning: onJsonLoadingWarning,
         ),
       );
@@ -85,20 +85,20 @@ class TabGrid extends StatelessWidget {
           widget = DraggableListLayout.fromJson(
             key: UniqueKey(),
             tabGrid: this,
-            enabled: nt4Connection.isNT4Connected,
+            enabled: ntConnection.isNT4Connected,
             jsonData: layoutData,
-            nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
-              return DraggableNT4WidgetContainer.fromJson(
+            ntContainerBuilder: (Map<String, dynamic> jsonData) {
+              return DraggableNTWidgetContainer.fromJson(
                 key: UniqueKey(),
                 tabGrid: this,
-                enabled: nt4Connection.isNT4Connected,
+                enabled: ntConnection.isNT4Connected,
                 jsonData: jsonData,
-                onUpdate: _nt4ContainerOnUpdate,
-                onDragBegin: _nt4ContainerOnDragBegin,
-                onDragEnd: _nt4ContainerOnDragEnd,
-                onDragCancel: _nt4ContainerOnDragCancel,
-                onResizeBegin: _nt4ContainerOnResizeBegin,
-                onResizeEnd: _nt4ContainerOnResizeEnd,
+                onUpdate: _ntContainerOnUpdate,
+                onDragBegin: _ntContainerOnDragBegin,
+                onDragEnd: _ntContainerOnDragEnd,
+                onDragCancel: _ntContainerOnDragCancel,
+                onResizeBegin: _ntContainerOnResizeBegin,
+                onResizeEnd: _ntContainerOnResizeEnd,
                 onJsonLoadingWarning: onJsonLoadingWarning,
               );
             },
@@ -122,7 +122,7 @@ class TabGrid extends StatelessWidget {
     var containers = [];
     var layouts = [];
     for (DraggableWidgetContainer container in _widgetContainers) {
-      if (container is DraggableNT4WidgetContainer) {
+      if (container is DraggableNTWidgetContainer) {
         containers.add(container.toJson());
       } else {
         layouts.add(container.toJson());
@@ -224,7 +224,7 @@ class TabGrid extends StatelessWidget {
 
     widget.dispose();
     widget.refresh();
-    widget.tryCast<DraggableNT4WidgetContainer>()?.refreshChild();
+    widget.tryCast<DraggableNTWidgetContainer>()?.refreshChild();
   }
 
   void onWidgetDragEnd(DraggableWidgetContainer widget) {
@@ -242,7 +242,7 @@ class TabGrid extends StatelessWidget {
 
     widget.dispose();
     widget.refresh();
-    widget.tryCast<DraggableNT4WidgetContainer>()?.refreshChild();
+    widget.tryCast<DraggableNTWidgetContainer>()?.refreshChild();
   }
 
   void onWidgetDragCancel(DraggableWidgetContainer widget) {
@@ -302,46 +302,46 @@ class TabGrid extends StatelessWidget {
     }
   }
 
-  void _nt4ContainerOnUpdate(dynamic widget, Rect newRect) {
+  void _ntContainerOnUpdate(dynamic widget, Rect newRect) {
     onWidgetUpdate(widget, newRect);
 
     refresh();
   }
 
-  void _nt4ContainerOnDragBegin(dynamic widget) {
+  void _ntContainerOnDragBegin(dynamic widget) {
     refresh();
   }
 
-  void _nt4ContainerOnDragEnd(dynamic widget, Rect releaseRect,
+  void _ntContainerOnDragEnd(dynamic widget, Rect releaseRect,
       {Offset? globalPosition}) {
     onWidgetDragEnd(widget);
 
-    DraggableNT4WidgetContainer nt4Container =
-        widget as DraggableNT4WidgetContainer;
+    DraggableNTWidgetContainer ntContainer =
+        widget as DraggableNTWidgetContainer;
 
     if (widget.draggingIntoLayout && globalPosition != null) {
       DraggableLayoutContainer? layoutContainer =
           getLayoutAtLocation(globalPosition);
 
       if (layoutContainer != null) {
-        layoutContainer.addWidget(nt4Container);
-        _widgetContainers.remove(nt4Container);
+        layoutContainer.addWidget(ntContainer);
+        _widgetContainers.remove(ntContainer);
       }
     }
     refresh();
   }
 
-  void _nt4ContainerOnDragCancel(dynamic widget) {
+  void _ntContainerOnDragCancel(dynamic widget) {
     onWidgetDragCancel(widget);
 
     refresh();
   }
 
-  void _nt4ContainerOnResizeBegin(dynamic widget) {
+  void _ntContainerOnResizeBegin(dynamic widget) {
     refresh();
   }
 
-  void _nt4ContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+  void _ntContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
     onWidgetResizeEnd(widget);
 
     refresh();
@@ -381,8 +381,8 @@ class TabGrid extends StatelessWidget {
   }
 
   void layoutDragOutEnd(DraggableWidgetContainer widget) {
-    if (widget is DraggableNT4WidgetContainer) {
-      placeNT4DragInWidget(widget, true);
+    if (widget is DraggableNTWidgetContainer) {
+      placeNTDragInWidget(widget, true);
     }
   }
 
@@ -463,8 +463,8 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void addNT4DragInWidget(
-      DraggableNT4WidgetContainer widget, Offset globalPosition) {
+  void addNTDragInWidget(
+      DraggableNTWidgetContainer widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
     widget.draggingRect = Rect.fromLTWH(
       localPosition.dx,
@@ -476,7 +476,7 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void placeNT4DragInWidget(DraggableNT4WidgetContainer widget,
+  void placeNTDragInWidget(DraggableNTWidgetContainer widget,
       [bool fromLayout = false]) {
     if (_containerDraggingIn == null) {
       return;
@@ -526,34 +526,33 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  DraggableNT4WidgetContainer? createNT4WidgetContainer(
-      WidgetContainer? widget) {
+  DraggableNTWidgetContainer? createNTWidgetContainer(WidgetContainer? widget) {
     if (widget == null || widget.child == null) {
       return null;
     }
 
-    if (widget.child is! NT4Widget) {
+    if (widget.child is! NTWidget) {
       return null;
     }
 
-    return DraggableNT4WidgetContainer(
+    return DraggableNTWidgetContainer(
       key: UniqueKey(),
       tabGrid: this,
       title: widget.title,
-      enabled: nt4Connection.isNT4Connected,
+      enabled: ntConnection.isNT4Connected,
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
         widget.width,
         widget.height,
       ),
-      onUpdate: _nt4ContainerOnUpdate,
-      onDragBegin: _nt4ContainerOnDragBegin,
-      onDragEnd: _nt4ContainerOnDragEnd,
-      onDragCancel: _nt4ContainerOnDragCancel,
-      onResizeBegin: _nt4ContainerOnResizeBegin,
-      onResizeEnd: _nt4ContainerOnResizeEnd,
-      child: widget.child as NT4Widget,
+      onUpdate: _ntContainerOnUpdate,
+      onDragBegin: _ntContainerOnDragBegin,
+      onDragEnd: _ntContainerOnDragEnd,
+      onDragCancel: _ntContainerOnDragCancel,
+      onResizeBegin: _ntContainerOnResizeBegin,
+      onResizeEnd: _ntContainerOnResizeEnd,
+      child: widget.child as NTWidget,
     );
   }
 
@@ -568,7 +567,7 @@ class TabGrid extends StatelessWidget {
         Settings.gridSize.toDouble() * 2,
         Settings.gridSize.toDouble() * 2,
       ),
-      enabled: nt4Connection.isNT4Connected,
+      enabled: ntConnection.isNT4Connected,
       onUpdate: _layoutContainerOnUpdate,
       onDragBegin: _layoutContainerOnDragBegin,
       onDragEnd: _layoutContainerOnDragEnd,
@@ -591,8 +590,8 @@ class TabGrid extends StatelessWidget {
     );
     // If the widget is already in the tab, don't add it
     if (!widgetData['layout']) {
-      for (DraggableNT4WidgetContainer container
-          in _widgetContainers.whereType<DraggableNT4WidgetContainer>()) {
+      for (DraggableNTWidgetContainer container
+          in _widgetContainers.whereType<DraggableNTWidgetContainer>()) {
         String? title = container.title;
         String? type = container.child.type;
         String? topic = container.child.topic;
@@ -635,19 +634,19 @@ class TabGrid extends StatelessWidget {
             DraggableListLayout.fromJson(
               key: UniqueKey(),
               tabGrid: this,
-              enabled: nt4Connection.isNT4Connected,
-              nt4ContainerBuilder: (Map<String, dynamic> jsonData) {
-                return DraggableNT4WidgetContainer.fromJson(
+              enabled: ntConnection.isNT4Connected,
+              ntContainerBuilder: (Map<String, dynamic> jsonData) {
+                return DraggableNTWidgetContainer.fromJson(
                   key: UniqueKey(),
                   tabGrid: this,
-                  enabled: nt4Connection.isNT4Connected,
+                  enabled: ntConnection.isNT4Connected,
                   jsonData: jsonData,
-                  onUpdate: _nt4ContainerOnUpdate,
-                  onDragBegin: _nt4ContainerOnDragBegin,
-                  onDragEnd: _nt4ContainerOnDragEnd,
-                  onDragCancel: _nt4ContainerOnDragCancel,
-                  onResizeBegin: _nt4ContainerOnResizeBegin,
-                  onResizeEnd: _nt4ContainerOnResizeEnd,
+                  onUpdate: _ntContainerOnUpdate,
+                  onDragBegin: _ntContainerOnDragBegin,
+                  onDragEnd: _ntContainerOnDragEnd,
+                  onDragCancel: _ntContainerOnDragCancel,
+                  onResizeBegin: _ntContainerOnResizeBegin,
+                  onResizeEnd: _ntContainerOnResizeEnd,
                 );
               },
               jsonData: widgetData,
@@ -662,17 +661,17 @@ class TabGrid extends StatelessWidget {
           break;
       }
     } else {
-      _widgetContainers.add(DraggableNT4WidgetContainer.fromJson(
+      _widgetContainers.add(DraggableNTWidgetContainer.fromJson(
         key: UniqueKey(),
         tabGrid: this,
-        enabled: nt4Connection.isNT4Connected,
+        enabled: ntConnection.isNT4Connected,
         jsonData: widgetData,
-        onUpdate: _nt4ContainerOnUpdate,
-        onDragBegin: _nt4ContainerOnDragBegin,
-        onDragEnd: _nt4ContainerOnDragEnd,
-        onDragCancel: _nt4ContainerOnDragCancel,
-        onResizeBegin: _nt4ContainerOnResizeBegin,
-        onResizeEnd: _nt4ContainerOnResizeEnd,
+        onUpdate: _ntContainerOnUpdate,
+        onDragBegin: _ntContainerOnDragBegin,
+        onDragEnd: _ntContainerOnDragEnd,
+        onDragCancel: _ntContainerOnDragCancel,
+        onResizeBegin: _ntContainerOnResizeBegin,
+        onResizeEnd: _ntContainerOnResizeEnd,
       ));
     }
 

@@ -8,14 +8,14 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
   @override
   String type = 'List Layout';
 
-  List<DraggableNT4WidgetContainer> children = [];
+  List<DraggableNTWidgetContainer> children = [];
 
   String labelPosition = 'TOP';
 
@@ -46,7 +46,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     super.key,
     required super.tabGrid,
     required super.jsonData,
-    required super.nt4ContainerBuilder,
+    required super.ntContainerBuilder,
     super.enabled = false,
     super.onUpdate,
     super.onDragBegin,
@@ -182,7 +182,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   List<Widget> getChildEditProperties(BuildContext context,
-      DraggableNT4WidgetContainer container, StateSetter setState) {
+      DraggableNTWidgetContainer container, StateSetter setState) {
     List<Widget> containerEditProperties = [
       // Settings for the widget container
       const Text('Container Settings'),
@@ -218,7 +218,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
         ...childEditProperties,
       ],
       const Divider(),
-      ...container.getNT4EditProperties(),
+      ...container.getNTEditProperties(),
       const SizedBox(height: 5),
     ];
   }
@@ -262,8 +262,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
     }
 
     for (Map<String, dynamic> childData in jsonData['children']) {
-      children.add(nt4ContainerBuilder?.call(childData) ??
-          DraggableNT4WidgetContainer.fromJson(
+      children.add(ntContainerBuilder?.call(childData) ??
+          DraggableNTWidgetContainer.fromJson(
             tabGrid: tabGrid,
             jsonData: childData,
             onJsonLoadingWarning: onJsonLoadingWarning,
@@ -310,7 +310,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   @override
   void setEnabled(bool enabled) {
-    for (DraggableNT4WidgetContainer container in children) {
+    for (DraggableNTWidgetContainer container in children) {
       container.setEnabled(enabled);
     }
 
@@ -320,11 +320,11 @@ class DraggableListLayout extends DraggableLayoutContainer {
   @override
   bool willAcceptWidget(DraggableWidgetContainer widget,
       {Offset? globalPosition}) {
-    return widget is DraggableNT4WidgetContainer;
+    return widget is DraggableNTWidgetContainer;
   }
 
   @override
-  void addWidget(DraggableNT4WidgetContainer widget) {
+  void addWidget(DraggableNTWidgetContainer widget) {
     children.add(widget);
 
     refresh();
@@ -333,7 +333,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
   List<Widget> _getListColumn() {
     List<Widget> column = [];
 
-    for (DraggableNT4WidgetContainer widget in children) {
+    for (DraggableNTWidgetContainer widget in children) {
       Widget widgetInContainer = Container(
         constraints: BoxConstraints(
           maxHeight: (widget.minHeight ?? 128.0) - 64.0,

@@ -10,33 +10,33 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt4_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/camera_stream.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_scheduler.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/command_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/field_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/fms_info.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/gyro.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/pid_controller.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/power_distribution.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/robot_preferences.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/split_button_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/subsystem_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/multi-topic/swerve_drive.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/nt4_widget.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/boolean_box.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/graph.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/match_time.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/multi_color_view.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_bar.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/number_slider.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/single_color_view.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/text_display.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_button.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/toggle_switch.dart';
-import 'package:elastic_dashboard/widgets/nt4_widgets/single_topic/voltage_view.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/command_scheduler.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/command_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/fms_info.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/pid_controller.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/power_distribution.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/robot_preferences.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/split_button_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/subsystem_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/swerve_drive.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
 
@@ -84,9 +84,9 @@ void main() async {
 
     await widgetTester.pump(Duration.zero);
 
-    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(10));
+    expect(find.bySubtype<DraggableNTWidgetContainer>(), findsNWidgets(10));
     expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(11));
-    expect(find.bySubtype<NT4Widget>(), findsNWidgets(12));
+    expect(find.bySubtype<NTWidget>(), findsNWidgets(12));
 
     expect(find.bySubtype<TextDisplay>(), findsOneWidget);
     expect(find.bySubtype<BooleanBox>(), findsNWidgets(2));
@@ -129,8 +129,8 @@ void main() async {
 
     await widgetTester.pump(Duration.zero);
 
-    expect(find.bySubtype<DraggableNT4WidgetContainer>(), findsNWidgets(14));
-    expect(find.bySubtype<NT4Widget>(), findsNWidgets(14));
+    expect(find.bySubtype<DraggableNTWidgetContainer>(), findsNWidgets(14));
+    expect(find.bySubtype<NTWidget>(), findsNWidgets(14));
 
     expect(find.bySubtype<ToggleButton>(), findsOneWidget);
     expect(find.bySubtype<ToggleSwitch>(), findsOneWidget);
