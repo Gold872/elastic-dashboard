@@ -135,9 +135,12 @@ class CameraStreamWidget extends NTWidget {
                 children: [
                   CustomLoadingIndicator(),
                   const SizedBox(height: 10),
-                  Text((ntConnection.isNT4Connected)
-                      ? 'Waiting for Camera Stream connection...'
-                      : 'Waiting for Network Tables Connection...'),
+                  Text(
+                    (ntConnection.isNT4Connected)
+                        ? 'Waiting for Camera Stream connection...'
+                        : 'Waiting for Network Tables Connection...',
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ],
