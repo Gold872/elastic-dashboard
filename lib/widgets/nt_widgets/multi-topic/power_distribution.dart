@@ -130,12 +130,32 @@ class PowerDistribution extends NTWidget {
   }
 
   @override
+  List<Object> getCurrentData() {
+    List<Object> data = [];
+
+    double voltage =
+        tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
+    double totalCurrent =
+        tryCast(ntConnection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
+
+    data.addAll([voltage, totalCurrent]);
+
+    for (String channel in channelTopics) {
+      data.add(tryCast(ntConnection.getLastAnnouncedValue(channel)) ?? 0.0);
+    }
+
+    return data;
+  }
+
+  @override
   Widget build(BuildContext context) {
     notifier = context.watch<NTWidgetNotifier?>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
+        notifier = context.watch<NTWidgetNotifier?>();
+
         double voltage =
             tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
         double totalCurrent =
