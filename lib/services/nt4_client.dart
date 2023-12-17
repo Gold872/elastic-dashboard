@@ -60,7 +60,8 @@ class NT4Subscription {
 
   Object? currentValue;
   final List<Function(Object?)> _listeners = [];
-  bool _newValueRequested = false;
+  // Multiple instances of this can be used at once, so it has to request the new value for all of the subscription streams
+  int _newValueRequestCount = 0;
 
   NT4Subscription({
     required this.topic,
@@ -77,10 +78,12 @@ class NT4Subscription {
     Object? lastYielded = currentValue;
 
     while (true) {
-      if (lastYielded != currentValue || yieldAll || _newValueRequested) {
+      if (lastYielded != currentValue ||
+          yieldAll ||
+          _newValueRequestCount > 0) {
         yield currentValue;
         lastYielded = currentValue;
-        _newValueRequested = false;
+        _newValueRequestCount--;
       }
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
@@ -95,7 +98,7 @@ class NT4Subscription {
   }
 
   void requestNewValue() {
-    _newValueRequested = true;
+    _newValueRequestCount = useCount;
   }
 
   Map<String, dynamic> _toSubscribeJson() {
