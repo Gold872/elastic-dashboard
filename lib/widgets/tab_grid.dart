@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -275,8 +277,8 @@ class TabGrid extends StatelessWidget {
     Rect preview = Rect.fromLTWH(
         previewX, previewY, previewWidth.toDouble(), previewHeight.toDouble());
 
-    double newWidth = newRect.width.clamp(widget.minWidth, double.infinity);
-    double newHeight = newRect.height.clamp(widget.minHeight, double.infinity);
+    double newWidth = max(newRect.width, widget.minWidth);
+    double newHeight = max(newRect.height, widget.minHeight);
 
     widget.draggingRect =
         Rect.fromLTWH(newRect.left, newRect.top, newWidth, newHeight);

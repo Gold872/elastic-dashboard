@@ -244,6 +244,10 @@ class DraggableWidgetContainer extends StatelessWidget {
         rect: draggingRect,
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
+        constraints: const BoxConstraints(
+          minWidth: 128.0,
+          minHeight: 128.0,
+        ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
