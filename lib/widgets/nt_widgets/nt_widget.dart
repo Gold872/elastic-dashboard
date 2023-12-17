@@ -162,7 +162,9 @@ abstract class NTWidget extends StatelessWidget {
   void refresh() {
     Future(() async {
       notifier?.refresh();
-      subscription?.requestNewValue();
+      if (type != 'Graph') {
+        subscription?.requestNewValue();
+      }
     });
   }
 

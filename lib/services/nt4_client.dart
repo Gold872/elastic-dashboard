@@ -399,17 +399,7 @@ class NT4Client {
   }
 
   NT4Topic? getTopicFromName(String topic) {
-    for (NT4Topic t in announcedTopics.values) {
-      if (t.name == topic) {
-        return t;
-      }
-    }
-    if (announcedTopics.values
-            .firstWhereOrNull((e) => e.name.startsWith('/$topic')) !=
-        null) {
-      logger.debug('[NT4] Topic not found: $topic');
-    }
-    return null;
+    return announcedTopics.values.firstWhereOrNull((e) => e.name == topic);
   }
 
   bool isTopicPublished(NT4Topic? topic) {
