@@ -6,6 +6,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import '../dialog_widgets/dialog_text_input.dart';
@@ -122,7 +123,7 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
       type,
       child.topic,
       dataType: child.dataType,
-      period: child.period,
+      period: (type != 'Graph') ? child.period : Settings.defaultGraphPeriod,
     );
 
     if (newWidget == null) {
