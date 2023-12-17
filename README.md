@@ -32,9 +32,9 @@ This dashboard wouldn't have been made without the help and inspiration from the
 * [Michael Jansen](https://github.com/mjansen4857) from Team 3015
 * [Jonah](https://github.com/jwbonner) from Team 6328
 * [Oh yes 10 FPS](https://github.com/oh-yes-0-fps) from Team 3173
-* [Jason](https://github.com/jasondaming) and [Peter](https://github.com/PeterJohnson) from [WPILib](https://wpilib.org)
+* [Jason](https://github.com/jasondaming) and [Peter](https://github.com/PeterJohnson) from WPILib
 * [MikLast](https://www.chiefdelphi.com/u/MikLast), FRC Alum, Mentor, & Volunteer
-    * Crerated all of the field images that were used in this program:
+    * Created all of the field images that were used in this program:
         * [Power Up](https://www.chiefdelphi.com/t/pic-top-down-orthographic-view-of-the-field/161896)
         * [Destination: Deep Space](https://www.chiefdelphi.com/t/8k-2019-top-down-orthographic-field-views/337019)
         * [Infinite Recharge](https://www.chiefdelphi.com/t/2020-top-down-orthographic-field-views/369892)
