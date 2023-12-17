@@ -92,15 +92,20 @@ class NT4Subscription {
     }
   }
 
-  Stream<Pair<Object?, int>> timestampedStream() async* {
+  Stream<Pair<Object?, int>> timestampedStream({bool yieldAll = false}) async* {
     yield Pair(currentValue, timestamp);
 
     int lastTimestamp = timestamp;
+    int fakeTimestamp = timestamp;
 
     while (true) {
       if (lastTimestamp != timestamp) {
         yield Pair(currentValue, timestamp);
         lastTimestamp = timestamp;
+        fakeTimestamp = timestamp;
+      } else if (yieldAll) {
+        fakeTimestamp += (options.periodicRateSeconds * 1e6).round();
+        yield Pair(currentValue, fakeTimestamp);
       }
 
       await Future.delayed(
@@ -338,7 +343,7 @@ class NT4Client {
     return newSub;
   }
 
-  NT4Subscription subscribeAllSamples(String topic) {
+  NT4Subscription subscribeAllSamples(String topic, [double period = 0.1]) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),

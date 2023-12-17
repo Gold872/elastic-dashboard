@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -23,7 +24,7 @@ class GraphWidget extends NTWidget {
   double? maxValue;
   late Color mainColor;
 
-  List<double> _graphData = [];
+  List<_GraphPoint> _graphData = [];
   _GraphWidgetGraph? _graphWidget;
 
   GraphWidget({
@@ -35,9 +36,7 @@ class GraphWidget extends NTWidget {
     this.mainColor = Colors.cyan,
     super.dataType,
     super.period = Settings.defaultGraphPeriod,
-  }) : super() {
-    resetGraphData();
-  }
+  }) : super();
 
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
@@ -47,25 +46,6 @@ class GraphWidget extends NTWidget {
     minValue = tryCast(jsonData['min_value']);
     maxValue = tryCast(jsonData['max_value']);
     mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
-
-    resetGraphData();
-  }
-
-  @override
-  void resetSubscription() {
-    resetGraphData();
-
-    super.resetSubscription();
-  }
-
-  void resetGraphData() {
-    _graphData.clear();
-
-    int graphSize = timeDisplayed ~/ period;
-
-    for (int i = 0; i < graphSize; i++) {
-      _graphData.add((minValue != null && minValue! > 0.0) ? minValue! : 0.0);
-    }
   }
 
   @override
@@ -105,7 +85,6 @@ class GraphWidget extends NTWidget {
                   return;
                 }
                 timeDisplayed = newTime;
-                resetGraphData();
                 refresh();
               },
               formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
@@ -165,18 +144,16 @@ class GraphWidget extends NTWidget {
   Widget build(BuildContext context) {
     notifier = context.watch<NTWidgetNotifier?>();
 
-    resetGraphData();
+    List<_GraphPoint>? currentGraphData = _graphWidget?.getCurrentData();
 
-    List<double>? currentGraphData = _graphWidget?.getCurrentData();
-
-    if (currentGraphData != null &&
-        currentGraphData.length == _graphData.length) {
+    if (currentGraphData != null) {
       _graphData = currentGraphData;
     }
 
     _graphWidget = _GraphWidgetGraph(
       initialData: _graphData,
       subscription: subscription,
+      timeDisplayed: timeDisplayed,
       mainColor: mainColor,
       minValue: minValue,
       maxValue: maxValue,
@@ -199,8 +176,9 @@ class _GraphWidgetGraph extends StatefulWidget {
   final double? minValue;
   final double? maxValue;
   final Color mainColor;
+  final double timeDisplayed;
 
-  final List<double> initialData;
+  final List<_GraphPoint> initialData;
 
   final List<_GraphPoint> _currentData = [];
 
@@ -212,13 +190,14 @@ class _GraphWidgetGraph extends StatefulWidget {
   _GraphWidgetGraph({
     required this.initialData,
     required this.subscription,
+    required this.timeDisplayed,
     required this.mainColor,
     this.minValue,
     this.maxValue,
   });
 
-  List<double> getCurrentData() {
-    return _currentData.map((e) => e.y).toList();
+  List<_GraphPoint> getCurrentData() {
+    return _currentData;
   }
 
   @override
@@ -230,34 +209,64 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   late List<_GraphPoint> graphData;
   late StreamSubscription<Object?>? subscriptionListener;
 
-  int fakeXIndex = 0;
-
   @override
   void initState() {
     super.initState();
 
-    graphData = [];
+    graphData = widget.initialData;
 
-    for (double y in widget.initialData) {
-      graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: y));
-      fakeXIndex++;
+    if (graphData.isEmpty) {
+      graphData.add(const _GraphPoint(x: 0, y: 0));
     }
 
     widget.currentData = graphData;
 
-    subscriptionListener = widget.subscription?.periodicStream().listen((data) {
-      if (data != null) {
+    subscriptionListener =
+        widget.subscription?.timestampedStream(yieldAll: true).listen((data) {
+      if (data.key != null) {
+        List<int> addedIndexes = [];
+        List<int> removedIndexes = [];
+
         graphData.add(
-            _GraphPoint(x: fakeXIndex.toDouble(), y: tryCast(data) ?? 0.0));
-        graphData.removeAt(0);
+            _GraphPoint(x: data.value.toDouble(), y: tryCast(data.key) ?? 0.0));
+
+        graphData.sort((a, b) => a.x.compareTo(b.x));
+
+        int indexOffset = 0;
+
+        while (data.value - graphData[0].x > widget.timeDisplayed * 1e6 &&
+            graphData.length > 1) {
+          graphData.removeAt(0);
+          removedIndexes.add(indexOffset++);
+        }
+
+        int existingIndex = graphData.indexWhere((e) => e.x == data.value);
+        while (existingIndex != -1 &&
+            existingIndex != graphData.length - 1 &&
+            graphData.length > 1) {
+          removedIndexes.add(existingIndex + indexOffset++);
+          graphData.removeAt(existingIndex);
+
+          existingIndex = graphData.indexWhere((e) => e.x == data.value);
+        }
+
+        if (graphData.last.x - graphData.first.x < widget.timeDisplayed * 1e6) {
+          graphData.insert(
+              0,
+              _GraphPoint(
+                x: graphData.last.x - widget.timeDisplayed * 1e6,
+                y: graphData.first.y,
+              ));
+          addedIndexes.add(0);
+        }
+
+        addedIndexes.add(graphData.length - 1);
 
         widget.currentData = graphData;
 
-        fakeXIndex++;
-
         seriesController?.updateDataSource(
-          addedDataIndex: graphData.length - 1,
-          removedDataIndex: 0,
+          addedDataIndexes: addedIndexes,
+          removedDataIndexes: removedIndexes,
         );
       }
     });
@@ -267,18 +276,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   void dispose() {
     seriesController = null;
     subscriptionListener?.cancel();
-    graphData.clear();
 
     super.dispose();
-  }
-
-  void resetGraphData() {
-    graphData.clear();
-
-    for (double y in widget.initialData) {
-      graphData.add(_GraphPoint(x: fakeXIndex.toDouble(), y: y));
-      fakeXIndex++;
-    }
   }
 
   List<FastLineSeries<_GraphPoint, num>> getChartData() {
@@ -301,9 +300,6 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.initialData.length != graphData.length) {
-      resetGraphData();
-    }
     return SfCartesianChart(
       series: getChartData(),
       margin: const EdgeInsets.only(top: 8.0),
