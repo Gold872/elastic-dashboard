@@ -232,6 +232,12 @@ class FieldWidget extends NTWidget {
   Widget _getTransformedFieldObject(List<double> objectPosition, Offset center,
       Offset fieldCenter, double scaleReduction,
       {Size? objectSize}) {
+    for (int i = 0; i < objectPosition.length; i++) {
+      if (!objectPosition[i].isFinite) {
+        objectPosition[i] = 0.0;
+      }
+    }
+
     double xFromCenter =
         (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
 
@@ -251,11 +257,9 @@ class FieldWidget extends NTWidget {
         field!.pixelsPerMeterVertical *
         scaleReduction;
 
-    Matrix4 transform = Matrix4.compose(
-      Vector3(positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0),
-      Quaternion.fromRotation(Matrix3.rotationZ(-radians(objectPosition[2]))),
-      Vector3(1, 1, 1),
-    );
+    Matrix4 transform = Matrix4.translationValues(
+        positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0.0)
+      ..rotateZ(-radians(objectPosition[2]));
 
     Widget otherObject = Container(
       alignment: Alignment.center,
@@ -288,6 +292,12 @@ class FieldWidget extends NTWidget {
 
   Widget _getTrajectoryPoint(List<double> objectPosition, Offset center,
       Offset fieldCenter, double scaleReduction) {
+    for (int i = 0; i < objectPosition.length; i++) {
+      if (!objectPosition[i].isFinite) {
+        objectPosition[i] = 0.0;
+      }
+    }
+
     double xFromCenter =
         (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
 
