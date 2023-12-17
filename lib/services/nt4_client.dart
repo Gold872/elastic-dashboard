@@ -11,6 +11,7 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
+import 'package:pair/pair.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
@@ -59,6 +60,7 @@ class NT4Subscription {
   int useCount = 0;
 
   Object? currentValue;
+  int timestamp = 0;
   final List<Function(Object?)> _listeners = [];
   // Multiple instances of this can be used at once, so it has to request the new value for all of the subscription streams
   int _newValueRequestCount = 0;
@@ -85,6 +87,22 @@ class NT4Subscription {
         lastYielded = currentValue;
         _newValueRequestCount--;
       }
+      await Future.delayed(
+          Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
+    }
+  }
+
+  Stream<Pair<Object?, int>> timestampedStream() async* {
+    yield Pair(currentValue, timestamp);
+
+    int lastTimestamp = timestamp;
+
+    while (true) {
+      if (lastTimestamp != timestamp) {
+        yield Pair(currentValue, timestamp);
+        lastTimestamp = timestamp;
+      }
+
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
     }
@@ -438,6 +456,7 @@ class NT4Client {
     for (NT4Subscription sub in _subscriptions.values) {
       if (sub.topic == topic.name) {
         sub.updateValue(data);
+        sub.timestamp = timestamp;
       }
     }
   }
@@ -797,6 +816,7 @@ class NT4Client {
             for (NT4Subscription sub in _subscriptions.values) {
               if (sub.topic == topic.name) {
                 sub.updateValue(value);
+                sub.timestamp = timestampUS;
               }
             }
           } else if (topicID == -1 && !_useRTT) {
