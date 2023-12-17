@@ -188,7 +188,9 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
           ],
         );
       },
-    );
+    ).then((_) {
+      child.refresh();
+    });
   }
 
   Widget getWidgetTypeProperties(StateSetter setState) {

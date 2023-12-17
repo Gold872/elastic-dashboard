@@ -133,10 +133,11 @@ class FieldWidget extends NTWidget {
           }
 
           fieldGame = value;
-
           field.dispose();
-
           field = newField;
+
+          widgetSize = null;
+          rendered = false;
 
           refresh();
         },
@@ -363,6 +364,7 @@ class FieldWidget extends NTWidget {
       showTrajectories,
       robotWidthMeters,
       robotLengthMeters,
+      otherObjectTopics,
       fieldGame,
     ]);
 
@@ -398,9 +400,6 @@ class FieldWidget extends NTWidget {
   @override
   Widget build(BuildContext context) {
     notifier = context.watch<NTWidgetNotifier?>();
-
-    widgetSize = null;
-    rendered = false;
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
@@ -448,7 +447,8 @@ class FieldWidget extends NTWidget {
             size.width > 100.0 &&
             scaleReduction != 0.0 &&
             robotPosition != null &&
-            fieldCenter != const Offset(0.0, 0.0)) {
+            fieldCenter != const Offset(0.0, 0.0) &&
+            field.fieldImageLoaded) {
           rendered = true;
         }
 

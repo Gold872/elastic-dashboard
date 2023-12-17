@@ -106,9 +106,9 @@ class Field {
         .addListener(ImageStreamListener((image, synchronousCall) {
       fieldImageWidth = image.image.width;
       fieldImageHeight = image.image.height;
-    }));
 
-    fieldImageLoaded = true;
+      fieldImageLoaded = true;
+    }));
   }
 
   void dispose() {
