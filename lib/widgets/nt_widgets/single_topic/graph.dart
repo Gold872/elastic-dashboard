@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -221,6 +220,26 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
     widget.currentData = graphData;
 
+    initializeListener();
+  }
+
+  @override
+  void dispose() {
+    seriesController = null;
+    subscriptionListener?.cancel();
+
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_GraphWidgetGraph oldWidget) {
+    subscriptionListener?.cancel();
+    initializeListener();
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void initializeListener() {
     subscriptionListener =
         widget.subscription?.timestampedStream(yieldAll: true).listen((data) {
       if (data.key != null) {
@@ -270,14 +289,6 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         );
       }
     });
-  }
-
-  @override
-  void dispose() {
-    seriesController = null;
-    subscriptionListener?.cancel();
-
-    super.dispose();
   }
 
   List<FastLineSeries<_GraphPoint, num>> getChartData() {
