@@ -20,6 +20,10 @@ class FieldImages {
     return field;
   }
 
+  static bool hasField(String game) {
+    return fields.map((e) => e.game).contains(game);
+  }
+
   static Future loadFields(String directory) async {
     List<String> filePaths = jsonDecode(
             await rootBundle.loadString('AssetManifest.json'))

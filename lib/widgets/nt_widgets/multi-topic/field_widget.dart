@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
+import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
@@ -16,16 +17,14 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-import 'package:vector_math/vector_math_64.dart'
-    show Matrix3, Quaternion, Vector3, radians;
-
 class FieldWidget extends NTWidget {
   static const String widgetType = 'Field';
   @override
   String type = widgetType;
 
-  String fieldGame = 'Charged Up';
-  late Field? field;
+  static String defaultGame = 'Charged Up';
+  String fieldGame = defaultGame;
+  late Field field;
 
   double robotWidthMeters = 0.82;
   double robotLengthMeters = 1.00;
@@ -34,7 +33,7 @@ class FieldWidget extends NTWidget {
   bool showTrajectories = true;
 
   final double otherObjectSize = 0.55;
-  final double trajectoryPointSize = 0.10;
+  final double trajectoryPointSize = 0.08;
 
   Size? widgetSize;
 
@@ -54,7 +53,11 @@ class FieldWidget extends NTWidget {
   }) : super() {
     fieldGame = fieldName ?? fieldGame;
 
-    field = FieldImages.getFieldFromGame(fieldGame);
+    if (!FieldImages.hasField(fieldGame)) {
+      fieldGame = defaultGame;
+    }
+
+    field = FieldImages.getFieldFromGame(fieldGame)!;
   }
 
   FieldWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
@@ -67,7 +70,11 @@ class FieldWidget extends NTWidget {
     showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
     showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
 
-    field = FieldImages.getFieldFromGame(fieldGame);
+    if (!FieldImages.hasField(fieldGame)) {
+      fieldGame = defaultGame;
+    }
+
+    field = FieldImages.getFieldFromGame(fieldGame)!;
   }
 
   @override
@@ -90,7 +97,7 @@ class FieldWidget extends NTWidget {
     super.dispose(deleting: deleting);
 
     if (deleting) {
-      field?.dispose();
+      field.dispose();
     }
 
     widgetSize = null;
@@ -127,14 +134,14 @@ class FieldWidget extends NTWidget {
 
           fieldGame = value;
 
-          field?.dispose();
+          field.dispose();
 
           field = newField;
 
           refresh();
         },
         choices: FieldImages.fields.map((e) => e.game).toList(),
-        initialValue: field!.game,
+        initialValue: field.game,
       ),
       const SizedBox(height: 5),
       Row(
@@ -216,17 +223,7 @@ class FieldWidget extends NTWidget {
     return min(
         fitWidth,
         fitHeight /
-            ((field!.fieldImageHeight ?? 0) / (field!.fieldImageWidth ?? 1)));
-  }
-
-  double _getBackgroundFitHeight(Size size) {
-    double fitWidth = size.width;
-    double fitHeight = size.height;
-
-    return min(
-        fitHeight,
-        fitWidth *
-            ((field!.fieldImageHeight ?? 0) / (field!.fieldImageWidth ?? 1)));
+            ((field.fieldImageHeight ?? 0) / (field.fieldImageWidth ?? 1)));
   }
 
   Widget _getTransformedFieldObject(List<double> objectPosition, Offset center,
@@ -239,22 +236,22 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
+        (objectPosition[0]) * field.pixelsPerMeterHorizontal - fieldCenter.dx;
 
     double yFromCenter =
-        fieldCenter.dy - (objectPosition[1]) * field!.pixelsPerMeterVertical;
+        fieldCenter.dy - (objectPosition[1]) * field.pixelsPerMeterVertical;
 
     Offset positionOffset = center +
-        (Offset(xFromCenter + field!.topLeftCorner.dx,
-                yFromCenter - field!.topLeftCorner.dy)) *
+        (Offset(xFromCenter + field.topLeftCorner.dx,
+                yFromCenter - field.topLeftCorner.dy)) *
             scaleReduction;
 
     double width = (objectSize?.width ?? otherObjectSize) *
-        field!.pixelsPerMeterHorizontal *
+        field.pixelsPerMeterHorizontal *
         scaleReduction;
 
     double length = (objectSize?.height ?? otherObjectSize) *
-        field!.pixelsPerMeterVertical *
+        field.pixelsPerMeterVertical *
         scaleReduction;
 
     Matrix4 transform = Matrix4.translationValues(
@@ -290,8 +287,8 @@ class FieldWidget extends NTWidget {
     );
   }
 
-  Widget _getTrajectoryPoint(List<double> objectPosition, Offset center,
-      Offset fieldCenter, double scaleReduction) {
+  Offset _getTransformedTrajectoryPoint(List<double> objectPosition,
+      Offset center, Offset fieldCenter, double scaleReduction) {
     for (int i = 0; i < objectPosition.length; i++) {
       if (!objectPosition[i].isFinite) {
         objectPosition[i] = 0.0;
@@ -299,34 +296,17 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * field!.pixelsPerMeterHorizontal - fieldCenter.dx;
+        (objectPosition[0]) * field.pixelsPerMeterHorizontal - fieldCenter.dx;
 
     double yFromCenter =
-        fieldCenter.dy - (objectPosition[1]) * field!.pixelsPerMeterVertical;
+        fieldCenter.dy - (objectPosition[1]) * field.pixelsPerMeterVertical;
 
     Offset positionOffset = center +
-        (Offset(xFromCenter + field!.topLeftCorner.dx,
-                yFromCenter - field!.topLeftCorner.dy)) *
+        (Offset(xFromCenter + field.topLeftCorner.dx,
+                yFromCenter - field.topLeftCorner.dy)) *
             scaleReduction;
 
-    double size =
-        trajectoryPointSize * field!.pixelsPerMeterHorizontal * scaleReduction;
-
-    Widget otherObject = Container(
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-      ),
-      width: size,
-      height: size,
-    );
-
-    return Positioned(
-      left: positionOffset.dx - size / 2,
-      top: positionOffset.dy - size / 2,
-      child: otherObject,
-    );
+    return positionOffset;
   }
 
   void _updateOtherObjectTopics() {
@@ -363,9 +343,11 @@ class FieldWidget extends NTWidget {
           continue;
         }
 
-        if (objectPositionRaw.length > 24 && !showTrajectories) {
+        bool isTrajectory = objectPositionRaw.length > 24;
+
+        if (isTrajectory && !showTrajectories) {
           continue;
-        } else if (!showOtherObjects) {
+        } else if (!showOtherObjects && !isTrajectory) {
           continue;
         }
 
@@ -398,10 +380,11 @@ class FieldWidget extends NTWidget {
 
       List<Object> currentData = getCurrentData();
 
-      if (!(const DeepCollectionEquality().equals(previousData, currentData)) ||
-          !rendered) {
+      if (!(const DeepCollectionEquality().equals(previousData, currentData))) {
         yield Object();
         previousData = currentData;
+      } else if (!rendered) {
+        yield Object();
       }
 
       await Future.delayed(Duration(
@@ -452,12 +435,12 @@ class FieldWidget extends NTWidget {
         }
 
         Offset center = Offset(size.width / 2, size.height / 2);
-        Offset fieldCenter = Offset((field!.fieldImageWidth?.toDouble() ?? 0.0),
-                (field!.fieldImageHeight?.toDouble() ?? 0.0)) /
+        Offset fieldCenter = Offset((field.fieldImageWidth?.toDouble() ?? 0.0),
+                (field.fieldImageHeight?.toDouble() ?? 0.0)) /
             2;
 
         double scaleReduction =
-            (_getBackgroundFitWidth(size)) / (field!.fieldImageWidth ?? 1);
+            (_getBackgroundFitWidth(size)) / (field.fieldImageWidth ?? 1);
 
         if (renderBox != null &&
             widgetSize != null &&
@@ -477,7 +460,7 @@ class FieldWidget extends NTWidget {
             objectSize: Size(robotWidthMeters, robotLengthMeters));
 
         List<Widget> otherObjects = [];
-        List<Widget> trajectoryPoints = [];
+        List<List<Offset>> trajectoryPoints = [];
 
         if (showOtherObjects || showTrajectories) {
           for (String objectTopic in otherObjectTopics) {
@@ -489,28 +472,40 @@ class FieldWidget extends NTWidget {
               continue;
             }
 
-            if (objectPositionRaw.length > 24 && !showTrajectories) {
+            bool isTrajectory = objectPositionRaw.length > 24;
+
+            if (isTrajectory && !showTrajectories) {
               continue;
-            } else if (!showOtherObjects) {
+            } else if (!showOtherObjects && !isTrajectory) {
               continue;
             }
 
             List<double> objectPosition =
                 objectPositionRaw.whereType<double>().toList();
 
+            if (isTrajectory) {
+              trajectoryPoints.add([]);
+            }
+
             for (int i = 0; i < objectPosition.length - 2; i += 3) {
-              if (objectPosition.length > 24) {
-                trajectoryPoints.add(_getTrajectoryPoint(
-                    objectPosition.sublist(i, i + 3),
+              if (isTrajectory) {
+                trajectoryPoints.last.add(
+                  _getTransformedTrajectoryPoint(
+                    objectPosition.sublist(i, i + 2),
                     center,
                     fieldCenter,
-                    scaleReduction));
+                    scaleReduction,
+                  ),
+                );
               } else {
-                otherObjects.add(_getTransformedFieldObject(
+                otherObjects.add(
+                  _getTransformedFieldObject(
                     objectPosition.sublist(i, i + 3),
                     center,
                     fieldCenter,
-                    scaleReduction));
+                    scaleReduction,
+                  ),
+                );
               }
             }
           }
@@ -518,8 +513,16 @@ class FieldWidget extends NTWidget {
 
         return Stack(
           children: [
-            field!.fieldImage,
-            ...trajectoryPoints,
+            field.fieldImage,
+            for (List<Offset> points in trajectoryPoints)
+              CustomPaint(
+                painter: TrajectoryPainter(
+                  points: points,
+                  strokeWidth: trajectoryPointSize *
+                      field.pixelsPerMeterHorizontal *
+                      scaleReduction,
+                ),
+              ),
             robot,
             ...otherObjects,
           ],
@@ -562,6 +565,42 @@ class TrianglePainter extends CustomPainter {
   bool shouldRepaint(TrianglePainter oldDelegate) {
     return oldDelegate.strokeColor != strokeColor ||
         oldDelegate.paintingStyle != paintingStyle ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+class TrajectoryPainter extends CustomPainter {
+  final List<Offset> points;
+  final double strokeWidth;
+
+  TrajectoryPainter({
+    required this.points,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.isEmpty) {
+      return;
+    }
+    Paint trajectoryPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    Path trajectoryPath = Path();
+
+    trajectoryPath.moveTo(points[0].dx, points[0].dy);
+
+    for (Offset point in points) {
+      trajectoryPath.lineTo(point.dx, point.dy);
+    }
+    canvas.drawPath(trajectoryPath, trajectoryPaint);
+  }
+
+  @override
+  bool shouldRepaint(TrajectoryPainter oldDelegate) {
+    return oldDelegate.points != points ||
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
