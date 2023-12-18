@@ -305,6 +305,13 @@ class TabGrid extends StatelessWidget {
           constrainedRect.top + newHeight,
         );
       }
+    } else {
+      constrainedRect = Rect.fromLTWH(
+        newRect.left,
+        newRect.top,
+        newWidth,
+        newHeight,
+      );
     }
 
     double previewX = DraggableWidgetContainer.snapToGrid(constrainedRect.left);
