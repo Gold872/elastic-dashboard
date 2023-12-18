@@ -66,7 +66,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   bool previewVisible = false;
   bool validLocation = true;
 
-  Function(dynamic widget, Rect newRect)? onUpdate;
+  Function(dynamic widget, Rect newRect, TransformResult result)? onUpdate;
   Function(dynamic widget)? onDragBegin;
   Function(dynamic widget, Rect releaseRect, {Offset? globalPosition})?
       onDragEnd;
@@ -297,7 +297,7 @@ class DraggableWidgetContainer extends StatelessWidget {
 
           cursorGlobalLocation = event.globalPosition;
 
-          onUpdate?.call(this, result.rect);
+          onUpdate?.call(this, result.rect, result);
 
           controller?.setRect(draggingRect);
         },

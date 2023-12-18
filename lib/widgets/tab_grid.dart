@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
@@ -265,24 +266,59 @@ class TabGrid extends StatelessWidget {
     widget.dispose();
   }
 
-  void onWidgetUpdate(DraggableWidgetContainer widget, Rect newRect) {
-    double previewX = DraggableWidgetContainer.snapToGrid(newRect.left);
-    double previewY = DraggableWidgetContainer.snapToGrid(newRect.top);
-
-    double previewWidth = DraggableWidgetContainer.snapToGrid(
-        newRect.width.clamp(widget.minWidth, double.infinity));
-    double previewHeight = DraggableWidgetContainer.snapToGrid(
-        newRect.height.clamp(widget.minHeight, double.infinity));
-
-    Rect preview = Rect.fromLTWH(
-        previewX, previewY, previewWidth.toDouble(), previewHeight.toDouble());
-
+  void onWidgetUpdate(
+      DraggableWidgetContainer widget, Rect newRect, TransformResult result) {
     double newWidth = max(newRect.width, widget.minWidth);
     double newHeight = max(newRect.height, widget.minHeight);
 
-    widget.draggingRect =
-        Rect.fromLTWH(newRect.left, newRect.top, newWidth, newHeight);
+    Rect constrainedRect = newRect;
 
+    if (widget.resizing) {
+      if (result.handle.influencesLeft) {
+        constrainedRect = Rect.fromLTRB(
+          constrainedRect.right - newWidth,
+          constrainedRect.top,
+          constrainedRect.right,
+          constrainedRect.bottom,
+        );
+      } else if (result.handle.influencesRight) {
+        constrainedRect = Rect.fromLTRB(
+          constrainedRect.left,
+          constrainedRect.top,
+          constrainedRect.left + newWidth,
+          constrainedRect.bottom,
+        );
+      }
+
+      if (result.handle.influencesTop) {
+        constrainedRect = Rect.fromLTRB(
+          constrainedRect.left,
+          constrainedRect.bottom - newHeight,
+          constrainedRect.right,
+          constrainedRect.bottom,
+        );
+      } else if (result.handle.influencesBottom) {
+        constrainedRect = Rect.fromLTRB(
+          constrainedRect.left,
+          constrainedRect.top,
+          constrainedRect.right,
+          constrainedRect.top + newHeight,
+        );
+      }
+    }
+
+    double previewX = DraggableWidgetContainer.snapToGrid(constrainedRect.left);
+    double previewY = DraggableWidgetContainer.snapToGrid(constrainedRect.top);
+
+    double previewWidth = DraggableWidgetContainer.snapToGrid(
+        constrainedRect.width.clamp(widget.minWidth, double.infinity));
+    double previewHeight = DraggableWidgetContainer.snapToGrid(
+        constrainedRect.height.clamp(widget.minHeight, double.infinity));
+
+    Rect preview =
+        Rect.fromLTWH(previewX, previewY, previewWidth, previewHeight);
+
+    widget.draggingRect = constrainedRect;
     widget.previewRect = preview;
     widget.previewVisible = true;
 
@@ -303,8 +339,9 @@ class TabGrid extends StatelessWidget {
     }
   }
 
-  void _ntContainerOnUpdate(dynamic widget, Rect newRect) {
-    onWidgetUpdate(widget, newRect);
+  void _ntContainerOnUpdate(
+      dynamic widget, Rect newRect, TransformResult result) {
+    onWidgetUpdate(widget, newRect, result);
 
     refresh();
   }
@@ -348,8 +385,9 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void _layoutContainerOnUpdate(dynamic widget, Rect newRect) {
-    onWidgetUpdate(widget, newRect);
+  void _layoutContainerOnUpdate(
+      dynamic widget, Rect newRect, TransformResult result) {
+    onWidgetUpdate(widget, newRect, result);
 
     refresh();
   }
