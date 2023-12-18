@@ -263,7 +263,11 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onDragStart: (event) {
           dragging = true;
+          previewVisible = true;
+          draggingIntoLayout = false;
           dragStartLocation = displayRect;
+          previewRect = dragStartLocation;
+          validLocation = tabGrid.isValidMoveLocation(this, previewRect);
           onDragBegin?.call(this);
 
           controller?.setRect(draggingRect);
@@ -272,7 +276,11 @@ class DraggableWidgetContainer extends StatelessWidget {
         onResizeStart: (handle, event) {
           dragging = true;
           resizing = true;
+          previewVisible = true;
+          draggingIntoLayout = false;
           dragStartLocation = displayRect;
+          previewRect = dragStartLocation;
+          validLocation = tabGrid.isValidMoveLocation(this, previewRect);
           onResizeBegin?.call(this);
 
           controller?.setRect(draggingRect);
@@ -292,7 +300,6 @@ class DraggableWidgetContainer extends StatelessWidget {
           onUpdate?.call(this, result.rect);
 
           controller?.setRect(draggingRect);
-          refresh();
         },
         onDragEnd: (event) {
           if (!dragging) {

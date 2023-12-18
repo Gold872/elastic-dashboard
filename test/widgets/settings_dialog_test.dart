@@ -437,8 +437,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final periodField =
-        find.widgetWithText(DialogTextInput, 'Default Period');
+    final periodField = find.widgetWithText(DialogTextInput, 'Default Period');
 
     expect(periodField, findsOneWidget);
 
