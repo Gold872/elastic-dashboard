@@ -19,8 +19,8 @@ class Settings {
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
 
-  static const double defaultPeriod = 0.1;
-  static const double defaultGraphPeriod = 0.033;
+  static double defaultPeriod = 0.1;
+  static double defaultGraphPeriod = 0.033;
 }
 
 class PrefKeys {
@@ -33,4 +33,6 @@ class PrefKeys {
   static String cornerRadius = 'corner_radius';
   static String showGrid = 'show_grid';
   static String autoResizeToDS = 'auto_resize_to_driver_station';
+  static String defaultPeriod = 'default_period';
+  static String defaultGraphPeriod = 'default_graph_period';
 }

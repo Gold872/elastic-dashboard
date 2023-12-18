@@ -267,8 +267,10 @@ class NTWidgetBuilder {
     String type,
     String topic, {
     String dataType = 'Unknown',
-    double period = Settings.defaultPeriod,
+    double? period,
   }) {
+    period ??= Settings.defaultPeriod;
+
     ensureInitialized();
 
     if (_widgetNameBuildMap.containsKey(type)) {

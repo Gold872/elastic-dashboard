@@ -41,8 +41,10 @@ abstract class NTWidget extends StatelessWidget {
     super.key,
     required this.topic,
     this.dataType = 'Unknown',
-    this.period = Settings.defaultPeriod,
+    double? period,
   }) {
+    this.period = period ?? Settings.defaultPeriod;
+
     init();
   }
 

@@ -881,6 +881,34 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setBool(PrefKeys.autoResizeToDS, value);
         },
+        onDefaultPeriodChanged: (value) async {
+          if (value == null) {
+            return;
+          }
+          double? newPeriod = double.tryParse(value);
+
+          if (newPeriod == null) {
+            return;
+          }
+
+          await _preferences.setDouble(PrefKeys.defaultPeriod, newPeriod);
+
+          setState(() => Settings.defaultPeriod = newPeriod);
+        },
+        onDefaultGraphPeriodChanged: (value) async {
+          if (value == null) {
+            return;
+          }
+          double? newPeriod = double.tryParse(value);
+
+          if (newPeriod == null) {
+            return;
+          }
+
+          await _preferences.setDouble(PrefKeys.defaultGraphPeriod, newPeriod);
+
+          setState(() => Settings.defaultGraphPeriod = newPeriod);
+        },
         onColorChanged: widget.onColorChanged,
       ),
     );

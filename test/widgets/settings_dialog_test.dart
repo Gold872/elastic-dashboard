@@ -33,6 +33,10 @@ class FakeSettingsMethods {
   void changeCornerRadius() {}
 
   void changeDSAutoResize() {}
+
+  void changeDefaultPeriod() {}
+
+  void changeDefaultGraphPeriod() {}
 }
 
 void main() {
@@ -51,6 +55,8 @@ void main() {
       PrefKeys.gridSize: 128,
       PrefKeys.cornerRadius: 15.0,
       PrefKeys.autoResizeToDS: false,
+      PrefKeys.defaultPeriod: 0.10,
+      PrefKeys.defaultGraphPeriod: 0.033,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -85,6 +91,8 @@ void main() {
     expect(find.text('Grid Size'), findsWidgets);
     expect(find.text('Corner Radius'), findsOneWidget);
     expect(find.text('Resize to Driver Station Height'), findsOneWidget);
+    expect(find.text('Default Period (Seconds)'), findsOneWidget);
+    expect(find.text('Default Graph Period'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -407,5 +415,72 @@ void main() {
 
     expect(preferences.getBool(PrefKeys.autoResizeToDS), false);
     verify(fakeSettings.changeDSAutoResize()).called(2);
+  });
+
+  testWidgets('Change default period', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onDefaultPeriodChanged: (period) async {
+            fakeSettings.changeDefaultPeriod();
+
+            await preferences.setDouble(
+                PrefKeys.defaultPeriod, double.parse(period!));
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final periodField =
+        find.widgetWithText(DialogTextInput, 'Default Period (Seconds)');
+
+    expect(periodField, findsOneWidget);
+
+    await widgetTester.enterText(periodField, '0.05');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getDouble(PrefKeys.defaultPeriod), 0.05);
+    verify(fakeSettings.changeDefaultPeriod()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change default graph period', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onDefaultGraphPeriodChanged: (period) async {
+            fakeSettings.changeDefaultGraphPeriod();
+
+            await preferences.setDouble(
+                PrefKeys.defaultGraphPeriod, double.parse(period!));
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final periodField =
+        find.widgetWithText(DialogTextInput, 'Default Graph Period');
+
+    expect(periodField, findsOneWidget);
+
+    await widgetTester.enterText(periodField, '0.05');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getDouble(PrefKeys.defaultGraphPeriod), 0.05);
+    verify(fakeSettings.changeDefaultGraphPeriod())
+        .called(greaterThanOrEqualTo(1));
   });
 }

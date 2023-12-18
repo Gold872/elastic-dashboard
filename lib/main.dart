@@ -62,6 +62,11 @@ void main() async {
       preferences.getDouble(PrefKeys.cornerRadius) ?? Settings.cornerRadius;
   Settings.autoResizeToDS =
       preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
+  Settings.defaultPeriod =
+      preferences.getDouble(PrefKeys.defaultPeriod) ?? Settings.defaultPeriod;
+  Settings.defaultGraphPeriod =
+      preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
+          Settings.defaultGraphPeriod;
 
   NTWidgetBuilder.ensureInitialized();
 

@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -34,7 +33,7 @@ class GraphWidget extends NTWidget {
     this.maxValue,
     this.mainColor = Colors.cyan,
     super.dataType,
-    super.period = Settings.defaultGraphPeriod,
+    super.period,
   }) : super();
 
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
