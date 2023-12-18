@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -10,6 +11,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:provider/provider.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
   @override
@@ -214,6 +216,8 @@ class DraggableListLayout extends DraggableLayoutContainer {
         const SizedBox(height: 5),
         ...childEditProperties,
       ],
+      const Divider(),
+      ...container.getNTEditProperties(),
       const SizedBox(height: 5),
     ];
   }
@@ -331,7 +335,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
     for (DraggableNTWidgetContainer widget in children) {
       Widget widgetInContainer = Container(
         constraints: BoxConstraints(
-          maxHeight: (widget.minHeight ?? 128.0) - 64.0,
+          maxHeight: (widget.minHeight) - 64.0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +344,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.0),
-                child: widget.child,
+                child: ChangeNotifierProvider(
+                  create: (context) => NTWidgetNotifier(),
+                  child: widget.child,
+                ),
               ),
             ),
           ],
