@@ -54,7 +54,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       content: Container(
         constraints: const BoxConstraints(
           maxHeight: 250,
-          maxWidth: 750,
+          maxWidth: 650,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -263,7 +263,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       (widget.preferences.getDouble(PrefKeys.defaultPeriod) ??
                               Settings.defaultPeriod)
                           .toString(),
-                  label: 'Default Period (Seconds)',
+                  label: 'Default Period',
                   onSubmit: (value) {
                     setState(() {
                       widget.onDefaultPeriodChanged?.call(value);

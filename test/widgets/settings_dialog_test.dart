@@ -91,7 +91,7 @@ void main() {
     expect(find.text('Grid Size'), findsWidgets);
     expect(find.text('Corner Radius'), findsOneWidget);
     expect(find.text('Resize to Driver Station Height'), findsOneWidget);
-    expect(find.text('Default Period (Seconds)'), findsOneWidget);
+    expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
@@ -438,7 +438,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     final periodField =
-        find.widgetWithText(DialogTextInput, 'Default Period (Seconds)');
+        find.widgetWithText(DialogTextInput, 'Default Period');
 
     expect(periodField, findsOneWidget);
 
