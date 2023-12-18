@@ -211,10 +211,10 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   void initState() {
     super.initState();
 
-    graphData = widget.initialData;
+    graphData = widget.initialData.skip(1).toList();
 
     if (graphData.isEmpty) {
-      graphData.add(const _GraphPoint(x: 0, y: 0));
+      graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
     }
 
     widget.currentData = graphData;
@@ -232,8 +232,10 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   void didUpdateWidget(_GraphWidgetGraph oldWidget) {
-    subscriptionListener?.cancel();
-    initializeListener();
+    if (oldWidget.subscription == widget.subscription) {
+      subscriptionListener?.cancel();
+      initializeListener();
+    }
 
     super.didUpdateWidget(oldWidget);
   }
@@ -241,14 +243,15 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   void initializeListener() {
     subscriptionListener =
         widget.subscription?.timestampedStream(yieldAll: true).listen((data) {
+      if (seriesController == null) {
+        return;
+      }
       if (data.key != null) {
         List<int> addedIndexes = [];
         List<int> removedIndexes = [];
 
         graphData.add(
             _GraphPoint(x: data.value.toDouble(), y: tryCast(data.key) ?? 0.0));
-
-        graphData.sort((a, b) => a.x.compareTo(b.x));
 
         int indexOffset = 0;
 
@@ -280,13 +283,23 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
         addedIndexes.add(graphData.length - 1);
 
-        widget.currentData = graphData;
-
         seriesController?.updateDataSource(
           addedDataIndexes: addedIndexes,
           removedDataIndexes: removedIndexes,
         );
+      } else if (graphData.length > 1) {
+        int oldLength = graphData.length;
+
+        graphData.clear();
+        graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+
+        seriesController?.updateDataSource(
+          removedDataIndexes: List.generate(oldLength, (index) => index),
+          addedDataIndex: 0,
+        );
       }
+
+      widget.currentData = graphData;
     });
   }
 
@@ -314,7 +327,12 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
       series: getChartData(),
       margin: const EdgeInsets.only(top: 8.0),
       primaryXAxis: NumericAxis(
-        labelStyle: const TextStyle(color: Colors.transparent),
+        axisLabelFormatter: (axisLabelRenderArgs) {
+          num value = (graphData.last.x - axisLabelRenderArgs.value) / 1e6;
+          String valueString = value.abs().toStringAsFixed(2);
+
+          return ChartAxisLabel(num.parse(valueString).toString(), null);
+        },
         desiredIntervals: 5,
       ),
       primaryYAxis: NumericAxis(
