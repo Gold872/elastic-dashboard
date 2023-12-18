@@ -168,6 +168,8 @@ abstract class NTWidget extends StatelessWidget {
     });
   }
 
+  static final Function listEquals = const DeepCollectionEquality().equals;
+
   @protected
   List<Object> getCurrentData() {
     return [];
@@ -180,7 +182,7 @@ abstract class NTWidget extends StatelessWidget {
     while (true) {
       List<Object> currentData = getCurrentData();
 
-      if (!(const DeepCollectionEquality().equals(previousData, currentData))) {
+      if (!listEquals(previousData, currentData)) {
         yield Object();
         previousData = currentData;
       }

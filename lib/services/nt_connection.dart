@@ -155,11 +155,7 @@ class NTConnection {
   }
 
   Object? getLastAnnouncedValue(String topic) {
-    if (_ntClient.lastAnnouncedValues.containsKey(topic)) {
-      return _ntClient.lastAnnouncedValues[topic];
-    }
-
-    return null;
+    return _ntClient.lastAnnouncedValues[topic];
   }
 
   void unpublishTopic(NT4Topic topic) {

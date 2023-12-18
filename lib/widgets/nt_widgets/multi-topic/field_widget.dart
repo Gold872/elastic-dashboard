@@ -382,7 +382,7 @@ class FieldWidget extends NTWidget {
 
       List<Object> currentData = getCurrentData();
 
-      if (!(const DeepCollectionEquality().equals(previousData, currentData))) {
+      if (!NTWidget.listEquals(previousData, currentData)) {
         yield Object();
         previousData = currentData;
       } else if (!rendered) {
