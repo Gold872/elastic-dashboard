@@ -245,6 +245,7 @@ class TabGrid extends StatelessWidget {
     widget.dispose();
     widget.refresh();
     widget.tryCast<DraggableNTWidgetContainer>()?.refreshChild();
+    widget.tryCast<DraggableLayoutContainer>()?.refreshChildren();
   }
 
   void onWidgetDragCancel(DraggableWidgetContainer widget) {

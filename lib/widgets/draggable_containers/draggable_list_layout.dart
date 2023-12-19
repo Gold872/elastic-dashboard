@@ -329,6 +329,13 @@ class DraggableListLayout extends DraggableLayoutContainer {
     refresh();
   }
 
+  @override
+  void refreshChildren() {
+    for (var child in children) {
+      child.refreshChild();
+    }
+  }
+
   List<Widget> _getListColumn() {
     List<Widget> column = [];
 

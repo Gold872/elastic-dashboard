@@ -58,4 +58,6 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
       {Offset? globalPosition});
 
   void addWidget(DraggableNTWidgetContainer widget);
+
+  void refreshChildren();
 }
