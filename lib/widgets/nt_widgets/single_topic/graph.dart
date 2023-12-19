@@ -232,7 +232,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   void didUpdateWidget(_GraphWidgetGraph oldWidget) {
-    if (oldWidget.subscription == widget.subscription) {
+    if (oldWidget.subscription != widget.subscription) {
       subscriptionListener?.cancel();
       initializeListener();
     }
