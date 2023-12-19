@@ -233,11 +233,24 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   @override
   void didUpdateWidget(_GraphWidgetGraph oldWidget) {
     if (oldWidget.subscription != widget.subscription) {
+      resetGraphData();
       subscriptionListener?.cancel();
       initializeListener();
     }
 
     super.didUpdateWidget(oldWidget);
+  }
+
+  void resetGraphData() {
+    int oldLength = graphData.length;
+
+    graphData.clear();
+    graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+
+    seriesController?.updateDataSource(
+      removedDataIndexes: List.generate(oldLength, (index) => index),
+      addedDataIndex: 0,
+    );
   }
 
   void initializeListener() {
@@ -288,15 +301,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
           removedDataIndexes: removedIndexes,
         );
       } else if (graphData.length > 1) {
-        int oldLength = graphData.length;
-
-        graphData.clear();
-        graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
-
-        seriesController?.updateDataSource(
-          removedDataIndexes: List.generate(oldLength, (index) => index),
-          addedDataIndex: 0,
-        );
+        resetGraphData();
       }
 
       widget.currentData = graphData;
