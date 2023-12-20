@@ -12,37 +12,18 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import '../dialog_widgets/dialog_text_input.dart';
 import '../nt_widgets/nt_widget.dart';
 
-class DraggableNTWidgetContainer extends DraggableWidgetContainer {
+class NTWidgetContainerModel extends WidgetContainerModel {
   late NTWidget child;
 
-  DraggableNTWidgetContainer({
-    super.key,
-    required super.tabGrid,
-    required super.title,
+  NTWidgetContainerModel({
     required super.initialPosition,
+    required super.title,
     required this.child,
-    super.enabled = false,
-    super.minWidth,
-    super.minHeight,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
-  }) : super();
+  });
 
-  DraggableNTWidgetContainer.fromJson({
-    super.key,
-    required super.tabGrid,
+  NTWidgetContainerModel.fromJson({
     required super.jsonData,
-    super.enabled = false,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    super.enabled,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
 
@@ -61,6 +42,10 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
       'type': child.type,
       'properties': getChildJson(),
     };
+  }
+
+  Map<String, dynamic> getChildJson() {
+    return child.toJson();
   }
 
   @override
@@ -88,13 +73,9 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
         onWidgetTypeNotFound: onJsonLoadingWarning);
   }
 
-  void refreshChild() {
-    child.refresh();
-  }
-
   @override
-  void dispose({bool deleting = false}) {
-    super.dispose(deleting: deleting);
+  void disposeModel({bool deleting = false}) {
+    super.disposeModel(deleting: deleting);
 
     child.dispose(deleting: deleting);
   }
@@ -104,40 +85,6 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
     super.unSubscribe();
 
     child.unSubscribe();
-  }
-
-  Map<String, dynamic> getChildJson() {
-    return child.toJson();
-  }
-
-  void changeChildToType(String? type) {
-    if (type == null) {
-      return;
-    }
-
-    if (type == child.type) {
-      return;
-    }
-
-    NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromType(
-      type,
-      child.topic,
-      dataType: child.dataType,
-      period: (type != 'Graph') ? child.period : Settings.defaultGraphPeriod,
-    );
-
-    if (newWidget == null) {
-      return;
-    }
-
-    child.dispose(deleting: true);
-    child.unSubscribe();
-    child = newWidget;
-
-    minWidth = NTWidgetBuilder.getMinimumWidth(child);
-    minHeight = NTWidgetBuilder.getMinimumHeight(child);
-
-    refresh();
   }
 
   @override
@@ -314,18 +261,61 @@ class DraggableNTWidgetContainer extends DraggableWidgetContainer {
     );
   }
 
+  void changeChildToType(String? type) {
+    if (type == null) {
+      return;
+    }
+
+    if (type == child.type) {
+      return;
+    }
+
+    NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromType(
+      type,
+      child.topic,
+      dataType: child.dataType,
+      period: (type != 'Graph') ? child.period : Settings.defaultGraphPeriod,
+    );
+
+    if (newWidget == null) {
+      return;
+    }
+
+    child.dispose(deleting: true);
+    child.unSubscribe();
+    child = newWidget;
+
+    minWidth = NTWidgetBuilder.getMinimumWidth(child);
+    minHeight = NTWidgetBuilder.getMinimumHeight(child);
+
+    notifyListeners();
+  }
+}
+
+class DraggableNTWidgetContainer extends DraggableWidgetContainer {
+  const DraggableNTWidgetContainer({
+    super.key,
+    required super.tabGrid,
+    super.onUpdate,
+    super.onDragBegin,
+    super.onDragEnd,
+    super.onDragCancel,
+    super.onResizeBegin,
+    super.onResizeEnd,
+  }) : super();
+
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    NTWidgetContainerModel model = context.watch<NTWidgetContainerModel>();
 
     return Stack(
       children: [
         Positioned(
-          left: displayRect.left,
-          top: displayRect.top,
-          child: getWidgetContainer(context),
+          left: model.displayRect.left,
+          top: model.displayRect.top,
+          child: model.getWidgetContainer(context),
         ),
-        ...super.getStackChildren(model!),
+        ...super.getStackChildren(model),
       ],
     );
   }

@@ -315,9 +315,6 @@ void main() {
         matching: find.byType(DraggableListLayout));
     expect(listLayout, findsOneWidget);
 
-    DraggableListLayout listLayoutWidget =
-        listLayout.evaluate().first.widget as DraggableListLayout;
-
     final testBooleanContainer =
         find.widgetWithText(WidgetContainer, 'Test Boolean');
     expect(testBooleanContainer, findsOneWidget);
@@ -327,7 +324,6 @@ void main() {
         matching: find.byType(BooleanBox));
 
     expect(testBooleanInLayout, findsNothing);
-    expect(listLayoutWidget.children.length, 0);
 
     // Drag into layout
     await widgetTester.timedDrag(testBooleanContainer, const Offset(250, 32),
@@ -335,7 +331,6 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(testBooleanInLayout, findsOneWidget);
-    expect(listLayoutWidget.children.length, 1);
 
     // Drag out of layout
     await widgetTester.timedDrag(testBooleanInLayout, const Offset(-200, -60),
@@ -343,7 +338,6 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(testBooleanInLayout, findsNothing);
-    expect(listLayoutWidget.children.length, 0);
   });
 
   testWidgets('Adding widgets from shuffleboard api', (widgetTester) async {

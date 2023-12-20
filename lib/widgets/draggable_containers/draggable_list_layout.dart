@@ -12,16 +12,20 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
-class DraggableListLayout extends DraggableLayoutContainer {
+class ListLayoutModel extends LayoutContainerModel {
   @override
   String type = 'List Layout';
 
-  List<DraggableNTWidgetContainer> children = [];
+  List<NTWidgetContainerModel> children = [];
 
   String labelPosition = 'TOP';
 
-  List<String> labelPositions = const [
+  final TabGrid tabGrid;
+  final Function(WidgetContainerModel model)? onDragCancel;
+
+  static List<String> labelPositions = const [
     'Top',
     'Left',
     'Right',
@@ -29,204 +33,46 @@ class DraggableListLayout extends DraggableLayoutContainer {
     'Hidden',
   ];
 
-  DraggableListLayout({
-    super.key,
-    required super.tabGrid,
-    required super.title,
+  ListLayoutModel({
     required super.initialPosition,
-    super.enabled = false,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    required super.title,
+    required this.tabGrid,
+    required this.onDragCancel,
     this.labelPosition = 'TOP',
-  }) : super();
+  });
 
-  DraggableListLayout.fromJson({
-    super.key,
-    required super.tabGrid,
+  ListLayoutModel.fromJson({
     required super.jsonData,
-    required super.ntContainerBuilder,
-    super.enabled = false,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    required this.tabGrid,
+    required this.onDragCancel,
+    super.enabled,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
-
-  @override
-  void showEditProperties(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Properties'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return SizedBox(
-                width: 353,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...getContainerEditProperties(),
-                    const Divider(),
-                    const Center(
-                      child: Text('Label Position'),
-                    ),
-                    DialogDropdownChooser(
-                      onSelectionChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-
-                        if (!labelPositions.contains(value)) {
-                          return;
-                        }
-
-                        setState(() {
-                          labelPosition = value.toUpperCase();
-
-                          refresh();
-                        });
-                      },
-                      choices: labelPositions,
-                      initialValue:
-                          labelPosition.substring(0, 1).toUpperCase() +
-                              labelPosition.substring(1).toLowerCase(),
-                    ),
-                    const Divider(),
-                    if (children.isNotEmpty)
-                      Flexible(
-                        child: ReorderableListView(
-                          header: const Text('Children Order & Properties'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: children
-                              .map(
-                                (container) => Padding(
-                                  key: UniqueKey(),
-                                  padding: EdgeInsets.zero,
-                                  child: ExpansionTile(
-                                    title: Text(container.title ?? ''),
-                                    subtitle: Text(container.child.type),
-                                    controlAffinity:
-                                        ListTileControlAffinity.leading,
-                                    trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            children.remove(container);
-
-                                            container.unSubscribe();
-                                            container.dispose(deleting: true);
-
-                                            refresh();
-                                          });
-                                        }),
-                                    tilePadding:
-                                        const EdgeInsets.only(right: 40.0),
-                                    childrenPadding: const EdgeInsets.only(
-                                      left: 16.0,
-                                      top: 8.0,
-                                      right: 32.0,
-                                      bottom: 8.0,
-                                    ),
-                                    expandedCrossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: getChildEditProperties(
-                                        context, container, setState),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onReorder: (oldIndex, newIndex) {
-                            setState(() {
-                              if (newIndex > oldIndex) {
-                                newIndex--;
-                              }
-                              var temp = children[newIndex];
-                              children[newIndex] = children[oldIndex];
-                              children[oldIndex] = temp;
-
-                              refresh();
-                            });
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  List<Widget> getChildEditProperties(BuildContext context,
-      DraggableNTWidgetContainer container, StateSetter setState) {
-    List<Widget> containerEditProperties = [
-      // Settings for the widget container
-      const Text('Container Settings'),
-      const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          setState(() {
-            container.title = value;
-
-            container.refresh();
-
-            refresh();
-          });
-        },
-        label: 'Title',
-        initialText: container.title,
-      ),
-    ];
-
-    List<Widget> childEditProperties =
-        container.child.getEditProperties(context);
-
-    return [
-      ...containerEditProperties,
-      container.getWidgetTypeProperties((fn) {
-        setState(fn);
-        refresh();
-      }),
-      if (childEditProperties.isNotEmpty) ...[
-        const Divider(),
-        Text('${container.child.type} Widget Settings'),
-        const SizedBox(height: 5),
-        ...childEditProperties,
-      ],
-      const Divider(),
-      ...container.getNTEditProperties(),
-      const SizedBox(height: 5),
-    ];
-  }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
       ...getChildrenJson(),
+    };
+  }
+
+  Map<String, dynamic> getChildrenJson() {
+    var childrenJson = [];
+
+    for (WidgetContainerModel childContainer in children) {
+      childrenJson.add(childContainer.toJson());
+    }
+
+    return {
+      'children': childrenJson,
+    };
+  }
+
+  @override
+  Map<String, dynamic> getProperties() {
+    return {
+      'label_position': labelPosition,
     };
   }
 
@@ -261,40 +107,22 @@ class DraggableListLayout extends DraggableLayoutContainer {
     }
 
     for (Map<String, dynamic> childData in jsonData['children']) {
-      children.add(ntContainerBuilder?.call(childData) ??
-          DraggableNTWidgetContainer.fromJson(
-            tabGrid: tabGrid,
-            jsonData: childData,
-            onJsonLoadingWarning: onJsonLoadingWarning,
-          ));
+      children.add(
+        NTWidgetContainerModel.fromJson(
+          jsonData: childData,
+          enabled: enabled,
+          onJsonLoadingWarning: onJsonLoadingWarning,
+        ),
+      );
     }
   }
 
-  Map<String, dynamic> getChildrenJson() {
-    var childrenJson = [];
-
-    for (DraggableWidgetContainer childContainer in children) {
-      childrenJson.add(childContainer.toJson());
-    }
-
-    return {
-      'children': childrenJson,
-    };
-  }
-
   @override
-  Map<String, dynamic> getProperties() {
-    return {
-      'label_position': labelPosition,
-    };
-  }
-
-  @override
-  void dispose({bool deleting = false}) {
-    super.dispose(deleting: deleting);
+  void disposeModel({bool deleting = false}) {
+    super.disposeModel(deleting: deleting);
 
     for (var child in children) {
-      child.dispose(deleting: deleting);
+      child.disposeModel(deleting: deleting);
     }
   }
 
@@ -309,7 +137,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
 
   @override
   void setEnabled(bool enabled) {
-    for (DraggableNTWidgetContainer container in children) {
+    for (var container in children) {
       container.setEnabled(enabled);
     }
 
@@ -317,29 +145,179 @@ class DraggableListLayout extends DraggableLayoutContainer {
   }
 
   @override
-  bool willAcceptWidget(DraggableWidgetContainer widget,
-      {Offset? globalPosition}) {
-    return widget is DraggableNTWidgetContainer;
+  void showEditProperties(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Properties'),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return SizedBox(
+                width: 353,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ...getContainerEditProperties(),
+                    const Divider(),
+                    const Center(
+                      child: Text('Label Position'),
+                    ),
+                    DialogDropdownChooser(
+                      onSelectionChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+
+                        if (!labelPositions.contains(value)) {
+                          return;
+                        }
+
+                        setState(() {
+                          labelPosition = value.toUpperCase();
+
+                          notifyListeners();
+                        });
+                      },
+                      choices: labelPositions,
+                      initialValue:
+                          labelPosition.substring(0, 1).toUpperCase() +
+                              labelPosition.substring(1).toLowerCase(),
+                    ),
+                    const Divider(),
+                    if (children.isNotEmpty)
+                      Flexible(
+                        child: ReorderableListView(
+                          header: const Text('Children Order & Properties'),
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: children
+                              .map(
+                                (container) => Padding(
+                                  key: UniqueKey(),
+                                  padding: EdgeInsets.zero,
+                                  child: ExpansionTile(
+                                    title: Text(container.title ?? ''),
+                                    subtitle: Text(container.child.type),
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    trailing: IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            children.remove(container);
+
+                                            container.unSubscribe();
+                                            container.disposeModel(
+                                                deleting: true);
+
+                                            notifyListeners();
+                                          });
+                                        }),
+                                    tilePadding:
+                                        const EdgeInsets.only(right: 40.0),
+                                    childrenPadding: const EdgeInsets.only(
+                                      left: 16.0,
+                                      top: 8.0,
+                                      right: 32.0,
+                                      bottom: 8.0,
+                                    ),
+                                    expandedCrossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: getChildEditProperties(
+                                        context, container, setState),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onReorder: (oldIndex, newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex--;
+                              }
+                              var temp = children[newIndex];
+                              children[newIndex] = children[oldIndex];
+                              children[oldIndex] = temp;
+
+                              notifyListeners();
+                            });
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> getChildEditProperties(BuildContext context,
+      NTWidgetContainerModel container, StateSetter setState) {
+    List<Widget> containerEditProperties = [
+      // Settings for the widget container
+      const Text('Container Settings'),
+      const SizedBox(height: 5),
+      DialogTextInput(
+        onSubmit: (value) {
+          setState(() {
+            container.setTitle(value);
+
+            notifyListeners();
+          });
+        },
+        label: 'Title',
+        initialText: container.title,
+      ),
+    ];
+
+    List<Widget> childEditProperties =
+        container.child.getEditProperties(context);
+
+    return [
+      ...containerEditProperties,
+      container.getWidgetTypeProperties((fn) {
+        setState(fn);
+        notifyListeners();
+      }),
+      if (childEditProperties.isNotEmpty) ...[
+        const Divider(),
+        Text('${container.child.type} Widget Settings'),
+        const SizedBox(height: 5),
+        ...childEditProperties,
+      ],
+      const Divider(),
+      ...container.getNTEditProperties(),
+      const SizedBox(height: 5),
+    ];
   }
 
   @override
-  void addWidget(DraggableNTWidgetContainer widget) {
-    children.add(widget);
-
-    refresh();
-  }
+  void addWidget(NTWidgetContainerModel model) {}
 
   @override
-  void refreshChildren() {
-    for (var child in children) {
-      child.refreshChild();
-    }
+  bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition}) {
+    return widget is NTWidgetContainerModel;
   }
 
   List<Widget> _getListColumn() {
     List<Widget> column = [];
 
-    for (DraggableNTWidgetContainer widget in children) {
+    for (NTWidgetContainerModel widget in children) {
       Widget widgetInContainer = Container(
         constraints: BoxConstraints(
           maxHeight: (widget.minHeight) - 64.0,
@@ -460,13 +438,13 @@ class DraggableListLayout extends DraggableLayoutContainer {
             widget.cursorGlobalLocation = details.globalPosition;
 
             Future(() {
-              onDragCancel?.call(this);
+              // onDragCancel?.call(this);
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                controller?.setRect(draggingRect);
+                // controller?.setRect(draggingRect);
               }
 
-              model?.setDraggable(false);
+              setDraggable(false);
             });
           },
           onPanUpdate: (details) {
@@ -478,7 +456,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
             tabGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
-            Future(() => model?.setDraggable(true));
+            Future(() => setDraggable(true));
 
             Rect previewLocation = Rect.fromLTWH(
               DraggableWidgetContainer.snapToGrid(widget.draggingRect.left),
@@ -492,6 +470,7 @@ class DraggableListLayout extends DraggableLayoutContainer {
                         .isValidLayoutLocation(widget.cursorGlobalLocation)) &&
                 tabGrid.isDraggingInContainer()) {
               children.remove(widget);
+              notifyListeners();
             }
 
             tabGrid.layoutDragOutEnd(widget);
@@ -500,10 +479,10 @@ class DraggableListLayout extends DraggableLayoutContainer {
             Future(() {
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                controller?.setRect(draggingRect);
+                // controller?.setRect(draggingRect);
               }
 
-              model?.setDraggable(true);
+              setDraggable(true);
             });
           },
           child: Padding(
@@ -588,19 +567,32 @@ class DraggableListLayout extends DraggableLayoutContainer {
       ),
     );
   }
+}
+
+class DraggableListLayout extends DraggableLayoutContainer {
+  const DraggableListLayout({
+    super.key,
+    required super.tabGrid,
+    super.onUpdate,
+    super.onDragBegin,
+    super.onDragEnd,
+    super.onDragCancel,
+    super.onResizeBegin,
+    super.onResizeEnd,
+  }) : super();
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    ListLayoutModel model = context.watch<ListLayoutModel>();
 
     return Stack(
       children: [
         Positioned(
-          left: displayRect.left,
-          top: displayRect.top,
-          child: getWidgetContainer(context),
+          left: model.displayRect.left,
+          top: model.displayRect.top,
+          child: model.getWidgetContainer(context),
         ),
-        ...super.getStackChildren(model!),
+        ...super.getStackChildren(model),
       ],
     );
   }

@@ -9,37 +9,13 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
-class WidgetContainerModel extends ChangeNotifier {
-  bool draggable = true;
-  bool _disposed = false;
-
-  void setDraggable(bool draggable) {
-    this.draggable = draggable;
-    notifyListeners();
-  }
-
-  void refresh() {
-    notifyListeners();
-  }
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
-  }
-}
-
-class DraggableWidgetContainer extends StatelessWidget {
-  final TabGrid tabGrid;
+abstract class WidgetContainerModel extends ChangeNotifier {
+  final Key key = UniqueKey();
 
   String? title;
+
+  bool draggable = true;
+  bool _disposed = false;
 
   Rect draggingRect = Rect.fromLTWH(
       0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
@@ -52,13 +28,6 @@ class DraggableWidgetContainer extends StatelessWidget {
   Rect previewRect = Rect.fromLTWH(
       0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
 
-  late Rect dragStartLocation;
-
-  TransformableBoxController? controller;
-
-  double minWidth = Settings.gridSize.toDouble();
-  double minHeight = Settings.gridSize.toDouble();
-
   bool enabled = false;
   bool dragging = false;
   bool resizing = false;
@@ -66,62 +35,147 @@ class DraggableWidgetContainer extends StatelessWidget {
   bool previewVisible = false;
   bool validLocation = true;
 
-  Function(dynamic widget, Rect newRect, TransformResult result)? onUpdate;
-  Function(dynamic widget)? onDragBegin;
-  Function(dynamic widget, Rect releaseRect, {Offset? globalPosition})?
-      onDragEnd;
-  Function(dynamic widget)? onDragCancel;
-  Function(dynamic widget)? onResizeBegin;
-  Function(dynamic widget, Rect releaseRect)? onResizeEnd;
+  double minWidth = Settings.gridSize.toDouble();
+  double minHeight = Settings.gridSize.toDouble();
 
-  WidgetContainerModel? model;
+  late Rect dragStartLocation;
 
-  DraggableWidgetContainer({
-    super.key,
-    required this.tabGrid,
-    required this.title,
+  WidgetContainerModel({
     required Rect initialPosition,
-    this.enabled = false,
-    this.minWidth = 128,
-    this.minHeight = 128,
-    this.onUpdate,
-    this.onDragBegin,
-    this.onDragEnd,
-    this.onDragCancel,
-    this.onResizeBegin,
-    this.onResizeEnd,
+    required this.title,
   }) {
     displayRect = initialPosition;
-
     init();
   }
 
-  DraggableWidgetContainer.fromJson({
-    super.key,
-    required this.tabGrid,
+  WidgetContainerModel.fromJson({
     required Map<String, dynamic> jsonData,
     this.enabled = false,
-    this.onUpdate,
-    this.onDragBegin,
-    this.onDragEnd,
-    this.onDragCancel,
-    this.onResizeBegin,
-    this.onResizeEnd,
     Function(String errorMessage)? onJsonLoadingWarning,
   }) {
-    fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
-
+    fromJson(jsonData);
     init();
   }
 
-  static double snapToGrid(double value) {
-    return (value / Settings.gridSize).roundToDouble() * Settings.gridSize;
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
   }
 
-  void refresh() {
-    Future(() async {
-      model?.refresh();
-    });
+  @override
+  void dispose() {
+    if (!hasListeners) {
+      super.dispose();
+      _disposed = true;
+    }
+  }
+
+  void init() {
+    draggingRect = displayRect;
+    dragStartLocation = displayRect;
+  }
+
+  @mustCallSuper
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'x': displayRect.left,
+      'y': displayRect.top,
+      'width': displayRect.width,
+      'height': displayRect.height,
+    };
+  }
+
+  @mustCallSuper
+  void fromJson(Map<String, dynamic> jsonData,
+      {Function(String warningMessage)? onJsonLoadingWarning}) {
+    title = tryCast(jsonData['title']) ?? '';
+
+    double x = tryCast(jsonData['x']) ?? 0.0;
+
+    double y = tryCast(jsonData['y']) ?? 0.0;
+
+    double width = tryCast(jsonData['width']) ?? Settings.gridSize.toDouble();
+
+    double height = tryCast(jsonData['height']) ?? Settings.gridSize.toDouble();
+
+    displayRect = Rect.fromLTWH(x, y, width, height);
+  }
+
+  List<ContextMenuEntry> getContextMenuItems() {
+    return [];
+  }
+
+  void disposeModel({bool deleting = false}) {}
+
+  void unSubscribe() {}
+
+  void setTitle(String title) {
+    this.title = title;
+
+    notifyListeners();
+  }
+
+  void setDraggable(bool draggable) {
+    this.draggable = draggable;
+    notifyListeners();
+  }
+
+  void setDragging(bool dragging) {
+    this.dragging = dragging;
+    notifyListeners();
+  }
+
+  void setResizing(bool resizing) {
+    this.resizing = resizing;
+    notifyListeners();
+  }
+
+  void setPreviewVisible(bool previewVisible) {
+    this.previewVisible = previewVisible;
+    notifyListeners();
+  }
+
+  void setValidLocation(bool validLocation) {
+    this.validLocation = validLocation;
+    notifyListeners();
+  }
+
+  void setDraggingIntoLayout(bool draggingIntoLayout) {
+    this.draggingIntoLayout = draggingIntoLayout;
+    notifyListeners();
+  }
+
+  void setEnabled(bool enabled) {
+    this.enabled = enabled;
+    notifyListeners();
+  }
+
+  void setDisplayRect(Rect displayRect) {
+    this.displayRect = displayRect;
+    notifyListeners();
+  }
+
+  void setDraggingRect(Rect draggingRect) {
+    this.draggingRect = draggingRect;
+    notifyListeners();
+  }
+
+  void setPreviewRect(Rect previewRect) {
+    this.previewRect = previewRect;
+    notifyListeners();
+  }
+
+  void setDragStartLocation(Rect dragStartLocation) {
+    this.dragStartLocation = dragStartLocation;
+    notifyListeners();
+  }
+
+  void setCursorGlobalLocation(Offset globalLocation) {
+    cursorGlobalLocation = globalLocation;
+    notifyListeners();
   }
 
   void showEditProperties(BuildContext context) {
@@ -160,62 +214,12 @@ class DraggableWidgetContainer extends StatelessWidget {
       const SizedBox(height: 5),
       DialogTextInput(
         onSubmit: (value) {
-          title = value;
-
-          refresh();
+          setTitle(value);
         },
         label: 'Title',
         initialText: title,
       ),
     ];
-  }
-
-  List<ContextMenuEntry> getContextMenuItems() {
-    return [];
-  }
-
-  @mustCallSuper
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'x': displayRect.left,
-      'y': displayRect.top,
-      'width': displayRect.width,
-      'height': displayRect.height,
-    };
-  }
-
-  @mustCallSuper
-  void init() {
-    draggingRect = displayRect;
-    dragStartLocation = displayRect;
-  }
-
-  @mustCallSuper
-  void fromJson(Map<String, dynamic> jsonData,
-      {Function(String warningMessage)? onJsonLoadingWarning}) {
-    title = tryCast(jsonData['title']) ?? '';
-
-    double x = tryCast(jsonData['x']) ?? 0.0;
-
-    double y = tryCast(jsonData['y']) ?? 0.0;
-
-    double width = tryCast(jsonData['width']) ?? Settings.gridSize.toDouble();
-
-    double height = tryCast(jsonData['height']) ?? Settings.gridSize.toDouble();
-
-    displayRect = Rect.fromLTWH(x, y, width, height);
-  }
-
-  void dispose({bool deleting = false}) {}
-
-  void unSubscribe() {}
-
-  @mustCallSuper
-  void setEnabled(bool enabled) {
-    this.enabled = enabled;
-
-    refresh();
   }
 
   WidgetContainer getDraggingWidgetContainer(BuildContext context) {
@@ -235,115 +239,6 @@ class DraggableWidgetContainer extends StatelessWidget {
       height: displayRect.height,
       child: Container(),
     );
-  }
-
-  List<Widget> getStackChildren(WidgetContainerModel model) {
-    return [
-      TransformableBox(
-        handleAlignment: HandleAlignment.inside,
-        rect: draggingRect,
-        clampingRect:
-            const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
-        constraints: const BoxConstraints(
-          minWidth: 128.0,
-          minHeight: 128.0,
-        ),
-        resizeModeResolver: () => ResizeMode.freeform,
-        allowFlippingWhileResizing: false,
-        handleTapSize: 12,
-        visibleHandles: const {},
-        draggable: model.draggable,
-        resizable: model.draggable,
-        contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Builder(builder: (context) {
-            controller = TransformableBox.controllerOf(context);
-
-            return Container();
-          });
-        },
-        onDragStart: (event) {
-          dragging = true;
-          previewVisible = true;
-          draggingIntoLayout = false;
-          dragStartLocation = displayRect;
-          previewRect = dragStartLocation;
-          validLocation = tabGrid.isValidMoveLocation(this, previewRect);
-          onDragBegin?.call(this);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-        onResizeStart: (handle, event) {
-          dragging = true;
-          resizing = true;
-          previewVisible = true;
-          draggingIntoLayout = false;
-          dragStartLocation = displayRect;
-          previewRect = dragStartLocation;
-          validLocation = tabGrid.isValidMoveLocation(this, previewRect);
-          onResizeBegin?.call(this);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-        onChanged: (result, event) {
-          if (!dragging && !resizing) {
-            onDragCancel?.call(this);
-
-            controller?.setRect(draggingRect);
-            refresh();
-            return;
-          }
-
-          cursorGlobalLocation = event.globalPosition;
-
-          onUpdate?.call(this, result.rect, result);
-
-          controller?.setRect(draggingRect);
-        },
-        onDragEnd: (event) {
-          if (!dragging) {
-            return;
-          }
-          dragging = false;
-
-          onDragEnd?.call(this, draggingRect,
-              globalPosition: cursorGlobalLocation);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-        onDragCancel: () {
-          dragging = false;
-
-          onDragCancel?.call(this);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-        onResizeEnd: (handle, event) {
-          if (!dragging && !resizing) {
-            return;
-          }
-          dragging = false;
-          resizing = false;
-
-          onResizeEnd?.call(this, draggingRect);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-        onResizeCancel: (handle) {
-          dragging = false;
-          resizing = false;
-
-          onDragCancel?.call(this);
-
-          controller?.setRect(draggingRect);
-          refresh();
-        },
-      ),
-    ];
   }
 
   Widget getDefaultPreview() {
@@ -370,12 +265,127 @@ class DraggableWidgetContainer extends StatelessWidget {
       ),
     );
   }
+}
+
+class DraggableWidgetContainer extends StatelessWidget {
+  final TabGrid tabGrid;
+
+  final Function(
+          WidgetContainerModel widget, Rect newRect, TransformResult result)?
+      onUpdate;
+  final Function(WidgetContainerModel widget)? onDragBegin;
+  final Function(WidgetContainerModel widget, Rect releaseRect,
+      {Offset? globalPosition})? onDragEnd;
+  final Function(WidgetContainerModel widget)? onDragCancel;
+  final Function(WidgetContainerModel widget)? onResizeBegin;
+  final Function(WidgetContainerModel widget, Rect releaseRect)? onResizeEnd;
+
+  const DraggableWidgetContainer({
+    super.key,
+    required this.tabGrid,
+    this.onUpdate,
+    this.onDragBegin,
+    this.onDragEnd,
+    this.onDragCancel,
+    this.onResizeBegin,
+    this.onResizeEnd,
+  });
+
+  static double snapToGrid(double value) {
+    return (value / Settings.gridSize).roundToDouble() * Settings.gridSize;
+  }
+
+  List<Widget> getStackChildren(WidgetContainerModel model) {
+    return [
+      TransformableBox(
+        handleAlignment: HandleAlignment.inside,
+        rect: model.draggingRect,
+        clampingRect:
+            const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
+        constraints: const BoxConstraints(
+          minWidth: 128.0,
+          minHeight: 128.0,
+        ),
+        resizeModeResolver: () => ResizeMode.freeform,
+        allowFlippingWhileResizing: false,
+        handleTapSize: 12,
+        visibleHandles: const {},
+        draggable: model.draggable,
+        resizable: model.draggable,
+        contentBuilder: (BuildContext context, Rect rect, Flip flip) {
+          return Container();
+        },
+        onDragStart: (event) {
+          model.setDragging(true);
+          model.setPreviewVisible(true);
+          model.setDraggingIntoLayout(false);
+          model.setDragStartLocation(model.displayRect);
+          model.setPreviewRect(model.dragStartLocation);
+          model.setValidLocation(
+              tabGrid.isValidMoveLocation(model, model.previewRect));
+          onDragBegin?.call(model);
+
+          // controller?.setRect(draggingRect);
+        },
+        onResizeStart: (handle, event) {
+          model.setDragging(true);
+          model.setResizing(true);
+          model.setPreviewVisible(true);
+          model.setDraggingIntoLayout(false);
+          model.setDragStartLocation(model.displayRect);
+          model.setPreviewRect(model.dragStartLocation);
+          model.setValidLocation(
+              tabGrid.isValidMoveLocation(model, model.previewRect));
+          onResizeBegin?.call(model);
+        },
+        onChanged: (result, event) {
+          if (!model.dragging && !model.resizing) {
+            onDragCancel?.call(model);
+            return;
+          }
+
+          model.setCursorGlobalLocation(event.globalPosition);
+
+          onUpdate?.call(model, result.rect, result);
+        },
+        onDragEnd: (event) {
+          if (!model.dragging) {
+            return;
+          }
+          model.setDragging(false);
+
+          onDragEnd?.call(model, model.draggingRect,
+              globalPosition: model.cursorGlobalLocation);
+        },
+        onDragCancel: () {
+          Future(() {
+            model.setDragging(false);
+          });
+
+          onDragCancel?.call(model);
+        },
+        onResizeEnd: (handle, event) {
+          if (!model.dragging && !model.resizing) {
+            return;
+          }
+          model.setDragging(false);
+          model.setResizing(false);
+
+          onResizeEnd?.call(model, model.draggingRect);
+        },
+        onResizeCancel: (handle) {
+          model.setDragging(false);
+          model.setResizing(false);
+
+          onDragCancel?.call(model);
+        },
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    WidgetContainerModel model = context.watch<WidgetContainerModel>();
-
-    this.model = model;
+    WidgetContainerModel model = context.read<WidgetContainerModel>();
 
     return Stack(
       children: getStackChildren(model),

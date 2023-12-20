@@ -6,13 +6,13 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_
 class LayoutDragTile extends StatelessWidget {
   final String title;
 
-  DraggableLayoutContainer Function()? layoutBuilder;
+  LayoutContainerModel Function()? layoutBuilder;
 
-  DraggableLayoutContainer? draggingWidget;
+  LayoutContainerModel? draggingWidget;
 
-  final Function(Offset globalPosition, DraggableLayoutContainer widget)?
+  final Function(Offset globalPosition, LayoutContainerModel widget)?
       onDragUpdate;
-  final Function(DraggableLayoutContainer widget)? onDragEnd;
+  final Function(LayoutContainerModel widget)? onDragEnd;
 
   LayoutDragTile({
     super.key,

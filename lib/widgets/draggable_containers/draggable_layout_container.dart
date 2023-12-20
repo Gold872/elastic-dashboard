@@ -5,38 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 
-abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
+abstract class LayoutContainerModel extends WidgetContainerModel {
   String get type;
 
-  DraggableNTWidgetContainer Function(Map<String, dynamic> jsonData)?
-      ntContainerBuilder;
-
-  DraggableLayoutContainer({
-    super.key,
-    required super.tabGrid,
-    required super.title,
+  LayoutContainerModel({
     required super.initialPosition,
-    super.enabled = false,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
-  }) : super();
+    required super.title,
+  });
 
-  DraggableLayoutContainer.fromJson({
-    super.key,
-    required super.tabGrid,
+  LayoutContainerModel.fromJson({
     required super.jsonData,
-    required this.ntContainerBuilder,
-    super.enabled = false,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    super.enabled,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
 
@@ -54,10 +33,20 @@ abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
     return {};
   }
 
-  bool willAcceptWidget(DraggableWidgetContainer widget,
-      {Offset? globalPosition});
+  bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition});
 
-  void addWidget(DraggableNTWidgetContainer widget);
+  void addWidget(NTWidgetContainerModel model);
+}
 
-  void refreshChildren();
+abstract class DraggableLayoutContainer extends DraggableWidgetContainer {
+  const DraggableLayoutContainer({
+    super.key,
+    required super.tabGrid,
+    super.onUpdate,
+    super.onDragBegin,
+    super.onDragEnd,
+    super.onDragCancel,
+    super.onResizeBegin,
+    super.onResizeEnd,
+  }) : super();
 }

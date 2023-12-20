@@ -1355,13 +1355,13 @@ class AddWidgetDialog extends StatelessWidget {
   final TabGrid Function() grid;
   final bool visible;
 
-  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
+  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
       onNTDragUpdate;
-  final Function(DraggableNTWidgetContainer widget)? onNTDragEnd;
+  final Function(NTWidgetContainerModel widget)? onNTDragEnd;
 
-  final Function(Offset globalPosition, DraggableLayoutContainer widget)?
+  final Function(Offset globalPosition, LayoutContainerModel widget)?
       onLayoutDragUpdate;
-  final Function(DraggableLayoutContainer widget)? onLayoutDragEnd;
+  final Function(LayoutContainerModel widget)? onLayoutDragEnd;
 
   final Function()? onClose;
 

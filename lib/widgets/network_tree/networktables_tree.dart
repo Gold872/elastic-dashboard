@@ -12,10 +12,10 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
 class NetworkTableTree extends StatefulWidget {
-  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
+  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
       onDragUpdate;
-  final Function(DraggableNTWidgetContainer widget)? onDragEnd;
-  final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
+  final Function(NTWidgetContainerModel widget)? onDragEnd;
+  final NTWidgetContainerModel? Function(WidgetContainer? widget)?
       widgetContainerBuilder;
 
   const NetworkTableTree(
@@ -32,11 +32,11 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   final NetworkTableTreeRow root = NetworkTableTreeRow(topic: '/', rowName: '');
   late final TreeController<NetworkTableTreeRow> treeController;
 
-  late final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
+  late final Function(Offset globalPosition, NTWidgetContainerModel widget)?
       onDragUpdate = widget.onDragUpdate;
-  late final Function(DraggableNTWidgetContainer widget)? onDragEnd =
+  late final Function(NTWidgetContainerModel widget)? onDragEnd =
       widget.onDragEnd;
-  late final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
+  late final NTWidgetContainerModel? Function(WidgetContainer? widget)?
       widgetContainerBuilder = widget.widgetContainerBuilder;
 
   late final Function(NT4Topic topic) onNewTopicAnnounced;
@@ -146,13 +146,13 @@ class TreeTile extends StatelessWidget {
 
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
-  final Function(Offset globalPosition, DraggableNTWidgetContainer widget)?
+  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
       onDragUpdate;
-  final Function(DraggableNTWidgetContainer widget)? onDragEnd;
-  final DraggableNTWidgetContainer? Function(WidgetContainer? widget)?
+  final Function(NTWidgetContainerModel widget)? onDragEnd;
+  final NTWidgetContainerModel? Function(WidgetContainer? widget)?
       widgetContainerBuilder;
 
-  DraggableNTWidgetContainer? draggingWidget;
+  NTWidgetContainerModel? draggingWidget;
 
   @override
   Widget build(BuildContext context) {
