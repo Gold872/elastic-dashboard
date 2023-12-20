@@ -193,7 +193,8 @@ class SwerveDriveWidget extends NTWidget {
             tryCast(ntConnection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
 
         return LayoutBuilder(builder: (context, constraints) {
-          double sideLength = min(constraints.maxWidth, constraints.maxHeight);
+          double sideLength =
+              min(constraints.maxWidth, constraints.maxHeight) * 0.9;
           return Transform.rotate(
             angle: (showRobotRotation) ? radians(-robotAngle) : 0.0,
             child: SizedBox(
@@ -271,10 +272,11 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   void drawRobotFrame(Canvas canvas, Size size, Offset offset) {
+    final double scaleFactor = size.width / 128.95;
     final double circleRadius = min(size.width, size.height) / 8;
 
     Paint framePainter = Paint()
-      ..strokeWidth = 2
+      ..strokeWidth = 1.75 * scaleFactor
       ..color = Colors.grey
       ..style = PaintingStyle.stroke;
 
@@ -328,20 +330,23 @@ class SwerveDrivePainter extends CustomPainter {
     final double circleRadius = min(size.width, size.height) / 8;
     const double arrowAngle = 40 * pi / 180;
 
-    final double pixelsPerMPS = 12.5 / 1.0 * size.width / 240.0;
+    final double scaleFactor = size.width / 128.95;
 
-    const double minArrowBase = 8.5;
-    const double maxArrowBase = 16.0;
+    final double pixelsPerMPS = 6.75 / 1.0 * scaleFactor;
+
+    final double minArrowBase = 6.5 * scaleFactor;
+    final double maxArrowBase = 16.0 * scaleFactor;
 
     Paint arrowPaint = Paint()
-      ..strokeWidth = 2
+      ..strokeWidth = 2 * scaleFactor
       ..color = Colors.red
       ..style = PaintingStyle.stroke;
 
     Paint anglePaint = Paint()
-      ..strokeWidth = 4
+      ..strokeWidth = 3.75 * scaleFactor
       ..color = Colors.red
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
     // Front left angle indicator thing
     Rect frontLeftWheel = Rect.fromCenter(
@@ -571,6 +576,8 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   void drawRobotDirectionArrow(Canvas canvas, Size size, Offset offset) {
+    final double scaleFactor = size.width / 58.0;
+
     const double arrowAngle = 40 * pi / 180;
     final double base = size.width * 0.45;
     const double arrowRotation = -pi / 2;
@@ -580,7 +587,7 @@ class SwerveDrivePainter extends CustomPainter {
     Offset center = Offset(size.width, size.height) / 2 + offset;
 
     Paint arrowPainter = Paint()
-      ..strokeWidth = 4
+      ..strokeWidth = 4 * scaleFactor
       ..color = Colors.red
       ..style = PaintingStyle.stroke;
 
