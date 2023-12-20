@@ -14,6 +14,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   bool draggable = true;
   bool _disposed = false;
+  bool _forceDispose = false;
 
   Rect draggingRect = Rect.fromLTWH(
       0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
@@ -68,10 +69,15 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (!hasListeners) {
+    if (!hasListeners || _forceDispose) {
       super.dispose();
       _disposed = true;
     }
+  }
+
+  void forceDispose() {
+    _forceDispose = true;
+    dispose();
   }
 
   void init() {

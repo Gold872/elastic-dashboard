@@ -656,6 +656,7 @@ class TabGrid extends StatelessWidget {
   void removeWidget(WidgetContainerModel widget) {
     widget.disposeModel(deleting: true);
     widget.unSubscribe();
+    widget.forceDispose();
     _widgetModels.remove(widget);
     refresh();
   }
@@ -675,6 +676,7 @@ class TabGrid extends StatelessWidget {
               for (WidgetContainerModel container in _widgetModels) {
                 container.disposeModel(deleting: true);
                 container.unSubscribe();
+                container.forceDispose();
               }
               _widgetModels.clear();
               refresh();
@@ -696,6 +698,7 @@ class TabGrid extends StatelessWidget {
     for (WidgetContainerModel container in _widgetModels) {
       container.disposeModel(deleting: true);
       container.unSubscribe();
+      container.forceDispose();
     }
     _widgetModels.clear();
   }
