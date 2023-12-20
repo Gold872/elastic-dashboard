@@ -18,7 +18,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 // Used to refresh the tab grid when a widget is added or removed
 // This doesn't use a stateless widget since everything has to be rendered at program startup or data will be lost
 class TabGridModel extends ChangeNotifier {
-  void onUpdate() {
+  void notify() {
     notifyListeners();
   }
 }
@@ -28,16 +28,16 @@ class TabGrid extends StatelessWidget {
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
 
-  final VoidCallback? onAddWidgetPressed;
+  final VoidCallback onAddWidgetPressed;
 
   TabGridModel? model;
 
-  TabGrid({super.key, this.onAddWidgetPressed});
+  TabGrid({super.key, required this.onAddWidgetPressed});
 
   TabGrid.fromJson({
     super.key,
     required Map<String, dynamic> jsonData,
-    this.onAddWidgetPressed,
+    required this.onAddWidgetPressed,
     Function(String message)? onJsonLoadingWarning,
   }) {
     if (jsonData['containers'] != null) {
@@ -198,7 +198,6 @@ class TabGrid extends StatelessWidget {
     model.setValidLocation(true);
 
     model.dispose();
-    // model.tryCast<DraggableNTWidgetContainer>()?.refreshChild();
   }
 
   void onWidgetDragEnd(WidgetContainerModel model) {
@@ -215,8 +214,6 @@ class TabGrid extends StatelessWidget {
     model.validLocation = true;
 
     model.dispose();
-    // model.tryCast<DraggableNTWidgetContainer>()?.refreshChild();
-    // model.tryCast<DraggableLayoutContainer>()?.refreshChildren();
   }
 
   void onWidgetDragCancel(WidgetContainerModel model) {
@@ -309,7 +306,7 @@ class TabGrid extends StatelessWidget {
       model.setDraggingIntoLayout(false);
     } else {
       validLocation = isValidLayoutLocation(model.cursorGlobalLocation) &&
-          model is! DraggableLayoutContainer &&
+          model is! LayoutContainerModel &&
           !model.resizing;
 
       model.setDraggingIntoLayout(validLocation);
@@ -702,7 +699,7 @@ class TabGrid extends StatelessWidget {
 
   void refresh() {
     Future(() async {
-      model?.onUpdate();
+      model?.notify();
     });
   }
 
@@ -714,42 +711,42 @@ class TabGrid extends StatelessWidget {
     });
   }
 
-  Widget getWidgetFromModel(WidgetContainerModel model) {
-    if (model is NTWidgetContainerModel) {
-      return ChangeNotifierProvider<NTWidgetContainerModel>.value(
-        key: model.key,
-        value: model,
-        child: DraggableNTWidgetContainer(
-          tabGrid: this,
-          onUpdate: _ntContainerOnUpdate,
-          onDragBegin: _ntContainerOnDragBegin,
-          onDragEnd: _ntContainerOnDragEnd,
-          onDragCancel: _ntContainerOnDragCancel,
-          onResizeBegin: _ntContainerOnResizeBegin,
-          onResizeEnd: _ntContainerOnResizeEnd,
-        ),
-      );
-    } else if (model is ListLayoutModel) {
-      return ChangeNotifierProvider<ListLayoutModel>.value(
-        key: model.key,
-        value: model,
-        child: DraggableListLayout(
-          tabGrid: this,
-          onUpdate: _layoutContainerOnUpdate,
-          onDragBegin: _layoutContainerOnDragBegin,
-          onDragEnd: _layoutContainerOnDragEnd,
-          onDragCancel: _layoutContainerOnDragCancel,
-          onResizeBegin: _layoutContainerOnResizeBegin,
-          onResizeEnd: _layoutContainerOnResizeEnd,
-        ),
-      );
-    }
-    return Container();
-  }
-
   @override
   Widget build(BuildContext context) {
-    model = context.watch<TabGridModel?>();
+    model = context.watch<TabGridModel>();
+
+    Widget getWidgetFromModel(WidgetContainerModel model) {
+      if (model is NTWidgetContainerModel) {
+        return ChangeNotifierProvider<NTWidgetContainerModel>.value(
+          key: model.key,
+          value: model,
+          child: DraggableNTWidgetContainer(
+            tabGrid: this,
+            onUpdate: _ntContainerOnUpdate,
+            onDragBegin: _ntContainerOnDragBegin,
+            onDragEnd: _ntContainerOnDragEnd,
+            onDragCancel: _ntContainerOnDragCancel,
+            onResizeBegin: _ntContainerOnResizeBegin,
+            onResizeEnd: _ntContainerOnResizeEnd,
+          ),
+        );
+      } else if (model is ListLayoutModel) {
+        return ChangeNotifierProvider<ListLayoutModel>.value(
+          key: model.key,
+          value: model,
+          child: DraggableListLayout(
+            tabGrid: this,
+            onUpdate: _layoutContainerOnUpdate,
+            onDragBegin: _layoutContainerOnDragBegin,
+            onDragEnd: _layoutContainerOnDragEnd,
+            onDragCancel: _layoutContainerOnDragCancel,
+            onResizeBegin: _layoutContainerOnResizeBegin,
+            onResizeEnd: _layoutContainerOnResizeEnd,
+          ),
+        );
+      }
+      return Container();
+    }
 
     List<Widget> dashboardWidgets = [];
     List<Widget> draggingWidgets = [];
@@ -854,24 +851,6 @@ class TabGrid extends StatelessWidget {
       );
     }
 
-    // dashboardWidgets.add(
-    //   ChangeNotifierProvider<NTWidgetContainerModel>.value(
-    //     value: _widgetModels
-    //             .firstWhere((element) => element is NTWidgetContainerModel)
-    //         as NTWidgetContainerModel,
-    //     child: DraggableNTWidgetContainer(
-    //       key: UniqueKey(),
-    //       tabGrid: this,
-    //       onUpdate: _ntContainerOnUpdate,
-    //       onDragBegin: _ntContainerOnDragBegin,
-    //       onDragEnd: _ntContainerOnDragEnd,
-    //       onDragCancel: _ntContainerOnDragCancel,
-    //       onResizeBegin: _ntContainerOnResizeBegin,
-    //       onResizeEnd: _ntContainerOnResizeEnd,
-    //     ),
-    //   ),
-    // );
-
     // Also render any containers that are being dragged into the grid
     if (_containerDraggingIn != null) {
       WidgetContainerModel container = _containerDraggingIn!.key;
@@ -940,7 +919,7 @@ class TabGrid extends StatelessWidget {
             MenuItem(
               label: 'Add Widget',
               icon: Icons.add,
-              onSelected: () => onAddWidgetPressed?.call(),
+              onSelected: () => onAddWidgetPressed.call(),
             ),
             MenuItem(
               label: 'Clear Layout',

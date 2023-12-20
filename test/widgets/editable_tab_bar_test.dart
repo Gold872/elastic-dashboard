@@ -46,8 +46,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {},
             onTabDestroy: (index) {},
@@ -86,8 +86,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
@@ -137,8 +137,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
@@ -188,8 +188,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
@@ -252,8 +252,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();
@@ -327,8 +327,8 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(),
-              TabGrid(),
+              TabGrid(onAddWidgetPressed: () {}),
+              TabGrid(onAddWidgetPressed: () {}),
             ],
             onTabCreate: (tab) {
               tabBarFunctions.onTabCreate();

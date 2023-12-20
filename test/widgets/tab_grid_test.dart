@@ -75,8 +75,10 @@ void main() async {
         home: Scaffold(
           body: ChangeNotifierProvider(
             create: (context) => TabGridModel(),
-            child:
-                TabGrid.fromJson(jsonData: jsonData['tabs'][0]['grid_layout']),
+            child: TabGrid.fromJson(
+              jsonData: jsonData['tabs'][0]['grid_layout'],
+              onAddWidgetPressed: () {},
+            ),
           ),
         ),
       ),
@@ -120,8 +122,10 @@ void main() async {
         home: Scaffold(
           body: ChangeNotifierProvider(
             create: (context) => TabGridModel(),
-            child:
-                TabGrid.fromJson(jsonData: jsonData['tabs'][1]['grid_layout']),
+            child: TabGrid.fromJson(
+              jsonData: jsonData['tabs'][1]['grid_layout'],
+              onAddWidgetPressed: () {},
+            ),
           ),
         ),
       ),
@@ -161,6 +165,7 @@ void main() async {
             child: TabGrid.fromJson(
               key: GlobalKey(),
               jsonData: jsonData['tabs'][0]['grid_layout'],
+              onAddWidgetPressed: () {},
             ),
           ),
         ),
@@ -236,6 +241,7 @@ void main() async {
             child: TabGrid.fromJson(
               key: GlobalKey(),
               jsonData: jsonData['tabs'][0]['grid_layout'],
+              onAddWidgetPressed: () {},
             ),
           ),
         ),
