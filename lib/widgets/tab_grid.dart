@@ -207,16 +207,16 @@ class TabGrid extends StatelessWidget {
     if (model.validLocation) {
       model.setDraggingRect(model.previewRect);
     } else {
-      model.draggingRect = model.dragStartLocation;
+      model.setDraggingRect(model.dragStartLocation);
     }
 
-    model.displayRect = model.draggingRect;
+    model.setDisplayRect(model.draggingRect);
 
-    model.previewRect = model.draggingRect;
-    model.previewVisible = false;
-    model.validLocation = true;
+    model.setPreviewRect(model.draggingRect);
+    model.setPreviewVisible(false);
+    model.setValidLocation(true);
 
-    model.dispose();
+    model.disposeModel(deleting: false);
   }
 
   void onWidgetDragCancel(WidgetContainerModel model) {

@@ -36,6 +36,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   }
 
   List<Widget> getStackChildren(WidgetContainerModel model) {
+    TransformableBoxController? controller;
     return [
       TransformableBox(
         handleAlignment: HandleAlignment.inside,
@@ -53,7 +54,10 @@ class DraggableWidgetContainer extends StatelessWidget {
         draggable: model.draggable,
         resizable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Container();
+          return Builder(builder: (context) {
+            controller = TransformableBox.controllerOf(context);
+            return Container();
+          });
         },
         onDragStart: (event) {
           model.setDragging(true);
@@ -65,6 +69,8 @@ class DraggableWidgetContainer extends StatelessWidget {
               tabGrid.isValidMoveLocation(model, model.previewRect));
 
           onDragBegin?.call(model);
+
+          controller?.setRect(model.draggingRect);
         },
         onResizeStart: (handle, event) {
           model.setDragging(true);
@@ -77,6 +83,8 @@ class DraggableWidgetContainer extends StatelessWidget {
               tabGrid.isValidMoveLocation(model, model.previewRect));
 
           onResizeBegin?.call(model);
+
+          controller?.setRect(model.draggingRect);
         },
         onChanged: (result, event) {
           if (!model.dragging && !model.resizing) {
@@ -87,6 +95,8 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setCursorGlobalLocation(event.globalPosition);
 
           onUpdate?.call(model, result.rect, result);
+
+          controller?.setRect(model.draggingRect);
         },
         onDragEnd: (event) {
           if (!model.dragging) {
@@ -96,6 +106,8 @@ class DraggableWidgetContainer extends StatelessWidget {
 
           onDragEnd?.call(model, model.draggingRect,
               globalPosition: model.cursorGlobalLocation);
+
+          controller?.setRect(model.draggingRect);
         },
         onDragCancel: () {
           Future(() {
@@ -103,6 +115,8 @@ class DraggableWidgetContainer extends StatelessWidget {
           });
 
           onDragCancel?.call(model);
+
+          controller?.setRect(model.draggingRect);
         },
         onResizeEnd: (handle, event) {
           if (!model.dragging && !model.resizing) {
@@ -112,12 +126,16 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setResizing(false);
 
           onResizeEnd?.call(model, model.draggingRect);
+
+          controller?.setRect(model.draggingRect);
         },
         onResizeCancel: (handle) {
           model.setDragging(false);
           model.setResizing(false);
 
           onDragCancel?.call(model);
+
+          controller?.setRect(model.draggingRect);
         },
       ),
     ];
