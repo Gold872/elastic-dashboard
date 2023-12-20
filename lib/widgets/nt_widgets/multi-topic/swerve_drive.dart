@@ -272,7 +272,7 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   void drawRobotFrame(Canvas canvas, Size size, Offset offset) {
-    final double scaleFactor = size.width / 128.95;
+    final double scaleFactor = size.width / 128.95 / 0.9;
     final double circleRadius = min(size.width, size.height) / 8;
 
     Paint framePainter = Paint()
@@ -330,9 +330,9 @@ class SwerveDrivePainter extends CustomPainter {
     final double circleRadius = min(size.width, size.height) / 8;
     const double arrowAngle = 40 * pi / 180;
 
-    final double scaleFactor = size.width / 128.95;
+    final double scaleFactor = size.width / 128.95 / 0.9;
 
-    final double pixelsPerMPS = 6.75 / 1.0 * scaleFactor;
+    final double pixelsPerMPS = 7.0 / 1.0 * scaleFactor;
 
     final double minArrowBase = 6.5 * scaleFactor;
     final double maxArrowBase = 16.0 * scaleFactor;
@@ -343,7 +343,7 @@ class SwerveDrivePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     Paint anglePaint = Paint()
-      ..strokeWidth = 3.75 * scaleFactor
+      ..strokeWidth = 3.5 * scaleFactor
       ..color = Colors.red
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -576,7 +576,7 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   void drawRobotDirectionArrow(Canvas canvas, Size size, Offset offset) {
-    final double scaleFactor = size.width / 58.0;
+    final double scaleFactor = size.width / 58.0 / 0.9;
 
     const double arrowAngle = 40 * pi / 180;
     final double base = size.width * 0.45;
@@ -587,7 +587,7 @@ class SwerveDrivePainter extends CustomPainter {
     Offset center = Offset(size.width, size.height) / 2 + offset;
 
     Paint arrowPainter = Paint()
-      ..strokeWidth = 4 * scaleFactor
+      ..strokeWidth = 3.5 * scaleFactor
       ..color = Colors.red
       ..style = PaintingStyle.stroke;
 
