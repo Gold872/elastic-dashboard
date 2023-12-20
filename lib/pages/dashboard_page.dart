@@ -24,13 +24,13 @@ import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_container.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
+import '../widgets/draggable_containers/models/layout_container_model.dart';
+import '../widgets/draggable_containers/models/nt_widget_container_model.dart';
 
 class DashboardPage extends StatefulWidget {
   final SharedPreferences preferences;
