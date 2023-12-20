@@ -43,6 +43,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   WidgetContainerModel({
     required Rect initialPosition,
     required this.title,
+    this.minWidth = 128.0,
+    this.minHeight = 128.0,
   }) {
     displayRect = initialPosition;
     init();
@@ -51,6 +53,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   WidgetContainerModel.fromJson({
     required Map<String, dynamic> jsonData,
     this.enabled = false,
+    this.minWidth = 128.0,
+    this.minHeight = 128.0,
     Function(String errorMessage)? onJsonLoadingWarning,
   }) {
     fromJson(jsonData);
@@ -323,9 +327,8 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewRect(model.dragStartLocation);
           model.setValidLocation(
               tabGrid.isValidMoveLocation(model, model.previewRect));
-          onDragBegin?.call(model);
 
-          // controller?.setRect(draggingRect);
+          onDragBegin?.call(model);
         },
         onResizeStart: (handle, event) {
           model.setDragging(true);
@@ -336,6 +339,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.setPreviewRect(model.dragStartLocation);
           model.setValidLocation(
               tabGrid.isValidMoveLocation(model, model.previewRect));
+
           onResizeBegin?.call(model);
         },
         onChanged: (result, event) {

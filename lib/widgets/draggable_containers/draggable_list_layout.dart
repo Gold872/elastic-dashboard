@@ -38,14 +38,18 @@ class ListLayoutModel extends LayoutContainerModel {
     required super.title,
     required this.tabGrid,
     required this.onDragCancel,
+    super.minWidth,
+    super.minHeight,
     this.labelPosition = 'TOP',
-  });
+  }) : super();
 
   ListLayoutModel.fromJson({
     required super.jsonData,
     required this.tabGrid,
     required this.onDragCancel,
     super.enabled,
+    super.minWidth,
+    super.minHeight,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
 
@@ -307,7 +311,10 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  void addWidget(NTWidgetContainerModel model) {}
+  void addWidget(NTWidgetContainerModel model) {
+    children.add(model);
+    notifyListeners();
+  }
 
   @override
   bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition}) {

@@ -11,11 +11,15 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
   LayoutContainerModel({
     required super.initialPosition,
     required super.title,
-  });
+    super.minWidth,
+    super.minHeight,
+  }) : super();
 
   LayoutContainerModel.fromJson({
     required super.jsonData,
     super.enabled,
+    super.minWidth,
+    super.minHeight,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
 

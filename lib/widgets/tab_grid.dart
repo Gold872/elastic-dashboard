@@ -81,6 +81,8 @@ class TabGrid extends StatelessWidget {
             enabled: ntConnection.isNT4Connected,
             tabGrid: this,
             onDragCancel: _layoutContainerOnDragCancel,
+            minWidth: 128.0 * 2,
+            minHeight: 128.0 * 2,
             onJsonLoadingWarning: onJsonLoadingWarning,
           );
         default:
@@ -572,9 +574,11 @@ class TabGrid extends StatelessWidget {
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
-        Settings.gridSize.toDouble(),
-        Settings.gridSize.toDouble(),
+        Settings.gridSize.toDouble() * 2,
+        Settings.gridSize.toDouble() * 2,
       ),
+      minWidth: 128.0 * 2,
+      minHeight: 128.0 * 2,
       tabGrid: this,
       onDragCancel: _layoutContainerOnDragCancel,
     );
@@ -631,6 +635,8 @@ class TabGrid extends StatelessWidget {
               enabled: ntConnection.isNT4Connected,
               tabGrid: this,
               onDragCancel: _layoutContainerOnDragCancel,
+              minWidth: 128.0 * 2,
+              minHeight: 128.0 * 2,
             ),
           );
           break;
@@ -708,25 +714,6 @@ class TabGrid extends StatelessWidget {
     });
   }
 
-  // return NTWidgetContainerModel(
-  //   key: UniqueKey(),
-  //   tabGrid: this,
-  //   title: widget.title,
-  //   enabled: ntConnection.isNT4Connected,
-  //   initialPosition: Rect.fromLTWH(
-  //     0.0,
-  //     0.0,
-  //     widget.width,
-  //     widget.height,
-  //   ),
-  //   onUpdate: _ntContainerOnUpdate,
-  //   onDragBegin: _ntContainerOnDragBegin,
-  //   onDragEnd: _ntContainerOnDragEnd,
-  //   onDragCancel: _ntContainerOnDragCancel,
-  //   onResizeBegin: _ntContainerOnResizeBegin,
-  //   onResizeEnd: _ntContainerOnResizeEnd,
-  //   child: widget.child as NTWidget,
-  // );
   Widget getWidgetFromModel(WidgetContainerModel model) {
     if (model is NTWidgetContainerModel) {
       return ChangeNotifierProvider<NTWidgetContainerModel>.value(
