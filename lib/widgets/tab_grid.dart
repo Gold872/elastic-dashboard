@@ -516,6 +516,10 @@ class TabGrid extends StatelessWidget {
     Rect previewLocation = Rect.fromLTWH(previewX, previewY, width, height);
     widget.setPreviewRect(previewLocation);
 
+    widget.updateMinimumSize();
+    widget.setEnabled(ntConnection.isNT4Connected);
+
+    // If dragging into layout
     if (isValidLayoutLocation(widget.cursorGlobalLocation)) {
       LayoutContainerModel layoutContainer =
           getLayoutAtLocation(widget.cursorGlobalLocation)!;
@@ -529,6 +533,7 @@ class TabGrid extends StatelessWidget {
       widget.child.dispose(deleting: !fromLayout);
       if (!fromLayout) {
         widget.child.unSubscribe();
+        widget.forceDispose();
       }
 
       refresh();
@@ -557,14 +562,15 @@ class TabGrid extends StatelessWidget {
     }
 
     return NTWidgetContainerModel(
+      title: widget.title,
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
         widget.width,
         widget.height,
       ),
-      title: widget.title,
       child: widget.child as NTWidget,
+      enabled: ntConnection.isNT4Connected,
     );
   }
 

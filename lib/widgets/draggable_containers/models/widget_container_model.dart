@@ -42,6 +42,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   WidgetContainerModel({
     required Rect initialPosition,
     required this.title,
+    this.enabled = false,
     this.minWidth = 128.0,
     this.minHeight = 128.0,
   }) {

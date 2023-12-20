@@ -20,6 +20,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     required super.initialPosition,
     required super.title,
     required this.child,
+    super.enabled,
   });
 
   NTWidgetContainerModel.fromJson({
@@ -286,6 +287,13 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     child.unSubscribe();
     child = newWidget;
 
+    minWidth = NTWidgetBuilder.getMinimumWidth(child);
+    minHeight = NTWidgetBuilder.getMinimumHeight(child);
+
+    notifyListeners();
+  }
+
+  void updateMinimumSize() {
     minWidth = NTWidgetBuilder.getMinimumWidth(child);
     minHeight = NTWidgetBuilder.getMinimumHeight(child);
 
