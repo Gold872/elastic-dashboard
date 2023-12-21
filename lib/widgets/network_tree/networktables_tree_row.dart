@@ -1,12 +1,12 @@
-import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
-import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:flutter/material.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';

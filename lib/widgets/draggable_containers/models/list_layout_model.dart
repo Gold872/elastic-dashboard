@@ -39,11 +39,15 @@ class ListLayoutModel extends LayoutContainerModel {
     required super.title,
     required this.tabGrid,
     required this.onDragCancel,
-    this.children = const [],
+    List<NTWidgetContainerModel>? children,
     super.minWidth,
     super.minHeight,
     this.labelPosition = 'TOP',
-  }) : super();
+  }) : super() {
+    if (children != null) {
+      this.children = children;
+    }
+  }
 
   ListLayoutModel.fromJson({
     required super.jsonData,

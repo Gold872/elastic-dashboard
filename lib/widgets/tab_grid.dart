@@ -527,8 +527,7 @@ class TabGrid extends StatelessWidget {
   }
 
   ListLayoutModel createListLayout(
-      {String title = 'List Layout',
-      List<NTWidgetContainerModel> children = const []}) {
+      {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
     return ListLayoutModel(
       title: title,
       initialPosition: Rect.fromLTWH(
