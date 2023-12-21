@@ -39,6 +39,7 @@ class ListLayoutModel extends LayoutContainerModel {
     required super.title,
     required this.tabGrid,
     required this.onDragCancel,
+    this.children = const [],
     super.minWidth,
     super.minHeight,
     this.labelPosition = 'TOP',

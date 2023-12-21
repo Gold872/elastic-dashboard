@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +31,6 @@ import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
-import '../widgets/draggable_containers/models/nt_widget_container_model.dart';
 
 class DashboardPage extends StatefulWidget {
   final SharedPreferences preferences;
@@ -1276,17 +1276,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     visible: addWidgetDialogVisible,
                     onNTDragUpdate: (globalPosition, widget) {
                       grids[currentTabIndex]
-                          .addNTDragInWidget(widget, globalPosition);
+                          .addDragInWidget(widget, globalPosition);
                     },
                     onNTDragEnd: (widget) {
-                      grids[currentTabIndex].placeNTDragInWidget(widget);
+                      grids[currentTabIndex].placeDragInWidget(widget);
                     },
                     onLayoutDragUpdate: (globalPosition, widget) {
                       grids[currentTabIndex]
-                          .addLayoutDragInWidget(widget, globalPosition);
+                          .addDragInWidget(widget, globalPosition);
                     },
                     onLayoutDragEnd: (widget) {
-                      grids[currentTabIndex].placeLayoutDragInWidget(widget);
+                      grids[currentTabIndex].placeDragInWidget(widget);
                     },
                     onClose: () {
                       setState(() => addWidgetDialogVisible = false);
@@ -1355,9 +1355,9 @@ class AddWidgetDialog extends StatelessWidget {
   final TabGrid Function() grid;
   final bool visible;
 
-  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
+  final Function(Offset globalPosition, WidgetContainerModel widget)?
       onNTDragUpdate;
-  final Function(NTWidgetContainerModel widget)? onNTDragEnd;
+  final Function(WidgetContainerModel widget)? onNTDragEnd;
 
   final Function(Offset globalPosition, LayoutContainerModel widget)?
       onLayoutDragUpdate;
@@ -1411,10 +1411,15 @@ class AddWidgetDialog extends StatelessWidget {
                     child: TabBarView(
                       children: [
                         NetworkTableTree(
+                          listLayoutBuilder: (
+                              {required title, required children}) {
+                            return grid().createListLayout(
+                              title: title,
+                              children: children,
+                            );
+                          },
                           onDragUpdate: onNTDragUpdate,
                           onDragEnd: onNTDragEnd,
-                          widgetContainerBuilder: (widgetContainer) =>
-                              grid().createNTWidgetContainer(widgetContainer),
                         ),
                         ListView(
                           children: [

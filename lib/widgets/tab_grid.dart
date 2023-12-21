@@ -398,7 +398,7 @@ class TabGrid extends StatelessWidget {
 
   void layoutDragOutEnd(WidgetContainerModel widget) {
     if (widget is NTWidgetContainerModel) {
-      placeNTDragInWidget(widget, true);
+      placeDragInWidget(widget, true);
     }
   }
 
@@ -432,58 +432,7 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void addLayoutDragInWidget(
-      LayoutContainerModel layout, Offset globalPosition) {
-    Offset localPosition = getLocalPosition(globalPosition);
-    layout.setDraggingRect(
-      Rect.fromLTWH(
-        localPosition.dx,
-        localPosition.dy,
-        layout.draggingRect.width,
-        layout.draggingRect.height,
-      ),
-    );
-    _containerDraggingIn = MapEntry(layout, globalPosition);
-    refresh();
-  }
-
-  void placeLayoutDragInWidget(LayoutContainerModel layout) {
-    if (_containerDraggingIn == null) {
-      return;
-    }
-
-    Offset globalPosition = _containerDraggingIn!.value;
-
-    Offset localPosition = getLocalPosition(globalPosition);
-
-    double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-    double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
-
-    Rect previewLocation = Rect.fromLTWH(previewX, previewY,
-        layout.displayRect.width, layout.displayRect.height);
-
-    if (!isValidLocation(previewLocation)) {
-      _containerDraggingIn = null;
-
-      refresh();
-      return;
-    }
-
-    double width = layout.displayRect.width;
-    double height = layout.displayRect.height;
-
-    layout.setDisplayRect(Rect.fromLTWH(previewX, previewY, width, height));
-    layout.setDraggingRect(Rect.fromLTWH(previewX, previewY, width, height));
-    layout
-        .setDragStartLocation(Rect.fromLTWH(previewX, previewY, width, height));
-
-    addWidget(layout);
-    _containerDraggingIn = null;
-
-    refresh();
-  }
-
-  void addNTDragInWidget(NTWidgetContainerModel widget, Offset globalPosition) {
+  void addDragInWidget(WidgetContainerModel widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
     widget.setDraggingRect(
       Rect.fromLTWH(
@@ -497,7 +446,7 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void placeNTDragInWidget(NTWidgetContainerModel widget,
+  void placeDragInWidget(WidgetContainerModel widget,
       [bool fromLayout = false]) {
     if (_containerDraggingIn == null) {
       return;
@@ -516,11 +465,12 @@ class TabGrid extends StatelessWidget {
     Rect previewLocation = Rect.fromLTWH(previewX, previewY, width, height);
     widget.setPreviewRect(previewLocation);
 
-    widget.updateMinimumSize();
+    widget.tryCast<NTWidgetContainerModel>()?.updateMinimumSize();
     widget.setEnabled(ntConnection.isNT4Connected);
 
     // If dragging into layout
-    if (isValidLayoutLocation(widget.cursorGlobalLocation)) {
+    if (widget is NTWidgetContainerModel &&
+        isValidLayoutLocation(widget.cursorGlobalLocation)) {
       LayoutContainerModel layoutContainer =
           getLayoutAtLocation(widget.cursorGlobalLocation)!;
 
@@ -530,10 +480,12 @@ class TabGrid extends StatelessWidget {
     } else if (!isValidLocation(previewLocation)) {
       _containerDraggingIn = null;
 
-      widget.child.dispose(deleting: !fromLayout);
-      if (!fromLayout) {
-        widget.child.unSubscribe();
-        widget.forceDispose();
+      if (widget is NTWidgetContainerModel) {
+        widget.child.dispose(deleting: !fromLayout);
+        if (!fromLayout) {
+          widget.child.unSubscribe();
+          widget.forceDispose();
+        }
       }
 
       refresh();
@@ -547,7 +499,7 @@ class TabGrid extends StatelessWidget {
 
     _containerDraggingIn = null;
 
-    widget.child.dispose();
+    widget.tryCast<NTWidgetContainerModel>()?.child.dispose();
 
     refresh();
   }
@@ -574,15 +526,18 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  ListLayoutModel createListLayout() {
+  ListLayoutModel createListLayout(
+      {String title = 'List Layout',
+      List<NTWidgetContainerModel> children = const []}) {
     return ListLayoutModel(
-      title: 'List Layout',
+      title: title,
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
         Settings.gridSize.toDouble() * 2,
         Settings.gridSize.toDouble() * 2,
       ),
+      children: children,
       minWidth: 128.0 * 2,
       minHeight: 128.0 * 2,
       tabGrid: this,

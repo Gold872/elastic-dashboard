@@ -1,5 +1,8 @@
 import 'dart:ui';
 
+import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -7,22 +10,26 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
-import '../draggable_containers/models/nt_widget_container_model.dart';
+
+typedef ListLayoutBuilder = ListLayoutModel Function({
+  required String title,
+  required List<NTWidgetContainerModel> children,
+});
 
 class NetworkTableTree extends StatefulWidget {
-  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
-      onDragUpdate;
-  final Function(NTWidgetContainerModel widget)? onDragEnd;
-  final NTWidgetContainerModel? Function(WidgetContainer? widget)?
-      widgetContainerBuilder;
+  final ListLayoutBuilder listLayoutBuilder;
 
-  const NetworkTableTree(
-      {super.key,
-      this.onDragUpdate,
-      this.onDragEnd,
-      this.widgetContainerBuilder});
+  final Function(Offset globalPosition, WidgetContainerModel widget)?
+      onDragUpdate;
+  final Function(WidgetContainerModel widget)? onDragEnd;
+
+  const NetworkTableTree({
+    super.key,
+    required this.listLayoutBuilder,
+    this.onDragUpdate,
+    this.onDragEnd,
+  });
 
   @override
   State<NetworkTableTree> createState() => _NetworkTableTreeState();
@@ -32,12 +39,10 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   final NetworkTableTreeRow root = NetworkTableTreeRow(topic: '/', rowName: '');
   late final TreeController<NetworkTableTreeRow> treeController;
 
-  late final Function(Offset globalPosition, NTWidgetContainerModel widget)?
+  late final Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate = widget.onDragUpdate;
-  late final Function(NTWidgetContainerModel widget)? onDragEnd =
+  late final Function(WidgetContainerModel widget)? onDragEnd =
       widget.onDragEnd;
-  late final NTWidgetContainerModel? Function(WidgetContainer? widget)?
-      widgetContainerBuilder = widget.widgetContainerBuilder;
 
   late final Function(NT4Topic topic) onNewTopicAnnounced;
 
@@ -122,9 +127,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         return TreeTile(
           key: UniqueKey(),
           entry: entry,
+          listLayoutBuilder: widget.listLayoutBuilder,
           onDragUpdate: onDragUpdate,
           onDragEnd: onDragEnd,
-          widgetContainerBuilder: widgetContainerBuilder,
           onTap: () {
             setState(() => treeController.toggleExpansion(entry.node));
           },
@@ -139,20 +144,21 @@ class TreeTile extends StatelessWidget {
     super.key,
     required this.entry,
     required this.onTap,
+    required this.listLayoutBuilder,
     this.onDragUpdate,
     this.onDragEnd,
-    this.widgetContainerBuilder,
   });
 
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
-  final Function(Offset globalPosition, NTWidgetContainerModel widget)?
-      onDragUpdate;
-  final Function(NTWidgetContainerModel widget)? onDragEnd;
-  final NTWidgetContainerModel? Function(WidgetContainer? widget)?
-      widgetContainerBuilder;
 
-  NTWidgetContainerModel? draggingWidget;
+  final ListLayoutBuilder listLayoutBuilder;
+
+  final Function(Offset globalPosition, WidgetContainerModel widget)?
+      onDragUpdate;
+  final Function(WidgetContainerModel widget)? onDragEnd;
+
+  WidgetContainerModel? draggingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +178,8 @@ class TreeTile extends StatelessWidget {
                 return;
               }
 
-              draggingWidget = widgetContainerBuilder
-                  ?.call(await entry.node.toWidgetContainer());
+              draggingWidget = await entry.node
+                  .toWidgetContainerModel(listLayoutBuilder: listLayoutBuilder);
             },
             onPanUpdate: (details) {
               if (draggingWidget == null) {

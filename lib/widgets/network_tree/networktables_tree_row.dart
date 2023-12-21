@@ -1,3 +1,6 @@
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:flutter/material.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
@@ -152,6 +155,58 @@ class NetworkTableTreeRow {
     }
 
     return NTWidgetBuilder.buildNTWidgetFromType(type, topic);
+  }
+
+  Future<List<NTWidgetContainerModel>?> getListLayoutChildren() async {
+    List<NTWidgetContainerModel> listChildren = [];
+    for (NetworkTableTreeRow child in children) {
+      if (child.rowName.startsWith('.')) {
+        continue;
+      }
+      WidgetContainerModel? childModel =
+          await child.toWidgetContainerModel(resortToListLayout: false);
+
+      if (childModel is NTWidgetContainerModel) {
+        listChildren.add(childModel);
+      }
+    }
+
+    if (listChildren.isEmpty) {
+      return null;
+    }
+
+    return listChildren;
+  }
+
+  Future<WidgetContainerModel?> toWidgetContainerModel({
+    bool resortToListLayout = true,
+    ListLayoutBuilder? listLayoutBuilder,
+  }) async {
+    NTWidget? primary = await getPrimaryWidget();
+
+    if (primary == null) {
+      if (resortToListLayout) {
+        List<NTWidgetContainerModel>? listLayoutChildren =
+            await getListLayoutChildren();
+
+        if (listLayoutChildren != null) {
+          return listLayoutBuilder?.call(
+            title: rowName,
+            children: listLayoutChildren,
+          );
+        }
+      }
+      return null;
+    }
+
+    double width = NTWidgetBuilder.getDefaultWidth(primary);
+    double height = NTWidgetBuilder.getDefaultHeight(primary);
+
+    return NTWidgetContainerModel(
+      initialPosition: Rect.fromLTWH(0.0, 0.0, width, height),
+      title: rowName,
+      child: primary,
+    );
   }
 
   Future<WidgetContainer?> toWidgetContainer() async {
