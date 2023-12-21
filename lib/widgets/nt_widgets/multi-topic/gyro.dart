@@ -89,12 +89,6 @@ class Gyro extends NTWidget {
     ];
   }
 
-  @override
-  void refresh() {
-    super.refresh();
-    valueSubscription.requestNewValue();
-  }
-
   double _wrapAngle(double angle) {
     if (angle < 0) {
       return ((angle % 360) + 360) % 360;
@@ -105,14 +99,12 @@ class Gyro extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: valueSubscription.periodicStream(yieldAll: false),
       initialData: ntConnection.getLastAnnouncedValue(valueTopic),
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         double value = tryCast(snapshot.data) ?? 0.0;
 
         if (counterClockwisePositive) {

@@ -90,13 +90,11 @@ class SplitButtonChooser extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         List<Object?> rawOptions = ntConnection
                 .getLastAnnouncedValue(optionsTopicName)
                 ?.tryCast<List<Object?>>() ??

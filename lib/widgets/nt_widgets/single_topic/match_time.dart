@@ -86,14 +86,12 @@ class MatchTimeWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: subscription?.periodicStream(yieldAll: false),
       initialData: ntConnection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         double time = tryCast(snapshot.data) ?? -1.0;
         time = time.floorToDouble();
 

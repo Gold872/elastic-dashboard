@@ -54,13 +54,11 @@ class ThreeAxisAccelerometer extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         double xAccel =
             tryCast(ntConnection.getLastAnnouncedValue(xTopic)) ?? 0.0;
         double yAccel =

@@ -23,14 +23,12 @@ class MultiColorView extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: subscription?.periodicStream(yieldAll: false),
       initialData: ntConnection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         List<Object?> hexStringsRaw =
             snapshot.data?.tryCast<List<Object?>>() ?? [];
         List<String> hexStrings = hexStringsRaw.whereType<String>().toList();

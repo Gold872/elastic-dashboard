@@ -56,14 +56,12 @@ class RelayWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: valueSubscription.periodicStream(yieldAll: false),
       initialData: ntConnection.getLastAnnouncedValue(valueTopicName),
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         String selected = tryCast(snapshot.data) ?? 'Off';
 
         if (!selectedOptions.contains(selected)) {

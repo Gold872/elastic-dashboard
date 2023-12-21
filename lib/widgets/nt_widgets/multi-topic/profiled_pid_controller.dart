@@ -85,13 +85,11 @@ class ProfiledPIDControllerWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
         stream: multiTopicPeriodicStream,
         builder: (context, snapshot) {
-          notifier = context.watch<NTWidgetNotifier?>();
-
           double kP =
               tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
           double kI =

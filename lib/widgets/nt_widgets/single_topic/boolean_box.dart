@@ -103,14 +103,12 @@ class BooleanBox extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: subscription?.periodicStream(yieldAll: false),
       initialData: ntConnection.getLastAnnouncedValue(topic),
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         bool value = tryCast(snapshot.data) ?? false;
 
         return Container(

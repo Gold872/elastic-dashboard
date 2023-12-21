@@ -15,6 +15,7 @@ import 'widget_container_model.dart';
 
 class NTWidgetContainerModel extends WidgetContainerModel {
   late NTWidget child;
+  NTWidgetModel childModel = NTWidgetModel();
 
   NTWidgetContainerModel({
     required super.initialPosition,
@@ -73,6 +74,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     child = NTWidgetBuilder.buildNTWidgetFromJson(type, widgetProperties,
         onWidgetTypeNotFound: onJsonLoadingWarning);
+    childModel.forceDispose();
+
+    childModel = NTWidgetModel();
   }
 
   @override
@@ -80,6 +84,12 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     super.disposeModel(deleting: deleting);
 
     child.dispose(deleting: deleting);
+  }
+
+  @override
+  void forceDispose() {
+    super.forceDispose();
+    childModel.forceDispose();
   }
 
   @override
@@ -236,8 +246,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       width: draggingRect.width,
       height: draggingRect.height,
       opacity: 0.80,
-      child: ChangeNotifierProvider(
-        create: (context) => NTWidgetNotifier(),
+      child: ChangeNotifierProvider<NTWidgetModel>.value(
+        value: childModel,
         child: child,
       ),
     );
@@ -254,8 +264,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         opacity: (enabled) ? 1.00 : 0.50,
         child: AbsorbPointer(
           absorbing: !enabled,
-          child: ChangeNotifierProvider(
-            create: (context) => NTWidgetNotifier(),
+          child: ChangeNotifierProvider.value(
+            value: childModel,
             child: child,
           ),
         ),
@@ -285,7 +295,10 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     child.dispose(deleting: true);
     child.unSubscribe();
+    childModel.forceDispose();
+
     child = newWidget;
+    childModel = NTWidgetModel();
 
     minWidth = NTWidgetBuilder.getMinimumWidth(child);
     minHeight = NTWidgetBuilder.getMinimumHeight(child);

@@ -56,14 +56,12 @@ class AccelerometerWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
         stream: valueSubscription.periodicStream(yieldAll: false),
         initialData: ntConnection.getLastAnnouncedValue(valueTopic),
         builder: (context, snapshot) {
-          notifier = context.watch<NTWidgetNotifier?>();
-
           double value = tryCast(snapshot.data) ?? 0.0;
 
           return Row(

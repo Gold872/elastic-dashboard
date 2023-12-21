@@ -140,7 +140,7 @@ class GraphWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     List<_GraphPoint>? currentGraphData = _graphWidget?.getCurrentData();
 
@@ -148,23 +148,13 @@ class GraphWidget extends NTWidget {
       _graphData = currentGraphData;
     }
 
-    _graphWidget = _GraphWidgetGraph(
+    return _graphWidget = _GraphWidgetGraph(
       initialData: _graphData,
       subscription: subscription,
       timeDisplayed: timeDisplayed,
       mainColor: mainColor,
       minValue: minValue,
       maxValue: maxValue,
-    );
-
-    // Idk why this works but otherwise it doesn't ever rebuild ¯\_(ツ)_/¯
-    return StreamBuilder(
-      stream: Stream.periodic(const Duration(milliseconds: 500)),
-      builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
-        return _graphWidget!;
-      },
     );
   }
 }

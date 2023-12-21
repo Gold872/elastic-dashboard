@@ -52,13 +52,11 @@ class EncoderWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         double distance =
             tryCast(ntConnection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
         double speed =

@@ -74,13 +74,11 @@ class DifferentialDrive extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         double leftSpeed =
             tryCast(ntConnection.getLastAnnouncedValue(leftSpeedTopicName)) ??
                 0.0;

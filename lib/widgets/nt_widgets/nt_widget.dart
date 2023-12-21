@@ -7,15 +7,22 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
-class NTWidgetNotifier extends ChangeNotifier {
-  // No idea why this is needed, but it was throwing errors ¯\_(ツ)_/¯
+class NTWidgetModel extends ChangeNotifier {
   bool _disposed = false;
+  bool _forceDispose = false;
+
+  void forceDispose() {
+    _forceDispose = true;
+    dispose();
+  }
 
   @override
   void dispose() {
-    super.dispose();
+    if (!hasListeners || _forceDispose) {
+      super.dispose();
 
-    _disposed = true;
+      _disposed = true;
+    }
   }
 
   void refresh() {
@@ -34,7 +41,7 @@ abstract class NTWidget extends StatelessWidget {
   String dataType = 'Unknown';
 
   NT4Subscription? subscription;
-  NTWidgetNotifier? notifier;
+  NTWidgetModel? notifier;
   NT4Topic? ntTopic;
 
   NTWidget({

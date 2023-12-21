@@ -91,13 +91,11 @@ class CameraStreamWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetNotifier?>();
+    notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        notifier = context.watch<NTWidgetNotifier?>();
-
         if (!ntConnection.isNT4Connected && clientOpen) {
           closeClient();
         }
