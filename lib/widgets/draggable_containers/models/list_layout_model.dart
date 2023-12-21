@@ -164,7 +164,7 @@ class ListLayoutModel extends LayoutContainerModel {
           content: StatefulBuilder(
             builder: (context, setState) {
               return SizedBox(
-                width: 353,
+                width: 375,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
