@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -83,34 +85,24 @@ class TextDisplay extends NTWidget {
                 break;
               case NT4TypeStr.kFloat32Arr:
               case NT4TypeStr.kFloat64Arr:
-                formattedData = List<double>.of(value
-                    .substring(1)
-                    .substring(value.length - 1)
-                    .split(',')
-                    .map((e) => double.tryParse(e.trim()) ?? 0.0));
+                formattedData = tryCast<List<dynamic>>(jsonDecode(value))
+                    ?.whereType<num>()
+                    .toList();
                 break;
               case NT4TypeStr.kIntArr:
-                formattedData = List<int>.of(value
-                    .substring(1)
-                    .substring(1)
-                    .substring(value.length - 1)
-                    .split(',')
-                    .map((e) => int.tryParse(e.trim()) ?? 0));
+                formattedData = tryCast<List<dynamic>>(jsonDecode(value))
+                    ?.whereType<int>()
+                    .toList();
                 break;
               case NT4TypeStr.kBoolArr:
-                formattedData = List<bool>.of(value
-                    .substring(1)
-                    .substring(1)
-                    .substring(value.length - 1)
-                    .split(',')
-                    .map((e) => bool.tryParse(e.trim()) ?? false));
+                formattedData = tryCast<List<dynamic>>(jsonDecode(value))
+                    ?.whereType<bool>()
+                    .toList();
                 break;
               case NT4TypeStr.kStringArr:
-                formattedData = List<String>.of(value
-                    .substring(1)
-                    .substring(value.length - 1)
-                    .split(',')
-                    .map((e) => e.replaceAll(']', '').trim()));
+                formattedData = tryCast<List<dynamic>>(jsonDecode(value))
+                    ?.whereType<String>()
+                    .toList();
                 break;
               default:
                 break;
