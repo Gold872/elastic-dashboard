@@ -537,8 +537,8 @@ class TabGrid extends StatelessWidget {
         Settings.gridSize.toDouble() * 2,
       ),
       children: children,
-      minWidth: 128.0 * 2,
-      minHeight: 128.0 * 2,
+      minWidth: 128.0,
+      minHeight: 128.0,
       tabGrid: this,
       onDragCancel: _layoutContainerOnDragCancel,
     );
