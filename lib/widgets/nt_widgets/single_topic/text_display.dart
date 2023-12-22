@@ -91,7 +91,7 @@ class TextDisplay extends NTWidget {
                 break;
               case NT4TypeStr.kIntArr:
                 formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-                    ?.whereType<int>()
+                    ?.whereType<num>()
                     .toList();
                 break;
               case NT4TypeStr.kBoolArr:

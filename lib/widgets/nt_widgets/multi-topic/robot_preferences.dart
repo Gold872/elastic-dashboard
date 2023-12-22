@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
@@ -37,6 +38,8 @@ class RobotPreferences extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
+    notifier = context.watch<NTWidgetModel>();
+
     return StreamBuilder(
       stream: subscription?.periodicStream(),
       builder: (context, snapshot) {
