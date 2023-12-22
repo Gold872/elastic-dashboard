@@ -247,9 +247,11 @@ class DifferentialDrivePainter extends CustomPainter {
   }
 
   void drawRobotFrame(Canvas canvas, Size size) {
+    final double scaleFactor = size.width / 108.15;
+
     Paint outlinePainter = Paint()
       ..color = Colors.grey
-      ..strokeWidth = 2
+      ..strokeWidth = 2 * scaleFactor
       ..style = PaintingStyle.stroke;
 
     double wheelWidth = size.width / 8;
@@ -290,9 +292,11 @@ class DifferentialDrivePainter extends CustomPainter {
   }
 
   void drawMotionVector(Canvas canvas, Size size, Offset center) {
+    final double scaleFactor = size.width / 94.6;
+
     Paint vectorArc = Paint()
       ..color = Colors.red
-      ..strokeWidth = 2
+      ..strokeWidth = 2 * scaleFactor
       ..style = PaintingStyle.stroke;
 
     final double forwardSpeed = (leftSpeed + rightSpeed) / 2;
@@ -355,9 +359,10 @@ class DifferentialDrivePainter extends CustomPainter {
       // Draw curved arrow
       final double arcLength = sqrt(vectorX * vectorX + vectorY * vectorY);
 
-      final double scaleFactor = (7.50 * arcLength / maxRadius).clamp(0.0, 1.1);
+      final double arrowScaleFactor =
+          (7.50 * arcLength / maxRadius).clamp(0.0, 1.1) * scaleFactor;
 
-      final double base = scaleFactor * arrowSize / 2;
+      final double base = arrowScaleFactor * arrowSize / 2;
 
       final double arrowRotation = atan2(vectorY, vectorX) +
           forwardSpeedSign * arcSign * arcLength / radius;
@@ -378,10 +383,11 @@ class DifferentialDrivePainter extends CustomPainter {
 
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
-        final double scaleFactor =
-            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1);
+        final double arrowScaleFactor =
+            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1) *
+                scaleFactor;
 
-        final double base = scaleFactor * arrowSize / 2;
+        final double base = arrowScaleFactor * arrowSize / 2;
 
         const double arrowRotation = pi / 2;
 
@@ -400,10 +406,11 @@ class DifferentialDrivePainter extends CustomPainter {
 
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
-        final double scaleFactor =
-            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1);
+        final double arrowScaleFactor =
+            (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1) *
+                scaleFactor;
 
-        final double base = scaleFactor * arrowSize / 2;
+        final double base = arrowScaleFactor * arrowSize / 2;
 
         double tipX = 0.5 * radius * cos(angle + startAngle);
         double tipY = 0.5 * radius * sin(angle + startAngle);
