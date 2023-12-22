@@ -69,7 +69,14 @@ class DifferentialDrive extends NTWidget {
     double rightSpeed =
         tryCast(ntConnection.getLastAnnouncedValue(rightSpeedTopicName)) ?? 0.0;
 
-    return [leftSpeed, rightSpeed];
+    return [
+      leftSpeed,
+      rightSpeed,
+      leftSpeedPreviousValue,
+      rightSpeedPreviousValue,
+      leftSpeedCurrentValue,
+      rightSpeedCurrentValue,
+    ];
   }
 
   @override
