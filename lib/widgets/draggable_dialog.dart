@@ -31,9 +31,9 @@ class _DraggableDialogState extends State<DraggableDialog> {
   @override
   Widget build(BuildContext context) {
     return TransformableBox(
-      constraints: BoxConstraints(
-          minWidth: Settings.gridSize.toDouble(),
-          minHeight: Settings.gridSize.toDouble(),
+      constraints: const BoxConstraints(
+          minWidth: 300,
+          minHeight: 400,
           maxWidth: double.infinity,
           maxHeight: double.infinity),
       clampingRect: const Rect.fromLTWH(0, 0, double.infinity, double.infinity),

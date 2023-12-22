@@ -24,9 +24,12 @@ class NetworkTableTree extends StatefulWidget {
       onDragUpdate;
   final Function(WidgetContainerModel widget)? onDragEnd;
 
+  final bool hideMetadata;
+
   const NetworkTableTree({
     super.key,
     required this.listLayoutBuilder,
+    required this.hideMetadata,
     this.onDragUpdate,
     this.onDragEnd,
   });
@@ -51,7 +54,16 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     super.initState();
 
     treeController = TreeController<NetworkTableTreeRow>(
-        roots: root.children, childrenProvider: (node) => node.children);
+      roots: root.children,
+      childrenProvider: (node) {
+        if (widget.hideMetadata) {
+          return node.children
+              .whereNot((element) => element.rowName.startsWith('.'));
+        } else {
+          return node.children;
+        }
+      },
+    );
 
     ntConnection.nt4Client
         .addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
@@ -66,6 +78,14 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     ntConnection.nt4Client.removeTopicAnnounceListener(onNewTopicAnnounced);
 
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(NetworkTableTree oldWidget) {
+    if (widget.hideMetadata != oldWidget.hideMetadata) {
+      treeController.rebuild();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   void createRows(NT4Topic nt4Topic) {
@@ -131,6 +151,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           onDragUpdate: onDragUpdate,
           onDragEnd: onDragEnd,
           onTap: () {
+            if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
+              return;
+            }
             setState(() => treeController.toggleExpansion(entry.node));
           },
         );
@@ -213,15 +236,16 @@ class TreeTile extends StatelessWidget {
                   ListTile(
                     dense: true,
                     contentPadding: const EdgeInsets.only(right: 20.0),
-                    leading: (entry.hasChildren)
-                        ? FolderButton(
-                            openedIcon: const Icon(Icons.arrow_drop_down),
-                            closedIcon: const Icon(Icons.arrow_right),
-                            iconSize: 24,
-                            isOpen: entry.hasChildren ? entry.isExpanded : null,
-                            onPressed: entry.hasChildren ? onTap : null,
-                          )
-                        : const SizedBox(width: 8.0),
+                    leading:
+                        (entry.hasChildren || entry.node.containsOnlyMetadata())
+                            ? FolderButton(
+                                openedIcon: const Icon(Icons.arrow_drop_down),
+                                closedIcon: const Icon(Icons.arrow_right),
+                                iconSize: 24,
+                                isOpen: entry.hasChildren && entry.isExpanded,
+                                onPressed: entry.hasChildren ? onTap : null,
+                              )
+                            : const SizedBox(width: 8.0),
                     title: Text(entry.node.rowName),
                     trailing: (entry.node.ntTopic != null)
                         ? Text(entry.node.ntTopic!.type, style: trailingStyle)

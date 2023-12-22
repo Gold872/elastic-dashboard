@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1351,7 +1353,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 }
 
-class AddWidgetDialog extends StatelessWidget {
+class AddWidgetDialog extends StatefulWidget {
   final TabGrid Function() grid;
   final bool visible;
 
@@ -1377,9 +1379,16 @@ class AddWidgetDialog extends StatelessWidget {
   });
 
   @override
+  State<AddWidgetDialog> createState() => _AddWidgetDialogState();
+}
+
+class _AddWidgetDialogState extends State<AddWidgetDialog> {
+  bool hideMetadata = true;
+
+  @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: visible,
+      visible: widget.visible,
       child: DraggableDialog(
         dialog: Container(
           decoration: const BoxDecoration(boxShadow: [
@@ -1413,21 +1422,23 @@ class AddWidgetDialog extends StatelessWidget {
                         NetworkTableTree(
                           listLayoutBuilder: (
                               {required title, required children}) {
-                            return grid().createListLayout(
-                              title: title,
-                              children: children,
-                            );
+                            return widget.grid().createListLayout(
+                                  title: title,
+                                  children: children,
+                                );
                           },
-                          onDragUpdate: onNTDragUpdate,
-                          onDragEnd: onNTDragEnd,
+                          hideMetadata: hideMetadata,
+                          onDragUpdate: widget.onNTDragUpdate,
+                          onDragEnd: widget.onNTDragEnd,
                         ),
                         ListView(
                           children: [
                             LayoutDragTile(
                               title: 'List Layout',
-                              layoutBuilder: () => grid().createListLayout(),
-                              onDragUpdate: onLayoutDragUpdate,
-                              onDragEnd: onLayoutDragEnd,
+                              layoutBuilder: () =>
+                                  widget.grid().createListLayout(),
+                              onDragUpdate: widget.onLayoutDragUpdate,
+                              onDragEnd: widget.onLayoutDragEnd,
                             ),
                           ],
                         ),
@@ -1436,10 +1447,39 @@ class AddWidgetDialog extends StatelessWidget {
                   ),
                   Row(
                     children: [
+                      Builder(builder: (context) {
+                        return IconButton(
+                          icon: const Icon(Icons.settings),
+                          onPressed: () {
+                            showPopover(
+                              context: context,
+                              direction: PopoverDirection.top,
+                              transitionDuration:
+                                  const Duration(milliseconds: 100),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.background,
+                              barrierColor: Colors.transparent,
+                              width: 200.0,
+                              bodyBuilder: (context) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: DialogToggleSwitch(
+                                    label: 'Hide Metadata',
+                                    initialValue: hideMetadata,
+                                    onToggle: (value) {
+                                      setState(() => hideMetadata = value);
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      }),
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          onClose?.call();
+                          widget.onClose?.call();
                         },
                         child: const Text('Close'),
                       ),

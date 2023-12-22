@@ -45,6 +45,14 @@ class NetworkTableTreeRow {
     return true;
   }
 
+  bool containsOnlyMetadata() {
+    if (children.isEmpty) {
+      return false;
+    }
+
+    return !children.any((row) => !row.rowName.startsWith('.'));
+  }
+
   void addRow(NetworkTableTreeRow row) {
     if (hasRow(row.rowName)) {
       return;
