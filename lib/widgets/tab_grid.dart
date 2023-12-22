@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -200,6 +201,10 @@ class TabGrid extends StatelessWidget {
     model.setPreviewVisible(false);
     model.setValidLocation(true);
 
+    if (model is NTWidgetContainerModel && model.child is FieldWidget) {
+      model.child.refresh();
+    }
+
     model.dispose();
   }
 
@@ -319,17 +324,17 @@ class TabGrid extends StatelessWidget {
   }
 
   void _ntContainerOnUpdate(
-      dynamic widget, Rect newRect, TransformResult result) {
+      WidgetContainerModel widget, Rect newRect, TransformResult result) {
     onWidgetUpdate(widget, newRect, result);
 
     refresh();
   }
 
-  void _ntContainerOnDragBegin(dynamic widget) {
+  void _ntContainerOnDragBegin(WidgetContainerModel widget) {
     refresh();
   }
 
-  void _ntContainerOnDragEnd(dynamic model, Rect releaseRect,
+  void _ntContainerOnDragEnd(WidgetContainerModel model, Rect releaseRect,
       {Offset? globalPosition}) {
     onWidgetDragEnd(model);
 
@@ -346,51 +351,52 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  void _ntContainerOnDragCancel(dynamic widget) {
+  void _ntContainerOnDragCancel(WidgetContainerModel widget) {
     onWidgetDragCancel(widget);
 
     refresh();
   }
 
-  void _ntContainerOnResizeBegin(dynamic widget) {
+  void _ntContainerOnResizeBegin(WidgetContainerModel widget) {
     refresh();
   }
 
-  void _ntContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+  void _ntContainerOnResizeEnd(WidgetContainerModel widget, Rect releaseRect) {
     onWidgetResizeEnd(widget);
 
     refresh();
   }
 
   void _layoutContainerOnUpdate(
-      dynamic widget, Rect newRect, TransformResult result) {
+      WidgetContainerModel widget, Rect newRect, TransformResult result) {
     onWidgetUpdate(widget, newRect, result);
 
     refresh();
   }
 
-  void _layoutContainerOnDragBegin(dynamic widget) {
+  void _layoutContainerOnDragBegin(WidgetContainerModel widget) {
     refresh();
   }
 
-  void _layoutContainerOnDragEnd(dynamic widget, Rect releaseRect,
+  void _layoutContainerOnDragEnd(WidgetContainerModel widget, Rect releaseRect,
       {Offset? globalPosition}) {
     onWidgetDragEnd(widget);
 
     refresh();
   }
 
-  void _layoutContainerOnDragCancel(dynamic widget) {
+  void _layoutContainerOnDragCancel(WidgetContainerModel widget) {
     onWidgetDragCancel(widget);
 
     refresh();
   }
 
-  void _layoutContainerOnResizeBegin(dynamic widget) {
+  void _layoutContainerOnResizeBegin(WidgetContainerModel widget) {
     refresh();
   }
 
-  void _layoutContainerOnResizeEnd(dynamic widget, Rect releaseRect) {
+  void _layoutContainerOnResizeEnd(
+      WidgetContainerModel widget, Rect releaseRect) {
     onWidgetResizeEnd(widget);
 
     refresh();
