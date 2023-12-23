@@ -103,7 +103,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             child: DialogTextInput(
               initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber).toString(),
+                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString(),
               label: 'Team Number',
               onSubmit: (data) {
                 setState(() {

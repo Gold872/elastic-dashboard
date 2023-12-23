@@ -441,10 +441,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     setState(() => loadLayoutFromJsonData(jsonString));
   }
 
-  void loadLayout() async {
+  void loadLayout() {
     String? jsonString = _preferences.getString(PrefKeys.layout);
 
     if (jsonString == null) {
+      createDefaultTabs();
       return;
     }
 
@@ -1326,7 +1327,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: Text(
-                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? '9999'}',
+                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
                         textAlign: TextAlign.center,
                       ),
                     ),

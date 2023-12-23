@@ -8,10 +8,10 @@ class Settings {
   static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
 
   static String ipAddress = '127.0.0.1';
-  static int teamNumber = 353;
+  static int teamNumber = 9999;
   static int gridSize = 128;
   static double cornerRadius = 15.0;
-  static bool showGrid = false;
+  static bool showGrid = true;
   static bool autoResizeToDS = false;
 
   // window_manager doesn't support drag disable/maximize
@@ -19,7 +19,7 @@ class Settings {
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
 
-  static double defaultPeriod = 0.1;
+  static double defaultPeriod = 0.06;
   static double defaultGraphPeriod = 0.033;
 }
 
