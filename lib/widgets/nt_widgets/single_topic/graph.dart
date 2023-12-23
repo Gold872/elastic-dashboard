@@ -301,6 +301,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   List<FastLineSeries<_GraphPoint, num>> getChartData() {
     return <FastLineSeries<_GraphPoint, num>>[
       FastLineSeries<_GraphPoint, num>(
+        sortingOrder: SortingOrder.ascending,
         onRendererCreated: (controller) => seriesController = controller,
         color: widget.mainColor,
         width: 2.0,
@@ -310,6 +311,9 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         },
         yValueMapper: (value, index) {
           return value.y;
+        },
+        sortFieldValueMapper: (datum, index) {
+          return datum.x;
         },
         animationDuration: 0.0,
       ),
