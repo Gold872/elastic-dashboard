@@ -841,9 +841,9 @@ class NT4Client {
       return;
     }
 
-    int currentTime = DateTime.now().millisecondsSinceEpoch;
+    int currentTime = _getClientTimeUS();
 
-    if (currentTime - _lastPongTime > _timeoutInterval) {
+    if (currentTime - _lastPongTime > _timeoutInterval * 1000) {
       _wsOnClose();
     }
   }
