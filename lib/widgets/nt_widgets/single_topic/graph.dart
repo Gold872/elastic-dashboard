@@ -326,12 +326,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
       series: getChartData(),
       margin: const EdgeInsets.only(top: 8.0),
       primaryXAxis: NumericAxis(
-        axisLabelFormatter: (axisLabelRenderArgs) {
-          num value = (graphData.last.x - axisLabelRenderArgs.value) / 1e6;
-          String valueString = value.abs().toStringAsFixed(2);
-
-          return ChartAxisLabel(num.parse(valueString).toString(), null);
-        },
+        labelStyle: const TextStyle(color: Colors.transparent),
         desiredIntervals: 5,
       ),
       primaryYAxis: NumericAxis(
