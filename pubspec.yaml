@@ -29,7 +29,7 @@ dependencies:
   msgpack_dart: ^1.0.1
   package_info_plus: ^5.0.1
   pair: ^0.1.2
-  path: ^1.8.3
+  path: ^1.9.0
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
   popover: ^0.2.9
@@ -42,11 +42,11 @@ dependencies:
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
   url_launcher: ^6.1.14
-  uuid: ^4.2.1
+  uuid: ^4.3.1
   vector_math: ^2.1.4
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
-  web_socket_channel: ^2.4.0
+  web_socket_channel: ^2.4.1
   window_manager: ^0.3.7
 
 dev_dependencies:

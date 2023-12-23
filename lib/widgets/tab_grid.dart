@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -13,6 +12,7 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'draggable_containers/models/layout_container_model.dart';
 import 'draggable_containers/models/list_layout_model.dart';
