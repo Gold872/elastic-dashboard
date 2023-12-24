@@ -342,9 +342,12 @@ class ListLayoutModel extends LayoutContainerModel {
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.0),
-                child: ChangeNotifierProvider<NTWidgetModel>.value(
-                  value: widget.childModel,
-                  child: widget.child,
+                child: AbsorbPointer(
+                  absorbing: !widget.enabled,
+                  child: ChangeNotifierProvider<NTWidgetModel>.value(
+                    value: widget.childModel,
+                    child: widget.child,
+                  ),
                 ),
               ),
             ),
