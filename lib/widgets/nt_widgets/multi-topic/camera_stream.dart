@@ -105,11 +105,13 @@ class CameraStreamWidget extends NTWidget {
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
-          if (stream == null || stream is! String) {
+          if (stream == null ||
+              stream is! String ||
+              !stream.startsWith('mjpg:')) {
             continue;
           }
 
-          streams.add(stream.substring(5));
+          streams.add(stream.substring('mjpg:'.length));
         }
 
         if (streams.isEmpty || !ntConnection.isNT4Connected) {
