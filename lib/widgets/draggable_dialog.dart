@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 
-import 'package:elastic_dashboard/services/settings.dart';
-
 class DraggableDialog extends StatefulWidget {
   final Widget dialog;
   final Rect initialPosition;
@@ -19,14 +17,7 @@ class DraggableDialog extends StatefulWidget {
 }
 
 class _DraggableDialogState extends State<DraggableDialog> {
-  late Rect position;
-
-  @override
-  void initState() {
-    super.initState();
-
-    position = widget.initialPosition;
-  }
+  late Rect position = widget.initialPosition;
 
   @override
   Widget build(BuildContext context) {

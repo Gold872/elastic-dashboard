@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -19,7 +18,6 @@ class CameraStreamWidget extends NTWidget {
   Mjpeg? streamWidget;
   MemoryImage? lastDisplayedImage;
 
-  late Client httpClient;
   bool clientOpen = false;
 
   CameraStreamWidget({
@@ -38,7 +36,6 @@ class CameraStreamWidget extends NTWidget {
 
     streamsTopic = '$topic/streams';
 
-    httpClient = Client();
     clientOpen = true;
   }
 
@@ -54,9 +51,9 @@ class CameraStreamWidget extends NTWidget {
   @override
   void dispose({bool deleting = false}) {
     Future(() async {
-      await streamWidget?.cancelSubscription();
-
-      httpClient.close();
+      if (deleting) {
+        await streamWidget?.dispose();
+      }
       clientOpen = false;
 
       if (deleting) {
@@ -71,8 +68,8 @@ class CameraStreamWidget extends NTWidget {
   void closeClient() {
     lastDisplayedImage?.evict();
     lastDisplayedImage = streamWidget?.previousImage;
+    streamWidget?.dispose();
     streamWidget = null;
-    httpClient.close();
     clientOpen = false;
   }
 
@@ -146,17 +143,13 @@ class CameraStreamWidget extends NTWidget {
         }
 
         if (createNewWidget) {
-          if (!clientOpen) {
-            httpClient = Client();
-            clientOpen = true;
-          }
+          clientOpen = true;
           lastDisplayedImage?.evict();
 
           String stream = streams.last;
 
           streamWidget = Mjpeg(
             fit: BoxFit.contain,
-            httpClient: httpClient,
             isLive: true,
             stream: stream,
           );

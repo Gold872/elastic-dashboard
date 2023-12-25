@@ -74,6 +74,10 @@ class Mjpeg extends HookWidget {
     await _manager.cancelSubscription();
   }
 
+  Future<void> dispose() async {
+    await _manager.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final image = useState<MemoryImage?>(null);
@@ -91,6 +95,7 @@ class Mjpeg extends HookWidget {
               httpClient ?? Client(),
               preprocessor ?? MjpegPreprocessor(),
               isMounted,
+              () => visible.visible,
             ),
         [
           stream,
@@ -173,10 +178,11 @@ class _StreamManager {
   final Client _httpClient;
   final MjpegPreprocessor _preprocessor;
   final bool Function() _mounted;
+  final bool Function() _visible;
   StreamSubscription? _subscription;
 
   _StreamManager(this.stream, this.isLive, this.headers, this._timeout,
-      this._httpClient, this._preprocessor, this._mounted);
+      this._httpClient, this._preprocessor, this._mounted, this._visible);
 
   Future<void> cancelSubscription() async {
     if (_subscription != null) {
@@ -186,10 +192,11 @@ class _StreamManager {
   }
 
   Future<void> dispose() async {
-    if (_subscription != null) {
-      await _subscription!.cancel();
-      _subscription = null;
-    }
+    try {
+      _httpClient.close();
+    } catch (e) {}
+    await _subscription?.cancel();
+    _subscription = null;
   }
 
   void _sendImage(ValueNotifier<MemoryImage?> image,
@@ -207,7 +214,8 @@ class _StreamManager {
 
   void updateStream(ValueNotifier<MemoryImage?> image,
       ValueNotifier<List<dynamic>?> errorState) async {
-    if (!_mounted()) {
+    if (!_visible() || !_mounted()) {
+      await dispose();
       return;
     }
     try {
@@ -219,6 +227,10 @@ class _StreamManager {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         var carry = <int>[];
         _subscription = response.stream.listen((chunk) async {
+          if (!_visible() || !_mounted()) {
+            carry = [];
+            return;
+          }
           if (carry.isNotEmpty && carry.last == _trigger) {
             if (chunk.first == _eoi) {
               carry.add(chunk.first);
