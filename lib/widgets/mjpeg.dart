@@ -81,6 +81,7 @@ class Mjpeg extends HookWidget {
     final visible = useListenable(state);
     final errorState = useState<List<dynamic>?>(null);
     final isMounted = useIsMounted();
+
     final manager = useMemoized(
         () => _manager = _StreamManager(
               stream,
@@ -172,7 +173,6 @@ class _StreamManager {
   final Client _httpClient;
   final MjpegPreprocessor _preprocessor;
   final bool Function() _mounted;
-  // ignore: cancel_subscriptions
   StreamSubscription? _subscription;
 
   _StreamManager(this.stream, this.isLive, this.headers, this._timeout,
@@ -186,11 +186,10 @@ class _StreamManager {
   }
 
   Future<void> dispose() async {
-    // if (_subscription != null) {
-    //   await _subscription!.cancel();
-    //   _subscription = null;
-    // }
-    // _httpClient.close();
+    if (_subscription != null) {
+      await _subscription!.cancel();
+      _subscription = null;
+    }
   }
 
   void _sendImage(ValueNotifier<MemoryImage?> image,
@@ -208,6 +207,9 @@ class _StreamManager {
 
   void updateStream(ValueNotifier<MemoryImage?> image,
       ValueNotifier<List<dynamic>?> errorState) async {
+    if (!_mounted()) {
+      return;
+    }
     try {
       final request = Request("GET", Uri.parse(stream));
       request.headers.addAll(headers);
