@@ -1358,13 +1358,13 @@ class AddWidgetDialog extends StatefulWidget {
   final TabGrid Function() grid;
   final bool visible;
 
-  final Function(Offset globalPosition, WidgetContainerModel widget)?
+  final Function(Offset globalPosition, WidgetContainerModel widget)
       onNTDragUpdate;
-  final Function(WidgetContainerModel widget)? onNTDragEnd;
+  final Function(WidgetContainerModel widget) onNTDragEnd;
 
-  final Function(Offset globalPosition, LayoutContainerModel widget)?
+  final Function(Offset globalPosition, LayoutContainerModel widget)
       onLayoutDragUpdate;
-  final Function(LayoutContainerModel widget)? onLayoutDragEnd;
+  final Function(LayoutContainerModel widget) onLayoutDragEnd;
 
   final Function()? onClose;
 
@@ -1372,10 +1372,10 @@ class AddWidgetDialog extends StatefulWidget {
     super.key,
     required this.grid,
     required this.visible,
-    this.onNTDragUpdate,
-    this.onNTDragEnd,
-    this.onLayoutDragUpdate,
-    this.onLayoutDragEnd,
+    required this.onNTDragUpdate,
+    required this.onNTDragEnd,
+    required this.onLayoutDragUpdate,
+    required this.onLayoutDragEnd,
     this.onClose,
   });
 
@@ -1436,6 +1436,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                           children: [
                             LayoutDragTile(
                               title: 'List Layout',
+                              icon: Icons.table_rows,
                               layoutBuilder: () =>
                                   widget.grid().createListLayout(),
                               onDragUpdate: widget.onLayoutDragUpdate,

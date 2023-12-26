@@ -1,25 +1,27 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../draggable_containers/models/layout_container_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/layout_container_model.dart';
 
 class LayoutDragTile extends StatelessWidget {
   final String title;
+  final IconData icon;
 
-  LayoutContainerModel Function()? layoutBuilder;
+  final LayoutContainerModel Function() layoutBuilder;
 
   LayoutContainerModel? draggingWidget;
 
-  final Function(Offset globalPosition, LayoutContainerModel widget)?
+  final Function(Offset globalPosition, LayoutContainerModel widget)
       onDragUpdate;
-  final Function(LayoutContainerModel widget)? onDragEnd;
+  final Function(LayoutContainerModel widget) onDragEnd;
 
   LayoutDragTile({
     super.key,
     required this.title,
-    this.layoutBuilder,
-    this.onDragUpdate,
-    this.onDragEnd,
+    required this.icon,
+    required this.layoutBuilder,
+    required this.onDragUpdate,
+    required this.onDragEnd,
   });
 
   @override
@@ -39,14 +41,14 @@ class LayoutDragTile extends StatelessWidget {
             return;
           }
 
-          draggingWidget = layoutBuilder?.call();
+          draggingWidget = layoutBuilder.call();
         },
         onPanUpdate: (details) {
           if (draggingWidget == null) {
             return;
           }
 
-          onDragUpdate?.call(
+          onDragUpdate.call(
               details.globalPosition -
                   Offset(draggingWidget!.displayRect.width,
                           draggingWidget!.displayRect.height) /
@@ -58,7 +60,7 @@ class LayoutDragTile extends StatelessWidget {
             return;
           }
 
-          onDragEnd?.call(draggingWidget!);
+          onDragEnd.call(draggingWidget!);
 
           draggingWidget = null;
         },
@@ -66,9 +68,8 @@ class LayoutDragTile extends StatelessWidget {
           padding: const EdgeInsetsDirectional.only(start: 16.0),
           child: ListTile(
             style: ListTileStyle.drawer,
-            dense: true,
             contentPadding: const EdgeInsets.only(right: 20.0),
-            leading: const SizedBox(width: 16.0),
+            leading: Icon(icon),
             title: Text(title),
           ),
         ),
