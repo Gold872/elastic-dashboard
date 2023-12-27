@@ -481,7 +481,7 @@ class ListLayoutModel extends LayoutContainerModel {
               widget.displayRect.height,
             );
 
-            if ((tabGrid.isValidLocation(previewLocation) ||
+            if ((tabGrid.isValidMoveLocation(widget, previewLocation) ||
                     tabGrid
                         .isValidLayoutLocation(widget.cursorGlobalLocation)) &&
                 tabGrid.isDraggingInContainer()) {

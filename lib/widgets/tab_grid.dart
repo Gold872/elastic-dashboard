@@ -483,7 +483,7 @@ class TabGrid extends StatelessWidget {
       if (layoutContainer.willAcceptWidget(widget)) {
         layoutContainer.addWidget(widget);
       }
-    } else if (!isValidLocation(previewLocation)) {
+    } else if (!isValidMoveLocation(widget, previewLocation)) {
       _containerDraggingIn = null;
 
       if (widget is NTWidgetContainerModel) {
@@ -845,7 +845,7 @@ class TabGrid extends StatelessWidget {
       Rect previewLocation = Rect.fromLTWH(previewX, previewY,
           container.displayRect.width, container.displayRect.height);
 
-      bool validLocation = isValidLocation(previewLocation) ||
+      bool validLocation = isValidMoveLocation(container, previewLocation) ||
           isValidLayoutLocation(container.cursorGlobalLocation);
 
       Color borderColor =
