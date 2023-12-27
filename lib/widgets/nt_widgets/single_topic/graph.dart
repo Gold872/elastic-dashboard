@@ -168,21 +168,21 @@ class _GraphWidgetGraph extends StatefulWidget {
 
   final List<_GraphPoint> initialData;
 
-  final List<_GraphPoint> _currentData = [];
+  final List<_GraphPoint> _currentData;
 
   set currentData(List<_GraphPoint> data) {
     _currentData.clear();
     _currentData.addAll(data);
   }
 
-  _GraphWidgetGraph({
+  const _GraphWidgetGraph({
     required this.initialData,
     required this.subscription,
     required this.timeDisplayed,
     required this.mainColor,
     this.minValue,
     this.maxValue,
-  });
+  }) : _currentData = initialData;
 
   List<_GraphPoint> getCurrentData() {
     return _currentData;
@@ -195,16 +195,24 @@ class _GraphWidgetGraph extends StatefulWidget {
 class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   ChartSeriesController? seriesController;
   late List<_GraphPoint> graphData;
-  late StreamSubscription<Object?>? subscriptionListener;
+  StreamSubscription<Object?>? subscriptionListener;
 
   @override
   void initState() {
     super.initState();
 
-    graphData = widget.initialData.skip(1).toList();
+    graphData = widget.initialData.toList();
 
     if (graphData.isEmpty) {
+      // This could cause data to be displayed slightly off if the time is 12:00 am on January 1st, 1970.
+      // However if that were the case, then the user would either have secretly invented a modern 64 bit
+      // operating system that can't even run on hardware from their time, or they invented time travel,
+      // which according to the second law of thermodynamics is literally impossible. In summary, this
+      // won't be causing issues unless if the user finds a way of violating the laws of thermodynamics,
+      // or for some reason they change their time on their device
       graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+    } else {
+      graphData.removeLast();
     }
 
     widget.currentData = graphData;
@@ -214,7 +222,6 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   void dispose() {
-    seriesController = null;
     subscriptionListener?.cancel();
 
     super.dispose();
@@ -244,6 +251,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   }
 
   void initializeListener() {
+    subscriptionListener?.cancel();
     subscriptionListener =
         widget.subscription?.timestampedStream(yieldAll: true).listen((data) {
       if (seriesController == null) {
