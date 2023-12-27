@@ -681,7 +681,7 @@ class NT4Client {
           return;
         }
 
-        if (topicID == -1) {
+        if (topicID & 0xFF == 0xFF) {
           _rttHandleRecieveTimestamp(timestampUS, value);
         }
       },
@@ -824,10 +824,11 @@ class NT4Client {
                 sub.timestamp = timestampUS;
               }
             }
-          } else if (topicID == -1 && !_useRTT) {
+          } else if (topicID & 0xFF == 0xFF && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);
           } else {
-            logger.warning('[NT4] ignoring binary data, invalid topic ID');
+            logger.warning(
+                '[NT4] ignoring binary data, invalid topic ID: $topicID');
           }
         } catch (err) {
           done = true;
