@@ -205,7 +205,7 @@ class TabGrid extends StatelessWidget {
       model.child.refresh();
     }
 
-    model.dispose();
+    model.disposeModel();
   }
 
   void onWidgetDragEnd(WidgetContainerModel model) {
@@ -240,7 +240,7 @@ class TabGrid extends StatelessWidget {
     model.setResizing(false);
     model.setDraggingIntoLayout(false);
 
-    model.dispose();
+    model.disposeModel();
   }
 
   void onWidgetUpdate(
@@ -486,12 +486,10 @@ class TabGrid extends StatelessWidget {
     } else if (!isValidMoveLocation(widget, previewLocation)) {
       _containerDraggingIn = null;
 
-      if (widget is NTWidgetContainerModel) {
-        widget.child.dispose(deleting: !fromLayout);
-        if (!fromLayout) {
-          widget.child.unSubscribe();
-          widget.forceDispose();
-        }
+      widget.disposeModel(deleting: !fromLayout);
+      if (!fromLayout) {
+        widget.unSubscribe();
+        widget.forceDispose();
       }
 
       refresh();
@@ -505,7 +503,7 @@ class TabGrid extends StatelessWidget {
 
     _containerDraggingIn = null;
 
-    widget.tryCast<NTWidgetContainerModel>()?.child.dispose();
+    widget.disposeModel();
 
     refresh();
   }
