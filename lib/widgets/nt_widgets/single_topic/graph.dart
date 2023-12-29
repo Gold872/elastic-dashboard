@@ -211,7 +211,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
       // won't be causing issues unless if the user finds a way of violating the laws of thermodynamics,
       // or for some reason they change their time on their device
       graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
-    } else {
+    } else if (graphData.length > 1) {
       graphData.removeLast();
     }
 
