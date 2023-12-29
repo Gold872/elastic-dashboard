@@ -27,7 +27,8 @@ class NT4TypeStr {
     'raw': 5,
     'rpc': 5,
     'msgpack': 5,
-    'protobuff': 5,
+    'protobuf': 5,
+    'structschema': 5,
     'boolean[]': 16,
     'double[]': 17,
     'int[]': 18,
@@ -45,6 +46,7 @@ class NT4TypeStr {
   static const kBinaryRPC = 'rpc';
   static const kBinaryMsgpack = 'msgpack';
   static const kBinaryProtobuf = 'protobuf';
+  static const kStructSchema = 'structschema';
   static const kBoolArr = 'boolean[]';
   static const kFloat64Arr = 'double[]';
   static const kIntArr = 'int[]';
@@ -62,8 +64,6 @@ class NT4Subscription {
   Object? currentValue;
   int timestamp = 0;
   final List<Function(Object?)> _listeners = [];
-  // Multiple instances of this can be used at once, so it has to request the new value for all of the subscription streams
-  int _newValueRequestCount = 0;
 
   NT4Subscription({
     required this.topic,
@@ -80,12 +80,9 @@ class NT4Subscription {
     Object? lastYielded = currentValue;
 
     while (true) {
-      if (lastYielded != currentValue ||
-          yieldAll ||
-          _newValueRequestCount > 0) {
+      if (lastYielded != currentValue || yieldAll) {
         yield currentValue;
         lastYielded = currentValue;
-        _newValueRequestCount--;
       }
       await Future.delayed(
           Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
@@ -118,10 +115,6 @@ class NT4Subscription {
     for (var listener in _listeners) {
       listener(currentValue);
     }
-  }
-
-  void requestNewValue() {
-    _newValueRequestCount = useCount;
   }
 
   Map<String, dynamic> _toSubscribeJson() {
@@ -812,7 +805,6 @@ class NT4Client {
 
           int topicID = msg[0] as int;
           int timestampUS = msg[1] as int;
-          // int typeID = msg[2] as int;
           var value = msg[3];
 
           if (topicID >= 0) {

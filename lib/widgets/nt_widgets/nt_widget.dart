@@ -170,7 +170,6 @@ abstract class NTWidget extends StatelessWidget {
   @mustCallSuper
   void refresh() {
     Future(() async {
-      subscription?.requestNewValue();
       notifier?.refresh();
     });
   }
