@@ -3,9 +3,9 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ShuffleboardNTListener {
   static const String shuffleboardTableRoot = '/Shuffleboard';
@@ -81,13 +81,13 @@ class ShuffleboardNTListener {
   Future<void> _metadataChanged(NT4Topic topic) async {
     String name = topic.name;
 
-    List<String> metaHierarchy = getHierarchy(name);
+    List<String> metaHierarchy = _getHierarchy(name);
 
     if (metaHierarchy.length < 5) {
       return;
     }
 
-    List<String> realHierarchy = getHierarchy(_realPath(name));
+    List<String> realHierarchy = _getHierarchy(_realPath(name));
 
     // Properties
     if (name.contains('/Properties')) {
@@ -256,7 +256,7 @@ class ShuffleboardNTListener {
   Future<void> _topicAnnounced(NT4Topic topic) async {
     String name = topic.name;
 
-    List<String> hierarchy = getHierarchy(name);
+    List<String> hierarchy = _getHierarchy(name);
     List<String> tables = name.substring(1).split('/');
 
     if (hierarchy.length < 3) {
@@ -317,14 +317,18 @@ class ShuffleboardNTListener {
       return;
     }
 
-    WidgetContainer? widgetContainer;
-    NTWidget? widget;
+    WidgetContainerModel? widget;
+    NTWidgetContainerModel? ntWidget;
 
     if (!isCameraStream) {
-      widgetContainer = await widgetRow.toWidgetContainer();
-      widget = tryCast(widgetContainer?.child);
+      widget =
+          await widgetRow.toWidgetContainerModel(resortToListLayout: false);
+      ntWidget = tryCast(widget);
 
-      if (widgetContainer == null || widget == null) {
+      if (widget == null || ntWidget == null) {
+        widget?.unSubscribe();
+        widget?.disposeModel(deleting: true);
+        widget?.forceDispose();
         return;
       }
     }
@@ -349,7 +353,7 @@ class ShuffleboardNTListener {
     await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
       currentJsonData.putIfAbsent(jsonKey, () => {});
 
-      String type = (!isCameraStream) ? widget!.type : 'Camera Stream';
+      String type = (!isCameraStream) ? ntWidget!.child.type : 'Camera Stream';
 
       currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
       currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
@@ -357,12 +361,12 @@ class ShuffleboardNTListener {
       currentJsonData[jsonKey]!.putIfAbsent(
           'width',
           () => (!isCameraStream)
-              ? widgetContainer!.width
+              ? widget!.displayRect.width
               : Settings.gridSize * 2);
       currentJsonData[jsonKey]!.putIfAbsent(
           'height',
           () => (!isCameraStream)
-              ? widgetContainer!.height
+              ? widget!.displayRect.height
               : Settings.gridSize * 2);
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonKey]!.putIfAbsent('type', () => type);
@@ -380,8 +384,9 @@ class ShuffleboardNTListener {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
       }
 
-      widget?.unSubscribe();
-      widget?.dispose(deleting: true);
+      ntWidget?.unSubscribe();
+      ntWidget?.disposeModel(deleting: true);
+      ntWidget?.forceDispose();
     });
   }
 
@@ -429,12 +434,16 @@ class ShuffleboardNTListener {
         }
         NetworkTableTreeRow childRow = widgetRow.getRow(child['title']);
 
-        WidgetContainer? widgetContainer = await childRow.toWidgetContainer();
-        NTWidget? widget = tryCast(widgetContainer?.child);
+        WidgetContainerModel? widget =
+            await childRow.toWidgetContainerModel(resortToListLayout: false);
+        NTWidgetContainerModel? ntWidget = tryCast(widget);
 
         bool isCameraStream = childRow.hasRow('.ShuffleboardURI');
 
-        if (!isCameraStream && (widget == null || widgetContainer == null)) {
+        if (!isCameraStream && (ntWidget == null || widget == null)) {
+          widget?.unSubscribe();
+          widget?.disposeModel(deleting: true);
+          widget?.forceDispose();
           continue;
         }
 
@@ -451,7 +460,8 @@ class ShuffleboardNTListener {
           child['properties']['topic'] = '/CameraPublisher/$cameraName';
         }
 
-        String type = (!isCameraStream) ? widget!.type : 'Camera Stream';
+        String type =
+            (!isCameraStream) ? ntWidget!.child.type : 'Camera Stream';
 
         child.putIfAbsent('type', () => type);
         child.putIfAbsent('x', () => 0.0);
@@ -459,12 +469,12 @@ class ShuffleboardNTListener {
         child.putIfAbsent(
             'width',
             () => (!isCameraStream)
-                ? widgetContainer!.width
+                ? widget!.displayRect.width
                 : Settings.gridSize * 2);
         child.putIfAbsent(
             'height',
             () => (!isCameraStream)
-                ? widgetContainer!.height
+                ? widget!.displayRect.height
                 : Settings.gridSize * 2);
 
         child['properties']!.putIfAbsent('topic', () => childRow.topic);
@@ -475,7 +485,8 @@ class ShuffleboardNTListener {
                 : Settings.defaultGraphPeriod);
 
         widget?.unSubscribe();
-        widget?.dispose(deleting: true);
+        widget?.disposeModel(deleting: true);
+        widget?.forceDispose();
       }
       if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
@@ -491,7 +502,7 @@ class ShuffleboardNTListener {
     return path.replaceFirst('/Shuffleboard/.metadata/', '/Shuffleboard/');
   }
 
-  List<String> getHierarchy(String path) {
+  List<String> _getHierarchy(String path) {
     final String normal = path;
     List<String> hierarchy = [];
     if (normal.length == 1) {
