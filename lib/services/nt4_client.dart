@@ -244,7 +244,9 @@ class NT4Client {
   int _latencyMs = 0;
 
   WebSocketChannel? _mainWebsocket;
+  StreamSubscription? _mainWebsocketListener;
   WebSocketChannel? _rttWebsocket;
+  StreamSubscription? _rttWebsocketListener;
 
   Timer? _pingTimer;
   Timer? _pongTimer;
@@ -576,14 +578,14 @@ class NT4Client {
       _useRTT = true;
       _pingInterval = _pingIntervalMsV41;
       _timeoutInterval = _pingTimeoutMsV41;
-      _rttConnect();
+      await _rttConnect();
     } else {
       _useRTT = false;
       _pingInterval = _pingIntervalMsV40;
       _timeoutInterval = _pingTimeoutMsV40;
     }
 
-    _mainWebsocket!.stream.listen(
+    _mainWebsocketListener = _mainWebsocket!.stream.listen(
       (data) {
         // Prevents repeated calls to onConnect and reconnecting after changing ip addresses
         if (!_serverConnectionActive &&
@@ -604,10 +606,11 @@ class NT4Client {
       onError: (err) {
         logger.error('NT4 Error', err);
       },
+      cancelOnError: true,
     );
 
     NT4Topic timeTopic = NT4Topic(
-        name: "Time",
+        name: 'Time',
         type: NT4TypeStr.kInt,
         id: -1,
         pubUID: -1,
@@ -633,7 +636,7 @@ class NT4Client {
     }
   }
 
-  void _rttConnect() async {
+  Future<void> _rttConnect() async {
     if (!_useRTT || _rttConnectionActive) {
       return;
     }
@@ -653,7 +656,7 @@ class NT4Client {
       return;
     }
 
-    _rttWebsocket!.stream.listen(
+    _rttWebsocketListener = _rttWebsocket!.stream.listen(
       (data) {
         if (!_rttConnectionActive) {
           logger.info('RTT protocol connected on $serverBaseAddress');
@@ -679,28 +682,41 @@ class NT4Client {
         }
       },
       onDone: _rttOnClose,
+      onError: (err) {
+        logger.error('RTT Error', err);
+      },
+      cancelOnError: true,
     );
   }
 
-  void _rttOnClose() {
-    _rttWebsocket?.sink.close();
+  void _rttOnClose() async {
+    await _rttWebsocketListener?.cancel();
+    _rttWebsocketListener = null;
+    await _rttWebsocket?.sink.close();
     _rttWebsocket = null;
 
     _lastPongTime = 0;
     _rttConnectionActive = false;
+    _useRTT = false;
 
     logger.debug('[RTT] Connection closed');
   }
 
-  void _wsOnClose() {
-    _mainWebsocket?.sink.close();
-    _rttWebsocket?.sink.close();
-
+  void _wsOnClose() async {
     _pingTimer?.cancel();
     _pongTimer?.cancel();
 
+    await _mainWebsocketListener?.cancel();
+    await _mainWebsocket?.sink.close();
+
+    await _rttWebsocketListener?.cancel();
+    await _rttWebsocket?.sink.close();
+
     _mainWebsocket = null;
     _rttWebsocket = null;
+
+    _mainWebsocketListener = null;
+    _rttWebsocketListener = null;
 
     _serverConnectionActive = false;
     _rttConnectionActive = false;
@@ -837,6 +853,7 @@ class NT4Client {
     int currentTime = _getClientTimeUS();
 
     if (currentTime - _lastPongTime > _timeoutInterval * 1000) {
+      logger.info('Network Tables connection timed out');
       _wsOnClose();
     }
   }
