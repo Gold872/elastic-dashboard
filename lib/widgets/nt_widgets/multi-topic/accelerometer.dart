@@ -20,14 +20,10 @@ class AccelerometerWidget extends NTWidget {
     required super.topic,
     super.dataType,
     super.period,
-  }) : super() {
-    init();
-  }
+  }) : super();
 
   AccelerometerWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson() {
-    init();
-  }
+      : super.fromJson();
 
   @override
   void init() {

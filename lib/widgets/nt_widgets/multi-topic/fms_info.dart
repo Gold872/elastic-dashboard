@@ -34,13 +34,7 @@ class FMSInfo extends NTWidget {
     super.period,
   }) : super();
 
-  FMSInfo.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
-    if (topic == '') {
-      topic = tryCast(jsonData['topic']) ?? '/FMSInfo';
-      init();
-    }
-  }
+  FMSInfo.fromJson({super.key, required super.jsonData}) : super.fromJson();
 
   @override
   void init() {

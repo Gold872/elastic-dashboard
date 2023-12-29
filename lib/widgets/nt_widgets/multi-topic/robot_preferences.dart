@@ -29,12 +29,8 @@ class RobotPreferences extends NTWidget {
     super.period,
   }) : super();
 
-  RobotPreferences.fromJson({super.key, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
-    if (topic == '') {
-      topic = tryCast(jsonData['topic']) ?? '/Preferences';
-    }
-  }
+  RobotPreferences.fromJson({super.key, required super.jsonData})
+      : super.fromJson();
 
   @override
   Widget build(BuildContext context) {
