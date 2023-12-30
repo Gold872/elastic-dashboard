@@ -15,6 +15,7 @@ import 'package:pair/pair.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/struct_decoder.dart';
 
 class NT4TypeStr {
   static final Map<String, int> typeMap = {
@@ -247,6 +248,8 @@ class NT4Client {
   StreamSubscription? _mainWebsocketListener;
   WebSocketChannel? _rttWebsocket;
   StreamSubscription? _rttWebsocketListener;
+
+  StructDecoder structDecoder = StructDecoder();
 
   Timer? _pingTimer;
   Timer? _pongTimer;
@@ -831,6 +834,13 @@ class NT4Client {
                 sub.updateValue(value);
                 sub.timestamp = timestampUS;
               }
+            }
+
+            if (topic.name.startsWith('/.schema')) {
+              String structName =
+                  topic.name.split('/').last.replaceFirst('struct:', '');
+              structDecoder.addSchema(
+                  structName, Uint8List.fromList(value as List<int>));
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);

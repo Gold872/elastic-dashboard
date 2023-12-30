@@ -55,6 +55,7 @@ class NTConnection {
 
     // Allows all published topics to be announced
     allTopicsSubscription = _ntClient.subscribeTopicsOnly('/');
+    _ntClient.subscribe('/.schema');
   }
 
   void dsClientConnect(
