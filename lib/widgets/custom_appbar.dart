@@ -11,6 +11,7 @@ class CustomAppBar extends AppBar {
   final MenuBar menuBar;
   final VoidCallback? onWindowClose;
 
+  static const double _leadingSize = 460;
   static const ThemeType buttonType = ThemeType.materia;
 
   CustomAppBar(
@@ -25,51 +26,59 @@ class CustomAppBar extends AppBar {
           elevation: 0.0,
           scrolledUnderElevation: 0.0,
           leading: menuBar,
-          leadingWidth: 460,
+          leadingWidth: _leadingSize,
           centerTitle: true,
           actions: [
-            ExcludeFocus(
-              child: InkWell(
-                onTap: () {},
-                child: DecoratedMinimizeButton(
-                  type: buttonType,
-                  onPressed: () async => await windowManager.minimize(),
-                ),
-              ),
-            ),
-            ExcludeFocus(
-              child: InkWell(
-                onTap: () {},
-                child: DecoratedMaximizeButton(
-                  type: buttonType,
-                  onPressed: () async {
-                    if (!Settings.isWindowMaximizable) {
-                      return;
-                    }
+            SizedBox(
+              width: _leadingSize,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const Expanded(
+                    child: _WindowDragArea(),
+                  ),
+                  InkWell(
+                    canRequestFocus: false,
+                    onTap: () {},
+                    child: DecoratedMinimizeButton(
+                      type: buttonType,
+                      onPressed: () async => await windowManager.minimize(),
+                    ),
+                  ),
+                  InkWell(
+                    canRequestFocus: false,
+                    onTap: () {},
+                    child: DecoratedMaximizeButton(
+                      type: buttonType,
+                      onPressed: () async {
+                        if (!Settings.isWindowMaximizable) {
+                          return;
+                        }
 
-                    if (await windowManager.isMaximized()) {
-                      windowManager.unmaximize();
-                    } else {
-                      windowManager.maximize();
-                    }
-                  },
-                ),
-              ),
-            ),
-            ExcludeFocus(
-              child: InkWell(
-                hoverColor: Colors.red,
-                onTap: () {},
-                child: DecoratedCloseButton(
-                  type: buttonType,
-                  onPressed: () async {
-                    if (onWindowClose == null) {
-                      await windowManager.close();
-                    } else {
-                      onWindowClose.call();
-                    }
-                  },
-                ),
+                        if (await windowManager.isMaximized()) {
+                          windowManager.unmaximize();
+                        } else {
+                          windowManager.maximize();
+                        }
+                      },
+                    ),
+                  ),
+                  InkWell(
+                    canRequestFocus: false,
+                    hoverColor: Colors.red,
+                    onTap: () {},
+                    child: DecoratedCloseButton(
+                      type: buttonType,
+                      onPressed: () async {
+                        if (onWindowClose == null) {
+                          await windowManager.close();
+                        } else {
+                          onWindowClose.call();
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -78,16 +87,13 @@ class CustomAppBar extends AppBar {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: [
-                const Spacer(flex: 5),
                 Expanded(
-                  flex: 4,
                   child: Text(
                     titleText,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.visible,
                   ),
                 ),
-                const Spacer(flex: 14),
               ],
             ),
           ),
