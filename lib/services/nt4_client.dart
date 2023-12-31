@@ -11,7 +11,6 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
-import 'package:pair/pair.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
@@ -64,7 +63,8 @@ class NT4Subscription {
 
   Object? currentValue;
   int timestamp = 0;
-  final List<Function(Object?)> _listeners = [];
+
+  final List<Function(Object?, int)> _listeners = [];
 
   NT4Subscription({
     required this.topic,
@@ -72,7 +72,7 @@ class NT4Subscription {
     this.uid = -1,
   });
 
-  void listen(Function(Object?) onChanged) {
+  void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
   }
 
@@ -81,40 +81,52 @@ class NT4Subscription {
     Object? lastYielded = currentValue;
 
     while (true) {
+      await Future.delayed(
+          Duration(microseconds: (options.periodicRateSeconds * 1e6).round()));
+
       if (lastYielded != currentValue || yieldAll) {
         yield currentValue;
         lastYielded = currentValue;
       }
-      await Future.delayed(
-          Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
     }
   }
 
-  Stream<Pair<Object?, int>> timestampedStream({bool yieldAll = false}) async* {
-    yield Pair(currentValue, timestamp);
+  Stream<({Object? value, DateTime timestamp})> timestampedStream(
+      {bool yieldAll = false}) async* {
+    yield (
+      value: currentValue,
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(timestamp),
+    );
 
     int lastTimestamp = timestamp;
     int fakeTimestamp = timestamp;
 
     while (true) {
-      if (lastTimestamp != timestamp) {
-        yield Pair(currentValue, timestamp);
+      await Future.delayed(
+          Duration(microseconds: (options.periodicRateSeconds * 1e6).round()));
+
+      if (lastTimestamp != timestamp || yieldAll) {
+        yield (
+          value: currentValue,
+          timestamp: DateTime.fromMicrosecondsSinceEpoch(timestamp),
+        );
         lastTimestamp = timestamp;
         fakeTimestamp = timestamp;
       } else if (yieldAll) {
         fakeTimestamp += (options.periodicRateSeconds * 1e6).round();
-        yield Pair(currentValue, fakeTimestamp);
+        yield (
+          value: currentValue,
+          timestamp: DateTime.fromMicrosecondsSinceEpoch(fakeTimestamp),
+        );
       }
-
-      await Future.delayed(
-          Duration(milliseconds: (options.periodicRateSeconds * 1000).round()));
     }
   }
 
-  void updateValue(Object? value) {
+  void updateValue(Object? value, int timestamp) {
     currentValue = value;
+    this.timestamp = timestamp;
     for (var listener in _listeners) {
-      listener(currentValue);
+      listener(currentValue, timestamp);
     }
   }
 
@@ -238,6 +250,7 @@ class NT4Client {
   int _subscriptionUIDCounter = 0;
   int _publishUIDCounter = 0;
   final Map<String, Object?> lastAnnouncedValues = {};
+  final Map<String, int> lastAnnouncedTimestamps = {};
   final Map<String, NT4Topic> _clientPublishedTopics = {};
   final Map<int, NT4Topic> announcedTopics = {};
   int _clientId = 0;
@@ -289,12 +302,12 @@ class NT4Client {
     int lastYielded = _latencyMs;
 
     while (true) {
+      await Future.delayed(const Duration(seconds: 1));
+
       if (_latencyMs != lastYielded) {
         yield _latencyMs;
         lastYielded = _latencyMs;
       }
-
-      await Future.delayed(const Duration(seconds: 1));
     }
   }
 
@@ -334,8 +347,10 @@ class NT4Client {
     _subscribedTopics.add(newSub);
     _wsSubscribe(newSub);
 
-    if (lastAnnouncedValues.containsKey(topic)) {
-      newSub.updateValue(lastAnnouncedValues[topic]);
+    if (lastAnnouncedValues.containsKey(topic) &&
+        lastAnnouncedTimestamps.containsKey(topic)) {
+      newSub.updateValue(
+          lastAnnouncedValues[topic], lastAnnouncedTimestamps[topic]!);
     }
 
     return newSub;
@@ -456,10 +471,10 @@ class NT4Client {
         serialize([topic.pubUID, timestamp, topic.getTypeId(), data]));
 
     lastAnnouncedValues[topic.name] = data;
+    lastAnnouncedTimestamps[topic.name] = timestamp;
     for (NT4Subscription sub in _subscriptions.values) {
       if (sub.topic == topic.name) {
-        sub.updateValue(data);
-        sub.timestamp = timestamp;
+        sub.updateValue(data, timestamp);
       }
     }
   }
@@ -594,6 +609,7 @@ class NT4Client {
         if (!_serverConnectionActive &&
             mainServerAddr.contains(serverBaseAddress)) {
           lastAnnouncedValues.clear();
+          lastAnnouncedTimestamps.clear();
 
           for (NT4Subscription sub in _subscriptions.values) {
             sub.currentValue = null;
@@ -829,10 +845,10 @@ class NT4Client {
           if (topicID >= 0) {
             NT4Topic topic = announcedTopics[topicID]!;
             lastAnnouncedValues[topic.name] = value;
+            lastAnnouncedTimestamps[topic.name] = timestampUS;
             for (NT4Subscription sub in _subscriptions.values) {
               if (sub.topic == topic.name) {
-                sub.updateValue(value);
-                sub.timestamp = timestampUS;
+                sub.updateValue(value, timestampUS);
               }
             }
 
