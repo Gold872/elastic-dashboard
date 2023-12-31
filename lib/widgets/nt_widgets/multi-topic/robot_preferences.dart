@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
