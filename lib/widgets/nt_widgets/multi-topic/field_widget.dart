@@ -159,7 +159,7 @@ class FieldWidget extends NTWidget {
                 robotWidthMeters = newWidth;
                 refresh();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              formatter: Constants.decimalTextFormatter(),
               label: 'Robot Width (meters)',
               initialText: robotWidthMeters.toString(),
             ),
@@ -176,7 +176,7 @@ class FieldWidget extends NTWidget {
                 robotLengthMeters = newLength;
                 refresh();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              formatter: Constants.decimalTextFormatter(),
               label: 'Robot Length (meters)',
               initialText: robotLengthMeters.toString(),
             ),

@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 
 class Settings {
@@ -21,6 +23,17 @@ class Settings {
 
   static double defaultPeriod = 0.06;
   static double defaultGraphPeriod = 0.033;
+}
+
+class Constants {
+  static FilteringTextInputFormatter decimalTextFormatter(
+      {bool allowNegative = false}) {
+    if (allowNegative) {
+      return FilteringTextInputFormatter.allow(RegExp(r'[0-9.-]'));
+    } else {
+      return FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'));
+    }
+  }
 }
 
 class PrefKeys {

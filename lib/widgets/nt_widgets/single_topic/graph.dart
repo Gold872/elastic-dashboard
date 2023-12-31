@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -85,7 +86,7 @@ class GraphWidget extends NTWidget {
                 timeDisplayed = newTime;
                 refresh();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
+              formatter: Constants.decimalTextFormatter(),
               label: 'Time Displayed (Seconds)',
               initialText: timeDisplayed.toString(),
             ),
@@ -109,7 +110,7 @@ class GraphWidget extends NTWidget {
                   refresh();
                 }
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
+              formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Minimum',
               initialText: minValue?.toString(),
               allowEmptySubmission: true,
@@ -127,7 +128,7 @@ class GraphWidget extends NTWidget {
                   refresh();
                 }
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Maximum',
               initialText: maxValue?.toString(),
               allowEmptySubmission: true,

@@ -94,8 +94,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Widget> _generalSettings() {
-    Color currentColor = Color(
-        widget.preferences.getInt('team_color') ?? Colors.blueAccent.value);
+    Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
+        Colors.blueAccent.value);
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -110,7 +110,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.onTeamNumberChanged?.call(data);
                 });
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+              formatter: FilteringTextInputFormatter.digitsOnly,
             ),
           ),
           Flexible(
@@ -202,7 +202,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.onGridSizeChanged?.call(value);
                 });
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9]")),
+              formatter: FilteringTextInputFormatter.digitsOnly,
             ),
           )
         ],
@@ -224,7 +224,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.onCornerRadiusChanged?.call(value);
                 });
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              formatter: Constants.decimalTextFormatter(),
             ),
           ),
           Flexible(
@@ -259,33 +259,33 @@ class _SettingsDialogState extends State<SettingsDialog> {
           children: [
             Flexible(
               child: DialogTextInput(
-                  initialText:
-                      (widget.preferences.getDouble(PrefKeys.defaultPeriod) ??
-                              Settings.defaultPeriod)
-                          .toString(),
-                  label: 'Default Period',
-                  onSubmit: (value) {
-                    setState(() {
-                      widget.onDefaultPeriodChanged?.call(value);
-                    });
-                  },
-                  formatter:
-                      FilteringTextInputFormatter.allow(RegExp(r"[0-9.]"))),
+                initialText:
+                    (widget.preferences.getDouble(PrefKeys.defaultPeriod) ??
+                            Settings.defaultPeriod)
+                        .toString(),
+                label: 'Default Period',
+                onSubmit: (value) {
+                  setState(() {
+                    widget.onDefaultPeriodChanged?.call(value);
+                  });
+                },
+                formatter: Constants.decimalTextFormatter(),
+              ),
             ),
             Flexible(
               child: DialogTextInput(
-                  initialText: (widget.preferences
-                              .getDouble(PrefKeys.defaultGraphPeriod) ??
-                          Settings.defaultGraphPeriod)
-                      .toString(),
-                  label: 'Default Graph Period',
-                  onSubmit: (value) {
-                    setState(() {
-                      widget.onDefaultGraphPeriodChanged?.call(value);
-                    });
-                  },
-                  formatter:
-                      FilteringTextInputFormatter.allow(RegExp(r"[0-9.]"))),
+                initialText: (widget.preferences
+                            .getDouble(PrefKeys.defaultGraphPeriod) ??
+                        Settings.defaultGraphPeriod)
+                    .toString(),
+                label: 'Default Graph Period',
+                onSubmit: (value) {
+                  setState(() {
+                    widget.onDefaultGraphPeriodChanged?.call(value);
+                  });
+                },
+                formatter: Constants.decimalTextFormatter(),
+              ),
             ),
           ],
         ),

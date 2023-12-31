@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -95,7 +96,7 @@ class VoltageView extends NTWidget {
                 minValue = newMin;
                 refresh();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
+              formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
               initialText: minValue.toString(),
             ),
@@ -111,7 +112,7 @@ class VoltageView extends NTWidget {
                 maxValue = newMax;
                 refresh();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.-]")),
+              formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
               initialText: maxValue.toString(),
             ),

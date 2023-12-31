@@ -204,7 +204,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
                 child.period = newPeriod;
                 child.resetSubscription();
               },
-              formatter: FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+              formatter: Constants.decimalTextFormatter(),
               label: 'Period',
               initialText: child.period.toString(),
             ),
