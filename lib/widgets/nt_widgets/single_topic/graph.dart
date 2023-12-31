@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +21,7 @@ class GraphWidget extends NTWidget {
   double? minValue;
   double? maxValue;
   late Color mainColor;
+  late double lineWidth;
 
   List<_GraphPoint> _graphData = [];
   _GraphWidgetGraph? _graphWidget;
@@ -45,6 +45,7 @@ class GraphWidget extends NTWidget {
     minValue = tryCast(jsonData['min_value']);
     maxValue = tryCast(jsonData['max_value']);
     mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
+    lineWidth = tryCast(jsonData['line_width']) ?? 2.0;
   }
 
   @override
@@ -55,6 +56,7 @@ class GraphWidget extends NTWidget {
       'min_value': minValue,
       'max_value': maxValue,
       'color': mainColor.value,
+      'line_width': lineWidth,
     };
   }
 
@@ -134,6 +136,23 @@ class GraphWidget extends NTWidget {
               allowEmptySubmission: true,
             ),
           ),
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newWidth = double.tryParse(value);
+
+                if (newWidth == null || newWidth < 0.01) {
+                  return;
+                }
+
+                lineWidth = newWidth;
+                refresh();
+              },
+              formatter: Constants.decimalTextFormatter(),
+              label: 'Line Width',
+              initialText: lineWidth.toString(),
+            ),
+          ),
         ],
       ),
     ];
@@ -153,6 +172,7 @@ class GraphWidget extends NTWidget {
       initialData: _graphData,
       subscription: subscription,
       timeDisplayed: timeDisplayed,
+      lineWidth: lineWidth,
       mainColor: mainColor,
       minValue: minValue,
       maxValue: maxValue,
@@ -166,6 +186,7 @@ class _GraphWidgetGraph extends StatefulWidget {
   final double? maxValue;
   final Color mainColor;
   final double timeDisplayed;
+  final double lineWidth;
 
   final List<_GraphPoint> initialData;
 
@@ -181,6 +202,7 @@ class _GraphWidgetGraph extends StatefulWidget {
     required this.subscription,
     required this.timeDisplayed,
     required this.mainColor,
+    required this.lineWidth,
     this.minValue,
     this.maxValue,
   }) : _currentData = initialData;
@@ -311,10 +333,12 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   List<FastLineSeries<_GraphPoint, num>> getChartData() {
     return <FastLineSeries<_GraphPoint, num>>[
       FastLineSeries<_GraphPoint, num>(
+        animationDuration: 0.0,
+        animationDelay: 0.0,
         sortingOrder: SortingOrder.ascending,
         onRendererCreated: (controller) => seriesController = controller,
         color: widget.mainColor,
-        width: 2.0,
+        width: widget.lineWidth,
         dataSource: graphData,
         xValueMapper: (value, index) {
           return value.x;
@@ -325,7 +349,6 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         sortFieldValueMapper: (datum, index) {
           return datum.x;
         },
-        animationDuration: 0.0,
       ),
     ];
   }
