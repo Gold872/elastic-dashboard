@@ -72,6 +72,78 @@ class ProfiledPIDControllerWidget extends NTWidget {
     super.resetSubscription();
   }
 
+  void _publishKP() {
+    bool publishTopic = kpTopic == null;
+
+    kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
+
+    double? data = double.tryParse(kpTextController?.text ?? '');
+
+    if (kpTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kpTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kpTopic!, data);
+  }
+
+  void _publishKI() {
+    bool publishTopic = kiTopic == null;
+
+    kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
+
+    double? data = double.tryParse(kiTextController?.text ?? '');
+
+    if (kiTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kiTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kiTopic!, data);
+  }
+
+  void _publishKD() {
+    bool publishTopic = kdTopic == null;
+
+    kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
+
+    double? data = double.tryParse(kdTextController?.text ?? '');
+
+    if (kdTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kdTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kdTopic!, data);
+  }
+
+  void _publishGoal() {
+    bool publishTopic = goalTopic == null;
+
+    goalTopic ??= ntConnection.getTopicFromName(goalTopicName);
+
+    double? data = double.tryParse(goalTextController?.text ?? '');
+
+    if (goalTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(goalTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(goalTopic!, data);
+  }
+
   @override
   List<Object> getCurrentData() {
     double kP = tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
@@ -80,7 +152,20 @@ class ProfiledPIDControllerWidget extends NTWidget {
     double goal =
         tryCast(ntConnection.getLastAnnouncedValue(goalTopicName)) ?? 0.0;
 
-    return [kP, kI, kD, goal];
+    return [
+      kP,
+      kI,
+      kD,
+      goal,
+      kpLastValue,
+      kiLastValue,
+      kdLastValue,
+      goalLastValue,
+      kpTextController?.text ?? '',
+      kiTextController?.text ?? '',
+      kdTextController?.text ?? '',
+      goalTextController?.text ?? '',
+    ];
   }
 
   @override
@@ -129,10 +214,15 @@ class ProfiledPIDControllerWidget extends NTWidget {
           }
           goalLastValue = goal;
 
-          TextStyle labelStyle =
-              Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  );
+          TextStyle labelStyle = Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(fontWeight: FontWeight.bold);
+
+          bool showWarning = kP != double.tryParse(kpTextController!.text) ||
+              kI != double.tryParse(kiTextController!.text) ||
+              kD != double.tryParse(kdTextController!.text) ||
+              goal != double.tryParse(goalTextController!.text);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -150,23 +240,7 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       textEditingController: kpTextController,
                       initialText: kpTextController!.text,
                       label: 'kP',
-                      onSubmit: (value) {
-                        bool publishTopic = kpTopic == null;
-
-                        kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kpTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kpTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kpTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -185,23 +259,7 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       textEditingController: kiTextController,
                       initialText: kiTextController!.text,
                       label: 'kI',
-                      onSubmit: (value) {
-                        bool publishTopic = kiTopic == null;
-
-                        kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kiTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kiTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kiTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -220,23 +278,7 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       textEditingController: kdTextController,
                       initialText: kdTextController!.text,
                       label: 'kD',
-                      onSubmit: (value) {
-                        bool publishTopic = kdTopic == null;
-
-                        kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kdTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kdTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kdTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -253,27 +295,36 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       textEditingController: goalTextController,
                       initialText: goalTextController!.text,
                       label: 'Goal',
-                      onSubmit: (value) {
-                        bool publishTopic = goalTopic == null;
-
-                        goalTopic ??=
-                            ntConnection.getTopicFromName(goalTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (goalTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(goalTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(goalTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      _publishKP();
+                      _publishKI();
+                      _publishKD();
+                      _publishGoal();
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                    ),
+                    child: const Text('Publish Values'),
+                  ),
+                  const SizedBox(width: 10),
+                  Icon(
+                    (showWarning) ? Icons.priority_high : Icons.check,
+                    color: (showWarning) ? Colors.red : Colors.green,
+                  ),
                 ],
               ),
             ],

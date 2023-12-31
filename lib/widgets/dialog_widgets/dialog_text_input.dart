@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class DialogTextInput extends StatelessWidget {
+class DialogTextInput extends StatefulWidget {
   final Function(String value) onSubmit;
   final TextInputFormatter? formatter;
   final String? label;
@@ -9,21 +9,29 @@ class DialogTextInput extends StatelessWidget {
   final bool allowEmptySubmission;
   final bool enabled;
 
-  TextEditingController? textEditingController;
+  final TextEditingController? textEditingController;
 
+  const DialogTextInput({
+    super.key,
+    required this.onSubmit,
+    this.label,
+    this.initialText,
+    this.allowEmptySubmission = false,
+    this.enabled = true,
+    this.formatter,
+    this.textEditingController,
+  });
+
+  @override
+  State<DialogTextInput> createState() => _DialogTextInputState();
+}
+
+class _DialogTextInputState extends State<DialogTextInput> {
   bool focused = false;
 
-  DialogTextInput(
-      {super.key,
-      required this.onSubmit,
-      this.label,
-      this.initialText,
-      this.allowEmptySubmission = false,
-      this.enabled = true,
-      this.formatter,
-      this.textEditingController}) {
-    textEditingController ??= TextEditingController(text: initialText);
-  }
+  late final TextEditingController? textEditingController =
+      widget.textEditingController ??
+          TextEditingController(text: widget.initialText);
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +42,10 @@ class DialogTextInput extends StatelessWidget {
           focused = value;
         },
         child: TextField(
-          enabled: enabled,
+          enabled: widget.enabled,
           onSubmitted: (value) {
-            if (value.isNotEmpty || allowEmptySubmission) {
-              onSubmit.call(value);
+            if (value.isNotEmpty || widget.allowEmptySubmission) {
+              widget.onSubmit.call(value);
             }
           },
           onTapOutside: (_) {
@@ -46,17 +54,19 @@ class DialogTextInput extends StatelessWidget {
             }
 
             String textValue = textEditingController!.text;
-            if (textValue.isNotEmpty || allowEmptySubmission) {
-              onSubmit.call(textValue);
+            if (textValue.isNotEmpty || widget.allowEmptySubmission) {
+              widget.onSubmit.call(textValue);
             }
 
+            focused = false;
             FocusManager.instance.primaryFocus?.unfocus();
           },
           controller: textEditingController,
-          inputFormatters: (formatter != null) ? [formatter!] : null,
+          inputFormatters:
+              (widget.formatter != null) ? [widget.formatter!] : null,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-            labelText: label,
+            labelText: widget.label,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
           ),
         ),

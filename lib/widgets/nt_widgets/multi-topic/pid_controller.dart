@@ -72,6 +72,78 @@ class PIDControllerWidget extends NTWidget {
     super.resetSubscription();
   }
 
+  void _publishKP() {
+    bool publishTopic = kpTopic == null;
+
+    kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
+
+    double? data = double.tryParse(kpTextController?.text ?? '');
+
+    if (kpTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kpTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kpTopic!, data);
+  }
+
+  void _publishKI() {
+    bool publishTopic = kiTopic == null;
+
+    kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
+
+    double? data = double.tryParse(kiTextController?.text ?? '');
+
+    if (kiTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kiTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kiTopic!, data);
+  }
+
+  void _publishKD() {
+    bool publishTopic = kdTopic == null;
+
+    kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
+
+    double? data = double.tryParse(kdTextController?.text ?? '');
+
+    if (kdTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(kdTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(kdTopic!, data);
+  }
+
+  void _publishSetpoint() {
+    bool publishTopic = setpointTopic == null;
+
+    setpointTopic ??= ntConnection.getTopicFromName(setpointTopicName);
+
+    double? data = double.tryParse(setpointTextController?.text ?? '');
+
+    if (setpointTopic == null || data == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(setpointTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(setpointTopic!, data);
+  }
+
   @override
   List<Object> getCurrentData() {
     double kP = tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
@@ -80,7 +152,20 @@ class PIDControllerWidget extends NTWidget {
     double setpoint =
         tryCast(ntConnection.getLastAnnouncedValue(setpointTopicName)) ?? 0.0;
 
-    return [kP, kI, kD, setpoint];
+    return [
+      kP,
+      kI,
+      kD,
+      setpoint,
+      kpLastValue,
+      kiLastValue,
+      kdLastValue,
+      setpointLastValue,
+      kpTextController?.text ?? '',
+      kiTextController?.text ?? '',
+      kdTextController?.text ?? '',
+      setpointTextController?.text ?? '',
+    ];
   }
 
   @override
@@ -131,10 +216,15 @@ class PIDControllerWidget extends NTWidget {
           }
           setpointLastValue = setpoint;
 
-          TextStyle labelStyle =
-              Theme.of(context).textTheme.bodyLarge!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  );
+          TextStyle labelStyle = Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(fontWeight: FontWeight.bold);
+
+          bool showWarning = kP != double.tryParse(kpTextController!.text) ||
+              kI != double.tryParse(kiTextController!.text) ||
+              kD != double.tryParse(kdTextController!.text) ||
+              setpoint != double.tryParse(setpointTextController!.text);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -152,23 +242,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kpTextController,
                       initialText: kpTextController!.text,
                       label: 'kP',
-                      onSubmit: (value) {
-                        bool publishTopic = kpTopic == null;
-
-                        kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kpTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kpTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kpTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -187,23 +261,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kiTextController,
                       initialText: kiTextController!.text,
                       label: 'kI',
-                      onSubmit: (value) {
-                        bool publishTopic = kiTopic == null;
-
-                        kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kiTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kiTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kiTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -222,23 +280,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kdTextController,
                       initialText: kdTextController!.text,
                       label: 'kD',
-                      onSubmit: (value) {
-                        bool publishTopic = kdTopic == null;
-
-                        kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (kdTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(kdTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(kdTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -255,27 +297,36 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: setpointTextController,
                       initialText: setpointTextController!.text,
                       label: 'Setpoint',
-                      onSubmit: (value) {
-                        bool publishTopic = setpointTopic == null;
-
-                        setpointTopic ??=
-                            ntConnection.getTopicFromName(setpointTopicName);
-
-                        double? data = double.tryParse(value);
-
-                        if (setpointTopic == null || data == null) {
-                          return;
-                        }
-
-                        if (publishTopic) {
-                          ntConnection.nt4Client.publishTopic(setpointTopic!);
-                        }
-
-                        ntConnection.updateDataFromTopic(setpointTopic!, data);
-                      },
+                      onSubmit: (value) {},
                     ),
                   ),
                   const Spacer(),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      _publishKP();
+                      _publishKI();
+                      _publishKD();
+                      _publishSetpoint();
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                    ),
+                    child: const Text('Publish Values'),
+                  ),
+                  const SizedBox(width: 10),
+                  Icon(
+                    (showWarning) ? Icons.priority_high : Icons.check,
+                    color: (showWarning) ? Colors.red : Colors.green,
+                  ),
                 ],
               ),
             ],
