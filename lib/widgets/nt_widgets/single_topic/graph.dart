@@ -253,33 +253,34 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   void initializeListener() {
     subscriptionListener?.cancel();
     subscriptionListener =
-        widget.subscription?.timestampedStream(yieldAll: true).listen((data) {
+        widget.subscription?.periodicStream(yieldAll: true).listen((data) {
       if (seriesController == null) {
         return;
       }
-      if (data.key != null) {
+      if (data != null) {
         List<int> addedIndexes = [];
         List<int> removedIndexes = [];
 
-        graphData.add(
-            _GraphPoint(x: data.value.toDouble(), y: tryCast(data.key) ?? 0.0));
+        double currentTime = DateTime.now().microsecondsSinceEpoch.toDouble();
+
+        graphData.add(_GraphPoint(x: currentTime, y: tryCast(data) ?? 0.0));
 
         int indexOffset = 0;
 
-        while (data.value - graphData[0].x > widget.timeDisplayed * 1e6 &&
+        while (currentTime - graphData[0].x > widget.timeDisplayed * 1e6 &&
             graphData.length > 1) {
           graphData.removeAt(0);
           removedIndexes.add(indexOffset++);
         }
 
-        int existingIndex = graphData.indexWhere((e) => e.x == data.value);
+        int existingIndex = graphData.indexWhere((e) => e.x == currentTime);
         while (existingIndex != -1 &&
             existingIndex != graphData.length - 1 &&
             graphData.length > 1) {
           removedIndexes.add(existingIndex + indexOffset++);
           graphData.removeAt(existingIndex);
 
-          existingIndex = graphData.indexWhere((e) => e.x == data.value);
+          existingIndex = graphData.indexWhere((e) => e.x == currentTime);
         }
 
         if (graphData.last.x - graphData.first.x < widget.timeDisplayed * 1e6) {
