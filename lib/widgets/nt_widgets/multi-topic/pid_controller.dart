@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -242,6 +243,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kpTextController,
                       initialText: kpTextController!.text,
                       label: 'kP',
+                      formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -261,6 +263,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kiTextController,
                       initialText: kiTextController!.text,
                       label: 'kI',
+                      formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -280,6 +283,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: kdTextController,
                       initialText: kdTextController!.text,
                       label: 'kD',
+                      formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -297,6 +301,8 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: setpointTextController,
                       initialText: setpointTextController!.text,
                       label: 'Setpoint',
+                      formatter:
+                          Constants.decimalTextFormatter(allowNegative: true),
                       onSubmit: (value) {},
                     ),
                   ),
