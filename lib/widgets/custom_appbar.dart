@@ -39,43 +39,49 @@ class CustomAppBar extends AppBar {
                   ),
                   InkWell(
                     canRequestFocus: false,
-                    onTap: () {},
-                    child: DecoratedMinimizeButton(
-                      type: buttonType,
-                      onPressed: () async => await windowManager.minimize(),
+                    onTap: () async => await windowManager.minimize(),
+                    child: const AbsorbPointer(
+                      child: DecoratedMinimizeButton(
+                        type: buttonType,
+                        onPressed: null,
+                      ),
                     ),
                   ),
                   InkWell(
                     canRequestFocus: false,
-                    onTap: () {},
-                    child: DecoratedMaximizeButton(
-                      type: buttonType,
-                      onPressed: () async {
-                        if (!Settings.isWindowMaximizable) {
-                          return;
-                        }
+                    onTap: () async {
+                      if (!Settings.isWindowMaximizable) {
+                        return;
+                      }
 
-                        if (await windowManager.isMaximized()) {
-                          windowManager.unmaximize();
-                        } else {
-                          windowManager.maximize();
-                        }
-                      },
+                      if (await windowManager.isMaximized()) {
+                        windowManager.unmaximize();
+                      } else {
+                        windowManager.maximize();
+                      }
+                    },
+                    child: const AbsorbPointer(
+                      child: DecoratedMaximizeButton(
+                        type: buttonType,
+                        onPressed: null,
+                      ),
                     ),
                   ),
                   InkWell(
                     canRequestFocus: false,
                     hoverColor: Colors.red,
-                    onTap: () {},
-                    child: DecoratedCloseButton(
-                      type: buttonType,
-                      onPressed: () async {
-                        if (onWindowClose == null) {
-                          await windowManager.close();
-                        } else {
-                          onWindowClose.call();
-                        }
-                      },
+                    onTap: () async {
+                      if (onWindowClose == null) {
+                        await windowManager.close();
+                      } else {
+                        onWindowClose.call();
+                      }
+                    },
+                    child: const AbsorbPointer(
+                      child: DecoratedCloseButton(
+                        type: buttonType,
+                        onPressed: null,
+                      ),
                     ),
                   ),
                 ],
