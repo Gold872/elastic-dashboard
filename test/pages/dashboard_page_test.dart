@@ -730,14 +730,13 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final minimizeButton = find.byType(DecoratedMinimizeButton);
+    final minimizeButton = find.ancestor(
+        of: find.byType(DecoratedMinimizeButton),
+        matching: find.byType(InkWell));
 
     expect(minimizeButton, findsOneWidget);
 
-    final minimizeButtonWidget =
-        minimizeButton.evaluate().first.widget as DecoratedMinimizeButton;
-
-    minimizeButtonWidget.onPressed?.call();
+    await widgetTester.tap(minimizeButton);
   });
 
   testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
@@ -765,12 +764,11 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final maximizeButton = find.byType(DecoratedMaximizeButton);
+    final maximizeButton = find.ancestor(
+        of: find.byType(DecoratedMaximizeButton),
+        matching: find.byType(InkWell));
 
-    final maximizeButtonWidget =
-        maximizeButton.evaluate().first.widget as DecoratedMaximizeButton;
-
-    maximizeButtonWidget.onPressed?.call();
+    await widgetTester.tap(maximizeButton);
   });
 
   testWidgets('Closing window (All changes saved)', (widgetTester) async {
@@ -800,14 +798,10 @@ void main() {
     await widgetTester.drag(gyroWidget, const Offset(-256, 128));
     await widgetTester.pumpAndSettle();
 
-    final closeButton = find.byType(DecoratedCloseButton);
+    final closeButton = find.ancestor(
+        of: find.byType(DecoratedCloseButton), matching: find.byType(InkWell));
 
-    expect(closeButton, findsOneWidget);
-
-    final closeButtonWidget =
-        closeButton.evaluate().first.widget as DecoratedCloseButton;
-
-    closeButtonWidget.onPressed?.call();
+    await widgetTester.tap(closeButton);
     await widgetTester.pumpAndSettle();
 
     expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsNothing);
@@ -837,14 +831,12 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final closeButton = find.byType(DecoratedCloseButton);
+    final closeButton = find.ancestor(
+        of: find.byType(DecoratedCloseButton), matching: find.byType(InkWell));
 
     expect(closeButton, findsOneWidget);
 
-    final closeButtonWidget =
-        closeButton.evaluate().first.widget as DecoratedCloseButton;
-
-    closeButtonWidget.onPressed?.call();
+    await widgetTester.tap(closeButton);
     await widgetTester.pumpAndSettle();
 
     expect(find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsOneWidget);
