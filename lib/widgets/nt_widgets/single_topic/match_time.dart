@@ -1,6 +1,8 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -18,10 +20,15 @@ class MatchTimeWidget extends NTWidget {
     'Seconds Only',
   ];
 
+  int redStartTime = 15;
+  int yellowStartTime = 30;
+
   MatchTimeWidget({
     super.key,
     required super.topic,
     this.timeDisplayMode = 'Minutes and Seconds',
+    this.redStartTime = 15,
+    this.yellowStartTime = 30,
     super.dataType,
     super.period,
   }) : super();
@@ -34,6 +41,11 @@ class MatchTimeWidget extends NTWidget {
     _timeDisplayOptions.firstWhere(
         (e) => e.toUpperCase() == timeDisplayMode.toUpperCase(),
         orElse: () => 'Minutes and Seconds');
+
+    redStartTime =
+        tryCast<num>(jsonData['red_start_time'])?.toInt() ?? redStartTime;
+    yellowStartTime =
+        tryCast<num>(jsonData['yellow_start_time'])?.toInt() ?? yellowStartTime;
   }
 
   @override
@@ -55,6 +67,55 @@ class MatchTimeWidget extends NTWidget {
               refresh();
             },
           ),
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              Flexible(
+                child: Tooltip(
+                  message:
+                      'The time (in seconds) where time will begin to display in red',
+                  waitDuration: const Duration(milliseconds: 750),
+                  child: DialogTextInput(
+                    label: 'Red Start Time',
+                    initialText: redStartTime.toString(),
+                    onSubmit: (value) {
+                      int? newRedTime = int.tryParse(value);
+
+                      if (newRedTime == null) {
+                        return;
+                      }
+
+                      redStartTime = newRedTime;
+                      refresh();
+                    },
+                    formatter: FilteringTextInputFormatter.digitsOnly,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Tooltip(
+                  message:
+                      'The time (in seconds) where time will begin to display in yellow',
+                  waitDuration: const Duration(milliseconds: 750),
+                  child: DialogTextInput(
+                    label: 'Yellow Start Time',
+                    initialText: yellowStartTime.toString(),
+                    onSubmit: (value) {
+                      int? newYellowTime = int.tryParse(value);
+
+                      if (newYellowTime == null) {
+                        return;
+                      }
+
+                      yellowStartTime = newYellowTime;
+                      refresh();
+                    },
+                    formatter: FilteringTextInputFormatter.digitsOnly,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     ];
@@ -65,13 +126,15 @@ class MatchTimeWidget extends NTWidget {
     return {
       ...super.toJson(),
       'time_display_mode': timeDisplayMode,
+      'red_start_time': redStartTime,
+      'yellow_start_time': yellowStartTime,
     };
   }
 
   Color _getTimeColor(num time) {
-    if (time <= 15.0) {
+    if (time <= redStartTime) {
       return Colors.red;
-    } else if (time <= 30.0) {
+    } else if (time <= yellowStartTime) {
       return Colors.yellow;
     } else if (time <= 60.0) {
       return Colors.green;
