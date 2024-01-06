@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
@@ -117,7 +119,54 @@ class FieldWidget extends NTWidget {
   @override
   List<Widget> getEditProperties(BuildContext context) {
     return [
-      const Center(child: Text('Game')),
+      Center(
+        child: RichText(
+          text: TextSpan(
+            text: 'Field Image (',
+            children: [
+              WidgetSpan(
+                child: Tooltip(
+                  waitDuration: const Duration(milliseconds: 750),
+                  richMessage: WidgetSpan(
+                    // Builder is used so the message updates when the field image is changed
+                    child: Builder(
+                      builder: (context) {
+                        return Text(
+                          field.sourceURL ?? '',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(color: Colors.black),
+                        );
+                      },
+                    ),
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Source',
+                      style: const TextStyle(color: Colors.blue),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          if (field.sourceURL == null) {
+                            return;
+                          }
+                          Uri? url = Uri.tryParse(field.sourceURL!);
+                          if (url == null) {
+                            return;
+                          }
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url);
+                          }
+                        },
+                    ),
+                  ),
+                ),
+              ),
+              const TextSpan(text: ')'),
+            ],
+          ),
+        ),
+      ),
       DialogDropdownChooser(
         onSelectionChanged: (value) {
           if (value == null) {

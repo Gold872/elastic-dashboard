@@ -51,6 +51,7 @@ class Field {
   final Map<String, dynamic> jsonData;
 
   late String? game;
+  late String? sourceURL;
 
   int? fieldImageWidth;
   int? fieldImageHeight;
@@ -80,6 +81,7 @@ class Field {
     fieldImageHeight = 1400;
 
     game = jsonData['game'];
+    sourceURL = jsonData['source-url'];
 
     fieldWidthMeters = jsonData['field-size'][0];
     fieldHeightMeters = jsonData['field-size'][1];
