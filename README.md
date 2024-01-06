@@ -40,4 +40,5 @@ This dashboard wouldn't have been made without the help and inspiration from the
         * [Infinite Recharge](https://www.chiefdelphi.com/t/2020-top-down-orthographic-field-views/369892)
         * [Rapid React](https://www.chiefdelphi.com/t/2022-top-down-field-renders/399031)
         * [Charged Up](https://www.chiefdelphi.com/t/2023-top-down-field-renders/421365)
+        * [Crescendo](https://www.chiefdelphi.com/t/2024-crescendo-top-down-field-renders/447764)
 * All mentors and advisors of Team 353, the POBots
