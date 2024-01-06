@@ -22,7 +22,7 @@ class FieldWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  static String defaultGame = 'Charged Up';
+  static const String defaultGame = 'Crescendo';
   String fieldGame = defaultGame;
   late Field field;
 
