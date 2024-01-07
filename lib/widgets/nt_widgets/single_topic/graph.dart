@@ -33,6 +33,7 @@ class GraphWidget extends NTWidget {
     this.minValue,
     this.maxValue,
     this.mainColor = Colors.cyan,
+    this.lineWidth = 2.0,
     super.dataType,
     super.period,
   }) : super();
