@@ -26,8 +26,8 @@ class FieldWidget extends NTWidget {
   String fieldGame = defaultGame;
   late Field field;
 
-  double robotWidthMeters = 0.82;
-  double robotLengthMeters = 1.00;
+  double robotWidthMeters = 0.85;
+  double robotLengthMeters = 0.85;
 
   bool showOtherObjects = true;
   bool showTrajectories = true;
