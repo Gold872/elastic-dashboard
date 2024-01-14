@@ -574,6 +574,7 @@ class NT4Client {
       await _mainWebsocket!.ready;
     } catch (e) {
       // Failed to connect... try again
+      logger.info('Failed to connect to network tables, attempting to reconnect in 1 second');
       Future.delayed(const Duration(seconds: 1), _connect);
       return;
     }
@@ -664,6 +665,7 @@ class NT4Client {
     try {
       await _rttWebsocket!.ready;
     } catch (e) {
+      logger.info('Failed to connect to RTT Network Tables protocol, attempting to reconnect in 1 second');
       Future.delayed(const Duration(seconds: 1), _rttConnect);
       return;
     }

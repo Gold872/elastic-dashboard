@@ -81,7 +81,7 @@ class DSInteropClient {
     try {
       _dbModeServer = await ServerSocket.bind(serverBaseAddress, 1741);
     } catch (e) {
-      logger.debug(
+      logger.info(
           'Failed to start TCP server on port 1741, attempting to reconnect in 5 seconds');
       Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
       return;
