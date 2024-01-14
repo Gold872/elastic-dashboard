@@ -607,6 +607,8 @@ class NT4Client {
         // Prevents repeated calls to onConnect and reconnecting after changing ip addresses
         if (!_serverConnectionActive &&
             mainServerAddr.contains(serverBaseAddress)) {
+          logger.info(
+              'Network Tables connected on IP address $serverBaseAddress with protocol ${_mainWebsocket!.protocol}');
           lastAnnouncedValues.clear();
           lastAnnouncedTimestamps.clear();
 
@@ -719,7 +721,7 @@ class NT4Client {
     _rttConnectionActive = false;
     _useRTT = false;
 
-    logger.debug('[RTT] Connection closed');
+    logger.info('RTT Connection closed');
   }
 
   void _wsOnClose() async {
@@ -745,6 +747,7 @@ class NT4Client {
     _lastPongTime = 0;
     _latencyMs = 0;
 
+    logger.info('Network Tables disconnected');
     onDisconnect?.call();
 
     announcedTopics.clear();

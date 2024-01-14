@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
 NTConnection get ntConnection => NTConnection.instance;
@@ -11,8 +10,6 @@ class NTConnection {
 
   late NT4Client _ntClient;
   late DSInteropClient _dsClient;
-
-  late NT4Subscription allTopicsSubscription;
 
   List<VoidCallback> onConnectedListeners = [];
   List<VoidCallback> onDisconnectedListeners = [];
@@ -36,8 +33,6 @@ class NTConnection {
     _ntClient = NT4Client(
         serverBaseAddress: ipAddress,
         onConnect: () {
-          logger.info(
-              'Network Tables connected on IP address ${_ntClient.serverBaseAddress}');
           _ntConnected = true;
 
           for (VoidCallback callback in onConnectedListeners) {
@@ -45,7 +40,6 @@ class NTConnection {
           }
         },
         onDisconnect: () {
-          logger.info('Network Tables disconnected');
           _ntConnected = false;
 
           for (VoidCallback callback in onDisconnectedListeners) {
@@ -54,8 +48,7 @@ class NTConnection {
         });
 
     // Allows all published topics to be announced
-    allTopicsSubscription = _ntClient.subscribeTopicsOnly('/');
-    _ntClient.subscribe('/.schema');
+    _ntClient.subscribeTopicsOnly('/');
   }
 
   void dsClientConnect(
