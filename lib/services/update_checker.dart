@@ -9,7 +9,7 @@ class UpdateChecker {
 
   UpdateChecker({required this.currentVersion}) : _github = GitHub();
 
-  Future<Object?> isUpdateAvailable() async {
+  Future<UpdateCheckerResponse> isUpdateAvailable() async {
     logger.info('Checking for updates');
 
     try {
@@ -20,11 +20,19 @@ class UpdateChecker {
 
       if (tagName == null) {
         logger.error('Release tag not found in git repository');
-        return 'Release tag not found';
+        return UpdateCheckerResponse(
+          updateAvailable: false,
+          error: true,
+          errorMessage: 'Release tag not found',
+        );
       }
       if (!tagName.startsWith('v')) {
         logger.error('Invalid version name: $tagName');
-        return 'Invalid version name: \'$tagName\'';
+        return UpdateCheckerResponse(
+          updateAvailable: false,
+          error: true,
+          errorMessage: 'Invalid version name: \'$tagName\'',
+        );
       }
 
       String versionName = tagName.substring(1);
@@ -32,10 +40,36 @@ class UpdateChecker {
       Version current = Version.parse(currentVersion);
       Version latest = Version.parse(versionName);
 
-      return current < latest;
+      bool updateAvailable = current < latest;
+
+      return UpdateCheckerResponse(
+        updateAvailable: updateAvailable,
+        latestVersion: latest.toString(),
+        error: false,
+      );
     } catch (error) {
       logger.error('Failed to check for updates', error);
-      return error.toString();
+      return UpdateCheckerResponse(
+        updateAvailable: false,
+        error: true,
+        errorMessage: error.toString(),
+      );
     }
   }
+}
+
+class UpdateCheckerResponse {
+  final bool updateAvailable;
+  final String? latestVersion;
+  final bool error;
+  final String? errorMessage;
+
+  bool get onLatestVersion => !updateAvailable && !error;
+
+  UpdateCheckerResponse({
+    required this.updateAvailable,
+    this.latestVersion,
+    required this.error,
+    this.errorMessage,
+  });
 }

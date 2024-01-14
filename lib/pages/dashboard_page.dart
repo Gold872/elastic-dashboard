@@ -280,9 +280,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     TextTheme textTheme = Theme.of(context).textTheme;
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
-    Object? updateAvailable = await updateChecker.isUpdateAvailable();
+    UpdateCheckerResponse updateResponse =
+        await updateChecker.isUpdateAvailable();
 
-    if (updateAvailable is String && notifyIfError) {
+    if (updateResponse.error && notifyIfError) {
       // ignore: use_build_context_synchronously
       ElegantNotification(
         background: colorScheme.background,
@@ -298,12 +299,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             style: textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.bold,
             )),
-        description: Text(updateAvailable),
+        description: Text(
+          updateResponse.errorMessage!,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 3,
+        ),
       ).show(context);
       return;
     }
 
-    if (tryCast(updateAvailable) ?? false) {
+    if (updateResponse.updateAvailable) {
       // ignore: use_build_context_synchronously
       ElegantNotification(
         autoDismiss: false,
@@ -314,7 +319,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         height: 100,
         notificationPosition: NotificationPosition.bottomRight,
         title: Text(
-          'Update Available',
+          'Version ${updateResponse.latestVersion!} Available',
           style: textTheme.bodyMedium!.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -336,7 +341,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
         },
       ).show(context);
-    } else if (notifyIfLatest) {
+    } else if (updateResponse.onLatestVersion && notifyIfLatest) {
       // ignore: use_build_context_synchronously
       ElegantNotification(
         background: colorScheme.background,
