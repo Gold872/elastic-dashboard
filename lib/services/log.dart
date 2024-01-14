@@ -4,12 +4,15 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Log {
+  static final DateFormat _dateFormat = DateFormat('HH:mm:ss.S');
+
   static Log instance = Log._internal();
 
   Log._internal();
@@ -36,7 +39,12 @@ class Log {
   }
 
   void log(Level level, dynamic message, [dynamic error, StackTrace? trace]) {
-    _logger?.log(level, message, error: error, stackTrace: trace);
+    _logger?.log(
+      level,
+      '[${_dateFormat.format(DateTime.now())}]:  $message',
+      error: error,
+      stackTrace: trace,
+    );
   }
 
   void info(dynamic message, [dynamic error, StackTrace? stackTrace]) {

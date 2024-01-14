@@ -23,7 +23,7 @@ void main() async {
 
   await logger.initialize();
 
-  logger.info('[${DateTime.now().toString()}] Starting application');
+  logger.info('Starting application');
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
