@@ -159,8 +159,8 @@ class WidgetContainer extends StatelessWidget {
     required this.width,
     required this.height,
     this.opacity = 1.0,
-    this.horizontalPadding = 10.0,
-    this.verticalPadding = 10.0,
+    this.horizontalPadding = 7.5,
+    this.verticalPadding = 7.5,
   });
 
   final double opacity;
@@ -212,7 +212,8 @@ class WidgetContainer extends StatelessWidget {
                         width: constraints.maxWidth,
                         alignment: Alignment.center,
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 6.50),
                           child: Text(
                             title!,
                             overflow: TextOverflow.ellipsis,
@@ -226,7 +227,7 @@ class WidgetContainer extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(
-                        top: verticalPadding / 2,
+                        top: verticalPadding * 0.75,
                         left: horizontalPadding,
                         right: horizontalPadding,
                         bottom: verticalPadding,
