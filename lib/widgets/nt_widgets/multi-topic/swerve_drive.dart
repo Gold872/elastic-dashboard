@@ -31,10 +31,13 @@ class SwerveDriveWidget extends NTWidget {
 
   bool showRobotRotation = true;
 
+  String rotationUnit = 'Radians';
+
   SwerveDriveWidget({
     super.key,
     required super.topic,
     this.showRobotRotation = true,
+    this.rotationUnit = 'Radians',
     super.dataType,
     super.period,
   }) : super();
@@ -43,6 +46,7 @@ class SwerveDriveWidget extends NTWidget {
       {super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
+    rotationUnit = tryCast(jsonData['rotation_unit']) ?? 'Degrees';
   }
 
   @override
@@ -88,6 +92,7 @@ class SwerveDriveWidget extends NTWidget {
     return {
       ...super.toJson(),
       'show_robot_rotation': showRobotRotation,
+      'rotation_unit': rotationUnit,
     };
   }
 
@@ -105,6 +110,56 @@ class SwerveDriveWidget extends NTWidget {
           },
         ),
       ),
+      const SizedBox(height: 5),
+      const Text('Rotation Unit'),
+      StatefulBuilder(builder: (context, setState) {
+        return Column(
+          children: [
+            ListTile(
+              title: const Text('Radians'),
+              dense: true,
+              leading: Radio(
+                value: 'Radians',
+                groupValue: rotationUnit,
+                onChanged: (value) {
+                  rotationUnit = 'Radians';
+
+                  setState(() {});
+                  refresh();
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('Degrees'),
+              dense: true,
+              leading: Radio(
+                value: 'Degrees',
+                groupValue: rotationUnit,
+                onChanged: (value) {
+                  rotationUnit = 'Degrees';
+
+                  setState(() {});
+                  refresh();
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('Rotations'),
+              dense: true,
+              leading: Radio(
+                value: 'Rotations',
+                groupValue: rotationUnit,
+                onChanged: (value) {
+                  rotationUnit = 'Rotations';
+
+                  setState(() {});
+                  refresh();
+                },
+              ),
+            ),
+          ],
+        );
+      }),
     ];
   }
 
@@ -190,29 +245,47 @@ class SwerveDriveWidget extends NTWidget {
         double robotAngle =
             tryCast(ntConnection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
 
-        return LayoutBuilder(builder: (context, constraints) {
-          double sideLength =
-              min(constraints.maxWidth, constraints.maxHeight) * 0.9;
-          return Transform.rotate(
-            angle: (showRobotRotation) ? radians(-robotAngle) : 0.0,
-            child: SizedBox(
-              width: sideLength,
-              height: sideLength,
-              child: CustomPaint(
-                painter: SwerveDrivePainter(
-                  frontLeftAngle: frontLeftAngle,
-                  frontLeftVelocity: frontLeftVelocity,
-                  frontRightAngle: frontRightAngle,
-                  frontRightVelocity: frontRightVelocity,
-                  backLeftAngle: backLeftAngle,
-                  backLeftVelocity: backLeftVelocity,
-                  backRightAngle: backRightAngle,
-                  backRightVelocity: backRightVelocity,
+        if (rotationUnit == 'Degrees') {
+          frontLeftAngle = radians(frontLeftAngle);
+          frontRightAngle = radians(frontRightAngle);
+          backLeftAngle = radians(backLeftAngle);
+          backRightAngle = radians(backRightAngle);
+
+          robotAngle = radians(robotAngle);
+        } else if (rotationUnit == 'Rotations') {
+          frontLeftAngle *= 2 * pi;
+          frontRightAngle *= 2 * pi;
+          backLeftAngle *= 2 * pi;
+          backRightAngle *= 2 * pi;
+
+          robotAngle *= 2 * pi;
+        }
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            double sideLength =
+                min(constraints.maxWidth, constraints.maxHeight) * 0.9;
+            return Transform.rotate(
+              angle: (showRobotRotation) ? -robotAngle : 0.0,
+              child: SizedBox(
+                width: sideLength,
+                height: sideLength,
+                child: CustomPaint(
+                  painter: SwerveDrivePainter(
+                    frontLeftAngle: frontLeftAngle,
+                    frontLeftVelocity: frontLeftVelocity,
+                    frontRightAngle: frontRightAngle,
+                    frontRightVelocity: frontRightVelocity,
+                    backLeftAngle: backLeftAngle,
+                    backLeftVelocity: backLeftVelocity,
+                    backRightAngle: backRightAngle,
+                    backRightVelocity: backRightVelocity,
+                  ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -352,21 +425,19 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(frontLeftWheel, radians(-(frontLeftAngle + 22.5) - 90),
+    canvas.drawArc(frontLeftWheel, -(frontLeftAngle + radians(22.5)) - pi / 2,
         radians(45), false, anglePaint);
 
     // Front left vector arrow
     if (frontLeftVelocity.abs() >= 0.05) {
       double frontLeftAngle = this.frontLeftAngle;
 
-      frontLeftAngle += 90;
+      frontLeftAngle += pi / 2;
       frontLeftAngle *= -1;
 
       if (frontLeftVelocity < 0) {
-        frontLeftAngle -= 180;
+        frontLeftAngle -= pi;
       }
-
-      frontLeftAngle = radians(frontLeftAngle);
 
       double frontLeftArrowLength = frontLeftVelocity.abs() * pixelsPerMPS;
       double frontLeftArrowBase =
@@ -401,21 +472,19 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(frontRightWheel, radians(-(frontRightAngle + 22.5) - 90),
+    canvas.drawArc(frontRightWheel, -(frontRightAngle + radians(22.5)) - pi / 2,
         radians(45), false, anglePaint);
 
     // Front right vector arrow
     if (frontRightVelocity.abs() >= 0.05) {
       double frontRightAngle = this.frontRightAngle;
 
-      frontRightAngle += 90;
+      frontRightAngle += pi / 2;
       frontRightAngle *= -1;
 
       if (frontRightVelocity < 0) {
-        frontRightAngle -= 180;
+        frontRightAngle -= pi;
       }
-
-      frontRightAngle = radians(frontRightAngle);
 
       double frontRightArrowLength = frontRightVelocity.abs() * pixelsPerMPS;
       double frontRightArrowBase =
@@ -450,21 +519,19 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(backLeftWheel, radians(-(backLeftAngle + 22.5) - 90),
+    canvas.drawArc(backLeftWheel, -(backLeftAngle + radians(22.5)) - pi / 2,
         radians(45), false, anglePaint);
 
     // Back left vector arrow
     if (backLeftVelocity.abs() >= 0.05) {
       double backLeftAngle = this.backLeftAngle;
 
-      backLeftAngle += 90;
+      backLeftAngle += pi / 2;
       backLeftAngle *= -1;
 
       if (backLeftVelocity < 0) {
-        backLeftAngle -= 180;
+        backLeftAngle -= pi;
       }
-
-      backLeftAngle = radians(backLeftAngle);
 
       double backLeftArrowLength = backLeftVelocity.abs() * pixelsPerMPS;
       double backLeftArrowBase =
@@ -500,21 +567,19 @@ class SwerveDrivePainter extends CustomPainter {
         width: circleRadius * 2,
         height: circleRadius * 2);
 
-    canvas.drawArc(backRightWheel, radians(-(backRightAngle + 22.5) - 90),
+    canvas.drawArc(backRightWheel, -(backRightAngle + radians(22.5)) - pi / 2,
         radians(45), false, anglePaint);
 
     // Back right vector arrow
     if (backRightVelocity.abs() >= 0.05) {
       double backRightAngle = this.backRightAngle;
 
-      backRightAngle += 90;
+      backRightAngle += pi / 2;
       backRightAngle *= -1;
 
       if (backRightVelocity < 0) {
-        backRightAngle -= 180;
+        backRightAngle -= pi;
       }
-
-      backRightAngle = radians(backRightAngle);
 
       double backRightArrowLength = backRightVelocity.abs() * pixelsPerMPS;
       double backRightArrowBase =
