@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -107,6 +109,8 @@ class CommandSchedulerWidget extends NTWidget {
         List<String> names = rawNames.whereType<String>().toList();
         List<int> ids = rawIds.whereType<int>().toList();
 
+        int commandsLength = min(names.length, ids.length);
+
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +123,7 @@ class CommandSchedulerWidget extends NTWidget {
             const Divider(),
             Flexible(
               child: ListView.builder(
-                itemCount: names.length,
+                itemCount: commandsLength,
                 itemBuilder: (context, index) {
                   return ListTile(
                     dense: true,
