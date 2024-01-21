@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -81,7 +82,10 @@ void main() async {
   Size screenSize = (primaryDisplay.visibleSize ?? primaryDisplay.size) *
       (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
 
-  await windowManager.setMinimumSize(screenSize * 0.60);
+  double minimumSizeWidth = min(screenSize.width * 0.60, 1280.0);
+  double minimumSizeHeight = min(screenSize.height * 0.60, 720.0);
+
+  await windowManager.setMinimumSize(Size(minimumSizeWidth, minimumSizeHeight));
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
 
