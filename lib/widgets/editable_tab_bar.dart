@@ -124,6 +124,9 @@ class EditableTabBar extends StatelessWidget {
                           onTabChanged.call(index);
                         },
                         onSecondaryTapUp: (details) {
+                          if (Settings.layoutLocked) {
+                            return;
+                          }
                           ContextMenu contextMenu = ContextMenu(
                             position: details.globalPosition,
                             borderRadius: BorderRadius.circular(5.0),
@@ -190,22 +193,28 @@ class EditableTabBar extends StatelessWidget {
                                         : theme.colorScheme.onPrimaryContainer,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                IconButton(
-                                  onPressed: () {
-                                    closeTab(index);
-                                  },
-                                  padding: const EdgeInsets.all(0.0),
-                                  alignment: Alignment.center,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 15.0,
-                                    minHeight: 15.0,
+                                Visibility(
+                                  visible: !Settings.layoutLocked,
+                                  child: const SizedBox(width: 10),
+                                ),
+                                Visibility(
+                                  visible: !Settings.layoutLocked,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      closeTab(index);
+                                    },
+                                    padding: const EdgeInsets.all(0.0),
+                                    alignment: Alignment.center,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 15.0,
+                                      minHeight: 15.0,
+                                    ),
+                                    iconSize: 14,
+                                    color: (currentIndex == index)
+                                        ? theme.colorScheme.primaryContainer
+                                        : theme.colorScheme.onPrimaryContainer,
+                                    icon: const Icon(Icons.close),
                                   ),
-                                  iconSize: 14,
-                                  color: (currentIndex == index)
-                                      ? theme.colorScheme.primaryContainer
-                                      : theme.colorScheme.onPrimaryContainer,
-                                  icon: const Icon(Icons.close),
                                 ),
                               ],
                             ),
@@ -220,25 +229,24 @@ class EditableTabBar extends StatelessWidget {
                   children: [
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: () {
-                        onTabMoveLeft.call();
-                      },
+                      onPressed: (!Settings.layoutLocked)
+                          ? () => onTabMoveLeft.call()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.west),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: () {
-                        createTab();
-                      },
+                      onPressed:
+                          (!Settings.layoutLocked) ? () => createTab() : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.add),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: () {
-                        onTabMoveRight.call();
-                      },
+                      onPressed: (!Settings.layoutLocked)
+                          ? () => onTabMoveRight.call()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.east),
                     ),

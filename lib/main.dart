@@ -55,6 +55,8 @@ void main() async {
   Settings.ipAddressMode =
       IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
 
+  Settings.layoutLocked =
+      preferences.getBool(PrefKeys.layoutLocked) ?? Settings.layoutLocked;
   Settings.gridSize =
       preferences.getInt(PrefKeys.gridSize) ?? Settings.gridSize;
   Settings.showGrid =

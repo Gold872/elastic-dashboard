@@ -658,6 +658,18 @@ class TabGrid extends StatelessWidget {
     );
   }
 
+  void lockLayout() {
+    for (WidgetContainerModel container in _widgetModels) {
+      container.setDraggable(false);
+    }
+  }
+
+  void unlockLayout() {
+    for (WidgetContainerModel container in _widgetModels) {
+      container.setDraggable(true);
+    }
+  }
+
   void onDestroy() {
     for (WidgetContainerModel container in _widgetModels) {
       container.disposeModel(deleting: true);
@@ -775,31 +787,36 @@ class TabGrid extends StatelessWidget {
         GestureDetector(
           onTap: () {},
           onSecondaryTapUp: (details) {
+            if (Settings.layoutLocked) {
+              return;
+            }
+            List<ContextMenuEntry> menuEntries = [
+              MenuHeader(
+                text: container.title ?? '',
+                disableUppercase: true,
+              ),
+              const MenuDivider(),
+              MenuItem(
+                label: 'Edit Properties',
+                icon: Icons.edit_outlined,
+                onSelected: () {
+                  container.showEditProperties(context);
+                },
+              ),
+              ...container.getContextMenuItems(),
+              MenuItem(
+                  label: 'Remove',
+                  icon: Icons.delete_outlined,
+                  onSelected: () {
+                    removeWidget(container);
+                  }),
+            ];
+
             ContextMenu contextMenu = ContextMenu(
               position: details.globalPosition,
               borderRadius: BorderRadius.circular(5.0),
               padding: const EdgeInsets.all(4.0),
-              entries: [
-                MenuHeader(
-                  text: container.title ?? '',
-                  disableUppercase: true,
-                ),
-                const MenuDivider(),
-                MenuItem(
-                  label: 'Edit Properties',
-                  icon: Icons.edit_outlined,
-                  onSelected: () {
-                    container.showEditProperties(context);
-                  },
-                ),
-                ...container.getContextMenuItems(),
-                MenuItem(
-                    label: 'Remove',
-                    icon: Icons.delete_outlined,
-                    onSelected: () {
-                      removeWidget(container);
-                    }),
-              ],
+              entries: menuEntries,
             );
 
             showContextMenu(
@@ -881,6 +898,9 @@ class TabGrid extends StatelessWidget {
       behavior: HitTestBehavior.translucent,
       onTap: () {},
       onSecondaryTapUp: (details) {
+        if (Settings.layoutLocked) {
+          return;
+        }
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
           borderRadius: BorderRadius.circular(5.0),

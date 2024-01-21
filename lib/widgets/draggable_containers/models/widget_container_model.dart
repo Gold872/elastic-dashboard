@@ -12,7 +12,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   String? title;
 
-  bool draggable = true;
+  bool draggable = !Settings.layoutLocked;
   bool _disposed = false;
   bool _forceDispose = false;
 

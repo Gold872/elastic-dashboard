@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -451,19 +452,23 @@ class ListLayoutModel extends LayoutContainerModel {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
+            if (Settings.layoutLocked) {
+              return;
+            }
             widget.cursorGlobalLocation = details.globalPosition;
 
             Future(() {
-              // onDragCancel?.call(this);
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                // controller?.setRect(draggingRect);
               }
 
               setDraggable(false);
             });
           },
           onPanUpdate: (details) {
+            if (Settings.layoutLocked) {
+              return;
+            }
             widget.cursorGlobalLocation = details.globalPosition;
 
             Offset location = details.globalPosition -
@@ -472,6 +477,9 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
+            if (Settings.layoutLocked) {
+              return;
+            }
             Future(() => setDraggable(true));
 
             Rect previewLocation = Rect.fromLTWH(
@@ -492,10 +500,12 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
+            if (Settings.layoutLocked) {
+              return;
+            }
             Future(() {
               if (dragging || resizing) {
                 onDragCancel?.call(this);
-                // controller?.setRect(draggingRect);
               }
 
               setDraggable(true);

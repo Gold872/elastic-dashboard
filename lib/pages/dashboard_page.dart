@@ -145,6 +145,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
       onWidgetAdded: (widgetData) {
+        if (Settings.layoutLocked) {
+          return;
+        }
         // Needs to be done in case if widget data gets erased by the listener
         Map<String, dynamic> widgetDataCopy = {};
 
@@ -401,6 +404,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void importLayout() async {
+    if (Settings.layoutLocked) {
+      return;
+    }
     const XTypeGroup jsonTypeGroup = XTypeGroup(
       label: 'JSON (JavaScript Object Notation)',
       extensions: ['.json'],
@@ -615,20 +621,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     // Switch to Tab (Ctrl + Tab #)
     for (int i = 1; i <= 9; i++) {
       hotKeyManager.register(
-          HotKey(
-            LogicalKeyboardKey(48 + i),
-            modifiers: [ModifierKey.controlModifier],
-          ), callback: () {
-        if (currentTabIndex == i - 1) {
-          logger.debug(
-              'Ignoring switch to tab ${i - 1}, current tab is already $currentTabIndex');
-          return;
-        }
-        if (i - 1 < tabData.length) {
-          logger.info('Switching tab to index ${i - 1} via keyboard shortcut');
-          setState(() => currentTabIndex = i - 1);
-        }
-      });
+        HotKey(
+          LogicalKeyboardKey(48 + i),
+          modifiers: [ModifierKey.controlModifier],
+        ),
+        callback: () {
+          if (currentTabIndex == i - 1) {
+            logger.debug(
+                'Ignoring switch to tab ${i - 1}, current tab is already $currentTabIndex');
+            return;
+          }
+          if (i - 1 < tabData.length) {
+            logger
+                .info('Switching tab to index ${i - 1} via keyboard shortcut');
+            setState(() => currentTabIndex = i - 1);
+          }
+        },
+      );
     }
     // Move Tab Left (Ctrl + <-)
     hotKeyManager.register(
@@ -656,50 +665,76 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
     // New Tab (Ctrl + T)
     hotKeyManager.register(
-        HotKey(
-          LogicalKeyboardKey.keyT,
-          modifiers: [ModifierKey.controlModifier],
-        ), callback: () {
-      String newTabName = 'Tab ${tabData.length + 1}';
-      int newTabIndex = tabData.length;
+      HotKey(
+        LogicalKeyboardKey.keyT,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: () {
+        if (Settings.layoutLocked) {
+          return;
+        }
+        String newTabName = 'Tab ${tabData.length + 1}';
+        int newTabIndex = tabData.length;
 
-      tabData.add(TabData(name: newTabName));
-      grids.add(
-        TabGrid(
-          key: GlobalKey(),
-          onAddWidgetPressed: displayAddWidgetDialog,
-        ),
-      );
+        tabData.add(TabData(name: newTabName));
+        grids.add(
+          TabGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ),
+        );
 
-      setState(() => currentTabIndex = newTabIndex);
-    });
+        setState(() => currentTabIndex = newTabIndex);
+      },
+    );
     // Close Tab (Ctrl + W)
     hotKeyManager.register(
-        HotKey(
-          LogicalKeyboardKey.keyW,
-          modifiers: [ModifierKey.controlModifier],
-        ), callback: () {
-      if (tabData.length <= 1) {
-        return;
-      }
-
-      TabData currentTab = tabData[currentTabIndex];
-
-      showTabCloseConfirmation(context, currentTab.name, () {
-        int oldTabIndex = currentTabIndex;
-
-        if (currentTabIndex == tabData.length - 1) {
-          currentTabIndex--;
+      HotKey(
+        LogicalKeyboardKey.keyW,
+        modifiers: [ModifierKey.controlModifier],
+      ),
+      callback: () {
+        if (Settings.layoutLocked) {
+          return;
+        }
+        if (tabData.length <= 1) {
+          return;
         }
 
-        grids[oldTabIndex].onDestroy();
+        TabData currentTab = tabData[currentTabIndex];
 
-        setState(() {
-          tabData.removeAt(oldTabIndex);
-          grids.removeAt(oldTabIndex);
+        showTabCloseConfirmation(context, currentTab.name, () {
+          int oldTabIndex = currentTabIndex;
+
+          if (currentTabIndex == tabData.length - 1) {
+            currentTabIndex--;
+          }
+
+          grids[oldTabIndex].onDestroy();
+
+          setState(() {
+            tabData.removeAt(oldTabIndex);
+            grids.removeAt(oldTabIndex);
+          });
         });
-      });
-    });
+      },
+    );
+  }
+
+  void _lockLayout() async {
+    for (TabGrid grid in grids) {
+      grid.lockLayout();
+    }
+    Settings.layoutLocked = true;
+    await _preferences.setBool(PrefKeys.layoutLocked, true);
+  }
+
+  void _unlockLayout() async {
+    for (TabGrid grid in grids) {
+      grid.unlockLayout();
+    }
+    Settings.layoutLocked = false;
+    await _preferences.setBool(PrefKeys.layoutLocked, false);
   }
 
   void displayAddWidgetDialog() {
@@ -1029,6 +1064,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabLeft() {
+    if (Settings.layoutLocked) {
+      return;
+    }
     if (currentTabIndex <= 0) {
       logger.debug(
           'Ignoring move tab left, tab index is already $currentTabIndex');
@@ -1053,6 +1091,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabRight() {
+    if (Settings.layoutLocked) {
+      return;
+    }
     if (currentTabIndex >= tabData.length - 1) {
       logger.debug(
           'Ignoring move tab left, tab index is already $currentTabIndex');
@@ -1108,9 +1149,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             // Open Layout
             MenuItemButton(
               style: menuButtonStyle,
-              onPressed: () {
-                importLayout();
-              },
+              onPressed: (!Settings.layoutLocked) ? () => importLayout() : null,
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyO, control: true),
               child: const Text(
@@ -1153,13 +1192,34 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               // Clear layout
               MenuItemButton(
                 style: menuButtonStyle,
-                onPressed: () {
-                  setState(() {
-                    grids[currentTabIndex].clearWidgets(context);
-                  });
-                },
+                onPressed: (!Settings.layoutLocked)
+                    ? () {
+                        setState(() {
+                          grids[currentTabIndex].clearWidgets(context);
+                        });
+                      }
+                    : null,
+                leadingIcon: const Icon(Icons.clear),
                 child: const Text('Clear Layout'),
               ),
+              // Lock/Unlock Layout
+              MenuItemButton(
+                style: menuButtonStyle,
+                onPressed: () {
+                  setState(() {
+                    if (Settings.layoutLocked) {
+                      _unlockLayout();
+                    } else {
+                      _lockLayout();
+                    }
+                  });
+                },
+                leadingIcon: (Settings.layoutLocked)
+                    ? const Icon(Icons.lock_open)
+                    : const Icon(Icons.lock_outline),
+                child: Text(
+                    '${(Settings.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
+              )
             ],
             child: const Text(
               'Edit',
@@ -1208,9 +1268,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed: () {
-            displayAddWidgetDialog();
-          },
+          onPressed:
+              (!Settings.layoutLocked) ? () => displayAddWidgetDialog() : null,
           child: const Text('Add Widget'),
         )
       ],

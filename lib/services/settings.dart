@@ -12,6 +12,7 @@ class Settings {
   static String ipAddress = '127.0.0.1';
   static int teamNumber = 9999;
   static int gridSize = 128;
+  static bool layoutLocked = false;
   static double cornerRadius = 15.0;
   static bool showGrid = true;
   static bool autoResizeToDS = false;
@@ -42,6 +43,7 @@ class PrefKeys {
   static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
+  static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';
   static String showGrid = 'show_grid';
