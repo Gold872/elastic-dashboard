@@ -78,8 +78,8 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  Size screenSize =
-      primaryDisplay.size * (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  Size screenSize = (primaryDisplay.visibleSize ?? primaryDisplay.size) *
+      (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
 
   await windowManager.setMinimumSize(screenSize * 0.60);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,

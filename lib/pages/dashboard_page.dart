@@ -933,7 +933,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   void _onDriverStationDocked() async {
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
     double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
-    Size screenSize = primaryDisplay.size * pixelRatio;
+    Size screenSize =
+        (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
 
     await windowManager.unmaximize();
 
