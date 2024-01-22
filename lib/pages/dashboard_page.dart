@@ -1271,7 +1271,29 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           onPressed:
               (!Settings.layoutLocked) ? () => displayAddWidgetDialog() : null,
           child: const Text('Add Widget'),
-        )
+        ),
+        if (Settings.layoutLocked) ...[
+          const VerticalDivider(),
+          // Unlock Layout
+          Tooltip(
+            message: 'Unlock Layout',
+            child: MenuItemButton(
+              style: menuButtonStyle.copyWith(
+                alignment: Alignment.center,
+                minimumSize:
+                    const MaterialStatePropertyAll(Size(40.0, double.infinity)),
+                maximumSize:
+                    const MaterialStatePropertyAll(Size(40.0, double.infinity)),
+              ),
+              onPressed: () {
+                setState(() {
+                  _unlockLayout();
+                });
+              },
+              child: const Icon(Icons.lock_outline),
+            ),
+          ),
+        ],
       ],
     );
 
