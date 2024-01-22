@@ -1122,9 +1122,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
+      alignment: Alignment.center,
       textStyle: MaterialStateProperty.all(menuTextStyle),
       backgroundColor:
           const MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      iconSize: const MaterialStatePropertyAll(20.0),
     );
 
     MenuBar menuBar = MenuBar(
@@ -1279,11 +1281,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             message: 'Unlock Layout',
             child: MenuItemButton(
               style: menuButtonStyle.copyWith(
-                alignment: Alignment.center,
                 minimumSize:
-                    const MaterialStatePropertyAll(Size(40.0, double.infinity)),
+                    const MaterialStatePropertyAll(Size(36.0, double.infinity)),
                 maximumSize:
-                    const MaterialStatePropertyAll(Size(40.0, double.infinity)),
+                    const MaterialStatePropertyAll(Size(36.0, double.infinity)),
               ),
               onPressed: () {
                 setState(() {

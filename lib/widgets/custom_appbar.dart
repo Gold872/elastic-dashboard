@@ -11,7 +11,7 @@ class CustomAppBar extends AppBar {
   final MenuBar menuBar;
   final VoidCallback? onWindowClose;
 
-  static const double _leadingSize = 515;
+  static const double _leadingSize = 500;
   static const ThemeType buttonType = ThemeType.materia;
 
   CustomAppBar(
@@ -21,7 +21,7 @@ class CustomAppBar extends AppBar {
       this.onWindowClose,
       required this.menuBar})
       : super(
-          toolbarHeight: 40,
+          toolbarHeight: 36,
           backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
           elevation: 0.0,
           scrolledUnderElevation: 0.0,
