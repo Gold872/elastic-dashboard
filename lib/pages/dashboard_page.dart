@@ -816,6 +816,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
 
           await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
+          Settings.teamNumber = newTeamNumber;
 
           switch (Settings.ipAddressMode) {
             case IPAddressMode.roboRIOmDNS:
@@ -959,6 +960,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _updateIPAddress(String newIPAddress) async {
     await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
+    Settings.ipAddress = newIPAddress;
 
     setState(() {
       ntConnection.changeIPAddress(newIPAddress);

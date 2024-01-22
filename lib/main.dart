@@ -52,6 +52,8 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
+  Settings.teamNumber =
+      preferences.getInt(PrefKeys.teamNumber) ?? Settings.teamNumber;
   Settings.ipAddressMode =
       IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
 

@@ -103,7 +103,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             child: DialogTextInput(
               initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString(),
+                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
+                      Settings.teamNumber.toString(),
               label: 'Team Number',
               onSubmit: (data) {
                 setState(() {
@@ -157,7 +158,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               enabled: Settings.ipAddressMode == IPAddressMode.custom ||
                   (Settings.ipAddressMode == IPAddressMode.driverStation &&
                       !dsConnected),
-              initialText: widget.preferences.getString(PrefKeys.ipAddress),
+              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
+                  Settings.ipAddress,
               label: 'IP Address',
               onSubmit: (String? data) {
                 setState(() {

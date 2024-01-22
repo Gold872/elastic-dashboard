@@ -29,9 +29,18 @@ class DialogTextInput extends StatefulWidget {
 class _DialogTextInputState extends State<DialogTextInput> {
   bool focused = false;
 
-  late final TextEditingController? textEditingController =
+  late final TextEditingController textEditingController =
       widget.textEditingController ??
           TextEditingController(text: widget.initialText);
+
+  @override
+  void didUpdateWidget(DialogTextInput oldWidget) {
+    if (widget.initialText != oldWidget.initialText &&
+        widget.initialText != null) {
+      textEditingController.text = widget.initialText!;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,7 @@ class _DialogTextInputState extends State<DialogTextInput> {
               return;
             }
 
-            String textValue = textEditingController!.text;
+            String textValue = textEditingController.text;
             if (textValue.isNotEmpty || widget.allowEmptySubmission) {
               widget.onSubmit.call(textValue);
             }
