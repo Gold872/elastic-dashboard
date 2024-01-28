@@ -4,6 +4,7 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/accelerometer.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/basic_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/command_scheduler.dart';
@@ -22,9 +23,9 @@ import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/relay_widget.da
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/subsystem_widget.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/ultrasonic.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/yagsl_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
@@ -119,6 +120,7 @@ class NTWidgetBuilder {
       ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.fromJson,
       '3AxisAccelerometer': ThreeAxisAccelerometer.fromJson,
       Ultrasonic.widgetType: Ultrasonic.fromJson,
+      YAGSLSwerveDrive.widgetType: YAGSLSwerveDrive.fromJson,
     });
 
     // Used when building widgets from network tables (drag and drop)
@@ -168,6 +170,7 @@ class NTWidgetBuilder {
       ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.new,
       '3AxisAccelerometer': ThreeAxisAccelerometer.new,
       Ultrasonic.widgetType: Ultrasonic.new,
+      YAGSLSwerveDrive.widgetType: YAGSLSwerveDrive.new,
     });
 
     // Min width and height
@@ -189,9 +192,11 @@ class NTWidgetBuilder {
       SubsystemWidget.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
       Ultrasonic.widgetType: _normalSize * 2,
+      YAGSLSwerveDrive.widgetType: _normalSize * 2,
     });
 
     _minimumHeightMap.addAll({
+      YAGSLSwerveDrive.widgetType: _normalSize * 2,
       CameraStreamWidget.widgetType: _normalSize * 2,
       CommandSchedulerWidget.widgetType: _normalSize * 2,
       DifferentialDrive.widgetType: _normalSize * 2,
@@ -209,6 +214,7 @@ class NTWidgetBuilder {
 
     // Default width and height (when dragging and dropping)
     _defaultWidthMap.addAll({
+      YAGSLSwerveDrive.widgetType: 2,
       CameraStreamWidget.widgetType: 2,
       CommandSchedulerWidget.widgetType: 2,
       CommandWidget.widgetType: 2,
@@ -228,6 +234,7 @@ class NTWidgetBuilder {
     });
 
     _defaultHeightMap.addAll({
+      YAGSLSwerveDrive.widgetType: 2,
       CameraStreamWidget.widgetType: 2,
       CommandSchedulerWidget.widgetType: 3,
       DifferentialDrive.widgetType: 2,

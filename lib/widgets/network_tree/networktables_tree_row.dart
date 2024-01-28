@@ -8,6 +8,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/yagsl_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
@@ -140,9 +141,20 @@ class NetworkTableTreeRow {
           ]) &&
           (hasRow('description') || hasRow('connected'));
 
-      // If it's a camera stream
       if (isCameraStream) {
         return CameraStreamWidget(key: UniqueKey(), topic: topic);
+      }
+
+      if (hasRows([
+        'desiredStates',
+        'maxSpeed',
+        'measuredStates',
+        'robotRotation',
+        'rotationUnit',
+        'sizeFrontBack',
+        'sizeLeftRight',
+      ])) {
+        return YAGSLSwerveDrive(key: UniqueKey(), topic: topic);
       }
 
       return null;

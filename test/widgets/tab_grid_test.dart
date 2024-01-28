@@ -12,6 +12,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/basic_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/command_scheduler.dart';
@@ -24,7 +25,6 @@ import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/power_distribut
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/subsystem_widget.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
