@@ -8,6 +8,7 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class NumberSlider extends NTWidget {
@@ -18,9 +19,11 @@ class NumberSlider extends NTWidget {
   late double minValue;
   late double maxValue;
   late int divisions;
+  late bool updateContinuously;
 
   double _currentValue = 0.0;
-  double _previousValue = 0.0;
+
+  bool _dragging = false;
 
   NumberSlider({
     super.key,
@@ -28,6 +31,7 @@ class NumberSlider extends NTWidget {
     this.minValue = -1.0,
     this.maxValue = 1.0,
     this.divisions = 5,
+    this.updateContinuously = false,
     super.dataType,
     super.period,
   }) : super();
@@ -41,6 +45,8 @@ class NumberSlider extends NTWidget {
     divisions = tryCast(jsonData['divisions']) ??
         tryCast(jsonData['numOfTickMarks']) ??
         5;
+
+    updateContinuously = tryCast(jsonData['update_continuously']) ?? false;
   }
 
   @override
@@ -50,6 +56,7 @@ class NumberSlider extends NTWidget {
       'min_value': minValue,
       'max_value': maxValue,
       'divisions': divisions,
+      'publish_all': updateContinuously,
     };
   }
 
@@ -96,20 +103,53 @@ class NumberSlider extends NTWidget {
       ),
       const SizedBox(height: 5),
       // Number of divisions
-      DialogTextInput(
-        onSubmit: (value) {
-          int? newDivisions = int.tryParse(value);
-          if (newDivisions == null || newDivisions < 2) {
-            return;
-          }
-          divisions = newDivisions;
-          refresh();
-        },
-        formatter: FilteringTextInputFormatter.digitsOnly,
-        label: 'Divisions',
-        initialText: divisions.toString(),
+      Row(
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                int? newDivisions = int.tryParse(value);
+                if (newDivisions == null || newDivisions < 2) {
+                  return;
+                }
+                divisions = newDivisions;
+                refresh();
+              },
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              label: 'Divisions',
+              initialText: divisions.toString(),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: updateContinuously,
+              label: 'Update While Dragging',
+              onToggle: (value) {
+                updateContinuously = value;
+              },
+            ),
+          ),
+        ],
       ),
     ];
+  }
+
+  void _publishValue(double value) {
+    bool publishTopic =
+        ntTopic == null || !ntConnection.isTopicPublished(ntTopic);
+
+    createTopicIfNull();
+
+    if (ntTopic == null) {
+      return;
+    }
+
+    if (publishTopic) {
+      ntConnection.nt4Client.publishTopic(ntTopic!);
+    }
+
+    ntConnection.updateDataFromTopic(ntTopic!, value);
   }
 
   @override
@@ -124,11 +164,9 @@ class NumberSlider extends NTWidget {
 
         double clampedValue = value.clamp(minValue, maxValue);
 
-        if (clampedValue != _previousValue) {
+        if (!_dragging) {
           _currentValue = clampedValue;
         }
-
-        _previousValue = clampedValue;
 
         double divisionSeparation = (maxValue - minValue) / (divisions - 1);
 
@@ -160,26 +198,20 @@ class NumberSlider extends NTWidget {
                     shapeType: LinearShapePointerType.circle,
                     position: LinearElementPosition.cross,
                     dragBehavior: LinearMarkerDragBehavior.free,
+                    onChangeStart: (_) {
+                      _dragging = true;
+                    },
                     onChanged: (value) {
                       _currentValue = value;
+
+                      if (updateContinuously) {
+                        _publishValue(_currentValue);
+                      }
                     },
                     onChangeEnd: (value) {
-                      bool publishTopic = ntTopic == null ||
-                          !ntConnection.isTopicPublished(ntTopic);
+                      _publishValue(_currentValue);
 
-                      createTopicIfNull();
-
-                      if (ntTopic == null) {
-                        return;
-                      }
-
-                      if (publishTopic) {
-                        ntConnection.nt4Client.publishTopic(ntTopic!);
-                      }
-
-                      ntConnection.updateDataFromTopic(ntTopic!, value);
-
-                      _previousValue = value;
+                      _dragging = false;
                     },
                   ),
                 ],
