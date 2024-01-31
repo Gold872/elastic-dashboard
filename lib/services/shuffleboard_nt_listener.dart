@@ -15,6 +15,7 @@ class ShuffleboardNTListener {
 
   final Function(Map<String, dynamic> widgetData)? onWidgetAdded;
   final Function(String tab)? onTabChanged;
+  final Function(String tab)? onTabCreated;
 
   late NT4Subscription selectedSubscription;
 
@@ -25,7 +26,8 @@ class ShuffleboardNTListener {
   final NetworkTableTreeRow shuffleboardTreeRoot =
       NetworkTableTreeRow(topic: '/', rowName: '');
 
-  ShuffleboardNTListener({this.onTabChanged, this.onWidgetAdded});
+  ShuffleboardNTListener(
+      {this.onTabChanged, this.onTabCreated, this.onWidgetAdded});
 
   void initializeSubscriptions() {
     selectedSubscription = ntConnection.subscribe(selectedEntry);
@@ -63,17 +65,27 @@ class ShuffleboardNTListener {
         return;
       }
 
+      String name = topic.name;
+
       createRows(topic);
 
       if (topic.name.contains(metadataTable)) {
         Future(() async => _metadataChanged(topic));
       }
 
-      if (!topic.name.contains(metadataTable) &&
-          !topic.name.contains('$shuffleboardTableRoot/.recording') &&
-          !topic.name.contains(RegExp(
+      if (!name.contains(metadataTable) &&
+          !name.contains('$shuffleboardTableRoot/.recording') &&
+          !name.contains(RegExp(
               '${r'\'}$shuffleboardTableRoot${r'\/([^\/]+\/){1}\.type'}'))) {
         Future(() async => _topicAnnounced(topic));
+      }
+
+      if (!name.contains(metadataTable) &&
+          !name.contains('$shuffleboardTableRoot/.recording') &&
+          name.endsWith('/.type') &&
+          name.substring(1).split('/').length == 3) {
+        String tabName = name.substring(1).split('/')[1];
+        onTabCreated?.call(tabName);
       }
     });
   }

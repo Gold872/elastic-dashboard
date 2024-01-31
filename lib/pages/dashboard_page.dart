@@ -144,6 +144,25 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           currentTabIndex = tabIndex;
         });
       },
+      onTabCreated: (tab) {
+        if (Settings.layoutLocked) {
+          return;
+        }
+
+        Iterable<String> tabNamesList = tabData.map((data) => data.name);
+
+        if (tabNamesList.contains(tab)) {
+          return;
+        }
+
+        tabData.add(TabData(name: tab));
+        grids.add(
+          TabGrid(
+            key: GlobalKey(),
+            onAddWidgetPressed: displayAddWidgetDialog,
+          ),
+        );
+      },
       onWidgetAdded: (widgetData) {
         if (Settings.layoutLocked) {
           return;
