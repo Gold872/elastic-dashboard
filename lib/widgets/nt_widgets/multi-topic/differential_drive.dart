@@ -140,9 +140,10 @@ class DifferentialDrive extends NTWidget {
                       ntConnection.nt4Client.publishTopic(leftSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(leftSpeedTopic!, value);
+                    ntConnection.updateDataFromTopic(
+                        leftSpeedTopic!, leftSpeedCurrentValue);
 
-                    leftSpeedPreviousValue = value;
+                    leftSpeedPreviousValue = leftSpeedCurrentValue;
                   },
                 ),
               ],
@@ -210,9 +211,10 @@ class DifferentialDrive extends NTWidget {
                       ntConnection.nt4Client.publishTopic(rightSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(rightSpeedTopic!, value);
+                    ntConnection.updateDataFromTopic(
+                        rightSpeedTopic!, rightSpeedCurrentValue);
 
-                    rightSpeedPreviousValue = value;
+                    rightSpeedPreviousValue = rightSpeedCurrentValue;
                   },
                 ),
               ],
