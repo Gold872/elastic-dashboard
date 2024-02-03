@@ -131,6 +131,8 @@ class DSInteropClient {
 
     String ipAddress = IPAddressUtil.getIpFromInt32Value(rawIP);
 
+    logger.info('Received IP Address from Driver Station: $ipAddress');
+
     if (_lastAnnouncedIP != ipAddress) {
       onNewIPAnnounced?.call(ipAddress);
     }

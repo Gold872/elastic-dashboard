@@ -581,6 +581,7 @@ class NT4Client {
     }
 
     if (!mainServerAddr.contains(serverBaseAddress)) {
+      await _mainWebsocket?.sink.close();
       return;
     }
 
@@ -607,18 +608,7 @@ class NT4Client {
         // Prevents repeated calls to onConnect and reconnecting after changing ip addresses
         if (!_serverConnectionActive &&
             mainServerAddr.contains(serverBaseAddress)) {
-          logger.info(
-              'Network Tables connected on IP address $serverBaseAddress with protocol ${_mainWebsocket!.protocol}');
-          lastAnnouncedValues.clear();
-          lastAnnouncedTimestamps.clear();
-
-          for (NT4Subscription sub in _subscriptions.values) {
-            sub.currentValue = null;
-          }
-
-          _serverConnectionActive = true;
-
-          onConnect?.call();
+          _onFirstMessageReceived();
         }
         _wsOnMessage(data);
       },
@@ -675,6 +665,7 @@ class NT4Client {
     }
 
     if (!rttServerAddr.contains(serverBaseAddress)) {
+      await _rttWebsocket?.sink.close();
       return;
     }
 
@@ -683,6 +674,10 @@ class NT4Client {
         if (!_rttConnectionActive) {
           logger.info('RTT protocol connected on $serverBaseAddress');
           _rttConnectionActive = true;
+        }
+
+        if (!_serverConnectionActive && _mainWebsocket != null) {
+          _onFirstMessageReceived();
         }
 
         if (data is! List<int>) {
@@ -709,6 +704,21 @@ class NT4Client {
       },
       cancelOnError: true,
     );
+  }
+
+  void _onFirstMessageReceived() {
+    logger.info(
+        'Network Tables connected on IP address $serverBaseAddress with protocol ${_mainWebsocket!.protocol}');
+    lastAnnouncedValues.clear();
+    lastAnnouncedTimestamps.clear();
+
+    for (NT4Subscription sub in _subscriptions.values) {
+      sub.currentValue = null;
+    }
+
+    _serverConnectionActive = true;
+
+    onConnect?.call();
   }
 
   void _rttOnClose() async {
