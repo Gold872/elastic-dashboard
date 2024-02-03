@@ -279,6 +279,7 @@ class ShuffleboardNTListener {
     String componentName = tables[2];
 
     String jsonKey = '$tabName/$componentName';
+    currentJsonData.putIfAbsent(jsonKey, () => {});
 
     if (!shuffleboardTreeRoot.hasRow(shuffleboardTableRoot.substring(1))) {
       return;
@@ -322,7 +323,7 @@ class ShuffleboardNTListener {
       return;
     }
 
-    bool isLayout = currentJsonData[jsonKey]!['layout'];
+    bool isLayout = tryCast(currentJsonData[jsonKey]!['layout']) ?? false;
 
     if (isLayout) {
       handleLayoutTopicAnnounce(topic, widgetRow);
@@ -355,7 +356,6 @@ class ShuffleboardNTListener {
 
       String cameraName = cameraStream.substring(16);
 
-      currentJsonData.putIfAbsent(jsonKey, () => {});
       currentJsonData[jsonKey]!
           .putIfAbsent('properties', () => <String, dynamic>{});
       currentJsonData[jsonKey]!['properties']['topic'] =
