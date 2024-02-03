@@ -152,7 +152,7 @@ class RobotPreferences extends NTWidget {
 }
 
 class PreferenceSearch extends StatelessWidget {
-  PreferenceSearch({
+  const PreferenceSearch({
     super.key,
     required this.onSubmit,
     required this.searchTextController,
@@ -163,9 +163,9 @@ class PreferenceSearch extends StatelessWidget {
 
   final Function(String topic, String? data) onSubmit;
   final TextEditingController searchTextController;
-  List<String> preferenceTopicNames;
-  Map<String, TextEditingController> preferenceTextControllers;
-  Map<String, NT4Topic> preferenceTopics;
+  final List<String> preferenceTopicNames;
+  final Map<String, TextEditingController> preferenceTextControllers;
+  final Map<String, NT4Topic> preferenceTopics;
 
   @override
   Widget build(BuildContext context) {
