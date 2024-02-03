@@ -37,10 +37,6 @@ class PIDControllerWidget extends NTWidget {
   PIDControllerWidget({
     super.key,
     required super.topic,
-    kpTopic,
-    kiTopic,
-    kdTopic,
-    setpointTopic,
     super.dataType,
     super.period,
   }) : super();

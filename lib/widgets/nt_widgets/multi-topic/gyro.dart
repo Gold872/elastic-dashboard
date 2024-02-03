@@ -23,14 +23,10 @@ class Gyro extends NTWidget {
   Gyro({
     super.key,
     required super.topic,
-    counterClockwisePositive,
+    this.counterClockwisePositive = false,
     super.dataType,
     super.period,
-  }) : super() {
-    if (counterClockwisePositive != null) {
-      this.counterClockwisePositive = counterClockwisePositive;
-    }
-  }
+  }) : super();
 
   Gyro.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
