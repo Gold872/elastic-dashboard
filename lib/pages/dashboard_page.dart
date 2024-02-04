@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
-import 'package:elegant_notification/resources/arrays.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -266,7 +265,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         progressIndicatorColor: const Color(0xff01CB67),
         enableShadow: false,
         width: 150,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
         title: Text('Saved',
@@ -284,7 +283,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         progressIndicatorColor: const Color(0xffFE355C),
         enableShadow: false,
         width: 150,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         title: Text('Error',
@@ -314,7 +313,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         enableShadow: false,
         width: 350,
         height: 100,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         title: Text('Failed to check for updates',
@@ -339,7 +338,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         enableShadow: false,
         width: 150,
         height: 100,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
           style: textTheme.bodyMedium!.copyWith(
@@ -372,7 +371,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         enableShadow: false,
         width: 150,
         height: 100,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
         title: Text('No Updates Available',
@@ -572,7 +571,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         title: Text('Error while loading JSON data',
@@ -599,7 +598,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
-        notificationPosition: NotificationPosition.bottomRight,
+        position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.warning, color: Colors.yellow),
         title: Text('Warning while loading JSON data',
