@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -96,7 +94,6 @@ class RadialGauge extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               label: 'End Angle (CW+)',
@@ -137,7 +134,6 @@ class RadialGauge extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               label: 'Max Value',
@@ -172,7 +168,6 @@ class RadialGauge extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Pointer',
@@ -207,7 +202,6 @@ class RadialGauge extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Ticks',
@@ -277,7 +271,7 @@ class RadialGauge extends NTWidget {
                   angle: 90.0,
                   positionFactor: (showPointer) ? 0.35 : 0.05,
                   widget: Text(
-                    value.toStringAsFixed(1),
+                    value.toStringAsFixed(2),
                     style: TextStyle(
                       fontSize: (showPointer) ? 18.0 : 28.0,
                     ),

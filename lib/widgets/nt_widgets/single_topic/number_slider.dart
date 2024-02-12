@@ -83,7 +83,6 @@ class NumberSlider extends NTWidget {
               initialText: minValue.toString(),
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
@@ -106,6 +105,7 @@ class NumberSlider extends NTWidget {
       Row(
         children: [
           Flexible(
+            flex: 2,
             child: DialogTextInput(
               onSubmit: (value) {
                 int? newDivisions = int.tryParse(value);
@@ -120,8 +120,8 @@ class NumberSlider extends NTWidget {
               initialText: divisions.toString(),
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
+            flex: 3,
             child: DialogToggleSwitch(
               initialValue: updateContinuously,
               label: 'Update While Dragging',

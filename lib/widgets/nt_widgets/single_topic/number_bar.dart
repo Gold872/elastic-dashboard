@@ -99,7 +99,6 @@ class NumberBar extends NTWidget {
               initialText: minValue.toString(),
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {

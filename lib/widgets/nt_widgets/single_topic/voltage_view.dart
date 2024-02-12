@@ -101,7 +101,6 @@ class VoltageView extends NTWidget {
               initialText: minValue.toString(),
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
@@ -141,7 +140,6 @@ class VoltageView extends NTWidget {
               allowEmptySubmission: true,
             ),
           ),
-          const SizedBox(width: 5),
           Expanded(
             child: Center(
               child: DialogToggleSwitch(

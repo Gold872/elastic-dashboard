@@ -212,7 +212,6 @@ class FieldWidget extends NTWidget {
               initialText: robotWidthMeters.toString(),
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
@@ -247,7 +246,6 @@ class FieldWidget extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Trajectories',

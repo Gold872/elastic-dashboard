@@ -43,7 +43,7 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
             Flexible(
               child: Text(widget.label ?? '', textAlign: TextAlign.center),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 3),
             Switch(
               onChanged: (value) {
                 widget.onToggle.call(value);
