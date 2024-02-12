@@ -6,6 +6,17 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/radial_gauge.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
 class NTWidgetModel extends ChangeNotifier {
   bool _disposed = false;
@@ -91,31 +102,40 @@ abstract class NTWidget extends StatelessWidget {
     switch (dataType) {
       case NT4TypeStr.kBool:
         return [
-          'Boolean Box',
-          'Toggle Switch',
-          'Toggle Button',
-          'Text Display',
+          BooleanBox.widgetType,
+          ToggleSwitch.widgetType,
+          ToggleSwitch.widgetType,
+          TextDisplay.widgetType,
         ];
       case NT4TypeStr.kFloat32:
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
         return [
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Voltage View',
-          'Graph',
-          'Match Time',
+          TextDisplay.widgetType,
+          NumberBar.widgetType,
+          NumberSlider.widgetType,
+          VoltageView.widgetType,
+          RadialGauge.widgetType,
+          GraphWidget.widgetType,
+          MatchTimeWidget.widgetType,
         ];
       case NT4TypeStr.kString:
-        return ['Text Display', 'Single Color View'];
+        return [
+          TextDisplay.widgetType,
+          SingleColorView.widgetType,
+        ];
       case NT4TypeStr.kStringArr:
-        return ['Text Display', 'Multi Color View'];
+        return [
+          TextDisplay.widgetType,
+          MultiColorView.widgetType,
+        ];
       case NT4TypeStr.kBoolArr:
       case NT4TypeStr.kFloat32Arr:
       case NT4TypeStr.kFloat64Arr:
       case NT4TypeStr.kIntArr:
-        return ['Text Display'];
+        return [
+          TextDisplay.widgetType,
+        ];
     }
 
     return [type];

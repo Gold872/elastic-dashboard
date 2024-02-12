@@ -33,6 +33,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dar
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/radial_gauge.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.dart';
@@ -80,6 +81,7 @@ class NTWidgetBuilder {
       MultiColorView.widgetType: MultiColorView.fromJson,
       NumberBar.widgetType: NumberBar.fromJson,
       NumberSlider.widgetType: NumberSlider.fromJson,
+      RadialGauge.widgetType: RadialGauge.fromJson,
       SingleColorView.widgetType: SingleColorView.fromJson,
       TextDisplay.widgetType: TextDisplay.fromJson,
       'Text View': TextDisplay.fromJson,
@@ -131,6 +133,7 @@ class NTWidgetBuilder {
       MultiColorView.widgetType: MultiColorView.new,
       NumberBar.widgetType: NumberBar.new,
       NumberSlider.widgetType: NumberSlider.new,
+      RadialGauge.widgetType: RadialGauge.new,
       SingleColorView.widgetType: SingleColorView.new,
       TextDisplay.widgetType: TextDisplay.new,
       'Text View': TextDisplay.new,
@@ -188,6 +191,7 @@ class NTWidgetBuilder {
       PIDControllerWidget.widgetType: _normalSize * 2,
       PowerDistribution.widgetType: _normalSize * 3,
       ProfiledPIDControllerWidget.widgetType: _normalSize * 2,
+      RadialGauge.widgetType: _normalSize * 1.6,
       RobotPreferences.widgetType: _normalSize * 2,
       SubsystemWidget.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
@@ -207,6 +211,7 @@ class NTWidgetBuilder {
       PIDControllerWidget.widgetType: _normalSize * 3,
       PowerDistribution.widgetType: _normalSize * 3,
       ProfiledPIDControllerWidget.widgetType: _normalSize * 3,
+      RadialGauge.widgetType: _normalSize * 1.6,
       RelayWidget.widgetType: _normalSize * 2,
       RobotPreferences.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,

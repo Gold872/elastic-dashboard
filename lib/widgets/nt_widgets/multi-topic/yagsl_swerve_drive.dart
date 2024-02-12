@@ -103,7 +103,7 @@ class YAGSLSwerveDrive extends NTWidget {
               },
             ),
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 3),
           Flexible(
             child: DialogToggleSwitch(
               initialValue: showDesiredStates,
