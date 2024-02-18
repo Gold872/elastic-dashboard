@@ -64,8 +64,10 @@ class FieldWidget extends NTWidget {
       : super.fromJson(jsonData: jsonData) {
     fieldGame = tryCast(jsonData['field_game']) ?? fieldGame;
 
-    robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.82;
-    robotLengthMeters = tryCast(jsonData['robot_length']) ?? 1.00;
+    robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
+    robotLengthMeters = tryCast(jsonData['robot_length']) ??
+        tryCast(jsonData['robot_height']) ??
+        0.85;
 
     showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
     showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
