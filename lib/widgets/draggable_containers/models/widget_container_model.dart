@@ -121,6 +121,26 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   void unSubscribe() {}
 
+  @mustCallSuper
+  void updateGridSize(double oldGridSize, double newGridSize) {
+    double newX =
+        DraggableWidgetContainer.snapToGrid(displayRect.left, newGridSize);
+    double newY =
+        DraggableWidgetContainer.snapToGrid(displayRect.top, newGridSize);
+
+    double newWidth =
+        DraggableWidgetContainer.snapToGrid(displayRect.width, newGridSize)
+            .clamp(minWidth, double.infinity);
+    double newHeight =
+        DraggableWidgetContainer.snapToGrid(displayRect.height, newGridSize)
+            .clamp(minHeight, double.infinity);
+
+    displayRect = Rect.fromLTWH(newX, newY, newWidth, newHeight);
+    draggingRect = displayRect;
+
+    notifyListeners();
+  }
+
   void setTitle(String title) {
     this.title = title;
 

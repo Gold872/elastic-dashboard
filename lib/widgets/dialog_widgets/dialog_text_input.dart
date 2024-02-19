@@ -35,8 +35,7 @@ class _DialogTextInputState extends State<DialogTextInput> {
 
   @override
   void didUpdateWidget(DialogTextInput oldWidget) {
-    if (widget.initialText != oldWidget.initialText &&
-        widget.initialText != null) {
+    if (widget.initialText != null) {
       textEditingController.text = widget.initialText!;
     }
     super.didUpdateWidget(oldWidget);
@@ -48,6 +47,12 @@ class _DialogTextInputState extends State<DialogTextInput> {
       padding: const EdgeInsets.all(4.0),
       child: Focus(
         onFocusChange: (value) {
+          if (focused && !value) {
+            String textValue = textEditingController.text;
+            if (textValue.isNotEmpty || widget.allowEmptySubmission) {
+              widget.onSubmit.call(textValue);
+            }
+          }
           focused = value;
         },
         child: TextField(
@@ -55,19 +60,13 @@ class _DialogTextInputState extends State<DialogTextInput> {
           onSubmitted: (value) {
             if (value.isNotEmpty || widget.allowEmptySubmission) {
               widget.onSubmit.call(value);
+              focused = false;
             }
           },
           onTapOutside: (_) {
             if (!focused) {
               return;
             }
-
-            String textValue = textEditingController.text;
-            if (textValue.isNotEmpty || widget.allowEmptySubmission) {
-              widget.onSubmit.call(textValue);
-            }
-
-            focused = false;
             FocusManager.instance.primaryFocus?.unfocus();
           },
           controller: textEditingController,

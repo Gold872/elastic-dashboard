@@ -31,8 +31,9 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.onResizeEnd,
   });
 
-  static double snapToGrid(double value) {
-    return (value / Settings.gridSize).roundToDouble() * Settings.gridSize;
+  static double snapToGrid(double value, [double? gridSize]) {
+    gridSize ??= Settings.gridSize.toDouble();
+    return (value / gridSize).roundToDouble() * gridSize;
   }
 
   List<Widget> getStackChildren(WidgetContainerModel model) {
@@ -43,9 +44,9 @@ class DraggableWidgetContainer extends StatelessWidget {
         rect: model.draggingRect,
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
-        constraints: const BoxConstraints(
-          minWidth: 128.0,
-          minHeight: 128.0,
+        constraints: BoxConstraints(
+          minWidth: model.minWidth,
+          minHeight: model.minHeight,
         ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,

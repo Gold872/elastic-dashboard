@@ -202,12 +202,19 @@ class NTWidgetBuilder {
     _minimumHeightMap.addAll({
       YAGSLSwerveDrive.widgetType: _normalSize * 2,
       CameraStreamWidget.widgetType: _normalSize * 2,
+      ComboBoxChooser.widgetType: _normalSize * 0.75,
       CommandSchedulerWidget.widgetType: _normalSize * 2,
+      CommandWidget.widgetType: _normalSize * 0.86,
       DifferentialDrive.widgetType: _normalSize * 2,
+      EncoderWidget.widgetType: _normalSize * 0.86,
       FieldWidget.widgetType: _normalSize * 2,
+      FMSInfo.widgetType: _normalSize,
       GraphWidget.widgetType: _normalSize * 2,
       Gyro.widgetType: _normalSize * 2,
+      MotorController.widgetType: _normalSize * 0.92,
       NetworkAlerts.widgetType: _normalSize * 2,
+      NumberBar.widgetType: _normalSize,
+      NumberSlider.widgetType: _normalSize,
       PIDControllerWidget.widgetType: _normalSize * 3,
       PowerDistribution.widgetType: _normalSize * 3,
       ProfiledPIDControllerWidget.widgetType: _normalSize * 3,
@@ -215,6 +222,7 @@ class NTWidgetBuilder {
       RelayWidget.widgetType: _normalSize * 2,
       RobotPreferences.widgetType: _normalSize * 2,
       SwerveDriveWidget.widgetType: _normalSize * 2,
+      VoltageView.widgetType: _normalSize,
     });
 
     // Default width and height (when dragging and dropping)
@@ -303,7 +311,7 @@ class NTWidgetBuilder {
     if (widget != null && _minimumWidthMap.containsKey(widget.type)) {
       return _minimumWidthMap[widget.type]!;
     } else {
-      return _normalSize;
+      return Settings.gridSize.toDouble();
     }
   }
 
@@ -313,7 +321,7 @@ class NTWidgetBuilder {
     if (widget != null && _minimumHeightMap.containsKey(widget.type)) {
       return _minimumHeightMap[widget.type]!;
     } else {
-      return _normalSize;
+      return Settings.gridSize.toDouble();
     }
   }
 

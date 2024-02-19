@@ -829,7 +829,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           int? newTeamNumber = int.tryParse(data);
 
-          if (newTeamNumber == null) {
+          if (newTeamNumber == null ||
+              (newTeamNumber == Settings.teamNumber &&
+                  Settings.teamNumber != 9999)) {
             return;
           }
 
@@ -850,6 +852,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
         },
         onIPAddressModeChanged: (mode) async {
+          if (mode == Settings.ipAddressMode) {
+            return;
+          }
           await _preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
           Settings.ipAddressMode = mode;
@@ -881,7 +886,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
         },
         onIPAddressChanged: (String? data) async {
-          if (data == null) {
+          if (data == null || data == Settings.ipAddress) {
             return;
           }
 
@@ -901,13 +906,63 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           int? newGridSize = int.tryParse(gridSize);
 
-          if (newGridSize == null || newGridSize == 0) {
+          if (newGridSize == null ||
+              newGridSize == 0 ||
+              newGridSize == Settings.gridSize) {
+            return;
+          }
+
+          bool? cancel = await showDialog<bool>(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.yellow),
+                        SizedBox(width: 5),
+                        Text('Grid Resizing Warning'),
+                      ],
+                    ),
+                    content: Container(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              'Resizing the grid may cause widgets to become misaligned due to sizing constraints. Manual work may be required after resizing.'),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Okay'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  );
+                },
+              ) ??
+              true;
+
+          if (cancel) {
             return;
           }
 
           setState(() => Settings.gridSize = newGridSize);
 
           await _preferences.setInt(PrefKeys.gridSize, newGridSize);
+
+          for (TabGrid grid in grids) {
+            grid.resizeGrid(
+                Settings.gridSize.toDouble(), newGridSize.toDouble());
+          }
         },
         onCornerRadiusChanged: (radius) async {
           if (radius == null) {
@@ -916,7 +971,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           double? newRadius = double.tryParse(radius);
 
-          if (newRadius == null) {
+          if (newRadius == null || newRadius == Settings.cornerRadius) {
             return;
           }
 
@@ -949,7 +1004,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           double? newPeriod = double.tryParse(value);
 
-          if (newPeriod == null) {
+          if (newPeriod == null || newPeriod == Settings.defaultPeriod) {
             return;
           }
 
@@ -963,7 +1018,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           double? newPeriod = double.tryParse(value);
 
-          if (newPeriod == null) {
+          if (newPeriod == null || newPeriod == Settings.defaultGraphPeriod) {
             return;
           }
 
@@ -977,6 +1032,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _updateIPAddress(String newIPAddress) async {
+    if (newIPAddress == Settings.ipAddress) {
+      return;
+    }
     await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
     Settings.ipAddress = newIPAddress;
 

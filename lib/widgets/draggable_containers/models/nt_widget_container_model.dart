@@ -99,6 +99,13 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   }
 
   @override
+  void updateGridSize(double oldGridSize, double newGridSize) {
+    updateMinimumSize();
+
+    super.updateGridSize(oldGridSize, newGridSize);
+  }
+
+  @override
   void showEditProperties(BuildContext context) {
     showDialog(
       context: context,

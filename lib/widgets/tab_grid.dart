@@ -299,6 +299,18 @@ class TabGrid extends StatelessWidget {
     double previewHeight = DraggableWidgetContainer.snapToGrid(
         constrainedRect.height.clamp(model.minHeight, double.infinity));
 
+    if (previewWidth < model.minWidth) {
+      previewWidth = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.width.clamp(model.minWidth, double.infinity) +
+              Settings.gridSize);
+    }
+
+    if (previewHeight < model.minHeight) {
+      previewHeight = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.height.clamp(model.minHeight, double.infinity) +
+              Settings.gridSize);
+    }
+
     Rect preview =
         Rect.fromLTWH(previewX, previewY, previewWidth, previewHeight);
 
@@ -683,6 +695,13 @@ class TabGrid extends StatelessWidget {
     Future(() async {
       model?.notify();
     });
+  }
+
+  void resizeGrid(double oldSize, double newSize) {
+    for (WidgetContainerModel widget in _widgetModels) {
+      widget.updateGridSize(oldSize, newSize);
+    }
+    refresh();
   }
 
   void refreshAllContainers() {

@@ -106,10 +106,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
                       Settings.teamNumber.toString(),
               label: 'Team Number',
-              onSubmit: (data) {
-                setState(() {
-                  widget.onTeamNumberChanged?.call(data);
-                });
+              onSubmit: (data) async {
+                await widget.onTeamNumberChanged?.call(data);
+                setState(() {});
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
             ),
@@ -161,10 +160,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
               initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
                   Settings.ipAddress,
               label: 'IP Address',
-              onSubmit: (String? data) {
-                setState(() {
-                  widget.onIPAddressChanged?.call(data);
-                });
+              onSubmit: (String? data) async {
+                await widget.onIPAddressChanged?.call(data);
+                setState(() {});
               },
             );
           })
@@ -199,10 +197,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.preferences.getInt(PrefKeys.gridSize)?.toString() ??
                       Settings.gridSize.toString(),
               label: 'Grid Size',
-              onSubmit: (value) {
-                setState(() {
-                  widget.onGridSizeChanged?.call(value);
-                });
+              onSubmit: (value) async {
+                await widget.onGridSizeChanged?.call(value);
+                setState(() {});
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
             ),
@@ -266,10 +263,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             Settings.defaultPeriod)
                         .toString(),
                 label: 'Default Period',
-                onSubmit: (value) {
-                  setState(() {
-                    widget.onDefaultPeriodChanged?.call(value);
-                  });
+                onSubmit: (value) async {
+                  await widget.onDefaultPeriodChanged?.call(value);
+                  setState(() {});
                 },
                 formatter: Constants.decimalTextFormatter(),
               ),
@@ -281,10 +277,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         Settings.defaultGraphPeriod)
                     .toString(),
                 label: 'Default Graph Period',
-                onSubmit: (value) {
-                  setState(() {
-                    widget.onDefaultGraphPeriodChanged?.call(value);
-                  });
+                onSubmit: (value) async {
+                  widget.onDefaultGraphPeriodChanged?.call(value);
+                  setState(() {});
                 },
                 formatter: Constants.decimalTextFormatter(),
               ),
