@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ComboBoxChooser extends NTWidget {
@@ -27,15 +28,20 @@ class ComboBoxChooser extends NTWidget {
   NT4Topic? selectedTopic;
   NT4Topic? activeTopic;
 
+  bool sortOptions = false;
+
   ComboBoxChooser({
     super.key,
     required super.topic,
+    this.sortOptions = false,
     super.dataType,
     super.period,
   }) : super();
 
-  ComboBoxChooser.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  ComboBoxChooser.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
+    sortOptions = tryCast(jsonData['sort_options']) ?? sortOptions;
+  }
 
   @override
   void init() {
@@ -59,7 +65,30 @@ class ComboBoxChooser extends NTWidget {
     super.resetSubscription();
   }
 
-  void publishSelectedValue(String? selected) {
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'sort_options': sortOptions,
+    };
+  }
+
+  @override
+  List<Widget> getEditProperties(BuildContext context) {
+    return [
+      DialogToggleSwitch(
+        label: 'Sort Options Alphabetically',
+        initialValue: sortOptions,
+        onToggle: (value) {
+          sortOptions = value;
+
+          refresh();
+        },
+      ),
+    ];
+  }
+
+  void _publishSelectedValue(String? selected) {
     if (selected == null || !ntConnection.isNT4Connected) {
       return;
     }
@@ -70,7 +99,7 @@ class ComboBoxChooser extends NTWidget {
     ntConnection.updateDataFromTopic(selectedTopic!, selected);
   }
 
-  void publishActiveValue(String? active) {
+  void _publishActiveValue(String? active) {
     if (active == null || !ntConnection.isNT4Connected) {
       return;
     }
@@ -125,6 +154,10 @@ class ComboBoxChooser extends NTWidget {
 
         List<String> options = rawOptions.whereType<String>().toList();
 
+        if (sortOptions) {
+          options.sort();
+        }
+
         String? active =
             tryCast(ntConnection.getLastAnnouncedValue(activeTopicName));
         if (active != null && active == '') {
@@ -164,7 +197,7 @@ class ComboBoxChooser extends NTWidget {
         } else if (currentData.activeChanged(_previousData) || active == null) {
           if (selected == null && selectedChoice != null) {
             if (options.contains(selectedChoice!)) {
-              publishSelectedValue(selectedChoice!);
+              _publishSelectedValue(selectedChoice!);
             } else if (options.isNotEmpty) {
               selectedChoice = active;
             }
@@ -185,15 +218,20 @@ class ComboBoxChooser extends NTWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
-              child: _StringChooserDropdown(
-                selected: selectedChoice,
-                options: options,
-                textController: searchController,
-                onValueChanged: (String? value) {
-                  publishSelectedValue(value);
+              child: Container(
+                constraints: const BoxConstraints(
+                  minHeight: 36.0,
+                ),
+                child: _StringChooserDropdown(
+                  selected: selectedChoice,
+                  options: options,
+                  textController: searchController,
+                  onValueChanged: (String? value) {
+                    _publishSelectedValue(value);
 
-                  selectedChoice = value;
-                },
+                    selectedChoice = value;
+                  },
+                ),
               ),
             ),
             const SizedBox(width: 5),
