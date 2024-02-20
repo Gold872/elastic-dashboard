@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class CommandWidget extends NTWidget {
@@ -17,15 +18,20 @@ class CommandWidget extends NTWidget {
   late String runningTopicName;
   late String nameTopicName;
 
+  bool showType = true;
+
   CommandWidget({
     super.key,
     required super.topic,
+    this.showType = true,
     super.dataType,
     super.period,
   }) : super();
 
-  CommandWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  CommandWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
+    showType = tryCast(jsonData['show_type']) ?? showType;
+  }
 
   @override
   void init() {
@@ -43,6 +49,28 @@ class CommandWidget extends NTWidget {
     runningTopic = null;
 
     super.resetSubscription();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'show_type': showType,
+    };
+  }
+
+  @override
+  List<Widget> getEditProperties(BuildContext context) {
+    return [
+      DialogToggleSwitch(
+        label: 'Show Command Type',
+        initialValue: showType,
+        onToggle: (value) {
+          showType = value;
+          refresh();
+        },
+      ),
+    ];
   }
 
   @override
@@ -79,9 +107,12 @@ class CommandWidget extends NTWidget {
 
         return Column(
           children: [
-            Text('Type: $name',
-                style: theme.textTheme.bodySmall,
-                overflow: TextOverflow.ellipsis),
+            Visibility(
+              visible: showType,
+              child: Text('Type: $name',
+                  style: theme.textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis),
+            ),
             const SizedBox(height: 10),
             GestureDetector(
               onTapUp: (_) {
