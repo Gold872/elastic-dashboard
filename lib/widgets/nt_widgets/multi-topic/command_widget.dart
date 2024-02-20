@@ -82,7 +82,7 @@ class CommandWidget extends NTWidget {
             Text('Type: $name',
                 style: theme.textTheme.bodySmall,
                 overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 5),
+            const SizedBox(height: 10),
             GestureDetector(
               onTapUp: (_) {
                 bool publishTopic = runningTopic == null;

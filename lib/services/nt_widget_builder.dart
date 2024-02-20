@@ -202,9 +202,9 @@ class NTWidgetBuilder {
     _minimumHeightMap.addAll({
       YAGSLSwerveDrive.widgetType: _normalSize * 2,
       CameraStreamWidget.widgetType: _normalSize * 2,
-      ComboBoxChooser.widgetType: _normalSize * 0.75,
+      ComboBoxChooser.widgetType: _normalSize * 0.85,
       CommandSchedulerWidget.widgetType: _normalSize * 2,
-      CommandWidget.widgetType: _normalSize * 0.86,
+      CommandWidget.widgetType: _normalSize * 0.90,
       DifferentialDrive.widgetType: _normalSize * 2,
       EncoderWidget.widgetType: _normalSize * 0.86,
       FieldWidget.widgetType: _normalSize * 2,

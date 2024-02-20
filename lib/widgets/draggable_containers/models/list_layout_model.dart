@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -334,7 +335,8 @@ class ListLayoutModel extends LayoutContainerModel {
     for (NTWidgetContainerModel widget in children) {
       Widget widgetInContainer = Container(
         constraints: BoxConstraints(
-          maxHeight: (widget.minHeight) - 64.0,
+          minHeight: 32.0,
+          maxHeight: max((widget.minHeight) - 48.0, 32.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
