@@ -581,16 +581,13 @@ class NT4Client {
     }
 
     if (!mainServerAddr.contains(serverBaseAddress)) {
+      logger.info('IP Address changed while connecting, aborting connection');
       await _mainWebsocket?.sink.close();
       return;
     }
 
-    if (_pingTimer != null) {
-      _pingTimer!.cancel();
-    }
-    if (_pongTimer != null) {
-      _pongTimer!.cancel();
-    }
+    _pingTimer?.cancel();
+    _pongTimer?.cancel();
 
     if (_mainWebsocket!.protocol == 'v4.1.networktables.first.wpi.edu') {
       _useRTT = true;
@@ -665,6 +662,8 @@ class NT4Client {
     }
 
     if (!rttServerAddr.contains(serverBaseAddress)) {
+      logger.info(
+          'IP Addressed changed while connecting to RTT, aborting connection');
       await _rttWebsocket?.sink.close();
       return;
     }

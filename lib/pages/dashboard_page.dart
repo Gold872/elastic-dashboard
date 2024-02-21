@@ -396,13 +396,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       label: 'All Files',
     );
 
-    hotKeyManager.resetKeysPressed();
-
     logger.info('Exporting layout');
     final FileSaveLocation? saveLocation = await getSaveLocation(
       suggestedName: 'elastic-layout.json',
       acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
     );
+
+    hotKeyManager.resetKeysPressed();
 
     if (saveLocation == null) {
       logger.info('Ignoring layout export, no location was selected');
@@ -436,13 +436,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       label: 'All Files',
     );
 
-    hotKeyManager.resetKeysPressed();
-
     logger.info('Importing layout');
     final XFile? file = await openFile(acceptedTypeGroups: [
       jsonTypeGroup,
       anyTypeGroup,
     ]);
+
+    hotKeyManager.resetKeysPressed();
 
     if (file == null) {
       logger.info('Canceling layout import, no file was selected');
@@ -616,7 +616,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyO,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: importLayout,
     );
@@ -624,7 +624,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyS,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: saveLayout,
     );
@@ -632,7 +632,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyS,
-        modifiers: [ModifierKey.controlModifier, ModifierKey.shiftModifier],
+        modifiers: [KeyModifier.control, KeyModifier.shift],
       ),
       callback: exportLayout,
     );
@@ -641,7 +641,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       hotKeyManager.register(
         HotKey(
           LogicalKeyboardKey(48 + i),
-          modifiers: [ModifierKey.controlModifier],
+          modifiers: [KeyModifier.control],
         ),
         callback: () {
           if (currentTabIndex == i - 1) {
@@ -661,7 +661,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.arrowLeft,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: () {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
@@ -673,7 +673,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.arrowRight,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: () {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
@@ -685,7 +685,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyT,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: () {
         if (Settings.layoutLocked) {
@@ -709,7 +709,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyW,
-        modifiers: [ModifierKey.controlModifier],
+        modifiers: [KeyModifier.control],
       ),
       callback: () {
         if (Settings.layoutLocked) {

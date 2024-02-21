@@ -3,9 +3,22 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
+class KeyModifier {
+  static final KeyModifier control =
+      KeyModifier._(() => HardwareKeyboard.instance.isControlPressed);
+  static final KeyModifier shift =
+      KeyModifier._(() => HardwareKeyboard.instance.isShiftPressed);
+  static final KeyModifier alt =
+      KeyModifier._(() => HardwareKeyboard.instance.isAltPressed);
+
+  const KeyModifier._(this.active);
+
+  final bool Function() active;
+}
+
 class HotKey {
   final LogicalKeyboardKey logicalKey;
-  final List<ModifierKey>? modifiers;
+  final List<KeyModifier>? modifiers;
   String identifier = const Uuid().v4();
 
   HotKey(this.logicalKey, {this.modifiers, String? identifier}) {
@@ -28,29 +41,71 @@ class HotKeyManager {
   final Map<String, HotKeyCallback> _callbackMap = {};
 
   void _init() {
-    RawKeyboard.instance.addListener(_handleRawKeyEvent);
+    HardwareKeyboard.instance.addHandler(_handleRawKeyEvent);
     _initialized = true;
   }
 
-  _handleRawKeyEvent(RawKeyEvent value) {
-    if (value is RawKeyDownEvent) {
-      if (value.repeat) return;
+  int _getNumberModifiersPressed() {
+    int count = 0;
+
+    if (HardwareKeyboard.instance.isControlPressed) {
+      count++;
+    }
+
+    if (HardwareKeyboard.instance.isAltPressed) {
+      count++;
+    }
+
+    if (HardwareKeyboard.instance.isShiftPressed) {
+      count++;
+    }
+
+    if (HardwareKeyboard.instance.isMetaPressed) {
+      count++;
+    }
+
+    return count;
+  }
+
+  bool _handleRawKeyEvent(KeyEvent value) {
+    if (value is KeyUpEvent) {
+      if (value is KeyRepeatEvent) return false;
+      int modifierCount = _getNumberModifiersPressed();
       HotKey? hotKey = _hotKeyList.firstWhereOrNull(
         (e) {
-          return value.isKeyPressed(e.logicalKey) &&
-              value.data.modifiersPressed.keys.length ==
-                  (e.modifiers ?? []).length &&
-              (e.modifiers ?? []).every(
-                (m) => value.data.isModifierPressed(m),
-              );
+          if (value.logicalKey != e.logicalKey) {
+            return false;
+          }
+
+          if (e.modifiers == null) {
+            return true;
+          }
+
+          if (e.modifiers!.length != modifierCount) {
+            return false;
+          }
+
+          for (KeyModifier modifier in e.modifiers!) {
+            if (!modifier.active()) {
+              return false;
+            }
+          }
+
+          return true;
         },
       );
 
       if (hotKey != null) {
         HotKeyCallback? callback = _callbackMap[hotKey.identifier];
-        if (callback != null) callback();
+        if (callback != null) {
+          callback();
+          return true;
+        }
+      } else {
+        return false;
       }
     }
+    return false;
   }
 
   List<HotKey> get registeredHotKeyList => _hotKeyList;
@@ -89,9 +144,8 @@ class HotKeyManager {
     _hotKeyList.clear();
   }
 
-  void resetKeysPressed() {
-    // ignore: invalid_use_of_visible_for_testing_member
-    RawKeyboard.instance.clearKeysPressed();
+  Future<void> resetKeysPressed() async {
+    await HardwareKeyboard.instance.syncKeyboardState();
   }
 }
 
