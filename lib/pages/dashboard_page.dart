@@ -258,8 +258,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     if (successful) {
       logger.info('Layout saved successfully!');
-      // ignore: use_build_context_synchronously
-      ElegantNotification(
+      ElegantNotification notification = ElegantNotification(
         background: colorScheme.background,
         progressIndicatorBackground: colorScheme.background,
         progressIndicatorColor: const Color(0xff01CB67),
@@ -273,11 +272,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               fontWeight: FontWeight.bold,
             )),
         description: const Text('Layout saved successfully!'),
-      ).show(context);
+      );
+      if (mounted) {
+        notification.show(context);
+      }
     } else {
       logger.error('Could not save layout');
-      // ignore: use_build_context_synchronously
-      ElegantNotification(
+      ElegantNotification notification = ElegantNotification(
         background: colorScheme.background,
         progressIndicatorBackground: colorScheme.background,
         progressIndicatorColor: const Color(0xffFE355C),
@@ -291,7 +292,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               fontWeight: FontWeight.bold,
             )),
         description: const Text('Failed to save layout, please try again!'),
-      ).show(context);
+      );
+      if (mounted) {
+        notification.show(context);
+      }
     }
   }
 
@@ -305,8 +309,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         await updateChecker.isUpdateAvailable();
 
     if (updateResponse.error && notifyIfError) {
-      // ignore: use_build_context_synchronously
-      ElegantNotification(
+      ElegantNotification notification = ElegantNotification(
         background: colorScheme.background,
         progressIndicatorBackground: colorScheme.background,
         progressIndicatorColor: const Color(0xffFE355C),
@@ -325,13 +328,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           overflow: TextOverflow.ellipsis,
           maxLines: 3,
         ),
-      ).show(context);
+      );
+
+      if (mounted) {
+        notification.show(context);
+      }
       return;
     }
 
     if (updateResponse.updateAvailable) {
-      // ignore: use_build_context_synchronously
-      ElegantNotification(
+      ElegantNotification notification = ElegantNotification(
         autoDismiss: false,
         showProgressIndicator: false,
         background: colorScheme.background,
@@ -361,10 +367,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             await launchUrl(url);
           }
         },
-      ).show(context);
+      );
+
+      if (mounted) {
+        notification.show(context);
+      }
     } else if (updateResponse.onLatestVersion && notifyIfLatest) {
-      // ignore: use_build_context_synchronously
-      ElegantNotification(
+      ElegantNotification notification = ElegantNotification(
         background: colorScheme.background,
         progressIndicatorBackground: colorScheme.background,
         progressIndicatorColor: const Color(0xff01CB67),
@@ -380,7 +389,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             )),
         description:
             const Text('You are running on the latest version of Elastic'),
-      ).show(context);
+      );
+
+      if (mounted) {
+        notification.show(context);
+      }
     }
   }
 
