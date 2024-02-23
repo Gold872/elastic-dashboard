@@ -243,6 +243,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
 
     return {
+      'version': 1.0,
       'tabs': gridData,
     };
   }
