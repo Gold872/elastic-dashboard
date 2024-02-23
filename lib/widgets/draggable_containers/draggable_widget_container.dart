@@ -44,10 +44,6 @@ class DraggableWidgetContainer extends StatelessWidget {
         rect: model.draggingRect,
         clampingRect:
             const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
-        constraints: BoxConstraints(
-          minWidth: model.minWidth,
-          minHeight: model.minHeight,
-        ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
@@ -55,10 +51,12 @@ class DraggableWidgetContainer extends StatelessWidget {
         draggable: model.draggable,
         resizable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Builder(builder: (context) {
-            controller = TransformableBox.controllerOf(context);
-            return Container();
-          });
+          return Builder(
+            builder: (context) {
+              controller = TransformableBox.controllerOf(context);
+              return Container();
+            },
+          );
         },
         onDragStart: (event) {
           model.setDragging(true);
