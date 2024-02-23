@@ -122,18 +122,18 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   void unSubscribe() {}
 
   @mustCallSuper
-  void updateGridSize(double oldGridSize, double newGridSize) {
-    double newX =
-        DraggableWidgetContainer.snapToGrid(displayRect.left, newGridSize);
-    double newY =
-        DraggableWidgetContainer.snapToGrid(displayRect.top, newGridSize);
+  void updateGridSize(int oldGridSize, int newGridSize) {
+    double newX = DraggableWidgetContainer.snapToGrid(
+        displayRect.left, newGridSize.toDouble());
+    double newY = DraggableWidgetContainer.snapToGrid(
+        displayRect.top, newGridSize.toDouble());
 
-    double newWidth =
-        DraggableWidgetContainer.snapToGrid(displayRect.width, newGridSize)
-            .clamp(minWidth, double.infinity);
-    double newHeight =
-        DraggableWidgetContainer.snapToGrid(displayRect.height, newGridSize)
-            .clamp(minHeight, double.infinity);
+    double newWidth = DraggableWidgetContainer.snapToGrid(
+            displayRect.width, newGridSize.toDouble())
+        .clamp(minWidth, double.infinity);
+    double newHeight = DraggableWidgetContainer.snapToGrid(
+            displayRect.height, newGridSize.toDouble())
+        .clamp(minHeight, double.infinity);
 
     displayRect = Rect.fromLTWH(newX, newY, newWidth, newHeight);
     draggingRect = displayRect;

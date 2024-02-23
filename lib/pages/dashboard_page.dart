@@ -59,6 +59,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   final Function mapEquals = const DeepCollectionEquality().equals;
 
+  int gridSize = Settings.gridSize;
+
   int currentTabIndex = 0;
 
   bool addWidgetDialogVisible = false;
@@ -244,6 +246,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     return {
       'version': 1.0,
+      'grid_size': gridSize,
       'tabs': gridData,
     };
   }
@@ -511,6 +514,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       showJsonLoadingError('JSON does not contain necessary data, aborting.');
       createDefaultTabs();
       return;
+    }
+
+    if (jsonData.containsKey('grid_size')) {
+      gridSize = tryCast(jsonData['grid_size']) ?? gridSize;
+      Settings.gridSize = gridSize;
+      _preferences.setInt(PrefKeys.gridSize, gridSize);
     }
 
     tabData.clear();
@@ -922,7 +931,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           if (newGridSize == null ||
               newGridSize == 0 ||
-              newGridSize == Settings.gridSize) {
+              newGridSize == this.gridSize) {
             return;
           }
 
@@ -969,13 +978,15 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             return;
           }
 
-          setState(() => Settings.gridSize = newGridSize);
+          setState(() {
+            Settings.gridSize = newGridSize;
+            this.gridSize = newGridSize;
+          });
 
           await _preferences.setInt(PrefKeys.gridSize, newGridSize);
 
           for (TabGrid grid in grids) {
-            grid.resizeGrid(
-                Settings.gridSize.toDouble(), newGridSize.toDouble());
+            grid.resizeGrid(this.gridSize, this.gridSize);
           }
         },
         onCornerRadiusChanged: (radius) async {

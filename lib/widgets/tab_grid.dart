@@ -697,7 +697,7 @@ class TabGrid extends StatelessWidget {
     });
   }
 
-  void resizeGrid(double oldSize, double newSize) {
+  void resizeGrid(int oldSize, int newSize) {
     for (WidgetContainerModel widget in _widgetModels) {
       widget.updateGridSize(oldSize, newSize);
     }
