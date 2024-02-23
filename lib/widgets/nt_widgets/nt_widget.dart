@@ -15,6 +15,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/radial_gauge.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
@@ -104,7 +105,7 @@ abstract class NTWidget extends StatelessWidget {
         return [
           BooleanBox.widgetType,
           ToggleSwitch.widgetType,
-          ToggleSwitch.widgetType,
+          ToggleButton.widgetType,
           TextDisplay.widgetType,
         ];
       case NT4TypeStr.kFloat32:
