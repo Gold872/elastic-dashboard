@@ -13,12 +13,12 @@ class CameraStreamWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String streamsTopic;
+  late String _streamsTopic;
 
-  Mjpeg? streamWidget;
-  MemoryImage? lastDisplayedImage;
+  Mjpeg? _streamWidget;
+  MemoryImage? _lastDisplayedImage;
 
-  bool clientOpen = false;
+  bool _clientOpen = false;
 
   CameraStreamWidget({
     super.key,
@@ -34,16 +34,16 @@ class CameraStreamWidget extends NTWidget {
   void init() {
     super.init();
 
-    streamsTopic = '$topic/streams';
+    _streamsTopic = '$topic/streams';
 
-    clientOpen = true;
+    _clientOpen = true;
   }
 
   @override
   void resetSubscription() {
-    closeClient();
+    _closeClient();
 
-    streamsTopic = '$topic/streams';
+    _streamsTopic = '$topic/streams';
 
     super.resetSubscription();
   }
@@ -52,36 +52,36 @@ class CameraStreamWidget extends NTWidget {
   void dispose({bool deleting = false}) {
     Future(() async {
       if (deleting) {
-        await streamWidget?.dispose();
+        await _streamWidget?.dispose();
       }
-      clientOpen = false;
+      _clientOpen = false;
 
       if (deleting) {
-        lastDisplayedImage?.evict();
-        streamWidget?.previousImage?.evict();
+        _lastDisplayedImage?.evict();
+        _streamWidget?.previousImage?.evict();
       }
     });
 
     super.dispose(deleting: deleting);
   }
 
-  void closeClient() {
-    lastDisplayedImage?.evict();
-    lastDisplayedImage = streamWidget?.previousImage;
-    streamWidget?.dispose();
-    streamWidget = null;
-    clientOpen = false;
+  void _closeClient() {
+    _lastDisplayedImage?.evict();
+    _lastDisplayedImage = _streamWidget?.previousImage;
+    _streamWidget?.dispose();
+    _streamWidget = null;
+    _clientOpen = false;
   }
 
   @override
   List<Object> getCurrentData() {
     List<Object?> rawStreams =
-        tryCast(ntConnection.getLastAnnouncedValue(streamsTopic)) ?? [];
+        tryCast(ntConnection.getLastAnnouncedValue(_streamsTopic)) ?? [];
     List<String> streams = rawStreams.whereType<String>().toList();
 
     return [
       ...streams,
-      clientOpen,
+      _clientOpen,
       ntConnection.isNT4Connected,
     ];
   }
@@ -93,15 +93,15 @@ class CameraStreamWidget extends NTWidget {
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        if (!ntConnection.isNT4Connected && clientOpen) {
-          closeClient();
+        if (!ntConnection.isNT4Connected && _clientOpen) {
+          _closeClient();
         }
 
-        bool createNewWidget = streamWidget == null ||
-            (!clientOpen && ntConnection.isNT4Connected);
+        bool createNewWidget = _streamWidget == null ||
+            (!_clientOpen && ntConnection.isNT4Connected);
 
         List<Object?> rawStreams =
-            tryCast(ntConnection.getLastAnnouncedValue(streamsTopic)) ?? [];
+            tryCast(ntConnection.getLastAnnouncedValue(_streamsTopic)) ?? [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
@@ -118,11 +118,11 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (lastDisplayedImage != null)
+              if (_lastDisplayedImage != null)
                 Opacity(
                   opacity: 0.35,
                   child: Image(
-                    image: lastDisplayedImage!,
+                    image: _lastDisplayedImage!,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -145,12 +145,12 @@ class CameraStreamWidget extends NTWidget {
         }
 
         if (createNewWidget) {
-          clientOpen = true;
-          lastDisplayedImage?.evict();
+          _clientOpen = true;
+          _lastDisplayedImage?.evict();
 
           String stream = streams.last;
 
-          streamWidget = Mjpeg(
+          _streamWidget = Mjpeg(
             fit: BoxFit.contain,
             isLive: true,
             stream: stream,
@@ -160,7 +160,7 @@ class CameraStreamWidget extends NTWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            streamWidget!,
+            _streamWidget!,
           ],
         );
       },

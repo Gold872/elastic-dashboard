@@ -11,9 +11,9 @@ class ThreeAxisAccelerometer extends NTWidget {
   @override
   String type = widgetType;
 
-  late String xTopic;
-  late String yTopic;
-  late String zTopic;
+  late String _xTopic;
+  late String _yTopic;
+  late String _zTopic;
 
   ThreeAxisAccelerometer({
     super.key,
@@ -29,25 +29,25 @@ class ThreeAxisAccelerometer extends NTWidget {
   void init() {
     super.init();
 
-    xTopic = '$topic/X';
-    yTopic = '$topic/Y';
-    zTopic = '$topic/Z';
+    _xTopic = '$topic/X';
+    _yTopic = '$topic/Y';
+    _zTopic = '$topic/Z';
   }
 
   @override
   void resetSubscription() {
-    xTopic = '$topic/X';
-    yTopic = '$topic/Y';
-    zTopic = '$topic/Z';
+    _xTopic = '$topic/X';
+    _yTopic = '$topic/Y';
+    _zTopic = '$topic/Z';
 
     super.resetSubscription();
   }
 
   @override
   List<Object> getCurrentData() {
-    double xAccel = tryCast(ntConnection.getLastAnnouncedValue(xTopic)) ?? 0.0;
-    double yAccel = tryCast(ntConnection.getLastAnnouncedValue(yTopic)) ?? 0.0;
-    double zAccel = tryCast(ntConnection.getLastAnnouncedValue(zTopic)) ?? 0.0;
+    double xAccel = tryCast(ntConnection.getLastAnnouncedValue(_xTopic)) ?? 0.0;
+    double yAccel = tryCast(ntConnection.getLastAnnouncedValue(_yTopic)) ?? 0.0;
+    double zAccel = tryCast(ntConnection.getLastAnnouncedValue(_zTopic)) ?? 0.0;
 
     return [xAccel, yAccel, zAccel];
   }
@@ -60,11 +60,11 @@ class ThreeAxisAccelerometer extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double xAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(xTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_xTopic)) ?? 0.0;
         double yAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(yTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_yTopic)) ?? 0.0;
         double zAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(zTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_zTopic)) ?? 0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

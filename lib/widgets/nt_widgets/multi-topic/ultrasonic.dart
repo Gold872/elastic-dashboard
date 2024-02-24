@@ -12,8 +12,8 @@ class Ultrasonic extends NTWidget {
   @override
   String type = widgetType;
 
-  late String valueTopic;
-  late NT4Subscription valueSubscription;
+  late String _valueTopic;
+  late NT4Subscription _valueSubscription;
 
   Ultrasonic({
     super.key,
@@ -28,23 +28,23 @@ class Ultrasonic extends NTWidget {
   void init() {
     super.init();
 
-    valueTopic = '$topic/Value';
-    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
+    _valueTopic = '$topic/Value';
+    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(valueSubscription);
+    ntConnection.unSubscribe(_valueSubscription);
 
-    valueTopic = '$topic/Value';
-    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
+    _valueTopic = '$topic/Value';
+    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
 
     super.resetSubscription();
   }
 
   @override
   void unSubscribe() {
-    ntConnection.unSubscribe(valueSubscription);
+    ntConnection.unSubscribe(_valueSubscription);
 
     super.unSubscribe();
   }
@@ -54,8 +54,8 @@ class Ultrasonic extends NTWidget {
     notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(valueTopic),
+      stream: _valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(_valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

@@ -15,17 +15,17 @@ class DifferentialDrive extends NTWidget {
   @override
   String type = widgetType;
 
-  late String leftSpeedTopicName;
-  late String rightSpeedTopicName;
+  late String _leftSpeedTopicName;
+  late String _rightSpeedTopicName;
 
-  NT4Topic? leftSpeedTopic;
-  NT4Topic? rightSpeedTopic;
+  NT4Topic? _leftSpeedTopic;
+  NT4Topic? _rightSpeedTopic;
 
-  double leftSpeedPreviousValue = 0.0;
-  double rightSpeedPreviousValue = 0.0;
+  double _leftSpeedPreviousValue = 0.0;
+  double _rightSpeedPreviousValue = 0.0;
 
-  double leftSpeedCurrentValue = 0.0;
-  double rightSpeedCurrentValue = 0.0;
+  double _leftSpeedCurrentValue = 0.0;
+  double _rightSpeedCurrentValue = 0.0;
 
   DifferentialDrive({
     super.key,
@@ -41,23 +41,23 @@ class DifferentialDrive extends NTWidget {
   void init() {
     super.init();
 
-    leftSpeedTopicName = '$topic/Left Motor Speed';
-    rightSpeedTopicName = '$topic/Right Motor Speed';
+    _leftSpeedTopicName = '$topic/Left Motor Speed';
+    _rightSpeedTopicName = '$topic/Right Motor Speed';
   }
 
   @override
   void resetSubscription() {
-    leftSpeedTopicName = '$topic/Left Motor Speed';
-    rightSpeedTopicName = '$topic/Right Motor Speed';
+    _leftSpeedTopicName = '$topic/Left Motor Speed';
+    _rightSpeedTopicName = '$topic/Right Motor Speed';
 
-    leftSpeedTopic = null;
-    rightSpeedTopic = null;
+    _leftSpeedTopic = null;
+    _rightSpeedTopic = null;
 
-    leftSpeedPreviousValue = 0.0;
-    leftSpeedCurrentValue = 0.0;
+    _leftSpeedPreviousValue = 0.0;
+    _leftSpeedCurrentValue = 0.0;
 
-    rightSpeedPreviousValue = 0.0;
-    rightSpeedCurrentValue = 0.0;
+    _rightSpeedPreviousValue = 0.0;
+    _rightSpeedCurrentValue = 0.0;
 
     super.resetSubscription();
   }
@@ -65,17 +65,18 @@ class DifferentialDrive extends NTWidget {
   @override
   List<Object> getCurrentData() {
     double leftSpeed =
-        tryCast(ntConnection.getLastAnnouncedValue(leftSpeedTopicName)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_leftSpeedTopicName)) ?? 0.0;
     double rightSpeed =
-        tryCast(ntConnection.getLastAnnouncedValue(rightSpeedTopicName)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_rightSpeedTopicName)) ??
+            0.0;
 
     return [
       leftSpeed,
       rightSpeed,
-      leftSpeedPreviousValue,
-      rightSpeedPreviousValue,
-      leftSpeedCurrentValue,
-      rightSpeedCurrentValue,
+      _leftSpeedPreviousValue,
+      _rightSpeedPreviousValue,
+      _leftSpeedCurrentValue,
+      _rightSpeedCurrentValue,
     ];
   }
 
@@ -87,21 +88,21 @@ class DifferentialDrive extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double leftSpeed =
-            tryCast(ntConnection.getLastAnnouncedValue(leftSpeedTopicName)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_leftSpeedTopicName)) ??
                 0.0;
         double rightSpeed =
-            tryCast(ntConnection.getLastAnnouncedValue(rightSpeedTopicName)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_rightSpeedTopicName)) ??
                 0.0;
 
-        if (leftSpeed != leftSpeedPreviousValue) {
-          leftSpeedCurrentValue = leftSpeed;
+        if (leftSpeed != _leftSpeedPreviousValue) {
+          _leftSpeedCurrentValue = leftSpeed;
         }
-        leftSpeedPreviousValue = leftSpeed;
+        _leftSpeedPreviousValue = leftSpeed;
 
-        if (rightSpeed != rightSpeedPreviousValue) {
-          rightSpeedCurrentValue = rightSpeed;
+        if (rightSpeed != _rightSpeedPreviousValue) {
+          _rightSpeedCurrentValue = rightSpeed;
         }
-        rightSpeedPreviousValue = rightSpeed;
+        _rightSpeedPreviousValue = rightSpeed;
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -115,7 +116,7 @@ class DifferentialDrive extends NTWidget {
               tickPosition: LinearElementPosition.inside,
               markerPointers: [
                 LinearShapePointer(
-                  value: leftSpeedCurrentValue.clamp(-1.0, 1.0),
+                  value: _leftSpeedCurrentValue.clamp(-1.0, 1.0),
                   color: Theme.of(context).colorScheme.primary,
                   height: 12.5,
                   width: 12.5,
@@ -124,26 +125,26 @@ class DifferentialDrive extends NTWidget {
                   position: LinearElementPosition.outside,
                   dragBehavior: LinearMarkerDragBehavior.free,
                   onChanged: (value) {
-                    leftSpeedCurrentValue = value;
+                    _leftSpeedCurrentValue = value;
                   },
                   onChangeEnd: (value) {
-                    bool publishTopic = leftSpeedTopic == null;
+                    bool publishTopic = _leftSpeedTopic == null;
 
-                    leftSpeedTopic ??=
-                        ntConnection.getTopicFromName(leftSpeedTopicName);
+                    _leftSpeedTopic ??=
+                        ntConnection.getTopicFromName(_leftSpeedTopicName);
 
-                    if (leftSpeedTopic == null) {
+                    if (_leftSpeedTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(leftSpeedTopic!);
+                      ntConnection.nt4Client.publishTopic(_leftSpeedTopic!);
                     }
 
                     ntConnection.updateDataFromTopic(
-                        leftSpeedTopic!, leftSpeedCurrentValue);
+                        _leftSpeedTopic!, _leftSpeedCurrentValue);
 
-                    leftSpeedPreviousValue = leftSpeedCurrentValue;
+                    _leftSpeedPreviousValue = _leftSpeedCurrentValue;
                   },
                 ),
               ],
@@ -167,9 +168,9 @@ class DifferentialDrive extends NTWidget {
                     width: sideLength,
                     height: sideLength,
                     child: CustomPaint(
-                      painter: DifferentialDrivePainter(
-                        leftSpeed: leftSpeedCurrentValue.clamp(-1.0, 1.0),
-                        rightSpeed: rightSpeedCurrentValue.clamp(-1.0, 1.0),
+                      painter: _DifferentialDrivePainter(
+                        leftSpeed: _leftSpeedCurrentValue.clamp(-1.0, 1.0),
+                        rightSpeed: _rightSpeedCurrentValue.clamp(-1.0, 1.0),
                       ),
                     ),
                   );
@@ -186,7 +187,7 @@ class DifferentialDrive extends NTWidget {
               tickPosition: LinearElementPosition.outside,
               markerPointers: [
                 LinearShapePointer(
-                  value: rightSpeedCurrentValue.clamp(-1.0, 1.0),
+                  value: _rightSpeedCurrentValue.clamp(-1.0, 1.0),
                   color: Theme.of(context).colorScheme.primary,
                   height: 12.5,
                   width: 12.5,
@@ -195,26 +196,26 @@ class DifferentialDrive extends NTWidget {
                   position: LinearElementPosition.inside,
                   dragBehavior: LinearMarkerDragBehavior.free,
                   onChanged: (value) {
-                    rightSpeedCurrentValue = value;
+                    _rightSpeedCurrentValue = value;
                   },
                   onChangeEnd: (value) {
-                    bool publishTopic = rightSpeedTopic == null;
+                    bool publishTopic = _rightSpeedTopic == null;
 
-                    rightSpeedTopic ??=
-                        ntConnection.getTopicFromName(rightSpeedTopicName);
+                    _rightSpeedTopic ??=
+                        ntConnection.getTopicFromName(_rightSpeedTopicName);
 
-                    if (rightSpeedTopic == null) {
+                    if (_rightSpeedTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(rightSpeedTopic!);
+                      ntConnection.nt4Client.publishTopic(_rightSpeedTopic!);
                     }
 
                     ntConnection.updateDataFromTopic(
-                        rightSpeedTopic!, rightSpeedCurrentValue);
+                        _rightSpeedTopic!, _rightSpeedCurrentValue);
 
-                    rightSpeedPreviousValue = rightSpeedCurrentValue;
+                    _rightSpeedPreviousValue = _rightSpeedCurrentValue;
                   },
                 ),
               ],
@@ -232,23 +233,23 @@ class DifferentialDrive extends NTWidget {
   }
 }
 
-class DifferentialDrivePainter extends CustomPainter {
+class _DifferentialDrivePainter extends CustomPainter {
   final double leftSpeed;
   final double rightSpeed;
 
-  DifferentialDrivePainter({
+  _DifferentialDrivePainter({
     required this.leftSpeed,
     required this.rightSpeed,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRobotFrame(canvas, size);
-    drawMotionVector(
+    _drawRobotFrame(canvas, size);
+    _drawMotionVector(
         canvas, size * 7 / 8, Offset(size.width / 2, size.height / 2));
   }
 
-  void drawRobotFrame(Canvas canvas, Size size) {
+  void _drawRobotFrame(Canvas canvas, Size size) {
     final double scaleFactor = size.width / 108.15;
 
     Paint outlinePainter = Paint()
@@ -293,7 +294,7 @@ class DifferentialDrivePainter extends CustomPainter {
     canvas.drawRect(body, outlinePainter);
   }
 
-  void drawMotionVector(Canvas canvas, Size size, Offset center) {
+  void _drawMotionVector(Canvas canvas, Size size, Offset center) {
     final double scaleFactor = size.width / 94.6;
 
     Paint vectorArc = Paint()
@@ -457,7 +458,7 @@ class DifferentialDrivePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DifferentialDrivePainter oldDelegate) {
+  bool shouldRepaint(_DifferentialDrivePainter oldDelegate) {
     return oldDelegate.leftSpeed != leftSpeed ||
         oldDelegate.rightSpeed != rightSpeed;
   }

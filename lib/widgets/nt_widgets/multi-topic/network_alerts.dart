@@ -11,9 +11,9 @@ class NetworkAlerts extends NTWidget {
   @override
   String type = widgetType;
 
-  late String errorsTopicName;
-  late String warningsTopicName;
-  late String infosTopicName;
+  late String _errorsTopicName;
+  late String _warningsTopicName;
+  late String _infosTopicName;
 
   NetworkAlerts({
     super.key,
@@ -29,16 +29,16 @@ class NetworkAlerts extends NTWidget {
   void init() {
     super.init();
 
-    errorsTopicName = '$topic/errors';
-    warningsTopicName = '$topic/warnings';
-    infosTopicName = '$topic/infos';
+    _errorsTopicName = '$topic/errors';
+    _warningsTopicName = '$topic/warnings';
+    _infosTopicName = '$topic/infos';
   }
 
   @override
   void resetSubscription() {
-    errorsTopicName = '$topic/errors';
-    warningsTopicName = '$topic/warnings';
-    infosTopicName = '$topic/infos';
+    _errorsTopicName = '$topic/errors';
+    _warningsTopicName = '$topic/warnings';
+    _infosTopicName = '$topic/infos';
 
     super.resetSubscription();
   }
@@ -46,17 +46,17 @@ class NetworkAlerts extends NTWidget {
   @override
   List<Object> getCurrentData() {
     List<Object?> errorsRaw = ntConnection
-            .getLastAnnouncedValue(errorsTopicName)
+            .getLastAnnouncedValue(_errorsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> warningsRaw = ntConnection
-            .getLastAnnouncedValue(warningsTopicName)
+            .getLastAnnouncedValue(_warningsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> infosRaw = ntConnection
-            .getLastAnnouncedValue(infosTopicName)
+            .getLastAnnouncedValue(_infosTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -75,17 +75,17 @@ class NetworkAlerts extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> errorsRaw = ntConnection
-                .getLastAnnouncedValue(errorsTopicName)
+                .getLastAnnouncedValue(_errorsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> warningsRaw = ntConnection
-                .getLastAnnouncedValue(warningsTopicName)
+                .getLastAnnouncedValue(_warningsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> infosRaw = ntConnection
-                .getLastAnnouncedValue(infosTopicName)
+                .getLastAnnouncedValue(_infosTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 

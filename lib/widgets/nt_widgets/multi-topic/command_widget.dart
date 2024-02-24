@@ -13,40 +13,41 @@ class CommandWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  NT4Topic? runningTopic;
+  NT4Topic? _runningTopic;
 
-  late String runningTopicName;
-  late String nameTopicName;
+  late String _runningTopicName;
+  late String _nameTopicName;
 
-  bool showType = true;
+  bool _showType = true;
 
   CommandWidget({
     super.key,
     required super.topic,
-    this.showType = true,
+    bool showType = true,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _showType = showType,
+        super();
 
   CommandWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    showType = tryCast(jsonData['show_type']) ?? showType;
+    _showType = tryCast(jsonData['show_type']) ?? _showType;
   }
 
   @override
   void init() {
     super.init();
 
-    runningTopicName = '$topic/running';
-    nameTopicName = '$topic/.name';
+    _runningTopicName = '$topic/running';
+    _nameTopicName = '$topic/.name';
   }
 
   @override
   void resetSubscription() {
-    runningTopicName = '$topic/running';
-    nameTopicName = '$topic/.name';
+    _runningTopicName = '$topic/running';
+    _nameTopicName = '$topic/.name';
 
-    runningTopic = null;
+    _runningTopic = null;
 
     super.resetSubscription();
   }
@@ -55,7 +56,7 @@ class CommandWidget extends NTWidget {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'show_type': showType,
+      'show_type': _showType,
     };
   }
 
@@ -64,9 +65,9 @@ class CommandWidget extends NTWidget {
     return [
       DialogToggleSwitch(
         label: 'Show Command Type',
-        initialValue: showType,
+        initialValue: _showType,
         onToggle: (value) {
-          showType = value;
+          _showType = value;
           refresh();
         },
       ),
@@ -75,11 +76,12 @@ class CommandWidget extends NTWidget {
 
   @override
   List<Object> getCurrentData() {
-    bool running =
-        ntConnection.getLastAnnouncedValue(runningTopicName)?.tryCast<bool>() ??
-            false;
+    bool running = ntConnection
+            .getLastAnnouncedValue(_runningTopicName)
+            ?.tryCast<bool>() ??
+        false;
     String name =
-        ntConnection.getLastAnnouncedValue(nameTopicName)?.tryCast<String>() ??
+        ntConnection.getLastAnnouncedValue(_nameTopicName)?.tryCast<String>() ??
             'Unknown';
 
     return [running, name];
@@ -93,11 +95,11 @@ class CommandWidget extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         bool running = ntConnection
-                .getLastAnnouncedValue(runningTopicName)
+                .getLastAnnouncedValue(_runningTopicName)
                 ?.tryCast<bool>() ??
             false;
         String name = ntConnection
-                .getLastAnnouncedValue(nameTopicName)
+                .getLastAnnouncedValue(_nameTopicName)
                 ?.tryCast<String>() ??
             'Unknown';
 
@@ -108,7 +110,7 @@ class CommandWidget extends NTWidget {
         return Column(
           children: [
             Visibility(
-              visible: showType,
+              visible: _showType,
               child: Text('Type: $name',
                   style: theme.textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis),
@@ -116,19 +118,20 @@ class CommandWidget extends NTWidget {
             const SizedBox(height: 10),
             GestureDetector(
               onTapUp: (_) {
-                bool publishTopic = runningTopic == null;
+                bool publishTopic = _runningTopic == null;
 
-                runningTopic = ntConnection.getTopicFromName(runningTopicName);
+                _runningTopic =
+                    ntConnection.getTopicFromName(_runningTopicName);
 
-                if (runningTopic == null) {
+                if (_runningTopic == null) {
                   return;
                 }
 
                 if (publishTopic) {
-                  ntConnection.nt4Client.publishTopic(runningTopic!);
+                  ntConnection.nt4Client.publishTopic(_runningTopic!);
                 }
 
-                ntConnection.updateDataFromTopic(runningTopic!, !running);
+                ntConnection.updateDataFromTopic(_runningTopic!, !running);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 50),

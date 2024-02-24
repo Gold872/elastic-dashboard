@@ -12,11 +12,11 @@ class RelayWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String valueTopicName;
-  late NT4Subscription valueSubscription;
-  NT4Topic? valueTopic;
+  late String _valueTopicName;
+  late NT4Subscription _valueSubscription;
+  NT4Topic? _valueTopic;
 
-  final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
+  final List<String> _selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
   RelayWidget({
     super.key,
@@ -31,17 +31,17 @@ class RelayWidget extends NTWidget {
   void init() {
     super.init();
 
-    valueTopicName = '$topic/Value';
-    valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
+    _valueTopicName = '$topic/Value';
+    _valueSubscription = ntConnection.subscribe(_valueTopicName, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(valueSubscription);
+    ntConnection.unSubscribe(_valueSubscription);
 
-    valueTopicName = '$topic/Value';
-    valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
-    valueTopic = null;
+    _valueTopicName = '$topic/Value';
+    _valueSubscription = ntConnection.subscribe(_valueTopicName, super.period);
+    _valueTopic = null;
 
     super.resetSubscription();
   }
@@ -50,8 +50,8 @@ class RelayWidget extends NTWidget {
   void unSubscribe() {
     super.unSubscribe();
 
-    ntConnection.unSubscribe(valueSubscription);
-    valueTopic = null;
+    ntConnection.unSubscribe(_valueSubscription);
+    _valueTopic = null;
   }
 
   @override
@@ -59,12 +59,12 @@ class RelayWidget extends NTWidget {
     notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(valueTopicName),
+      stream: _valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(_valueTopicName),
       builder: (context, snapshot) {
         String selected = tryCast(snapshot.data) ?? 'Off';
 
-        if (!selectedOptions.contains(selected)) {
+        if (!_selectedOptions.contains(selected)) {
           selected = 'Off';
         }
 
@@ -81,26 +81,26 @@ class RelayWidget extends NTWidget {
                   ),
                   direction: Axis.vertical,
                   onPressed: (index) {
-                    String option = selectedOptions[index];
+                    String option = _selectedOptions[index];
 
-                    bool publishTopic = valueTopic == null;
+                    bool publishTopic = _valueTopic == null;
 
-                    valueTopic ??=
-                        ntConnection.getTopicFromName(valueTopicName);
+                    _valueTopic ??=
+                        ntConnection.getTopicFromName(_valueTopicName);
 
-                    if (valueTopic == null) {
+                    if (_valueTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(valueTopic!);
+                      ntConnection.nt4Client.publishTopic(_valueTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(valueTopic!, option);
+                    ntConnection.updateDataFromTopic(_valueTopic!, option);
                   },
                   isSelected:
-                      selectedOptions.map((e) => selected == e).toList(),
-                  children: selectedOptions.map((element) {
+                      _selectedOptions.map((e) => selected == e).toList(),
+                  children: _selectedOptions.map((element) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 0.0),

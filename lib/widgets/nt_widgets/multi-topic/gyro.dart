@@ -14,23 +14,24 @@ class Gyro extends NTWidget {
   @override
   String type = widgetType;
 
-  bool counterClockwisePositive = false;
+  bool _counterClockwisePositive = false;
 
-  late String valueTopic;
+  late String _valueTopic;
 
-  late NT4Subscription valueSubscription;
+  late NT4Subscription _valueSubscription;
 
   Gyro({
     super.key,
     required super.topic,
-    this.counterClockwisePositive = false,
+    bool counterClockwisePositive = false,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _counterClockwisePositive = counterClockwisePositive,
+        super();
 
   Gyro.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    counterClockwisePositive =
+    _counterClockwisePositive =
         tryCast(jsonData['counter_clockwise_positive']) ?? false;
   }
 
@@ -38,24 +39,24 @@ class Gyro extends NTWidget {
   void init() {
     super.init();
 
-    valueTopic = '$topic/Value';
+    _valueTopic = '$topic/Value';
 
-    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
+    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(valueSubscription);
+    ntConnection.unSubscribe(_valueSubscription);
 
-    valueTopic = '$topic/Value';
-    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
+    _valueTopic = '$topic/Value';
+    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
 
     super.resetSubscription();
   }
 
   @override
   void unSubscribe() {
-    ntConnection.unSubscribe(valueSubscription);
+    ntConnection.unSubscribe(_valueSubscription);
 
     super.unSubscribe();
   }
@@ -64,7 +65,7 @@ class Gyro extends NTWidget {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'counter_clockwise_positive': counterClockwisePositive,
+      'counter_clockwise_positive': _counterClockwisePositive,
     };
   }
 
@@ -73,10 +74,10 @@ class Gyro extends NTWidget {
     return [
       Center(
         child: DialogToggleSwitch(
-          initialValue: counterClockwisePositive,
+          initialValue: _counterClockwisePositive,
           label: 'Counter Clockwise Positive',
           onToggle: (value) {
-            counterClockwisePositive = value;
+            _counterClockwisePositive = value;
 
             refresh();
           },
@@ -98,12 +99,12 @@ class Gyro extends NTWidget {
     notifier = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(valueTopic),
+      stream: _valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(_valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        if (counterClockwisePositive) {
+        if (_counterClockwisePositive) {
           value *= -1;
         }
 

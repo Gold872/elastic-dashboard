@@ -11,12 +11,12 @@ class PowerDistribution extends NTWidget {
   @override
   String type = widgetType;
 
-  static int numberOfChannels = 23;
+  static const int _numberOfChannels = 23;
 
-  List<String> channelTopics = [];
+  final List<String> _channelTopics = [];
 
-  late String voltageTopic;
-  late String currentTopic;
+  late String _voltageTopic;
+  late String _currentTopic;
 
   PowerDistribution({
     super.key,
@@ -32,24 +32,24 @@ class PowerDistribution extends NTWidget {
   void init() {
     super.init();
 
-    for (int channel = 0; channel <= numberOfChannels; channel++) {
-      channelTopics.add('$topic/Chan$channel');
+    for (int channel = 0; channel <= _numberOfChannels; channel++) {
+      _channelTopics.add('$topic/Chan$channel');
     }
 
-    voltageTopic = '$topic/Voltage';
-    currentTopic = '$topic/TotalCurrent';
+    _voltageTopic = '$topic/Voltage';
+    _currentTopic = '$topic/TotalCurrent';
   }
 
   @override
   void resetSubscription() {
-    channelTopics.clear();
+    _channelTopics.clear();
 
-    for (int channel = 0; channel <= numberOfChannels; channel++) {
-      channelTopics.add('$topic/Chan$channel');
+    for (int channel = 0; channel <= _numberOfChannels; channel++) {
+      _channelTopics.add('$topic/Chan$channel');
     }
 
-    voltageTopic = '$topic/Voltage';
-    currentTopic = '$topic/TotalCurrent';
+    _voltageTopic = '$topic/Voltage';
+    _currentTopic = '$topic/TotalCurrent';
 
     super.resetSubscription();
   }
@@ -58,9 +58,9 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current =
-          tryCast(ntConnection.getLastAnnouncedValue(channelTopics[channel])) ??
-              0.0;
+      double current = tryCast(
+              ntConnection.getLastAnnouncedValue(_channelTopics[channel])) ??
+          0.0;
 
       channels.add(
         Row(
@@ -95,9 +95,9 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current =
-          tryCast(ntConnection.getLastAnnouncedValue(channelTopics[channel])) ??
-              0.0;
+      double current = tryCast(
+              ntConnection.getLastAnnouncedValue(_channelTopics[channel])) ??
+          0.0;
 
       channels.add(
         Row(
@@ -134,13 +134,13 @@ class PowerDistribution extends NTWidget {
     List<Object> data = [];
 
     double voltage =
-        tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_voltageTopic)) ?? 0.0;
     double totalCurrent =
-        tryCast(ntConnection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_currentTopic)) ?? 0.0;
 
     data.addAll([voltage, totalCurrent]);
 
-    for (String channel in channelTopics) {
+    for (String channel in _channelTopics) {
       data.add(tryCast(ntConnection.getLastAnnouncedValue(channel)) ?? 0.0);
     }
 
@@ -155,9 +155,9 @@ class PowerDistribution extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double voltage =
-            tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_voltageTopic)) ?? 0.0;
         double totalCurrent =
-            tryCast(ntConnection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_currentTopic)) ?? 0.0;
 
         return Column(
           children: [

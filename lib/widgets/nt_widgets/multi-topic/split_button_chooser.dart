@@ -13,16 +13,16 @@ class SplitButtonChooser extends NTWidget {
   @override
   String type = widgetType;
 
-  late String optionsTopicName;
-  late String selectedTopicName;
-  late String activeTopicName;
-  late String defaultTopicName;
+  late String _optionsTopicName;
+  late String _selectedTopicName;
+  late String _activeTopicName;
+  late String _defaultTopicName;
 
-  String? selectedChoice;
+  String? _selectedChoice;
 
   StringChooserData? _previousData;
 
-  NT4Topic? selectedTopic;
+  NT4Topic? _selectedTopic;
 
   SplitButtonChooser({
     super.key,
@@ -38,52 +38,52 @@ class SplitButtonChooser extends NTWidget {
   void init() {
     super.init();
 
-    optionsTopicName = '$topic/options';
-    selectedTopicName = '$topic/selected';
-    activeTopicName = '$topic/active';
-    defaultTopicName = '$topic/default';
+    _optionsTopicName = '$topic/options';
+    _selectedTopicName = '$topic/selected';
+    _activeTopicName = '$topic/active';
+    _defaultTopicName = '$topic/default';
   }
 
   @override
   void resetSubscription() {
-    optionsTopicName = '$topic/options';
-    selectedTopicName = '$topic/selected';
-    activeTopicName = '$topic/active';
-    defaultTopicName = '$topic/default';
+    _optionsTopicName = '$topic/options';
+    _selectedTopicName = '$topic/selected';
+    _activeTopicName = '$topic/active';
+    _defaultTopicName = '$topic/default';
 
-    selectedTopic = null;
+    _selectedTopic = null;
 
     super.resetSubscription();
   }
 
-  void publishSelectedValue(String? selected) {
+  void _publishSelectedValue(String? selected) {
     if (selected == null || !ntConnection.isNT4Connected) {
       return;
     }
 
-    selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??= ntConnection.nt4Client
+        .publishNewTopic(_selectedTopicName, NT4TypeStr.kString);
 
-    ntConnection.updateDataFromTopic(selectedTopic!, selected);
+    ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
 
   @override
   List<Object> getCurrentData() {
     List<Object?> rawOptions = ntConnection
-            .getLastAnnouncedValue(optionsTopicName)
+            .getLastAnnouncedValue(_optionsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<String> options = rawOptions.whereType<String>().toList();
 
     String active =
-        tryCast(ntConnection.getLastAnnouncedValue(activeTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(_activeTopicName)) ?? '';
 
     String selected =
-        tryCast(ntConnection.getLastAnnouncedValue(selectedTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(_selectedTopicName)) ?? '';
 
     String defaultOption =
-        tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(_defaultTopicName)) ?? '';
 
     return [options, active, selected, defaultOption];
   }
@@ -96,26 +96,26 @@ class SplitButtonChooser extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> rawOptions = ntConnection
-                .getLastAnnouncedValue(optionsTopicName)
+                .getLastAnnouncedValue(_optionsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<String> options = rawOptions.whereType<String>().toList();
 
         String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(activeTopicName));
+            tryCast(ntConnection.getLastAnnouncedValue(_activeTopicName));
         if (active != null && active == '') {
           active = null;
         }
 
         String? selected =
-            tryCast(ntConnection.getLastAnnouncedValue(selectedTopicName));
+            tryCast(ntConnection.getLastAnnouncedValue(_selectedTopicName));
         if (selected != null && selected == '') {
           selected = null;
         }
 
         String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName));
+            tryCast(ntConnection.getLastAnnouncedValue(_defaultTopicName));
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
@@ -135,28 +135,28 @@ class SplitButtonChooser extends NTWidget {
         // If a choice has been selected previously but the topic on NT has no value, publish it
         // This can happen if NT happens to restart
         if (currentData.selectedChanged(_previousData)) {
-          if (selected != null && selectedChoice != selected) {
-            selectedChoice = selected;
+          if (selected != null && _selectedChoice != selected) {
+            _selectedChoice = selected;
           }
         } else if (currentData.activeChanged(_previousData) || active == null) {
-          if (selected == null && selectedChoice != null) {
-            if (options.contains(selectedChoice!)) {
-              publishSelectedValue(selectedChoice!);
+          if (selected == null && _selectedChoice != null) {
+            if (options.contains(_selectedChoice!)) {
+              _publishSelectedValue(_selectedChoice!);
             } else if (options.isNotEmpty) {
-              selectedChoice = active;
+              _selectedChoice = active;
             }
           }
         }
 
         // If nothing is selected but NT has an active value, set the selected to the NT value
         // This happens on program startup
-        if (active != null && selectedChoice == null) {
-          selectedChoice = active;
+        if (active != null && _selectedChoice == null) {
+          _selectedChoice = active;
         }
 
         _previousData = currentData;
 
-        bool showWarning = active != selectedChoice;
+        bool showWarning = active != _selectedChoice;
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -167,12 +167,12 @@ class SplitButtonChooser extends NTWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: ToggleButtons(
                   onPressed: (index) {
-                    selectedChoice = options[index];
+                    _selectedChoice = options[index];
 
-                    publishSelectedValue(selectedChoice!);
+                    _publishSelectedValue(_selectedChoice!);
                   },
                   isSelected: options.map((String option) {
-                    if (option == selectedChoice) {
+                    if (option == _selectedChoice) {
                       return true;
                     }
                     return false;

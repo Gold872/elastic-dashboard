@@ -19,20 +19,21 @@ class TextDisplay extends NTWidget {
 
   Object? _previousValue;
 
-  bool showSubmitButton = false;
+  bool _showSubmitButton = false;
 
   TextDisplay({
     super.key,
     required super.topic,
-    this.showSubmitButton = false,
+    bool showSubmitButton = false,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _showSubmitButton = showSubmitButton,
+        super();
 
   TextDisplay.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    showSubmitButton =
-        tryCast(jsonData['show_submit_button']) ?? showSubmitButton;
+    _showSubmitButton =
+        tryCast(jsonData['show_submit_button']) ?? _showSubmitButton;
   }
 
   @override
@@ -40,9 +41,9 @@ class TextDisplay extends NTWidget {
     return [
       DialogToggleSwitch(
         label: 'Show Submit Button',
-        initialValue: showSubmitButton,
+        initialValue: _showSubmitButton,
         onToggle: (value) {
-          showSubmitButton = value;
+          _showSubmitButton = value;
           refresh();
         },
       ),
@@ -53,7 +54,7 @@ class TextDisplay extends NTWidget {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'show_submit_button': showSubmitButton,
+      'show_submit_button': _showSubmitButton,
     };
   }
 
@@ -157,7 +158,7 @@ class TextDisplay extends NTWidget {
                 },
               ),
             ),
-            if (showSubmitButton) ...[
+            if (_showSubmitButton) ...[
               const SizedBox(width: 1.5),
               Tooltip(
                 message: 'Publish Data',

@@ -11,8 +11,8 @@ class SubsystemWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String defaultCommandTopic;
-  late String currentCommandTopic;
+  late String _defaultCommandTopic;
+  late String _currentCommandTopic;
 
   SubsystemWidget({
     super.key,
@@ -28,14 +28,14 @@ class SubsystemWidget extends NTWidget {
   void init() {
     super.init();
 
-    defaultCommandTopic = '$topic/.default';
-    currentCommandTopic = '$topic/.command';
+    _defaultCommandTopic = '$topic/.default';
+    _currentCommandTopic = '$topic/.command';
   }
 
   @override
   void resetSubscription() {
-    defaultCommandTopic = '$topic/.default';
-    currentCommandTopic = '$topic/.command';
+    _defaultCommandTopic = '$topic/.default';
+    _currentCommandTopic = '$topic/.command';
 
     super.resetSubscription();
   }
@@ -43,10 +43,10 @@ class SubsystemWidget extends NTWidget {
   @override
   List<Object> getCurrentData() {
     String defaultCommand =
-        tryCast(ntConnection.getLastAnnouncedValue(defaultCommandTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_defaultCommandTopic)) ??
             'none';
     String currentCommand =
-        tryCast(ntConnection.getLastAnnouncedValue(currentCommandTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_currentCommandTopic)) ??
             'none';
 
     return [defaultCommand, currentCommand];
@@ -60,10 +60,10 @@ class SubsystemWidget extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         String defaultCommand =
-            tryCast(ntConnection.getLastAnnouncedValue(defaultCommandTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_defaultCommandTopic)) ??
                 'none';
         String currentCommand =
-            tryCast(ntConnection.getLastAnnouncedValue(currentCommandTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_currentCommandTopic)) ??
                 'none';
 
         return Column(

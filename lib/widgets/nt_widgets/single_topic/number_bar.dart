@@ -17,42 +17,47 @@ class NumberBar extends NTWidget {
   @override
   String type = widgetType;
 
-  late double minValue;
-  late double maxValue;
-  late int? divisions;
-  late bool inverted;
-  late String orientation;
+  late double _minValue;
+  late double _maxValue;
+  late int? _divisions;
+  late bool _inverted;
+  late String _orientation;
 
   NumberBar({
     super.key,
     required super.topic,
-    this.minValue = -1.0,
-    this.maxValue = 1.0,
-    this.divisions = 5,
-    this.inverted = false,
-    this.orientation = 'horizontal',
+    double minValue = -1.0,
+    double maxValue = 1.0,
+    int? divisions = 5,
+    bool inverted = false,
+    String orientation = 'horizontal',
     super.dataType,
     super.period,
-  }) : super();
+  })  : _orientation = orientation,
+        _divisions = divisions,
+        _inverted = inverted,
+        _maxValue = maxValue,
+        _minValue = minValue,
+        super();
 
   NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    minValue = tryCast(jsonData['min_value']) ?? -1.0;
-    maxValue = tryCast(jsonData['max_value']) ?? 1.0;
-    divisions = tryCast(jsonData['divisions']);
-    inverted = tryCast(jsonData['inverted']) ?? false;
-    orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
+    _minValue = tryCast(jsonData['min_value']) ?? -1.0;
+    _maxValue = tryCast(jsonData['max_value']) ?? 1.0;
+    _divisions = tryCast(jsonData['divisions']);
+    _inverted = tryCast(jsonData['inverted']) ?? false;
+    _orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'min_value': minValue,
-      'max_value': maxValue,
-      'divisions': divisions,
-      'inverted': inverted,
-      'orientation': orientation,
+      'min_value': _minValue,
+      'max_value': _maxValue,
+      'divisions': _divisions,
+      'inverted': _inverted,
+      'orientation': _orientation,
     };
   }
 
@@ -65,14 +70,14 @@ class NumberBar extends NTWidget {
           const Text('Orientation'),
           DialogDropdownChooser<String>(
             initialValue:
-                '${orientation[0].toUpperCase()}${orientation.substring(1)}',
+                '${_orientation[0].toUpperCase()}${_orientation.substring(1)}',
             choices: const ['Horizontal', 'Vertical'],
             onSelectionChanged: (value) {
               if (value == null) {
                 return;
               }
 
-              orientation = value.toLowerCase();
+              _orientation = value.toLowerCase();
               refresh();
             },
           ),
@@ -91,12 +96,12 @@ class NumberBar extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                minValue = newMin;
+                _minValue = newMin;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
-              initialText: minValue.toString(),
+              initialText: _minValue.toString(),
             ),
           ),
           Flexible(
@@ -106,12 +111,12 @@ class NumberBar extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                maxValue = newMax;
+                _maxValue = newMax;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
-              initialText: maxValue.toString(),
+              initialText: _maxValue.toString(),
             ),
           ),
         ],
@@ -129,12 +134,12 @@ class NumberBar extends NTWidget {
                 if (newDivisions != null && newDivisions < 2) {
                   return;
                 }
-                divisions = newDivisions;
+                _divisions = newDivisions;
                 refresh();
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
-              initialText: (divisions != null) ? divisions.toString() : '',
+              initialText: (_divisions != null) ? _divisions.toString() : '',
               allowEmptySubmission: true,
             ),
           ),
@@ -142,10 +147,10 @@ class NumberBar extends NTWidget {
           Expanded(
             child: Center(
               child: DialogToggleSwitch(
-                initialValue: inverted,
+                initialValue: _inverted,
                 label: 'Inverted',
                 onToggle: (value) {
-                  inverted = value;
+                  _inverted = value;
                   refresh();
                 },
               ),
@@ -166,13 +171,13 @@ class NumberBar extends NTWidget {
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedValue = value.clamp(minValue, maxValue);
+        double clampedValue = value.clamp(_minValue, _maxValue);
 
-        double? divisionInterval = (divisions != null)
-            ? (maxValue - minValue) / (divisions! - 1)
+        double? divisionInterval = (_divisions != null)
+            ? (_maxValue - _minValue) / (_divisions! - 1)
             : null;
 
-        LinearGaugeOrientation gaugeOrientation = (orientation == 'vertical')
+        LinearGaugeOrientation gaugeOrientation = (_orientation == 'vertical')
             ? LinearGaugeOrientation.vertical
             : LinearGaugeOrientation.horizontal;
 
@@ -187,8 +192,8 @@ class NumberBar extends NTWidget {
           ),
           SfLinearGauge(
             key: UniqueKey(),
-            maximum: maxValue,
-            minimum: minValue,
+            maximum: _maxValue,
+            minimum: _minValue,
             barPointers: [
               LinearBarPointer(
                 value: clampedValue,
@@ -202,7 +207,7 @@ class NumberBar extends NTWidget {
               edgeStyle: LinearEdgeStyle.bothCurve,
             ),
             orientation: gaugeOrientation,
-            isAxisInversed: inverted,
+            isAxisInversed: _inverted,
             interval: divisionInterval,
           ),
         ];

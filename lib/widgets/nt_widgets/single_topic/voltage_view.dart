@@ -17,44 +17,49 @@ class VoltageView extends NTWidget {
   @override
   String type = widgetType;
 
-  late double minValue;
-  late double maxValue;
-  late int? divisions;
-  late bool inverted;
-  late String orientation;
+  late double _minValue;
+  late double _maxValue;
+  late int? _divisions;
+  late bool _inverted;
+  late String _orientation;
 
   VoltageView({
     super.key,
     required super.topic,
-    this.minValue = 4.0,
-    this.maxValue = 13.0,
-    this.divisions = 5,
-    this.inverted = false,
-    this.orientation = 'horizontal',
+    double minValue = 4.0,
+    double maxValue = 13.0,
+    int? divisions = 5,
+    bool inverted = false,
+    String orientation = 'horizontal',
     super.dataType,
     super.period,
-  }) : super();
+  })  : _orientation = orientation,
+        _inverted = inverted,
+        _divisions = divisions,
+        _maxValue = maxValue,
+        _minValue = minValue,
+        super();
 
   VoltageView.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    minValue = tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? 4;
-    maxValue =
+    _minValue = tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? 4;
+    _maxValue =
         tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 13.0;
-    divisions =
+    _divisions =
         tryCast(jsonData['divisions']) ?? tryCast(jsonData['numOfTickMarks']);
-    inverted = tryCast(jsonData['inverted']) ?? false;
-    orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
+    _inverted = tryCast(jsonData['inverted']) ?? false;
+    _orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'min_value': minValue,
-      'max_value': maxValue,
-      'divisions': divisions,
-      'inverted': inverted,
-      'orientation': orientation,
+      'min_value': _minValue,
+      'max_value': _maxValue,
+      'divisions': _divisions,
+      'inverted': _inverted,
+      'orientation': _orientation,
     };
   }
 
@@ -67,14 +72,14 @@ class VoltageView extends NTWidget {
           const Text('Orientation'),
           DialogDropdownChooser<String>(
             initialValue:
-                '${orientation[0].toUpperCase()}${orientation.substring(1)}',
+                '${_orientation[0].toUpperCase()}${_orientation.substring(1)}',
             choices: const ['Horizontal', 'Vertical'],
             onSelectionChanged: (value) {
               if (value == null) {
                 return;
               }
 
-              orientation = value.toLowerCase();
+              _orientation = value.toLowerCase();
               refresh();
             },
           ),
@@ -93,12 +98,12 @@ class VoltageView extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                minValue = newMin;
+                _minValue = newMin;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
-              initialText: minValue.toString(),
+              initialText: _minValue.toString(),
             ),
           ),
           Flexible(
@@ -108,12 +113,12 @@ class VoltageView extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                maxValue = newMax;
+                _maxValue = newMax;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
-              initialText: maxValue.toString(),
+              initialText: _maxValue.toString(),
             ),
           ),
         ],
@@ -131,22 +136,22 @@ class VoltageView extends NTWidget {
                 if (newDivisions != null && newDivisions < 2) {
                   return;
                 }
-                divisions = newDivisions;
+                _divisions = newDivisions;
                 refresh();
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
-              initialText: (divisions != null) ? divisions.toString() : '',
+              initialText: (_divisions != null) ? _divisions.toString() : '',
               allowEmptySubmission: true,
             ),
           ),
           Expanded(
             child: Center(
               child: DialogToggleSwitch(
-                initialValue: inverted,
+                initialValue: _inverted,
                 label: 'Inverted',
                 onToggle: (value) {
-                  inverted = value;
+                  _inverted = value;
                   refresh();
                 },
               ),
@@ -167,13 +172,13 @@ class VoltageView extends NTWidget {
       builder: (context, snapshot) {
         double voltage = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedVoltage = voltage.clamp(minValue, maxValue);
+        double clampedVoltage = voltage.clamp(_minValue, _maxValue);
 
-        double? divisionInterval = (divisions != null)
-            ? (maxValue - minValue) / (divisions! - 1)
+        double? divisionInterval = (_divisions != null)
+            ? (_maxValue - _minValue) / (_divisions! - 1)
             : null;
 
-        LinearGaugeOrientation gaugeOrientation = (orientation == 'vertical')
+        LinearGaugeOrientation gaugeOrientation = (_orientation == 'vertical')
             ? LinearGaugeOrientation.vertical
             : LinearGaugeOrientation.horizontal;
 
@@ -188,8 +193,8 @@ class VoltageView extends NTWidget {
           ),
           SfLinearGauge(
             key: UniqueKey(),
-            maximum: maxValue,
-            minimum: minValue,
+            maximum: _maxValue,
+            minimum: _minValue,
             barPointers: [
               LinearBarPointer(
                 value: clampedVoltage,
@@ -203,7 +208,7 @@ class VoltageView extends NTWidget {
             ),
             labelFormatterCallback: (value) => '$value V',
             orientation: gaugeOrientation,
-            isAxisInversed: inverted,
+            isAxisInversed: _inverted,
             interval: divisionInterval,
           ),
         ];

@@ -12,17 +12,19 @@ class BooleanBox extends NTWidget {
   @override
   String type = widgetType;
 
-  late Color trueColor;
-  late Color falseColor;
+  late Color _trueColor;
+  late Color _falseColor;
 
   BooleanBox({
     super.key,
     required super.topic,
-    this.trueColor = Colors.green,
-    this.falseColor = Colors.red,
+    Color trueColor = Colors.green,
+    Color falseColor = Colors.red,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _falseColor = falseColor,
+        _trueColor = trueColor,
+        super();
 
   BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
@@ -59,16 +61,16 @@ class BooleanBox extends NTWidget {
       }
     }
 
-    trueColor = Color(trueColorValue ?? Colors.green.value);
-    falseColor = Color(falseColorValue ?? Colors.red.value);
+    _trueColor = Color(trueColorValue ?? Colors.green.value);
+    _falseColor = Color(falseColorValue ?? Colors.red.value);
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'true_color': trueColor.value,
-      'false_color': falseColor.value,
+      'true_color': _trueColor.value,
+      'false_color': _falseColor.value,
     };
   }
 
@@ -81,20 +83,20 @@ class BooleanBox extends NTWidget {
         children: [
           DialogColorPicker(
             onColorPicked: (Color color) {
-              trueColor = color;
+              _trueColor = color;
               refresh();
             },
             label: 'True Color',
-            initialColor: trueColor,
+            initialColor: _trueColor,
           ),
           const SizedBox(width: 10),
           DialogColorPicker(
             onColorPicked: (Color color) {
-              falseColor = color;
+              _falseColor = color;
               refresh();
             },
             label: 'False Color',
-            initialColor: falseColor,
+            initialColor: _falseColor,
           ),
         ],
       ),
@@ -114,7 +116,7 @@ class BooleanBox extends NTWidget {
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15.0),
-            color: (value) ? trueColor : falseColor,
+            color: (value) ? _trueColor : _falseColor,
           ),
         );
       },

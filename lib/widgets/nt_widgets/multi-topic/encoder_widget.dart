@@ -11,8 +11,8 @@ class EncoderWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String distanceTopic;
-  late String speedTopic;
+  late String _distanceTopic;
+  late String _speedTopic;
 
   EncoderWidget({
     super.key,
@@ -28,14 +28,14 @@ class EncoderWidget extends NTWidget {
   void init() {
     super.init();
 
-    distanceTopic = '$topic/Distance';
-    speedTopic = '$topic/Speed';
+    _distanceTopic = '$topic/Distance';
+    _speedTopic = '$topic/Speed';
   }
 
   @override
   void resetSubscription() {
-    distanceTopic = '$topic/Distance';
-    speedTopic = '$topic/Speed';
+    _distanceTopic = '$topic/Distance';
+    _speedTopic = '$topic/Speed';
 
     super.resetSubscription();
   }
@@ -43,9 +43,9 @@ class EncoderWidget extends NTWidget {
   @override
   List<Object> getCurrentData() {
     double distance =
-        tryCast(ntConnection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_distanceTopic)) ?? 0.0;
     double speed =
-        tryCast(ntConnection.getLastAnnouncedValue(speedTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_speedTopic)) ?? 0.0;
 
     return [distance, speed];
   }
@@ -58,9 +58,9 @@ class EncoderWidget extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double distance =
-            tryCast(ntConnection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_distanceTopic)) ?? 0.0;
         double speed =
-            tryCast(ntConnection.getLastAnnouncedValue(speedTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_speedTopic)) ?? 0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -17,11 +17,11 @@ class GraphWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late double timeDisplayed;
-  double? minValue;
-  double? maxValue;
-  late Color mainColor;
-  late double lineWidth;
+  late double _timeDisplayed;
+  double? _minValue;
+  double? _maxValue;
+  late Color _mainColor;
+  late double _lineWidth;
 
   List<_GraphPoint> _graphData = [];
   _GraphWidgetGraph? _graphWidget;
@@ -29,35 +29,40 @@ class GraphWidget extends NTWidget {
   GraphWidget({
     super.key,
     required super.topic,
-    this.timeDisplayed = 5.0,
-    this.minValue,
-    this.maxValue,
-    this.mainColor = Colors.cyan,
-    this.lineWidth = 2.0,
+    double timeDisplayed = 5.0,
+    double? minValue,
+    double? maxValue,
+    Color mainColor = Colors.cyan,
+    double lineWidth = 2.0,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _timeDisplayed = timeDisplayed,
+        _minValue = minValue,
+        _maxValue = maxValue,
+        _mainColor = mainColor,
+        _lineWidth = lineWidth,
+        super();
 
   GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    timeDisplayed = tryCast(jsonData['time_displayed']) ??
+    _timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
         5.0;
-    minValue = tryCast(jsonData['min_value']);
-    maxValue = tryCast(jsonData['max_value']);
-    mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
-    lineWidth = tryCast(jsonData['line_width']) ?? 2.0;
+    _minValue = tryCast(jsonData['min_value']);
+    _maxValue = tryCast(jsonData['max_value']);
+    _mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
+    _lineWidth = tryCast(jsonData['line_width']) ?? 2.0;
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'time_displayed': timeDisplayed,
-      'min_value': minValue,
-      'max_value': maxValue,
-      'color': mainColor.value,
-      'line_width': lineWidth,
+      'time_displayed': _timeDisplayed,
+      'min_value': _minValue,
+      'max_value': _maxValue,
+      'color': _mainColor.value,
+      'line_width': _lineWidth,
     };
   }
 
@@ -71,12 +76,12 @@ class GraphWidget extends NTWidget {
           Flexible(
             child: DialogColorPicker(
                 onColorPicked: (color) {
-                  mainColor = color;
+                  _mainColor = color;
 
                   refresh();
                 },
                 label: 'Graph Color',
-                initialColor: mainColor),
+                initialColor: _mainColor),
           ),
           Flexible(
             child: DialogTextInput(
@@ -86,12 +91,12 @@ class GraphWidget extends NTWidget {
                 if (newTime == null) {
                   return;
                 }
-                timeDisplayed = newTime;
+                _timeDisplayed = newTime;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Time Displayed (Seconds)',
-              initialText: timeDisplayed.toString(),
+              initialText: _timeDisplayed.toString(),
             ),
           ),
         ],
@@ -105,9 +110,9 @@ class GraphWidget extends NTWidget {
             child: DialogTextInput(
               onSubmit: (value) {
                 double? newMinimum = double.tryParse(value);
-                bool refreshGraph = newMinimum != minValue;
+                bool refreshGraph = newMinimum != _minValue;
 
-                minValue = newMinimum;
+                _minValue = newMinimum;
 
                 if (refreshGraph) {
                   refresh();
@@ -115,7 +120,7 @@ class GraphWidget extends NTWidget {
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Minimum',
-              initialText: minValue?.toString(),
+              initialText: _minValue?.toString(),
               allowEmptySubmission: true,
             ),
           ),
@@ -123,9 +128,9 @@ class GraphWidget extends NTWidget {
             child: DialogTextInput(
               onSubmit: (value) {
                 double? newMaximum = double.tryParse(value);
-                bool refreshGraph = newMaximum != maxValue;
+                bool refreshGraph = newMaximum != _maxValue;
 
-                maxValue = newMaximum;
+                _maxValue = newMaximum;
 
                 if (refreshGraph) {
                   refresh();
@@ -133,7 +138,7 @@ class GraphWidget extends NTWidget {
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Maximum',
-              initialText: maxValue?.toString(),
+              initialText: _maxValue?.toString(),
               allowEmptySubmission: true,
             ),
           ),
@@ -146,12 +151,12 @@ class GraphWidget extends NTWidget {
                   return;
                 }
 
-                lineWidth = newWidth;
+                _lineWidth = newWidth;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Line Width',
-              initialText: lineWidth.toString(),
+              initialText: _lineWidth.toString(),
             ),
           ),
         ],
@@ -172,11 +177,11 @@ class GraphWidget extends NTWidget {
     return _graphWidget = _GraphWidgetGraph(
       initialData: _graphData,
       subscription: subscription,
-      timeDisplayed: timeDisplayed,
-      lineWidth: lineWidth,
-      mainColor: mainColor,
-      minValue: minValue,
-      maxValue: maxValue,
+      timeDisplayed: _timeDisplayed,
+      lineWidth: _lineWidth,
+      mainColor: _mainColor,
+      minValue: _minValue,
+      maxValue: _maxValue,
     );
   }
 }
@@ -217,36 +222,36 @@ class _GraphWidgetGraph extends StatefulWidget {
 }
 
 class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
-  ChartSeriesController? seriesController;
-  late List<_GraphPoint> graphData;
-  StreamSubscription<Object?>? subscriptionListener;
+  ChartSeriesController? _seriesController;
+  late List<_GraphPoint> _graphData;
+  StreamSubscription<Object?>? _subscriptionListener;
 
   @override
   void initState() {
     super.initState();
 
-    graphData = widget.initialData.toList();
+    _graphData = widget.initialData.toList();
 
-    if (graphData.isEmpty) {
+    if (_graphData.isEmpty) {
       // This could cause data to be displayed slightly off if the time is 12:00 am on January 1st, 1970.
       // However if that were the case, then the user would either have secretly invented a modern 64 bit
       // operating system that can't even run on hardware from their time, or they invented time travel,
       // which according to the second law of thermodynamics is literally impossible. In summary, this
       // won't be causing issues unless if the user finds a way of violating the laws of thermodynamics,
       // or for some reason they change their time on their device
-      graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
-    } else if (graphData.length > 1) {
-      graphData.removeLast();
+      _graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+    } else if (_graphData.length > 1) {
+      _graphData.removeLast();
     }
 
-    widget.currentData = graphData;
+    widget.currentData = _graphData;
 
-    initializeListener();
+    _initializeListener();
   }
 
   @override
   void dispose() {
-    subscriptionListener?.cancel();
+    _subscriptionListener?.cancel();
 
     super.dispose();
   }
@@ -254,31 +259,31 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   @override
   void didUpdateWidget(_GraphWidgetGraph oldWidget) {
     if (oldWidget.subscription != widget.subscription) {
-      resetGraphData();
-      subscriptionListener?.cancel();
-      initializeListener();
+      _resetGraphData();
+      _subscriptionListener?.cancel();
+      _initializeListener();
     }
 
     super.didUpdateWidget(oldWidget);
   }
 
-  void resetGraphData() {
-    int oldLength = graphData.length;
+  void _resetGraphData() {
+    int oldLength = _graphData.length;
 
-    graphData.clear();
-    graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+    _graphData.clear();
+    _graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
 
-    seriesController?.updateDataSource(
+    _seriesController?.updateDataSource(
       removedDataIndexes: List.generate(oldLength, (index) => index),
       addedDataIndex: 0,
     );
   }
 
-  void initializeListener() {
-    subscriptionListener?.cancel();
-    subscriptionListener =
+  void _initializeListener() {
+    _subscriptionListener?.cancel();
+    _subscriptionListener =
         widget.subscription?.periodicStream(yieldAll: true).listen((data) {
-      if (seriesController == null) {
+      if (_seriesController == null) {
         return;
       }
       if (data != null) {
@@ -287,60 +292,61 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
         double currentTime = DateTime.now().microsecondsSinceEpoch.toDouble();
 
-        graphData.add(_GraphPoint(x: currentTime, y: tryCast(data) ?? 0.0));
+        _graphData.add(_GraphPoint(x: currentTime, y: tryCast(data) ?? 0.0));
 
         int indexOffset = 0;
 
-        while (currentTime - graphData[0].x > widget.timeDisplayed * 1e6 &&
-            graphData.length > 1) {
-          graphData.removeAt(0);
+        while (currentTime - _graphData[0].x > widget.timeDisplayed * 1e6 &&
+            _graphData.length > 1) {
+          _graphData.removeAt(0);
           removedIndexes.add(indexOffset++);
         }
 
-        int existingIndex = graphData.indexWhere((e) => e.x == currentTime);
+        int existingIndex = _graphData.indexWhere((e) => e.x == currentTime);
         while (existingIndex != -1 &&
-            existingIndex != graphData.length - 1 &&
-            graphData.length > 1) {
+            existingIndex != _graphData.length - 1 &&
+            _graphData.length > 1) {
           removedIndexes.add(existingIndex + indexOffset++);
-          graphData.removeAt(existingIndex);
+          _graphData.removeAt(existingIndex);
 
-          existingIndex = graphData.indexWhere((e) => e.x == currentTime);
+          existingIndex = _graphData.indexWhere((e) => e.x == currentTime);
         }
 
-        if (graphData.last.x - graphData.first.x < widget.timeDisplayed * 1e6) {
-          graphData.insert(
+        if (_graphData.last.x - _graphData.first.x <
+            widget.timeDisplayed * 1e6) {
+          _graphData.insert(
               0,
               _GraphPoint(
-                x: graphData.last.x - widget.timeDisplayed * 1e6,
-                y: graphData.first.y,
+                x: _graphData.last.x - widget.timeDisplayed * 1e6,
+                y: _graphData.first.y,
               ));
           addedIndexes.add(0);
         }
 
-        addedIndexes.add(graphData.length - 1);
+        addedIndexes.add(_graphData.length - 1);
 
-        seriesController?.updateDataSource(
+        _seriesController?.updateDataSource(
           addedDataIndexes: addedIndexes,
           removedDataIndexes: removedIndexes,
         );
-      } else if (graphData.length > 1) {
-        resetGraphData();
+      } else if (_graphData.length > 1) {
+        _resetGraphData();
       }
 
-      widget.currentData = graphData;
+      widget.currentData = _graphData;
     });
   }
 
-  List<FastLineSeries<_GraphPoint, num>> getChartData() {
+  List<FastLineSeries<_GraphPoint, num>> _getChartData() {
     return <FastLineSeries<_GraphPoint, num>>[
       FastLineSeries<_GraphPoint, num>(
         animationDuration: 0.0,
         animationDelay: 0.0,
         sortingOrder: SortingOrder.ascending,
-        onRendererCreated: (controller) => seriesController = controller,
+        onRendererCreated: (controller) => _seriesController = controller,
         color: widget.mainColor,
         width: widget.lineWidth,
-        dataSource: graphData,
+        dataSource: _graphData,
         xValueMapper: (value, index) {
           return value.x;
         },
@@ -357,7 +363,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   @override
   Widget build(BuildContext context) {
     return SfCartesianChart(
-      series: getChartData(),
+      series: _getChartData(),
       margin: const EdgeInsets.only(top: 8.0),
       primaryXAxis: NumericAxis(
         labelStyle: const TextStyle(color: Colors.transparent),

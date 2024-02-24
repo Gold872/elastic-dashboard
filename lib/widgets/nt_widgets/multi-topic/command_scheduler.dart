@@ -14,11 +14,11 @@ class CommandSchedulerWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  NT4Topic? cancelTopic;
+  NT4Topic? _cancelTopic;
 
-  late String namesTopicName;
-  late String idsTopicName;
-  late String cancelTopicName;
+  late String _namesTopicName;
+  late String _idsTopicName;
+  late String _cancelTopicName;
 
   CommandSchedulerWidget({
     super.key,
@@ -34,25 +34,25 @@ class CommandSchedulerWidget extends NTWidget {
   void init() {
     super.init();
 
-    namesTopicName = '$topic/Names';
-    idsTopicName = '$topic/Ids';
-    cancelTopicName = '$topic/Cancel';
+    _namesTopicName = '$topic/Names';
+    _idsTopicName = '$topic/Ids';
+    _cancelTopicName = '$topic/Cancel';
   }
 
   @override
   void resetSubscription() {
-    namesTopicName = '$topic/Names';
-    idsTopicName = '$topic/Ids';
-    cancelTopicName = '$topic/Cancel';
+    _namesTopicName = '$topic/Names';
+    _idsTopicName = '$topic/Ids';
+    _cancelTopicName = '$topic/Cancel';
 
-    cancelTopic = null;
+    _cancelTopic = null;
 
     super.resetSubscription();
   }
 
-  void cancelCommand(int id) {
+  void _cancelCommand(int id) {
     List<Object?> currentCancellationsRaw = ntConnection
-            .getLastAnnouncedValue(cancelTopicName)
+            .getLastAnnouncedValue(_cancelTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -61,25 +61,25 @@ class CommandSchedulerWidget extends NTWidget {
 
     currentCancellations.add(id);
 
-    cancelTopic ??= ntConnection.nt4Client
-        .publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??= ntConnection.nt4Client
+        .publishNewTopic(_cancelTopicName, NT4TypeStr.kIntArr);
 
-    if (cancelTopic == null) {
+    if (_cancelTopic == null) {
       return;
     }
 
-    ntConnection.updateDataFromTopic(cancelTopic!, currentCancellations);
+    ntConnection.updateDataFromTopic(_cancelTopic!, currentCancellations);
   }
 
   @override
   List<Object> getCurrentData() {
     List<Object?> rawNames = ntConnection
-            .getLastAnnouncedValue(namesTopicName)
+            .getLastAnnouncedValue(_namesTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> rawIds = ntConnection
-            .getLastAnnouncedValue(idsTopicName)
+            .getLastAnnouncedValue(_idsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -97,12 +97,12 @@ class CommandSchedulerWidget extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> rawNames = ntConnection
-                .getLastAnnouncedValue(namesTopicName)
+                .getLastAnnouncedValue(_namesTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> rawIds = ntConnection
-                .getLastAnnouncedValue(idsTopicName)
+                .getLastAnnouncedValue(_idsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
@@ -135,7 +135,7 @@ class CommandSchedulerWidget extends NTWidget {
                     trailing: IconButton(
                       tooltip: 'Cancel Command',
                       onPressed: () {
-                        cancelCommand(ids[index]);
+                        _cancelCommand(ids[index]);
                       },
                       color: Colors.red,
                       icon: const Icon(Icons.cancel_outlined),

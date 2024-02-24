@@ -14,25 +14,25 @@ class PIDControllerWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String kpTopicName;
-  late String kiTopicName;
-  late String kdTopicName;
-  late String setpointTopicName;
+  late String _kpTopicName;
+  late String _kiTopicName;
+  late String _kdTopicName;
+  late String _setpointTopicName;
 
-  NT4Topic? kpTopic;
-  NT4Topic? kiTopic;
-  NT4Topic? kdTopic;
-  NT4Topic? setpointTopic;
+  NT4Topic? _kpTopic;
+  NT4Topic? _kiTopic;
+  NT4Topic? _kdTopic;
+  NT4Topic? _setpointTopic;
 
-  TextEditingController? kpTextController;
-  TextEditingController? kiTextController;
-  TextEditingController? kdTextController;
-  TextEditingController? setpointTextController;
+  TextEditingController? _kpTextController;
+  TextEditingController? _kiTextController;
+  TextEditingController? _kdTextController;
+  TextEditingController? _setpointTextController;
 
-  double kpLastValue = 0.0;
-  double kiLastValue = 0.0;
-  double kdLastValue = 0.0;
-  double setpointLastValue = 0.0;
+  double _kpLastValue = 0.0;
+  double _kiLastValue = 0.0;
+  double _kdLastValue = 0.0;
+  double _setpointLastValue = 0.0;
 
   PIDControllerWidget({
     super.key,
@@ -48,120 +48,123 @@ class PIDControllerWidget extends NTWidget {
   void init() {
     super.init();
 
-    kpTopicName = '$topic/p';
-    kiTopicName = '$topic/i';
-    kdTopicName = '$topic/d';
-    setpointTopicName = '$topic/setpoint';
+    _kpTopicName = '$topic/p';
+    _kiTopicName = '$topic/i';
+    _kdTopicName = '$topic/d';
+    _setpointTopicName = '$topic/setpoint';
   }
 
   @override
   void resetSubscription() {
-    kpTopicName = '$topic/p';
-    kiTopicName = '$topic/i';
-    kdTopicName = '$topic/d';
-    setpointTopicName = '$topic/setpoint';
+    _kpTopicName = '$topic/p';
+    _kiTopicName = '$topic/i';
+    _kdTopicName = '$topic/d';
+    _setpointTopicName = '$topic/setpoint';
 
-    kpTopic = null;
-    kiTopic = null;
-    kdTopic = null;
-    setpointTopic = null;
+    _kpTopic = null;
+    _kiTopic = null;
+    _kdTopic = null;
+    _setpointTopic = null;
 
     super.resetSubscription();
   }
 
   void _publishKP() {
-    bool publishTopic = kpTopic == null;
+    bool publishTopic = _kpTopic == null;
 
-    kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
+    _kpTopic ??= ntConnection.getTopicFromName(_kpTopicName);
 
-    double? data = double.tryParse(kpTextController?.text ?? '');
+    double? data = double.tryParse(_kpTextController?.text ?? '');
 
-    if (kpTopic == null || data == null) {
+    if (_kpTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kpTopic!);
+      ntConnection.nt4Client.publishTopic(_kpTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kpTopic!, data);
+    ntConnection.updateDataFromTopic(_kpTopic!, data);
   }
 
   void _publishKI() {
-    bool publishTopic = kiTopic == null;
+    bool publishTopic = _kiTopic == null;
 
-    kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
+    _kiTopic ??= ntConnection.getTopicFromName(_kiTopicName);
 
-    double? data = double.tryParse(kiTextController?.text ?? '');
+    double? data = double.tryParse(_kiTextController?.text ?? '');
 
-    if (kiTopic == null || data == null) {
+    if (_kiTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kiTopic!);
+      ntConnection.nt4Client.publishTopic(_kiTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kiTopic!, data);
+    ntConnection.updateDataFromTopic(_kiTopic!, data);
   }
 
   void _publishKD() {
-    bool publishTopic = kdTopic == null;
+    bool publishTopic = _kdTopic == null;
 
-    kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
+    _kdTopic ??= ntConnection.getTopicFromName(_kdTopicName);
 
-    double? data = double.tryParse(kdTextController?.text ?? '');
+    double? data = double.tryParse(_kdTextController?.text ?? '');
 
-    if (kdTopic == null || data == null) {
+    if (_kdTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kdTopic!);
+      ntConnection.nt4Client.publishTopic(_kdTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kdTopic!, data);
+    ntConnection.updateDataFromTopic(_kdTopic!, data);
   }
 
   void _publishSetpoint() {
-    bool publishTopic = setpointTopic == null;
+    bool publishTopic = _setpointTopic == null;
 
-    setpointTopic ??= ntConnection.getTopicFromName(setpointTopicName);
+    _setpointTopic ??= ntConnection.getTopicFromName(_setpointTopicName);
 
-    double? data = double.tryParse(setpointTextController?.text ?? '');
+    double? data = double.tryParse(_setpointTextController?.text ?? '');
 
-    if (setpointTopic == null || data == null) {
+    if (_setpointTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(setpointTopic!);
+      ntConnection.nt4Client.publishTopic(_setpointTopic!);
     }
 
-    ntConnection.updateDataFromTopic(setpointTopic!, data);
+    ntConnection.updateDataFromTopic(_setpointTopic!, data);
   }
 
   @override
   List<Object> getCurrentData() {
-    double kP = tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
-    double kI = tryCast(ntConnection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
-    double kD = tryCast(ntConnection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+    double kP =
+        tryCast(ntConnection.getLastAnnouncedValue(_kpTopicName)) ?? 0.0;
+    double kI =
+        tryCast(ntConnection.getLastAnnouncedValue(_kiTopicName)) ?? 0.0;
+    double kD =
+        tryCast(ntConnection.getLastAnnouncedValue(_kdTopicName)) ?? 0.0;
     double setpoint =
-        tryCast(ntConnection.getLastAnnouncedValue(setpointTopicName)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_setpointTopicName)) ?? 0.0;
 
     return [
       kP,
       kI,
       kD,
       setpoint,
-      kpLastValue,
-      kiLastValue,
-      kdLastValue,
-      setpointLastValue,
-      kpTextController?.text ?? '',
-      kiTextController?.text ?? '',
-      kdTextController?.text ?? '',
-      setpointTextController?.text ?? '',
+      _kpLastValue,
+      _kiLastValue,
+      _kdLastValue,
+      _setpointLastValue,
+      _kpTextController?.text ?? '',
+      _kiTextController?.text ?? '',
+      _kdTextController?.text ?? '',
+      _setpointTextController?.text ?? '',
     ];
   }
 
@@ -173,55 +176,55 @@ class PIDControllerWidget extends NTWidget {
         stream: multiTopicPeriodicStream,
         builder: (context, snapshot) {
           double kP =
-              tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kpTopicName)) ?? 0.0;
           double kI =
-              tryCast(ntConnection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kiTopicName)) ?? 0.0;
           double kD =
-              tryCast(ntConnection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kdTopicName)) ?? 0.0;
           double setpoint =
-              tryCast(ntConnection.getLastAnnouncedValue(setpointTopicName)) ??
+              tryCast(ntConnection.getLastAnnouncedValue(_setpointTopicName)) ??
                   0.0;
 
           // Creates the text editing controllers if they are null
-          kpTextController ??= TextEditingController(text: kP.toString());
-          kiTextController ??= TextEditingController(text: kI.toString());
-          kdTextController ??= TextEditingController(text: kD.toString());
-          setpointTextController ??=
+          _kpTextController ??= TextEditingController(text: kP.toString());
+          _kiTextController ??= TextEditingController(text: kI.toString());
+          _kdTextController ??= TextEditingController(text: kD.toString());
+          _setpointTextController ??=
               TextEditingController(text: setpoint.toString());
 
           // Updates the text of the text editing controller if the kp value has changed
-          if (kP != kpLastValue) {
-            kpTextController!.text = kP.toString();
+          if (kP != _kpLastValue) {
+            _kpTextController!.text = kP.toString();
           }
-          kpLastValue = kP;
+          _kpLastValue = kP;
 
           // Updates the text of the text editing controller if the ki value has changed
-          if (kI != kiLastValue) {
-            kiTextController!.text = kI.toString();
+          if (kI != _kiLastValue) {
+            _kiTextController!.text = kI.toString();
           }
-          kiLastValue = kI;
+          _kiLastValue = kI;
 
           // Updates the text of the text editing controller if the kd value has changed
-          if (kD != kdLastValue) {
-            kdTextController!.text = kD.toString();
+          if (kD != _kdLastValue) {
+            _kdTextController!.text = kD.toString();
           }
-          kdLastValue = kD;
+          _kdLastValue = kD;
 
           // Updates the text of the text editing controller if the setpoint value has changed
-          if (setpoint != setpointLastValue) {
-            setpointTextController!.text = setpoint.toString();
+          if (setpoint != _setpointLastValue) {
+            _setpointTextController!.text = setpoint.toString();
           }
-          setpointLastValue = setpoint;
+          _setpointLastValue = setpoint;
 
           TextStyle labelStyle = Theme.of(context)
               .textTheme
               .bodyLarge!
               .copyWith(fontWeight: FontWeight.bold);
 
-          bool showWarning = kP != double.tryParse(kpTextController!.text) ||
-              kI != double.tryParse(kiTextController!.text) ||
-              kD != double.tryParse(kdTextController!.text) ||
-              setpoint != double.tryParse(setpointTextController!.text);
+          bool showWarning = kP != double.tryParse(_kpTextController!.text) ||
+              kI != double.tryParse(_kiTextController!.text) ||
+              kD != double.tryParse(_kdTextController!.text) ||
+              setpoint != double.tryParse(_setpointTextController!.text);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -236,8 +239,8 @@ class PIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kpTextController,
-                      initialText: kpTextController!.text,
+                      textEditingController: _kpTextController,
+                      initialText: _kpTextController!.text,
                       label: 'kP',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -256,8 +259,8 @@ class PIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kiTextController,
-                      initialText: kiTextController!.text,
+                      textEditingController: _kiTextController,
+                      initialText: _kiTextController!.text,
                       label: 'kI',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -276,8 +279,8 @@ class PIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kdTextController,
-                      initialText: kdTextController!.text,
+                      textEditingController: _kdTextController,
+                      initialText: _kdTextController!.text,
                       label: 'kD',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -294,8 +297,8 @@ class PIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: setpointTextController,
-                      initialText: setpointTextController!.text,
+                      textEditingController: _setpointTextController,
+                      initialText: _setpointTextController!.text,
                       label: 'Setpoint',
                       formatter:
                           Constants.decimalTextFormatter(allowNegative: true),

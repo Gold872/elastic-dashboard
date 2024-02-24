@@ -14,25 +14,25 @@ class ProfiledPIDControllerWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String kpTopicName;
-  late String kiTopicName;
-  late String kdTopicName;
-  late String goalTopicName;
+  late String _kpTopicName;
+  late String _kiTopicName;
+  late String _kdTopicName;
+  late String _goalTopicName;
 
-  NT4Topic? kpTopic;
-  NT4Topic? kiTopic;
-  NT4Topic? kdTopic;
-  NT4Topic? goalTopic;
+  NT4Topic? _kpTopic;
+  NT4Topic? _kiTopic;
+  NT4Topic? _kdTopic;
+  NT4Topic? _goalTopic;
 
-  TextEditingController? kpTextController;
-  TextEditingController? kiTextController;
-  TextEditingController? kdTextController;
-  TextEditingController? goalTextController;
+  TextEditingController? _kpTextController;
+  TextEditingController? _kiTextController;
+  TextEditingController? _kdTextController;
+  TextEditingController? _goalTextController;
 
-  double kpLastValue = 0.0;
-  double kiLastValue = 0.0;
-  double kdLastValue = 0.0;
-  double goalLastValue = 0.0;
+  double _kpLastValue = 0.0;
+  double _kiLastValue = 0.0;
+  double _kdLastValue = 0.0;
+  double _goalLastValue = 0.0;
 
   ProfiledPIDControllerWidget({
     super.key,
@@ -48,120 +48,123 @@ class ProfiledPIDControllerWidget extends NTWidget {
   void init() {
     super.init();
 
-    kpTopicName = '$topic/p';
-    kiTopicName = '$topic/i';
-    kdTopicName = '$topic/d';
-    goalTopicName = '$topic/goal';
+    _kpTopicName = '$topic/p';
+    _kiTopicName = '$topic/i';
+    _kdTopicName = '$topic/d';
+    _goalTopicName = '$topic/goal';
   }
 
   @override
   void resetSubscription() {
-    kpTopicName = '$topic/p';
-    kiTopicName = '$topic/i';
-    kdTopicName = '$topic/d';
-    goalTopicName = '$topic/setpoint';
+    _kpTopicName = '$topic/p';
+    _kiTopicName = '$topic/i';
+    _kdTopicName = '$topic/d';
+    _goalTopicName = '$topic/setpoint';
 
-    kpTopic = null;
-    kiTopic = null;
-    kdTopic = null;
-    goalTopic = null;
+    _kpTopic = null;
+    _kiTopic = null;
+    _kdTopic = null;
+    _goalTopic = null;
 
     super.resetSubscription();
   }
 
   void _publishKP() {
-    bool publishTopic = kpTopic == null;
+    bool publishTopic = _kpTopic == null;
 
-    kpTopic ??= ntConnection.getTopicFromName(kpTopicName);
+    _kpTopic ??= ntConnection.getTopicFromName(_kpTopicName);
 
-    double? data = double.tryParse(kpTextController?.text ?? '');
+    double? data = double.tryParse(_kpTextController?.text ?? '');
 
-    if (kpTopic == null || data == null) {
+    if (_kpTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kpTopic!);
+      ntConnection.nt4Client.publishTopic(_kpTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kpTopic!, data);
+    ntConnection.updateDataFromTopic(_kpTopic!, data);
   }
 
   void _publishKI() {
-    bool publishTopic = kiTopic == null;
+    bool publishTopic = _kiTopic == null;
 
-    kiTopic ??= ntConnection.getTopicFromName(kiTopicName);
+    _kiTopic ??= ntConnection.getTopicFromName(_kiTopicName);
 
-    double? data = double.tryParse(kiTextController?.text ?? '');
+    double? data = double.tryParse(_kiTextController?.text ?? '');
 
-    if (kiTopic == null || data == null) {
+    if (_kiTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kiTopic!);
+      ntConnection.nt4Client.publishTopic(_kiTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kiTopic!, data);
+    ntConnection.updateDataFromTopic(_kiTopic!, data);
   }
 
   void _publishKD() {
-    bool publishTopic = kdTopic == null;
+    bool publishTopic = _kdTopic == null;
 
-    kdTopic ??= ntConnection.getTopicFromName(kdTopicName);
+    _kdTopic ??= ntConnection.getTopicFromName(_kdTopicName);
 
-    double? data = double.tryParse(kdTextController?.text ?? '');
+    double? data = double.tryParse(_kdTextController?.text ?? '');
 
-    if (kdTopic == null || data == null) {
+    if (_kdTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(kdTopic!);
+      ntConnection.nt4Client.publishTopic(_kdTopic!);
     }
 
-    ntConnection.updateDataFromTopic(kdTopic!, data);
+    ntConnection.updateDataFromTopic(_kdTopic!, data);
   }
 
   void _publishGoal() {
-    bool publishTopic = goalTopic == null;
+    bool publishTopic = _goalTopic == null;
 
-    goalTopic ??= ntConnection.getTopicFromName(goalTopicName);
+    _goalTopic ??= ntConnection.getTopicFromName(_goalTopicName);
 
-    double? data = double.tryParse(goalTextController?.text ?? '');
+    double? data = double.tryParse(_goalTextController?.text ?? '');
 
-    if (goalTopic == null || data == null) {
+    if (_goalTopic == null || data == null) {
       return;
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(goalTopic!);
+      ntConnection.nt4Client.publishTopic(_goalTopic!);
     }
 
-    ntConnection.updateDataFromTopic(goalTopic!, data);
+    ntConnection.updateDataFromTopic(_goalTopic!, data);
   }
 
   @override
   List<Object> getCurrentData() {
-    double kP = tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
-    double kI = tryCast(ntConnection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
-    double kD = tryCast(ntConnection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+    double kP =
+        tryCast(ntConnection.getLastAnnouncedValue(_kpTopicName)) ?? 0.0;
+    double kI =
+        tryCast(ntConnection.getLastAnnouncedValue(_kiTopicName)) ?? 0.0;
+    double kD =
+        tryCast(ntConnection.getLastAnnouncedValue(_kdTopicName)) ?? 0.0;
     double goal =
-        tryCast(ntConnection.getLastAnnouncedValue(goalTopicName)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_goalTopicName)) ?? 0.0;
 
     return [
       kP,
       kI,
       kD,
       goal,
-      kpLastValue,
-      kiLastValue,
-      kdLastValue,
-      goalLastValue,
-      kpTextController?.text ?? '',
-      kiTextController?.text ?? '',
-      kdTextController?.text ?? '',
-      goalTextController?.text ?? '',
+      _kpLastValue,
+      _kiLastValue,
+      _kdLastValue,
+      _goalLastValue,
+      _kpTextController?.text ?? '',
+      _kiTextController?.text ?? '',
+      _kdTextController?.text ?? '',
+      _goalTextController?.text ?? '',
     ];
   }
 
@@ -173,53 +176,54 @@ class ProfiledPIDControllerWidget extends NTWidget {
         stream: multiTopicPeriodicStream,
         builder: (context, snapshot) {
           double kP =
-              tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kpTopicName)) ?? 0.0;
           double kI =
-              tryCast(ntConnection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kiTopicName)) ?? 0.0;
           double kD =
-              tryCast(ntConnection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_kdTopicName)) ?? 0.0;
           double goal =
-              tryCast(ntConnection.getLastAnnouncedValue(goalTopicName)) ?? 0.0;
+              tryCast(ntConnection.getLastAnnouncedValue(_goalTopicName)) ??
+                  0.0;
 
           // Creates the text editing controllers if they are null
-          kpTextController ??= TextEditingController(text: kP.toString());
-          kiTextController ??= TextEditingController(text: kI.toString());
-          kdTextController ??= TextEditingController(text: kD.toString());
-          goalTextController ??= TextEditingController(text: goal.toString());
+          _kpTextController ??= TextEditingController(text: kP.toString());
+          _kiTextController ??= TextEditingController(text: kI.toString());
+          _kdTextController ??= TextEditingController(text: kD.toString());
+          _goalTextController ??= TextEditingController(text: goal.toString());
 
           // Updates the text of the text editing controller if the kp value has changed
-          if (kP != kpLastValue) {
-            kpTextController!.text = kP.toString();
+          if (kP != _kpLastValue) {
+            _kpTextController!.text = kP.toString();
           }
-          kpLastValue = kP;
+          _kpLastValue = kP;
 
           // Updates the text of the text editing controller if the ki value has changed
-          if (kI != kiLastValue) {
-            kiTextController!.text = kI.toString();
+          if (kI != _kiLastValue) {
+            _kiTextController!.text = kI.toString();
           }
-          kiLastValue = kI;
+          _kiLastValue = kI;
 
           // Updates the text of the text editing controller if the kd value has changed
-          if (kD != kdLastValue) {
-            kdTextController!.text = kD.toString();
+          if (kD != _kdLastValue) {
+            _kdTextController!.text = kD.toString();
           }
-          kdLastValue = kD;
+          _kdLastValue = kD;
 
           // Updates the text of the text editing controller if the setpoint value has changed
-          if (goal != goalLastValue) {
-            goalTextController!.text = goal.toString();
+          if (goal != _goalLastValue) {
+            _goalTextController!.text = goal.toString();
           }
-          goalLastValue = goal;
+          _goalLastValue = goal;
 
           TextStyle labelStyle = Theme.of(context)
               .textTheme
               .bodyLarge!
               .copyWith(fontWeight: FontWeight.bold);
 
-          bool showWarning = kP != double.tryParse(kpTextController!.text) ||
-              kI != double.tryParse(kiTextController!.text) ||
-              kD != double.tryParse(kdTextController!.text) ||
-              goal != double.tryParse(goalTextController!.text);
+          bool showWarning = kP != double.tryParse(_kpTextController!.text) ||
+              kI != double.tryParse(_kiTextController!.text) ||
+              kD != double.tryParse(_kdTextController!.text) ||
+              goal != double.tryParse(_goalTextController!.text);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -234,8 +238,8 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kpTextController,
-                      initialText: kpTextController!.text,
+                      textEditingController: _kpTextController,
+                      initialText: _kpTextController!.text,
                       label: 'kP',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -254,8 +258,8 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kiTextController,
-                      initialText: kiTextController!.text,
+                      textEditingController: _kiTextController,
+                      initialText: _kiTextController!.text,
                       label: 'kI',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -274,8 +278,8 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: kdTextController,
-                      initialText: kdTextController!.text,
+                      textEditingController: _kdTextController,
+                      initialText: _kdTextController!.text,
                       label: 'kD',
                       formatter: Constants.decimalTextFormatter(),
                       onSubmit: (value) {},
@@ -292,8 +296,8 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   Flexible(
                     flex: 5,
                     child: DialogTextInput(
-                      textEditingController: goalTextController,
-                      initialText: goalTextController!.text,
+                      textEditingController: _goalTextController,
+                      initialText: _goalTextController!.text,
                       label: 'Goal',
                       formatter:
                           Constants.decimalTextFormatter(allowNegative: true),

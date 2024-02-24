@@ -16,10 +16,10 @@ class NumberSlider extends NTWidget {
   @override
   final String type = widgetType;
 
-  late double minValue;
-  late double maxValue;
-  late int divisions;
-  late bool updateContinuously;
+  late double _minValue;
+  late double _maxValue;
+  late int _divisions;
+  late bool _updateContinuously;
 
   double _currentValue = 0.0;
 
@@ -28,35 +28,39 @@ class NumberSlider extends NTWidget {
   NumberSlider({
     super.key,
     required super.topic,
-    this.minValue = -1.0,
-    this.maxValue = 1.0,
-    this.divisions = 5,
-    this.updateContinuously = false,
+    double minValue = -1.0,
+    double maxValue = 1.0,
+    int divisions = 5,
+    bool updateContinuously = false,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _updateContinuously = updateContinuously,
+        _divisions = divisions,
+        _minValue = minValue,
+        _maxValue = maxValue,
+        super();
 
   NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    minValue =
+    _minValue =
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
-    maxValue =
+    _maxValue =
         tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 1.0;
-    divisions = tryCast(jsonData['divisions']) ??
+    _divisions = tryCast(jsonData['divisions']) ??
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    updateContinuously = tryCast(jsonData['update_continuously']) ?? false;
+    _updateContinuously = tryCast(jsonData['update_continuously']) ?? false;
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'min_value': minValue,
-      'max_value': maxValue,
-      'divisions': divisions,
-      'publish_all': updateContinuously,
+      'min_value': _minValue,
+      'max_value': _maxValue,
+      'divisions': _divisions,
+      'publish_all': _updateContinuously,
     };
   }
 
@@ -75,12 +79,12 @@ class NumberSlider extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                minValue = newMin;
+                _minValue = newMin;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
-              initialText: minValue.toString(),
+              initialText: _minValue.toString(),
             ),
           ),
           Flexible(
@@ -90,12 +94,12 @@ class NumberSlider extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                maxValue = newMax;
+                _maxValue = newMax;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
-              initialText: maxValue.toString(),
+              initialText: _maxValue.toString(),
             ),
           ),
         ],
@@ -112,21 +116,21 @@ class NumberSlider extends NTWidget {
                 if (newDivisions == null || newDivisions < 2) {
                   return;
                 }
-                divisions = newDivisions;
+                _divisions = newDivisions;
                 refresh();
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
-              initialText: divisions.toString(),
+              initialText: _divisions.toString(),
             ),
           ),
           Flexible(
             flex: 3,
             child: DialogToggleSwitch(
-              initialValue: updateContinuously,
+              initialValue: _updateContinuously,
               label: 'Update While Dragging',
               onToggle: (value) {
-                updateContinuously = value;
+                _updateContinuously = value;
               },
             ),
           ),
@@ -162,13 +166,13 @@ class NumberSlider extends NTWidget {
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedValue = value.clamp(minValue, maxValue);
+        double clampedValue = value.clamp(_minValue, _maxValue);
 
         if (!_dragging) {
           _currentValue = clampedValue;
         }
 
-        double divisionSeparation = (maxValue - minValue) / (divisions - 1);
+        double divisionSeparation = (_maxValue - _minValue) / (_divisions - 1);
 
         return Column(
           children: [
@@ -180,8 +184,8 @@ class NumberSlider extends NTWidget {
             Expanded(
               child: SfLinearGauge(
                 key: UniqueKey(),
-                minimum: minValue,
-                maximum: maxValue,
+                minimum: _minValue,
+                maximum: _maxValue,
                 labelPosition: LinearLabelPosition.inside,
                 tickPosition: LinearElementPosition.cross,
                 interval: divisionSeparation,
@@ -204,7 +208,7 @@ class NumberSlider extends NTWidget {
                     onChanged: (value) {
                       _currentValue = value;
 
-                      if (updateContinuously) {
+                      if (_updateContinuously) {
                         _publishValue(_currentValue);
                       }
                     },

@@ -16,58 +16,66 @@ class RadialGauge extends NTWidget {
   @override
   String type = widgetType;
 
-  double startAngle = -140.0;
-  double endAngle = 140.0;
-  double minValue = 0.0;
-  double maxValue = 100.0;
+  double _startAngle = -140.0;
+  double _endAngle = 140.0;
+  double _minValue = 0.0;
+  double _maxValue = 100.0;
 
-  int numberOfLabels = 8;
+  int _numberOfLabels = 8;
 
-  bool wrapValue = false;
-  bool showPointer = true;
-  bool showTicks = true;
+  bool _wrapValue = false;
+  bool _showPointer = true;
+  bool _showTicks = true;
 
   RadialGauge({
     super.key,
     required super.topic,
-    this.startAngle = -140.0,
-    this.endAngle = 140.0,
-    this.minValue = 0.0,
-    this.maxValue = 100.0,
-    this.numberOfLabels = 8,
-    this.wrapValue = false,
-    this.showPointer = true,
-    this.showTicks = true,
+    double startAngle = -140.0,
+    double endAngle = 140.0,
+    double minValue = 0.0,
+    double maxValue = 100.0,
+    int numberOfLabels = 8,
+    bool wrapValue = false,
+    bool showPointer = true,
+    bool showTicks = true,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _wrapValue = wrapValue,
+        _showTicks = showTicks,
+        _showPointer = showPointer,
+        _numberOfLabels = numberOfLabels,
+        _maxValue = maxValue,
+        _minValue = minValue,
+        _startAngle = startAngle,
+        _endAngle = endAngle,
+        super();
 
   RadialGauge.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    startAngle = tryCast(jsonData['start_angle']) ?? startAngle;
-    endAngle = tryCast(jsonData['end_angle']) ?? endAngle;
-    minValue = tryCast(jsonData['min_value']) ?? minValue;
-    maxValue = tryCast(jsonData['max_value']) ?? maxValue;
+    _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;
+    _endAngle = tryCast(jsonData['end_angle']) ?? _endAngle;
+    _minValue = tryCast(jsonData['min_value']) ?? _minValue;
+    _maxValue = tryCast(jsonData['max_value']) ?? _maxValue;
 
-    numberOfLabels = tryCast(jsonData['number_of_labels']) ?? numberOfLabels;
+    _numberOfLabels = tryCast(jsonData['number_of_labels']) ?? _numberOfLabels;
 
-    wrapValue = tryCast(jsonData['wrap_value']) ?? wrapValue;
-    showPointer = tryCast(jsonData['show_pointer']) ?? showPointer;
-    showTicks = tryCast(jsonData['show_ticks']) ?? showTicks;
+    _wrapValue = tryCast(jsonData['wrap_value']) ?? _wrapValue;
+    _showPointer = tryCast(jsonData['show_pointer']) ?? _showPointer;
+    _showTicks = tryCast(jsonData['show_ticks']) ?? _showTicks;
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'start_angle': startAngle,
-      'end_angle': endAngle,
-      'min_value': minValue,
-      'max_value': maxValue,
-      'number_of_labels': numberOfLabels,
-      'wrap_value': wrapValue,
-      'show_pointer': showPointer,
-      'show_ticks': showTicks,
+      'start_angle': _startAngle,
+      'end_angle': _endAngle,
+      'min_value': _minValue,
+      'max_value': _maxValue,
+      'number_of_labels': _numberOfLabels,
+      'wrap_value': _wrapValue,
+      'show_pointer': _showPointer,
+      'show_ticks': _showTicks,
     };
   }
 
@@ -80,7 +88,7 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogTextInput(
               label: 'Start Angle (CW+)',
-              initialText: startAngle.toString(),
+              initialText: _startAngle.toString(),
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               onSubmit: (value) {
                 double? newStartAngle = double.tryParse(value);
@@ -88,7 +96,7 @@ class RadialGauge extends NTWidget {
                 if (newStartAngle == null) {
                   return;
                 }
-                startAngle = newStartAngle;
+                _startAngle = newStartAngle;
 
                 refresh();
               },
@@ -97,7 +105,7 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogTextInput(
               label: 'End Angle (CW+)',
-              initialText: endAngle.toString(),
+              initialText: _endAngle.toString(),
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               onSubmit: (value) {
                 double? newEndAngle = double.tryParse(value);
@@ -105,7 +113,7 @@ class RadialGauge extends NTWidget {
                 if (newEndAngle == null) {
                   return;
                 }
-                endAngle = newEndAngle;
+                _endAngle = newEndAngle;
 
                 refresh();
               },
@@ -120,7 +128,7 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogTextInput(
               label: 'Min Value',
-              initialText: minValue.toString(),
+              initialText: _minValue.toString(),
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               onSubmit: (value) {
                 double? newMin = double.tryParse(value);
@@ -128,7 +136,7 @@ class RadialGauge extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                minValue = newMin;
+                _minValue = newMin;
 
                 refresh();
               },
@@ -137,7 +145,7 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogTextInput(
               label: 'Max Value',
-              initialText: maxValue.toString(),
+              initialText: _maxValue.toString(),
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               onSubmit: (value) {
                 double? newMax = double.tryParse(value);
@@ -145,7 +153,7 @@ class RadialGauge extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                maxValue = newMax;
+                _maxValue = newMax;
 
                 refresh();
               },
@@ -160,9 +168,9 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogToggleSwitch(
               label: 'Wrap Value',
-              initialValue: wrapValue,
+              initialValue: _wrapValue,
               onToggle: (value) {
-                wrapValue = value;
+                _wrapValue = value;
 
                 refresh();
               },
@@ -171,9 +179,9 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Pointer',
-              initialValue: showPointer,
+              initialValue: _showPointer,
               onToggle: (value) {
-                showPointer = value;
+                _showPointer = value;
 
                 refresh();
               },
@@ -188,7 +196,7 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogTextInput(
               label: 'Number of Labels',
-              initialText: numberOfLabels.toString(),
+              initialText: _numberOfLabels.toString(),
               formatter: FilteringTextInputFormatter.digitsOnly,
               onSubmit: (value) {
                 int? newLabelCount = int.tryParse(value);
@@ -197,7 +205,7 @@ class RadialGauge extends NTWidget {
                   return;
                 }
 
-                numberOfLabels = newLabelCount;
+                _numberOfLabels = newLabelCount;
                 refresh();
               },
             ),
@@ -205,9 +213,9 @@ class RadialGauge extends NTWidget {
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Ticks',
-              initialValue: showTicks,
+              initialValue: _showTicks,
               onToggle: (value) {
-                showTicks = value;
+                _showTicks = value;
 
                 refresh();
               },
@@ -218,7 +226,7 @@ class RadialGauge extends NTWidget {
     ];
   }
 
-  static double _wrapValue(double value, double min, double max) {
+  static double _getWrappedValue(double value, double min, double max) {
     if (value >= min && value <= max) {
       return value;
     }
@@ -245,35 +253,36 @@ class RadialGauge extends NTWidget {
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        if (wrapValue) {
-          value = _wrapValue(value, minValue, maxValue);
+        if (_wrapValue) {
+          value = _getWrappedValue(value, _minValue, _maxValue);
         }
 
         return SfRadialGauge(
           axes: [
             RadialAxis(
-              startAngle: startAngle - 90.0,
-              endAngle: endAngle - 90.0,
-              minimum: minValue,
-              maximum: maxValue,
-              showTicks: showTicks,
-              showLabels: numberOfLabels != 0,
-              interval: (numberOfLabels != 0)
-                  ? (maxValue - minValue) / numberOfLabels
+              startAngle: _startAngle - 90.0,
+              endAngle: _endAngle - 90.0,
+              minimum: _minValue,
+              maximum: _maxValue,
+              showTicks: _showTicks,
+              showLabels: _numberOfLabels != 0,
+              interval: (_numberOfLabels != 0)
+                  ? (_maxValue - _minValue) / _numberOfLabels
                   : null,
               showLastLabel:
-                  _wrapValue(endAngle - startAngle, -180.0, 180.0) != 0.0,
+                  _getWrappedValue(_endAngle - _startAngle, -180.0, 180.0) !=
+                      0.0,
               canScaleToFit: true,
               annotations: [
                 GaugeAnnotation(
                   horizontalAlignment: GaugeAlignment.center,
                   verticalAlignment: GaugeAlignment.center,
                   angle: 90.0,
-                  positionFactor: (showPointer) ? 0.35 : 0.05,
+                  positionFactor: (_showPointer) ? 0.35 : 0.05,
                   widget: Text(
                     value.toStringAsFixed(2),
                     style: TextStyle(
-                      fontSize: (showPointer) ? 18.0 : 28.0,
+                      fontSize: (_showPointer) ? 18.0 : 28.0,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -286,7 +295,7 @@ class RadialGauge extends NTWidget {
                   color: Theme.of(context).colorScheme.primaryContainer,
                   value: value,
                 ),
-                if (showPointer)
+                if (_showPointer)
                   NeedlePointer(
                     enableAnimation: false,
                     enableDragging: false,

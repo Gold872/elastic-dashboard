@@ -52,8 +52,11 @@ abstract class NTWidget extends StatelessWidget {
 
   String dataType = 'Unknown';
 
+  @protected
   NT4Subscription? subscription;
+  @protected
   NTWidgetModel? notifier;
+  @protected
   NT4Topic? ntTopic;
 
   NTWidget({
@@ -147,6 +150,7 @@ abstract class NTWidget extends StatelessWidget {
     subscription = ntConnection.subscribe(topic, period);
   }
 
+  @protected
   void createTopicIfNull() {
     ntTopic ??= ntConnection.getTopicFromName(topic);
   }

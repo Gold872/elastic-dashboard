@@ -22,74 +22,76 @@ class FieldWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  static const String defaultGame = 'Crescendo';
-  String fieldGame = defaultGame;
-  late Field field;
+  static const String _defaultGame = 'Crescendo';
+  String _fieldGame = _defaultGame;
+  late Field _field;
 
-  double robotWidthMeters = 0.85;
-  double robotLengthMeters = 0.85;
+  double _robotWidthMeters = 0.85;
+  double _robotLengthMeters = 0.85;
 
-  bool showOtherObjects = true;
-  bool showTrajectories = true;
+  bool _showOtherObjects = true;
+  bool _showTrajectories = true;
 
-  final double otherObjectSize = 0.55;
-  final double trajectoryPointSize = 0.08;
+  final double _otherObjectSize = 0.55;
+  final double _trajectoryPointSize = 0.08;
 
-  Size? widgetSize;
+  Size? _widgetSize;
 
-  late String robotTopicName;
-  List<String> otherObjectTopics = [];
+  late String _robotTopicName;
+  final List<String> _otherObjectTopics = [];
 
-  bool rendered = false;
+  bool _rendered = false;
 
   FieldWidget({
     super.key,
     required super.topic,
     String? fieldName,
-    this.showOtherObjects = true,
-    this.showTrajectories = true,
+    bool showOtherObjects = true,
+    bool showTrajectories = true,
     super.dataType,
     super.period,
-  }) : super() {
-    fieldGame = fieldName ?? fieldGame;
+  })  : _showTrajectories = showTrajectories,
+        _showOtherObjects = showOtherObjects,
+        super() {
+    _fieldGame = fieldName ?? _fieldGame;
 
-    if (!FieldImages.hasField(fieldGame)) {
-      fieldGame = defaultGame;
+    if (!FieldImages.hasField(_fieldGame)) {
+      _fieldGame = _defaultGame;
     }
 
-    field = FieldImages.getFieldFromGame(fieldGame)!;
+    _field = FieldImages.getFieldFromGame(_fieldGame)!;
   }
 
   FieldWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    fieldGame = tryCast(jsonData['field_game']) ?? fieldGame;
+    _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
 
-    robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
-    robotLengthMeters = tryCast(jsonData['robot_length']) ??
+    _robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
+    _robotLengthMeters = tryCast(jsonData['robot_length']) ??
         tryCast(jsonData['robot_height']) ??
         0.85;
 
-    showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
-    showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
+    _showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
+    _showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
 
-    if (!FieldImages.hasField(fieldGame)) {
-      fieldGame = defaultGame;
+    if (!FieldImages.hasField(_fieldGame)) {
+      _fieldGame = _defaultGame;
     }
 
-    field = FieldImages.getFieldFromGame(fieldGame)!;
+    _field = FieldImages.getFieldFromGame(_fieldGame)!;
   }
 
   @override
   void init() {
     super.init();
 
-    robotTopicName = '$topic/Robot';
+    _robotTopicName = '$topic/Robot';
   }
 
   @override
   void resetSubscription() {
-    robotTopicName = '$topic/Robot';
-    otherObjectTopics.clear();
+    _robotTopicName = '$topic/Robot';
+    _otherObjectTopics.clear();
 
     super.resetSubscription();
   }
@@ -99,22 +101,22 @@ class FieldWidget extends NTWidget {
     super.dispose(deleting: deleting);
 
     if (deleting) {
-      field.dispose();
+      _field.dispose();
     }
 
-    widgetSize = null;
-    rendered = false;
+    _widgetSize = null;
+    _rendered = false;
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'field_game': fieldGame,
-      'robot_width': robotWidthMeters,
-      'robot_length': robotLengthMeters,
-      'show_other_objects': showOtherObjects,
-      'show_trajectories': showTrajectories,
+      'field_game': _fieldGame,
+      'robot_width': _robotWidthMeters,
+      'robot_length': _robotLengthMeters,
+      'show_other_objects': _showOtherObjects,
+      'show_trajectories': _showTrajectories,
     };
   }
 
@@ -134,7 +136,7 @@ class FieldWidget extends NTWidget {
                     child: Builder(
                       builder: (context) {
                         return Text(
-                          field.sourceURL ?? '',
+                          _field.sourceURL ?? '',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall!
@@ -149,10 +151,10 @@ class FieldWidget extends NTWidget {
                       style: const TextStyle(color: Colors.blue),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () async {
-                          if (field.sourceURL == null) {
+                          if (_field.sourceURL == null) {
                             return;
                           }
-                          Uri? url = Uri.tryParse(field.sourceURL!);
+                          Uri? url = Uri.tryParse(_field.sourceURL!);
                           if (url == null) {
                             return;
                           }
@@ -181,17 +183,17 @@ class FieldWidget extends NTWidget {
             return;
           }
 
-          fieldGame = value;
-          field.dispose();
-          field = newField;
+          _fieldGame = value;
+          _field.dispose();
+          _field = newField;
 
-          widgetSize = null;
-          rendered = false;
+          _widgetSize = null;
+          _rendered = false;
 
           refresh();
         },
         choices: FieldImages.fields.map((e) => e.game).toList(),
-        initialValue: field.game,
+        initialValue: _field.game,
       ),
       const SizedBox(height: 5),
       Row(
@@ -206,12 +208,12 @@ class FieldWidget extends NTWidget {
                 if (newWidth == null) {
                   return;
                 }
-                robotWidthMeters = newWidth;
+                _robotWidthMeters = newWidth;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Robot Width (meters)',
-              initialText: robotWidthMeters.toString(),
+              initialText: _robotWidthMeters.toString(),
             ),
           ),
           Flexible(
@@ -222,12 +224,12 @@ class FieldWidget extends NTWidget {
                 if (newLength == null) {
                   return;
                 }
-                robotLengthMeters = newLength;
+                _robotLengthMeters = newLength;
                 refresh();
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Robot Length (meters)',
-              initialText: robotLengthMeters.toString(),
+              initialText: _robotLengthMeters.toString(),
             ),
           ),
         ],
@@ -240,9 +242,9 @@ class FieldWidget extends NTWidget {
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Non-Robot Objects',
-              initialValue: showOtherObjects,
+              initialValue: _showOtherObjects,
               onToggle: (value) {
-                showOtherObjects = value;
+                _showOtherObjects = value;
 
                 refresh();
               },
@@ -251,9 +253,9 @@ class FieldWidget extends NTWidget {
           Flexible(
             child: DialogToggleSwitch(
               label: 'Show Trajectories',
-              initialValue: showTrajectories,
+              initialValue: _showTrajectories,
               onToggle: (value) {
-                showTrajectories = value;
+                _showTrajectories = value;
 
                 refresh();
               },
@@ -271,7 +273,7 @@ class FieldWidget extends NTWidget {
     return min(
         fitWidth,
         fitHeight /
-            ((field.fieldImageHeight ?? 0) / (field.fieldImageWidth ?? 1)));
+            ((_field.fieldImageHeight ?? 0) / (_field.fieldImageWidth ?? 1)));
   }
 
   Widget _getTransformedFieldObject(List<double> objectPosition, Offset center,
@@ -284,22 +286,22 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * field.pixelsPerMeterHorizontal - fieldCenter.dx;
+        (objectPosition[0]) * _field.pixelsPerMeterHorizontal - fieldCenter.dx;
 
     double yFromCenter =
-        fieldCenter.dy - (objectPosition[1]) * field.pixelsPerMeterVertical;
+        fieldCenter.dy - (objectPosition[1]) * _field.pixelsPerMeterVertical;
 
     Offset positionOffset = center +
-        (Offset(xFromCenter + field.topLeftCorner.dx,
-                yFromCenter - field.topLeftCorner.dy)) *
+        (Offset(xFromCenter + _field.topLeftCorner.dx,
+                yFromCenter - _field.topLeftCorner.dy)) *
             scaleReduction;
 
-    double width = (objectSize?.width ?? otherObjectSize) *
-        field.pixelsPerMeterHorizontal *
+    double width = (objectSize?.width ?? _otherObjectSize) *
+        _field.pixelsPerMeterHorizontal *
         scaleReduction;
 
-    double length = (objectSize?.height ?? otherObjectSize) *
-        field.pixelsPerMeterVertical *
+    double length = (objectSize?.height ?? _otherObjectSize) *
+        _field.pixelsPerMeterVertical *
         scaleReduction;
 
     Matrix4 transform = Matrix4.translationValues(
@@ -344,14 +346,14 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * field.pixelsPerMeterHorizontal - fieldCenter.dx;
+        (objectPosition[0]) * _field.pixelsPerMeterHorizontal - fieldCenter.dx;
 
     double yFromCenter =
-        fieldCenter.dy - (objectPosition[1]) * field.pixelsPerMeterVertical;
+        fieldCenter.dy - (objectPosition[1]) * _field.pixelsPerMeterVertical;
 
     Offset positionOffset = center +
-        (Offset(xFromCenter + field.topLeftCorner.dx,
-                yFromCenter - field.topLeftCorner.dy)) *
+        (Offset(xFromCenter + _field.topLeftCorner.dx,
+                yFromCenter - _field.topLeftCorner.dy)) *
             scaleReduction;
 
     return positionOffset;
@@ -362,8 +364,8 @@ class FieldWidget extends NTWidget {
       if (nt4Topic.name.contains(topic) &&
           !nt4Topic.name.contains('Robot') &&
           !nt4Topic.name.contains('.') &&
-          !otherObjectTopics.contains(nt4Topic.name)) {
-        otherObjectTopics.add(nt4Topic.name);
+          !_otherObjectTopics.contains(nt4Topic.name)) {
+        _otherObjectTopics.add(nt4Topic.name);
       }
     }
   }
@@ -373,7 +375,7 @@ class FieldWidget extends NTWidget {
     List<Object> data = [];
 
     List<Object?> robotPositionRaw = ntConnection
-            .getLastAnnouncedValue(robotTopicName)
+            .getLastAnnouncedValue(_robotTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -381,8 +383,8 @@ class FieldWidget extends NTWidget {
 
     data.add(robotPosition);
 
-    if (showOtherObjects || showTrajectories) {
-      for (String objectTopic in otherObjectTopics) {
+    if (_showOtherObjects || _showTrajectories) {
+      for (String objectTopic in _otherObjectTopics) {
         List<Object?>? objectPositionRaw = ntConnection
             .getLastAnnouncedValue(objectTopic)
             ?.tryCast<List<Object?>>();
@@ -393,9 +395,9 @@ class FieldWidget extends NTWidget {
 
         bool isTrajectory = objectPositionRaw.length > 24;
 
-        if (isTrajectory && !showTrajectories) {
+        if (isTrajectory && !_showTrajectories) {
           continue;
-        } else if (!showOtherObjects && !isTrajectory) {
+        } else if (!_showOtherObjects && !isTrajectory) {
           continue;
         }
 
@@ -407,12 +409,12 @@ class FieldWidget extends NTWidget {
     }
 
     data.addAll([
-      showOtherObjects,
-      showTrajectories,
-      robotWidthMeters,
-      robotLengthMeters,
-      otherObjectTopics,
-      fieldGame,
+      _showOtherObjects,
+      _showTrajectories,
+      _robotWidthMeters,
+      _robotLengthMeters,
+      _otherObjectTopics,
+      _fieldGame,
     ]);
 
     return data;
@@ -432,7 +434,7 @@ class FieldWidget extends NTWidget {
       if (!NTWidget.listEquals(previousData, currentData)) {
         yield Object();
         previousData = currentData;
-      } else if (!rendered) {
+      } else if (!_rendered) {
         yield Object();
       }
 
@@ -451,12 +453,12 @@ class FieldWidget extends NTWidget {
     return StreamBuilder(
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        if (showOtherObjects || showTrajectories) {
+        if (_showOtherObjects || _showTrajectories) {
           _updateOtherObjectTopics();
         }
 
         List<Object?> robotPositionRaw = ntConnection
-                .getLastAnnouncedValue(robotTopicName)
+                .getLastAnnouncedValue(_robotTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
@@ -471,30 +473,30 @@ class FieldWidget extends NTWidget {
             context.findAncestorRenderObjectOfType<RenderBox>();
 
         Size size = (renderBox == null || !renderBox.hasSize)
-            ? widgetSize ?? const Size(0, 0)
+            ? _widgetSize ?? const Size(0, 0)
             : renderBox.size;
 
         if (size != const Size(0, 0)) {
-          widgetSize = size;
+          _widgetSize = size;
         }
 
         Offset center = Offset(size.width / 2, size.height / 2);
-        Offset fieldCenter = Offset((field.fieldImageWidth?.toDouble() ?? 0.0),
-                (field.fieldImageHeight?.toDouble() ?? 0.0)) /
+        Offset fieldCenter = Offset((_field.fieldImageWidth?.toDouble() ?? 0.0),
+                (_field.fieldImageHeight?.toDouble() ?? 0.0)) /
             2;
 
         double scaleReduction =
-            (_getBackgroundFitWidth(size)) / (field.fieldImageWidth ?? 1);
+            (_getBackgroundFitWidth(size)) / (_field.fieldImageWidth ?? 1);
 
         if (renderBox != null &&
-            widgetSize != null &&
+            _widgetSize != null &&
             size != const Size(0, 0) &&
             size.width > 100.0 &&
             scaleReduction != 0.0 &&
             robotPosition != null &&
             fieldCenter != const Offset(0.0, 0.0) &&
-            field.fieldImageLoaded) {
-          rendered = true;
+            _field.fieldImageLoaded) {
+          _rendered = true;
         }
 
         Widget robot = _getTransformedFieldObject(
@@ -502,13 +504,13 @@ class FieldWidget extends NTWidget {
             center,
             fieldCenter,
             scaleReduction,
-            objectSize: Size(robotWidthMeters, robotLengthMeters));
+            objectSize: Size(_robotWidthMeters, _robotLengthMeters));
 
         List<Widget> otherObjects = [];
         List<List<Offset>> trajectoryPoints = [];
 
-        if (showOtherObjects || showTrajectories) {
-          for (String objectTopic in otherObjectTopics) {
+        if (_showOtherObjects || _showTrajectories) {
+          for (String objectTopic in _otherObjectTopics) {
             List<Object?>? objectPositionRaw = ntConnection
                 .getLastAnnouncedValue(objectTopic)
                 ?.tryCast<List<Object?>>();
@@ -519,9 +521,9 @@ class FieldWidget extends NTWidget {
 
             bool isTrajectory = objectPositionRaw.length > 24;
 
-            if (isTrajectory && !showTrajectories) {
+            if (isTrajectory && !_showTrajectories) {
               continue;
-            } else if (!showOtherObjects && !isTrajectory) {
+            } else if (!_showOtherObjects && !isTrajectory) {
               continue;
             }
 
@@ -558,13 +560,13 @@ class FieldWidget extends NTWidget {
 
         return Stack(
           children: [
-            field.fieldImage,
+            _field.fieldImage,
             for (List<Offset> points in trajectoryPoints)
               CustomPaint(
                 painter: TrajectoryPainter(
                   points: points,
-                  strokeWidth: trajectoryPointSize *
-                      field.pixelsPerMeterHorizontal *
+                  strokeWidth: _trajectoryPointSize *
+                      _field.pixelsPerMeterHorizontal *
                       scaleReduction,
                 ),
               ),

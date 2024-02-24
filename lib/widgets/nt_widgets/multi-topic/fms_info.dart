@@ -19,13 +19,13 @@ class FMSInfo extends NTWidget {
   static const int FMS_ATTACHED_FLAG = 0x10;
   static const int DS_ATTACHED_FLAG = 0x20;
 
-  late String eventNameTopic;
-  late String controlDataTopic;
-  late String allianceTopic;
-  late String matchNumberTopic;
-  late String matchTypeTopic;
-  late String replayNumberTopic;
-  late String stationNumberTopic;
+  late String _eventNameTopic;
+  late String _controlDataTopic;
+  late String _allianceTopic;
+  late String _matchNumberTopic;
+  late String _matchTypeTopic;
+  late String _replayNumberTopic;
+  late String _stationNumberTopic;
 
   FMSInfo({
     super.key,
@@ -40,24 +40,24 @@ class FMSInfo extends NTWidget {
   void init() {
     super.init();
 
-    eventNameTopic = '$topic/EventName';
-    controlDataTopic = '$topic/FMSControlData';
-    allianceTopic = '$topic/IsRedAlliance';
-    matchNumberTopic = '$topic/MatchNumber';
-    matchTypeTopic = '$topic/MatchType';
-    replayNumberTopic = '$topic/ReplayNumber';
-    stationNumberTopic = '$topic/StationNumber';
+    _eventNameTopic = '$topic/EventName';
+    _controlDataTopic = '$topic/FMSControlData';
+    _allianceTopic = '$topic/IsRedAlliance';
+    _matchNumberTopic = '$topic/MatchNumber';
+    _matchTypeTopic = '$topic/MatchType';
+    _replayNumberTopic = '$topic/ReplayNumber';
+    _stationNumberTopic = '$topic/StationNumber';
   }
 
   @override
   void resetSubscription() {
-    eventNameTopic = '$topic/EventName';
-    controlDataTopic = '$topic/FMSControlData';
-    allianceTopic = '$topic/IsRedAlliance';
-    matchNumberTopic = '$topic/MatchNumber';
-    matchTypeTopic = '$topic/MatchType';
-    replayNumberTopic = '$topic/ReplayNumber';
-    stationNumberTopic = '$topic/StationNumber';
+    _eventNameTopic = '$topic/EventName';
+    _controlDataTopic = '$topic/FMSControlData';
+    _allianceTopic = '$topic/IsRedAlliance';
+    _matchNumberTopic = '$topic/MatchNumber';
+    _matchTypeTopic = '$topic/MatchType';
+    _replayNumberTopic = '$topic/ReplayNumber';
+    _stationNumberTopic = '$topic/StationNumber';
 
     super.resetSubscription();
   }
@@ -82,17 +82,17 @@ class FMSInfo extends NTWidget {
   @override
   List<Object> getCurrentData() {
     String eventName =
-        tryCast(ntConnection.getLastAnnouncedValue(eventNameTopic)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(_eventNameTopic)) ?? '';
     int controlData =
-        tryCast(ntConnection.getLastAnnouncedValue(controlDataTopic)) ?? 32;
+        tryCast(ntConnection.getLastAnnouncedValue(_controlDataTopic)) ?? 32;
     bool redAlliance =
-        tryCast(ntConnection.getLastAnnouncedValue(allianceTopic)) ?? true;
+        tryCast(ntConnection.getLastAnnouncedValue(_allianceTopic)) ?? true;
     int matchNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
+        tryCast(ntConnection.getLastAnnouncedValue(_matchNumberTopic)) ?? 0;
     int matchType =
-        tryCast(ntConnection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
+        tryCast(ntConnection.getLastAnnouncedValue(_matchTypeTopic)) ?? 0;
     int replayNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(replayNumberTopic)) ?? 0;
+        tryCast(ntConnection.getLastAnnouncedValue(_replayNumberTopic)) ?? 0;
 
     return [
       eventName,
@@ -112,17 +112,19 @@ class FMSInfo extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         String eventName =
-            tryCast(ntConnection.getLastAnnouncedValue(eventNameTopic)) ?? '';
+            tryCast(ntConnection.getLastAnnouncedValue(_eventNameTopic)) ?? '';
         int controlData =
-            tryCast(ntConnection.getLastAnnouncedValue(controlDataTopic)) ?? 32;
+            tryCast(ntConnection.getLastAnnouncedValue(_controlDataTopic)) ??
+                32;
         bool redAlliance =
-            tryCast(ntConnection.getLastAnnouncedValue(allianceTopic)) ?? true;
+            tryCast(ntConnection.getLastAnnouncedValue(_allianceTopic)) ?? true;
         int matchNumber =
-            tryCast(ntConnection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
+            tryCast(ntConnection.getLastAnnouncedValue(_matchNumberTopic)) ?? 0;
         int matchType =
-            tryCast(ntConnection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
+            tryCast(ntConnection.getLastAnnouncedValue(_matchTypeTopic)) ?? 0;
         int replayNumber =
-            tryCast(ntConnection.getLastAnnouncedValue(replayNumberTopic)) ?? 0;
+            tryCast(ntConnection.getLastAnnouncedValue(_replayNumberTopic)) ??
+                0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);

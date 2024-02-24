@@ -15,74 +15,76 @@ class SwerveDriveWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  late String frontLeftAngleTopic;
-  late String frontLeftVelocityTopic;
+  late String _frontLeftAngleTopic;
+  late String _frontLeftVelocityTopic;
 
-  late String frontRightAngleTopic;
-  late String frontRightVelocityTopic;
+  late String _frontRightAngleTopic;
+  late String _frontRightVelocityTopic;
 
-  late String backLeftAngleTopic;
-  late String backLeftVelocityTopic;
+  late String _backLeftAngleTopic;
+  late String _backLeftVelocityTopic;
 
-  late String backRightAngleTopic;
-  late String backRightVelocityTopic;
+  late String _backRightAngleTopic;
+  late String _backRightVelocityTopic;
 
-  late String robotAngleTopic;
+  late String _robotAngleTopic;
 
-  bool showRobotRotation = true;
+  bool _showRobotRotation = true;
 
-  String rotationUnit = 'Radians';
+  String _rotationUnit = 'Radians';
 
   SwerveDriveWidget({
     super.key,
     required super.topic,
-    this.showRobotRotation = true,
-    this.rotationUnit = 'Radians',
+    bool showRobotRotation = true,
+    String rotationUnit = 'Radians',
     super.dataType,
     super.period,
-  }) : super();
+  })  : _rotationUnit = rotationUnit,
+        _showRobotRotation = showRobotRotation,
+        super();
 
   SwerveDriveWidget.fromJson(
       {super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
-    rotationUnit = tryCast(jsonData['rotation_unit']) ?? 'Degrees';
+    _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
+    _rotationUnit = tryCast(jsonData['rotation_unit']) ?? 'Degrees';
   }
 
   @override
   void init() {
     super.init();
 
-    frontLeftAngleTopic = '$topic/Front Left Angle';
-    frontLeftVelocityTopic = '$topic/Front Left Velocity';
+    _frontLeftAngleTopic = '$topic/Front Left Angle';
+    _frontLeftVelocityTopic = '$topic/Front Left Velocity';
 
-    frontRightAngleTopic = '$topic/Front Right Angle';
-    frontRightVelocityTopic = '$topic/Front Right Velocity';
+    _frontRightAngleTopic = '$topic/Front Right Angle';
+    _frontRightVelocityTopic = '$topic/Front Right Velocity';
 
-    backLeftAngleTopic = '$topic/Back Left Angle';
-    backLeftVelocityTopic = '$topic/Back Left Velocity';
+    _backLeftAngleTopic = '$topic/Back Left Angle';
+    _backLeftVelocityTopic = '$topic/Back Left Velocity';
 
-    backRightAngleTopic = '$topic/Back Right Angle';
-    backRightVelocityTopic = '$topic/Back Right Velocity';
+    _backRightAngleTopic = '$topic/Back Right Angle';
+    _backRightVelocityTopic = '$topic/Back Right Velocity';
 
-    robotAngleTopic = '$topic/Robot Angle';
+    _robotAngleTopic = '$topic/Robot Angle';
   }
 
   @override
   void resetSubscription() {
-    frontLeftAngleTopic = '$topic/Front Left Angle';
-    frontLeftVelocityTopic = '$topic/Front Left Velocity';
+    _frontLeftAngleTopic = '$topic/Front Left Angle';
+    _frontLeftVelocityTopic = '$topic/Front Left Velocity';
 
-    frontRightAngleTopic = '$topic/Front Right Angle';
-    frontRightVelocityTopic = '$topic/Front Right Velocity';
+    _frontRightAngleTopic = '$topic/Front Right Angle';
+    _frontRightVelocityTopic = '$topic/Front Right Velocity';
 
-    backLeftAngleTopic = '$topic/Back Left Angle';
-    backLeftVelocityTopic = '$topic/Back Left Velocity';
+    _backLeftAngleTopic = '$topic/Back Left Angle';
+    _backLeftVelocityTopic = '$topic/Back Left Velocity';
 
-    backRightAngleTopic = '$topic/Back Right Angle';
-    backRightVelocityTopic = '$topic/Back Right Velocity';
+    _backRightAngleTopic = '$topic/Back Right Angle';
+    _backRightVelocityTopic = '$topic/Back Right Velocity';
 
-    robotAngleTopic = '$topic/Robot Angle';
+    _robotAngleTopic = '$topic/Robot Angle';
 
     super.resetSubscription();
   }
@@ -91,8 +93,8 @@ class SwerveDriveWidget extends NTWidget {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'show_robot_rotation': showRobotRotation,
-      'rotation_unit': rotationUnit,
+      'show_robot_rotation': _showRobotRotation,
+      'rotation_unit': _rotationUnit,
     };
   }
 
@@ -101,10 +103,10 @@ class SwerveDriveWidget extends NTWidget {
     return [
       Center(
         child: DialogToggleSwitch(
-          initialValue: showRobotRotation,
+          initialValue: _showRobotRotation,
           label: 'Show Robot Rotation',
           onToggle: (value) {
-            showRobotRotation = value;
+            _showRobotRotation = value;
 
             refresh();
           },
@@ -120,9 +122,9 @@ class SwerveDriveWidget extends NTWidget {
               dense: true,
               leading: Radio(
                 value: 'Radians',
-                groupValue: rotationUnit,
+                groupValue: _rotationUnit,
                 onChanged: (value) {
-                  rotationUnit = 'Radians';
+                  _rotationUnit = 'Radians';
 
                   setState(() {});
                   refresh();
@@ -134,9 +136,9 @@ class SwerveDriveWidget extends NTWidget {
               dense: true,
               leading: Radio(
                 value: 'Degrees',
-                groupValue: rotationUnit,
+                groupValue: _rotationUnit,
                 onChanged: (value) {
-                  rotationUnit = 'Degrees';
+                  _rotationUnit = 'Degrees';
 
                   setState(() {});
                   refresh();
@@ -148,9 +150,9 @@ class SwerveDriveWidget extends NTWidget {
               dense: true,
               leading: Radio(
                 value: 'Rotations',
-                groupValue: rotationUnit,
+                groupValue: _rotationUnit,
                 onChanged: (value) {
-                  rotationUnit = 'Rotations';
+                  _rotationUnit = 'Rotations';
 
                   setState(() {});
                   refresh();
@@ -166,32 +168,34 @@ class SwerveDriveWidget extends NTWidget {
   @override
   List<Object> getCurrentData() {
     double frontLeftAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(frontLeftAngleTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_frontLeftAngleTopic)) ??
+            0.0;
     double frontLeftVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(frontLeftVelocityTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_frontLeftVelocityTopic)) ??
             0.0;
 
     double frontRightAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(frontRightAngleTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_frontRightAngleTopic)) ??
             0.0;
     double frontRightVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(frontRightVelocityTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_frontRightVelocityTopic)) ??
             0.0;
 
     double backLeftAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(backLeftAngleTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_backLeftAngleTopic)) ?? 0.0;
     double backLeftVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(backLeftVelocityTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_backLeftVelocityTopic)) ??
             0.0;
 
     double backRightAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(backRightAngleTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_backRightAngleTopic)) ??
+            0.0;
     double backRightVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(backRightVelocityTopic)) ??
+        tryCast(ntConnection.getLastAnnouncedValue(_backRightVelocityTopic)) ??
             0.0;
 
     double robotAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(_robotAngleTopic)) ?? 0.0;
 
     return [
       frontLeftAngle,
@@ -203,7 +207,7 @@ class SwerveDriveWidget extends NTWidget {
       backRightAngle,
       backRightVelocity,
       robotAngle,
-      showRobotRotation,
+      _showRobotRotation,
     ];
   }
 
@@ -215,44 +219,45 @@ class SwerveDriveWidget extends NTWidget {
       stream: multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double frontLeftAngle =
-            tryCast(ntConnection.getLastAnnouncedValue(frontLeftAngleTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_frontLeftAngleTopic)) ??
                 0.0;
         double frontLeftVelocity = tryCast(
-                ntConnection.getLastAnnouncedValue(frontLeftVelocityTopic)) ??
+                ntConnection.getLastAnnouncedValue(_frontLeftVelocityTopic)) ??
             0.0;
 
-        double frontRightAngle =
-            tryCast(ntConnection.getLastAnnouncedValue(frontRightAngleTopic)) ??
-                0.0;
+        double frontRightAngle = tryCast(
+                ntConnection.getLastAnnouncedValue(_frontRightAngleTopic)) ??
+            0.0;
         double frontRightVelocity = tryCast(
-                ntConnection.getLastAnnouncedValue(frontRightVelocityTopic)) ??
+                ntConnection.getLastAnnouncedValue(_frontRightVelocityTopic)) ??
             0.0;
 
         double backLeftAngle =
-            tryCast(ntConnection.getLastAnnouncedValue(backLeftAngleTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_backLeftAngleTopic)) ??
                 0.0;
         double backLeftVelocity = tryCast(
-                ntConnection.getLastAnnouncedValue(backLeftVelocityTopic)) ??
+                ntConnection.getLastAnnouncedValue(_backLeftVelocityTopic)) ??
             0.0;
 
         double backRightAngle =
-            tryCast(ntConnection.getLastAnnouncedValue(backRightAngleTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(_backRightAngleTopic)) ??
                 0.0;
         double backRightVelocity = tryCast(
-                ntConnection.getLastAnnouncedValue(backRightVelocityTopic)) ??
+                ntConnection.getLastAnnouncedValue(_backRightVelocityTopic)) ??
             0.0;
 
         double robotAngle =
-            tryCast(ntConnection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(_robotAngleTopic)) ??
+                0.0;
 
-        if (rotationUnit == 'Degrees') {
+        if (_rotationUnit == 'Degrees') {
           frontLeftAngle = radians(frontLeftAngle);
           frontRightAngle = radians(frontRightAngle);
           backLeftAngle = radians(backLeftAngle);
           backRightAngle = radians(backRightAngle);
 
           robotAngle = radians(robotAngle);
-        } else if (rotationUnit == 'Rotations') {
+        } else if (_rotationUnit == 'Rotations') {
           frontLeftAngle *= 2 * pi;
           frontRightAngle *= 2 * pi;
           backLeftAngle *= 2 * pi;
@@ -266,7 +271,7 @@ class SwerveDriveWidget extends NTWidget {
             double sideLength =
                 min(constraints.maxWidth, constraints.maxHeight) * 0.9;
             return Transform.rotate(
-              angle: (showRobotRotation) ? -robotAngle : 0.0,
+              angle: (_showRobotRotation) ? -robotAngle : 0.0,
               child: SizedBox(
                 width: sideLength,
                 height: sideLength,

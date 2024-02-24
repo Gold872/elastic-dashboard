@@ -14,38 +14,41 @@ class MatchTimeWidget extends NTWidget {
   @override
   String type = widgetType;
 
-  String timeDisplayMode = 'Minutes and Seconds';
+  String _timeDisplayMode = 'Minutes and Seconds';
   static final List<String> _timeDisplayOptions = [
     'Minutes and Seconds',
     'Seconds Only',
   ];
 
-  int redStartTime = 15;
-  int yellowStartTime = 30;
+  int _redStartTime = 15;
+  int _yellowStartTime = 30;
 
   MatchTimeWidget({
     super.key,
     required super.topic,
-    this.timeDisplayMode = 'Minutes and Seconds',
-    this.redStartTime = 15,
-    this.yellowStartTime = 30,
+    String timeDisplayMode = 'Minutes and Seconds',
+    int redStartTime = 15,
+    int yellowStartTime = 30,
     super.dataType,
     super.period,
-  }) : super();
+  })  : _timeDisplayMode = timeDisplayMode,
+        _yellowStartTime = yellowStartTime,
+        _redStartTime = redStartTime,
+        super();
 
   MatchTimeWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    timeDisplayMode =
+    _timeDisplayMode =
         tryCast(jsonData['time_display_mode']) ?? 'Minutes and Seconds';
 
     _timeDisplayOptions.firstWhere(
-        (e) => e.toUpperCase() == timeDisplayMode.toUpperCase(),
+        (e) => e.toUpperCase() == _timeDisplayMode.toUpperCase(),
         orElse: () => 'Minutes and Seconds');
 
-    redStartTime =
-        tryCast<num>(jsonData['red_start_time'])?.toInt() ?? redStartTime;
-    yellowStartTime =
-        tryCast<num>(jsonData['yellow_start_time'])?.toInt() ?? yellowStartTime;
+    _redStartTime =
+        tryCast<num>(jsonData['red_start_time'])?.toInt() ?? _redStartTime;
+    _yellowStartTime = tryCast<num>(jsonData['yellow_start_time'])?.toInt() ??
+        _yellowStartTime;
   }
 
   @override
@@ -55,14 +58,14 @@ class MatchTimeWidget extends NTWidget {
         children: [
           const Text('Time Display Mode'),
           DialogDropdownChooser<String>(
-            initialValue: timeDisplayMode,
+            initialValue: _timeDisplayMode,
             choices: const ['Minutes and Seconds', 'Seconds Only'],
             onSelectionChanged: (value) {
               if (value == null) {
                 return;
               }
 
-              timeDisplayMode = value;
+              _timeDisplayMode = value;
 
               refresh();
             },
@@ -77,7 +80,7 @@ class MatchTimeWidget extends NTWidget {
                   waitDuration: const Duration(milliseconds: 750),
                   child: DialogTextInput(
                     label: 'Red Start Time',
-                    initialText: redStartTime.toString(),
+                    initialText: _redStartTime.toString(),
                     onSubmit: (value) {
                       int? newRedTime = int.tryParse(value);
 
@@ -85,7 +88,7 @@ class MatchTimeWidget extends NTWidget {
                         return;
                       }
 
-                      redStartTime = newRedTime;
+                      _redStartTime = newRedTime;
                       refresh();
                     },
                     formatter: FilteringTextInputFormatter.digitsOnly,
@@ -99,7 +102,7 @@ class MatchTimeWidget extends NTWidget {
                   waitDuration: const Duration(milliseconds: 750),
                   child: DialogTextInput(
                     label: 'Yellow Start Time',
-                    initialText: yellowStartTime.toString(),
+                    initialText: _yellowStartTime.toString(),
                     onSubmit: (value) {
                       int? newYellowTime = int.tryParse(value);
 
@@ -107,7 +110,7 @@ class MatchTimeWidget extends NTWidget {
                         return;
                       }
 
-                      yellowStartTime = newYellowTime;
+                      _yellowStartTime = newYellowTime;
                       refresh();
                     },
                     formatter: FilteringTextInputFormatter.digitsOnly,
@@ -125,16 +128,16 @@ class MatchTimeWidget extends NTWidget {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'time_display_mode': timeDisplayMode,
-      'red_start_time': redStartTime,
-      'yellow_start_time': yellowStartTime,
+      'time_display_mode': _timeDisplayMode,
+      'red_start_time': _redStartTime,
+      'yellow_start_time': _yellowStartTime,
     };
   }
 
   Color _getTimeColor(num time) {
-    if (time <= redStartTime) {
+    if (time <= _redStartTime) {
       return Colors.red;
-    } else if (time <= yellowStartTime) {
+    } else if (time <= _yellowStartTime) {
       return Colors.yellow;
     } else if (time <= 60.0) {
       return Colors.green;
@@ -159,7 +162,7 @@ class MatchTimeWidget extends NTWidget {
         time = time.floorToDouble();
 
         String timeDisplayString;
-        if (timeDisplayMode == 'Minutes and Seconds' && time >= 0) {
+        if (_timeDisplayMode == 'Minutes and Seconds' && time >= 0) {
           timeDisplayString = _secondsToMinutes(time.toInt());
         } else {
           timeDisplayString = time.toInt().toString();
