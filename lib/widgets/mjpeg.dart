@@ -84,7 +84,8 @@ class Mjpeg extends HookWidget {
     final state = useMemoized(() => _MjpegStateNotifier());
     final visible = useListenable(state);
     final errorState = useState<List<dynamic>?>(null);
-    isMounted() => context.mounted;
+    // ignore: deprecated_member_use
+    final isMounted = useIsMounted();
 
     final manager = useMemoized(
         () => _manager = _StreamManager(
