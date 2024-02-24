@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -24,7 +26,7 @@ void main() async {
 
   await logger.initialize();
 
-  logger.info('Starting application');
+  logger.info('Starting application: Version ${packageInfo.version}');
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -86,17 +88,64 @@ void main() async {
   Size screenSize = (primaryDisplay.visibleSize ?? primaryDisplay.size) *
       (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
 
-  double minimumSizeWidth = min(screenSize.width * 0.60, 1280.0);
-  double minimumSizeHeight = min(screenSize.height * 0.60, 720.0);
+  double minimumWidth = min(screenSize.width * 0.60, 1280.0);
+  double minimumHeight = min(screenSize.height * 0.60, 720.0);
 
-  await windowManager.setMinimumSize(Size(minimumSizeWidth, minimumSizeHeight));
+  Size minimumSize = Size(minimumWidth, minimumHeight);
+
+  await windowManager.setMinimumSize(minimumSize);
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
+
+  if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
+    await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
+  }
 
   await windowManager.show();
   await windowManager.focus();
 
   runApp(Elastic(version: packageInfo.version, preferences: preferences));
+}
+
+Future<void> _restoreWindowPosition(SharedPreferences preferences,
+    Display primaryDisplay, Size minimumSize) async {
+  String? positionString = preferences.getString(PrefKeys.windowPosition);
+
+  if (positionString == null) {
+    return;
+  }
+
+  List<Object?>? rawPosition = tryCast(jsonDecode(positionString));
+
+  if (rawPosition == null || rawPosition.length < 4) {
+    return;
+  }
+
+  List<double> position =
+      rawPosition.whereType<num>().map((n) => n.toDouble()).toList();
+
+  if (position.length < 4) {
+    return;
+  }
+
+  double x = position[0];
+  double y = position[1];
+  double width =
+      position[2].clamp(minimumSize.width, primaryDisplay.size.width);
+  double height =
+      position[3].clamp(minimumSize.height, primaryDisplay.size.height);
+
+  x = x.clamp(0.0, primaryDisplay.size.width);
+  y = y.clamp(0.0, primaryDisplay.size.height);
+
+  await windowManager.setBounds(
+    Rect.fromLTWH(
+      x,
+      y,
+      width,
+      height,
+    ),
+  );
 }
 
 /// Makes a backup copy of the current shared preferences file.

@@ -34,6 +34,10 @@ class FakeSettingsMethods {
 
   void changeDSAutoResize() {}
 
+  void changeRememberWindow() {}
+
+  void changeLockLayout() {}
+
   void changeDefaultPeriod() {}
 
   void changeDefaultGraphPeriod() {}
@@ -55,6 +59,8 @@ void main() {
       PrefKeys.gridSize: 128,
       PrefKeys.cornerRadius: 15.0,
       PrefKeys.autoResizeToDS: false,
+      PrefKeys.rememberWindowPosition: false,
+      PrefKeys.layoutLocked: false,
       PrefKeys.defaultPeriod: 0.10,
       PrefKeys.defaultGraphPeriod: 0.033,
     });
@@ -91,6 +97,8 @@ void main() {
     expect(find.text('Grid Size'), findsWidgets);
     expect(find.text('Corner Radius'), findsOneWidget);
     expect(find.text('Resize to Driver Station Height'), findsOneWidget);
+    expect(find.text('Remember Window Position'), findsOneWidget);
+    expect(find.text('Lock Layout'), findsOneWidget);
     expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
 
@@ -190,82 +198,6 @@ void main() {
     expect(preferences.getInt(PrefKeys.teamColor),
         const Color.fromARGB(255, 0, 0, 255).value);
     verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Change IP address mode', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          preferences: preferences,
-          onIPAddressModeChanged: (mode) {
-            fakeSettings.changeIPAddressMode();
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final ipAddressMode = find.byType(DialogDropdownChooser<IPAddressMode>);
-
-    expect(ipAddressMode, findsOneWidget);
-
-    expect(find.text('Driver Station'), findsOneWidget);
-
-    await widgetTester.tap(ipAddressMode);
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
-
-    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Driver Station'), findsNothing);
-    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
-
-    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Driver Station'), findsOneWidget);
-
-    await widgetTester.tap(find.text('Driver Station'));
-    await widgetTester.pumpAndSettle();
-
-    verify(fakeSettings.changeIPAddressMode()).called(2);
-  });
-
-  testWidgets('Change IP address', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
-
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
-          preferences: preferences,
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final ipAddressField = find.widgetWithText(DialogTextInput, 'IP Address');
-
-    expect(ipAddressField, findsOneWidget);
-
-    await widgetTester.enterText(ipAddressField, '10.3.53.2');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pump();
-
-    expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
-    verify(fakeSettings.changeIPAddress()).called(greaterThanOrEqualTo(1));
   });
 
   testWidgets('Toggle grid', (widgetTester) async {
@@ -415,6 +347,168 @@ void main() {
 
     expect(preferences.getBool(PrefKeys.autoResizeToDS), false);
     verify(fakeSettings.changeDSAutoResize()).called(2);
+  });
+
+  testWidgets('Toggle remember window position', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onRememberWindowPositionChanged: (value) async {
+            fakeSettings.changeRememberWindow();
+
+            await preferences.setBool(PrefKeys.rememberWindowPosition, value);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final windowSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Remember Window Position');
+
+    expect(windowSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: windowSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.rememberWindowPosition), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.rememberWindowPosition), false);
+    verify(fakeSettings.changeRememberWindow()).called(2);
+  });
+
+  testWidgets('Toggle lock layout', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onLayoutLock: (value) async {
+            fakeSettings.changeLockLayout();
+
+            await preferences.setBool(PrefKeys.layoutLocked, value);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final lockLayoutSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Lock Layout');
+
+    expect(lockLayoutSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: lockLayoutSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.layoutLocked), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.layoutLocked), false);
+    verify(fakeSettings.changeLockLayout()).called(2);
+  });
+
+  testWidgets('Change IP address mode', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          preferences: preferences,
+          onIPAddressModeChanged: (mode) {
+            fakeSettings.changeIPAddressMode();
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final ipAddressMode = find.byType(DialogDropdownChooser<IPAddressMode>);
+
+    expect(ipAddressMode, findsOneWidget);
+
+    expect(find.text('Driver Station'), findsOneWidget);
+
+    await widgetTester.tap(ipAddressMode);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Driver Station'), findsNothing);
+    expect(find.text('Team Number (10.TE.AM.2)'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Team Number (10.TE.AM.2)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Driver Station'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Driver Station'));
+    await widgetTester.pumpAndSettle();
+
+    verify(fakeSettings.changeIPAddressMode()).called(2);
+  });
+
+  testWidgets('Change IP address', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onIPAddressChanged: (data) async {
+            fakeSettings.changeIPAddress();
+
+            await preferences.setString(PrefKeys.ipAddress, data!);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final ipAddressField = find.widgetWithText(DialogTextInput, 'IP Address');
+
+    expect(ipAddressField, findsOneWidget);
+
+    await widgetTester.enterText(ipAddressField, '10.3.53.2');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pump();
+
+    expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
+    verify(fakeSettings.changeIPAddress()).called(greaterThanOrEqualTo(1));
   });
 
   testWidgets('Change default period', (widgetTester) async {

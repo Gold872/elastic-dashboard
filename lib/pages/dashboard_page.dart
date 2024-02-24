@@ -221,8 +221,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       showWindowCloseConfirmation(context);
       await windowManager.focus();
     } else {
-      await windowManager.destroy();
+      await _closeWindow();
     }
+  }
+
+  Future<void> _closeWindow() async {
+    await _saveWindowPosition();
+    await windowManager.destroy();
   }
 
   @override
@@ -259,6 +264,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     bool successful =
         await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    await _saveWindowPosition();
 
     if (successful) {
       logger.info('Layout saved successfully!');
@@ -301,6 +307,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         notification.show(context);
       }
     }
+  }
+
+  Future<void> _saveWindowPosition() async {
+    Rect bounds = await windowManager.getBounds();
+
+    List<double> positionArray = [
+      bounds.left,
+      bounds.top,
+      bounds.width,
+      bounds.height,
+    ];
+
+    String positionString = jsonEncode(positionArray);
+
+    await _preferences.setString(PrefKeys.windowPosition, positionString);
   }
 
   void checkForUpdates(
@@ -1023,6 +1044,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setBool(PrefKeys.autoResizeToDS, value);
         },
+        onRememberWindowPositionChanged: (value) async {
+          await _preferences.setBool(PrefKeys.rememberWindowPosition, value);
+        },
+        onLayoutLock: (value) {
+          setState(() {
+            if (value) {
+              _lockLayout();
+            } else {
+              _unlockLayout();
+            }
+          });
+        },
         onDefaultPeriodChanged: (value) async {
           if (value == null) {
             return;
@@ -1116,14 +1149,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
               Future.delayed(
                 const Duration(milliseconds: 250),
-                () async => await windowManager.destroy(),
+                () async => await _closeWindow(),
               );
             },
             child: const Text('Save'),
           ),
           TextButton(
             onPressed: () async {
-              await windowManager.destroy();
+              await _closeWindow();
             },
             child: const Text('Discard'),
           ),

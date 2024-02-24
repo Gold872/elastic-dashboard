@@ -23,6 +23,8 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? gridSize)? onGridSizeChanged;
   final Function(String? radius)? onCornerRadiusChanged;
   final Function(bool value)? onResizeToDSChanged;
+  final Function(bool value)? onRememberWindowPositionChanged;
+  final Function(bool value)? onLayoutLock;
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
 
@@ -37,6 +39,8 @@ class SettingsDialog extends StatefulWidget {
     this.onGridSizeChanged,
     this.onCornerRadiusChanged,
     this.onResizeToDSChanged,
+    this.onRememberWindowPositionChanged,
+    this.onLayoutLock,
     this.onDefaultPeriodChanged,
     this.onDefaultGraphPeriodChanged,
   });
@@ -53,8 +57,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 250,
-          maxWidth: 650,
+          maxHeight: 275,
+          maxWidth: 725,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -66,7 +70,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 children: [
                   ..._generalSettings(),
                   const Divider(),
-                  ..._ipAddressSettings(),
+                  ..._gridSettings(),
                 ],
               ),
             ),
@@ -75,7 +79,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ..._gridSettings(),
+                  ..._ipAddressSettings(),
                   const Divider(),
                   ..._networkTablesSettings(),
                 ],
@@ -236,6 +240,39 @@ class _SettingsDialogState extends State<SettingsDialog> {
               onToggle: (value) {
                 setState(() {
                   widget.onResizeToDSChanged?.call(value);
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            flex: 5,
+            child: DialogToggleSwitch(
+              initialValue:
+                  widget.preferences.getBool(PrefKeys.rememberWindowPosition) ??
+                      false,
+              label: 'Remember Window Position',
+              onToggle: (value) {
+                setState(() {
+                  widget.onRememberWindowPositionChanged?.call(value);
+                });
+              },
+            ),
+          ),
+          Flexible(
+            flex: 4,
+            child: DialogToggleSwitch(
+              initialValue: widget.preferences.getBool(PrefKeys.layoutLocked) ??
+                  Settings.layoutLocked,
+              label: 'Lock Layout',
+              onToggle: (value) {
+                setState(() {
+                  widget.onLayoutLock?.call(value);
                 });
               },
             ),

@@ -48,6 +48,9 @@ class PrefKeys {
   static String cornerRadius = 'corner_radius';
   static String showGrid = 'show_grid';
   static String autoResizeToDS = 'auto_resize_to_driver_station';
+  static String rememberWindowPosition = 'remember_window_position';
   static String defaultPeriod = 'default_period';
   static String defaultGraphPeriod = 'default_graph_period';
+
+  static String windowPosition = 'window_position';
 }
