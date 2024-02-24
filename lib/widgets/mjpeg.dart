@@ -84,7 +84,7 @@ class Mjpeg extends HookWidget {
     final state = useMemoized(() => _MjpegStateNotifier());
     final visible = useListenable(state);
     final errorState = useState<List<dynamic>?>(null);
-    final isMounted = useIsMounted();
+    isMounted() => context.mounted;
 
     final manager = useMemoized(
         () => _manager = _StreamManager(
@@ -219,7 +219,7 @@ class _StreamManager {
       return;
     }
     try {
-      final request = Request("GET", Uri.parse(stream));
+      final request = Request('GET', Uri.parse(stream));
       request.headers.addAll(headers);
       final response = await _httpClient.send(request).timeout(
           _timeout); //timeout is to prevent process to hang forever in some case
