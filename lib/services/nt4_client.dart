@@ -76,12 +76,14 @@ class NT4Subscription {
   }
 
   Stream<Object?> periodicStream({bool yieldAll = true}) async* {
+    final Duration delayTime =
+        Duration(microseconds: (options.periodicRateSeconds * 1e6).round());
+
     yield currentValue;
     Object? lastYielded = currentValue;
 
     while (true) {
-      await Future.delayed(
-          Duration(microseconds: (options.periodicRateSeconds * 1e6).round()));
+      await Future.delayed(delayTime);
 
       if (lastYielded != currentValue || yieldAll) {
         yield currentValue;

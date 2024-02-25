@@ -139,10 +139,9 @@ class TextDisplay extends NTWidget {
       stream: model.subscription?.periodicStream(),
       initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
-        Object data = snapshot.data ?? Object();
+        Object? data = snapshot.data;
 
-        if (data.toString() != model.previousValue.toString() &&
-            !data.isExactType<Object>()) {
+        if (data?.toString() != model.previousValue?.toString() && data != null) {
           // Needed to prevent errors
           Future(() async {
             model.controller.text = data.toString();

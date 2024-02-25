@@ -697,9 +697,9 @@ class TabGrid extends StatelessWidget {
     Widget getWidgetFromModel(WidgetContainerModel model) {
       if (model is NTWidgetContainerModel) {
         return ChangeNotifierProvider<NTWidgetContainerModel>.value(
-          key: model.key,
           value: model,
           child: DraggableNTWidgetContainer(
+            key: model.key,
             tabGrid: this,
             onUpdate: _ntContainerOnUpdate,
             onDragBegin: _ntContainerOnDragBegin,
@@ -711,9 +711,9 @@ class TabGrid extends StatelessWidget {
         );
       } else if (model is ListLayoutModel) {
         return ChangeNotifierProvider<ListLayoutModel>.value(
-          key: model.key,
           value: model,
           child: DraggableListLayout(
+            key: model.key,
             tabGrid: this,
             onUpdate: _layoutContainerOnUpdate,
             onDragBegin: _layoutContainerOnDragBegin,

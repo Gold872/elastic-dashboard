@@ -193,6 +193,12 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   Stream<Object> get multiTopicPeriodicStream async* {
+    final Duration delayTime = Duration(
+        microseconds: ((subscription?.options.periodicRateSeconds ??
+                    Settings.defaultPeriod) *
+                1e6)
+            .round());
+
     int previousHash = Object.hashAll(getCurrentData());
 
     while (true) {
@@ -203,11 +209,7 @@ class NTWidgetModel extends ChangeNotifier {
         previousHash = currentHash;
       }
 
-      await Future.delayed(Duration(
-          milliseconds: ((subscription?.options.periodicRateSeconds ??
-                      Settings.defaultPeriod) *
-                  1000)
-              .round()));
+      await Future.delayed(delayTime);
     }
   }
 

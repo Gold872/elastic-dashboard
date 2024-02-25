@@ -315,6 +315,12 @@ class FieldWidgetModel extends NTWidgetModel {
 
   @override
   Stream<Object> get multiTopicPeriodicStream async* {
+    final Duration delayTime = Duration(
+        microseconds: ((subscription?.options.periodicRateSeconds ??
+                    Settings.defaultPeriod) *
+                1e6)
+            .round());
+
     yield Object();
 
     int previousHash = Object.hashAll(getCurrentData());
@@ -329,11 +335,7 @@ class FieldWidgetModel extends NTWidgetModel {
         yield Object();
       }
 
-      await Future.delayed(Duration(
-          milliseconds: ((subscription?.options.periodicRateSeconds ??
-                      Settings.defaultPeriod) *
-                  1000)
-              .round()));
+      await Future.delayed(delayTime);
     }
   }
 
