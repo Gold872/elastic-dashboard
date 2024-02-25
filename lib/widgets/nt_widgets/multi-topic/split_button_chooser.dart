@@ -89,7 +89,7 @@ class SplitButtonChooserModel extends NTWidgetModel {
     String defaultOption =
         tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName)) ?? '';
 
-    return [options, active, selected, defaultOption];
+    return [...options, active, selected, defaultOption];
   }
 }
 

@@ -163,7 +163,6 @@ class BasicSwerveModel extends NTWidgetModel {
       backRightAngle,
       backRightVelocity,
       robotAngle,
-      _showRobotRotation,
     ];
   }
 

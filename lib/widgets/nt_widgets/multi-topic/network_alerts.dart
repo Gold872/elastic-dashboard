@@ -40,7 +40,7 @@ class NetworkAlertsModel extends NTWidgetModel {
     List<String> warnings = warningsRaw.whereType<String>().toList();
     List<String> infos = infosRaw.whereType<String>().toList();
 
-    return [errors, warnings, infos];
+    return [...errors, ...warnings, ...infos];
   }
 }
 

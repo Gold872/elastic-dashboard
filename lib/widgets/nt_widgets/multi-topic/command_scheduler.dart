@@ -67,7 +67,7 @@ class CommandSchedulerModel extends NTWidgetModel {
     List<String> names = rawNames.whereType<String>().toList();
     List<int> ids = rawIds.whereType<int>().toList();
 
-    return [names, ids];
+    return [...names, ...ids];
   }
 }
 

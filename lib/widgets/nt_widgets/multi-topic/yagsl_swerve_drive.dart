@@ -126,7 +126,6 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       rotationUnit,
       robotAngle,
       maxSpeed,
-      _showRobotRotation,
     ];
   }
 }

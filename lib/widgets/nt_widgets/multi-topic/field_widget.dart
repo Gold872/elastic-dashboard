@@ -283,7 +283,7 @@ class FieldWidgetModel extends NTWidgetModel {
 
     List<double> robotPosition = robotPositionRaw.whereType<double>().toList();
 
-    data.add(robotPosition);
+    data.addAll(robotPosition);
 
     if (_showOtherObjects || _showTrajectories) {
       for (String objectTopic in _otherObjectTopics) {
@@ -306,18 +306,9 @@ class FieldWidgetModel extends NTWidgetModel {
         List<double> objectPosition =
             objectPositionRaw.whereType<double>().toList();
 
-        data.add(objectPosition);
+        data.addAll(objectPosition);
       }
     }
-
-    data.addAll([
-      _showOtherObjects,
-      _showTrajectories,
-      _robotWidthMeters,
-      _robotLengthMeters,
-      _otherObjectTopics,
-      _fieldGame,
-    ]);
 
     return data;
   }
@@ -326,14 +317,14 @@ class FieldWidgetModel extends NTWidgetModel {
   Stream<Object> get multiTopicPeriodicStream async* {
     yield Object();
 
-    List<Object> previousData = getCurrentData();
+    int previousHash = Object.hashAll(getCurrentData());
 
     while (true) {
-      List<Object> currentData = getCurrentData();
+      int currentHash = Object.hashAll(getCurrentData());
 
-      if (previousData.hashCode != currentData.hashCode) {
+      if (previousHash != currentHash) {
         yield Object();
-        previousData = currentData;
+        previousHash = currentHash;
       } else if (!rendered) {
         yield Object();
       }
@@ -535,12 +526,12 @@ class FieldWidget extends NTWidget {
         double scaleReduction = (_getBackgroundFitWidth(model, size)) /
             (model.field.fieldImageWidth ?? 1);
 
-        if (renderBox != null &&
+        if (!model.rendered &&
+            renderBox != null &&
             model.widgetSize != null &&
             size != const Size(0, 0) &&
             size.width > 100.0 &&
             scaleReduction != 0.0 &&
-            robotPosition != null &&
             fieldCenter != const Offset(0.0, 0.0) &&
             model.field.fieldImageLoaded) {
           model.rendered = true;

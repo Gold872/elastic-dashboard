@@ -193,14 +193,14 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   Stream<Object> get multiTopicPeriodicStream async* {
-    int previousData = Object.hashAll(getCurrentData());
+    int previousHash = Object.hashAll(getCurrentData());
 
     while (true) {
-      int currentData = Object.hashAll(getCurrentData());
+      int currentHash = Object.hashAll(getCurrentData());
 
-      if (previousData != currentData) {
+      if (previousHash != currentHash) {
         yield Object();
-        previousData = currentData;
+        previousHash = currentHash;
       }
 
       await Future.delayed(Duration(
