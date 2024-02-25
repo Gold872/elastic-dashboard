@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:dot_cast/dot_cast.dart';
+
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -352,7 +354,12 @@ class NTWidgetBuilder {
 
     onWidgetTypeNotFound
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
-    return NTWidgetModel.createDefault(type: type, topic: '');
+    return NTWidgetModel.createDefault(
+      type: type,
+      topic: tryCast(jsonData['topic']) ?? '',
+      dataType: tryCast(jsonData['data_type']) ?? 'Unknown',
+      period: tryCast(jsonData['period']),
+    );
   }
 
   static double getMinimumWidth(NTWidgetModel widget) {

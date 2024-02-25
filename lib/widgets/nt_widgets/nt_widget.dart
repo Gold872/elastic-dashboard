@@ -151,7 +151,7 @@ class NTWidgetModel extends ChangeNotifier {
     if (subscription != null) {
       ntConnection.unSubscribe(subscription!);
     }
-    notifyListeners();
+    refresh();
   }
 
   void disposeWidget({bool deleting = false}) {}
@@ -162,7 +162,7 @@ class NTWidgetModel extends ChangeNotifier {
 
       ntTopic = null;
 
-      notifyListeners();
+      refresh();
       return;
     }
 
@@ -182,7 +182,7 @@ class NTWidgetModel extends ChangeNotifier {
       }
     }
 
-    notifyListeners();
+    refresh();
   }
 
   static final Function listEquals = const DeepCollectionEquality().equals;
@@ -193,12 +193,12 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   Stream<Object> get multiTopicPeriodicStream async* {
-    List<Object> previousData = getCurrentData();
+    int previousData = Object.hashAll(getCurrentData());
 
     while (true) {
-      List<Object> currentData = getCurrentData();
+      int currentData = Object.hashAll(getCurrentData());
 
-      if (previousData.hashCode != currentData.hashCode) {
+      if (previousData != currentData) {
         yield Object();
         previousData = currentData;
       }

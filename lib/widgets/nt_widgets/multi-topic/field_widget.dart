@@ -272,17 +272,6 @@ class FieldWidgetModel extends NTWidgetModel {
     ];
   }
 
-  void updateOtherObjectTopics() {
-    for (NT4Topic nt4Topic in ntConnection.nt4Client.announcedTopics.values) {
-      if (nt4Topic.name.contains(topic) &&
-          !nt4Topic.name.contains('Robot') &&
-          !nt4Topic.name.contains('.') &&
-          !_otherObjectTopics.contains(nt4Topic.name)) {
-        _otherObjectTopics.add(nt4Topic.name);
-      }
-    }
-  }
-
   @override
   List<Object> getCurrentData() {
     List<Object> data = [];
@@ -393,7 +382,6 @@ class FieldWidgetModel extends NTWidgetModel {
 
   set widgetSize(value) {
     _widgetSize = value;
-    refresh();
   }
 
   get field => _field;

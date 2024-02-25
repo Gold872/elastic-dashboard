@@ -308,9 +308,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);
 
-    if (newWidget == null) {
-      return;
-    }
+    newWidget ??= const EmptyNTWidget();
 
     child = newWidget;
 
