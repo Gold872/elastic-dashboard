@@ -141,7 +141,8 @@ class TextDisplay extends NTWidget {
       builder: (context, snapshot) {
         Object? data = snapshot.data;
 
-        if (data?.toString() != model.previousValue?.toString() && data != null) {
+        if (data?.toString() != model.previousValue?.toString() &&
+            data != null) {
           // Needed to prevent errors
           Future(() async {
             model.controller.text = data.toString();
