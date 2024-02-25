@@ -7,10 +7,50 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
+class FMSInfoModel extends NTWidgetModel {
+  @override
+  String type = FMSInfo.widgetType;
+
+  String get eventNameTopic => '$topic/EventName';
+  String get controlDataTopic => '$topic/FMSControlData';
+  String get allianceTopic => '$topic/IsRedAlliance';
+  String get matchNumberTopic => '$topic/MatchNumber';
+  String get matchTypeTopic => '$topic/MatchType';
+  String get replayNumberTopic => '$topic/ReplayNumber';
+  String get stationNumberTopic => '$topic/StationNumber';
+
+  FMSInfoModel({required super.topic, super.dataType, super.period});
+
+  FMSInfoModel.fromJson({required super.jsonData}) : super.fromJson();
+
+  @override
+  List<Object> getCurrentData() {
+    String eventName =
+        tryCast(ntConnection.getLastAnnouncedValue(eventNameTopic)) ?? '';
+    int controlData =
+        tryCast(ntConnection.getLastAnnouncedValue(controlDataTopic)) ?? 32;
+    bool redAlliance =
+        tryCast(ntConnection.getLastAnnouncedValue(allianceTopic)) ?? true;
+    int matchNumber =
+        tryCast(ntConnection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
+    int matchType =
+        tryCast(ntConnection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
+    int replayNumber =
+        tryCast(ntConnection.getLastAnnouncedValue(replayNumberTopic)) ?? 0;
+
+    return [
+      eventName,
+      controlData,
+      redAlliance,
+      matchNumber,
+      matchType,
+      replayNumber,
+    ];
+  }
+}
+
 class FMSInfo extends NTWidget {
   static const String widgetType = 'FMSInfo';
-  @override
-  String type = widgetType;
 
   static const int ENABLED_FLAG = 0x01;
   static const int AUTO_FLAG = 0x02;
@@ -19,48 +59,7 @@ class FMSInfo extends NTWidget {
   static const int FMS_ATTACHED_FLAG = 0x10;
   static const int DS_ATTACHED_FLAG = 0x20;
 
-  late String _eventNameTopic;
-  late String _controlDataTopic;
-  late String _allianceTopic;
-  late String _matchNumberTopic;
-  late String _matchTypeTopic;
-  late String _replayNumberTopic;
-  late String _stationNumberTopic;
-
-  FMSInfo({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  FMSInfo.fromJson({super.key, required super.jsonData}) : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    _eventNameTopic = '$topic/EventName';
-    _controlDataTopic = '$topic/FMSControlData';
-    _allianceTopic = '$topic/IsRedAlliance';
-    _matchNumberTopic = '$topic/MatchNumber';
-    _matchTypeTopic = '$topic/MatchType';
-    _replayNumberTopic = '$topic/ReplayNumber';
-    _stationNumberTopic = '$topic/StationNumber';
-  }
-
-  @override
-  void resetSubscription() {
-    _eventNameTopic = '$topic/EventName';
-    _controlDataTopic = '$topic/FMSControlData';
-    _allianceTopic = '$topic/IsRedAlliance';
-    _matchNumberTopic = '$topic/MatchNumber';
-    _matchTypeTopic = '$topic/MatchType';
-    _replayNumberTopic = '$topic/ReplayNumber';
-    _stationNumberTopic = '$topic/StationNumber';
-
-    super.resetSubscription();
-  }
+  const FMSInfo({super.key}) : super();
 
   String _getMatchTypeString(int matchType) {
     switch (matchType) {
@@ -80,51 +79,30 @@ class FMSInfo extends NTWidget {
   }
 
   @override
-  List<Object> getCurrentData() {
-    String eventName =
-        tryCast(ntConnection.getLastAnnouncedValue(_eventNameTopic)) ?? '';
-    int controlData =
-        tryCast(ntConnection.getLastAnnouncedValue(_controlDataTopic)) ?? 32;
-    bool redAlliance =
-        tryCast(ntConnection.getLastAnnouncedValue(_allianceTopic)) ?? true;
-    int matchNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(_matchNumberTopic)) ?? 0;
-    int matchType =
-        tryCast(ntConnection.getLastAnnouncedValue(_matchTypeTopic)) ?? 0;
-    int replayNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(_replayNumberTopic)) ?? 0;
-
-    return [
-      eventName,
-      controlData,
-      redAlliance,
-      matchNumber,
-      matchType,
-      replayNumber,
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    FMSInfoModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         String eventName =
-            tryCast(ntConnection.getLastAnnouncedValue(_eventNameTopic)) ?? '';
-        int controlData =
-            tryCast(ntConnection.getLastAnnouncedValue(_controlDataTopic)) ??
-                32;
+            tryCast(ntConnection.getLastAnnouncedValue(model.eventNameTopic)) ??
+                '';
+        int controlData = tryCast(
+                ntConnection.getLastAnnouncedValue(model.controlDataTopic)) ??
+            32;
         bool redAlliance =
-            tryCast(ntConnection.getLastAnnouncedValue(_allianceTopic)) ?? true;
-        int matchNumber =
-            tryCast(ntConnection.getLastAnnouncedValue(_matchNumberTopic)) ?? 0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.allianceTopic)) ??
+                true;
+        int matchNumber = tryCast(
+                ntConnection.getLastAnnouncedValue(model.matchNumberTopic)) ??
+            0;
         int matchType =
-            tryCast(ntConnection.getLastAnnouncedValue(_matchTypeTopic)) ?? 0;
-        int replayNumber =
-            tryCast(ntConnection.getLastAnnouncedValue(_replayNumberTopic)) ??
+            tryCast(ntConnection.getLastAnnouncedValue(model.matchTypeTopic)) ??
                 0;
+        int replayNumber = tryCast(
+                ntConnection.getLastAnnouncedValue(model.replayNumberTopic)) ??
+            0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);

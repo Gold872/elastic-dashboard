@@ -6,65 +6,49 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class ThreeAxisAccelerometer extends NTWidget {
-  static const String widgetType = '3-Axis Accelerometer';
+class ThreeAxisAccelerometerModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = ThreeAxisAccelerometer.widgetType;
 
-  late String _xTopic;
-  late String _yTopic;
-  late String _zTopic;
+  String get xTopic => '$topic/X';
+  String get yTopic => '$topic/Y';
+  String get zTopic => '$topic/Z';
 
-  ThreeAxisAccelerometer({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  });
+  ThreeAxisAccelerometerModel(
+      {required super.topic, super.dataType, super.period})
+      : super();
 
-  ThreeAxisAccelerometer.fromJson({super.key, required super.jsonData})
+  ThreeAxisAccelerometerModel.fromJson({required super.jsonData})
       : super.fromJson();
 
   @override
-  void init() {
-    super.init();
-
-    _xTopic = '$topic/X';
-    _yTopic = '$topic/Y';
-    _zTopic = '$topic/Z';
-  }
-
-  @override
-  void resetSubscription() {
-    _xTopic = '$topic/X';
-    _yTopic = '$topic/Y';
-    _zTopic = '$topic/Z';
-
-    super.resetSubscription();
-  }
-
-  @override
   List<Object> getCurrentData() {
-    double xAccel = tryCast(ntConnection.getLastAnnouncedValue(_xTopic)) ?? 0.0;
-    double yAccel = tryCast(ntConnection.getLastAnnouncedValue(_yTopic)) ?? 0.0;
-    double zAccel = tryCast(ntConnection.getLastAnnouncedValue(_zTopic)) ?? 0.0;
+    double xAccel = tryCast(ntConnection.getLastAnnouncedValue(xTopic)) ?? 0.0;
+    double yAccel = tryCast(ntConnection.getLastAnnouncedValue(yTopic)) ?? 0.0;
+    double zAccel = tryCast(ntConnection.getLastAnnouncedValue(zTopic)) ?? 0.0;
 
     return [xAccel, yAccel, zAccel];
   }
+}
+
+class ThreeAxisAccelerometer extends NTWidget {
+  static const String widgetType = '3-Axis Accelerometer';
+
+  const ThreeAxisAccelerometer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    ThreeAxisAccelerometerModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double xAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(_xTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.xTopic)) ?? 0.0;
         double yAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(_yTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.yTopic)) ?? 0.0;
         double zAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(_zTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.zTopic)) ?? 0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

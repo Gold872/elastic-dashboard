@@ -12,19 +12,52 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class VoltageView extends NTWidget {
-  static const String widgetType = 'Voltage View';
+class VoltageViewModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = VoltageView.widgetType;
 
-  late double _minValue;
-  late double _maxValue;
-  late int? _divisions;
-  late bool _inverted;
-  late String _orientation;
+  double _minValue = 4.0;
+  double _maxValue = 13.0;
+  int? _divisions = 5;
+  bool _inverted = false;
+  String _orientation = 'horizontal';
 
-  VoltageView({
-    super.key,
+  double get minValue => _minValue;
+
+  set minValue(value) {
+    _minValue = value;
+    refresh();
+  }
+
+  double get maxValue => _maxValue;
+
+  set maxValue(value) {
+    _maxValue = value;
+    refresh();
+  }
+
+  int? get divisions => _divisions;
+
+  set divisions(value) {
+    _divisions = value;
+    refresh();
+  }
+
+  bool get inverted => _inverted;
+
+  set inverted(value) {
+    _inverted = value;
+    refresh();
+  }
+
+  String get orientation => _orientation;
+
+  set orientation(value) {
+    _orientation = value;
+    refresh();
+  }
+
+  VoltageViewModel({
     required super.topic,
     double minValue = 4.0,
     double maxValue = 13.0,
@@ -34,19 +67,17 @@ class VoltageView extends NTWidget {
     super.dataType,
     super.period,
   })  : _orientation = orientation,
-        _inverted = inverted,
         _divisions = divisions,
+        _inverted = inverted,
         _maxValue = maxValue,
         _minValue = minValue,
         super();
 
-  VoltageView.fromJson({super.key, required Map<String, dynamic> jsonData})
+  VoltageViewModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
-    _minValue = tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? 4;
-    _maxValue =
-        tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 13.0;
-    _divisions =
-        tryCast(jsonData['divisions']) ?? tryCast(jsonData['numOfTickMarks']);
+    _minValue = tryCast(jsonData['min_value']) ?? 4.0;
+    _maxValue = tryCast(jsonData['max_value']) ?? 13.0;
+    _divisions = tryCast(jsonData['divisions']);
     _inverted = tryCast(jsonData['inverted']) ?? false;
     _orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
   }
@@ -79,8 +110,7 @@ class VoltageView extends NTWidget {
                 return;
               }
 
-              _orientation = value.toLowerCase();
-              refresh();
+              orientation = value.toLowerCase();
             },
           ),
         ],
@@ -98,8 +128,7 @@ class VoltageView extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                _minValue = newMin;
-                refresh();
+                minValue = newMin;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
@@ -113,8 +142,7 @@ class VoltageView extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                _maxValue = newMax;
-                refresh();
+                maxValue = newMax;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
@@ -136,8 +164,7 @@ class VoltageView extends NTWidget {
                 if (newDivisions != null && newDivisions < 2) {
                   return;
                 }
-                _divisions = newDivisions;
-                refresh();
+                divisions = newDivisions;
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
@@ -145,14 +172,14 @@ class VoltageView extends NTWidget {
               allowEmptySubmission: true,
             ),
           ),
+          const SizedBox(width: 5),
           Expanded(
             child: Center(
               child: DialogToggleSwitch(
                 initialValue: _inverted,
                 label: 'Inverted',
                 onToggle: (value) {
-                  _inverted = value;
-                  refresh();
+                  inverted = value;
                 },
               ),
             ),
@@ -161,26 +188,33 @@ class VoltageView extends NTWidget {
       ),
     ];
   }
+}
+
+class VoltageView extends NTWidget {
+  static const String widgetType = 'Voltage View';
+
+  const VoltageView({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    VoltageViewModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double voltage = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedVoltage = voltage.clamp(_minValue, _maxValue);
+        double clampedVoltage = voltage.clamp(model.minValue, model.maxValue);
 
-        double? divisionInterval = (_divisions != null)
-            ? (_maxValue - _minValue) / (_divisions! - 1)
+        double? divisionInterval = (model.divisions != null)
+            ? (model.maxValue - model.minValue) / (model.divisions! - 1)
             : null;
 
-        LinearGaugeOrientation gaugeOrientation = (_orientation == 'vertical')
-            ? LinearGaugeOrientation.vertical
-            : LinearGaugeOrientation.horizontal;
+        LinearGaugeOrientation gaugeOrientation =
+            (model.orientation == 'vertical')
+                ? LinearGaugeOrientation.vertical
+                : LinearGaugeOrientation.horizontal;
 
         List<Widget> children = [
           Text(
@@ -193,8 +227,8 @@ class VoltageView extends NTWidget {
           ),
           SfLinearGauge(
             key: UniqueKey(),
-            maximum: _maxValue,
-            minimum: _minValue,
+            maximum: model.maxValue,
+            minimum: model.minValue,
             barPointers: [
               LinearBarPointer(
                 value: clampedVoltage,
@@ -208,7 +242,7 @@ class VoltageView extends NTWidget {
             ),
             labelFormatterCallback: (value) => '$value V',
             orientation: gaugeOrientation,
-            isAxisInversed: _inverted,
+            isAxisInversed: model.inverted,
             interval: divisionInterval,
           ),
         ];

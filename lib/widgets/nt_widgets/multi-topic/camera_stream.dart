@@ -8,48 +8,50 @@ import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CameraStreamWidget extends NTWidget {
-  static const String widgetType = 'Camera Stream';
+class CameraStreamModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = CameraStreamWidget.widgetType;
 
-  late String _streamsTopic;
+  String get streamsTopic => '$topic/streams';
 
   Mjpeg? _streamWidget;
   MemoryImage? _lastDisplayedImage;
 
+  get streamWidget => _streamWidget;
+
+  set streamWidget(value) => _streamWidget = value;
+
+  get lastDisplayedImage => _lastDisplayedImage;
+
+  set lastDisplayedImage(value) => _lastDisplayedImage = value;
+
   bool _clientOpen = false;
 
-  CameraStreamWidget({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  get clientOpen => _clientOpen;
 
-  CameraStreamWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  set clientOpen(value) => _clientOpen = value;
+
+  CameraStreamModel({required super.topic, super.dataType, super.period})
+      : super();
+
+  CameraStreamModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void init() {
     super.init();
-
-    _streamsTopic = '$topic/streams';
 
     _clientOpen = true;
   }
 
   @override
   void resetSubscription() {
-    _closeClient();
-
-    _streamsTopic = '$topic/streams';
+    closeClient();
 
     super.resetSubscription();
   }
 
   @override
-  void dispose({bool deleting = false}) {
+  void disposeWidget({bool deleting = false}) {
     Future(() async {
       if (deleting) {
         await _streamWidget?.dispose();
@@ -62,10 +64,10 @@ class CameraStreamWidget extends NTWidget {
       }
     });
 
-    super.dispose(deleting: deleting);
+    super.disposeWidget(deleting: deleting);
   }
 
-  void _closeClient() {
+  void closeClient() {
     _lastDisplayedImage?.evict();
     _lastDisplayedImage = _streamWidget?.previousImage;
     _streamWidget?.dispose();
@@ -76,7 +78,7 @@ class CameraStreamWidget extends NTWidget {
   @override
   List<Object> getCurrentData() {
     List<Object?> rawStreams =
-        tryCast(ntConnection.getLastAnnouncedValue(_streamsTopic)) ?? [];
+        tryCast(ntConnection.getLastAnnouncedValue(streamsTopic)) ?? [];
     List<String> streams = rawStreams.whereType<String>().toList();
 
     return [
@@ -85,23 +87,30 @@ class CameraStreamWidget extends NTWidget {
       ntConnection.isNT4Connected,
     ];
   }
+}
+
+class CameraStreamWidget extends NTWidget {
+  static const String widgetType = 'Camera Stream';
+
+  const CameraStreamWidget({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    CameraStreamModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        if (!ntConnection.isNT4Connected && _clientOpen) {
-          _closeClient();
+        if (!ntConnection.isNT4Connected && model._clientOpen) {
+          model.closeClient();
         }
 
-        bool createNewWidget = _streamWidget == null ||
-            (!_clientOpen && ntConnection.isNT4Connected);
+        bool createNewWidget = model._streamWidget == null ||
+            (!model.clientOpen && ntConnection.isNT4Connected);
 
         List<Object?> rawStreams =
-            tryCast(ntConnection.getLastAnnouncedValue(_streamsTopic)) ?? [];
+            tryCast(ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
+                [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
@@ -118,11 +127,11 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (_lastDisplayedImage != null)
+              if (model.lastDisplayedImage != null)
                 Opacity(
                   opacity: 0.35,
                   child: Image(
-                    image: _lastDisplayedImage!,
+                    image: model.lastDisplayedImage!,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -145,12 +154,12 @@ class CameraStreamWidget extends NTWidget {
         }
 
         if (createNewWidget) {
-          _clientOpen = true;
-          _lastDisplayedImage?.evict();
+          model.clientOpen = true;
+          model.lastDisplayedImage?.evict();
 
           String stream = streams.last;
 
-          _streamWidget = Mjpeg(
+          model.streamWidget = Mjpeg(
             fit: BoxFit.contain,
             isLive: true,
             stream: stream,
@@ -160,7 +169,7 @@ class CameraStreamWidget extends NTWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            _streamWidget!,
+            model.streamWidget!,
           ],
         );
       },

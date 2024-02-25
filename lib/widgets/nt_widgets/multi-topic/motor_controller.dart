@@ -8,55 +8,55 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class MotorController extends NTWidget {
-  static const String widgetType = 'Motor Controller';
+class MotorControllerModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = MotorController.widgetType;
 
-  late String _valueTopic;
-  late NT4Subscription _valueSubscription;
+  String get valueTopic => '$topic/Value';
 
-  MotorController({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  late NT4Subscription valueSubscription;
 
-  MotorController.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  MotorControllerModel({required super.topic, super.dataType, super.period})
+      : super();
+
+  MotorControllerModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void init() {
     super.init();
 
-    _valueTopic = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(_valueSubscription);
+    ntConnection.unSubscribe(valueSubscription);
 
-    _valueTopic = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
 
     super.resetSubscription();
   }
 
   @override
   void unSubscribe() {
-    ntConnection.unSubscribe(_valueSubscription);
+    ntConnection.unSubscribe(valueSubscription);
 
     super.unSubscribe();
   }
+}
+
+class MotorController extends NTWidget {
+  static const String widgetType = 'Motor Controller';
+
+  const MotorController({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    MotorControllerModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: _valueSubscription.periodicStream(yieldAll: false),
+      stream: model.valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

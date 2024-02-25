@@ -8,20 +8,25 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CommandWidget extends NTWidget {
-  static const String widgetType = 'Command';
+class CommandModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = CommandWidget.widgetType;
 
-  NT4Topic? _runningTopic;
+  NT4Topic? runningTopic;
 
-  late String _runningTopicName;
-  late String _nameTopicName;
+  String get runningTopicName => '$topic/running';
+  String get nameTopicName => '$topic/name';
 
   bool _showType = true;
 
-  CommandWidget({
-    super.key,
+  bool get showType => _showType;
+
+  set showType(bool value) {
+    _showType = value;
+    refresh();
+  }
+
+  CommandModel({
     required super.topic,
     bool showType = true,
     super.dataType,
@@ -29,25 +34,14 @@ class CommandWidget extends NTWidget {
   })  : _showType = showType,
         super();
 
-  CommandWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+  CommandModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _showType = tryCast(jsonData['show_type']) ?? _showType;
   }
 
   @override
-  void init() {
-    super.init();
-
-    _runningTopicName = '$topic/running';
-    _nameTopicName = '$topic/.name';
-  }
-
-  @override
   void resetSubscription() {
-    _runningTopicName = '$topic/running';
-    _nameTopicName = '$topic/.name';
-
-    _runningTopic = null;
+    runningTopic = null;
 
     super.resetSubscription();
   }
@@ -67,8 +61,7 @@ class CommandWidget extends NTWidget {
         label: 'Show Command Type',
         initialValue: _showType,
         onToggle: (value) {
-          _showType = value;
-          refresh();
+          showType = value;
         },
       ),
     ];
@@ -76,41 +69,47 @@ class CommandWidget extends NTWidget {
 
   @override
   List<Object> getCurrentData() {
-    bool running = ntConnection
-            .getLastAnnouncedValue(_runningTopicName)
-            ?.tryCast<bool>() ??
-        false;
+    bool running =
+        ntConnection.getLastAnnouncedValue(runningTopicName)?.tryCast<bool>() ??
+            false;
     String name =
-        ntConnection.getLastAnnouncedValue(_nameTopicName)?.tryCast<String>() ??
+        ntConnection.getLastAnnouncedValue(nameTopicName)?.tryCast<String>() ??
             'Unknown';
 
     return [running, name];
   }
+}
+
+class CommandWidget extends NTWidget {
+  static const String widgetType = 'Command';
+
+  const CommandWidget({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    CommandModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         bool running = ntConnection
-                .getLastAnnouncedValue(_runningTopicName)
+                .getLastAnnouncedValue(model.runningTopicName)
                 ?.tryCast<bool>() ??
             false;
         String name = ntConnection
-                .getLastAnnouncedValue(_nameTopicName)
+                .getLastAnnouncedValue(model.nameTopicName)
                 ?.tryCast<String>() ??
             'Unknown';
 
-        String buttonText = topic.substring(topic.lastIndexOf('/') + 1);
+        String buttonText =
+            model.topic.substring(model.topic.lastIndexOf('/') + 1);
 
         ThemeData theme = Theme.of(context);
 
         return Column(
           children: [
             Visibility(
-              visible: _showType,
+              visible: model.showType,
               child: Text('Type: $name',
                   style: theme.textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis),
@@ -118,20 +117,20 @@ class CommandWidget extends NTWidget {
             const SizedBox(height: 10),
             GestureDetector(
               onTapUp: (_) {
-                bool publishTopic = _runningTopic == null;
+                bool publishTopic = model.runningTopic == null;
 
-                _runningTopic =
-                    ntConnection.getTopicFromName(_runningTopicName);
+                model.runningTopic =
+                    ntConnection.getTopicFromName(model.runningTopicName);
 
-                if (_runningTopic == null) {
+                if (model.runningTopic == null) {
                   return;
                 }
 
                 if (publishTopic) {
-                  ntConnection.nt4Client.publishTopic(_runningTopic!);
+                  ntConnection.nt4Client.publishTopic(model.runningTopic!);
                 }
 
-                ntConnection.updateDataFromTopic(_runningTopic!, !running);
+                ntConnection.updateDataFromTopic(model.runningTopic!, !running);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 50),

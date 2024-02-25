@@ -9,12 +9,19 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class MatchTimeWidget extends NTWidget {
-  static const String widgetType = 'Match Time';
+class MatchTimeModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = MatchTimeWidget.widgetType;
 
   String _timeDisplayMode = 'Minutes and Seconds';
+
+  String get timeDisplayMode => _timeDisplayMode;
+
+  set timeDisplayMode(String value) {
+    _timeDisplayMode = value;
+    refresh();
+  }
+
   static final List<String> _timeDisplayOptions = [
     'Minutes and Seconds',
     'Seconds Only',
@@ -23,20 +30,33 @@ class MatchTimeWidget extends NTWidget {
   int _redStartTime = 15;
   int _yellowStartTime = 30;
 
-  MatchTimeWidget({
-    super.key,
-    required super.topic,
-    String timeDisplayMode = 'Minutes and Seconds',
-    int redStartTime = 15,
-    int yellowStartTime = 30,
-    super.dataType,
-    super.period,
-  })  : _timeDisplayMode = timeDisplayMode,
+  get redStartTime => _redStartTime;
+
+  set redStartTime(value) {
+    _redStartTime = value;
+    refresh();
+  }
+
+  get yellowStartTime => _yellowStartTime;
+
+  set yellowStartTime(value) {
+    _yellowStartTime = value;
+    refresh();
+  }
+
+  MatchTimeModel(
+      {required super.topic,
+      String timeDisplayMode = 'Minutes and Seconds',
+      int redStartTime = 15,
+      int yellowStartTime = 30,
+      super.dataType,
+      super.period})
+      : _timeDisplayMode = timeDisplayMode,
         _yellowStartTime = yellowStartTime,
         _redStartTime = redStartTime,
         super();
 
-  MatchTimeWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+  MatchTimeModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _timeDisplayMode =
         tryCast(jsonData['time_display_mode']) ?? 'Minutes and Seconds';
@@ -65,9 +85,7 @@ class MatchTimeWidget extends NTWidget {
                 return;
               }
 
-              _timeDisplayMode = value;
-
-              refresh();
+              timeDisplayMode = value;
             },
           ),
           const SizedBox(height: 5),
@@ -88,8 +106,7 @@ class MatchTimeWidget extends NTWidget {
                         return;
                       }
 
-                      _redStartTime = newRedTime;
-                      refresh();
+                      redStartTime = newRedTime;
                     },
                     formatter: FilteringTextInputFormatter.digitsOnly,
                   ),
@@ -110,8 +127,7 @@ class MatchTimeWidget extends NTWidget {
                         return;
                       }
 
-                      _yellowStartTime = newYellowTime;
-                      refresh();
+                      yellowStartTime = newYellowTime;
                     },
                     formatter: FilteringTextInputFormatter.digitsOnly,
                   ),
@@ -133,11 +149,17 @@ class MatchTimeWidget extends NTWidget {
       'yellow_start_time': _yellowStartTime,
     };
   }
+}
 
-  Color _getTimeColor(num time) {
-    if (time <= _redStartTime) {
+class MatchTimeWidget extends NTWidget {
+  static const String widgetType = 'Match Time';
+
+  const MatchTimeWidget({super.key});
+
+  Color _getTimeColor(MatchTimeModel model, num time) {
+    if (time <= model.redStartTime) {
       return Colors.red;
-    } else if (time <= _yellowStartTime) {
+    } else if (time <= model.yellowStartTime) {
       return Colors.yellow;
     } else if (time <= 60.0) {
       return Colors.green;
@@ -152,17 +174,17 @@ class MatchTimeWidget extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    MatchTimeModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double time = tryCast(snapshot.data) ?? -1.0;
         time = time.floorToDouble();
 
         String timeDisplayString;
-        if (_timeDisplayMode == 'Minutes and Seconds' && time >= 0) {
+        if (model.timeDisplayMode == 'Minutes and Seconds' && time >= 0) {
           timeDisplayString = _secondsToMinutes(time.toInt());
         } else {
           timeDisplayString = time.toInt().toString();
@@ -179,7 +201,7 @@ class MatchTimeWidget extends NTWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     height: 1.0,
-                    color: _getTimeColor(time),
+                    color: _getTimeColor(model, time),
                   ),
                 ),
               ),

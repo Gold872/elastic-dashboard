@@ -6,60 +6,73 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class PowerDistribution extends NTWidget {
-  static const String widgetType = 'PowerDistribution';
+class PowerDistributionModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = PowerDistribution.widgetType;
 
-  static const int _numberOfChannels = 23;
+  static const int numberOfChannels = 23;
 
-  final List<String> _channelTopics = [];
+  final List<String> channelTopics = [];
 
-  late String _voltageTopic;
-  late String _currentTopic;
+  String get voltageTopic => '$topic/Voltage';
+  String get currentTopic => '$topic/TotalCurrent';
 
-  PowerDistribution({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  PowerDistributionModel({required super.topic, super.dataType, super.period})
+      : super();
 
-  PowerDistribution.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  PowerDistributionModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void init() {
     super.init();
 
-    for (int channel = 0; channel <= _numberOfChannels; channel++) {
-      _channelTopics.add('$topic/Chan$channel');
+    for (int channel = 0; channel <= numberOfChannels; channel++) {
+      channelTopics.add('$topic/Chan$channel');
     }
-
-    _voltageTopic = '$topic/Voltage';
-    _currentTopic = '$topic/TotalCurrent';
   }
 
   @override
   void resetSubscription() {
-    _channelTopics.clear();
+    channelTopics.clear();
 
-    for (int channel = 0; channel <= _numberOfChannels; channel++) {
-      _channelTopics.add('$topic/Chan$channel');
+    for (int channel = 0; channel <= numberOfChannels; channel++) {
+      channelTopics.add('$topic/Chan$channel');
     }
-
-    _voltageTopic = '$topic/Voltage';
-    _currentTopic = '$topic/TotalCurrent';
 
     super.resetSubscription();
   }
 
-  Widget _getChannelsColumn(BuildContext context, int start, int end) {
+  @override
+  List<Object> getCurrentData() {
+    List<Object> data = [];
+
+    double voltage =
+        tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
+    double totalCurrent =
+        tryCast(ntConnection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
+
+    data.addAll([voltage, totalCurrent]);
+
+    for (String channel in channelTopics) {
+      data.add(tryCast(ntConnection.getLastAnnouncedValue(channel)) ?? 0.0);
+    }
+
+    return data;
+  }
+}
+
+class PowerDistribution extends NTWidget {
+  static const String widgetType = 'PowerDistribution';
+
+  const PowerDistribution({super.key}) : super();
+
+  Widget _getChannelsColumn(
+      PowerDistributionModel model, BuildContext context, int start, int end) {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current = tryCast(
-              ntConnection.getLastAnnouncedValue(_channelTopics[channel])) ??
+      double current = tryCast(ntConnection
+              .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
       channels.add(
@@ -91,12 +104,13 @@ class PowerDistribution extends NTWidget {
     );
   }
 
-  Widget _getReversedChannelsColumn(BuildContext context, int start, int end) {
+  Widget _getReversedChannelsColumn(
+      PowerDistributionModel model, BuildContext context, int start, int end) {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current = tryCast(
-              ntConnection.getLastAnnouncedValue(_channelTopics[channel])) ??
+      double current = tryCast(ntConnection
+              .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
       channels.add(
@@ -130,34 +144,18 @@ class PowerDistribution extends NTWidget {
   }
 
   @override
-  List<Object> getCurrentData() {
-    List<Object> data = [];
-
-    double voltage =
-        tryCast(ntConnection.getLastAnnouncedValue(_voltageTopic)) ?? 0.0;
-    double totalCurrent =
-        tryCast(ntConnection.getLastAnnouncedValue(_currentTopic)) ?? 0.0;
-
-    data.addAll([voltage, totalCurrent]);
-
-    for (String channel in _channelTopics) {
-      data.add(tryCast(ntConnection.getLastAnnouncedValue(channel)) ?? 0.0);
-    }
-
-    return data;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    PowerDistributionModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double voltage =
-            tryCast(ntConnection.getLastAnnouncedValue(_voltageTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
+                0.0;
         double totalCurrent =
-            tryCast(ntConnection.getLastAnnouncedValue(_currentTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
+                0.0;
 
         return Column(
           children: [
@@ -215,8 +213,8 @@ class PowerDistribution extends NTWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // First 12 channels
-                  _getChannelsColumn(context, 0, 11),
-                  _getReversedChannelsColumn(context, 23, 12),
+                  _getChannelsColumn(model, context, 0, 11),
+                  _getReversedChannelsColumn(model, context, 23, 12),
                 ],
               ),
             ),

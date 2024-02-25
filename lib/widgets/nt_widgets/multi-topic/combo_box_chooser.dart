@@ -9,29 +9,34 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class ComboBoxChooser extends NTWidget {
-  static const String widgetType = 'ComboBox Chooser';
+class ComboBoxChooserModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = ComboBoxChooser.widgetType;
 
-  late String _optionsTopicName;
-  late String _selectedTopicName;
-  late String _activeTopicName;
-  late String _defaultTopicName;
+  String get optionsTopicName => '$topic/options';
+  String get selectedTopicName => '$topic/selected';
+  String get activeTopicName => '$topic/active';
+  String get defaultTopicName => '$topic/default';
 
   final TextEditingController _searchController = TextEditingController();
 
-  String? _selectedChoice;
+  String? selectedChoice;
 
-  StringChooserData? _previousData;
+  StringChooserData? previousData;
 
   NT4Topic? _selectedTopic;
   NT4Topic? _activeTopic;
 
   bool _sortOptions = false;
 
-  ComboBoxChooser({
-    super.key,
+  get sortOptions => _sortOptions;
+
+  set sortOptions(value) {
+    _sortOptions = value;
+    refresh();
+  }
+
+  ComboBoxChooserModel({
     required super.topic,
     bool sortOptions = false,
     super.dataType,
@@ -39,28 +44,13 @@ class ComboBoxChooser extends NTWidget {
   })  : _sortOptions = sortOptions,
         super();
 
-  ComboBoxChooser.fromJson({super.key, required Map<String, dynamic> jsonData})
+  ComboBoxChooserModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _sortOptions = tryCast(jsonData['sort_options']) ?? _sortOptions;
   }
 
   @override
-  void init() {
-    super.init();
-
-    _optionsTopicName = '$topic/options';
-    _selectedTopicName = '$topic/selected';
-    _activeTopicName = '$topic/active';
-    _defaultTopicName = '$topic/default';
-  }
-
-  @override
   void resetSubscription() {
-    _optionsTopicName = '$topic/options';
-    _selectedTopicName = '$topic/selected';
-    _activeTopicName = '$topic/active';
-    _defaultTopicName = '$topic/default';
-
     _selectedTopic = null;
 
     super.resetSubscription();
@@ -81,21 +71,19 @@ class ComboBoxChooser extends NTWidget {
         label: 'Sort Options Alphabetically',
         initialValue: _sortOptions,
         onToggle: (value) {
-          _sortOptions = value;
-
-          refresh();
+          sortOptions = value;
         },
       ),
     ];
   }
 
-  void _publishSelectedValue(String? selected) {
+  void publishSelectedValue(String? selected) {
     if (selected == null || !ntConnection.isNT4Connected) {
       return;
     }
 
     _selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(_selectedTopicName, NT4TypeStr.kString);
+        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
@@ -107,7 +95,7 @@ class ComboBoxChooser extends NTWidget {
 
     bool publishTopic = _activeTopic == null;
 
-    _activeTopic ??= ntConnection.getTopicFromName(_activeTopicName);
+    _activeTopic ??= ntConnection.getTopicFromName(activeTopicName);
 
     if (_activeTopic == null) {
       return;
@@ -123,56 +111,62 @@ class ComboBoxChooser extends NTWidget {
   @override
   List<Object> getCurrentData() {
     List<Object?> rawOptions = ntConnection
-            .getLastAnnouncedValue(_optionsTopicName)
+            .getLastAnnouncedValue(optionsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<String> options = rawOptions.whereType<String>().toList();
 
     String active =
-        tryCast(ntConnection.getLastAnnouncedValue(_activeTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(activeTopicName)) ?? '';
 
     String selected =
-        tryCast(ntConnection.getLastAnnouncedValue(_selectedTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(selectedTopicName)) ?? '';
 
     String defaultOption =
-        tryCast(ntConnection.getLastAnnouncedValue(_defaultTopicName)) ?? '';
+        tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName)) ?? '';
 
     return [options, active, selected, defaultOption];
   }
+}
+
+class ComboBoxChooser extends NTWidget {
+  static const String widgetType = 'ComboBox Chooser';
+
+  const ComboBoxChooser({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    ComboBoxChooserModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> rawOptions = ntConnection
-                .getLastAnnouncedValue(_optionsTopicName)
+                .getLastAnnouncedValue(model.optionsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<String> options = rawOptions.whereType<String>().toList();
 
-        if (_sortOptions) {
+        if (model.sortOptions) {
           options.sort();
         }
 
         String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(_activeTopicName));
+            tryCast(ntConnection.getLastAnnouncedValue(model.activeTopicName));
         if (active != null && active == '') {
           active = null;
         }
 
-        String? selected =
-            tryCast(ntConnection.getLastAnnouncedValue(_selectedTopicName));
+        String? selected = tryCast(
+            ntConnection.getLastAnnouncedValue(model.selectedTopicName));
         if (selected != null && selected == '') {
           selected = null;
         }
 
         String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(_defaultTopicName));
+            tryCast(ntConnection.getLastAnnouncedValue(model.defaultTopicName));
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
@@ -191,29 +185,30 @@ class ComboBoxChooser extends NTWidget {
 
         // If a choice has been selected previously but the topic on NT has no value, publish it
         // This can happen if NT happens to restart
-        if (currentData.selectedChanged(_previousData)) {
-          if (selected != null && _selectedChoice != selected) {
-            _selectedChoice = selected;
+        if (currentData.selectedChanged(model.previousData)) {
+          if (selected != null && model.selectedChoice != selected) {
+            model.selectedChoice = selected;
           }
-        } else if (currentData.activeChanged(_previousData) || active == null) {
-          if (selected == null && _selectedChoice != null) {
-            if (options.contains(_selectedChoice!)) {
-              _publishSelectedValue(_selectedChoice!);
+        } else if (currentData.activeChanged(model.previousData) ||
+            active == null) {
+          if (selected == null && model.selectedChoice != null) {
+            if (options.contains(model.selectedChoice!)) {
+              model.publishSelectedValue(model.selectedChoice!);
             } else if (options.isNotEmpty) {
-              _selectedChoice = active;
+              model.selectedChoice = active;
             }
           }
         }
 
         // If nothing is selected but NT has an active value, set the selected to the NT value
         // This happens on program startup
-        if (active != null && _selectedChoice == null) {
-          _selectedChoice = active;
+        if (active != null && model.selectedChoice == null) {
+          model.selectedChoice = active;
         }
 
-        _previousData = currentData;
+        model.previousData = currentData;
 
-        bool showWarning = active != _selectedChoice;
+        bool showWarning = active != model.selectedChoice;
 
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -224,13 +219,13 @@ class ComboBoxChooser extends NTWidget {
                   minHeight: 36.0,
                 ),
                 child: _StringChooserDropdown(
-                  selected: _selectedChoice,
+                  selected: model.selectedChoice,
                   options: options,
-                  textController: _searchController,
+                  textController: model._searchController,
                   onValueChanged: (String? value) {
-                    _publishSelectedValue(value);
+                    model.publishSelectedValue(value);
 
-                    _selectedChoice = value;
+                    model.selectedChoice = value;
                   },
                 ),
               ),

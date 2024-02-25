@@ -8,30 +8,21 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ToggleButton extends NTWidget {
   static const String widgetType = 'Toggle Button';
-  @override
-  String type = widgetType;
 
-  ToggleButton({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  ToggleButton.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  const ToggleButton({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NTWidgetModel model = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-        stream: subscription?.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(topic),
+        stream: model.subscription?.periodicStream(yieldAll: false),
+        initialData: ntConnection.getLastAnnouncedValue(model.topic),
         builder: (context, snapshot) {
           bool value = tryCast(snapshot.data) ?? false;
 
-          String buttonText = topic.substring(topic.lastIndexOf('/') + 1);
+          String buttonText =
+              model.topic.substring(model.topic.lastIndexOf('/') + 1);
 
           Size buttonSize = MediaQuery.of(context).size;
 
@@ -39,20 +30,20 @@ class ToggleButton extends NTWidget {
 
           return GestureDetector(
             onTapUp: (_) {
-              bool publishTopic =
-                  ntTopic == null || !ntConnection.isTopicPublished(ntTopic);
+              bool publishTopic = model.ntTopic == null ||
+                  !ntConnection.isTopicPublished(model.ntTopic);
 
-              createTopicIfNull();
+              model.createTopicIfNull();
 
-              if (ntTopic == null) {
+              if (model.ntTopic == null) {
                 return;
               }
 
               if (publishTopic) {
-                ntConnection.nt4Client.publishTopic(ntTopic!);
+                ntConnection.nt4Client.publishTopic(model.ntTopic!);
               }
 
-              ntConnection.updateDataFromTopic(ntTopic!, !value);
+              ntConnection.updateDataFromTopic(model.ntTopic!, !value);
             },
             child: Padding(
               padding: EdgeInsets.symmetric(

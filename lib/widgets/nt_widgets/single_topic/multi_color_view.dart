@@ -8,26 +8,16 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class MultiColorView extends NTWidget {
   static const String widgetType = 'Multi Color View';
-  @override
-  String type = widgetType;
 
-  MultiColorView({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  MultiColorView.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  const MultiColorView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NTWidgetModel model = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         List<Object?> hexStringsRaw =
             snapshot.data?.tryCast<List<Object?>>() ?? [];

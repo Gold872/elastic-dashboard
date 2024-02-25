@@ -8,26 +8,16 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class SingleColorView extends NTWidget {
   static const String widgetType = 'Single Color View';
-  @override
-  String type = widgetType;
 
-  SingleColorView({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  SingleColorView.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  const SingleColorView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NTWidgetModel model = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         String hexString = tryCast(snapshot.data) ?? '';
 

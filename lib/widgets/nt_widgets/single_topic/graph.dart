@@ -12,10 +12,9 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dar
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class GraphWidget extends NTWidget {
-  static const String widgetType = 'Graph';
+class GraphModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = GraphWidget.widgetType;
 
   late double _timeDisplayed;
   double? _minValue;
@@ -23,11 +22,45 @@ class GraphWidget extends NTWidget {
   late Color _mainColor;
   late double _lineWidth;
 
+  get timeDisplayed => _timeDisplayed;
+
+  set timeDisplayed(value) {
+    _timeDisplayed = value;
+    refresh();
+  }
+
+  get minValue => _minValue;
+
+  set minValue(value) {
+    _minValue = value;
+    refresh();
+  }
+
+  get maxValue => _maxValue;
+
+  set maxValue(value) {
+    _maxValue = value;
+    refresh();
+  }
+
+  get mainColor => _mainColor;
+
+  set mainColor(value) {
+    _mainColor = value;
+    refresh();
+  }
+
+  get lineWidth => _lineWidth;
+
+  set lineWidth(value) {
+    _lineWidth = value;
+    refresh();
+  }
+
   List<_GraphPoint> _graphData = [];
   _GraphWidgetGraph? _graphWidget;
 
-  GraphWidget({
-    super.key,
+  GraphModel({
     required super.topic,
     double timeDisplayed = 5.0,
     double? minValue,
@@ -43,7 +76,7 @@ class GraphWidget extends NTWidget {
         _lineWidth = lineWidth,
         super();
 
-  GraphWidget.fromJson({super.key, required Map<String, dynamic> jsonData})
+  GraphModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
@@ -76,9 +109,7 @@ class GraphWidget extends NTWidget {
           Flexible(
             child: DialogColorPicker(
                 onColorPicked: (color) {
-                  _mainColor = color;
-
-                  refresh();
+                  mainColor = color;
                 },
                 label: 'Graph Color',
                 initialColor: _mainColor),
@@ -91,8 +122,7 @@ class GraphWidget extends NTWidget {
                 if (newTime == null) {
                   return;
                 }
-                _timeDisplayed = newTime;
-                refresh();
+                timeDisplayed = newTime;
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Time Displayed (Seconds)',
@@ -151,8 +181,7 @@ class GraphWidget extends NTWidget {
                   return;
                 }
 
-                _lineWidth = newWidth;
-                refresh();
+                lineWidth = newWidth;
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Line Width',
@@ -163,25 +192,31 @@ class GraphWidget extends NTWidget {
       ),
     ];
   }
+}
+
+class GraphWidget extends NTWidget {
+  static const String widgetType = 'Graph';
+
+  const GraphWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    GraphModel model = cast(context.watch<NTWidgetModel>());
 
-    List<_GraphPoint>? currentGraphData = _graphWidget?.getCurrentData();
+    List<_GraphPoint>? currentGraphData = model._graphWidget?.getCurrentData();
 
     if (currentGraphData != null) {
-      _graphData = currentGraphData;
+      model._graphData = currentGraphData;
     }
 
-    return _graphWidget = _GraphWidgetGraph(
-      initialData: _graphData,
-      subscription: subscription,
-      timeDisplayed: _timeDisplayed,
-      lineWidth: _lineWidth,
-      mainColor: _mainColor,
-      minValue: _minValue,
-      maxValue: _maxValue,
+    return model._graphWidget = _GraphWidgetGraph(
+      initialData: model._graphData,
+      subscription: model.subscription,
+      timeDisplayed: model.timeDisplayed,
+      lineWidth: model.lineWidth,
+      mainColor: model.mainColor,
+      minValue: model.minValue,
+      maxValue: model.maxValue,
     );
   }
 }

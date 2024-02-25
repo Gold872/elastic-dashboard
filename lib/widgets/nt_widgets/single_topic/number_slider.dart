@@ -11,22 +11,53 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NumberSlider extends NTWidget {
-  static const String widgetType = 'Number Slider';
+class NumberSliderModel extends NTWidgetModel {
   @override
-  final String type = widgetType;
+  String type = NumberSlider.widgetType;
 
-  late double _minValue;
-  late double _maxValue;
-  late int _divisions;
-  late bool _updateContinuously;
+  double _minValue = -1.0;
+  double _maxValue = 1.0;
+  int _divisions = 5;
+  bool _updateContinuously = false;
 
   double _currentValue = 0.0;
 
   bool _dragging = false;
 
-  NumberSlider({
-    super.key,
+  double get minValue => _minValue;
+
+  set minValue(value) {
+    _minValue = value;
+    refresh();
+  }
+
+  double get maxValue => _maxValue;
+
+  set maxValue(value) {
+    _maxValue = value;
+    refresh();
+  }
+
+  int get divisions => _divisions;
+
+  set divisions(value) {
+    _divisions = value;
+    refresh();
+  }
+
+  bool get updateContinuously => _updateContinuously;
+
+  set updateContinuously(value) => _updateContinuously = value;
+
+  double get currentValue => _currentValue;
+
+  set currentValue(value) => _currentValue = value;
+
+  bool get dragging => _dragging;
+
+  set dragging(value) => _dragging = value;
+
+  NumberSliderModel({
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -40,7 +71,7 @@ class NumberSlider extends NTWidget {
         _maxValue = maxValue,
         super();
 
-  NumberSlider.fromJson({super.key, required Map<String, dynamic> jsonData})
+  NumberSliderModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _minValue =
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
@@ -79,8 +110,7 @@ class NumberSlider extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                _minValue = newMin;
-                refresh();
+                minValue = newMin;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
@@ -94,8 +124,7 @@ class NumberSlider extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                _maxValue = newMax;
-                refresh();
+                maxValue = newMax;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
@@ -116,8 +145,7 @@ class NumberSlider extends NTWidget {
                 if (newDivisions == null || newDivisions < 2) {
                   return;
                 }
-                _divisions = newDivisions;
-                refresh();
+                divisions = newDivisions;
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
@@ -130,7 +158,7 @@ class NumberSlider extends NTWidget {
               initialValue: _updateContinuously,
               label: 'Update While Dragging',
               onToggle: (value) {
-                _updateContinuously = value;
+                updateContinuously = value;
               },
             ),
           ),
@@ -139,7 +167,7 @@ class NumberSlider extends NTWidget {
     ];
   }
 
-  void _publishValue(double value) {
+  void publishValue(double value) {
     bool publishTopic =
         ntTopic == null || !ntConnection.isTopicPublished(ntTopic);
 
@@ -155,37 +183,44 @@ class NumberSlider extends NTWidget {
 
     ntConnection.updateDataFromTopic(ntTopic!, value);
   }
+}
+
+class NumberSlider extends NTWidget {
+  static const String widgetType = 'Number Slider';
+
+  const NumberSlider({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NumberSliderModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedValue = value.clamp(_minValue, _maxValue);
+        double clampedValue = value.clamp(model.minValue, model.maxValue);
 
-        if (!_dragging) {
-          _currentValue = clampedValue;
+        if (!model.dragging) {
+          model.currentValue = clampedValue;
         }
 
-        double divisionSeparation = (_maxValue - _minValue) / (_divisions - 1);
+        double divisionSeparation =
+            (model.maxValue - model.minValue) / (model.divisions - 1);
 
         return Column(
           children: [
             Text(
-              _currentValue.toStringAsFixed(2),
+              model.currentValue.toStringAsFixed(2),
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),
             Expanded(
               child: SfLinearGauge(
                 key: UniqueKey(),
-                minimum: _minValue,
-                maximum: _maxValue,
+                minimum: model.minValue,
+                maximum: model.maxValue,
                 labelPosition: LinearLabelPosition.inside,
                 tickPosition: LinearElementPosition.cross,
                 interval: divisionSeparation,
@@ -194,7 +229,7 @@ class NumberSlider extends NTWidget {
                 ),
                 markerPointers: [
                   LinearShapePointer(
-                    value: _currentValue,
+                    value: model.currentValue,
                     color: Theme.of(context).colorScheme.primary,
                     height: 15.0,
                     width: 15.0,
@@ -203,19 +238,19 @@ class NumberSlider extends NTWidget {
                     position: LinearElementPosition.cross,
                     dragBehavior: LinearMarkerDragBehavior.free,
                     onChangeStart: (_) {
-                      _dragging = true;
+                      model.dragging = true;
                     },
                     onChanged: (value) {
-                      _currentValue = value;
+                      model.currentValue = value;
 
-                      if (_updateContinuously) {
-                        _publishValue(_currentValue);
+                      if (model.updateContinuously) {
+                        model.publishValue(model.currentValue);
                       }
                     },
                     onChangeEnd: (value) {
-                      _publishValue(_currentValue);
+                      model.publishValue(model.currentValue);
 
-                      _dragging = false;
+                      model.dragging = false;
                     },
                   ),
                 ],

@@ -101,7 +101,7 @@ class NetworkTableTreeRow {
     children.clear();
   }
 
-  static NTWidget? getNTWidgetFromTopic(NT4Topic ntTopic) {
+  static NTWidgetModel? getNTWidgetFromTopic(NT4Topic ntTopic) {
     switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
@@ -112,22 +112,20 @@ class NetworkTableTreeRow {
       case NT4TypeStr.kIntArr:
       case NT4TypeStr.kString:
       case NT4TypeStr.kStringArr:
-        return TextDisplay(
-          key: UniqueKey(),
-          dataType: ntTopic.type,
+        return TextDisplayModel(
           topic: ntTopic.name,
+          dataType: ntTopic.type,
         );
       case NT4TypeStr.kBool:
-        return BooleanBox(
-          key: UniqueKey(),
-          dataType: ntTopic.type,
+        return BooleanBoxModel(
           topic: ntTopic.name,
+          dataType: ntTopic.type,
         );
     }
     return null;
   }
 
-  Future<NTWidget?>? getPrimaryWidget() async {
+  Future<NTWidgetModel?>? getPrimaryWidget() async {
     if (ntTopic == null) {
       if (hasRow('.type')) {
         return await getTypedWidget('$topic/.type');
@@ -142,7 +140,7 @@ class NetworkTableTreeRow {
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
-        return CameraStreamWidget(key: UniqueKey(), topic: topic);
+        return CameraStreamModel(topic: topic);
       }
 
       if (hasRows([
@@ -154,7 +152,7 @@ class NetworkTableTreeRow {
         'sizeFrontBack',
         'sizeLeftRight',
       ])) {
-        return YAGSLSwerveDrive(key: UniqueKey(), topic: topic);
+        return YAGSLSwerveDriveModel(topic: topic);
       }
 
       return null;
@@ -167,14 +165,14 @@ class NetworkTableTreeRow {
     return ntConnection.subscribeAndRetrieveData(typeTopic);
   }
 
-  Future<NTWidget?>? getTypedWidget(String typeTopic) async {
+  Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {
     String? type = await getTypeString(typeTopic);
 
     if (type == null) {
       return null;
     }
 
-    return NTWidgetBuilder.buildNTWidgetFromType(type, topic);
+    return NTWidgetBuilder.buildNTModelFromType(type, topic);
   }
 
   Future<List<NTWidgetContainerModel>?> getListLayoutChildren() async {
@@ -202,7 +200,7 @@ class NetworkTableTreeRow {
     bool resortToListLayout = true,
     ListLayoutBuilder? listLayoutBuilder,
   }) async {
-    NTWidget? primary = await getPrimaryWidget();
+    NTWidgetModel? primary = await getPrimaryWidget();
 
     if (primary == null) {
       if (resortToListLayout) {
@@ -219,20 +217,30 @@ class NetworkTableTreeRow {
       return null;
     }
 
+    NTWidget? widget = NTWidgetBuilder.buildNTWidgetFromModel(primary);
+
+    if (widget == null) {
+      return null;
+    }
+
     double width = NTWidgetBuilder.getDefaultWidth(primary);
     double height = NTWidgetBuilder.getDefaultHeight(primary);
 
     return NTWidgetContainerModel(
       initialPosition: Rect.fromLTWH(0.0, 0.0, width, height),
       title: rowName,
-      child: primary,
+      childModel: primary,
     );
   }
 
   Future<WidgetContainer?> toWidgetContainer() async {
-    NTWidget? primary = await getPrimaryWidget();
-
+    NTWidgetModel? primary = await getPrimaryWidget();
     if (primary == null) {
+      return null;
+    }
+    NTWidget? widget = NTWidgetBuilder.buildNTWidgetFromModel(primary);
+
+    if (widget == null) {
       return null;
     }
 
@@ -243,7 +251,7 @@ class NetworkTableTreeRow {
       title: rowName,
       width: width,
       height: height,
-      child: primary,
+      child: widget,
     );
   }
 }

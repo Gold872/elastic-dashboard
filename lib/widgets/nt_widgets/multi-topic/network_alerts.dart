@@ -6,57 +6,33 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NetworkAlerts extends NTWidget {
-  static const String widgetType = 'Alerts';
+class NetworkAlertsModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = NetworkAlerts.widgetType;
 
-  late String _errorsTopicName;
-  late String _warningsTopicName;
-  late String _infosTopicName;
+  String get errorsTopicName => '$topic/errors';
+  String get warningsTopicName => '$topic/warnings';
+  String get infosTopicName => '$topic/infos';
 
-  NetworkAlerts({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  NetworkAlertsModel({required super.topic, super.dataType, super.period})
+      : super();
 
-  NetworkAlerts.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    _errorsTopicName = '$topic/errors';
-    _warningsTopicName = '$topic/warnings';
-    _infosTopicName = '$topic/infos';
-  }
-
-  @override
-  void resetSubscription() {
-    _errorsTopicName = '$topic/errors';
-    _warningsTopicName = '$topic/warnings';
-    _infosTopicName = '$topic/infos';
-
-    super.resetSubscription();
-  }
+  NetworkAlertsModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
     List<Object?> errorsRaw = ntConnection
-            .getLastAnnouncedValue(_errorsTopicName)
+            .getLastAnnouncedValue(errorsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> warningsRaw = ntConnection
-            .getLastAnnouncedValue(_warningsTopicName)
+            .getLastAnnouncedValue(warningsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> infosRaw = ntConnection
-            .getLastAnnouncedValue(_infosTopicName)
+            .getLastAnnouncedValue(infosTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -66,26 +42,32 @@ class NetworkAlerts extends NTWidget {
 
     return [errors, warnings, infos];
   }
+}
+
+class NetworkAlerts extends NTWidget {
+  static const String widgetType = 'Alerts';
+
+  const NetworkAlerts({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NetworkAlertsModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> errorsRaw = ntConnection
-                .getLastAnnouncedValue(_errorsTopicName)
+                .getLastAnnouncedValue(model.errorsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> warningsRaw = ntConnection
-                .getLastAnnouncedValue(_warningsTopicName)
+                .getLastAnnouncedValue(model.warningsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> infosRaw = ntConnection
-                .getLastAnnouncedValue(_infosTopicName)
+                .getLastAnnouncedValue(model.infosTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 

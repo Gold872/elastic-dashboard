@@ -6,61 +6,46 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class EncoderWidget extends NTWidget {
-  static const String widgetType = 'Encoder';
+class EncoderModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = EncoderWidget.widgetType;
 
-  late String _distanceTopic;
-  late String _speedTopic;
+  String get distanceTopic => '$topic/Distance';
+  String get speedTopic => '$topic/Speed';
 
-  EncoderWidget({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  EncoderModel({required super.topic, super.dataType, super.period}) : super();
 
-  EncoderWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    _distanceTopic = '$topic/Distance';
-    _speedTopic = '$topic/Speed';
-  }
-
-  @override
-  void resetSubscription() {
-    _distanceTopic = '$topic/Distance';
-    _speedTopic = '$topic/Speed';
-
-    super.resetSubscription();
-  }
+  EncoderModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
     double distance =
-        tryCast(ntConnection.getLastAnnouncedValue(_distanceTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
     double speed =
-        tryCast(ntConnection.getLastAnnouncedValue(_speedTopic)) ?? 0.0;
+        tryCast(ntConnection.getLastAnnouncedValue(speedTopic)) ?? 0.0;
 
     return [distance, speed];
   }
+}
+
+class EncoderWidget extends NTWidget {
+  static const String widgetType = 'Encoder';
+
+  const EncoderWidget({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    EncoderModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double distance =
-            tryCast(ntConnection.getLastAnnouncedValue(_distanceTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.distanceTopic)) ??
+                0.0;
         double speed =
-            tryCast(ntConnection.getLastAnnouncedValue(_speedTopic)) ?? 0.0;
+            tryCast(ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
+                0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

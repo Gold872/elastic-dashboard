@@ -211,7 +211,7 @@ class ListLayoutModel extends LayoutContainerModel {
                                   padding: EdgeInsets.zero,
                                   child: ExpansionTile(
                                     title: Text(container.title ?? ''),
-                                    subtitle: Text(container.child.type),
+                                    subtitle: Text(container.childModel.type),
                                     controlAffinity:
                                         ListTileControlAffinity.leading,
                                     trailing: IconButton(
@@ -298,7 +298,7 @@ class ListLayoutModel extends LayoutContainerModel {
     ];
 
     List<Widget> childEditProperties =
-        container.child.getEditProperties(context);
+        container.childModel.getEditProperties(context);
 
     return [
       ...containerEditProperties,
@@ -308,7 +308,7 @@ class ListLayoutModel extends LayoutContainerModel {
       }),
       if (childEditProperties.isNotEmpty) ...[
         const Divider(),
-        Text('${container.child.type} Widget Settings'),
+        Text('${container.childModel.type} Widget Settings'),
         const SizedBox(height: 5),
         ...childEditProperties,
       ],

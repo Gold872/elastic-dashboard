@@ -9,27 +9,32 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class Gyro extends NTWidget {
-  static const String widgetType = 'Gyro';
+class GyroModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = Gyro.widgetType;
+
+  String get valueTopic => '$topic/Value';
+
+  late NT4Subscription valueSubscription;
 
   bool _counterClockwisePositive = false;
 
-  late String _valueTopic;
+  get counterClockwisePositive => _counterClockwisePositive;
 
-  late NT4Subscription _valueSubscription;
+  set counterClockwisePositive(value) {
+    _counterClockwisePositive = value;
+    refresh();
+  }
 
-  Gyro({
-    super.key,
-    required super.topic,
-    bool counterClockwisePositive = false,
-    super.dataType,
-    super.period,
-  })  : _counterClockwisePositive = counterClockwisePositive,
+  GyroModel(
+      {required super.topic,
+      bool counterClockwisePositive = false,
+      super.dataType,
+      super.period})
+      : _counterClockwisePositive = counterClockwisePositive,
         super();
 
-  Gyro.fromJson({super.key, required Map<String, dynamic> jsonData})
+  GyroModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _counterClockwisePositive =
         tryCast(jsonData['counter_clockwise_positive']) ?? false;
@@ -39,24 +44,21 @@ class Gyro extends NTWidget {
   void init() {
     super.init();
 
-    _valueTopic = '$topic/Value';
-
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(_valueSubscription);
+    ntConnection.unSubscribe(valueSubscription);
 
-    _valueTopic = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
 
     super.resetSubscription();
   }
 
   @override
   void unSubscribe() {
-    ntConnection.unSubscribe(_valueSubscription);
+    ntConnection.unSubscribe(valueSubscription);
 
     super.unSubscribe();
   }
@@ -77,14 +79,18 @@ class Gyro extends NTWidget {
           initialValue: _counterClockwisePositive,
           label: 'Counter Clockwise Positive',
           onToggle: (value) {
-            _counterClockwisePositive = value;
-
-            refresh();
+            counterClockwisePositive = value;
           },
         ),
       ),
     ];
   }
+}
+
+class Gyro extends NTWidget {
+  static const String widgetType = 'Gyro';
+
+  const Gyro({super.key}) : super();
 
   double _wrapAngle(double angle) {
     if (angle < 0) {
@@ -96,15 +102,15 @@ class Gyro extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    GyroModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: _valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(_valueTopic),
+      stream: model.valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        if (_counterClockwisePositive) {
+        if (model.counterClockwisePositive) {
           value *= -1;
         }
 

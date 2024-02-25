@@ -365,7 +365,8 @@ class ShuffleboardNTListener {
     await Future.delayed(const Duration(seconds: 2, milliseconds: 750), () {
       currentJsonData.putIfAbsent(jsonKey, () => {});
 
-      String type = (!isCameraStream) ? ntWidget!.child.type : 'Camera Stream';
+      String type =
+          (!isCameraStream) ? ntWidget!.childModel.type : 'Camera Stream';
 
       currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
       currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
@@ -473,7 +474,7 @@ class ShuffleboardNTListener {
         }
 
         String type =
-            (!isCameraStream) ? ntWidget!.child.type : 'Camera Stream';
+            (!isCameraStream) ? ntWidget!.childModel.type : 'Camera Stream';
 
         child.putIfAbsent('type', () => type);
         child.putIfAbsent('x', () => 0.0);

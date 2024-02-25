@@ -9,50 +9,31 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CommandSchedulerWidget extends NTWidget {
-  static const String widgetType = 'Scheduler';
+class CommandSchedulerModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = CommandSchedulerWidget.widgetType;
 
   NT4Topic? _cancelTopic;
 
-  late String _namesTopicName;
-  late String _idsTopicName;
-  late String _cancelTopicName;
+  String get namesTopicName => '$topic/Names';
+  String get idsTopicName => '$topic/Ids';
+  String get cancelTopicName => '$topic/Cancel';
 
-  CommandSchedulerWidget({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  CommandSchedulerModel({required super.topic, super.dataType, super.period})
+      : super();
 
-  CommandSchedulerWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    _namesTopicName = '$topic/Names';
-    _idsTopicName = '$topic/Ids';
-    _cancelTopicName = '$topic/Cancel';
-  }
+  CommandSchedulerModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void resetSubscription() {
-    _namesTopicName = '$topic/Names';
-    _idsTopicName = '$topic/Ids';
-    _cancelTopicName = '$topic/Cancel';
-
     _cancelTopic = null;
 
     super.resetSubscription();
   }
 
-  void _cancelCommand(int id) {
+  void cancelCommand(int id) {
     List<Object?> currentCancellationsRaw = ntConnection
-            .getLastAnnouncedValue(_cancelTopicName)
+            .getLastAnnouncedValue(cancelTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -62,7 +43,7 @@ class CommandSchedulerWidget extends NTWidget {
     currentCancellations.add(id);
 
     _cancelTopic ??= ntConnection.nt4Client
-        .publishNewTopic(_cancelTopicName, NT4TypeStr.kIntArr);
+        .publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
 
     if (_cancelTopic == null) {
       return;
@@ -74,12 +55,12 @@ class CommandSchedulerWidget extends NTWidget {
   @override
   List<Object> getCurrentData() {
     List<Object?> rawNames = ntConnection
-            .getLastAnnouncedValue(_namesTopicName)
+            .getLastAnnouncedValue(namesTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
     List<Object?> rawIds = ntConnection
-            .getLastAnnouncedValue(_idsTopicName)
+            .getLastAnnouncedValue(idsTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -88,21 +69,27 @@ class CommandSchedulerWidget extends NTWidget {
 
     return [names, ids];
   }
+}
+
+class CommandSchedulerWidget extends NTWidget {
+  static const String widgetType = 'Scheduler';
+
+  const CommandSchedulerWidget({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    CommandSchedulerModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: multiTopicPeriodicStream,
+      stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> rawNames = ntConnection
-                .getLastAnnouncedValue(_namesTopicName)
+                .getLastAnnouncedValue(model.namesTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<Object?> rawIds = ntConnection
-                .getLastAnnouncedValue(_idsTopicName)
+                .getLastAnnouncedValue(model.idsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
@@ -135,7 +122,7 @@ class CommandSchedulerWidget extends NTWidget {
                     trailing: IconButton(
                       tooltip: 'Cancel Command',
                       onPressed: () {
-                        _cancelCommand(ids[index]);
+                        model.cancelCommand(ids[index]);
                       },
                       color: Colors.red,
                       icon: const Icon(Icons.cancel_outlined),

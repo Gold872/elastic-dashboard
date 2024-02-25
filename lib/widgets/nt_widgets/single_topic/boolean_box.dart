@@ -7,26 +7,38 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class BooleanBox extends NTWidget {
-  static const String widgetType = 'Boolean Box';
+class BooleanBoxModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = BooleanBox.widgetType;
 
-  late Color _trueColor;
-  late Color _falseColor;
+  Color _trueColor = Colors.green;
+  Color _falseColor = Colors.red;
 
-  BooleanBox({
-    super.key,
-    required super.topic,
-    Color trueColor = Colors.green,
-    Color falseColor = Colors.red,
-    super.dataType,
-    super.period,
-  })  : _falseColor = falseColor,
+  get trueColor => _trueColor;
+
+  set trueColor(value) {
+    _trueColor = value;
+    refresh();
+  }
+
+  get falseColor => _falseColor;
+
+  set falseColor(value) {
+    _falseColor = value;
+    refresh();
+  }
+
+  BooleanBoxModel(
+      {required super.topic,
+      Color trueColor = Colors.green,
+      Color falseColor = Colors.red,
+      super.dataType,
+      super.period})
+      : _falseColor = falseColor,
         _trueColor = trueColor,
         super();
 
-  BooleanBox.fromJson({super.key, required Map<String, dynamic> jsonData})
+  BooleanBoxModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =
         tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
@@ -83,8 +95,7 @@ class BooleanBox extends NTWidget {
         children: [
           DialogColorPicker(
             onColorPicked: (Color color) {
-              _trueColor = color;
-              refresh();
+              trueColor = color;
             },
             label: 'True Color',
             initialColor: _trueColor,
@@ -92,8 +103,7 @@ class BooleanBox extends NTWidget {
           const SizedBox(width: 10),
           DialogColorPicker(
             onColorPicked: (Color color) {
-              _falseColor = color;
-              refresh();
+              falseColor = color;
             },
             label: 'False Color',
             initialColor: _falseColor,
@@ -102,21 +112,27 @@ class BooleanBox extends NTWidget {
       ),
     ];
   }
+}
+
+class BooleanBox extends NTWidget {
+  static const String widgetType = 'Boolean Box';
+
+  const BooleanBox({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    BooleanBoxModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         bool value = tryCast(snapshot.data) ?? false;
 
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15.0),
-            color: (value) ? _trueColor : _falseColor,
+            color: (value) ? model.trueColor : model.falseColor,
           ),
         );
       },

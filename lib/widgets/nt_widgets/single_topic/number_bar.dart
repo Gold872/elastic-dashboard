@@ -12,19 +12,52 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NumberBar extends NTWidget {
-  static const String widgetType = 'Number Bar';
+class NumberBarModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = NumberBar.widgetType;
 
-  late double _minValue;
-  late double _maxValue;
-  late int? _divisions;
-  late bool _inverted;
-  late String _orientation;
+  double _minValue = -1.0;
+  double _maxValue = 1.0;
+  int? _divisions = 5;
+  bool _inverted = false;
+  String _orientation = 'horizontal';
 
-  NumberBar({
-    super.key,
+  double get minValue => _minValue;
+
+  set minValue(value) {
+    _minValue = value;
+    refresh();
+  }
+
+  double get maxValue => _maxValue;
+
+  set maxValue(value) {
+    _maxValue = value;
+    refresh();
+  }
+
+  int? get divisions => _divisions;
+
+  set divisions(value) {
+    _divisions = value;
+    refresh();
+  }
+
+  bool get inverted => _inverted;
+
+  set inverted(value) {
+    _inverted = value;
+    refresh();
+  }
+
+  String get orientation => _orientation;
+
+  set orientation(value) {
+    _orientation = value;
+    refresh();
+  }
+
+  NumberBarModel({
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -40,7 +73,7 @@ class NumberBar extends NTWidget {
         _minValue = minValue,
         super();
 
-  NumberBar.fromJson({super.key, required Map<String, dynamic> jsonData})
+  NumberBarModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? -1.0;
     _maxValue = tryCast(jsonData['max_value']) ?? 1.0;
@@ -77,8 +110,7 @@ class NumberBar extends NTWidget {
                 return;
               }
 
-              _orientation = value.toLowerCase();
-              refresh();
+              orientation = value.toLowerCase();
             },
           ),
         ],
@@ -96,8 +128,7 @@ class NumberBar extends NTWidget {
                 if (newMin == null) {
                   return;
                 }
-                _minValue = newMin;
-                refresh();
+                minValue = newMin;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Min Value',
@@ -111,8 +142,7 @@ class NumberBar extends NTWidget {
                 if (newMax == null) {
                   return;
                 }
-                _maxValue = newMax;
-                refresh();
+                maxValue = newMax;
               },
               formatter: Constants.decimalTextFormatter(allowNegative: true),
               label: 'Max Value',
@@ -134,8 +164,7 @@ class NumberBar extends NTWidget {
                 if (newDivisions != null && newDivisions < 2) {
                   return;
                 }
-                _divisions = newDivisions;
-                refresh();
+                divisions = newDivisions;
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
@@ -150,8 +179,7 @@ class NumberBar extends NTWidget {
                 initialValue: _inverted,
                 label: 'Inverted',
                 onToggle: (value) {
-                  _inverted = value;
-                  refresh();
+                  inverted = value;
                 },
               ),
             ),
@@ -160,26 +188,33 @@ class NumberBar extends NTWidget {
       ),
     ];
   }
+}
+
+class NumberBar extends NTWidget {
+  static const String widgetType = 'Number Bar';
+
+  const NumberBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NumberBarModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 
-        double clampedValue = value.clamp(_minValue, _maxValue);
+        double clampedValue = value.clamp(model.minValue, model.maxValue);
 
-        double? divisionInterval = (_divisions != null)
-            ? (_maxValue - _minValue) / (_divisions! - 1)
+        double? divisionInterval = (model.divisions != null)
+            ? (model.maxValue - model.minValue) / (model.divisions! - 1)
             : null;
 
-        LinearGaugeOrientation gaugeOrientation = (_orientation == 'vertical')
-            ? LinearGaugeOrientation.vertical
-            : LinearGaugeOrientation.horizontal;
+        LinearGaugeOrientation gaugeOrientation =
+            (model.orientation == 'vertical')
+                ? LinearGaugeOrientation.vertical
+                : LinearGaugeOrientation.horizontal;
 
         List<Widget> children = [
           Text(
@@ -192,8 +227,8 @@ class NumberBar extends NTWidget {
           ),
           SfLinearGauge(
             key: UniqueKey(),
-            maximum: _maxValue,
-            minimum: _minValue,
+            maximum: model.maxValue,
+            minimum: model.minValue,
             barPointers: [
               LinearBarPointer(
                 value: clampedValue,
@@ -207,7 +242,7 @@ class NumberBar extends NTWidget {
               edgeStyle: LinearEdgeStyle.bothCurve,
             ),
             orientation: gaugeOrientation,
-            isAxisInversed: _inverted,
+            isAxisInversed: model.inverted,
             interval: divisionInterval,
           ),
         ];

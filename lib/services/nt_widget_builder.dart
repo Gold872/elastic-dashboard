@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -41,21 +41,22 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
 class NTWidgetBuilder {
-  static final Map<
-      String,
-      NTWidget Function({
-        Key? key,
-        required Map<String, dynamic> jsonData,
-      })> _widgetJsonBuildMap = {};
+  static final Map<String, NTWidget Function({Key? key})> _widgetNameBuildMap =
+      {};
 
   static final Map<
       String,
-      NTWidget Function({
-        Key? key,
+      NTWidgetModel Function({
         required String topic,
         String dataType,
         double period,
-      })> _widgetNameBuildMap = {};
+      })> _modelNameBuildMap = {};
+
+  static final Map<
+      String,
+      NTWidgetModel Function({
+        required Map<String, dynamic> jsonData,
+      })> _modelJsonBuildMap = {};
 
   static final Map<String, double> _minimumWidthMap = {};
   static final Map<String, double> _minimumHeightMap = {};
@@ -73,56 +74,96 @@ class NTWidgetBuilder {
 
     logger.info('Configuring NT Widget Builder');
 
-    // Single-Topic Widgets
-    _widgetJsonBuildMap.addAll({
-      BooleanBox.widgetType: BooleanBox.fromJson,
-      GraphWidget.widgetType: GraphWidget.fromJson,
-      MatchTimeWidget.widgetType: MatchTimeWidget.fromJson,
-      MultiColorView.widgetType: MultiColorView.fromJson,
-      NumberBar.widgetType: NumberBar.fromJson,
-      NumberSlider.widgetType: NumberSlider.fromJson,
-      RadialGauge.widgetType: RadialGauge.fromJson,
-      SingleColorView.widgetType: SingleColorView.fromJson,
-      TextDisplay.widgetType: TextDisplay.fromJson,
-      'Text View': TextDisplay.fromJson,
-      ToggleButton.widgetType: ToggleButton.fromJson,
-      ToggleSwitch.widgetType: ToggleSwitch.fromJson,
-      VoltageView.widgetType: VoltageView.fromJson,
+    _modelNameBuildMap.addAll({
+      BooleanBox.widgetType: BooleanBoxModel.new,
+      GraphWidget.widgetType: GraphModel.new,
+      MatchTimeWidget.widgetType: MatchTimeModel.new,
+      NumberBar.widgetType: NumberBarModel.new,
+      NumberSlider.widgetType: NumberSliderModel.new,
+      RadialGauge.widgetType: RadialGaugeModel.new,
+      TextDisplay.widgetType: TextDisplayModel.new,
+      'Text View': TextDisplayModel.new,
+      VoltageView.widgetType: VoltageViewModel.new,
     });
 
-    // Multi-Topic Widgets
-    _widgetJsonBuildMap.addAll({
-      AccelerometerWidget.widgetType: AccelerometerWidget.fromJson,
-      CameraStreamWidget.widgetType: CameraStreamWidget.fromJson,
-      ComboBoxChooser.widgetType: ComboBoxChooser.fromJson,
-      CommandSchedulerWidget.widgetType: CommandSchedulerWidget.fromJson,
-      CommandWidget.widgetType: CommandWidget.fromJson,
-      DifferentialDrive.widgetType: DifferentialDrive.fromJson,
-      'Differential Drivebase': DifferentialDrive.fromJson,
-      EncoderWidget.widgetType: EncoderWidget.fromJson,
-      'Quadrature Encoder': EncoderWidget.fromJson,
-      FieldWidget.widgetType: FieldWidget.fromJson,
-      'Field2d': FieldWidget.fromJson,
-      FMSInfo.widgetType: FMSInfo.fromJson,
-      Gyro.widgetType: Gyro.fromJson,
-      MotorController.widgetType: MotorController.fromJson,
-      'Nidec Brushless': MotorController.fromJson,
-      NetworkAlerts.widgetType: NetworkAlerts.fromJson,
-      PIDControllerWidget.widgetType: PIDControllerWidget.fromJson,
-      'PID Controller': PIDControllerWidget.fromJson,
-      PowerDistribution.widgetType: PowerDistribution.fromJson,
-      'PDP': PowerDistribution.fromJson,
+    _modelNameBuildMap.addAll({
+      AccelerometerWidget.widgetType: AccelerometerModel.new,
+      SwerveDriveWidget.widgetType: BasicSwerveModel.new,
+      CameraStreamWidget.widgetType: CameraStreamModel.new,
+      ComboBoxChooser.widgetType: ComboBoxChooserModel.new,
+      'String Chooser': ComboBoxChooserModel.new,
+      CommandSchedulerWidget.widgetType: CommandSchedulerModel.new,
+      CommandWidget.widgetType: CommandModel.new,
+      DifferentialDrive.widgetType: DifferentialDriveModel.new,
+      'Differential Drivebase': DifferentialDriveModel.new,
+      EncoderWidget.widgetType: EncoderModel.new,
+      'Quadrature Encoder': EncoderModel.new,
+      FieldWidget.widgetType: FieldWidgetModel.new,
+      'Field2d': FieldWidgetModel.new,
+      FMSInfo.widgetType: FMSInfoModel.new,
+      Gyro.widgetType: GyroModel.new,
+      MotorController.widgetType: MotorControllerModel.new,
+      'Nidec Brushless': MotorControllerModel.new,
+      NetworkAlerts.widgetType: NetworkAlertsModel.new,
+      PIDControllerWidget.widgetType: PIDControllerModel.new,
+      'PID Controller': PIDControllerModel.new,
+      PowerDistribution.widgetType: PowerDistributionModel.new,
+      'PDP': PowerDistributionModel.new,
+      ProfiledPIDControllerWidget.widgetType: ProfiledPIDControllerModel.new,
+      RelayWidget.widgetType: RelayModel.new,
+      RobotPreferences.widgetType: RobotPreferencesModel.new,
+      SplitButtonChooser.widgetType: SplitButtonChooserModel.new,
+      SubsystemWidget.widgetType: SubsystemModel.new,
+      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometerModel.new,
+      '3AxisAccelerometer': ThreeAxisAccelerometerModel.new,
+      Ultrasonic.widgetType: UltrasonicModel.new,
+      YAGSLSwerveDrive.widgetType: YAGSLSwerveDriveModel.new,
+    });
+
+    _modelJsonBuildMap.addAll({
+      BooleanBox.widgetType: BooleanBoxModel.fromJson,
+      GraphWidget.widgetType: GraphModel.fromJson,
+      MatchTimeWidget.widgetType: MatchTimeModel.fromJson,
+      NumberBar.widgetType: NumberBarModel.fromJson,
+      NumberSlider.widgetType: NumberSliderModel.fromJson,
+      RadialGauge.widgetType: RadialGaugeModel.fromJson,
+      TextDisplay.widgetType: TextDisplayModel.fromJson,
+      'Text View': TextDisplayModel.fromJson,
+      VoltageView.widgetType: VoltageViewModel.fromJson,
+    });
+
+    _modelJsonBuildMap.addAll({
+      AccelerometerWidget.widgetType: AccelerometerModel.fromJson,
+      SwerveDriveWidget.widgetType: BasicSwerveModel.fromJson,
+      CameraStreamWidget.widgetType: CameraStreamModel.fromJson,
+      ComboBoxChooser.widgetType: ComboBoxChooserModel.fromJson,
+      CommandSchedulerWidget.widgetType: CommandSchedulerModel.fromJson,
+      CommandWidget.widgetType: CommandModel.fromJson,
+      DifferentialDrive.widgetType: DifferentialDriveModel.fromJson,
+      'Differential Drivebase': DifferentialDriveModel.fromJson,
+      EncoderWidget.widgetType: EncoderModel.fromJson,
+      'Quadrature Encoder': EncoderModel.fromJson,
+      FieldWidget.widgetType: FieldWidgetModel.fromJson,
+      'Field2d': FieldWidgetModel.fromJson,
+      FMSInfo.widgetType: FMSInfoModel.fromJson,
+      Gyro.widgetType: GyroModel.fromJson,
+      MotorController.widgetType: MotorControllerModel.fromJson,
+      'Nidec Brushless': MotorControllerModel.fromJson,
+      NetworkAlerts.widgetType: NetworkAlertsModel.fromJson,
+      PIDControllerWidget.widgetType: PIDControllerModel.fromJson,
+      'PID Controller': PIDControllerModel.fromJson,
+      PowerDistribution.widgetType: PowerDistributionModel.fromJson,
+      'PDP': PowerDistributionModel.fromJson,
       ProfiledPIDControllerWidget.widgetType:
-          ProfiledPIDControllerWidget.fromJson,
-      RelayWidget.widgetType: RelayWidget.fromJson,
-      RobotPreferences.widgetType: RobotPreferences.fromJson,
-      SplitButtonChooser.widgetType: SplitButtonChooser.fromJson,
-      SubsystemWidget.widgetType: SubsystemWidget.fromJson,
-      SwerveDriveWidget.widgetType: SwerveDriveWidget.fromJson,
-      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.fromJson,
-      '3AxisAccelerometer': ThreeAxisAccelerometer.fromJson,
-      Ultrasonic.widgetType: Ultrasonic.fromJson,
-      YAGSLSwerveDrive.widgetType: YAGSLSwerveDrive.fromJson,
+          ProfiledPIDControllerModel.fromJson,
+      RelayWidget.widgetType: RelayModel.fromJson,
+      RobotPreferences.widgetType: RobotPreferencesModel.fromJson,
+      SplitButtonChooser.widgetType: SplitButtonChooserModel.fromJson,
+      SubsystemWidget.widgetType: SubsystemModel.fromJson,
+      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometerModel.fromJson,
+      '3AxisAccelerometer': ThreeAxisAccelerometerModel.fromJson,
+      Ultrasonic.widgetType: UltrasonicModel.fromJson,
+      YAGSLSwerveDrive.widgetType: YAGSLSwerveDriveModel.fromJson,
     });
 
     // Used when building widgets from network tables (drag and drop)
@@ -265,25 +306,16 @@ class NTWidgetBuilder {
     _initialized = true;
   }
 
-  static NTWidget buildNTWidgetFromJson(
-      String type, Map<String, dynamic> jsonData,
-      {Function(String message)? onWidgetTypeNotFound}) {
+  static NTWidget? buildNTWidgetFromModel(NTWidgetModel model, {Key? key}) {
     ensureInitialized();
 
-    if (_widgetJsonBuildMap.containsKey(type)) {
-      return _widgetJsonBuildMap[type]!(
-        key: UniqueKey(),
-        jsonData: jsonData,
-      );
-    } else {
-      onWidgetTypeNotFound?.call(
-          'Unknown widget type: \'$type\', defaulting to Text Display widget.');
-
-      return TextDisplay.fromJson(key: UniqueKey(), jsonData: jsonData);
+    if (_widgetNameBuildMap.containsKey(model.type)) {
+      return _widgetNameBuildMap[model.type]!(key: key);
     }
+    return null;
   }
 
-  static NTWidget? buildNTWidgetFromType(
+  static NTWidgetModel buildNTModelFromType(
     String type,
     String topic, {
     String dataType = 'Unknown',
@@ -293,39 +325,57 @@ class NTWidgetBuilder {
 
     ensureInitialized();
 
-    if (_widgetNameBuildMap.containsKey(type)) {
-      return _widgetNameBuildMap[type]!(
-        key: UniqueKey(),
+    if (_modelNameBuildMap.containsKey(type)) {
+      return _modelNameBuildMap[type]!(
         topic: topic,
         dataType: dataType,
         period: period,
       );
     }
 
-    return null;
+    return NTWidgetModel.createDefault(
+      type: type,
+      topic: topic,
+      dataType: dataType,
+      period: period,
+    );
   }
 
-  static double getMinimumWidth(NTWidget? widget) {
+  static NTWidgetModel buildNTModelFromJson(
+      String type, Map<String, dynamic> jsonData,
+      {Function(String message)? onWidgetTypeNotFound}) {
     ensureInitialized();
 
-    if (widget != null && _minimumWidthMap.containsKey(widget.type)) {
+    if (_modelJsonBuildMap.containsKey(type)) {
+      return _modelJsonBuildMap[type]!(jsonData: jsonData);
+    }
+
+    onWidgetTypeNotFound
+        ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
+    return NTWidgetModel.createDefault(type: type, topic: '');
+  }
+
+  static double getMinimumWidth(NTWidgetModel widget) {
+    ensureInitialized();
+
+    if (_minimumWidthMap.containsKey(widget.type)) {
       return _minimumWidthMap[widget.type]!;
     } else {
       return Settings.gridSize.toDouble();
     }
   }
 
-  static double getMinimumHeight(NTWidget? widget) {
+  static double getMinimumHeight(NTWidgetModel widget) {
     ensureInitialized();
 
-    if (widget != null && _minimumHeightMap.containsKey(widget.type)) {
+    if (_minimumHeightMap.containsKey(widget.type)) {
       return _minimumHeightMap[widget.type]!;
     } else {
       return Settings.gridSize.toDouble();
     }
   }
 
-  static double getDefaultWidth(NTWidget widget) {
+  static double getDefaultWidth(NTWidgetModel widget) {
     ensureInitialized();
 
     double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
@@ -337,7 +387,7 @@ class NTWidgetBuilder {
     return snappedNormal;
   }
 
-  static double getDefaultHeight(NTWidget widget) {
+  static double getDefaultHeight(NTWidgetModel widget) {
     ensureInitialized();
 
     double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)

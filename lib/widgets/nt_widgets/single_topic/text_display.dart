@@ -10,19 +10,24 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class TextDisplay extends NTWidget {
-  static const String widgetType = 'Text Display';
+class TextDisplayModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = TextDisplay.widgetType;
 
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController controller = TextEditingController();
 
-  Object? _previousValue;
+  Object? previousValue;
 
   bool _showSubmitButton = false;
 
-  TextDisplay({
-    super.key,
+  bool get showSubmitButton => _showSubmitButton;
+
+  set showSubmitButton(value) {
+    _showSubmitButton = value;
+    refresh();
+  }
+
+  TextDisplayModel({
     required super.topic,
     bool showSubmitButton = false,
     super.dataType,
@@ -30,7 +35,7 @@ class TextDisplay extends NTWidget {
   })  : _showSubmitButton = showSubmitButton,
         super();
 
-  TextDisplay.fromJson({super.key, required Map<String, dynamic> jsonData})
+  TextDisplayModel.fromJson({required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _showSubmitButton =
         tryCast(jsonData['show_submit_button']) ?? _showSubmitButton;
@@ -43,8 +48,7 @@ class TextDisplay extends NTWidget {
         label: 'Show Submit Button',
         initialValue: _showSubmitButton,
         onToggle: (value) {
-          _showSubmitButton = value;
-          refresh();
+          showSubmitButton = value;
         },
       ),
     ];
@@ -58,7 +62,7 @@ class TextDisplay extends NTWidget {
     };
   }
 
-  void _publishData(String value) {
+  void publishData(String value) {
     bool publishTopic =
         ntTopic == null || !ntConnection.isTopicPublished(ntTopic!);
 
@@ -118,26 +122,32 @@ class TextDisplay extends NTWidget {
       ntConnection.updateDataFromTopic(ntTopic!, formattedData);
     }
 
-    _previousValue = value;
+    previousValue = value;
   }
+}
+
+class TextDisplay extends NTWidget {
+  static const String widgetType = 'Text Display';
+
+  const TextDisplay({super.key});
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    TextDisplayModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         Object data = snapshot.data ?? Object();
 
-        if (data.toString() != _previousValue.toString() &&
+        if (data.toString() != model.previousValue.toString() &&
             !data.isExactType<Object>()) {
           // Needed to prevent errors
           Future(() async {
-            _controller.text = data.toString();
+            model.controller.text = data.toString();
 
-            _previousValue = data;
+            model.previousValue = data;
           });
         }
 
@@ -145,7 +155,7 @@ class TextDisplay extends NTWidget {
           children: [
             Flexible(
               child: TextField(
-                controller: _controller,
+                controller: model.controller,
                 textAlign: TextAlign.left,
                 textAlignVertical: TextAlignVertical.bottom,
                 decoration: const InputDecoration(
@@ -154,11 +164,11 @@ class TextDisplay extends NTWidget {
                   isDense: true,
                 ),
                 onSubmitted: (value) {
-                  _publishData(value);
+                  model.publishData(value);
                 },
               ),
             ),
-            if (_showSubmitButton) ...[
+            if (model.showSubmitButton) ...[
               const SizedBox(width: 1.5),
               Tooltip(
                 message: 'Publish Data',
@@ -170,7 +180,7 @@ class TextDisplay extends NTWidget {
                   child: IconButton(
                     iconSize: 18.0,
                     onPressed: () {
-                      _publishData(_controller.text);
+                      model.publishData(model.controller.text);
                     },
                     icon: const Icon(Icons.exit_to_app),
                   ),

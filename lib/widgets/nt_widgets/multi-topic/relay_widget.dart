@@ -7,41 +7,34 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class RelayWidget extends NTWidget {
-  static const String widgetType = 'Relay';
+class RelayModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = RelayWidget.widgetType;
 
-  late String _valueTopicName;
-  late NT4Subscription _valueSubscription;
-  NT4Topic? _valueTopic;
+  String get valueTopicName => '$topic/Value';
 
-  final List<String> _selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
+  late NT4Subscription valueSubscription;
+  NT4Topic? valueTopic;
 
-  RelayWidget({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayWidget.fromJson({super.key, required super.jsonData}) : super.fromJson();
+  RelayModel({required super.topic, super.dataType, super.period}) : super();
+
+  RelayModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void init() {
     super.init();
 
-    _valueTopicName = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopicName, super.period);
+    valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(_valueSubscription);
+    ntConnection.unSubscribe(valueSubscription);
 
-    _valueTopicName = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopicName, super.period);
-    _valueTopic = null;
+    valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
+    valueTopic = null;
 
     super.resetSubscription();
   }
@@ -50,21 +43,27 @@ class RelayWidget extends NTWidget {
   void unSubscribe() {
     super.unSubscribe();
 
-    ntConnection.unSubscribe(_valueSubscription);
-    _valueTopic = null;
+    ntConnection.unSubscribe(valueSubscription);
+    valueTopic = null;
   }
+}
+
+class RelayWidget extends NTWidget {
+  static const String widgetType = 'Relay';
+
+  const RelayWidget({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    RelayModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: _valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(_valueTopicName),
+      stream: model.valueSubscription.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.valueTopicName),
       builder: (context, snapshot) {
         String selected = tryCast(snapshot.data) ?? 'Off';
 
-        if (!_selectedOptions.contains(selected)) {
+        if (!model.selectedOptions.contains(selected)) {
           selected = 'Off';
         }
 
@@ -81,26 +80,26 @@ class RelayWidget extends NTWidget {
                   ),
                   direction: Axis.vertical,
                   onPressed: (index) {
-                    String option = _selectedOptions[index];
+                    String option = model.selectedOptions[index];
 
-                    bool publishTopic = _valueTopic == null;
+                    bool publishTopic = model.valueTopic == null;
 
-                    _valueTopic ??=
-                        ntConnection.getTopicFromName(_valueTopicName);
+                    model.valueTopic ??=
+                        ntConnection.getTopicFromName(model.valueTopicName);
 
-                    if (_valueTopic == null) {
+                    if (model.valueTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(_valueTopic!);
+                      ntConnection.nt4Client.publishTopic(model.valueTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(_valueTopic!, option);
+                    ntConnection.updateDataFromTopic(model.valueTopic!, option);
                   },
                   isSelected:
-                      _selectedOptions.map((e) => selected == e).toList(),
-                  children: _selectedOptions.map((element) {
+                      model.selectedOptions.map((e) => selected == e).toList(),
+                  children: model.selectedOptions.map((element) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 0.0),

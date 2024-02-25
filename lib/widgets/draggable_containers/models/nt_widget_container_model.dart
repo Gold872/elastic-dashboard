@@ -9,17 +9,18 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/empty_nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'widget_container_model.dart';
 
 class NTWidgetContainerModel extends WidgetContainerModel {
   late NTWidget child;
-  NTWidgetModel childModel = NTWidgetModel();
+  late NTWidgetModel childModel;
 
   NTWidgetContainerModel({
     required super.initialPosition,
     required super.title,
-    required this.child,
+    required this.childModel,
     super.enabled,
   });
 
@@ -33,21 +34,30 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   void init() {
     super.init();
 
-    minWidth = NTWidgetBuilder.getMinimumWidth(child);
-    minHeight = NTWidgetBuilder.getMinimumHeight(child);
+    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
+    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
+
+    NTWidget? childWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);
+
+    if (childWidget != null) {
+      child = childWidget;
+    } else {
+      childWidget = const EmptyNTWidget();
+      child = childWidget;
+    }
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'type': child.type,
+      'type': childModel.type,
       'properties': getChildJson(),
     };
   }
 
   Map<String, dynamic> getChildJson() {
-    return child.toJson();
+    return childModel.toJson();
   }
 
   @override
@@ -57,7 +67,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     if (!jsonData.containsKey('type')) {
       onJsonLoadingWarning?.call(
-          'NetworkTables widget does not specify a widget type, defaulting to text display widget');
+          'NetworkTables widget does not specify a widget type, defaulting to blank placeholder widget');
     }
 
     Map<String, dynamic> widgetProperties = {};
@@ -71,18 +81,15 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     String type = tryCast(jsonData['type']) ?? '';
 
-    child = NTWidgetBuilder.buildNTWidgetFromJson(type, widgetProperties,
+    childModel = NTWidgetBuilder.buildNTModelFromJson(type, widgetProperties,
         onWidgetTypeNotFound: onJsonLoadingWarning);
-    childModel.forceDispose();
-
-    childModel = NTWidgetModel();
   }
 
   @override
   void disposeModel({bool deleting = false}) {
     super.disposeModel(deleting: deleting);
 
-    child.dispose(deleting: deleting);
+    childModel.disposeWidget(deleting: deleting);
   }
 
   @override
@@ -95,7 +102,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   void unSubscribe() {
     super.unSubscribe();
 
-    child.unSubscribe();
+    childModel.unSubscribe();
   }
 
   @override
@@ -117,7 +124,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
               child: StatefulBuilder(
                 builder: (context, setState) {
                   List<Widget>? childProperties =
-                      child.getEditProperties(context);
+                      childModel.getEditProperties(context);
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +135,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
                       const Divider(),
                       // Settings for the widget inside (only if there are properties)
                       if (childProperties.isNotEmpty) ...[
-                        Text('${child.type} Widget Settings'),
+                        Text('${childModel.type} Widget Settings'),
                         const SizedBox(height: 5),
                         ...childProperties,
                         const Divider(),
@@ -145,7 +152,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                child.refresh();
+                childModel.refresh();
               },
               child: const Text('Close'),
             ),
@@ -153,7 +160,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         );
       },
     ).then((_) {
-      child.refresh();
+      childModel.refresh();
     });
   }
 
@@ -165,8 +172,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       children: [
         const Center(child: Text('Widget Type')),
         DialogDropdownChooser<String>(
-          choices: child.getAvailableDisplayTypes(),
-          initialValue: child.type,
+          choices: childModel.getAvailableDisplayTypes(),
+          initialValue: childModel.type,
           onSelectionChanged: (String? value) {
             setState(() {
               changeChildToType(value);
@@ -189,11 +196,11 @@ class NTWidgetContainerModel extends WidgetContainerModel {
           Flexible(
             child: DialogTextInput(
               onSubmit: (value) {
-                child.topic = value;
-                child.resetSubscription();
+                childModel.topic = value;
+                childModel.resetSubscription();
               },
               label: 'Topic',
-              initialText: child.topic,
+              initialText: childModel.topic,
             ),
           ),
           const SizedBox(width: 5),
@@ -206,12 +213,12 @@ class NTWidgetContainerModel extends WidgetContainerModel {
                   return;
                 }
 
-                child.period = newPeriod;
-                child.resetSubscription();
+                childModel.period = newPeriod;
+                childModel.resetSubscription();
               },
               formatter: Constants.decimalTextFormatter(),
               label: 'Period',
-              initialText: child.period.toString(),
+              initialText: childModel.period.toString(),
             ),
           ),
         ],
@@ -222,17 +229,17 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   @override
   List<ContextMenuEntry> getContextMenuItems() {
     List<ContextMenuEntry> widgetTypes = [];
-    for (String type in child.getAvailableDisplayTypes()) {
+    for (String type in childModel.getAvailableDisplayTypes()) {
       widgetTypes.add(
         MenuItem(
           label: type,
-          icon: (child.type == type) ? Icons.check : null,
+          icon: (childModel.type == type) ? Icons.check : null,
           onSelected: () {
-            if (child.type != type) {
+            if (childModel.type != type) {
               changeChildToType(type);
             }
           },
-          value: child.type != type,
+          value: childModel.type != type,
         ),
       );
     }
@@ -251,7 +258,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       width: draggingRect.width,
       height: draggingRect.height,
       opacity: 0.80,
-      child: ChangeNotifierProvider<NTWidgetModel>.value(
+      child: ChangeNotifierProvider.value(
         value: childModel,
         child: child,
       ),
@@ -283,37 +290,39 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       return;
     }
 
-    if (type == child.type) {
+    if (type == childModel.type) {
       return;
     }
 
-    NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromType(
+    childModel.disposeWidget(deleting: true);
+    childModel.unSubscribe();
+    childModel.forceDispose();
+
+    childModel = NTWidgetBuilder.buildNTModelFromType(
       type,
-      child.topic,
-      dataType: child.dataType,
-      period: (type != 'Graph') ? child.period : Settings.defaultGraphPeriod,
+      childModel.topic,
+      dataType: childModel.dataType,
+      period:
+          (type != 'Graph') ? childModel.period : Settings.defaultGraphPeriod,
     );
+
+    NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);
 
     if (newWidget == null) {
       return;
     }
 
-    child.dispose(deleting: true);
-    child.unSubscribe();
-    childModel.forceDispose();
-
     child = newWidget;
-    childModel = NTWidgetModel();
 
-    minWidth = NTWidgetBuilder.getMinimumWidth(child);
-    minHeight = NTWidgetBuilder.getMinimumHeight(child);
+    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
+    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
 
     notifyListeners();
   }
 
   void updateMinimumSize() {
-    minWidth = NTWidgetBuilder.getMinimumWidth(child);
-    minHeight = NTWidgetBuilder.getMinimumHeight(child);
+    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
+    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
 
     notifyListeners();
   }

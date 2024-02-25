@@ -8,46 +8,36 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ToggleSwitch extends NTWidget {
   static const String widgetType = 'Toggle Switch';
-  @override
-  String type = widgetType;
 
-  ToggleSwitch({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  ToggleSwitch.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  const ToggleSwitch({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    NTWidgetModel model = context.watch<NTWidgetModel>();
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(topic),
+      stream: model.subscription?.periodicStream(yieldAll: false),
+      initialData: ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         bool value = tryCast(snapshot.data) ?? false;
 
         return Switch(
           value: value,
           onChanged: (bool value) {
-            bool publishTopic =
-                ntTopic == null || !ntConnection.isTopicPublished(ntTopic);
+            bool publishTopic = model.ntTopic == null ||
+                !ntConnection.isTopicPublished(model.ntTopic);
 
-            createTopicIfNull();
+            model.createTopicIfNull();
 
-            if (ntTopic == null) {
+            if (model.ntTopic == null) {
               return;
             }
 
             if (publishTopic) {
-              ntConnection.nt4Client.publishTopic(ntTopic!);
+              ntConnection.nt4Client.publishTopic(model.ntTopic!);
             }
 
-            ntConnection.updateDataFromTopic(ntTopic!, value);
+            ntConnection.updateDataFromTopic(model.ntTopic!, value);
           },
         );
       },

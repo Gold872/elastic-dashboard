@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
@@ -7,43 +8,43 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
+class RobotPreferencesModel extends NTWidgetModel {
+  @override
+  String type = RobotPreferences.widgetType;
+
+  final TextEditingController searchTextController = TextEditingController();
+
+  final List<String> preferenceTopicNames = [];
+  final Map<String, NT4Topic> preferenceTopics = {};
+  final Map<String, TextEditingController> preferenceTextControllers = {};
+  final Map<String, Object?> previousValues = {};
+
+  PreferenceSearch? searchWidget;
+
+  RobotPreferencesModel({required super.topic, super.dataType, super.period})
+      : super();
+
+  RobotPreferencesModel.fromJson({required super.jsonData}) : super.fromJson();
+}
+
 class RobotPreferences extends NTWidget {
   static const String widgetType = 'RobotPreferences';
-  @override
-  String type = widgetType;
 
-  final TextEditingController _searchTextController = TextEditingController();
-
-  final List<String> _preferenceTopicNames = [];
-  final Map<String, NT4Topic> _preferenceTopics = {};
-  final Map<String, TextEditingController> _preferenceTextControllers = {};
-  final Map<String, Object?> _previousValues = {};
-
-  _PreferenceSearch? _searchWidget;
-
-  RobotPreferences({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
-
-  RobotPreferences.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  const RobotPreferences({super.key}) : super();
 
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    RobotPreferencesModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-      stream: subscription?.periodicStream(),
+      stream: model.subscription?.periodicStream(),
       builder: (context, snapshot) {
-        bool rebuildWidget = _searchWidget == null;
+        bool rebuildWidget = model.searchWidget == null;
 
         for (NT4Topic nt4Topic
             in ntConnection.nt4Client.announcedTopics.values) {
-          if (!nt4Topic.name.contains(topic) ||
-              _preferenceTopicNames.contains(nt4Topic.name) ||
+          if (!nt4Topic.name.contains(model.topic) ||
+              model.preferenceTopicNames.contains(nt4Topic.name) ||
               nt4Topic.name.contains('.type')) {
             continue;
           }
@@ -51,13 +52,13 @@ class RobotPreferences extends NTWidget {
           Object? previousValue =
               ntConnection.getLastAnnouncedValue(nt4Topic.name);
 
-          _preferenceTopicNames.add(nt4Topic.name);
-          _preferenceTopics.addAll({nt4Topic.name: nt4Topic});
-          _preferenceTextControllers.addAll({
+          model.preferenceTopicNames.add(nt4Topic.name);
+          model.preferenceTopics.addAll({nt4Topic.name: nt4Topic});
+          model.preferenceTextControllers.addAll({
             nt4Topic.name: TextEditingController()
               ..text = previousValue?.toString() ?? ''
           });
-          _previousValues.addAll({nt4Topic.name: previousValue});
+          model.previousValues.addAll({nt4Topic.name: previousValue});
 
           rebuildWidget = true;
         }
@@ -67,13 +68,13 @@ class RobotPreferences extends NTWidget {
           (e) => e.name,
         );
 
-        for (String topic in _preferenceTopicNames) {
+        for (String topic in model.preferenceTopicNames) {
           if (!announcedTopics.contains(topic)) {
-            _preferenceTopics.remove(topic);
+            model.preferenceTopics.remove(topic);
 
-            _preferenceTextControllers.remove(topic);
+            model.preferenceTextControllers.remove(topic);
 
-            _previousValues.remove(topic);
+            model.previousValues.remove(topic);
 
             rebuildWidget = true;
 
@@ -81,25 +82,26 @@ class RobotPreferences extends NTWidget {
           }
 
           if (ntConnection.getLastAnnouncedValue(topic).toString() !=
-              _previousValues[topic].toString()) {
-            _preferenceTextControllers[topic]?.text =
+              model.previousValues[topic].toString()) {
+            model.preferenceTextControllers[topic]?.text =
                 ntConnection.getLastAnnouncedValue(topic).toString();
 
-            _previousValues[topic] = ntConnection.getLastAnnouncedValue(topic);
+            model.previousValues[topic] =
+                ntConnection.getLastAnnouncedValue(topic);
           }
         }
 
-        _preferenceTopicNames
+        model.preferenceTopicNames
             .removeWhere((element) => !announcedTopics.contains(element));
 
         if (rebuildWidget) {
-          _searchWidget = _PreferenceSearch(
+          model.searchWidget = PreferenceSearch(
             onSubmit: (String topic, String? data) {
               if (data == null) {
                 return;
               }
 
-              NT4Topic? nt4Topic = _preferenceTopics[topic];
+              NT4Topic? nt4Topic = model.preferenceTopics[topic];
 
               if (nt4Topic == null) {
                 return;
@@ -127,8 +129,8 @@ class RobotPreferences extends NTWidget {
               }
 
               if (formattedData == null) {
-                _preferenceTextControllers[topic]?.text =
-                    _previousValues[topic].toString();
+                model.preferenceTextControllers[topic]?.text =
+                    model.previousValues[topic].toString();
                 return;
               }
 
@@ -136,24 +138,25 @@ class RobotPreferences extends NTWidget {
               ntConnection.updateDataFromTopic(nt4Topic, formattedData);
               ntConnection.nt4Client.unpublishTopic(nt4Topic);
 
-              _preferenceTextControllers[topic]?.text =
+              model.preferenceTextControllers[topic]?.text =
                   formattedData.toString();
             },
-            searchTextController: _searchTextController,
-            preferenceTopicNames: _preferenceTopicNames,
-            preferenceTextControllers: _preferenceTextControllers,
-            preferenceTopics: _preferenceTopics,
+            searchTextController: model.searchTextController,
+            preferenceTopicNames: model.preferenceTopicNames,
+            preferenceTextControllers: model.preferenceTextControllers,
+            preferenceTopics: model.preferenceTopics,
           );
         }
 
-        return _searchWidget!;
+        return model.searchWidget!;
       },
     );
   }
 }
 
-class _PreferenceSearch extends StatelessWidget {
-  const _PreferenceSearch({
+class PreferenceSearch extends StatelessWidget {
+  const PreferenceSearch({
+    super.key,
     required this.onSubmit,
     required this.searchTextController,
     required this.preferenceTopicNames,

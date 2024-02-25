@@ -20,59 +20,52 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
 class NTWidgetModel extends ChangeNotifier {
-  bool _disposed = false;
-  bool _forceDispose = false;
+  String _typeOverride = 'NTWidget';
+  String get type => _typeOverride;
 
-  void forceDispose() {
-    _forceDispose = true;
-    dispose();
-  }
+  late String _topic;
+  late double _period;
+  get topic => _topic;
 
-  @override
-  void dispose() {
-    if (!hasListeners || _forceDispose) {
-      super.dispose();
+  set topic(value) => _topic = value;
 
-      _disposed = true;
-    }
-  }
+  get period => _period;
 
-  void refresh() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-}
-
-abstract class NTWidget extends StatelessWidget {
-  String get type;
-
-  late String topic;
-  late double period;
+  set period(value) => _period = value;
 
   String dataType = 'Unknown';
 
-  @protected
   NT4Subscription? subscription;
-  @protected
-  NTWidgetModel? notifier;
-  @protected
   NT4Topic? ntTopic;
 
-  NTWidget({
-    super.key,
-    required this.topic,
+  bool _disposed = false;
+  bool _forceDispose = false;
+
+  NTWidgetModel({
+    required String topic,
     this.dataType = 'Unknown',
     double? period,
-  }) {
+  }) : _topic = topic {
     this.period = period ?? Settings.defaultPeriod;
 
     init();
   }
 
-  NTWidget.fromJson({super.key, required Map<String, dynamic> jsonData}) {
-    topic = tryCast(jsonData['topic']) ?? '';
-    period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
+  NTWidgetModel.createDefault({
+    required String type,
+    required String topic,
+    this.dataType = 'Unknown',
+    double? period,
+  })  : _typeOverride = type,
+        _topic = topic {
+    this.period = period ?? Settings.defaultPeriod;
+
+    init();
+  }
+
+  NTWidgetModel.fromJson({required Map<String, dynamic> jsonData}) {
+    _topic = tryCast(jsonData['topic']) ?? '';
+    _period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
     dataType = tryCast(jsonData['data_type']) ?? dataType;
 
     init();
@@ -85,7 +78,7 @@ abstract class NTWidget extends StatelessWidget {
       dataType = ntTopic?.type ?? dataType;
     }
     return {
-      'topic': topic,
+      'topic': _topic,
       'period': period,
       if (dataType != 'Unknown') 'data_type': dataType,
     };
@@ -147,36 +140,36 @@ abstract class NTWidget extends StatelessWidget {
 
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(_topic, _period);
   }
 
-  @protected
   void createTopicIfNull() {
-    ntTopic ??= ntConnection.getTopicFromName(topic);
+    ntTopic ??= ntConnection.getTopicFromName(_topic);
   }
-
-  void dispose({bool deleting = false}) {}
 
   void unSubscribe() {
     if (subscription != null) {
       ntConnection.unSubscribe(subscription!);
     }
+    notifyListeners();
   }
+
+  void disposeWidget({bool deleting = false}) {}
 
   void resetSubscription() {
     if (subscription == null) {
-      subscription = ntConnection.subscribe(topic, period);
+      subscription = ntConnection.subscribe(_topic, _period);
 
       ntTopic = null;
 
-      refresh();
+      notifyListeners();
       return;
     }
 
     bool resetDataType = subscription!.topic != topic;
 
     ntConnection.unSubscribe(subscription!);
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(_topic, _period);
 
     ntTopic = null;
 
@@ -189,14 +182,7 @@ abstract class NTWidget extends StatelessWidget {
       }
     }
 
-    refresh();
-  }
-
-  @mustCallSuper
-  void refresh() {
-    Future(() async {
-      notifier?.refresh();
-    });
+    notifyListeners();
   }
 
   static final Function listEquals = const DeepCollectionEquality().equals;
@@ -206,14 +192,13 @@ abstract class NTWidget extends StatelessWidget {
     return [];
   }
 
-  @protected
   Stream<Object> get multiTopicPeriodicStream async* {
     List<Object> previousData = getCurrentData();
 
     while (true) {
       List<Object> currentData = getCurrentData();
 
-      if (!listEquals(previousData, currentData)) {
+      if (previousData.hashCode != currentData.hashCode) {
         yield Object();
         previousData = currentData;
       }
@@ -225,4 +210,34 @@ abstract class NTWidget extends StatelessWidget {
               .round()));
     }
   }
+
+  void forceDispose() {
+    disposeWidget(deleting: true);
+    _forceDispose = true;
+    dispose();
+  }
+
+  @override
+  void dispose() {
+    if (!hasListeners || _forceDispose) {
+      super.dispose();
+
+      _disposed = true;
+    }
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  void refresh() {
+    Future(() => notifyListeners());
+  }
+}
+
+abstract class NTWidget extends StatelessWidget {
+  const NTWidget({super.key});
 }

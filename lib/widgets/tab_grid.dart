@@ -13,14 +13,13 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_la
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'draggable_containers/models/layout_container_model.dart';
 import 'draggable_containers/models/list_layout_model.dart';
 import 'draggable_containers/models/nt_widget_container_model.dart';
 import 'draggable_containers/models/widget_container_model.dart';
 
 // Used to refresh the tab grid when a widget is added or removed
-// This doesn't use a stateless widget since everything has to be rendered at program startup or data will be lost
+// This doesn't use a stateful widget since everything has to be rendered at program startup or data will be lost
 class TabGridModel extends ChangeNotifier {
   void notify() {
     notifyListeners();
@@ -201,8 +200,9 @@ class TabGrid extends StatelessWidget {
     model.setPreviewVisible(false);
     model.setValidLocation(true);
 
-    if (model is NTWidgetContainerModel && model.child is FieldWidget) {
-      model.child.refresh();
+    if (model is NTWidgetContainerModel &&
+        model.childModel is FieldWidgetModel) {
+      model.childModel.refresh();
     }
 
     model.disposeModel();
@@ -520,28 +520,6 @@ class TabGrid extends StatelessWidget {
     refresh();
   }
 
-  NTWidgetContainerModel? createNTWidgetContainer(WidgetContainer? widget) {
-    if (widget == null || widget.child == null) {
-      return null;
-    }
-
-    if (widget.child is! NTWidget) {
-      return null;
-    }
-
-    return NTWidgetContainerModel(
-      title: widget.title,
-      initialPosition: Rect.fromLTWH(
-        0.0,
-        0.0,
-        widget.width,
-        widget.height,
-      ),
-      child: widget.child as NTWidget,
-      enabled: ntConnection.isNT4Connected,
-    );
-  }
-
   ListLayoutModel createListLayout(
       {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
     return ListLayoutModel(
@@ -576,8 +554,8 @@ class TabGrid extends StatelessWidget {
       for (NTWidgetContainerModel container
           in _widgetModels.whereType<NTWidgetContainerModel>()) {
         String? title = container.title;
-        String? type = container.child.type;
-        String? topic = container.child.topic;
+        String? type = container.childModel.type;
+        String? topic = container.childModel.topic;
         bool validLocation = isValidLocation(newWidgetLocation);
 
         if (title == widgetData['title'] &&

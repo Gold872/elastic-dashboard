@@ -7,38 +7,31 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class AccelerometerWidget extends NTWidget {
-  static const String widgetType = 'Accelerometer';
+class AccelerometerModel extends NTWidgetModel {
   @override
-  String type = widgetType;
+  String type = AccelerometerWidget.widgetType;
 
-  late String _valueTopic;
   late NT4Subscription _valueSubscription;
 
-  AccelerometerWidget({
-    super.key,
-    required super.topic,
-    super.dataType,
-    super.period,
-  }) : super();
+  String get valueTopic => '$topic/Value';
 
-  AccelerometerWidget.fromJson({super.key, required super.jsonData})
-      : super.fromJson();
+  AccelerometerModel({required super.topic, super.dataType, super.period})
+      : super();
+
+  AccelerometerModel.fromJson({required super.jsonData}) : super.fromJson();
 
   @override
   void init() {
     super.init();
 
-    _valueTopic = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
   }
 
   @override
   void resetSubscription() {
     ntConnection.unSubscribe(_valueSubscription);
 
-    _valueTopic = '$topic/Value';
-    _valueSubscription = ntConnection.subscribe(_valueTopic, super.period);
+    _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
 
     super.resetSubscription();
   }
@@ -50,13 +43,21 @@ class AccelerometerWidget extends NTWidget {
     super.unSubscribe();
   }
 
+  NT4Subscription get valueSubscription => _valueSubscription;
+}
+
+class AccelerometerWidget extends NTWidget {
+  static const String widgetType = 'Accelerometer';
+
+  const AccelerometerWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
-    notifier = context.watch<NTWidgetModel>();
+    AccelerometerModel model = cast(context.watch<NTWidgetModel>());
 
     return StreamBuilder(
-        stream: _valueSubscription.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(_valueTopic),
+        stream: model.valueSubscription.periodicStream(yieldAll: false),
+        initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
         builder: (context, snapshot) {
           double value = tryCast(snapshot.data) ?? 0.0;
 
