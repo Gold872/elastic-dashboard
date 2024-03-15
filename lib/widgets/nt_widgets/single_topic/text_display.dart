@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -145,7 +146,16 @@ class TextDisplay extends NTWidget {
             data != null) {
           // Needed to prevent errors
           Future(() async {
-            model.controller.text = data.toString();
+            String displayString = data.toString();
+            if (data is double) {
+              if (cast<double>(data).abs() > 1e-10) {
+                displayString = Decimal.parse(data.toString()).toString();
+              } else {
+                data = 0.0 * cast<double>(data).sign;
+                displayString = data.toString();
+              }
+            }
+            model.controller.text = displayString;
 
             model.previousValue = data;
           });
