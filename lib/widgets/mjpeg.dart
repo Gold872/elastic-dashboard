@@ -84,8 +84,7 @@ class Mjpeg extends HookWidget {
     final state = useMemoized(() => _MjpegStateNotifier());
     final visible = useListenable(state);
     final errorState = useState<List<dynamic>?>(null);
-    // ignore: deprecated_member_use
-    final isMounted = useIsMounted();
+    isMounted() => context.mounted;
 
     final manager = useMemoized(
         () => _manager = _StreamManager(
@@ -105,7 +104,7 @@ class Mjpeg extends HookWidget {
           timeout,
           httpClient,
           preprocessor,
-          isMounted
+          isMounted()
         ]);
     final key = useMemoized(() => UniqueKey(), [manager]);
 
@@ -195,9 +194,10 @@ class _StreamManager {
   Future<void> dispose() async {
     try {
       _httpClient.close();
-    } catch (e) {}
-    await _subscription?.cancel();
-    _subscription = null;
+    } finally {
+      await _subscription?.cancel();
+      _subscription = null;
+    }
   }
 
   void _sendImage(ValueNotifier<MemoryImage?> image,
@@ -272,8 +272,9 @@ class _StreamManager {
               errorState.value = [error, stack];
               image.value = null;
             }
-          } catch (ex) {}
-          dispose();
+          } finally {
+            dispose();
+          }
         }, cancelOnError: true);
       } else {
         if (_mounted()) {
