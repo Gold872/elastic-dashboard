@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -41,7 +42,7 @@ void main() {
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
 
-    jsonString = File(jsonFilePath).readAsStringSync();
+    jsonString = jsonEncode(jsonDecode(File(jsonFilePath).readAsStringSync()));
 
     SharedPreferences.setMockInitialValues({
       PrefKeys.layout: jsonString,

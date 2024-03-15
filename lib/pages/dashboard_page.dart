@@ -448,7 +448,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
 
     Map<String, dynamic> jsonData = _toJson();
-    String jsonString = jsonEncode(jsonData);
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    String jsonString = encoder.convert(jsonData);
 
     final Uint8List fileData = Uint8List.fromList(jsonString.codeUnits);
 
@@ -496,14 +497,15 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
+    Map<String, dynamic> jsonData;
     try {
-      jsonDecode(jsonString);
+      jsonData = jsonDecode(jsonString);
     } catch (e) {
       _showJsonLoadingError(e.toString());
       return;
     }
 
-    await _preferences.setString(PrefKeys.layout, jsonString);
+    await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
     setState(() => _loadLayoutFromJsonData(jsonString));
   }
