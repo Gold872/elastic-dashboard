@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -14,6 +15,19 @@ class BooleanBoxModel extends NTWidgetModel {
   Color _trueColor = Colors.green;
   Color _falseColor = Colors.red;
 
+  static const List<String> _trueIconOptions = [
+    'None',
+    'Checkmark',
+  ];
+  static const List<String> _falseIconOptions = [
+    'None',
+    'X',
+    'Exclamation Point',
+  ];
+
+  String _trueIcon = 'None';
+  String _falseIcon = 'None';
+
   get trueColor => _trueColor;
 
   set trueColor(value) {
@@ -28,14 +42,32 @@ class BooleanBoxModel extends NTWidgetModel {
     refresh();
   }
 
+  String get trueIcon => _trueIcon;
+
+  set trueIcon(value) {
+    _trueIcon = value;
+    refresh();
+  }
+
+  String get falseIcon => _falseIcon;
+
+  set falseIcon(value) {
+    _falseIcon = value;
+    refresh();
+  }
+
   BooleanBoxModel(
       {required super.topic,
       Color trueColor = Colors.green,
       Color falseColor = Colors.red,
+      String trueIcon = 'None',
+      String falseIcon = 'None',
       super.dataType,
       super.period})
       : _falseColor = falseColor,
         _trueColor = trueColor,
+        _trueIcon = trueIcon,
+        _falseIcon = falseIcon,
         super();
 
   BooleanBoxModel.fromJson({required Map<String, dynamic> jsonData})
@@ -75,6 +107,9 @@ class BooleanBoxModel extends NTWidgetModel {
 
     _trueColor = Color(trueColorValue ?? Colors.green.value);
     _falseColor = Color(falseColorValue ?? Colors.red.value);
+
+    _trueIcon = tryCast(jsonData['true_icon']) ?? 'None';
+    _falseIcon = tryCast(jsonData['false_icon']) ?? 'None';
   }
 
   @override
@@ -83,6 +118,8 @@ class BooleanBoxModel extends NTWidgetModel {
       ...super.toJson(),
       'true_color': _trueColor.value,
       'false_color': _falseColor.value,
+      'true_icon': _trueIcon,
+      'false_icon': _falseIcon,
     };
   }
 
@@ -110,6 +147,44 @@ class BooleanBoxModel extends NTWidgetModel {
           ),
         ],
       ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: Column(
+              children: [
+                const Text('True Icon'),
+                DialogDropdownChooser(
+                  onSelectionChanged: (value) {
+                    trueIcon = value;
+                  },
+                  choices: _trueIconOptions,
+                  initialValue:
+                      (_trueIconOptions.contains(_trueIcon)) ? _trueIcon : null,
+                ),
+              ],
+            ),
+          ),
+          Flexible(
+            child: Column(
+              children: [
+                const Text('False Icon'),
+                DialogDropdownChooser(
+                  onSelectionChanged: (value) {
+                    falseIcon = value;
+                  },
+                  choices: _falseIconOptions,
+                  initialValue: (_falseIconOptions.contains(_falseIcon))
+                      ? _falseIcon
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     ];
   }
 }
@@ -129,12 +204,51 @@ class BooleanBox extends NTWidget {
       builder: (context, snapshot) {
         bool value = tryCast(snapshot.data) ?? false;
 
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15.0),
-            color: (value) ? model.trueColor : model.falseColor,
-          ),
-        );
+        Widget defaultWidget() => Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15.0),
+                color: (value) ? model.trueColor : model.falseColor,
+              ),
+            );
+
+        Widget? widgetToDisplay;
+        if (value && model.trueIcon.toUpperCase() != 'NONE') {
+          switch (model.trueIcon.toUpperCase()) {
+            case 'CHECKMARK':
+              widgetToDisplay = SizedBox.expand(
+                child: FittedBox(
+                  child: Icon(Icons.check, color: model.trueColor),
+                ),
+              );
+              break;
+          }
+        } else if (!value && model.falseIcon.toUpperCase() != 'NONE') {
+          switch (model.falseIcon.toUpperCase()) {
+            case 'X':
+              widgetToDisplay = SizedBox.expand(
+                child: FittedBox(
+                  child: Icon(Icons.clear, color: model.falseColor),
+                ),
+              );
+              break;
+            case 'EXCLAMATION POINT':
+              widgetToDisplay = SizedBox.expand(
+                child: FittedBox(
+                  child: Icon(Icons.priority_high, color: model.falseColor),
+                ),
+              );
+              break;
+          }
+        }
+
+        return widgetToDisplay ?? defaultWidget();
+
+        // return Container(
+        //   decoration: BoxDecoration(
+        //     borderRadius: BorderRadius.circular(15.0),
+        //     color: (value) ? model.trueColor : model.falseColor,
+        //   ),
+        // );
       },
     );
   }
