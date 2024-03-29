@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -216,7 +217,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
                 childModel.period = newPeriod;
                 childModel.resetSubscription();
               },
-              formatter: Constants.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Period',
               initialText: childModel.period.toString(),
             ),

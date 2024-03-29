@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -244,7 +244,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: model.kpTextController,
                       initialText: model.kpTextController!.text,
                       label: 'kP',
-                      formatter: Constants.decimalTextFormatter(),
+                      formatter: TextFormatterBuilder.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -264,7 +264,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: model.kiTextController,
                       initialText: model.kiTextController!.text,
                       label: 'kI',
-                      formatter: Constants.decimalTextFormatter(),
+                      formatter: TextFormatterBuilder.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -284,7 +284,7 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: model.kdTextController,
                       initialText: model.kdTextController!.text,
                       label: 'kD',
-                      formatter: Constants.decimalTextFormatter(),
+                      formatter: TextFormatterBuilder.decimalTextFormatter(),
                       onSubmit: (value) {},
                     ),
                   ),
@@ -302,8 +302,8 @@ class PIDControllerWidget extends NTWidget {
                       textEditingController: model.setpointTextController,
                       initialText: model.setpointTextController!.text,
                       label: 'Setpoint',
-                      formatter:
-                          Constants.decimalTextFormatter(allowNegative: true),
+                      formatter: TextFormatterBuilder.decimalTextFormatter(
+                          allowNegative: true),
                       onSubmit: (value) {},
                     ),
                   ),

@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -124,7 +124,7 @@ class GraphModel extends NTWidgetModel {
                 }
                 timeDisplayed = newTime;
               },
-              formatter: Constants.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Time Displayed (Seconds)',
               initialText: _timeDisplayed.toString(),
             ),
@@ -148,7 +148,8 @@ class GraphModel extends NTWidgetModel {
                   refresh();
                 }
               },
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               label: 'Minimum',
               initialText: _minValue?.toString(),
               allowEmptySubmission: true,
@@ -166,7 +167,8 @@ class GraphModel extends NTWidgetModel {
                   refresh();
                 }
               },
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               label: 'Maximum',
               initialText: _maxValue?.toString(),
               allowEmptySubmission: true,
@@ -183,7 +185,7 @@ class GraphModel extends NTWidgetModel {
 
                 lineWidth = newWidth;
               },
-              formatter: Constants.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Line Width',
               initialText: _lineWidth.toString(),
             ),

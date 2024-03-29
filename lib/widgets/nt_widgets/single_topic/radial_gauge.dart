@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -143,7 +143,8 @@ class RadialGaugeModel extends NTWidgetModel {
             child: DialogTextInput(
               label: 'Start Angle (CW+)',
               initialText: _startAngle.toString(),
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               onSubmit: (value) {
                 double? newStartAngle = double.tryParse(value);
 
@@ -158,7 +159,8 @@ class RadialGaugeModel extends NTWidgetModel {
             child: DialogTextInput(
               label: 'End Angle (CW+)',
               initialText: _endAngle.toString(),
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               onSubmit: (value) {
                 double? newEndAngle = double.tryParse(value);
 
@@ -179,7 +181,8 @@ class RadialGaugeModel extends NTWidgetModel {
             child: DialogTextInput(
               label: 'Min Value',
               initialText: _minValue.toString(),
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               onSubmit: (value) {
                 double? newMin = double.tryParse(value);
 
@@ -194,7 +197,8 @@ class RadialGaugeModel extends NTWidgetModel {
             child: DialogTextInput(
               label: 'Max Value',
               initialText: _maxValue.toString(),
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               onSubmit: (value) {
                 double? newMax = double.tryParse(value);
 

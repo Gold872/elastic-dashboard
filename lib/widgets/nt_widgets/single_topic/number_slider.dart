@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -112,7 +112,8 @@ class NumberSliderModel extends NTWidgetModel {
                 }
                 minValue = newMin;
               },
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               label: 'Min Value',
               initialText: _minValue.toString(),
             ),
@@ -126,7 +127,8 @@ class NumberSliderModel extends NTWidgetModel {
                 }
                 maxValue = newMax;
               },
-              formatter: Constants.decimalTextFormatter(allowNegative: true),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
               label: 'Max Value',
               initialText: _maxValue.toString(),
             ),

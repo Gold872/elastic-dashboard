@@ -12,6 +12,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -222,7 +223,7 @@ class FieldWidgetModel extends NTWidgetModel {
                 }
                 robotWidthMeters = newWidth;
               },
-              formatter: Constants.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Robot Width (meters)',
               initialText: _robotWidthMeters.toString(),
             ),
@@ -237,7 +238,7 @@ class FieldWidgetModel extends NTWidgetModel {
                 }
                 robotLengthMeters = newLength;
               },
-              formatter: Constants.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Robot Length (meters)',
               initialText: _robotLengthMeters.toString(),
             ),
