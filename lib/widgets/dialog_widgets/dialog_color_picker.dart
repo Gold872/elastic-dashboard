@@ -35,6 +35,7 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(widget.label),
@@ -103,7 +104,7 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                           selectedColor = initialColor;
                         });
                       },
-                      child: const Text('Reset'),
+                      child: const Text('Cancel'),
                     ),
                     TextButton(
                       onPressed: () {
@@ -133,6 +134,9 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: selectedColor ?? initialColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7.5),
+            ),
           ),
           child: Container(),
         ),
