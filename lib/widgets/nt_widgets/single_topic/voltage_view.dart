@@ -5,7 +5,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -58,6 +57,7 @@ class VoltageViewModel extends NTWidgetModel {
   }
 
   VoltageViewModel({
+    required super.elasticData,
     required super.topic,
     double minValue = 4.0,
     double maxValue = 13.0,
@@ -73,7 +73,7 @@ class VoltageViewModel extends NTWidgetModel {
         _minValue = minValue,
         super();
 
-  VoltageViewModel.fromJson({required Map<String, dynamic> jsonData})
+  VoltageViewModel.fromJson({required super.elasticData, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? 4.0;
     _maxValue = tryCast(jsonData['max_value']) ?? 13.0;
@@ -203,7 +203,7 @@ class VoltageView extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.elasticData.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double voltage = tryCast(snapshot.data) ?? 0.0;
 

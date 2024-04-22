@@ -33,14 +33,16 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
 
+typedef ElasticSharedData = ({NTConnection ntConnection, SharedPreferences preferences});
+
 class DashboardPage extends StatefulWidget {
-  final SharedPreferences preferences;
   final String version;
   final Function(Color color)? onColorChanged;
+  final ElasticSharedData elasticData;
 
   const DashboardPage({
     super.key,
-    required this.preferences,
+    required this.elasticData,
     required this.version,
     this.onColorChanged,
   });
@@ -50,7 +52,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
-  late final SharedPreferences _preferences;
+  late final SharedPreferences _preferences = widget.elasticData.preferences;
   late final UpdateChecker _updateChecker;
 
   final List<TabGrid> _grids = [];
@@ -69,7 +71,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   void initState() {
     super.initState();
 
-    _preferences = widget.preferences;
     _updateChecker = UpdateChecker(currentVersion: widget.version);
 
     windowManager.addListener(this);
@@ -81,7 +82,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _setupShortcuts();
 
-    ntConnection.dsClientConnect(
+    widget.elasticData.ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
         if (Settings.ipAddressMode != IPAddressMode.driverStation) {
           return;
@@ -93,7 +94,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        ntConnection.changeIPAddress(ip);
+        widget.elasticData.ntConnection.changeIPAddress(ip);
       },
       onDriverStationDockChanged: (docked) {
         if (Settings.autoResizeToDS && docked) {
@@ -104,7 +105,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       },
     );
 
-    ntConnection.addConnectedListener(() {
+    widget.elasticData.ntConnection.addConnectedListener(() {
       setState(() {
         for (TabGrid grid in _grids) {
           grid.onNTConnect();
@@ -112,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       });
     });
 
-    ntConnection.addDisconnectedListener(() {
+    widget.elasticData.ntConnection.addDisconnectedListener(() {
       setState(() {
         for (TabGrid grid in _grids) {
           grid.onNTDisconnect();
@@ -121,6 +122,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     });
 
     ShuffleboardNTListener apiListener = ShuffleboardNTListener(
+      elasticData: widget.elasticData,
       onTabChanged: (tab) {
         int? parsedTabIndex = int.tryParse(tab);
 
@@ -160,6 +162,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.add(
           TabGrid(
             key: GlobalKey(),
+            elasticData: widget.elasticData,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         );
@@ -182,6 +185,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           _tabData.add(TabData(name: tabName));
           _grids.add(TabGrid(
             key: GlobalKey(),
+            elasticData: widget.elasticData,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ));
 
@@ -203,7 +207,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future.delayed(const Duration(seconds: 1), () {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
-      ntConnection.nt4Client.recallAnnounceListeners();
+      widget.elasticData.ntConnection.recallTopicAnnounceListeners();
     });
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
@@ -565,6 +569,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _grids.add(
         TabGrid.fromJson(
           key: GlobalKey(),
+          elasticData: widget.elasticData,
           jsonData: data['grid_layout'],
           onAddWidgetPressed: _displayAddWidgetDialog,
           onJsonLoadingWarning: _showJsonLoadingWarning,
@@ -591,10 +596,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.addAll([
           TabGrid(
             key: GlobalKey(),
+            elasticData: widget.elasticData,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
           TabGrid(
             key: GlobalKey(),
+            elasticData: widget.elasticData,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         ]);
@@ -744,6 +751,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.add(
           TabGrid(
             key: GlobalKey(),
+            elasticData: widget.elasticData,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         );
@@ -867,7 +875,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     showDialog(
       context: context,
       builder: (context) => SettingsDialog(
-        preferences: widget.preferences,
+        elasticData: widget.elasticData,
         onTeamNumberChanged: (String? data) async {
           if (data == null) {
             return;
@@ -907,7 +915,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           switch (mode) {
             case IPAddressMode.driverStation:
-              String? lastAnnouncedIP = ntConnection.dsClient.lastAnnouncedIP;
+              String? lastAnnouncedIP = widget.elasticData.ntConnection.dsClient.lastAnnouncedIP;
 
               if (lastAnnouncedIP == null) {
                 break;
@@ -1002,7 +1010,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
 
           setState(() {
-            Settings.gridSize = newGridSize;
             _gridSize = newGridSize;
           });
 
@@ -1024,8 +1031,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
 
           setState(() {
-            Settings.cornerRadius = newRadius;
-
             for (TabGrid grid in _grids) {
               grid.refreshAllContainers();
             }
@@ -1035,9 +1040,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onResizeToDSChanged: (value) async {
           setState(() {
-            Settings.autoResizeToDS = value;
-
-            if (value && ntConnection.dsClient.driverStationDocked) {
+            if (value && widget.elasticData.ntConnection.dsClient.driverStationDocked) {
               _onDriverStationDocked();
             } else {
               _onDriverStationUndocked();
@@ -1070,7 +1073,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await _preferences.setDouble(PrefKeys.defaultPeriod, newPeriod);
 
-          setState(() => Settings.defaultPeriod = newPeriod);
+          setState(() {});
         },
         onDefaultGraphPeriodChanged: (value) async {
           if (value == null) {
@@ -1092,14 +1095,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _updateIPAddress(String newIPAddress) async {
-    if (newIPAddress == Settings.ipAddress) {
+    if (newIPAddress == _preferences.getString(PrefKeys.ipAddress)) {
       return;
     }
     await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
-    Settings.ipAddress = newIPAddress;
 
     setState(() {
-      ntConnection.changeIPAddress(newIPAddress);
+      widget.elasticData.ntConnection.changeIPAddress(newIPAddress);
     });
   }
 
@@ -1471,6 +1473,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         _tabData.add(tab);
                         _grids.add(TabGrid(
                           key: GlobalKey(),
+                          elasticData: widget.elasticData,
                           onAddWidgetPressed: _displayAddWidgetDialog,
                         ));
                       });
@@ -1535,7 +1538,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   children: [
                     Expanded(
                       child: StreamBuilder(
-                          stream: ntConnection.connectionStatus(),
+                          stream: widget.elasticData.ntConnection.connectionStatus(),
                           builder: (context, snapshot) {
                             bool connected = snapshot.data ?? false;
 
@@ -1560,7 +1563,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: StreamBuilder(
-                          stream: ntConnection.latencyStream(),
+                          stream: widget.elasticData.ntConnection.latencyStream(),
                           builder: (context, snapshot) {
                             int latency = snapshot.data ?? 0;
 

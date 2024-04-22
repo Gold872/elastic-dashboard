@@ -77,8 +77,10 @@ void main() async {
 
   NTWidgetBuilder.ensureInitialized();
 
-  Settings.ipAddress =
+  String ipAddress =
       preferences.getString(PrefKeys.ipAddress) ?? Settings.ipAddress;
+
+  NTConnection ntConnection = NTConnection(ipAddress);
 
   ntConnection.nt4Connect(Settings.ipAddress);
 
@@ -104,7 +106,15 @@ void main() async {
   await windowManager.show();
   await windowManager.focus();
 
-  runApp(Elastic(version: packageInfo.version, preferences: preferences));
+  runApp(
+    Elastic(
+      elasticData: (
+        ntConnection: ntConnection,
+        preferences: preferences,
+      ),
+      version: packageInfo.version,
+    ),
+  );
 }
 
 Future<void> _restoreWindowPosition(SharedPreferences preferences,
@@ -187,10 +197,10 @@ Future<void> _restorePreferencesFromBackup(String appFolderPath) async {
 }
 
 class Elastic extends StatefulWidget {
-  final SharedPreferences preferences;
+  final ElasticSharedData elasticData;
   final String version;
 
-  const Elastic({super.key, required this.version, required this.preferences});
+  const Elastic({super.key, required this.elasticData, required this.version});
 
   @override
   State<Elastic> createState() => _ElasticState();
@@ -198,7 +208,8 @@ class Elastic extends StatefulWidget {
 
 class _ElasticState extends State<Elastic> {
   late Color teamColor = Color(
-      widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+      widget.elasticData.preferences.getInt(PrefKeys.teamColor) ??
+          Colors.blueAccent.value);
 
   @override
   Widget build(BuildContext context) {
@@ -212,11 +223,12 @@ class _ElasticState extends State<Elastic> {
       title: 'Elastic',
       theme: theme,
       home: DashboardPage(
-        preferences: widget.preferences,
+        elasticData: widget.elasticData,
         version: widget.version,
         onColorChanged: (color) => setState(() {
           teamColor = color;
-          widget.preferences.setInt(PrefKeys.teamColor, color.value);
+          widget.elasticData.preferences
+              .setInt(PrefKeys.teamColor, color.value);
         }),
       ),
     );

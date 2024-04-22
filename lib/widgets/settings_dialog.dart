@@ -1,11 +1,10 @@
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -14,7 +13,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 
 class SettingsDialog extends StatefulWidget {
-  final SharedPreferences preferences;
+  final ElasticSharedData elasticData;
 
   final Function(String? data)? onIPAddressChanged;
   final Function(String? data)? onTeamNumberChanged;
@@ -31,7 +30,7 @@ class SettingsDialog extends StatefulWidget {
 
   const SettingsDialog({
     super.key,
-    required this.preferences,
+    required this.elasticData,
     this.onTeamNumberChanged,
     this.onIPAddressModeChanged,
     this.onIPAddressChanged,
@@ -99,17 +98,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Widget> _generalSettings() {
-    Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
-        Colors.blueAccent.value);
+    Color currentColor = Color(
+        widget.elasticData.preferences.getInt(PrefKeys.teamColor) ??
+            Colors.blueAccent.value);
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Flexible(
             child: DialogTextInput(
-              initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
-                      Settings.teamNumber.toString(),
+              initialText: widget.elasticData.preferences
+                      .getInt(PrefKeys.teamNumber)
+                      ?.toString() ??
+                  Settings.teamNumber.toString(),
               label: 'Team Number',
               onSubmit: (data) async {
                 await widget.onTeamNumberChanged?.call(data);
@@ -153,8 +154,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ),
       const SizedBox(height: 5),
       StreamBuilder(
-          stream: ntConnection.dsConnectionStatus(),
-          initialData: ntConnection.isDSConnected,
+          stream: widget.elasticData.ntConnection.dsConnectionStatus(),
+          initialData: widget.elasticData.ntConnection.isDSConnected,
           builder: (context, snapshot) {
             bool dsConnected = tryCast(snapshot.data) ?? false;
 
@@ -162,7 +163,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
               enabled: Settings.ipAddressMode == IPAddressMode.custom ||
                   (Settings.ipAddressMode == IPAddressMode.driverStation &&
                       !dsConnected),
-              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
+              initialText: widget.elasticData.preferences
+                      .getString(PrefKeys.ipAddress) ??
                   Settings.ipAddress,
               label: 'IP Address',
               onSubmit: (String? data) async {
@@ -186,8 +188,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         children: [
           Flexible(
             child: DialogToggleSwitch(
-              initialValue: widget.preferences.getBool(PrefKeys.showGrid) ??
-                  Settings.showGrid,
+              initialValue:
+                  widget.elasticData.preferences.getBool(PrefKeys.showGrid) ??
+                      Settings.showGrid,
               label: 'Show Grid',
               onToggle: (value) {
                 setState(() {
@@ -198,9 +201,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           Flexible(
             child: DialogTextInput(
-              initialText:
-                  widget.preferences.getInt(PrefKeys.gridSize)?.toString() ??
-                      Settings.gridSize.toString(),
+              initialText: widget.elasticData.preferences
+                      .getInt(PrefKeys.gridSize)
+                      ?.toString() ??
+                  Settings.gridSize.toString(),
               label: 'Grid Size',
               onSubmit: (value) async {
                 await widget.onGridSizeChanged?.call(value);
@@ -218,7 +222,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             flex: 2,
             child: DialogTextInput(
-              initialText: widget.preferences
+              initialText: widget.elasticData.preferences
                       .getDouble(PrefKeys.cornerRadius)
                       ?.toString() ??
                   Settings.cornerRadius.toString(),
@@ -234,9 +238,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             flex: 3,
             child: DialogToggleSwitch(
-              initialValue:
-                  widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
-                      Settings.autoResizeToDS,
+              initialValue: widget.elasticData.preferences
+                      .getBool(PrefKeys.autoResizeToDS) ??
+                  Settings.autoResizeToDS,
               label: 'Resize to Driver Station Height',
               onToggle: (value) {
                 setState(() {
@@ -254,9 +258,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             flex: 5,
             child: DialogToggleSwitch(
-              initialValue:
-                  widget.preferences.getBool(PrefKeys.rememberWindowPosition) ??
-                      false,
+              initialValue: widget.elasticData.preferences
+                      .getBool(PrefKeys.rememberWindowPosition) ??
+                  false,
               label: 'Remember Window Position',
               onToggle: (value) {
                 setState(() {
@@ -268,7 +272,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             flex: 4,
             child: DialogToggleSwitch(
-              initialValue: widget.preferences.getBool(PrefKeys.layoutLocked) ??
+              initialValue: widget.elasticData.preferences
+                      .getBool(PrefKeys.layoutLocked) ??
                   Settings.layoutLocked,
               label: 'Lock Layout',
               onToggle: (value) {
@@ -296,10 +301,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           children: [
             Flexible(
               child: DialogTextInput(
-                initialText:
-                    (widget.preferences.getDouble(PrefKeys.defaultPeriod) ??
-                            Settings.defaultPeriod)
-                        .toString(),
+                initialText: (widget.elasticData.preferences
+                            .getDouble(PrefKeys.defaultPeriod) ??
+                        Settings.defaultPeriod)
+                    .toString(),
                 label: 'Default Period',
                 onSubmit: (value) async {
                   await widget.onDefaultPeriodChanged?.call(value);
@@ -310,7 +315,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
             Flexible(
               child: DialogTextInput(
-                initialText: (widget.preferences
+                initialText: (widget.elasticData.preferences
                             .getDouble(PrefKeys.defaultGraphPeriod) ??
                         Settings.defaultGraphPeriod)
                     .toString(),

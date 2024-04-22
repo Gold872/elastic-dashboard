@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class RobotPreferencesModel extends NTWidgetModel {
@@ -56,7 +55,7 @@ class RobotPreferences extends NTWidget {
           model.preferenceTopics.addAll({nt4Topic.name: nt4Topic});
           model.preferenceTextControllers.addAll({
             nt4Topic.name: TextEditingController()
-              ..text = previousValue?.toString() ?? ''
+              ..text = previousValue.toString() ?? ''
           });
           model.previousValues.addAll({nt4Topic.name: previousValue});
 

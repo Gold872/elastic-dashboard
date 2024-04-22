@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -49,6 +50,7 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
+        required ElasticSharedData elasticData,
         required String topic,
         String dataType,
         double period,
@@ -57,6 +59,7 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
+        required ElasticSharedData elasticData,
         required Map<String, dynamic> jsonData,
       })> _modelJsonBuildMap = {};
 
@@ -344,6 +347,7 @@ class NTWidgetBuilder {
   }
 
   static NTWidgetModel buildNTModelFromJson(
+    ElasticSharedData elasticData,
       String type, Map<String, dynamic> jsonData,
       {Function(String message)? onWidgetTypeNotFound}) {
     ensureInitialized();
@@ -355,6 +359,7 @@ class NTWidgetBuilder {
     onWidgetTypeNotFound
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
     return NTWidgetModel.createDefault(
+            elasticData: elasticData,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
       dataType: tryCast(jsonData['data_type']) ?? 'Unknown',

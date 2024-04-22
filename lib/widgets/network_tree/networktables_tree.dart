@@ -1,12 +1,12 @@
 import 'dart:ui';
 
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -18,6 +18,7 @@ typedef ListLayoutBuilder = ListLayoutModel Function({
 });
 
 class NetworkTableTree extends StatefulWidget {
+  final ElasticSharedData elasticData;
   final ListLayoutBuilder listLayoutBuilder;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)?
@@ -28,6 +29,7 @@ class NetworkTableTree extends StatefulWidget {
 
   const NetworkTableTree({
     super.key,
+    required this.elasticData,
     required this.listLayoutBuilder,
     required this.hideMetadata,
     this.onDragUpdate,
@@ -39,7 +41,7 @@ class NetworkTableTree extends StatefulWidget {
 }
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
-  final NetworkTableTreeRow root = NetworkTableTreeRow(topic: '/', rowName: '');
+  late final NetworkTableTreeRow root = NetworkTableTreeRow(elasticData: widget.elasticData, topic: '/', rowName: '');
   late final TreeController<NetworkTableTreeRow> treeController;
 
   late final Function(Offset globalPosition, WidgetContainerModel widget)?
@@ -65,8 +67,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       },
     );
 
-    ntConnection.nt4Client
-        .addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
+    widget.elasticData.ntConnection.addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
       setState(() {
         treeController.rebuild();
       });
@@ -75,7 +76,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void dispose() {
-    ntConnection.nt4Client.removeTopicAnnounceListener(onNewTopicAnnounced);
+    widget.elasticData.ntConnection.removeTopicAnnounceListener(onNewTopicAnnounced);
 
     super.dispose();
   }
@@ -126,7 +127,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   Widget build(BuildContext context) {
     List<NT4Topic> topics = [];
 
-    for (NT4Topic topic in ntConnection.nt4Client.announcedTopics.values) {
+    for (NT4Topic topic in widget.elasticData.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
       }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ToggleButton extends NTWidget {

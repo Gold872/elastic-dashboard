@@ -10,7 +10,6 @@ import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -292,10 +291,6 @@ class FieldWidgetModel extends NTWidgetModel {
             .getLastAnnouncedValue(objectTopic)
             ?.tryCast<List<Object?>>();
 
-        if (objectPositionRaw == null) {
-          continue;
-        }
-
         bool isTrajectory = objectPositionRaw.length > 24;
 
         if (isTrajectory && !_showTrajectories) {
@@ -556,10 +551,6 @@ class FieldWidget extends NTWidget {
             List<Object?>? objectPositionRaw = ntConnection
                 .getLastAnnouncedValue(objectTopic)
                 ?.tryCast<List<Object?>>();
-
-            if (objectPositionRaw == null) {
-              continue;
-            }
 
             bool isTrajectory = objectPositionRaw.length > 24;
 

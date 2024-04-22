@@ -14,10 +14,13 @@ class NTConnection {
   bool _dsConnected = false;
 
   bool get isNT4Connected => _ntConnected;
-  NT4Client get nt4Client => _ntClient;
 
   bool get isDSConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
+
+  NTConnection(String ipAddress) {
+    nt4Connect(ipAddress);
+  }
 
   void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
@@ -58,6 +61,18 @@ class NTConnection {
 
   void addDisconnectedListener(VoidCallback callback) {
     onDisconnectedListeners.add(callback);
+  }
+
+  void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
+    _ntClient.addTopicAnnounceListener(onAnnounce);
+  }
+
+  void removeTopicAnnounceListener(Function(NT4Topic topic) onUnannounce) {
+    _ntClient.removeTopicAnnounceListener(onUnannounce);
+  }
+
+  void recallTopicAnnounceListeners() {
+    _ntClient.recallAnnounceListeners();
   }
 
   Future<T?>? subscribeAndRetrieveData<T>(String topic,
@@ -106,8 +121,12 @@ class NTConnection {
     }
   }
 
+  Map<int, NT4Topic> announcedTopics() {
+    return _ntClient.announcedTopics;
+  }
+
   Stream<int> latencyStream() {
-    return nt4Client.latencyStream();
+    return _ntClient.latencyStream();
   }
 
   void changeIPAddress(String ipAddress) {

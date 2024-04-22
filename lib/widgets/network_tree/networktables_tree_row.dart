@@ -1,7 +1,7 @@
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -14,6 +14,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.da
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
 
 class NetworkTableTreeRow {
+  final ElasticSharedData elasticData;
   final String topic;
   final String rowName;
 
@@ -22,6 +23,7 @@ class NetworkTableTreeRow {
   List<NetworkTableTreeRow> children = [];
 
   NetworkTableTreeRow({
+    required this.elasticData,
     required this.topic,
     required this.rowName,
     this.ntTopic,
@@ -74,8 +76,12 @@ class NetworkTableTreeRow {
 
   NetworkTableTreeRow createNewRow(
       {required String topic, required String name, NT4Topic? ntTopic}) {
-    NetworkTableTreeRow newRow =
-        NetworkTableTreeRow(topic: topic, rowName: name, ntTopic: ntTopic);
+    NetworkTableTreeRow newRow = NetworkTableTreeRow(
+      elasticData: elasticData,
+      topic: topic,
+      rowName: name,
+      ntTopic: ntTopic,
+    );
     addRow(newRow);
 
     return newRow;
@@ -162,7 +168,7 @@ class NetworkTableTreeRow {
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    return ntConnection.subscribeAndRetrieveData(typeTopic);
+    return elasticData.ntConnection.subscribeAndRetrieveData(typeTopic);
   }
 
   Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {

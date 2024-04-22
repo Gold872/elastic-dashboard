@@ -7,7 +7,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -142,8 +141,7 @@ class TextDisplay extends NTWidget {
       builder: (context, snapshot) {
         Object? data = snapshot.data;
 
-        if (data?.toString() != model.previousValue?.toString() &&
-            data != null) {
+        if (data.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors
           Future(() async {
             String displayString = data.toString();
