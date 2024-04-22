@@ -3,11 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
-NTConnection get ntConnection => NTConnection.instance;
-
 class NTConnection {
-  static NTConnection instance = NTConnection._internal();
-
   late NT4Client _ntClient;
   late DSInteropClient _dsClient;
 
@@ -22,12 +18,6 @@ class NTConnection {
 
   bool get isDSConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
-
-  NTConnection._internal();
-
-  factory NTConnection() {
-    return instance;
-  }
 
   void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
