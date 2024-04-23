@@ -52,7 +52,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
-  late final SharedPreferences _preferences = widget.preferences;
+  late final SharedPreferences preferences = widget.preferences;
   late final UpdateChecker _updateChecker;
 
   final List<TabGrid> _grids = [];
@@ -61,7 +61,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   final Function _mapEquals = const DeepCollectionEquality().equals;
 
-  int _gridSize = Settings.gridSize;
+  late int _gridSize =
+      preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
 
   int _currentTabIndex = 0;
 
@@ -88,8 +89,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        if (_preferences.getString(PrefKeys.ipAddress) != ip) {
-          await _preferences.setString(PrefKeys.ipAddress, ip);
+        if (preferences.getString(PrefKeys.ipAddress) != ip) {
+          await preferences.setString(PrefKeys.ipAddress, ip);
         } else {
           return;
         }
@@ -97,7 +98,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         widget.ntConnection.changeIPAddress(ip);
       },
       onDriverStationDockChanged: (docked) {
-        if (Settings.autoResizeToDS && docked) {
+        if ((preferences.getBool(PrefKeys.autoResizeToDS) ??
+                Defaults.autoResizeToDS) &&
+            docked) {
           _onDriverStationDocked();
         } else {
           _onDriverStationUndocked();
@@ -149,7 +152,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
       onTabCreated: (tab) {
-        if (Settings.layoutLocked) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
           return;
         }
 
@@ -170,7 +174,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         );
       },
       onWidgetAdded: (widgetData) {
-        if (Settings.layoutLocked) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
           return;
         }
         // Needs to be done in case if widget data gets erased by the listener
@@ -219,7 +224,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   @override
   void onWindowClose() async {
     Map<String, dynamic> savedJson =
-        jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
+        jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
     Map<String, dynamic> currentJson = _toJson();
 
     bool showConfirmation = !_mapEquals(savedJson, currentJson);
@@ -270,7 +275,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     TextTheme textTheme = Theme.of(context).textTheme;
 
     bool successful =
-        await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+        await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
     await _saveWindowPosition();
 
     if (successful) {
@@ -328,7 +333,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     String positionString = jsonEncode(positionArray);
 
-    await _preferences.setString(PrefKeys.windowPosition, positionString);
+    await preferences.setString(PrefKeys.windowPosition, positionString);
   }
 
   void _checkForUpdates(
@@ -468,7 +473,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _importLayout() async {
-    if (Settings.layoutLocked) {
+    if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
       return;
     }
     const XTypeGroup jsonTypeGroup = XTypeGroup(
@@ -512,13 +517,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
-    await _preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
 
     setState(() => _loadLayoutFromJsonData(jsonString));
   }
 
   void _loadLayout() {
-    String? jsonString = _preferences.getString(PrefKeys.layout);
+    String? jsonString = preferences.getString(PrefKeys.layout);
 
     if (jsonString == null) {
       _createDefaultTabs();
@@ -548,8 +553,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     if (jsonData.containsKey('grid_size')) {
       _gridSize = tryCast(jsonData['grid_size']) ?? _gridSize;
-      Settings.gridSize = _gridSize;
-      _preferences.setInt(PrefKeys.gridSize, _gridSize);
+      preferences.setInt(PrefKeys.gridSize, _gridSize);
     }
 
     _tabData.clear();
@@ -747,7 +751,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         modifiers: [KeyModifier.control],
       ),
       callback: () {
-        if (Settings.layoutLocked) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
           return;
         }
         String newTabName = 'Tab ${_tabData.length + 1}';
@@ -773,7 +778,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         modifiers: [KeyModifier.control],
       ),
       callback: () {
-        if (Settings.layoutLocked) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
           return;
         }
         if (_tabData.length <= 1) {
@@ -804,16 +810,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     for (TabGrid grid in _grids) {
       grid.lockLayout();
     }
-    Settings.layoutLocked = true;
-    await _preferences.setBool(PrefKeys.layoutLocked, true);
+    await preferences.setBool(PrefKeys.layoutLocked, true);
   }
 
   void _unlockLayout() async {
     for (TabGrid grid in _grids) {
       grid.unlockLayout();
     }
-    Settings.layoutLocked = false;
-    await _preferences.setBool(PrefKeys.layoutLocked, false);
+    await preferences.setBool(PrefKeys.layoutLocked, false);
   }
 
   void _displayAddWidgetDialog() {
@@ -892,13 +896,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           int? newTeamNumber = int.tryParse(data);
 
           if (newTeamNumber == null ||
-              (newTeamNumber == Settings.teamNumber &&
-                  Settings.teamNumber != 9999)) {
+              (newTeamNumber == preferences.getInt(PrefKeys.teamNumber))) {
             return;
           }
 
-          await _preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
-          Settings.teamNumber = newTeamNumber;
+          await preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
           switch (Settings.ipAddressMode) {
             case IPAddressMode.roboRIOmDNS:
@@ -917,7 +919,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           if (mode == Settings.ipAddressMode) {
             return;
           }
-          await _preferences.setInt(PrefKeys.ipAddressMode, mode.index);
+          await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
           Settings.ipAddressMode = mode;
 
@@ -933,12 +935,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               _updateIPAddress(lastAnnouncedIP);
               break;
             case IPAddressMode.roboRIOmDNS:
-              _updateIPAddress(
-                  IPAddressUtil.teamNumberToRIOmDNS(Settings.teamNumber));
+              _updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
+                  preferences.getInt(PrefKeys.teamNumber) ??
+                      Defaults.teamNumber));
               break;
             case IPAddressMode.teamNumber:
-              _updateIPAddress(
-                  IPAddressUtil.teamNumberToIP(Settings.teamNumber));
+              _updateIPAddress(IPAddressUtil.teamNumberToIP(
+                  preferences.getInt(PrefKeys.teamNumber) ??
+                      Defaults.teamNumber));
               break;
             case IPAddressMode.localhost:
               _updateIPAddress('localhost');
@@ -949,18 +953,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
         },
         onIPAddressChanged: (String? data) async {
-          if (data == null || data == Settings.ipAddress) {
+          if (data == null ||
+              data == preferences.getString(PrefKeys.ipAddress)) {
             return;
           }
 
           _updateIPAddress(data);
         },
         onGridToggle: (value) async {
-          setState(() {
-            Settings.showGrid = value;
-          });
+          await preferences.setBool(PrefKeys.showGrid, value);
 
-          await _preferences.setBool(PrefKeys.showGrid, value);
+          setState(() {});
         },
         onGridSizeChanged: (gridSize) async {
           if (gridSize == null) {
@@ -1022,7 +1025,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             _gridSize = newGridSize;
           });
 
-          await _preferences.setInt(PrefKeys.gridSize, newGridSize);
+          await preferences.setInt(PrefKeys.gridSize, newGridSize);
 
           for (TabGrid grid in _grids) {
             grid.resizeGrid(_gridSize, _gridSize);
@@ -1035,17 +1038,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           double? newRadius = double.tryParse(radius);
 
-          if (newRadius == null || newRadius == Settings.cornerRadius) {
+          if (newRadius == null ||
+              newRadius == preferences.getDouble(PrefKeys.cornerRadius)) {
             return;
           }
+
+          await preferences.setDouble(PrefKeys.cornerRadius, newRadius);
 
           setState(() {
             for (TabGrid grid in _grids) {
               grid.refreshAllContainers();
             }
           });
-
-          await _preferences.setDouble(PrefKeys.cornerRadius, newRadius);
         },
         onResizeToDSChanged: (value) async {
           setState(() {
@@ -1056,19 +1060,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             }
           });
 
-          await _preferences.setBool(PrefKeys.autoResizeToDS, value);
+          await preferences.setBool(PrefKeys.autoResizeToDS, value);
         },
         onRememberWindowPositionChanged: (value) async {
-          await _preferences.setBool(PrefKeys.rememberWindowPosition, value);
+          await preferences.setBool(PrefKeys.rememberWindowPosition, value);
         },
         onLayoutLock: (value) {
-          setState(() {
-            if (value) {
-              _lockLayout();
-            } else {
-              _unlockLayout();
-            }
-          });
+          if (value) {
+            _lockLayout();
+          } else {
+            _unlockLayout();
+          }
+          setState(() {});
         },
         onDefaultPeriodChanged: (value) async {
           if (value == null) {
@@ -1076,11 +1079,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           double? newPeriod = double.tryParse(value);
 
-          if (newPeriod == null || newPeriod == Settings.defaultPeriod) {
+          if (newPeriod == null ||
+              newPeriod == preferences.getDouble(PrefKeys.defaultPeriod)) {
             return;
           }
 
-          await _preferences.setDouble(PrefKeys.defaultPeriod, newPeriod);
+          await preferences.setDouble(PrefKeys.defaultPeriod, newPeriod);
 
           setState(() {});
         },
@@ -1090,13 +1094,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           double? newPeriod = double.tryParse(value);
 
-          if (newPeriod == null || newPeriod == Settings.defaultGraphPeriod) {
+          if (newPeriod == null ||
+              newPeriod == preferences.getDouble(PrefKeys.defaultGraphPeriod)) {
             return;
           }
 
-          await _preferences.setDouble(PrefKeys.defaultGraphPeriod, newPeriod);
+          await preferences.setDouble(PrefKeys.defaultGraphPeriod, newPeriod);
 
-          setState(() => Settings.defaultGraphPeriod = newPeriod);
+          setState(() {});
         },
         onColorChanged: widget.onColorChanged,
       ),
@@ -1104,10 +1109,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _updateIPAddress(String newIPAddress) async {
-    if (newIPAddress == _preferences.getString(PrefKeys.ipAddress)) {
+    if (newIPAddress == preferences.getString(PrefKeys.ipAddress)) {
       return;
     }
-    await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
+    await preferences.setString(PrefKeys.ipAddress, newIPAddress);
 
     setState(() {
       widget.ntConnection.changeIPAddress(newIPAddress);
@@ -1213,7 +1218,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabLeft() {
-    if (Settings.layoutLocked) {
+    if (!(preferences.getBool(PrefKeys.layoutLocked) ??
+        Defaults.layoutLocked)) {
       return;
     }
     if (_currentTabIndex <= 0) {
@@ -1240,7 +1246,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabRight() {
-    if (Settings.layoutLocked) {
+    if (!(preferences.getBool(PrefKeys.layoutLocked) ??
+        Defaults.layoutLocked)) {
       return;
     }
     if (_currentTabIndex >= _tabData.length - 1) {
@@ -1300,8 +1307,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             // Open Layout
             MenuItemButton(
               style: menuButtonStyle,
-              onPressed:
-                  (!Settings.layoutLocked) ? () => _importLayout() : null,
+              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked)
+                  ? () => _importLayout()
+                  : null,
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyO, control: true),
               child: const Text(
@@ -1344,7 +1353,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               // Clear layout
               MenuItemButton(
                 style: menuButtonStyle,
-                onPressed: (!Settings.layoutLocked)
+                onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                        Defaults.layoutLocked)
                     ? () {
                         setState(() {
                           _grids[_currentTabIndex].clearWidgets(context);
@@ -1358,19 +1368,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               MenuItemButton(
                 style: menuButtonStyle,
                 onPressed: () {
-                  setState(() {
-                    if (Settings.layoutLocked) {
-                      _unlockLayout();
-                    } else {
-                      _lockLayout();
-                    }
-                  });
+                  if (preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked) {
+                    _unlockLayout();
+                  } else {
+                    _lockLayout();
+                  }
+
+                  setState(() {});
                 },
-                leadingIcon: (Settings.layoutLocked)
+                leadingIcon: (preferences.getBool(PrefKeys.layoutLocked) ??
+                        Defaults.layoutLocked)
                     ? const Icon(Icons.lock_open)
                     : const Icon(Icons.lock_outline),
                 child: Text(
-                    '${(Settings.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
+                    '${(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
               )
             ],
             child: const Text(
@@ -1420,11 +1432,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed:
-              (!Settings.layoutLocked) ? () => _displayAddWidgetDialog() : null,
+          onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                  Defaults.layoutLocked)
+              ? () => _displayAddWidgetDialog()
+              : null,
           child: const Text('Add Widget'),
         ),
-        if (Settings.layoutLocked) ...[
+        if ((preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked)) ...[
           const VerticalDivider(),
           // Unlock Layout
           Tooltip(
@@ -1437,9 +1452,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     const MaterialStatePropertyAll(Size(36.0, double.infinity)),
               ),
               onPressed: () {
-                setState(() {
-                  _unlockLayout();
-                });
+                _unlockLayout();
+                setState(() {});
               },
               child: const Icon(Icons.lock_outline),
             ),
@@ -1465,6 +1479,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               child: Stack(
                 children: [
                   EditableTabBar(
+                    preferences: preferences,
                     currentIndex: _currentTabIndex,
                     onTabMoveLeft: () {
                       _moveTabLeft();
@@ -1555,7 +1570,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                             bool connected = snapshot.data ?? false;
 
                             String connectedText = (connected)
-                                ? 'Network Tables: Connected (${_preferences.getString(PrefKeys.ipAddress)})'
+                                ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress)})'
                                 : 'Network Tables: Disconnected';
 
                             return Text(
@@ -1569,7 +1584,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: Text(
-                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                        'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
                         textAlign: TextAlign.center,
                       ),
                     ),

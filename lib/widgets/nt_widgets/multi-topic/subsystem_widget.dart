@@ -14,6 +14,7 @@ class SubsystemModel extends NTWidgetModel {
 
   SubsystemModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -21,6 +22,7 @@ class SubsystemModel extends NTWidgetModel {
 
   SubsystemModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

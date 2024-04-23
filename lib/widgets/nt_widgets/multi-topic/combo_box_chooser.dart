@@ -37,6 +37,7 @@ class ComboBoxChooserModel extends NTWidgetModel {
 
   ComboBoxChooserModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool sortOptions = false,
     super.dataType,
@@ -46,6 +47,7 @@ class ComboBoxChooserModel extends NTWidgetModel {
 
   ComboBoxChooserModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _sortOptions = tryCast(jsonData['sort_options']) ?? _sortOptions;

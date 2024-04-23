@@ -25,6 +25,7 @@ class SplitButtonChooserModel extends NTWidgetModel {
 
   SplitButtonChooserModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -32,6 +33,7 @@ class SplitButtonChooserModel extends NTWidgetModel {
 
   SplitButtonChooserModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

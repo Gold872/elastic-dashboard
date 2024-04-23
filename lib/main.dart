@@ -54,35 +54,15 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
-  Settings.teamNumber =
-      preferences.getInt(PrefKeys.teamNumber) ?? Settings.teamNumber;
   Settings.ipAddressMode =
       IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
-
-  Settings.layoutLocked =
-      preferences.getBool(PrefKeys.layoutLocked) ?? Settings.layoutLocked;
-  Settings.gridSize =
-      preferences.getInt(PrefKeys.gridSize) ?? Settings.gridSize;
-  Settings.showGrid =
-      preferences.getBool(PrefKeys.showGrid) ?? Settings.showGrid;
-  Settings.cornerRadius =
-      preferences.getDouble(PrefKeys.cornerRadius) ?? Settings.cornerRadius;
-  Settings.autoResizeToDS =
-      preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
-  Settings.defaultPeriod =
-      preferences.getDouble(PrefKeys.defaultPeriod) ?? Settings.defaultPeriod;
-  Settings.defaultGraphPeriod =
-      preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
-          Settings.defaultGraphPeriod;
 
   NTWidgetBuilder.ensureInitialized();
 
   String ipAddress =
-      preferences.getString(PrefKeys.ipAddress) ?? Settings.ipAddress;
+      preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
 
   NTConnection ntConnection = NTConnection(ipAddress);
-
-  ntConnection.nt4Connect(Settings.ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
 

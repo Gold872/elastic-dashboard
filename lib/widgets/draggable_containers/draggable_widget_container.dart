@@ -32,7 +32,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   });
 
   static double snapToGrid(double value, [double? gridSize]) {
-    gridSize ??= Settings.gridSize.toDouble();
+    gridSize ??= Defaults.gridSize.toDouble();
     return (value / gridSize).roundToDouble() * gridSize;
   }
 
@@ -160,6 +160,7 @@ class WidgetContainer extends StatelessWidget {
     this.opacity = 1.0,
     this.horizontalPadding = 7.5,
     this.verticalPadding = 7.5,
+    this.cornerRadius = Defaults.cornerRadius,
   });
 
   final double opacity;
@@ -169,6 +170,7 @@ class WidgetContainer extends StatelessWidget {
   final double height;
   final double horizontalPadding;
   final double verticalPadding;
+  final double cornerRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +185,7 @@ class WidgetContainer extends StatelessWidget {
           opacity: opacity,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Settings.cornerRadius),
+              borderRadius: BorderRadius.circular(cornerRadius),
               color: const Color.fromARGB(255, 40, 40, 40),
               boxShadow: const [
                 BoxShadow(
@@ -203,8 +205,8 @@ class WidgetContainer extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(Settings.cornerRadius),
-                            topRight: Radius.circular(Settings.cornerRadius),
+                            topLeft: Radius.circular(cornerRadius),
+                            topRight: Radius.circular(cornerRadius),
                           ),
                           color: theme.colorScheme.primaryContainer,
                         ),

@@ -15,6 +15,7 @@ class NetworkAlertsModel extends NTWidgetModel {
 
   NetworkAlertsModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -22,6 +23,7 @@ class NetworkAlertsModel extends NTWidgetModel {
 
   NetworkAlertsModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

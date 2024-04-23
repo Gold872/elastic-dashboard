@@ -43,6 +43,7 @@ class DifferentialDriveModel extends NTWidgetModel {
 
   DifferentialDriveModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -50,6 +51,7 @@ class DifferentialDriveModel extends NTWidgetModel {
 
   DifferentialDriveModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

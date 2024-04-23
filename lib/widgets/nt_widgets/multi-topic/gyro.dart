@@ -27,6 +27,7 @@ class GyroModel extends NTWidgetModel {
 
   GyroModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool counterClockwisePositive = false,
     super.dataType,
@@ -36,6 +37,7 @@ class GyroModel extends NTWidgetModel {
 
   GyroModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _counterClockwisePositive =

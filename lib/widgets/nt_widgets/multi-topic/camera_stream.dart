@@ -32,6 +32,7 @@ class CameraStreamModel extends NTWidgetModel {
 
   CameraStreamModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -39,6 +40,7 @@ class CameraStreamModel extends NTWidgetModel {
 
   CameraStreamModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

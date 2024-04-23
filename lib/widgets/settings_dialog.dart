@@ -109,9 +109,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         children: [
           Flexible(
             child: DialogTextInput(
-              initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
-                      Settings.teamNumber.toString(),
+              initialText: (widget.preferences.getInt(PrefKeys.teamNumber) ??
+                      Defaults.teamNumber)
+                  .toString(),
               label: 'Team Number',
               onSubmit: (data) async {
                 await widget.onTeamNumberChanged?.call(data);
@@ -165,7 +165,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   (Settings.ipAddressMode == IPAddressMode.driverStation &&
                       !dsConnected),
               initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
-                  Settings.ipAddress,
+                  Defaults.ipAddress,
               label: 'IP Address',
               onSubmit: (String? data) async {
                 await widget.onIPAddressChanged?.call(data);
@@ -189,7 +189,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             child: DialogToggleSwitch(
               initialValue: widget.preferences.getBool(PrefKeys.showGrid) ??
-                  Settings.showGrid,
+                  Defaults.showGrid,
               label: 'Show Grid',
               onToggle: (value) {
                 setState(() {
@@ -202,7 +202,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             child: DialogTextInput(
               initialText:
                   widget.preferences.getInt(PrefKeys.gridSize)?.toString() ??
-                      Settings.gridSize.toString(),
+                      Defaults.gridSize.toString(),
               label: 'Grid Size',
               onSubmit: (value) async {
                 await widget.onGridSizeChanged?.call(value);
@@ -220,10 +220,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             flex: 2,
             child: DialogTextInput(
-              initialText: widget.preferences
-                      .getDouble(PrefKeys.cornerRadius)
-                      ?.toString() ??
-                  Settings.cornerRadius.toString(),
+              initialText:
+                  (widget.preferences.getDouble(PrefKeys.cornerRadius) ??
+                          Defaults.cornerRadius.toString())
+                      .toString(),
               label: 'Corner Radius',
               onSubmit: (value) {
                 setState(() {
@@ -238,7 +238,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             child: DialogToggleSwitch(
               initialValue:
                   widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
-                      Settings.autoResizeToDS,
+                      Defaults.autoResizeToDS,
               label: 'Resize to Driver Station Height',
               onToggle: (value) {
                 setState(() {
@@ -271,7 +271,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             flex: 4,
             child: DialogToggleSwitch(
               initialValue: widget.preferences.getBool(PrefKeys.layoutLocked) ??
-                  Settings.layoutLocked,
+                  Defaults.layoutLocked,
               label: 'Lock Layout',
               onToggle: (value) {
                 setState(() {
@@ -300,7 +300,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               child: DialogTextInput(
                 initialText:
                     (widget.preferences.getDouble(PrefKeys.defaultPeriod) ??
-                            Settings.defaultPeriod)
+                            Defaults.defaultPeriod)
                         .toString(),
                 label: 'Default Period',
                 onSubmit: (value) async {
@@ -314,7 +314,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               child: DialogTextInput(
                 initialText: (widget.preferences
                             .getDouble(PrefKeys.defaultGraphPeriod) ??
-                        Settings.defaultGraphPeriod)
+                        Defaults.defaultGraphPeriod)
                     .toString(),
                 label: 'Default Graph Period',
                 onSubmit: (value) async {

@@ -50,6 +50,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
 
   ProfiledPIDControllerModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -57,6 +58,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
 
   ProfiledPIDControllerModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

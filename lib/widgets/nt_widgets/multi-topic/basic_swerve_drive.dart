@@ -37,6 +37,7 @@ class BasicSwerveModel extends NTWidgetModel {
 
   BasicSwerveModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
@@ -46,9 +47,11 @@ class BasicSwerveModel extends NTWidgetModel {
         _showRobotRotation = showRobotRotation,
         super();
 
-  BasicSwerveModel.fromJson(
-      {required super.ntConnection, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  BasicSwerveModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _rotationUnit = tryCast(jsonData['rotation_unit']) ?? 'Degrees';
   }

@@ -22,6 +22,7 @@ class RobotPreferencesModel extends NTWidgetModel {
 
   RobotPreferencesModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -29,6 +30,7 @@ class RobotPreferencesModel extends NTWidgetModel {
 
   RobotPreferencesModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 }

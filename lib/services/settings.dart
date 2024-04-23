@@ -7,21 +7,33 @@ class Settings {
 
   static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
 
-  static String ipAddress = '127.0.0.1';
-  static int teamNumber = 9999;
-  static int gridSize = 128;
-  static bool layoutLocked = false;
-  static double cornerRadius = 15.0;
-  static bool showGrid = true;
-  static bool autoResizeToDS = false;
+  // static String ipAddress = '127.0.0.1';
+  // static int teamNumber = 9999;
+  // static int gridSize = 128;
+  // static bool layoutLocked = false;
+  // static double cornerRadius = 15.0;
+  // static bool showGrid = true;
+  // static bool autoResizeToDS = false;
 
   // window_manager doesn't support drag disable/maximize
   // disable on some platforms, this is a dumb workaround for it
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
+}
 
-  static double defaultPeriod = 0.06;
-  static double defaultGraphPeriod = 0.033;
+class Defaults {
+  static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
+
+  static const String ipAddress = '127.0.0.1';
+  static const int teamNumber = 9999;
+  static const int gridSize = 128;
+  static const bool layoutLocked = false;
+  static const double cornerRadius = 15.0;
+  static const bool showGrid = true;
+  static const bool autoResizeToDS = false;
+
+  static const double defaultPeriod = 0.06;
+  static const double defaultGraphPeriod = 0.033;
 }
 
 class PrefKeys {

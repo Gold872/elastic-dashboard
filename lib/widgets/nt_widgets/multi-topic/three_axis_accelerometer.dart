@@ -15,6 +15,7 @@ class ThreeAxisAccelerometerModel extends NTWidgetModel {
 
   ThreeAxisAccelerometerModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -22,6 +23,7 @@ class ThreeAxisAccelerometerModel extends NTWidgetModel {
 
   ThreeAxisAccelerometerModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

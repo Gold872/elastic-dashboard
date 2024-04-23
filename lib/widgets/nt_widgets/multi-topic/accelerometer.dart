@@ -14,16 +14,19 @@ class AccelerometerModel extends NTWidgetModel {
 
   String get valueTopic => '$topic/Value';
 
-  AccelerometerModel(
-      {required super.ntConnection,
-      required super.topic,
-      super.dataType,
-      super.period})
-      : super();
+  AccelerometerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  AccelerometerModel.fromJson(
-      {required super.ntConnection, required super.jsonData})
-      : super.fromJson();
+  AccelerometerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {

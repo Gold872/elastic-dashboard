@@ -40,6 +40,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   YAGSLSwerveDriveModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showRobotRotation = true,
     bool showDesiredStates = true,
@@ -51,6 +52,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   YAGSLSwerveDriveModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;

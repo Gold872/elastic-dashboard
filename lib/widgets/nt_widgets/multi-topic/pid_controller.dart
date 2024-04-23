@@ -48,16 +48,19 @@ class PIDControllerModel extends NTWidgetModel {
 
   set setpointLastValue(value) => _setpointLastValue = value;
 
-  PIDControllerModel(
-      {required super.ntConnection,
-      required super.topic,
-      super.dataType,
-      super.period})
-      : super();
+  PIDControllerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  PIDControllerModel.fromJson(
-      {required super.ntConnection, required super.jsonData})
-      : super.fromJson();
+  PIDControllerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void resetSubscription() {

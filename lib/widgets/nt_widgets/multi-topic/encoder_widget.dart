@@ -14,6 +14,7 @@ class EncoderModel extends NTWidgetModel {
 
   EncoderModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -21,6 +22,7 @@ class EncoderModel extends NTWidgetModel {
 
   EncoderModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

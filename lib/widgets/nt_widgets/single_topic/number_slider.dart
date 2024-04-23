@@ -58,6 +58,7 @@ class NumberSliderModel extends NTWidgetModel {
 
   NumberSliderModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -73,6 +74,7 @@ class NumberSliderModel extends NTWidgetModel {
 
   NumberSliderModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _minValue =

@@ -29,6 +29,7 @@ class TextDisplayModel extends NTWidgetModel {
 
   TextDisplayModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showSubmitButton = false,
     super.dataType,
@@ -38,6 +39,7 @@ class TextDisplayModel extends NTWidgetModel {
 
   TextDisplayModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showSubmitButton =
@@ -144,7 +146,7 @@ class TextDisplay extends NTWidget {
       builder: (context, snapshot) {
         Object? data = snapshot.data;
 
-        if (data.toString() != model.previousValue?.toString()) {
+        if (data?.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors
           Future(() async {
             String displayString = data.toString();

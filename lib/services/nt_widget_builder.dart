@@ -52,6 +52,7 @@ class NTWidgetBuilder {
       String,
       NTWidgetModel Function({
         required NTConnection ntConnection,
+        required SharedPreferences preferences,
         required String topic,
         String dataType,
         double period,
@@ -61,6 +62,7 @@ class NTWidgetBuilder {
       String,
       NTWidgetModel Function({
         required NTConnection ntConnection,
+        required SharedPreferences preferences,
         required Map<String, dynamic> jsonData,
       })> _modelJsonBuildMap = {};
 
@@ -323,18 +325,21 @@ class NTWidgetBuilder {
 
   static NTWidgetModel buildNTModelFromType(
     NTConnection ntConnection,
+    SharedPreferences preferences,
     String type,
     String topic, {
     String dataType = 'Unknown',
     double? period,
   }) {
-    period ??= Settings.defaultPeriod;
+    period ??=
+        preferences.getDouble(PrefKeys.defaultPeriod) ?? Defaults.defaultPeriod;
 
     ensureInitialized();
 
     if (_modelNameBuildMap.containsKey(type)) {
       return _modelNameBuildMap[type]!(
         ntConnection: ntConnection,
+        preferences: preferences,
         topic: topic,
         dataType: dataType,
         period: period,
@@ -343,6 +348,7 @@ class NTWidgetBuilder {
 
     return NTWidgetModel.createDefault(
       ntConnection: ntConnection,
+      preferences: preferences,
       type: type,
       topic: topic,
       dataType: dataType,
@@ -350,14 +356,19 @@ class NTWidgetBuilder {
     );
   }
 
-  static NTWidgetModel buildNTModelFromJson(NTConnection ntConnection,
-      SharedPreferences preferences, String type, Map<String, dynamic> jsonData,
-      {Function(String message)? onWidgetTypeNotFound}) {
+  static NTWidgetModel buildNTModelFromJson(
+    NTConnection ntConnection,
+    SharedPreferences preferences,
+    String type,
+    Map<String, dynamic> jsonData, {
+    Function(String message)? onWidgetTypeNotFound,
+  }) {
     ensureInitialized();
 
     if (_modelJsonBuildMap.containsKey(type)) {
       return _modelJsonBuildMap[type]!(
         ntConnection: ntConnection,
+        preferences: preferences,
         jsonData: jsonData,
       );
     }
@@ -366,6 +377,7 @@ class NTWidgetBuilder {
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
     return NTWidgetModel.createDefault(
       ntConnection: ntConnection,
+      preferences: preferences,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
       dataType: tryCast(jsonData['data_type']) ?? 'Unknown',
@@ -379,7 +391,8 @@ class NTWidgetBuilder {
     if (_minimumWidthMap.containsKey(widget.type)) {
       return _minimumWidthMap[widget.type]!;
     } else {
-      return Settings.gridSize.toDouble();
+      return (widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+          .toDouble();
     }
   }
 
@@ -389,7 +402,8 @@ class NTWidgetBuilder {
     if (_minimumHeightMap.containsKey(widget.type)) {
       return _minimumHeightMap[widget.type]!;
     } else {
-      return Settings.gridSize.toDouble();
+      return (widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+          .toDouble();
     }
   }
 

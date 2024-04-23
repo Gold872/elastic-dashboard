@@ -45,6 +45,7 @@ class FieldWidgetModel extends NTWidgetModel {
 
   FieldWidgetModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     String? fieldName,
     bool showOtherObjects = true,
@@ -63,9 +64,11 @@ class FieldWidgetModel extends NTWidgetModel {
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
   }
 
-  FieldWidgetModel.fromJson(
-      {required super.ntConnection, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  FieldWidgetModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
 
     _robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
@@ -319,7 +322,8 @@ class FieldWidgetModel extends NTWidgetModel {
   Stream<Object> get multiTopicPeriodicStream async* {
     final Duration delayTime = Duration(
         microseconds: ((subscription?.options.periodicRateSeconds ??
-                    Settings.defaultPeriod) *
+                    preferences.getDouble(PrefKeys.defaultPeriod) ??
+                    Defaults.defaultPeriod) *
                 1e6)
             .round());
 

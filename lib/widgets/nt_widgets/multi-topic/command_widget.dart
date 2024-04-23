@@ -27,6 +27,7 @@ class CommandModel extends NTWidgetModel {
 
   CommandModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showType = true,
     super.dataType,
@@ -36,6 +37,7 @@ class CommandModel extends NTWidgetModel {
 
   CommandModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showType = tryCast(jsonData['show_type']) ?? _showType;

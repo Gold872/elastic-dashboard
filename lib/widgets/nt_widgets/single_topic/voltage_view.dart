@@ -58,6 +58,7 @@ class VoltageViewModel extends NTWidgetModel {
 
   VoltageViewModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double minValue = 4.0,
     double maxValue = 13.0,
@@ -73,9 +74,11 @@ class VoltageViewModel extends NTWidgetModel {
         _minValue = minValue,
         super();
 
-  VoltageViewModel.fromJson(
-      {required super.ntConnection, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  VoltageViewModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? 4.0;
     _maxValue = tryCast(jsonData['max_value']) ?? 13.0;
     _divisions = tryCast(jsonData['divisions']);

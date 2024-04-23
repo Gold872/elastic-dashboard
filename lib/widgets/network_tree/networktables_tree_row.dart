@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -112,8 +113,8 @@ class NetworkTableTreeRow {
     children.clear();
   }
 
-  static NTWidgetModel? getNTWidgetFromTopic(
-      NTConnection ntConnection, NT4Topic ntTopic) {
+  static NTWidgetModel? getNTWidgetFromTopic(NTConnection ntConnection,
+      SharedPreferences preferences, NT4Topic ntTopic) {
     switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
@@ -126,12 +127,14 @@ class NetworkTableTreeRow {
       case NT4TypeStr.kStringArr:
         return TextDisplayModel(
           ntConnection: ntConnection,
+          preferences: preferences,
           topic: ntTopic.name,
           dataType: ntTopic.type,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
           ntConnection: ntConnection,
+          preferences: preferences,
           topic: ntTopic.name,
           dataType: ntTopic.type,
         );
@@ -154,7 +157,8 @@ class NetworkTableTreeRow {
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
-        return CameraStreamModel(ntConnection: ntConnection, topic: topic);
+        return CameraStreamModel(
+            ntConnection: ntConnection, preferences: preferences, topic: topic);
       }
 
       if (hasRows([
@@ -166,13 +170,14 @@ class NetworkTableTreeRow {
         'sizeFrontBack',
         'sizeLeftRight',
       ])) {
-        return YAGSLSwerveDriveModel(ntConnection: ntConnection, topic: topic);
+        return YAGSLSwerveDriveModel(
+            ntConnection: ntConnection, preferences: preferences, topic: topic);
       }
 
       return null;
     }
 
-    return getNTWidgetFromTopic(ntConnection, ntTopic!);
+    return getNTWidgetFromTopic(ntConnection, preferences, ntTopic!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
@@ -186,7 +191,8 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    return NTWidgetBuilder.buildNTModelFromType(ntConnection, type, topic);
+    return NTWidgetBuilder.buildNTModelFromType(
+        ntConnection, preferences, type, topic);
   }
 
   Future<List<NTWidgetContainerModel>?> getListLayoutChildren() async {
@@ -267,6 +273,8 @@ class NetworkTableTreeRow {
       title: rowName,
       width: width,
       height: height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       child: widget,
     );
   }

@@ -269,6 +269,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       title: title,
       width: draggingRect.width,
       height: draggingRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
       child: ChangeNotifierProvider.value(
         value: childModel,
@@ -283,6 +285,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: (previewVisible) ? 0.25 : 1.00,
       child: Opacity(
         opacity: (enabled) ? 1.00 : 0.50,
@@ -312,11 +316,14 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
+      preferences,
       type,
       childModel.topic,
       dataType: childModel.dataType,
-      period:
-          (type != 'Graph') ? childModel.period : Settings.defaultGraphPeriod,
+      period: (type != 'Graph')
+          ? childModel.period
+          : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
+              Defaults.defaultGraphPeriod,
     );
 
     NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);

@@ -18,6 +18,7 @@ class PowerDistributionModel extends NTWidgetModel {
 
   PowerDistributionModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -25,6 +26,7 @@ class PowerDistributionModel extends NTWidgetModel {
 
   PowerDistributionModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

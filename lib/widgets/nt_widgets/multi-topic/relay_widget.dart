@@ -19,6 +19,7 @@ class RelayModel extends NTWidgetModel {
 
   RelayModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -26,6 +27,7 @@ class RelayModel extends NTWidgetModel {
 
   RelayModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

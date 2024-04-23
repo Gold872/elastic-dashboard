@@ -16,6 +16,7 @@ class UltrasonicModel extends NTWidgetModel {
 
   UltrasonicModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -23,6 +24,7 @@ class UltrasonicModel extends NTWidgetModel {
 
   UltrasonicModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

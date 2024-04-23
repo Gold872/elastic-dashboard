@@ -14,20 +14,30 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   String? title;
 
-  bool draggable = !Settings.layoutLocked;
+  late bool draggable =
+      !(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked);
   bool _disposed = false;
   bool _forceDispose = false;
 
-  Rect draggingRect = Rect.fromLTWH(
-      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
+  late Rect draggingRect = Rect.fromLTWH(
+      0,
+      0,
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
   Offset cursorGlobalLocation = const Offset(double.nan, double.nan);
 
-  Rect displayRect = Rect.fromLTWH(
-      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
+  late Rect displayRect = Rect.fromLTWH(
+      0,
+      0,
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
-  Rect previewRect = Rect.fromLTWH(
-      0, 0, Settings.gridSize.toDouble(), Settings.gridSize.toDouble());
+  late Rect previewRect = Rect.fromLTWH(
+      0,
+      0,
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
   bool enabled = false;
   bool dragging = false;
@@ -36,8 +46,10 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   bool previewVisible = false;
   bool validLocation = true;
 
-  double minWidth = Settings.gridSize.toDouble();
-  double minHeight = Settings.gridSize.toDouble();
+  late double minWidth =
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
+  late double minHeight =
+      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
   late Rect dragStartLocation;
 
@@ -110,9 +122,11 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
     double y = tryCast(jsonData['y']) ?? 0.0;
 
-    double width = tryCast(jsonData['width']) ?? Settings.gridSize.toDouble();
+    double width = tryCast(jsonData['width']) ??
+        (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
-    double height = tryCast(jsonData['height']) ?? Settings.gridSize.toDouble();
+    double height = tryCast(jsonData['height']) ??
+        (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
@@ -260,6 +274,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
       title: title,
       width: draggingRect.width,
       height: draggingRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
       child: Container(),
     );
@@ -270,6 +286,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       child: Container(),
     );
   }
@@ -287,7 +305,9 @@ abstract class WidgetContainerModel extends ChangeNotifier {
             color: (validLocation)
                 ? Colors.white.withOpacity(0.25)
                 : Colors.black.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(Settings.cornerRadius),
+            borderRadius: BorderRadius.circular(
+                preferences.getDouble(PrefKeys.cornerRadius) ??
+                    Defaults.cornerRadius),
             border: Border.all(
                 color: (validLocation)
                     ? Colors.lightGreenAccent.shade400

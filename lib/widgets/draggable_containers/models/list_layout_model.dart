@@ -462,7 +462,8 @@ class ListLayoutModel extends LayoutContainerModel {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             widget.cursorGlobalLocation = details.globalPosition;
@@ -476,7 +477,8 @@ class ListLayoutModel extends LayoutContainerModel {
             });
           },
           onPanUpdate: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             widget.cursorGlobalLocation = details.globalPosition;
@@ -487,7 +489,8 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             Future(() => setDraggable(true));
@@ -510,7 +513,8 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             Future(() {
@@ -553,6 +557,8 @@ class ListLayoutModel extends LayoutContainerModel {
       title: title,
       width: draggingRect.width,
       height: draggingRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
       horizontalPadding: 5.0,
       verticalPadding: 5.0,
@@ -580,6 +586,8 @@ class ListLayoutModel extends LayoutContainerModel {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: (previewVisible) ? 0.25 : 1.00,
       horizontalPadding: 5.0,
       verticalPadding: 5.0,

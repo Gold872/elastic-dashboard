@@ -58,6 +58,7 @@ class NumberBarModel extends NTWidgetModel {
 
   NumberBarModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -75,6 +76,7 @@ class NumberBarModel extends NTWidgetModel {
 
   NumberBarModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? -1.0;

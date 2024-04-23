@@ -57,6 +57,7 @@ class BooleanBoxModel extends NTWidgetModel {
 
   BooleanBoxModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     Color trueColor = Colors.green,
     Color falseColor = Colors.red,
@@ -70,9 +71,11 @@ class BooleanBoxModel extends NTWidgetModel {
         _falseIcon = falseIcon,
         super();
 
-  BooleanBoxModel.fromJson(
-      {required super.ntConnection, required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  BooleanBoxModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =
         tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
     int? falseColorValue =

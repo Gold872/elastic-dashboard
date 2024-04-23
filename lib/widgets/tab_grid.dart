@@ -315,13 +315,13 @@ class TabGrid extends StatelessWidget {
     if (previewWidth < model.minWidth) {
       previewWidth = DraggableWidgetContainer.snapToGrid(
           constrainedRect.width.clamp(model.minWidth, double.infinity) +
-              Settings.gridSize);
+              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
     }
 
     if (previewHeight < model.minHeight) {
       previewHeight = DraggableWidgetContainer.snapToGrid(
           constrainedRect.height.clamp(model.minHeight, double.infinity) +
-              Settings.gridSize);
+              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
     }
 
     Rect preview =
@@ -542,8 +542,12 @@ class TabGrid extends StatelessWidget {
       initialPosition: Rect.fromLTWH(
         0.0,
         0.0,
-        Settings.gridSize.toDouble() * 2,
-        Settings.gridSize.toDouble() * 2,
+        (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+                .toDouble() *
+            2,
+        (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+                .toDouble() *
+            2,
       ),
       children: children,
       minWidth: 128.0,
@@ -787,8 +791,9 @@ class TabGrid extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
-                      borderRadius:
-                          BorderRadius.circular(Settings.cornerRadius),
+                      borderRadius: BorderRadius.circular(
+                          preferences.getDouble(PrefKeys.cornerRadius) ??
+                              Defaults.cornerRadius),
                       border: Border.all(color: Colors.yellow, width: 5.0),
                     ),
                   ),
@@ -803,7 +808,8 @@ class TabGrid extends StatelessWidget {
         GestureDetector(
           onTap: () {},
           onSecondaryTapUp: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             List<ContextMenuEntry> menuEntries = [
@@ -902,7 +908,9 @@ class TabGrid extends StatelessWidget {
               color: (validLocation)
                   ? Colors.white.withOpacity(0.25)
                   : Colors.black.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(Settings.cornerRadius),
+              borderRadius: BorderRadius.circular(
+                  preferences.getDouble(PrefKeys.cornerRadius) ??
+                      Defaults.cornerRadius),
               border: Border.all(color: borderColor, width: 5.0),
             ),
           ),
@@ -914,7 +922,8 @@ class TabGrid extends StatelessWidget {
       behavior: HitTestBehavior.translucent,
       onTap: () {},
       onSecondaryTapUp: (details) {
-        if (Settings.layoutLocked) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
           return;
         }
         ContextMenu contextMenu = ContextMenu(

@@ -17,6 +17,7 @@ class MotorControllerModel extends NTWidgetModel {
 
   MotorControllerModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -24,6 +25,7 @@ class MotorControllerModel extends NTWidgetModel {
 
   MotorControllerModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 

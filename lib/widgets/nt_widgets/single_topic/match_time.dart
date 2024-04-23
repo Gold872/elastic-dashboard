@@ -45,6 +45,7 @@ class MatchTimeModel extends NTWidgetModel {
 
   MatchTimeModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     String timeDisplayMode = 'Minutes and Seconds',
     int redStartTime = 15,
@@ -58,6 +59,7 @@ class MatchTimeModel extends NTWidgetModel {
 
   MatchTimeModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _timeDisplayMode =

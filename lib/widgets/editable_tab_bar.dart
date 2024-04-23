@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
@@ -16,6 +17,8 @@ class TabData {
 }
 
 class EditableTabBar extends StatelessWidget {
+  final SharedPreferences preferences;
+
   final List<TabGrid> tabViews;
   final List<TabData> tabData;
 
@@ -30,6 +33,7 @@ class EditableTabBar extends StatelessWidget {
 
   const EditableTabBar({
     super.key,
+    required this.preferences,
     required this.currentIndex,
     required this.tabData,
     required this.tabViews,
@@ -124,7 +128,8 @@ class EditableTabBar extends StatelessWidget {
                           onTabChanged.call(index);
                         },
                         onSecondaryTapUp: (details) {
-                          if (Settings.layoutLocked) {
+                          if (preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked) {
                             return;
                           }
                           ContextMenu contextMenu = ContextMenu(
@@ -194,11 +199,15 @@ class EditableTabBar extends StatelessWidget {
                                   ),
                                 ),
                                 Visibility(
-                                  visible: !Settings.layoutLocked,
+                                  visible: !(preferences
+                                          .getBool(PrefKeys.layoutLocked) ??
+                                      Defaults.layoutLocked),
                                   child: const SizedBox(width: 10),
                                 ),
                                 Visibility(
-                                  visible: !Settings.layoutLocked,
+                                  visible: !(preferences
+                                          .getBool(PrefKeys.layoutLocked) ??
+                                      Defaults.layoutLocked),
                                   child: IconButton(
                                     onPressed: () {
                                       closeTab(index);
@@ -229,7 +238,8 @@ class EditableTabBar extends StatelessWidget {
                   children: [
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: (!Settings.layoutLocked)
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
                           ? () => onTabMoveLeft.call()
                           : null,
                       alignment: Alignment.center,
@@ -237,14 +247,17 @@ class EditableTabBar extends StatelessWidget {
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed:
-                          (!Settings.layoutLocked) ? () => createTab() : null,
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
+                          ? () => createTab()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.add),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: (!Settings.layoutLocked)
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
                           ? () => onTabMoveRight.call()
                           : null,
                       alignment: Alignment.center,
@@ -262,10 +275,13 @@ class EditableTabBar extends StatelessWidget {
           child: Stack(
             children: [
               Visibility(
-                visible: Settings.showGrid,
+                visible:
+                    preferences.getBool(PrefKeys.showGrid) ?? Defaults.showGrid,
                 child: GridPaper(
                   color: const Color.fromARGB(50, 195, 232, 243),
-                  interval: Settings.gridSize.toDouble(),
+                  interval: (preferences.getInt(PrefKeys.gridSize) ??
+                          Defaults.gridSize)
+                      .toDouble(),
                   divisions: 1,
                   subdivisions: 1,
                   child: Container(),

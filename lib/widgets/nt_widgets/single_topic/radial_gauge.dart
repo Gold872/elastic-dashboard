@@ -83,6 +83,7 @@ class RadialGaugeModel extends NTWidgetModel {
 
   RadialGaugeModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double startAngle = -140.0,
     double endAngle = 140.0,
@@ -106,6 +107,7 @@ class RadialGaugeModel extends NTWidgetModel {
 
   RadialGaugeModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;

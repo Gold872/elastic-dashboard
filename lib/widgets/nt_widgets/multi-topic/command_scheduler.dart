@@ -20,6 +20,7 @@ class CommandSchedulerModel extends NTWidgetModel {
 
   CommandSchedulerModel({
     required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
@@ -27,6 +28,7 @@ class CommandSchedulerModel extends NTWidgetModel {
 
   CommandSchedulerModel.fromJson({
     required super.ntConnection,
+    required super.preferences,
     required super.jsonData,
   }) : super.fromJson();
 
