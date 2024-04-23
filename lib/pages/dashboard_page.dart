@@ -1218,8 +1218,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabLeft() {
-    if (!(preferences.getBool(PrefKeys.layoutLocked) ??
-        Defaults.layoutLocked)) {
+    if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
       return;
     }
     if (_currentTabIndex <= 0) {
@@ -1246,8 +1245,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabRight() {
-    if (!(preferences.getBool(PrefKeys.layoutLocked) ??
-        Defaults.layoutLocked)) {
+    if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
       return;
     }
     if (_currentTabIndex >= _tabData.length - 1) {

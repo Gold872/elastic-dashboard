@@ -14,16 +14,15 @@ import 'test_util.mocks.dart';
   MockSpec<NT4Client>(),
   MockSpec<NT4Subscription>()
 ])
-void setupMockOfflineNT4() {
+MockNTConnection createMockOfflineNT4() {
   HttpOverrides.global = null;
 
   final mockNT4Connection = MockNTConnection();
-  final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
-  when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
+  when(mockNT4Connection.announcedTopics()).thenReturn({});
 
-  when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
+  when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
@@ -44,17 +43,16 @@ void setupMockOfflineNT4() {
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
 
-  NTConnection.instance = mockNT4Connection;
+  return mockNT4Connection;
 }
 
-void setupMockOnlineNT4() {
+MockNTConnection createMockOnlineNT4() {
   HttpOverrides.global = null;
 
   final mockNT4Connection = MockNTConnection();
-  final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
-  when(mockNT4Client.announcedTopics).thenReturn({
+  when(mockNT4Connection.announcedTopics()).thenReturn({
     1: NT4Topic(
       name: '/SmartDashboard/Test Value 1',
       type: NT4TypeStr.kInt,
@@ -68,8 +66,6 @@ void setupMockOnlineNT4() {
   });
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
-
-  when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
 
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
@@ -90,7 +86,7 @@ void setupMockOnlineNT4() {
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
 
-  NTConnection.instance = mockNT4Connection;
+  return mockNT4Connection;
 }
 
 void ignoreOverflowErrors(
