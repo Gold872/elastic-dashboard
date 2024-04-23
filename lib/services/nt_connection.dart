@@ -153,6 +153,14 @@ class NTConnection {
     return _ntClient.getTopicFromName(topic);
   }
 
+  void publishTopic(NT4Topic topic) {
+    _ntClient.publishTopic(topic);
+  }
+
+  NT4Topic publishNewTopic(String name, String type) {
+    return _ntClient.publishNewTopic(name, type);
+  }
+
   bool isTopicPublished(NT4Topic? topic) {
     return _ntClient.isTopicPublished(topic);
   }

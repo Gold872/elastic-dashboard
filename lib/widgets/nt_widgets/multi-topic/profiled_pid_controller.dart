@@ -48,12 +48,17 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
 
   set goalLastValue(value) => _goalLastValue = value;
 
-  ProfiledPIDControllerModel(
-      {required super.topic, super.dataType, super.period})
-      : super();
+  ProfiledPIDControllerModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  ProfiledPIDControllerModel.fromJson({required super.jsonData})
-      : super.fromJson();
+  ProfiledPIDControllerModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void resetSubscription() {
@@ -77,7 +82,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kpTopic!);
+      ntConnection.publishTopic(_kpTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kpTopic!, data);
@@ -95,7 +100,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kiTopic!);
+      ntConnection.publishTopic(_kiTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kiTopic!, data);
@@ -113,7 +118,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kdTopic!);
+      ntConnection.publishTopic(_kdTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kdTopic!, data);
@@ -131,7 +136,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_goalTopic!);
+      ntConnection.publishTopic(_goalTopic!);
     }
 
     ntConnection.updateDataFromTopic(_goalTopic!, data);
@@ -174,17 +179,17 @@ class ProfiledPIDControllerWidget extends NTWidget {
     return StreamBuilder(
         stream: model.multiTopicPeriodicStream,
         builder: (context, snapshot) {
-          double kP =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kpTopicName)) ??
-                  0.0;
-          double kI =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kiTopicName)) ??
-                  0.0;
-          double kD =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kdTopicName)) ??
-                  0.0;
-          double goal = tryCast(
-                  ntConnection.getLastAnnouncedValue(model.goalTopicName)) ??
+          double kP = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kpTopicName)) ??
+              0.0;
+          double kI = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kiTopicName)) ??
+              0.0;
+          double kD = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kdTopicName)) ??
+              0.0;
+          double goal = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.goalTopicName)) ??
               0.0;
 
           // Creates the text editing controllers if they are null

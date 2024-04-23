@@ -28,6 +28,7 @@ class TextDisplayModel extends NTWidgetModel {
   }
 
   TextDisplayModel({
+    required super.ntConnection,
     required super.topic,
     bool showSubmitButton = false,
     super.dataType,
@@ -35,8 +36,10 @@ class TextDisplayModel extends NTWidgetModel {
   })  : _showSubmitButton = showSubmitButton,
         super();
 
-  TextDisplayModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  TextDisplayModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _showSubmitButton =
         tryCast(jsonData['show_submit_button']) ?? _showSubmitButton;
   }
@@ -115,7 +118,7 @@ class TextDisplayModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(ntTopic!);
+      ntConnection.publishTopic(ntTopic!);
     }
 
     if (formattedData != null) {
@@ -137,7 +140,7 @@ class TextDisplay extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         Object? data = snapshot.data;
 

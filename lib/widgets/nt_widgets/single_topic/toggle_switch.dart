@@ -16,7 +16,7 @@ class ToggleSwitch extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         bool value = tryCast(snapshot.data) ?? false;
 
@@ -24,7 +24,7 @@ class ToggleSwitch extends NTWidget {
           value: value,
           onChanged: (bool value) {
             bool publishTopic = model.ntTopic == null ||
-                !ntConnection.isTopicPublished(model.ntTopic);
+                !model.ntConnection.isTopicPublished(model.ntTopic);
 
             model.createTopicIfNull();
 
@@ -33,10 +33,10 @@ class ToggleSwitch extends NTWidget {
             }
 
             if (publishTopic) {
-              ntConnection.nt4Client.publishTopic(model.ntTopic!);
+              model.ntConnection.publishTopic(model.ntTopic!);
             }
 
-            ntConnection.updateDataFromTopic(model.ntTopic!, value);
+            model.ntConnection.updateDataFromTopic(model.ntTopic!, value);
           },
         );
       },

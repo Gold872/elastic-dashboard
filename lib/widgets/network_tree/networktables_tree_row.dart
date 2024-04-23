@@ -1,7 +1,9 @@
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -14,7 +16,8 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.da
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
 
 class NetworkTableTreeRow {
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final String topic;
   final String rowName;
 
@@ -23,7 +26,8 @@ class NetworkTableTreeRow {
   List<NetworkTableTreeRow> children = [];
 
   NetworkTableTreeRow({
-    required this.elasticData,
+    required this.ntConnection,
+    required this.preferences,
     required this.topic,
     required this.rowName,
     this.ntTopic,
@@ -77,7 +81,8 @@ class NetworkTableTreeRow {
   NetworkTableTreeRow createNewRow(
       {required String topic, required String name, NT4Topic? ntTopic}) {
     NetworkTableTreeRow newRow = NetworkTableTreeRow(
-      elasticData: elasticData,
+      ntConnection: ntConnection,
+      preferences: preferences,
       topic: topic,
       rowName: name,
       ntTopic: ntTopic,
@@ -107,7 +112,8 @@ class NetworkTableTreeRow {
     children.clear();
   }
 
-  static NTWidgetModel? getNTWidgetFromTopic(NT4Topic ntTopic) {
+  static NTWidgetModel? getNTWidgetFromTopic(
+      NTConnection ntConnection, NT4Topic ntTopic) {
     switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
@@ -119,11 +125,13 @@ class NetworkTableTreeRow {
       case NT4TypeStr.kString:
       case NT4TypeStr.kStringArr:
         return TextDisplayModel(
+          ntConnection: ntConnection,
           topic: ntTopic.name,
           dataType: ntTopic.type,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
+          ntConnection: ntConnection,
           topic: ntTopic.name,
           dataType: ntTopic.type,
         );
@@ -146,7 +154,7 @@ class NetworkTableTreeRow {
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
-        return CameraStreamModel(topic: topic);
+        return CameraStreamModel(ntConnection: ntConnection, topic: topic);
       }
 
       if (hasRows([
@@ -158,17 +166,17 @@ class NetworkTableTreeRow {
         'sizeFrontBack',
         'sizeLeftRight',
       ])) {
-        return YAGSLSwerveDriveModel(topic: topic);
+        return YAGSLSwerveDriveModel(ntConnection: ntConnection, topic: topic);
       }
 
       return null;
     }
 
-    return getNTWidgetFromTopic(ntTopic!);
+    return getNTWidgetFromTopic(ntConnection, ntTopic!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    return elasticData.ntConnection.subscribeAndRetrieveData(typeTopic);
+    return ntConnection.subscribeAndRetrieveData(typeTopic);
   }
 
   Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {
@@ -178,7 +186,7 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    return NTWidgetBuilder.buildNTModelFromType(type, topic);
+    return NTWidgetBuilder.buildNTModelFromType(ntConnection, type, topic);
   }
 
   Future<List<NTWidgetContainerModel>?> getListLayoutChildren() async {
@@ -233,6 +241,8 @@ class NetworkTableTreeRow {
     double height = NTWidgetBuilder.getDefaultHeight(primary);
 
     return NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
       initialPosition: Rect.fromLTWH(0.0, 0.0, width, height),
       title: rowName,
       childModel: primary,

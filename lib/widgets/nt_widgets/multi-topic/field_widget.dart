@@ -44,6 +44,7 @@ class FieldWidgetModel extends NTWidgetModel {
   late Function(NT4Topic topic) topicAnnounceListener;
 
   FieldWidgetModel({
+    required super.ntConnection,
     required super.topic,
     String? fieldName,
     bool showOtherObjects = true,
@@ -62,7 +63,8 @@ class FieldWidgetModel extends NTWidgetModel {
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
   }
 
-  FieldWidgetModel.fromJson({required Map<String, dynamic> jsonData})
+  FieldWidgetModel.fromJson(
+      {required super.ntConnection, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
 
@@ -96,7 +98,7 @@ class FieldWidgetModel extends NTWidgetModel {
       }
     };
 
-    ntConnection.nt4Client.addTopicAnnounceListener(topicAnnounceListener);
+    ntConnection.addTopicAnnounceListener(topicAnnounceListener);
   }
 
   @override
@@ -113,7 +115,7 @@ class FieldWidgetModel extends NTWidgetModel {
 
     if (deleting) {
       _field.dispose();
-      ntConnection.nt4Client.removeTopicAnnounceListener(topicAnnounceListener);
+      ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
     }
 
     _widgetSize = null;
@@ -290,6 +292,10 @@ class FieldWidgetModel extends NTWidgetModel {
         List<Object?>? objectPositionRaw = ntConnection
             .getLastAnnouncedValue(objectTopic)
             ?.tryCast<List<Object?>>();
+
+        if (objectPositionRaw == null) {
+          continue;
+        }
 
         bool isTrajectory = objectPositionRaw.length > 24;
 
@@ -492,7 +498,7 @@ class FieldWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> robotPositionRaw = ntConnection
+        List<Object?> robotPositionRaw = model.ntConnection
                 .getLastAnnouncedValue(model._robotTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
@@ -548,9 +554,13 @@ class FieldWidget extends NTWidget {
 
         if (model.showOtherObjects || model.showTrajectories) {
           for (String objectTopic in model._otherObjectTopics) {
-            List<Object?>? objectPositionRaw = ntConnection
+            List<Object?>? objectPositionRaw = model.ntConnection
                 .getLastAnnouncedValue(objectTopic)
                 ?.tryCast<List<Object?>>();
+
+            if (objectPositionRaw == null) {
+              continue;
+            }
 
             bool isTrajectory = objectPositionRaw.length > 24;
 

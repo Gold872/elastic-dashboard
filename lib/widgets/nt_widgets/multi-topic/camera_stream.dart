@@ -30,10 +30,17 @@ class CameraStreamModel extends NTWidgetModel {
 
   set clientOpen(value) => _clientOpen = value;
 
-  CameraStreamModel({required super.topic, super.dataType, super.period})
-      : super();
+  CameraStreamModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  CameraStreamModel.fromJson({required super.jsonData}) : super.fromJson();
+  CameraStreamModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -100,16 +107,16 @@ class CameraStreamWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        if (!ntConnection.isNT4Connected && model._clientOpen) {
+        if (!model.ntConnection.isNT4Connected && model._clientOpen) {
           model.closeClient();
         }
 
         bool createNewWidget = model._streamWidget == null ||
-            (!model.clientOpen && ntConnection.isNT4Connected);
+            (!model.clientOpen && model.ntConnection.isNT4Connected);
 
-        List<Object?> rawStreams =
-            tryCast(ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
-                [];
+        List<Object?> rawStreams = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
+            [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
@@ -122,7 +129,7 @@ class CameraStreamWidget extends NTWidget {
           streams.add(stream.substring('mjpg:'.length));
         }
 
-        if (streams.isEmpty || !ntConnection.isNT4Connected) {
+        if (streams.isEmpty || !model.ntConnection.isNT4Connected) {
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -141,7 +148,7 @@ class CameraStreamWidget extends NTWidget {
                   CustomLoadingIndicator(),
                   const SizedBox(height: 10),
                   Text(
-                    (ntConnection.isNT4Connected)
+                    (model.ntConnection.isNT4Connected)
                         ? 'Waiting for Camera Stream connection...'
                         : 'Waiting for Network Tables Connection...',
                     textAlign: TextAlign.center,

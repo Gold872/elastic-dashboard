@@ -26,6 +26,7 @@ class CommandModel extends NTWidgetModel {
   }
 
   CommandModel({
+    required super.ntConnection,
     required super.topic,
     bool showType = true,
     super.dataType,
@@ -33,8 +34,10 @@ class CommandModel extends NTWidgetModel {
   })  : _showType = showType,
         super();
 
-  CommandModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  CommandModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _showType = tryCast(jsonData['show_type']) ?? _showType;
   }
 
@@ -91,11 +94,11 @@ class CommandWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        bool running = ntConnection
+        bool running = model.ntConnection
                 .getLastAnnouncedValue(model.runningTopicName)
                 ?.tryCast<bool>() ??
             false;
-        String name = ntConnection
+        String name = model.ntConnection
                 .getLastAnnouncedValue(model.nameTopicName)
                 ?.tryCast<String>() ??
             'Unknown';
@@ -119,17 +122,18 @@ class CommandWidget extends NTWidget {
                 bool publishTopic = model.runningTopic == null;
 
                 model.runningTopic =
-                    ntConnection.getTopicFromName(model.runningTopicName);
+                    model.ntConnection.getTopicFromName(model.runningTopicName);
 
                 if (model.runningTopic == null) {
                   return;
                 }
 
                 if (publishTopic) {
-                  ntConnection.nt4Client.publishTopic(model.runningTopic!);
+                  model.ntConnection.publishTopic(model.runningTopic!);
                 }
 
-                ntConnection.updateDataFromTopic(model.runningTopic!, !running);
+                model.ntConnection
+                    .updateDataFromTopic(model.runningTopic!, !running);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 50),

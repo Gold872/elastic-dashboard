@@ -12,10 +12,17 @@ class SubsystemModel extends NTWidgetModel {
   String get defaultCommandTopic => '$topic/.default';
   String get currentCommandTopic => '$topic/.command';
 
-  SubsystemModel({required super.topic, super.dataType, super.period})
-      : super();
+  SubsystemModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  SubsystemModel.fromJson({required super.jsonData}) : super.fromJson();
+  SubsystemModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -42,10 +49,10 @@ class SubsystemWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        String defaultCommand = tryCast(ntConnection
+        String defaultCommand = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.defaultCommandTopic)) ??
             'none';
-        String currentCommand = tryCast(ntConnection
+        String currentCommand = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.currentCommandTopic)) ??
             'none';
 

@@ -55,21 +55,23 @@ class BooleanBoxModel extends NTWidgetModel {
     refresh();
   }
 
-  BooleanBoxModel(
-      {required super.topic,
-      Color trueColor = Colors.green,
-      Color falseColor = Colors.red,
-      String trueIcon = 'None',
-      String falseIcon = 'None',
-      super.dataType,
-      super.period})
-      : _falseColor = falseColor,
+  BooleanBoxModel({
+    required super.ntConnection,
+    required super.topic,
+    Color trueColor = Colors.green,
+    Color falseColor = Colors.red,
+    String trueIcon = 'None',
+    String falseIcon = 'None',
+    super.dataType,
+    super.period,
+  })  : _falseColor = falseColor,
         _trueColor = trueColor,
         _trueIcon = trueIcon,
         _falseIcon = falseIcon,
         super();
 
-  BooleanBoxModel.fromJson({required Map<String, dynamic> jsonData})
+  BooleanBoxModel.fromJson(
+      {required super.ntConnection, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =
         tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
@@ -199,7 +201,7 @@ class BooleanBox extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         bool value = tryCast(snapshot.data) ?? false;
 

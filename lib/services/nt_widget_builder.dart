@@ -1,9 +1,10 @@
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/accelerometer.dart';
@@ -50,7 +51,7 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
-        required ElasticSharedData elasticData,
+        required NTConnection ntConnection,
         required String topic,
         String dataType,
         double period,
@@ -59,7 +60,7 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
-        required ElasticSharedData elasticData,
+        required NTConnection ntConnection,
         required Map<String, dynamic> jsonData,
       })> _modelJsonBuildMap = {};
 
@@ -321,6 +322,7 @@ class NTWidgetBuilder {
   }
 
   static NTWidgetModel buildNTModelFromType(
+    NTConnection ntConnection,
     String type,
     String topic, {
     String dataType = 'Unknown',
@@ -332,6 +334,7 @@ class NTWidgetBuilder {
 
     if (_modelNameBuildMap.containsKey(type)) {
       return _modelNameBuildMap[type]!(
+        ntConnection: ntConnection,
         topic: topic,
         dataType: dataType,
         period: period,
@@ -339,6 +342,7 @@ class NTWidgetBuilder {
     }
 
     return NTWidgetModel.createDefault(
+      ntConnection: ntConnection,
       type: type,
       topic: topic,
       dataType: dataType,
@@ -346,20 +350,22 @@ class NTWidgetBuilder {
     );
   }
 
-  static NTWidgetModel buildNTModelFromJson(
-    ElasticSharedData elasticData,
-      String type, Map<String, dynamic> jsonData,
+  static NTWidgetModel buildNTModelFromJson(NTConnection ntConnection,
+      SharedPreferences preferences, String type, Map<String, dynamic> jsonData,
       {Function(String message)? onWidgetTypeNotFound}) {
     ensureInitialized();
 
     if (_modelJsonBuildMap.containsKey(type)) {
-      return _modelJsonBuildMap[type]!(jsonData: jsonData);
+      return _modelJsonBuildMap[type]!(
+        ntConnection: ntConnection,
+        jsonData: jsonData,
+      );
     }
 
     onWidgetTypeNotFound
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
     return NTWidgetModel.createDefault(
-            elasticData: elasticData,
+      ntConnection: ntConnection,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
       dataType: tryCast(jsonData['data_type']) ?? 'Unknown',

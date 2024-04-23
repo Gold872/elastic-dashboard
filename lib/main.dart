@@ -108,10 +108,8 @@ void main() async {
 
   runApp(
     Elastic(
-      elasticData: (
-        ntConnection: ntConnection,
-        preferences: preferences,
-      ),
+      ntConnection: ntConnection,
+      preferences: preferences,
       version: packageInfo.version,
     ),
   );
@@ -197,10 +195,15 @@ Future<void> _restorePreferencesFromBackup(String appFolderPath) async {
 }
 
 class Elastic extends StatefulWidget {
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final String version;
 
-  const Elastic({super.key, required this.elasticData, required this.version});
+  const Elastic(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      required this.version});
 
   @override
   State<Elastic> createState() => _ElasticState();
@@ -208,8 +211,7 @@ class Elastic extends StatefulWidget {
 
 class _ElasticState extends State<Elastic> {
   late Color teamColor = Color(
-      widget.elasticData.preferences.getInt(PrefKeys.teamColor) ??
-          Colors.blueAccent.value);
+      widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
 
   @override
   Widget build(BuildContext context) {
@@ -223,12 +225,12 @@ class _ElasticState extends State<Elastic> {
       title: 'Elastic',
       theme: theme,
       home: DashboardPage(
-        elasticData: widget.elasticData,
+        ntConnection: widget.ntConnection,
+        preferences: widget.preferences,
         version: widget.version,
         onColorChanged: (color) => setState(() {
           teamColor = color;
-          widget.elasticData.preferences
-              .setInt(PrefKeys.teamColor, color.value);
+          widget.preferences.setInt(PrefKeys.teamColor, color.value);
         }),
       ),
     );

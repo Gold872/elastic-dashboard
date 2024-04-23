@@ -33,16 +33,16 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
 
-typedef ElasticSharedData = ({NTConnection ntConnection, SharedPreferences preferences});
-
 class DashboardPage extends StatefulWidget {
   final String version;
   final Function(Color color)? onColorChanged;
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
 
   const DashboardPage({
     super.key,
-    required this.elasticData,
+    required this.ntConnection,
+    required this.preferences,
     required this.version,
     this.onColorChanged,
   });
@@ -52,7 +52,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
-  late final SharedPreferences _preferences = widget.elasticData.preferences;
+  late final SharedPreferences _preferences = widget.preferences;
   late final UpdateChecker _updateChecker;
 
   final List<TabGrid> _grids = [];
@@ -82,7 +82,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _setupShortcuts();
 
-    widget.elasticData.ntConnection.dsClientConnect(
+    widget.ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
         if (Settings.ipAddressMode != IPAddressMode.driverStation) {
           return;
@@ -94,7 +94,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        widget.elasticData.ntConnection.changeIPAddress(ip);
+        widget.ntConnection.changeIPAddress(ip);
       },
       onDriverStationDockChanged: (docked) {
         if (Settings.autoResizeToDS && docked) {
@@ -105,7 +105,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       },
     );
 
-    widget.elasticData.ntConnection.addConnectedListener(() {
+    widget.ntConnection.addConnectedListener(() {
       setState(() {
         for (TabGrid grid in _grids) {
           grid.onNTConnect();
@@ -113,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       });
     });
 
-    widget.elasticData.ntConnection.addDisconnectedListener(() {
+    widget.ntConnection.addDisconnectedListener(() {
       setState(() {
         for (TabGrid grid in _grids) {
           grid.onNTDisconnect();
@@ -122,7 +122,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     });
 
     ShuffleboardNTListener apiListener = ShuffleboardNTListener(
-      elasticData: widget.elasticData,
+      ntConnection: widget.ntConnection,
+      preferences: widget.preferences,
       onTabChanged: (tab) {
         int? parsedTabIndex = int.tryParse(tab);
 
@@ -162,7 +163,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.add(
           TabGrid(
             key: GlobalKey(),
-            elasticData: widget.elasticData,
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         );
@@ -185,7 +187,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           _tabData.add(TabData(name: tabName));
           _grids.add(TabGrid(
             key: GlobalKey(),
-            elasticData: widget.elasticData,
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ));
 
@@ -207,7 +210,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future.delayed(const Duration(seconds: 1), () {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
-      widget.elasticData.ntConnection.recallTopicAnnounceListeners();
+      widget.ntConnection.recallTopicAnnounceListeners();
     });
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
@@ -569,7 +572,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _grids.add(
         TabGrid.fromJson(
           key: GlobalKey(),
-          elasticData: widget.elasticData,
+          ntConnection: widget.ntConnection,
+          preferences: widget.preferences,
           jsonData: data['grid_layout'],
           onAddWidgetPressed: _displayAddWidgetDialog,
           onJsonLoadingWarning: _showJsonLoadingWarning,
@@ -596,12 +600,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.addAll([
           TabGrid(
             key: GlobalKey(),
-            elasticData: widget.elasticData,
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
           TabGrid(
             key: GlobalKey(),
-            elasticData: widget.elasticData,
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         ]);
@@ -751,7 +757,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         _grids.add(
           TabGrid(
             key: GlobalKey(),
-            elasticData: widget.elasticData,
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
         );
@@ -875,7 +882,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     showDialog(
       context: context,
       builder: (context) => SettingsDialog(
-        elasticData: widget.elasticData,
+        ntConnection: widget.ntConnection,
+        preferences: widget.preferences,
         onTeamNumberChanged: (String? data) async {
           if (data == null) {
             return;
@@ -915,7 +923,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           switch (mode) {
             case IPAddressMode.driverStation:
-              String? lastAnnouncedIP = widget.elasticData.ntConnection.dsClient.lastAnnouncedIP;
+              String? lastAnnouncedIP =
+                  widget.ntConnection.dsClient.lastAnnouncedIP;
 
               if (lastAnnouncedIP == null) {
                 break;
@@ -1040,7 +1049,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onResizeToDSChanged: (value) async {
           setState(() {
-            if (value && widget.elasticData.ntConnection.dsClient.driverStationDocked) {
+            if (value && widget.ntConnection.dsClient.driverStationDocked) {
               _onDriverStationDocked();
             } else {
               _onDriverStationUndocked();
@@ -1101,7 +1110,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await _preferences.setString(PrefKeys.ipAddress, newIPAddress);
 
     setState(() {
-      widget.elasticData.ntConnection.changeIPAddress(newIPAddress);
+      widget.ntConnection.changeIPAddress(newIPAddress);
     });
   }
 
@@ -1473,7 +1482,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         _tabData.add(tab);
                         _grids.add(TabGrid(
                           key: GlobalKey(),
-                          elasticData: widget.elasticData,
+                          ntConnection: widget.ntConnection,
+                          preferences: widget.preferences,
                           onAddWidgetPressed: _displayAddWidgetDialog,
                         ));
                       });
@@ -1505,6 +1515,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     tabViews: _grids,
                   ),
                   _AddWidgetDialog(
+                    ntConnection: widget.ntConnection,
+                    preferences: widget.preferences,
                     grid: () => _grids[_currentTabIndex],
                     visible: _addWidgetDialogVisible,
                     onNTDragUpdate: (globalPosition, widget) {
@@ -1538,7 +1550,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   children: [
                     Expanded(
                       child: StreamBuilder(
-                          stream: widget.elasticData.ntConnection.connectionStatus(),
+                          stream: widget.ntConnection.connectionStatus(),
                           builder: (context, snapshot) {
                             bool connected = snapshot.data ?? false;
 
@@ -1563,7 +1575,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: StreamBuilder(
-                          stream: widget.elasticData.ntConnection.latencyStream(),
+                          stream: widget.ntConnection.latencyStream(),
                           builder: (context, snapshot) {
                             int latency = snapshot.data ?? 0;
 
@@ -1585,6 +1597,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 }
 
 class _AddWidgetDialog extends StatefulWidget {
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final TabGrid Function() _grid;
   final bool _visible;
 
@@ -1599,6 +1613,8 @@ class _AddWidgetDialog extends StatefulWidget {
   final Function()? _onClose;
 
   const _AddWidgetDialog({
+    required this.ntConnection,
+    required this.preferences,
     required TabGrid Function() grid,
     required bool visible,
     required dynamic Function(Offset, WidgetContainerModel) onNTDragUpdate,
@@ -1656,6 +1672,8 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                     child: TabBarView(
                       children: [
                         NetworkTableTree(
+                          ntConnection: widget.ntConnection,
+                          preferences: widget.preferences,
                           listLayoutBuilder: (
                               {required title, required children}) {
                             return widget._grid().createListLayout(

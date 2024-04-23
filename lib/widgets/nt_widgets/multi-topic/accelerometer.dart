@@ -14,10 +14,16 @@ class AccelerometerModel extends NTWidgetModel {
 
   String get valueTopic => '$topic/Value';
 
-  AccelerometerModel({required super.topic, super.dataType, super.period})
+  AccelerometerModel(
+      {required super.ntConnection,
+      required super.topic,
+      super.dataType,
+      super.period})
       : super();
 
-  AccelerometerModel.fromJson({required super.jsonData}) : super.fromJson();
+  AccelerometerModel.fromJson(
+      {required super.ntConnection, required super.jsonData})
+      : super.fromJson();
 
   @override
   void init() {
@@ -56,7 +62,7 @@ class AccelerometerWidget extends NTWidget {
 
     return StreamBuilder(
         stream: model.valueSubscription.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+        initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
         builder: (context, snapshot) {
           double value = tryCast(snapshot.data) ?? 0.0;
 

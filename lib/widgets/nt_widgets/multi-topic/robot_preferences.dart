@@ -20,10 +20,17 @@ class RobotPreferencesModel extends NTWidgetModel {
 
   PreferenceSearch? searchWidget;
 
-  RobotPreferencesModel({required super.topic, super.dataType, super.period})
-      : super();
+  RobotPreferencesModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  RobotPreferencesModel.fromJson({required super.jsonData}) : super.fromJson();
+  RobotPreferencesModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 }
 
 class RobotPreferences extends NTWidget {
@@ -40,8 +47,7 @@ class RobotPreferences extends NTWidget {
       builder: (context, snapshot) {
         bool rebuildWidget = model.searchWidget == null;
 
-        for (NT4Topic nt4Topic
-            in ntConnection.nt4Client.announcedTopics.values) {
+        for (NT4Topic nt4Topic in model.ntConnection.announcedTopics().values) {
           if (!nt4Topic.name.contains(model.topic) ||
               model.preferenceTopicNames.contains(nt4Topic.name) ||
               nt4Topic.name.contains('.type')) {
@@ -49,13 +55,13 @@ class RobotPreferences extends NTWidget {
           }
 
           Object? previousValue =
-              ntConnection.getLastAnnouncedValue(nt4Topic.name);
+              model.ntConnection.getLastAnnouncedValue(nt4Topic.name);
 
           model.preferenceTopicNames.add(nt4Topic.name);
           model.preferenceTopics.addAll({nt4Topic.name: nt4Topic});
           model.preferenceTextControllers.addAll({
             nt4Topic.name: TextEditingController()
-              ..text = previousValue.toString() ?? ''
+              ..text = previousValue?.toString() ?? ''
           });
           model.previousValues.addAll({nt4Topic.name: previousValue});
 
@@ -63,9 +69,9 @@ class RobotPreferences extends NTWidget {
         }
 
         Iterable<String> announcedTopics =
-            ntConnection.nt4Client.announcedTopics.values.map(
-          (e) => e.name,
-        );
+            model.ntConnection.announcedTopics().values.map(
+                  (e) => e.name,
+                );
 
         for (String topic in model.preferenceTopicNames) {
           if (!announcedTopics.contains(topic)) {
@@ -80,13 +86,13 @@ class RobotPreferences extends NTWidget {
             continue;
           }
 
-          if (ntConnection.getLastAnnouncedValue(topic).toString() !=
+          if (model.ntConnection.getLastAnnouncedValue(topic).toString() !=
               model.previousValues[topic].toString()) {
             model.preferenceTextControllers[topic]?.text =
-                ntConnection.getLastAnnouncedValue(topic).toString();
+                model.ntConnection.getLastAnnouncedValue(topic).toString();
 
             model.previousValues[topic] =
-                ntConnection.getLastAnnouncedValue(topic);
+                model.ntConnection.getLastAnnouncedValue(topic);
           }
         }
 
@@ -133,9 +139,9 @@ class RobotPreferences extends NTWidget {
                 return;
               }
 
-              ntConnection.nt4Client.publishTopic(nt4Topic);
-              ntConnection.updateDataFromTopic(nt4Topic, formattedData);
-              ntConnection.nt4Client.unpublishTopic(nt4Topic);
+              model.ntConnection.publishTopic(nt4Topic);
+              model.ntConnection.updateDataFromTopic(nt4Topic, formattedData);
+              model.ntConnection.unpublishTopic(nt4Topic);
 
               model.preferenceTextControllers[topic]?.text =
                   formattedData.toString();

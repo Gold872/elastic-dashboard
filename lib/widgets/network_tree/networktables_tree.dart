@@ -1,12 +1,13 @@
 import 'dart:ui';
 
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -18,7 +19,8 @@ typedef ListLayoutBuilder = ListLayoutModel Function({
 });
 
 class NetworkTableTree extends StatefulWidget {
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final ListLayoutBuilder listLayoutBuilder;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)?
@@ -29,7 +31,8 @@ class NetworkTableTree extends StatefulWidget {
 
   const NetworkTableTree({
     super.key,
-    required this.elasticData,
+    required this.ntConnection,
+    required this.preferences,
     required this.listLayoutBuilder,
     required this.hideMetadata,
     this.onDragUpdate,
@@ -41,7 +44,11 @@ class NetworkTableTree extends StatefulWidget {
 }
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
-  late final NetworkTableTreeRow root = NetworkTableTreeRow(elasticData: widget.elasticData, topic: '/', rowName: '');
+  late final NetworkTableTreeRow root = NetworkTableTreeRow(
+      ntConnection: widget.ntConnection,
+      preferences: widget.preferences,
+      topic: '/',
+      rowName: '');
   late final TreeController<NetworkTableTreeRow> treeController;
 
   late final Function(Offset globalPosition, WidgetContainerModel widget)?
@@ -67,7 +74,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       },
     );
 
-    widget.elasticData.ntConnection.addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
+    widget.ntConnection.addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
       setState(() {
         treeController.rebuild();
       });
@@ -76,7 +83,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void dispose() {
-    widget.elasticData.ntConnection.removeTopicAnnounceListener(onNewTopicAnnounced);
+    widget.ntConnection.removeTopicAnnounceListener(onNewTopicAnnounced);
 
     super.dispose();
   }
@@ -127,7 +134,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   Widget build(BuildContext context) {
     List<NT4Topic> topics = [];
 
-    for (NT4Topic topic in widget.elasticData.ntConnection.announcedTopics().values) {
+    for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
       }
@@ -147,6 +154,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
         return TreeTile(
           key: UniqueKey(),
+          preferences: widget.preferences,
           entry: entry,
           listLayoutBuilder: widget.listLayoutBuilder,
           onDragUpdate: onDragUpdate,
@@ -164,15 +172,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 }
 
 class TreeTile extends StatelessWidget {
-  TreeTile({
-    super.key,
-    required this.entry,
-    required this.onTap,
-    required this.listLayoutBuilder,
-    this.onDragUpdate,
-    this.onDragEnd,
-  });
-
+  final SharedPreferences preferences;
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
 
@@ -183,6 +183,16 @@ class TreeTile extends StatelessWidget {
   final Function(WidgetContainerModel widget)? onDragEnd;
 
   WidgetContainerModel? draggingWidget;
+
+  TreeTile({
+    super.key,
+    required this.preferences,
+    required this.entry,
+    required this.onTap,
+    required this.listLayoutBuilder,
+    this.onDragUpdate,
+    this.onDragEnd,
+  });
 
   @override
   Widget build(BuildContext context) {

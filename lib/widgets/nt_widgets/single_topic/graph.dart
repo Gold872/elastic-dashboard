@@ -61,6 +61,7 @@ class GraphModel extends NTWidgetModel {
   _GraphWidgetGraph? _graphWidget;
 
   GraphModel({
+    required super.ntConnection,
     required super.topic,
     double timeDisplayed = 5.0,
     double? minValue,
@@ -76,7 +77,8 @@ class GraphModel extends NTWidgetModel {
         _lineWidth = lineWidth,
         super();
 
-  GraphModel.fromJson({required Map<String, dynamic> jsonData})
+  GraphModel.fromJson(
+      {required super.ntConnection, required Map<String, dynamic> jsonData})
       : super.fromJson(jsonData: jsonData) {
     _timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??

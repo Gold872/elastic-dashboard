@@ -13,12 +13,17 @@ class ThreeAxisAccelerometerModel extends NTWidgetModel {
   String get yTopic => '$topic/Y';
   String get zTopic => '$topic/Z';
 
-  ThreeAxisAccelerometerModel(
-      {required super.topic, super.dataType, super.period})
-      : super();
+  ThreeAxisAccelerometerModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  ThreeAxisAccelerometerModel.fromJson({required super.jsonData})
-      : super.fromJson();
+  ThreeAxisAccelerometerModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -43,11 +48,14 @@ class ThreeAxisAccelerometer extends NTWidget {
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         double xAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(model.xTopic)) ?? 0.0;
+            tryCast(model.ntConnection.getLastAnnouncedValue(model.xTopic)) ??
+                0.0;
         double yAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(model.yTopic)) ?? 0.0;
+            tryCast(model.ntConnection.getLastAnnouncedValue(model.yTopic)) ??
+                0.0;
         double zAccel =
-            tryCast(ntConnection.getLastAnnouncedValue(model.zTopic)) ?? 0.0;
+            tryCast(model.ntConnection.getLastAnnouncedValue(model.zTopic)) ??
+                0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -43,20 +43,23 @@ class MatchTimeModel extends NTWidgetModel {
     refresh();
   }
 
-  MatchTimeModel(
-      {required super.topic,
-      String timeDisplayMode = 'Minutes and Seconds',
-      int redStartTime = 15,
-      int yellowStartTime = 30,
-      super.dataType,
-      super.period})
-      : _timeDisplayMode = timeDisplayMode,
+  MatchTimeModel({
+    required super.ntConnection,
+    required super.topic,
+    String timeDisplayMode = 'Minutes and Seconds',
+    int redStartTime = 15,
+    int yellowStartTime = 30,
+    super.dataType,
+    super.period,
+  })  : _timeDisplayMode = timeDisplayMode,
         _yellowStartTime = yellowStartTime,
         _redStartTime = redStartTime,
         super();
 
-  MatchTimeModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  MatchTimeModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _timeDisplayMode =
         tryCast(jsonData['time_display_mode']) ?? 'Minutes and Seconds';
 
@@ -177,7 +180,7 @@ class MatchTimeWidget extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double time = tryCast(snapshot.data) ?? -1.0;
         time = time.floorToDouble();

@@ -1,7 +1,8 @@
 import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -13,7 +14,8 @@ class ShuffleboardNTListener {
   static const String tabsEntry = '$metadataTable/Tabs';
   static const String selectedEntry = '$metadataTable/Selected';
 
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final Function(Map<String, dynamic> widgetData)? onWidgetAdded;
   final Function(String tab)? onTabChanged;
   final Function(String tab)? onTabCreated;
@@ -24,18 +26,22 @@ class ShuffleboardNTListener {
 
   Map<String, Map<String, dynamic>> currentJsonData = {};
 
-  late final NetworkTableTreeRow shuffleboardTreeRoot =
-      NetworkTableTreeRow(elasticData: elasticData, topic: '/', rowName: '');
+  late final NetworkTableTreeRow shuffleboardTreeRoot = NetworkTableTreeRow(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: '/',
+      rowName: '');
 
   ShuffleboardNTListener({
-    required this.elasticData,
+    required this.ntConnection,
+    required this.preferences,
     this.onTabChanged,
     this.onTabCreated,
     this.onWidgetAdded,
   });
 
   void initializeSubscriptions() {
-    selectedSubscription = elasticData.ntConnection.subscribe(selectedEntry);
+    selectedSubscription = ntConnection.subscribe(selectedEntry);
   }
 
   void initializeListeners() {
@@ -53,19 +59,19 @@ class ShuffleboardNTListener {
 
     // Also clear data when connected in case if threads auto populate json after disconnection
     // Chances are low since the timing has to be just right but you never know
-    elasticData.ntConnection.addConnectedListener(() {
+    ntConnection.addConnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
       previousSelection = null;
     });
 
-    elasticData.ntConnection.addDisconnectedListener(() {
+    ntConnection.addDisconnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
       previousSelection = null;
     });
 
-    elasticData.ntConnection.addTopicAnnounceListener((topic) async {
+    ntConnection.addTopicAnnounceListener((topic) async {
       if (!topic.name.contains(shuffleboardTableRoot)) {
         return;
       }
@@ -110,8 +116,8 @@ class ShuffleboardNTListener {
     if (name.contains('/Properties')) {
       String propertyTopic = metaHierarchy[metaHierarchy.length - 1];
 
-      Object? subProperty = await elasticData.ntConnection
-          .subscribeAndRetrieveData(propertyTopic);
+      Object? subProperty =
+          await ntConnection.subscribeAndRetrieveData(propertyTopic);
 
       String real = realHierarchy[realHierarchy.length - 1];
       List<String> realTopics = real.split('/');
@@ -185,8 +191,8 @@ class ShuffleboardNTListener {
     if (name.endsWith('/PreferredComponent')) {
       String componentTopic = metaHierarchy[metaHierarchy.length - 1];
 
-      String? type = await elasticData.ntConnection
-          .subscribeAndRetrieveData(componentTopic);
+      String? type =
+          await ntConnection.subscribeAndRetrieveData(componentTopic);
 
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
@@ -202,8 +208,7 @@ class ShuffleboardNTListener {
       String sizeTopic = metaHierarchy[metaHierarchy.length - 1];
 
       List<Object?> sizeRaw =
-          await elasticData.ntConnection.subscribeAndRetrieveData(sizeTopic) ??
-              [];
+          await ntConnection.subscribeAndRetrieveData(sizeTopic) ?? [];
       List<double> size = sizeRaw.whereType<double>().toList();
 
       if (size.length < 2) {
@@ -227,9 +232,8 @@ class ShuffleboardNTListener {
     if (name.endsWith('/Position')) {
       String positionTopic = metaHierarchy[metaHierarchy.length - 1];
 
-      List<Object?> positionRaw = await elasticData.ntConnection
-              .subscribeAndRetrieveData(positionTopic) ??
-          [];
+      List<Object?> positionRaw =
+          await ntConnection.subscribeAndRetrieveData(positionTopic) ?? [];
       List<double> position = positionRaw.whereType<double>().toList();
 
       if (position.length < 2) {
@@ -301,8 +305,7 @@ class ShuffleboardNTListener {
     if (widgetRow.hasRow('.type')) {
       String typeTopic = widgetRow.getRow('.type').topic;
 
-      String? type = await elasticData.ntConnection.subscribeAndRetrieveData(
-          typeTopic,
+      String? type = await ntConnection.subscribeAndRetrieveData(typeTopic,
           timeout: const Duration(seconds: 3));
 
       if (type == 'ShuffleboardLayout') {
@@ -344,7 +347,7 @@ class ShuffleboardNTListener {
 
     if (isCameraStream) {
       String? cameraStream =
-          await elasticData.ntConnection.subscribeAndRetrieveData(topic.name);
+          await ntConnection.subscribeAndRetrieveData(topic.name);
 
       if (cameraStream == null) {
         return;
@@ -389,7 +392,7 @@ class ShuffleboardNTListener {
               ? Settings.defaultPeriod
               : Settings.defaultGraphPeriod);
 
-      if (elasticData.ntConnection.isNT4Connected) {
+      if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
       }
 
@@ -457,9 +460,8 @@ class ShuffleboardNTListener {
         }
 
         if (isCameraStream) {
-          String? cameraStream = await elasticData.ntConnection
-              .subscribeAndRetrieveData(
-                  childRow.getRow('.ShuffleboardURI').topic);
+          String? cameraStream = await ntConnection.subscribeAndRetrieveData(
+              childRow.getRow('.ShuffleboardURI').topic);
 
           if (cameraStream == null) {
             continue;
@@ -498,7 +500,7 @@ class ShuffleboardNTListener {
         widget?.disposeModel(deleting: true);
         widget?.forceDispose();
       }
-      if (elasticData.ntConnection.isNT4Connected) {
+      if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
       }
     });

@@ -1,13 +1,14 @@
 import 'dart:math';
 
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -27,7 +28,8 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -36,11 +38,16 @@ class TabGrid extends StatelessWidget {
 
   TabGridModel? model;
 
-  TabGrid({super.key, required this.elasticData, required this.onAddWidgetPressed});
+  TabGrid(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      required this.onAddWidgetPressed});
 
   TabGrid.fromJson({
     super.key,
-    required this.elasticData,
+    required this.ntConnection,
+    required this.preferences,
     required Map<String, dynamic> jsonData,
     required this.onAddWidgetPressed,
     Function(String message)? onJsonLoadingWarning,
@@ -60,7 +67,9 @@ class TabGrid extends StatelessWidget {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
       _widgetModels.add(
         NTWidgetContainerModel.fromJson(
-          enabled: elasticData.ntConnection.isNT4Connected,
+          ntConnection: ntConnection,
+          preferences: preferences,
+          enabled: ntConnection.isNT4Connected,
           jsonData: containerData,
           onJsonLoadingWarning: onJsonLoadingWarning,
         ),
@@ -82,8 +91,10 @@ class TabGrid extends StatelessWidget {
       switch (layoutData['type']) {
         case 'List Layout':
           widget = ListLayoutModel.fromJson(
+            ntConnection: ntConnection,
+            preferences: preferences,
             jsonData: layoutData,
-            enabled: elasticData.ntConnection.isNT4Connected,
+            enabled: ntConnection.isNT4Connected,
             tabGrid: this,
             onDragCancel: _layoutContainerOnDragCancel,
             minWidth: 128.0 * 2,
@@ -486,7 +497,7 @@ class TabGrid extends StatelessWidget {
     widget.setPreviewRect(previewLocation);
 
     widget.tryCast<NTWidgetContainerModel>()?.updateMinimumSize();
-    widget.setEnabled(elasticData.ntConnection.isNT4Connected);
+    widget.setEnabled(ntConnection.isNT4Connected);
 
     // If dragging into layout
     if (widget is NTWidgetContainerModel &&
@@ -525,6 +536,8 @@ class TabGrid extends StatelessWidget {
   ListLayoutModel createListLayout(
       {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
     return ListLayoutModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
       title: title,
       initialPosition: Rect.fromLTWH(
         0.0,
@@ -587,8 +600,10 @@ class TabGrid extends StatelessWidget {
         case 'List Layout':
           _widgetModels.add(
             ListLayoutModel.fromJson(
+              ntConnection: ntConnection,
+              preferences: preferences,
               jsonData: widgetData,
-              enabled: elasticData.ntConnection.isNT4Connected,
+              enabled: ntConnection.isNT4Connected,
               tabGrid: this,
               onDragCancel: _layoutContainerOnDragCancel,
               minWidth: 128.0 * 2,
@@ -600,7 +615,9 @@ class TabGrid extends StatelessWidget {
     } else {
       _widgetModels.add(
         NTWidgetContainerModel.fromJson(
-          enabled: elasticData.ntConnection.isNT4Connected,
+          ntConnection: ntConnection,
+          preferences: preferences,
+          enabled: ntConnection.isNT4Connected,
           jsonData: widgetData,
         ),
       );

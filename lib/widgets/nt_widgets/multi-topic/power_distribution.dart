@@ -16,10 +16,17 @@ class PowerDistributionModel extends NTWidgetModel {
   String get voltageTopic => '$topic/Voltage';
   String get currentTopic => '$topic/TotalCurrent';
 
-  PowerDistributionModel({required super.topic, super.dataType, super.period})
-      : super();
+  PowerDistributionModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  PowerDistributionModel.fromJson({required super.jsonData}) : super.fromJson();
+  PowerDistributionModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -70,7 +77,7 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current = tryCast(ntConnection
+      double current = tryCast(model.ntConnection
               .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
@@ -108,7 +115,7 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current = tryCast(ntConnection
+      double current = tryCast(model.ntConnection
               .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
@@ -149,12 +156,12 @@ class PowerDistribution extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double voltage =
-            tryCast(ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
-                0.0;
-        double totalCurrent =
-            tryCast(ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
-                0.0;
+        double voltage = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
+            0.0;
+        double totalCurrent = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
+            0.0;
 
         return Column(
           children: [

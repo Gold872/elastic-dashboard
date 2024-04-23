@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -25,6 +26,7 @@ class ListLayoutModel extends LayoutContainerModel {
 
   String labelPosition = 'TOP';
 
+  final NTConnection ntConnection;
   final TabGrid tabGrid;
   final Function(WidgetContainerModel model)? onDragCancel;
 
@@ -37,8 +39,10 @@ class ListLayoutModel extends LayoutContainerModel {
   ];
 
   ListLayoutModel({
+    required super.preferences,
     required super.initialPosition,
     required super.title,
+    required this.ntConnection,
     required this.tabGrid,
     required this.onDragCancel,
     List<NTWidgetContainerModel>? children,
@@ -53,6 +57,8 @@ class ListLayoutModel extends LayoutContainerModel {
 
   ListLayoutModel.fromJson({
     required super.jsonData,
+    required super.preferences,
+    required this.ntConnection,
     required this.tabGrid,
     required this.onDragCancel,
     super.enabled,
@@ -121,6 +127,8 @@ class ListLayoutModel extends LayoutContainerModel {
     for (Map<String, dynamic> childData in jsonData['children']) {
       children.add(
         NTWidgetContainerModel.fromJson(
+          ntConnection: ntConnection,
+          preferences: preferences,
           jsonData: childData,
           enabled: enabled,
           onJsonLoadingWarning: onJsonLoadingWarning,

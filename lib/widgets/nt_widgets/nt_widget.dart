@@ -1,10 +1,10 @@
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
@@ -20,7 +20,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
 class NTWidgetModel extends ChangeNotifier {
-  final ElasticSharedData elasticData;
+  final NTConnection ntConnection;
   String _typeOverride = 'NTWidget';
   String get type => _typeOverride;
 
@@ -43,7 +43,7 @@ class NTWidgetModel extends ChangeNotifier {
   bool _forceDispose = false;
 
   NTWidgetModel({
-    required this.elasticData,
+    required this.ntConnection,
     required String topic,
     this.dataType = 'Unknown',
     double? period,
@@ -54,7 +54,7 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   NTWidgetModel.createDefault({
-    required this.elasticData,
+    required this.ntConnection,
     required String type,
     required String topic,
     this.dataType = 'Unknown',
@@ -66,8 +66,10 @@ class NTWidgetModel extends ChangeNotifier {
     init();
   }
 
-  NTWidgetModel.fromJson(
-      {required this.elasticData, required Map<String, dynamic> jsonData}) {
+  NTWidgetModel.fromJson({
+    required this.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) {
     _topic = tryCast(jsonData['topic']) ?? '';
     _period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
     dataType = tryCast(jsonData['data_type']) ?? dataType;
@@ -77,7 +79,7 @@ class NTWidgetModel extends ChangeNotifier {
 
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    if (dataType == 'Unknown' && elasticData.ntConnection.isNT4Connected) {
+    if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
       createTopicIfNull();
       dataType = ntTopic?.type ?? dataType;
     }
@@ -144,16 +146,16 @@ class NTWidgetModel extends ChangeNotifier {
 
   @mustCallSuper
   void init() async {
-    subscription = elasticData.ntConnection.subscribe(_topic, _period);
+    subscription = ntConnection.subscribe(_topic, _period);
   }
 
   void createTopicIfNull() {
-    ntTopic ??= elasticData.ntConnection.getTopicFromName(_topic);
+    ntTopic ??= ntConnection.getTopicFromName(_topic);
   }
 
   void unSubscribe() {
     if (subscription != null) {
-      elasticData.ntConnection.unSubscribe(subscription!);
+      ntConnection.unSubscribe(subscription!);
     }
     refresh();
   }
@@ -162,7 +164,7 @@ class NTWidgetModel extends ChangeNotifier {
 
   void resetSubscription() {
     if (subscription == null) {
-      subscription = elasticData.ntConnection.subscribe(_topic, _period);
+      subscription = ntConnection.subscribe(_topic, _period);
 
       ntTopic = null;
 
@@ -172,14 +174,14 @@ class NTWidgetModel extends ChangeNotifier {
 
     bool resetDataType = subscription!.topic != topic;
 
-    elasticData.ntConnection.unSubscribe(subscription!);
-    subscription = elasticData.ntConnection.subscribe(_topic, _period);
+    ntConnection.unSubscribe(subscription!);
+    subscription = ntConnection.subscribe(_topic, _period);
 
     ntTopic = null;
 
     createTopicIfNull();
     if (resetDataType) {
-      if (ntTopic == null && elasticData.ntConnection.isNT4Connected) {
+      if (ntTopic == null && ntConnection.isNT4Connected) {
         dataType = 'Unknown';
       } else {
         dataType = ntTopic?.type ?? dataType;

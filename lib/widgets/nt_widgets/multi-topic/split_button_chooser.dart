@@ -24,13 +24,16 @@ class SplitButtonChooserModel extends NTWidgetModel {
   NT4Topic? _activeTopic;
 
   SplitButtonChooserModel({
+    required super.ntConnection,
     required super.topic,
     super.dataType,
     super.period,
   }) : super();
 
-  SplitButtonChooserModel.fromJson({required super.jsonData})
-      : super.fromJson();
+  SplitButtonChooserModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void resetSubscription() {
@@ -44,8 +47,8 @@ class SplitButtonChooserModel extends NTWidgetModel {
       return;
     }
 
-    _selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??=
+        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
@@ -64,7 +67,7 @@ class SplitButtonChooserModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_activeTopic!);
+      ntConnection.publishTopic(_activeTopic!);
     }
 
     ntConnection.updateDataFromTopic(_activeTopic!, active);
@@ -104,32 +107,32 @@ class SplitButtonChooser extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> rawOptions = ntConnection
+        List<Object?> rawOptions = model.ntConnection
                 .getLastAnnouncedValue(model.optionsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
         List<String> options = rawOptions.whereType<String>().toList();
 
-        String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(model.activeTopicName));
+        String? active = tryCast(
+            model.ntConnection.getLastAnnouncedValue(model.activeTopicName));
         if (active != null && active == '') {
           active = null;
         }
 
         String? selected = tryCast(
-            ntConnection.getLastAnnouncedValue(model.selectedTopicName));
+            model.ntConnection.getLastAnnouncedValue(model.selectedTopicName));
         if (selected != null && selected == '') {
           selected = null;
         }
 
-        String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(model.defaultTopicName));
+        String? defaultOption = tryCast(
+            model.ntConnection.getLastAnnouncedValue(model.defaultTopicName));
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
 
-        if (!ntConnection.isNT4Connected) {
+        if (!model.ntConnection.isNT4Connected) {
           active = null;
           selected = null;
           defaultOption = null;

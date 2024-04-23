@@ -57,6 +57,7 @@ class NumberSliderModel extends NTWidgetModel {
   set dragging(value) => _dragging = value;
 
   NumberSliderModel({
+    required super.ntConnection,
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -70,8 +71,10 @@ class NumberSliderModel extends NTWidgetModel {
         _maxValue = maxValue,
         super();
 
-  NumberSliderModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  NumberSliderModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _minValue =
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
     _maxValue =
@@ -179,7 +182,7 @@ class NumberSliderModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(ntTopic!);
+      ntConnection.publishTopic(ntTopic!);
     }
 
     ntConnection.updateDataFromTopic(ntTopic!, value);
@@ -197,7 +200,7 @@ class NumberSlider extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

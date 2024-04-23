@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
@@ -15,10 +16,13 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'widget_container_model.dart';
 
 class NTWidgetContainerModel extends WidgetContainerModel {
+  final NTConnection ntConnection;
   late NTWidget child;
   late NTWidgetModel childModel;
 
   NTWidgetContainerModel({
+    required this.ntConnection,
+    required super.preferences,
     required super.initialPosition,
     required super.title,
     required this.childModel,
@@ -26,7 +30,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   });
 
   NTWidgetContainerModel.fromJson({
+    required this.ntConnection,
     required super.jsonData,
+    required super.preferences,
     super.enabled,
     super.onJsonLoadingWarning,
   }) : super.fromJson();
@@ -82,8 +88,13 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     String type = tryCast(jsonData['type']) ?? '';
 
-    childModel = NTWidgetBuilder.buildNTModelFromJson(type, widgetProperties,
-        onWidgetTypeNotFound: onJsonLoadingWarning);
+    childModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      type,
+      widgetProperties,
+      onWidgetTypeNotFound: onJsonLoadingWarning,
+    );
   }
 
   @override
@@ -300,6 +311,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel.forceDispose();
 
     childModel = NTWidgetBuilder.buildNTModelFromType(
+      ntConnection,
       type,
       childModel.topic,
       dataType: childModel.dataType,

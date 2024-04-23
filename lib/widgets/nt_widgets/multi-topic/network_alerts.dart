@@ -13,10 +13,17 @@ class NetworkAlertsModel extends NTWidgetModel {
   String get warningsTopicName => '$topic/warnings';
   String get infosTopicName => '$topic/infos';
 
-  NetworkAlertsModel({required super.topic, super.dataType, super.period})
-      : super();
+  NetworkAlertsModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  NetworkAlertsModel.fromJson({required super.jsonData}) : super.fromJson();
+  NetworkAlertsModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -55,17 +62,17 @@ class NetworkAlerts extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> errorsRaw = ntConnection
+        List<Object?> errorsRaw = model.ntConnection
                 .getLastAnnouncedValue(model.errorsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
-        List<Object?> warningsRaw = ntConnection
+        List<Object?> warningsRaw = model.ntConnection
                 .getLastAnnouncedValue(model.warningsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
-        List<Object?> infosRaw = ntConnection
+        List<Object?> infosRaw = model.ntConnection
                 .getLastAnnouncedValue(model.infosTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];

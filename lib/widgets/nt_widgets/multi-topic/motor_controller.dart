@@ -15,10 +15,17 @@ class MotorControllerModel extends NTWidgetModel {
 
   late NT4Subscription valueSubscription;
 
-  MotorControllerModel({required super.topic, super.dataType, super.period})
-      : super();
+  MotorControllerModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  MotorControllerModel.fromJson({required super.jsonData}) : super.fromJson();
+  MotorControllerModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -55,7 +62,7 @@ class MotorController extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

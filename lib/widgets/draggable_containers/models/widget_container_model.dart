@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -9,6 +10,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 
 abstract class WidgetContainerModel extends ChangeNotifier {
   final Key key = UniqueKey();
+  final SharedPreferences preferences;
 
   String? title;
 
@@ -40,6 +42,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   late Rect dragStartLocation;
 
   WidgetContainerModel({
+    required this.preferences,
     required Rect initialPosition,
     required this.title,
     this.enabled = false,
@@ -52,6 +55,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   WidgetContainerModel.fromJson({
     required Map<String, dynamic> jsonData,
+    required this.preferences,
     this.enabled = false,
     this.minWidth = 128.0,
     this.minHeight = 128.0,

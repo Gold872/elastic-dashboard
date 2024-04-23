@@ -25,16 +25,19 @@ class GyroModel extends NTWidgetModel {
     refresh();
   }
 
-  GyroModel(
-      {required super.topic,
-      bool counterClockwisePositive = false,
-      super.dataType,
-      super.period})
-      : _counterClockwisePositive = counterClockwisePositive,
+  GyroModel({
+    required super.ntConnection,
+    required super.topic,
+    bool counterClockwisePositive = false,
+    super.dataType,
+    super.period,
+  })  : _counterClockwisePositive = counterClockwisePositive,
         super();
 
-  GyroModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  GyroModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _counterClockwisePositive =
         tryCast(jsonData['counter_clockwise_positive']) ?? false;
   }
@@ -105,7 +108,7 @@ class Gyro extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

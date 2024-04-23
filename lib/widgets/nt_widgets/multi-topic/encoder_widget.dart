@@ -12,9 +12,17 @@ class EncoderModel extends NTWidgetModel {
   String get distanceTopic => '$topic/Distance';
   String get speedTopic => '$topic/Speed';
 
-  EncoderModel({required super.topic, super.dataType, super.period}) : super();
+  EncoderModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  EncoderModel.fromJson({required super.jsonData}) : super.fromJson();
+  EncoderModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -39,12 +47,12 @@ class EncoderWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double distance =
-            tryCast(ntConnection.getLastAnnouncedValue(model.distanceTopic)) ??
-                0.0;
-        double speed =
-            tryCast(ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
-                0.0;
+        double distance = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.distanceTopic)) ??
+            0.0;
+        double speed = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
+            0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

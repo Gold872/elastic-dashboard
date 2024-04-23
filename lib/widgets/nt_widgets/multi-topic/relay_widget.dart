@@ -17,9 +17,17 @@ class RelayModel extends NTWidgetModel {
 
   final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayModel({required super.topic, super.dataType, super.period}) : super();
+  RelayModel({
+    required super.ntConnection,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  RelayModel.fromJson({required super.jsonData}) : super.fromJson();
+  RelayModel.fromJson({
+    required super.ntConnection,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -58,7 +66,8 @@ class RelayWidget extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopicName),
+      initialData:
+          model.ntConnection.getLastAnnouncedValue(model.valueTopicName),
       builder: (context, snapshot) {
         String selected = tryCast(snapshot.data) ?? 'Off';
 
@@ -83,18 +92,19 @@ class RelayWidget extends NTWidget {
 
                     bool publishTopic = model.valueTopic == null;
 
-                    model.valueTopic ??=
-                        ntConnection.getTopicFromName(model.valueTopicName);
+                    model.valueTopic ??= model.ntConnection
+                        .getTopicFromName(model.valueTopicName);
 
                     if (model.valueTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(model.valueTopic!);
+                      model.ntConnection.publishTopic(model.valueTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(model.valueTopic!, option);
+                    model.ntConnection
+                        .updateDataFromTopic(model.valueTopic!, option);
                   },
                   isSelected:
                       model.selectedOptions.map((e) => selected == e).toList(),

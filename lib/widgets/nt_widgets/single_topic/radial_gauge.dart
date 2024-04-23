@@ -82,6 +82,7 @@ class RadialGaugeModel extends NTWidgetModel {
   }
 
   RadialGaugeModel({
+    required super.ntConnection,
     required super.topic,
     double startAngle = -140.0,
     double endAngle = 140.0,
@@ -103,8 +104,10 @@ class RadialGaugeModel extends NTWidgetModel {
         _endAngle = endAngle,
         super();
 
-  RadialGaugeModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  RadialGaugeModel.fromJson({
+    required super.ntConnection,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;
     _endAngle = tryCast(jsonData['end_angle']) ?? _endAngle;
     _minValue = tryCast(jsonData['min_value']) ?? _minValue;
@@ -297,7 +300,7 @@ class RadialGauge extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

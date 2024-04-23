@@ -48,10 +48,16 @@ class PIDControllerModel extends NTWidgetModel {
 
   set setpointLastValue(value) => _setpointLastValue = value;
 
-  PIDControllerModel({required super.topic, super.dataType, super.period})
+  PIDControllerModel(
+      {required super.ntConnection,
+      required super.topic,
+      super.dataType,
+      super.period})
       : super();
 
-  PIDControllerModel.fromJson({required super.jsonData}) : super.fromJson();
+  PIDControllerModel.fromJson(
+      {required super.ntConnection, required super.jsonData})
+      : super.fromJson();
 
   @override
   void resetSubscription() {
@@ -75,7 +81,7 @@ class PIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kpTopic!);
+      ntConnection.publishTopic(_kpTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kpTopic!, data);
@@ -93,7 +99,7 @@ class PIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kiTopic!);
+      ntConnection.publishTopic(_kiTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kiTopic!, data);
@@ -111,7 +117,7 @@ class PIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kdTopic!);
+      ntConnection.publishTopic(_kdTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kdTopic!, data);
@@ -129,7 +135,7 @@ class PIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_setpointTopic!);
+      ntConnection.publishTopic(_setpointTopic!);
     }
 
     ntConnection.updateDataFromTopic(_setpointTopic!, data);
@@ -172,16 +178,16 @@ class PIDControllerWidget extends NTWidget {
     return StreamBuilder(
         stream: model.multiTopicPeriodicStream,
         builder: (context, snapshot) {
-          double kP =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kpTopicName)) ??
-                  0.0;
-          double kI =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kiTopicName)) ??
-                  0.0;
-          double kD =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kdTopicName)) ??
-                  0.0;
-          double setpoint = tryCast(ntConnection
+          double kP = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kpTopicName)) ??
+              0.0;
+          double kI = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kiTopicName)) ??
+              0.0;
+          double kD = tryCast(model.ntConnection
+                  .getLastAnnouncedValue(model.kdTopicName)) ??
+              0.0;
+          double setpoint = tryCast(model.ntConnection
                   .getLastAnnouncedValue(model.setpointTopicName)) ??
               0.0;
 
