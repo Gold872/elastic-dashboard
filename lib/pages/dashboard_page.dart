@@ -85,7 +85,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     widget.ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
-        if (Settings.ipAddressMode != IPAddressMode.driverStation) {
+        if (preferences.getInt(PrefKeys.ipAddressMode) !=
+            IPAddressMode.driverStation.index) {
           return;
         }
 
@@ -902,7 +903,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-          switch (Settings.ipAddressMode) {
+          switch (IPAddressMode.fromIndex(
+              preferences.getInt(PrefKeys.ipAddressMode))) {
             case IPAddressMode.roboRIOmDNS:
               _updateIPAddress(
                   IPAddressUtil.teamNumberToRIOmDNS(newTeamNumber));
@@ -916,12 +918,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
         },
         onIPAddressModeChanged: (mode) async {
-          if (mode == Settings.ipAddressMode) {
+          if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
             return;
           }
           await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
-
-          Settings.ipAddressMode = mode;
 
           switch (mode) {
             case IPAddressMode.driverStation:

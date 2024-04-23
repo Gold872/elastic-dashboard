@@ -151,7 +151,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
           setState(() {});
         },
         choices: IPAddressMode.values,
-        initialValue: Settings.ipAddressMode,
+        initialValue: IPAddressMode.fromIndex(
+            widget.preferences.getInt(PrefKeys.ipAddressMode)),
       ),
       const SizedBox(height: 5),
       StreamBuilder(
@@ -161,8 +162,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
             bool dsConnected = tryCast(snapshot.data) ?? false;
 
             return DialogTextInput(
-              enabled: Settings.ipAddressMode == IPAddressMode.custom ||
-                  (Settings.ipAddressMode == IPAddressMode.driverStation &&
+              enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                      IPAddressMode.custom.index ||
+                  (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                          IPAddressMode.driverStation.index &&
                       !dsConnected),
               initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
                   Defaults.ipAddress,

@@ -54,9 +54,6 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
-  Settings.ipAddressMode =
-      IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
-
   NTWidgetBuilder.ensureInitialized();
 
   String ipAddress =

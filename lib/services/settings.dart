@@ -5,8 +5,6 @@ class Settings {
       'https://github.com/Gold872/elastic-dashboard';
   static const String releasesLink = '$repositoryLink/releases/latest';
 
-  static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
-
   // static String ipAddress = '127.0.0.1';
   // static int teamNumber = 9999;
   // static int gridSize = 128;
