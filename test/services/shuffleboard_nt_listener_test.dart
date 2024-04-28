@@ -35,9 +35,6 @@ void main() {
 
     when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
-    when(mockNT4Connection.bandiwdthStream())
-        .thenAnswer((_) => Stream.value(0.0));
-
     when(mockNT4Connection.getLastAnnouncedValue(any)).thenAnswer(
       (realInvocation) =>
           lastAnnouncedValues[realInvocation.positionalArguments[0]],

@@ -356,9 +356,6 @@ void main() {
         .thenAnswer((_) => Stream.value(true));
     when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
-    when(mockNT4Connection.bandiwdthStream())
-        .thenAnswer((_) => Stream.value(0.0));
-
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
 

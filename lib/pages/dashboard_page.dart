@@ -9,7 +9,6 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:multiple_stream_builder/multiple_stream_builder.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1560,15 +1559,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       ),
                     ),
                     Expanded(
-                      child: StreamBuilder2(
-                          streams: StreamTuple2(ntConnection.bandiwdthStream(),
-                              ntConnection.latencyStream()),
+                      child: StreamBuilder(
+                          stream: ntConnection.latencyStream(),
                           builder: (context, snapshot) {
-                            double bandwidth = snapshot.snapshot1.data ?? 0.0;
-                            double latency = snapshot.snapshot2.data ?? 0.0;
+                            double latency = snapshot.data ?? 0.0;
 
                             return Text(
-                              '${bandwidth.toStringAsFixed(2).padLeft(5)} kb/s | ${latency.toStringAsFixed(2).padLeft(4)} ms',
+                              'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
                               textAlign: TextAlign.right,
                             );
                           }),
