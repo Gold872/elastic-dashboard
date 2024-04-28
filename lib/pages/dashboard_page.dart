@@ -1565,10 +1565,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                               ntConnection.latencyStream()),
                           builder: (context, snapshot) {
                             double bandwidth = snapshot.snapshot1.data ?? 0.0;
-                            int latency = snapshot.snapshot2.data ?? 0;
+                            double latency = snapshot.snapshot2.data ?? 0.0;
 
                             return Text(
-                              '${bandwidth.toStringAsFixed(2).padLeft(5)} kb/s | ${latency.toString().padLeft(1)} ms',
+                              '${bandwidth.toStringAsFixed(2).padLeft(5)} kb/s | ${latency.toStringAsFixed(2).padLeft(4)} ms',
                               textAlign: TextAlign.right,
                             );
                           }),
