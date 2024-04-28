@@ -256,7 +256,7 @@ class NT4Client {
   final Map<int, NT4Topic> announcedTopics = {};
   int _clientId = 0;
   int _serverTimeOffsetUS = 0;
-  int _latencyMs = 0;
+  double _latencyMs = 0;
   int _bitUsage = 0;
   double _dataRateKbPerSecond = 0;
 
@@ -297,10 +297,10 @@ class NT4Client {
     _wsOnClose();
   }
 
-  Stream<int> latencyStream() async* {
+  Stream<double> latencyStream() async* {
     yield _latencyMs;
 
-    int lastYielded = _latencyMs;
+    double lastYielded = _latencyMs;
 
     while (true) {
       await Future.delayed(const Duration(seconds: 1));
@@ -543,7 +543,7 @@ class NT4Client {
 
     _lastPongTime = rxTime;
 
-    _latencyMs = (rtt / 2) ~/ 1000;
+    _latencyMs = (rtt / 2) / 1000;
   }
 
   void _wsSubscribe(NT4Subscription sub) {

@@ -116,7 +116,7 @@ class NTConnection {
     }
   }
 
-  Stream<int> latencyStream() {
+  Stream<double> latencyStream() {
     return nt4Client.latencyStream();
   }
 
