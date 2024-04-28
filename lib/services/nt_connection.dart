@@ -120,6 +120,10 @@ class NTConnection {
     return nt4Client.latencyStream();
   }
 
+  Stream<double> bandiwdthStream() {
+    return nt4Client.bandwidthStream();
+  }
+
   void changeIPAddress(String ipAddress) {
     if (_ntClient.serverBaseAddress == ipAddress) {
       return;

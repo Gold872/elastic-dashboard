@@ -257,6 +257,8 @@ class NT4Client {
   int _clientId = 0;
   int _serverTimeOffsetUS = 0;
   int _latencyMs = 0;
+  int _bitUsage = 0;
+  double _dataRateKbPerSecond = 0;
 
   WebSocketChannel? _mainWebsocket;
   StreamSubscription? _mainWebsocketListener;
@@ -306,6 +308,21 @@ class NT4Client {
       if (_latencyMs != lastYielded) {
         yield _latencyMs;
         lastYielded = _latencyMs;
+      }
+    }
+  }
+
+  Stream<double> bandwidthStream() async* {
+    yield _dataRateKbPerSecond;
+
+    double lastYielded = _dataRateKbPerSecond;
+
+    while (true) {
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (_dataRateKbPerSecond != lastYielded) {
+        yield _dataRateKbPerSecond;
+        lastYielded = _dataRateKbPerSecond;
       }
     }
   }
@@ -504,12 +521,17 @@ class NT4Client {
       var rawData =
           serialize([timeTopic.pubUID, 0, timeTopic.getTypeId(), timeToSend]);
 
+      _bitUsage += rawData.lengthInBytes * 8;
+
       if (_useRTT) {
         _rttWebsocket?.sink.add(rawData);
       } else {
         _mainWebsocket?.sink.add(rawData);
       }
     }
+
+    _dataRateKbPerSecond = (_bitUsage / 1000) / (_pingInterval / 1000);
+    _bitUsage = 0;
   }
 
   void _rttHandleRecieveTimestamp(int serverTimestamp, int clientTimestamp) {
@@ -545,15 +567,22 @@ class NT4Client {
   }
 
   void _wsSendJSON(String method, Map<String, dynamic> params) {
-    _mainWebsocket?.sink.add(jsonEncode([
+    String encodedJson = jsonEncode([
       {
         'method': method,
         'params': params,
       }
-    ]));
+    ]);
+
+    _bitUsage += encodedJson.length * 8;
+
+    _mainWebsocket?.sink.add(encodedJson);
   }
 
   void _wsSendBinary(dynamic data) {
+    if (data is Uint8List) {
+      _bitUsage += data.lengthInBytes * 8;
+    }
     _mainWebsocket?.sink.add(data);
   }
 
@@ -685,6 +714,10 @@ class NT4Client {
           return;
         }
 
+        if (data is Uint8List) {
+          _bitUsage += data.lengthInBytes * 8;
+        }
+
         var msg = Unpacker.fromList(data).unpackList();
 
         int topicID = msg[0] as int;
@@ -758,6 +791,9 @@ class NT4Client {
     _lastPongTime = 0;
     _latencyMs = 0;
 
+    _bitUsage = 0;
+    _dataRateKbPerSecond = 0;
+
     logger.info('Network Tables disconnected');
     onDisconnect?.call();
 
@@ -770,6 +806,8 @@ class NT4Client {
 
   void _wsOnMessage(data) {
     if (data is String) {
+      _bitUsage += data.length * 8;
+
       var rxArr = jsonDecode(data.toString());
 
       if (rxArr is! List) {
@@ -846,6 +884,9 @@ class NT4Client {
         }
       }
     } else {
+      if (data is Uint8List) {
+        _bitUsage += data.lengthInBytes * 8;
+      }
       var u = Unpacker.fromList(data);
 
       bool done = false;

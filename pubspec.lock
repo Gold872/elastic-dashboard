@@ -656,6 +656,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  multiple_stream_builder:
+    dependency: "direct main"
+    description:
+      name: multiple_stream_builder
+      sha256: fec7a8909d0942d1a8d726b7e3057bd73e2ab64a5ae2da6b7b44a959f17f09fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   nested:
     dependency: transitive
     description:

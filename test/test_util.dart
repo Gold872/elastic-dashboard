@@ -35,6 +35,9 @@ void setupMockOfflineNT4() {
 
   when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
+  when(mockNT4Connection.bandiwdthStream())
+      .thenAnswer((_) => Stream.value(0.0));
+
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
@@ -80,6 +83,9 @@ void setupMockOnlineNT4() {
       .thenAnswer((_) => Stream.value(true));
 
   when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
+
+  when(mockNT4Connection.bandiwdthStream())
+      .thenAnswer((_) => Stream.value(0.0));
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
