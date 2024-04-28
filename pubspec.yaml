@@ -29,7 +29,6 @@ dependencies:
   logger: ^2.0.2+1
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
-  multiple_stream_builder: ^3.0.2
   package_info_plus: ^5.0.1
   path: ^1.8.3
   path_provider: ^2.0.15
