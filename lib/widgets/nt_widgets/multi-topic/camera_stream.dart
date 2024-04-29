@@ -14,34 +14,18 @@ class CameraStreamModel extends NTWidgetModel {
 
   String get streamsTopic => '$topic/streams';
 
-  Mjpeg? _streamWidget;
   MemoryImage? _lastDisplayedImage;
 
-  get streamWidget => _streamWidget;
-
-  set streamWidget(value) => _streamWidget = value;
+  MjpegStreamState? mjpegStream;
 
   get lastDisplayedImage => _lastDisplayedImage;
 
   set lastDisplayedImage(value) => _lastDisplayedImage = value;
 
-  bool _clientOpen = false;
-
-  get clientOpen => _clientOpen;
-
-  set clientOpen(value) => _clientOpen = value;
-
   CameraStreamModel({required super.topic, super.dataType, super.period})
       : super();
 
   CameraStreamModel.fromJson({required super.jsonData}) : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    _clientOpen = true;
-  }
 
   @override
   void resetSubscription() {
@@ -52,27 +36,20 @@ class CameraStreamModel extends NTWidgetModel {
 
   @override
   void disposeWidget({bool deleting = false}) {
-    Future(() async {
-      if (deleting) {
-        await _streamWidget?.dispose();
-      }
-      _clientOpen = false;
-
-      if (deleting) {
-        _lastDisplayedImage?.evict();
-        _streamWidget?.previousImage?.evict();
-      }
-    });
+    if (deleting) {
+      _lastDisplayedImage?.evict();
+      mjpegStream?.previousImage?.evict();
+      mjpegStream?.dispose();
+    }
 
     super.disposeWidget(deleting: deleting);
   }
 
   void closeClient() {
     _lastDisplayedImage?.evict();
-    _lastDisplayedImage = _streamWidget?.previousImage;
-    _streamWidget?.dispose();
-    _streamWidget = null;
-    _clientOpen = false;
+    _lastDisplayedImage = mjpegStream?.previousImage;
+    mjpegStream?.dispose();
+    mjpegStream = null;
   }
 
   @override
@@ -83,7 +60,6 @@ class CameraStreamModel extends NTWidgetModel {
 
     return [
       ...streams,
-      _clientOpen,
       ntConnection.isNT4Connected,
     ];
   }
@@ -101,13 +77,6 @@ class CameraStreamWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        if (!ntConnection.isNT4Connected && model._clientOpen) {
-          model.closeClient();
-        }
-
-        bool createNewWidget = model._streamWidget == null ||
-            (!model.clientOpen && ntConnection.isNT4Connected);
-
         List<Object?> rawStreams =
             tryCast(ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
                 [];
@@ -127,11 +96,12 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (model.lastDisplayedImage != null)
+              if (model.mjpegStream != null || model.lastDisplayedImage != null)
                 Opacity(
                   opacity: 0.35,
                   child: Image(
-                    image: model.lastDisplayedImage!,
+                    image: model.mjpegStream?.previousImage ??
+                        model.lastDisplayedImage!,
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -153,23 +123,26 @@ class CameraStreamWidget extends NTWidget {
           );
         }
 
+        bool createNewWidget = model.mjpegStream == null;
+
+        createNewWidget =
+            createNewWidget || (model.mjpegStream?.stream != streams.last);
+
         if (createNewWidget) {
-          model.clientOpen = true;
           model.lastDisplayedImage?.evict();
+          model.mjpegStream?.dispose();
 
           String stream = streams.last;
-
-          model.streamWidget = Mjpeg(
-            fit: BoxFit.contain,
-            isLive: true,
-            stream: stream,
-          );
+          model.mjpegStream = MjpegStreamState(stream: stream);
         }
 
         return Stack(
           fit: StackFit.expand,
           children: [
-            model.streamWidget!,
+            Mjpeg(
+              mjpegStream: model.mjpegStream!,
+              fit: BoxFit.contain,
+            ),
           ],
         );
       },

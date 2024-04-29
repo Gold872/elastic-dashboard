@@ -38,45 +38,24 @@ class MjpegPreprocessor {
 
 /// An Mjpeg.
 class Mjpeg extends HookWidget {
-  final String stream;
+  final streamKey = UniqueKey();
+  final MjpegStreamState mjpegStream;
   final BoxFit? fit;
   final double? width;
   final double? height;
-  final bool isLive;
-  final Duration timeout;
   final WidgetBuilder? loading;
-  final Client? httpClient;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
       error;
-  final Map<String, String> headers;
-  final MjpegPreprocessor? preprocessor;
-
-  MemoryImage? previousImage;
-
-  late _StreamManager _manager;
 
   Mjpeg({
-    this.httpClient,
-    this.isLive = false,
+    required this.mjpegStream,
     this.width,
-    this.timeout = const Duration(seconds: 5),
     this.height,
     this.fit,
-    required this.stream,
     this.error,
     this.loading,
-    this.headers = const {},
-    this.preprocessor,
     super.key,
   });
-
-  Future<void> cancelSubscription() async {
-    await _manager.cancelSubscription();
-  }
-
-  Future<void> dispose() async {
-    await _manager.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,31 +66,27 @@ class Mjpeg extends HookWidget {
     isMounted() => context.mounted;
 
     final manager = useMemoized(
-        () => _manager = _StreamManager(
-              stream,
-              isLive && visible.visible,
-              headers,
-              timeout,
-              httpClient ?? Client(),
-              preprocessor ?? MjpegPreprocessor(),
-              isMounted,
-              () => visible.visible,
+        () => _StreamManager(
+              mjpegStream: mjpegStream,
+              mounted: isMounted,
+              visible: () => visible.visible,
             ),
         [
-          stream,
-          isLive,
           visible.visible,
-          timeout,
-          httpClient,
-          preprocessor,
-          isMounted()
+          isMounted(),
         ]);
+
     final key = useMemoized(() => UniqueKey(), [manager]);
 
     useEffect(() {
       errorState.value = null;
-      manager.updateStream(image, errorState);
-      return manager.dispose;
+      manager.updateStream(streamKey, image, errorState);
+      return () {
+        if (visible.visible && isMounted()) {
+          return;
+        }
+        mjpegStream.cancelSubscription(streamKey);
+      };
     }, [manager]);
 
     if (errorState.value != null && kDebugMode) {
@@ -133,7 +108,7 @@ class Mjpeg extends HookWidget {
       );
     }
 
-    if ((image.value == null && previousImage == null) ||
+    if ((image.value == null && mjpegStream.previousImage == null) ||
         errorState.value != null) {
       return SizedBox(
           width: width,
@@ -143,15 +118,10 @@ class Mjpeg extends HookWidget {
               : loading!(context));
     }
 
-    if (image.value != null) {
-      previousImage?.evict();
-      previousImage = image.value!;
-    }
-
     return VisibilityDetector(
       key: key,
       child: Image(
-        image: image.value ?? previousImage!,
+        image: image.value ?? mjpegStream.previousImage!,
         width: width,
         height: height,
         gaplessPlayback: true,
@@ -166,136 +136,226 @@ class Mjpeg extends HookWidget {
   }
 }
 
-class _StreamManager {
+class MjpegStreamState {
   static const _trigger = 0xFF;
   static const _soi = 0xD8;
   static const _eoi = 0xD9;
 
   final String stream;
   final bool isLive;
-  final Duration _timeout;
+  final Duration timeout;
   final Map<String, String> headers;
-  final Client _httpClient;
-  final MjpegPreprocessor _preprocessor;
-  final bool Function() _mounted;
-  final bool Function() _visible;
-  StreamSubscription? _subscription;
+  Client httpClient = Client();
+  Stream<List<int>>? byteStream;
 
-  _StreamManager(this.stream, this.isLive, this.headers, this._timeout,
-      this._httpClient, this._preprocessor, this._mounted, this._visible);
+  final MjpegPreprocessor? preprocessor;
 
-  Future<void> cancelSubscription() async {
-    if (_subscription != null) {
-      await _subscription!.cancel();
-      _subscription = null;
+  MemoryImage? previousImage;
+
+  final Map<Key, StreamSubscription> _subscriptions = {};
+
+  StreamSubscription? _bitSubscription;
+  int bitCount = 0;
+  double bandwidth = 0.0;
+
+  late final Timer bandwidthTimer;
+
+  MjpegStreamState({
+    required this.stream,
+    this.isLive = true,
+    this.timeout = const Duration(seconds: 5),
+    this.headers = const {},
+    this.preprocessor,
+  }) {
+    bandwidthTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      bandwidth = bitCount / 1e6;
+
+      bitCount = 0;
+    });
+  }
+
+  void dispose() {
+    for (StreamSubscription subscription in _subscriptions.values) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
+    _bitSubscription?.cancel();
+    _bitSubscription = null;
+    byteStream = null;
+    httpClient.close();
+    httpClient = Client();
+    bitCount = 0;
+  }
+
+  void cancelSubscription(Key key) {
+    if (_subscriptions.containsKey(key)) {
+      _subscriptions.remove(key)!.cancel();
+
+      if (_subscriptions.isEmpty) {
+        dispose();
+      }
     }
   }
 
-  Future<void> dispose() async {
-    try {
-      _httpClient.close();
-    } finally {
-      await _subscription?.cancel();
-      _subscription = null;
-    }
-  }
-
-  void _sendImage(ValueNotifier<MemoryImage?> image,
-      ValueNotifier<dynamic> errorState, List<int> chunks) async {
+  void sendImage(
+    ValueNotifier<MemoryImage?> image,
+    ValueNotifier<dynamic> errorState,
+    List<int> chunks, {
+    required bool Function() mounted,
+  }) async {
     // pass image through preprocessor sending to [Image] for rendering
-    final List<int>? imageData = _preprocessor.process(chunks);
+    final List<int>? imageData;
+
+    if (preprocessor != null) {
+      imageData = preprocessor?.process(chunks);
+    } else {
+      imageData = chunks;
+    }
+
     if (imageData == null) return;
 
     final imageMemory = MemoryImage(Uint8List.fromList(imageData));
-    if (_mounted()) {
+    previousImage?.evict();
+    previousImage = imageMemory;
+    if (mounted()) {
       errorState.value = null;
       image.value = imageMemory;
     }
   }
 
-  void updateStream(ValueNotifier<MemoryImage?> image,
-      ValueNotifier<List<dynamic>?> errorState) async {
-    if (!_visible() || !_mounted()) {
-      await dispose();
+  void _onDataReceived({
+    required List<int> carry,
+    required List<int> chunk,
+    required ValueNotifier<MemoryImage?> image,
+    required ValueNotifier<List<dynamic>?> errorState,
+    required bool Function() mounted,
+  }) async {
+    if (carry.isNotEmpty && carry.last == _trigger) {
+      if (chunk.first == _eoi) {
+        carry.add(chunk.first);
+        sendImage(image, errorState, carry, mounted: mounted);
+        carry = [];
+        if (!isLive) {
+          dispose();
+        }
+      }
+    }
+
+    for (var i = 0; i < chunk.length - 1; i++) {
+      final d = chunk[i];
+      final d1 = chunk[i + 1];
+
+      if (d == _trigger && d1 == _soi) {
+        carry = [];
+        carry.add(d);
+      } else if (d == _trigger && d1 == _eoi && carry.isNotEmpty) {
+        carry.add(d);
+        carry.add(d1);
+
+        sendImage(image, errorState, carry, mounted: mounted);
+        carry = [];
+        if (!isLive) {
+          dispose();
+        }
+      } else if (carry.isNotEmpty) {
+        carry.add(d);
+        if (i == chunk.length - 2) {
+          carry.add(d1);
+        }
+      }
+    }
+  }
+
+  void updateStream(
+    Key key,
+    ValueNotifier<MemoryImage?> image,
+    ValueNotifier<List<dynamic>?> errorState, {
+    required bool Function() visible,
+    required bool Function() mounted,
+  }) async {
+    if (byteStream == null && visible() && mounted()) {
+      try {
+        final request = Request('GET', Uri.parse(stream));
+        request.headers.addAll(headers);
+        final response = await httpClient.send(request).timeout(
+            timeout); //timeout is to prevent process to hang forever in some case
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          byteStream = response.stream.asBroadcastStream();
+
+          _bitSubscription = byteStream!.listen((data) {
+            bitCount += data.length * Uint8List.bytesPerElement * 8;
+          });
+        } else {
+          if (mounted()) {
+            errorState.value = [
+              HttpException('Stream returned ${response.statusCode} status'),
+              StackTrace.current
+            ];
+            image.value = null;
+          }
+          dispose();
+        }
+      } catch (error, stack) {
+        // we ignore those errors in case play/pause is triggers
+        if (!error
+            .toString()
+            .contains('Connection closed before full header was received')) {
+          if (mounted()) {
+            errorState.value = [error, stack];
+            image.value = null;
+          }
+        }
+      }
+    }
+
+    if (byteStream == null) {
       return;
     }
-    try {
-      final request = Request('GET', Uri.parse(stream));
-      request.headers.addAll(headers);
-      final response = await _httpClient.send(request).timeout(
-          _timeout); //timeout is to prevent process to hang forever in some case
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        var carry = <int>[];
-        _subscription = response.stream.listen((chunk) async {
-          if (!_visible() || !_mounted()) {
-            carry = [];
-            return;
-          }
-          if (carry.isNotEmpty && carry.last == _trigger) {
-            if (chunk.first == _eoi) {
-              carry.add(chunk.first);
-              _sendImage(image, errorState, carry);
-              carry = [];
-              if (!isLive) {
-                await dispose();
+    var carry = <int>[];
+    _subscriptions.putIfAbsent(
+        key,
+        () => byteStream!.listen((chunk) {
+              if (!visible() || !mounted()) {
+                carry.clear();
+                return;
               }
-            }
-          }
-
-          for (var i = 0; i < chunk.length - 1; i++) {
-            final d = chunk[i];
-            final d1 = chunk[i + 1];
-
-            if (d == _trigger && d1 == _soi) {
-              carry = [];
-              carry.add(d);
-            } else if (d == _trigger && d1 == _eoi && carry.isNotEmpty) {
-              carry.add(d);
-              carry.add(d1);
-
-              _sendImage(image, errorState, carry);
-              carry = [];
-              if (!isLive) {
-                await dispose();
+              _onDataReceived(
+                carry: carry,
+                chunk: chunk,
+                image: image,
+                errorState: errorState,
+                mounted: mounted,
+              );
+            }, onError: (error, stack) {
+              try {
+                if (mounted()) {
+                  errorState.value = [error, stack];
+                  image.value = null;
+                }
+              } finally {
+                dispose();
               }
-            } else if (carry.isNotEmpty) {
-              carry.add(d);
-              if (i == chunk.length - 2) {
-                carry.add(d1);
-              }
-            }
-          }
-        }, onError: (error, stack) {
-          try {
-            if (_mounted()) {
-              errorState.value = [error, stack];
-              image.value = null;
-            }
-          } finally {
-            dispose();
-          }
-        }, cancelOnError: true);
-      } else {
-        if (_mounted()) {
-          errorState.value = [
-            HttpException('Stream returned ${response.statusCode} status'),
-            StackTrace.current
-          ];
-          image.value = null;
-        }
-        dispose();
-      }
-    } catch (error, stack) {
-      // we ignore those errors in case play/pause is triggers
-      if (!error
-          .toString()
-          .contains('Connection closed before full header was received')) {
-        if (_mounted()) {
-          errorState.value = [error, stack];
-          image.value = null;
-        }
-      }
-    }
+            }, cancelOnError: true));
+  }
+}
+
+class _StreamManager {
+  final MjpegStreamState mjpegStream;
+
+  final bool Function() mounted;
+  final bool Function() visible;
+
+  _StreamManager({
+    required this.mjpegStream,
+    required this.mounted,
+    required this.visible,
+  });
+
+  void updateStream(Key key, ValueNotifier<MemoryImage?> image,
+      ValueNotifier<List<dynamic>?> errorState) async {
+    mjpegStream.updateStream(key, image, errorState,
+        visible: visible, mounted: mounted);
   }
 }
