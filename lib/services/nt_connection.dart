@@ -125,7 +125,7 @@ class NTConnection {
     return _ntClient.announcedTopics;
   }
 
-  Stream<int> latencyStream() {
+  Stream<double> latencyStream() {
     return _ntClient.latencyStream();
   }
 

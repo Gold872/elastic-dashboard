@@ -1590,10 +1590,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       child: StreamBuilder(
                           stream: widget.ntConnection.latencyStream(),
                           builder: (context, snapshot) {
-                            int latency = snapshot.data ?? 0;
+                            double latency = snapshot.data ?? 0.0;
 
                             return Text(
-                              'Latency: ${latency.toString().padLeft(5)} ms',
+                              'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
                               textAlign: TextAlign.right,
                             );
                           }),
