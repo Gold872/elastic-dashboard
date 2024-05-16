@@ -269,8 +269,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     if (successful) {
       logger.info('Layout saved successfully!');
       ElegantNotification notification = ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
         enableShadow: false,
         width: 150,
@@ -289,8 +289,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     } else {
       logger.error('Could not save layout');
       ElegantNotification notification = ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
         enableShadow: false,
         width: 150,
@@ -335,8 +335,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     if (updateResponse.error && notifyIfError) {
       ElegantNotification notification = ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
         enableShadow: false,
         width: 350,
@@ -365,7 +365,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ElegantNotification notification = ElegantNotification(
         autoDismiss: false,
         showProgressIndicator: false,
-        background: colorScheme.background,
+        background: colorScheme.surface,
         enableShadow: false,
         width: 150,
         height: 100,
@@ -399,8 +399,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       }
     } else if (updateResponse.onLatestVersion && notifyIfLatest) {
       ElegantNotification notification = ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
         enableShadow: false,
         width: 150,
@@ -611,8 +611,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       int lines = '\n'.allMatches(errorMessage).length + 1;
 
       ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
         enableShadow: false,
         width: 350,
@@ -638,8 +638,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       int lines = '\n'.allMatches(warningMessage).length + 1;
 
       ElegantNotification(
-        background: colorScheme.background,
-        progressIndicatorBackground: colorScheme.background,
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: Colors.yellow,
         enableShadow: false,
         width: 350,
@@ -1261,17 +1261,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
-      textStyle: MaterialStateProperty.all(menuTextStyle),
+      textStyle: WidgetStateProperty.all(menuTextStyle),
       backgroundColor:
-          const MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
-      iconSize: const MaterialStatePropertyAll(20.0),
+          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      iconSize: const WidgetStatePropertyAll(20.0),
     );
 
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
         backgroundColor:
-            MaterialStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
-        elevation: MaterialStatePropertyAll(0),
+            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        elevation: WidgetStatePropertyAll(0),
       ),
       children: [
         Center(
@@ -1421,9 +1421,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             child: MenuItemButton(
               style: menuButtonStyle.copyWith(
                 minimumSize:
-                    const MaterialStatePropertyAll(Size(36.0, double.infinity)),
+                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
                 maximumSize:
-                    const MaterialStatePropertyAll(Size(36.0, double.infinity)),
+                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
               ),
               onPressed: () {
                 setState(() {
@@ -1691,7 +1691,7 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                               transitionDuration:
                                   const Duration(milliseconds: 100),
                               backgroundColor:
-                                  Theme.of(context).colorScheme.background,
+                                  Theme.of(context).colorScheme.surface,
                               barrierColor: Colors.transparent,
                               width: 200.0,
                               bodyBuilder: (context) {
