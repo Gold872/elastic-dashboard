@@ -25,9 +25,11 @@ class FieldImages {
   }
 
   static Future loadFields(String directory) async {
-    List<String> filePaths = jsonDecode(
-            await rootBundle.loadString('AssetManifest.json'))
-        .keys
+    AssetManifest assetManifest =
+        await AssetManifest.loadFromAssetBundle(rootBundle);
+
+    List<String> filePaths = assetManifest
+        .listAssets()
         .where((String key) => key.contains(directory) && key.contains('.json'))
         .toList();
 
