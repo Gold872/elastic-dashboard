@@ -1,6 +1,8 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -14,24 +16,202 @@ class CameraStreamModel extends NTWidgetModel {
 
   String get streamsTopic => '$topic/streams';
 
+  int? _quality;
+  int? _fps;
+  Size? _resolution;
+
   MemoryImage? _lastDisplayedImage;
 
   MjpegStreamState? mjpegStream;
 
-  get lastDisplayedImage => _lastDisplayedImage;
+  MemoryImage? get lastDisplayedImage => _lastDisplayedImage;
 
   set lastDisplayedImage(value) => _lastDisplayedImage = value;
 
-  CameraStreamModel({required super.topic, super.dataType, super.period})
-      : super();
+  int? get quality => _quality;
 
-  CameraStreamModel.fromJson({required super.jsonData}) : super.fromJson();
+  set quality(value) => _quality = value;
+
+  int? get fps => _fps;
+
+  set fps(value) => _fps = value;
+
+  Size? get resolution => _resolution;
+
+  set resolution(value) => _resolution = value;
+
+  String getUrlWithParameters(String urlString) {
+    Uri url = Uri.parse(urlString);
+
+    Map<String, String> parameters =
+        Map<String, String>.from(url.queryParameters);
+
+    parameters.addAll({
+      if (resolution != null &&
+          resolution!.width != 0.0 &&
+          resolution!.height != 0.0)
+        'resolution':
+            '${resolution!.width.floor()}x${resolution!.height.floor()}',
+      if (fps != null) 'fps': '$fps',
+      if (quality != null) 'compression': '$quality',
+    });
+
+    return url.replace(queryParameters: parameters).toString();
+  }
+
+  CameraStreamModel({
+    required super.topic,
+    int? compression,
+    int? fps,
+    Size? resolution,
+    super.dataType,
+    super.period,
+  })  : _quality = compression,
+        _fps = fps,
+        _resolution = resolution,
+        super();
+
+  CameraStreamModel.fromJson({required Map<String, dynamic> jsonData})
+      : super.fromJson(jsonData: jsonData) {
+    _quality = tryCast(jsonData['compression']);
+    _fps = tryCast(jsonData['fps']);
+
+    List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
+        ?.whereType<num>()
+        .toList();
+
+    if (resolution != null && resolution.length > 1) {
+      _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+    }
+  }
 
   @override
   void resetSubscription() {
     closeClient();
 
     super.resetSubscription();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      if (quality != null) 'compression': quality,
+      if (fps != null) 'fps': fps,
+      if (resolution != null)
+        'resolution': [
+          resolution!.width,
+          resolution!.height,
+        ],
+    };
+  }
+
+  @override
+  List<Widget> getEditProperties(BuildContext context) {
+    return [
+      StatefulBuilder(builder: (context, setState) {
+        return Row(
+          children: [
+            Flexible(
+              child: DialogTextInput(
+                allowEmptySubmission: true,
+                initialText: fps?.toString() ?? '-1',
+                label: 'FPS',
+                formatter: FilteringTextInputFormatter.digitsOnly,
+                onSubmit: (value) {
+                  int? newFPS = int.tryParse(value);
+
+                  setState(() {
+                    if (newFPS == -1 || newFPS == 0) {
+                      fps = null;
+                      return;
+                    }
+
+                    fps = newFPS;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 10.0),
+            const Text('Resolution'),
+            Flexible(
+              child: DialogTextInput(
+                allowEmptySubmission: true,
+                initialText: resolution?.width.floor().toString() ?? '-1',
+                label: 'Width',
+                formatter: FilteringTextInputFormatter.digitsOnly,
+                onSubmit: (value) {
+                  int? newWidth = int.tryParse(value);
+
+                  setState(() {
+                    if (newWidth == null || newWidth == 0) {
+                      resolution = null;
+                      return;
+                    }
+
+                    resolution = Size(newWidth.toDouble(),
+                        resolution?.height.toDouble() ?? 0);
+                  });
+                },
+              ),
+            ),
+            const Text('x'),
+            Flexible(
+              child: DialogTextInput(
+                allowEmptySubmission: true,
+                initialText: resolution?.height.floor().toString() ?? '-1',
+                label: 'Height',
+                formatter: FilteringTextInputFormatter.digitsOnly,
+                onSubmit: (value) {
+                  int? newHeight = int.tryParse(value);
+
+                  setState(() {
+                    if (newHeight == null || newHeight == 0) {
+                      resolution = null;
+                      return;
+                    }
+
+                    resolution = Size(resolution?.width.toDouble() ?? 0,
+                        newHeight.toDouble());
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      }),
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Row(
+            children: [
+              const Text('Quality:'),
+              Expanded(
+                child: Slider(
+                  value: quality?.toDouble() ?? -5.0,
+                  min: -5.0,
+                  max: 100.0,
+                  divisions: 104,
+                  label: '${quality ?? -1}',
+                  onChanged: (value) {
+                    setState(() {
+                      if (value < 0) {
+                        quality = null;
+                      } else {
+                        quality = value.floor();
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      TextButton(
+        onPressed: () => refresh(),
+        child: const Text('Apply Quality Settings'),
+      ),
+    ];
   }
 
   @override
@@ -125,14 +305,15 @@ class CameraStreamWidget extends NTWidget {
 
         bool createNewWidget = model.mjpegStream == null;
 
+        String stream = model.getUrlWithParameters(streams.last);
+
         createNewWidget =
-            createNewWidget || (model.mjpegStream?.stream != streams.last);
+            createNewWidget || (model.mjpegStream?.stream != stream);
 
         if (createNewWidget) {
           model.lastDisplayedImage?.evict();
           model.mjpegStream?.dispose();
 
-          String stream = streams.last;
           model.mjpegStream = MjpegStreamState(stream: stream);
         }
 
