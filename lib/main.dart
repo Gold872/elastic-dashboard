@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -193,8 +194,11 @@ class _ElasticState extends State<Elastic> {
   Widget build(BuildContext context) {
     ThemeData theme = ThemeData(
       useMaterial3: true,
-      colorSchemeSeed: teamColor,
-      brightness: Brightness.dark,
+      colorScheme: SeedColorScheme.fromSeeds(
+        primaryKey: teamColor,
+        brightness: Brightness.dark,
+        variant: FlexSchemeVariant.material3Legacy,
+      ),
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,

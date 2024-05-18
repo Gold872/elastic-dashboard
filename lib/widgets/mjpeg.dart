@@ -74,6 +74,7 @@ class Mjpeg extends HookWidget {
         [
           visible.visible,
           isMounted(),
+          mjpegStream,
         ]);
 
     final key = useMemoized(() => UniqueKey(), [manager]);
