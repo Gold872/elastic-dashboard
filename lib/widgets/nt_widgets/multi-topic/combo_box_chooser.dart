@@ -19,7 +19,14 @@ class ComboBoxChooserModel extends NTWidgetModel {
 
   final TextEditingController _searchController = TextEditingController();
 
-  String? selectedChoice;
+  String? _selectedChoice;
+
+  String? get selectedChoice => _selectedChoice;
+
+  set selectedChoice(value) {
+    _selectedChoice = value;
+    refresh();
+  }
 
   StringChooserData? previousData;
 

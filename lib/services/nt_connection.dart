@@ -180,4 +180,9 @@ class NTConnection {
   void updateDataFromTopic(NT4Topic topic, dynamic data) {
     _ntClient.addSample(topic, data);
   }
+
+  @visibleForTesting
+  void updateDataFromTopicName(String topic, dynamic data) {
+    _ntClient.addSampleFromName(topic, data);
+  }
 }

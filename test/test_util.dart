@@ -40,30 +40,42 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
-  when(mockNT4Connection.getTopicFromName(any))
-      .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
+  when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
   return mockNT4Connection;
 }
 
-MockNTConnection createMockOnlineNT4() {
+MockNTConnection createMockOnlineNT4({
+  List<NT4Topic>? virtualTopics,
+  Map<String, dynamic>? virtualValues,
+}) {
   HttpOverrides.global = null;
 
   final mockNT4Connection = MockNTConnection();
   final mockSubscription = MockNT4Subscription();
 
-  when(mockNT4Connection.announcedTopics()).thenReturn({
-    1: NT4Topic(
+  virtualTopics ??= [
+    NT4Topic(
       name: '/SmartDashboard/Test Value 1',
       type: NT4TypeStr.kInt,
       properties: {},
     ),
-    2: NT4Topic(
+    NT4Topic(
       name: '/SmartDashboard/Test Value 2',
       type: NT4TypeStr.kFloat32,
       properties: {},
     ),
-  });
+  ];
+
+  virtualValues ??= {};
+
+  Map<int, NT4Topic> virtualTopicsMap = {};
+
+  for (int i = 0; i < virtualTopics.length; i++) {
+    virtualTopicsMap.addAll({i + 1: virtualTopics[i]});
+  }
+
+  when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
@@ -83,8 +95,48 @@ MockNTConnection createMockOnlineNT4() {
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
-  when(mockNT4Connection.getTopicFromName(any))
-      .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
+  when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
+
+  when(mockNT4Connection.publishNewTopic(any, any)).thenAnswer((invocation) {
+    NT4Topic newTopic = NT4Topic(
+        name: invocation.positionalArguments[0],
+        type: invocation.positionalArguments[1],
+        properties: {});
+
+    virtualTopicsMap[virtualTopicsMap.length] = newTopic;
+    return newTopic;
+  });
+
+  when(mockNT4Connection.updateDataFromTopic(any, any))
+      .thenAnswer((invocation) {
+    NT4Topic topic = invocation.positionalArguments[0];
+    Object? data = invocation.positionalArguments[1];
+
+    virtualValues![topic.name] = data;
+  });
+
+  when(mockNT4Connection.updateDataFromTopicName(any, any))
+      .thenAnswer((invocation) {
+    String topic = invocation.positionalArguments[0];
+    Object? data = invocation.positionalArguments[1];
+
+    virtualValues![topic] = data;
+  });
+
+  for (NT4Topic topic in virtualTopics) {
+    MockNT4Subscription topicSubscription = MockNT4Subscription();
+
+    when(mockNT4Connection.getTopicFromName(topic.name)).thenReturn(topic);
+
+    when(topicSubscription.periodicStream())
+        .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
+
+    when(mockNT4Connection.getLastAnnouncedValue(topic.name))
+        .thenAnswer((_) => virtualValues?[topic.name]);
+
+    when(mockNT4Connection.subscribe(topic.name, any))
+        .thenReturn(topicSubscription);
+  }
 
   return mockNT4Connection;
 }

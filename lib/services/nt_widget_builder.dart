@@ -147,6 +147,7 @@ class NTWidgetBuilder {
       SwerveDriveWidget.widgetType: BasicSwerveModel.fromJson,
       CameraStreamWidget.widgetType: CameraStreamModel.fromJson,
       ComboBoxChooser.widgetType: ComboBoxChooserModel.fromJson,
+      'String Chooser': ComboBoxChooserModel.fromJson,
       CommandSchedulerWidget.widgetType: CommandSchedulerModel.fromJson,
       CommandWidget.widgetType: CommandModel.fromJson,
       DifferentialDrive.widgetType: DifferentialDriveModel.fromJson,
