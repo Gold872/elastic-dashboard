@@ -3,6 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
+typedef SubscriptionIdentification = ({
+  String topic,
+  NT4SubscriptionOptions options
+});
+
 class NTConnection {
   late NT4Client _ntClient;
   late DSInteropClient _dsClient;
@@ -17,6 +22,15 @@ class NTConnection {
 
   bool get isDSConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
+
+  @visibleForTesting
+  List<NT4Subscription> get subscriptions => subscriptionUseCount.keys.toList();
+
+  @visibleForTesting
+  String get serverBaseAddress => _ntClient.serverBaseAddress;
+
+  Map<int, NT4Subscription> subscriptionMap = {};
+  Map<NT4Subscription, int> subscriptionUseCount = {};
 
   NTConnection(String ipAddress) {
     nt4Connect(ipAddress);
@@ -41,7 +55,10 @@ class NTConnection {
         });
 
     // Allows all published topics to be announced
-    _ntClient.subscribeTopicsOnly('/');
+    _ntClient.subscribe(
+      topic: '/',
+      options: const NT4SubscriptionOptions(topicsOnly: true),
+    );
   }
 
   void dsClientConnect(
@@ -138,11 +155,42 @@ class NTConnection {
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
-    return _ntClient.subscribe(topic, period);
+    NT4SubscriptionOptions subscriptionOptions =
+        NT4SubscriptionOptions(periodicRateSeconds: period);
+
+    int hashCode = Object.hash(topic, subscriptionOptions);
+
+    if (subscriptionMap.containsKey(hashCode)) {
+      NT4Subscription existingSubscription = subscriptionMap[hashCode]!;
+      subscriptionUseCount.update(existingSubscription, (value) => value + 1);
+
+      return existingSubscription;
+    }
+
+    NT4Subscription newSubscription =
+        _ntClient.subscribe(topic: topic, options: subscriptionOptions);
+
+    subscriptionMap[hashCode] = newSubscription;
+    subscriptionUseCount[newSubscription] = 1;
+
+    return newSubscription;
   }
 
   void unSubscribe(NT4Subscription subscription) {
-    _ntClient.unSubscribe(subscription);
+    if (!subscriptionUseCount.containsKey(subscription)) {
+      _ntClient.unSubscribe(subscription);
+      return;
+    }
+
+    int hashCode = Object.hash(subscription.topic, subscription.options);
+
+    subscriptionUseCount.update(subscription, (value) => value - 1);
+
+    if (subscriptionUseCount[subscription]! <= 0) {
+      subscriptionMap.remove(hashCode);
+      subscriptionUseCount.remove(subscription);
+      _ntClient.unSubscribe(subscription);
+    }
   }
 
   NT4Topic? getTopicFromSubscription(NT4Subscription subscription) {
