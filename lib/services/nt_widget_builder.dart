@@ -74,6 +74,8 @@ class NTWidgetBuilder {
 
   static const double _normalSize = 128.0;
 
+  NTWidgetBuilder._();
+
   static bool _initialized = false;
   static void ensureInitialized() {
     if (_initialized) {
