@@ -310,18 +310,14 @@ class NT4Client {
 
   void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
     _topicAnnounceListeners.add(onAnnounce);
+
+    for (NT4Topic topic in announcedTopics.values) {
+      onAnnounce(topic);
+    }
   }
 
   void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
     _topicAnnounceListeners.remove(onAnnounce);
-  }
-
-  void recallAnnounceListeners() {
-    for (NT4Topic topic in announcedTopics.values) {
-      for (var callback in _topicAnnounceListeners) {
-        callback.call(topic);
-      }
-    }
   }
 
   NT4Subscription subscribe({

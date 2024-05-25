@@ -216,7 +216,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future.delayed(const Duration(seconds: 1), () {
       apiListener.initializeSubscriptions();
       apiListener.initializeListeners();
-      widget.ntConnection.recallTopicAnnounceListeners();
     });
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
