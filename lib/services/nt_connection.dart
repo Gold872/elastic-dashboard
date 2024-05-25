@@ -88,10 +88,6 @@ class NTConnection {
     _ntClient.removeTopicAnnounceListener(onUnannounce);
   }
 
-  void recallTopicAnnounceListeners() {
-    _ntClient.recallAnnounceListeners();
-  }
-
   Future<T?>? subscribeAndRetrieveData<T>(String topic,
       {period = 0.1,
       timeout = const Duration(seconds: 2, milliseconds: 500)}) async {
