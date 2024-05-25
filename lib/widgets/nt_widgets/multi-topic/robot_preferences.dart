@@ -196,12 +196,15 @@ class PreferenceSearch extends StatelessWidget {
       spaceBetweenSearchAndList: 15,
       filter: (query) {
         return preferenceTopicNames
-            .where((element) =>
-                element.toLowerCase().contains(query.toLowerCase()))
+            .where((element) => element
+                .split('/')
+                .last
+                .toLowerCase()
+                .contains(query.toLowerCase()))
             .toList();
       },
       initialList: preferenceTopicNames,
-      builder: (displayedList, itemIndex, item) {
+      itemBuilder: (item) {
         TextEditingController? textController = preferenceTextControllers[item];
 
         return _RobotPreference(
