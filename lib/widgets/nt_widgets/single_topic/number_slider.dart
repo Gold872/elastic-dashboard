@@ -85,7 +85,9 @@ class NumberSliderModel extends NTWidgetModel {
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    _updateContinuously = tryCast(jsonData['update_continuously']) ?? false;
+    _updateContinuously = tryCast(jsonData['update_continuously']) ??
+        tryCast(jsonData['publish_all']) ??
+        false;
   }
 
   @override
@@ -95,7 +97,7 @@ class NumberSliderModel extends NTWidgetModel {
       'min_value': _minValue,
       'max_value': _maxValue,
       'divisions': _divisions,
-      'publish_all': _updateContinuously,
+      'update_continuously': _updateContinuously,
     };
   }
 

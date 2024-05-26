@@ -362,7 +362,7 @@
               "min_value": -1.0,
               "max_value": 1.0,
               "divisions": 5,
-              "publish_all": false
+              "update_continuously": false
             }
           },
           {
