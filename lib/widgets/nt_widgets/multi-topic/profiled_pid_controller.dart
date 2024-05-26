@@ -323,7 +323,7 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       model.publishGoal();
                     },
                     style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),
