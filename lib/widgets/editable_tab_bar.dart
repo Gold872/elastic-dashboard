@@ -97,11 +97,11 @@ class EditableTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     ButtonStyle endButtonStyle = const ButtonStyle(
-      shape: MaterialStatePropertyAll(RoundedRectangleBorder()),
-      maximumSize: MaterialStatePropertyAll(Size.square(34.0)),
-      minimumSize: MaterialStatePropertyAll(Size.zero),
-      padding: MaterialStatePropertyAll(EdgeInsets.all(4.0)),
-      iconSize: MaterialStatePropertyAll(24.0),
+      shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+      maximumSize: WidgetStatePropertyAll(Size.square(34.0)),
+      minimumSize: WidgetStatePropertyAll(Size.zero),
+      padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+      iconSize: WidgetStatePropertyAll(24.0),
     );
 
     return Column(
