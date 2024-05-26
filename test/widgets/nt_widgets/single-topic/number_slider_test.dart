@@ -96,7 +96,7 @@ void main() {
 
   testWidgets('Number slider widget test continuous update',
       (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    // FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
@@ -128,16 +128,19 @@ void main() {
       const Duration(seconds: 1),
     );
 
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      () {
-        expect((numberSliderModel as NumberSliderModel).dragging, isTrue);
-        expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
-            isNot(-1.0));
-      },
-    );
+    // Stupid workaround since expect can't be used during a drag
+    bool? draggingDuringDrag;
+    Object? valueDuringDrag;
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      draggingDuringDrag = (numberSliderModel as NumberSliderModel).dragging;
+      valueDuringDrag = ntConnection.getLastAnnouncedValue('Test/Double Value');
+    });
 
     await pointerDrag;
+
+    expect(draggingDuringDrag, isTrue);
+    expect(valueDuringDrag, isNot(-1.0));
 
     expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
         greaterThan(0.0));
@@ -182,15 +185,19 @@ void main() {
       const Duration(seconds: 1),
     );
 
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      () {
-        expect((numberSliderModel).dragging, isTrue);
-        expect(ntConnection.getLastAnnouncedValue('Test/Double Value'), -1.0);
-      },
-    );
+    // Stupid workaround since expect can't be used during a drag
+    bool? draggingDuringDrag;
+    Object? valueDuringDrag;
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      draggingDuringDrag = numberSliderModel.dragging;
+      valueDuringDrag = ntConnection.getLastAnnouncedValue('Test/Double Value');
+    });
 
     await pointerDrag;
+
+    expect(draggingDuringDrag, isTrue);
+    expect(valueDuringDrag, -1.0);
 
     expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
         greaterThan(0.0));
