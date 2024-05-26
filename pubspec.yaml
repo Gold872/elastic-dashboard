@@ -18,10 +18,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_box_transform: ^0.4.2
-  flutter_colorpicker:
-    git:
-      url: https://github.com/mchome/flutter_colorpicker
-      ref: 92bdb69a313a56c391ef148c12ef6539bd31253d
+  flutter_colorpicker: ^1.1.0
   flutter_context_menu: ^0.1.3
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
