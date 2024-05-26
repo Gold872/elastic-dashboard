@@ -63,7 +63,7 @@ class TextDisplayModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'show_submit_button': _showSubmitButton,
+      'show_submit_button': showSubmitButton,
     };
   }
 

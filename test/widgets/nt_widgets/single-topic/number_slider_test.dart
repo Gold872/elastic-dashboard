@@ -96,7 +96,7 @@ void main() {
 
   testWidgets('Number slider widget test continuous update',
       (widgetTester) async {
-    // FlutterError.onError = ignoreOverflowErrors;
+    FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
