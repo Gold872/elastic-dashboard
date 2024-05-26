@@ -55,7 +55,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences preferences = widget.preferences;
   late final UpdateChecker _updateChecker;
 
-  final List<TabGrid> _grids = [];
+  final List<TabGridModel> _grids = [];
 
   final List<TabData> _tabData = [];
 
@@ -111,7 +111,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     widget.ntConnection.addConnectedListener(() {
       setState(() {
-        for (TabGrid grid in _grids) {
+        for (TabGridModel grid in _grids) {
           grid.onNTConnect();
         }
       });
@@ -119,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     widget.ntConnection.addDisconnectedListener(() {
       setState(() {
-        for (TabGrid grid in _grids) {
+        for (TabGridModel grid in _grids) {
           grid.onNTDisconnect();
         }
       });
@@ -166,8 +166,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         _tabData.add(TabData(name: tab));
         _grids.add(
-          TabGrid(
-            key: GlobalKey(),
+          TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
@@ -191,8 +190,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         if (!tabNamesList.contains(tabName)) {
           _tabData.add(TabData(name: tabName));
-          _grids.add(TabGrid(
-            key: GlobalKey(),
+          _grids.add(TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
@@ -253,7 +251,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     for (int i = 0; i < _tabData.length; i++) {
       TabData data = _tabData[i];
-      TabGrid grid = _grids[i];
+      TabGridModel grid = _grids[i];
 
       gridData.add({
         'name': data.name,
@@ -574,8 +572,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _tabData.add(TabData(name: data['name']));
 
       _grids.add(
-        TabGrid.fromJson(
-          key: GlobalKey(),
+        TabGridModel.fromJson(
           ntConnection: widget.ntConnection,
           preferences: widget.preferences,
           jsonData: data['grid_layout'],
@@ -602,14 +599,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ]);
 
         _grids.addAll([
-          TabGrid(
-            key: GlobalKey(),
+          TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
-          TabGrid(
-            key: GlobalKey(),
+          TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
@@ -760,8 +755,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
         _tabData.add(TabData(name: newTabName));
         _grids.add(
-          TabGrid(
-            key: GlobalKey(),
+          TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
@@ -807,14 +801,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _lockLayout() async {
-    for (TabGrid grid in _grids) {
+    for (TabGridModel grid in _grids) {
       grid.lockLayout();
     }
     await preferences.setBool(PrefKeys.layoutLocked, true);
   }
 
   void _unlockLayout() async {
-    for (TabGrid grid in _grids) {
+    for (TabGridModel grid in _grids) {
       grid.unlockLayout();
     }
     await preferences.setBool(PrefKeys.layoutLocked, false);
@@ -1026,7 +1020,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await preferences.setInt(PrefKeys.gridSize, newGridSize);
 
-          for (TabGrid grid in _grids) {
+          for (TabGridModel grid in _grids) {
             grid.resizeGrid(_gridSize, _gridSize);
           }
         },
@@ -1045,7 +1039,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           await preferences.setDouble(PrefKeys.cornerRadius, newRadius);
 
           setState(() {
-            for (TabGrid grid in _grids) {
+            for (TabGridModel grid in _grids) {
               grid.refreshAllContainers();
             }
           });
@@ -1235,7 +1229,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _tabData[_currentTabIndex] = tempData;
 
       // Swap the tab grids
-      TabGrid tempGrid = _grids[_currentTabIndex - 1];
+      TabGridModel tempGrid = _grids[_currentTabIndex - 1];
       _grids[_currentTabIndex - 1] = _grids[_currentTabIndex];
       _grids[_currentTabIndex] = tempGrid;
 
@@ -1262,7 +1256,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _tabData[_currentTabIndex] = tempData;
 
       // Swap the tab grids
-      TabGrid tempGrid = _grids[_currentTabIndex + 1];
+      TabGridModel tempGrid = _grids[_currentTabIndex + 1];
       _grids[_currentTabIndex + 1] = _grids[_currentTabIndex];
       _grids[_currentTabIndex] = tempGrid;
 
@@ -1492,8 +1486,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     onTabCreate: (tab) {
                       setState(() {
                         _tabData.add(tab);
-                        _grids.add(TabGrid(
-                          key: GlobalKey(),
+                        _grids.add(TabGridModel(
                           ntConnection: widget.ntConnection,
                           preferences: widget.preferences,
                           onAddWidgetPressed: _displayAddWidgetDialog,
@@ -1611,7 +1604,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 class _AddWidgetDialog extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final TabGrid Function() _grid;
+  final TabGridModel Function() _grid;
   final bool _visible;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)
@@ -1627,7 +1620,7 @@ class _AddWidgetDialog extends StatefulWidget {
   const _AddWidgetDialog({
     required this.ntConnection,
     required this.preferences,
-    required TabGrid Function() grid,
+    required TabGridModel Function() grid,
     required bool visible,
     required dynamic Function(Offset, WidgetContainerModel) onNTDragUpdate,
     required dynamic Function(WidgetContainerModel) onNTDragEnd,

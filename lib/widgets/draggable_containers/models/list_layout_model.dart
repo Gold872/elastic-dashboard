@@ -27,7 +27,7 @@ class ListLayoutModel extends LayoutContainerModel {
   String labelPosition = 'TOP';
 
   final NTConnection ntConnection;
-  final TabGrid tabGrid;
+  final TabGridModel tabGrid;
   final Function(WidgetContainerModel model)? onDragCancel;
 
   static List<String> labelPositions = const [

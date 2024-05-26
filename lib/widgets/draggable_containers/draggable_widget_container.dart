@@ -8,7 +8,7 @@ import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import 'models/widget_container_model.dart';
 
 class DraggableWidgetContainer extends StatelessWidget {
-  final TabGrid tabGrid;
+  final TabGridModel tabGrid;
 
   final Function(
           WidgetContainerModel widget, Rect newRect, TransformResult result)?

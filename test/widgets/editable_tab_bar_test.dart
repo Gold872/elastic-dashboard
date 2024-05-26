@@ -54,12 +54,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
@@ -103,12 +103,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
@@ -163,12 +163,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
@@ -223,12 +223,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
@@ -296,12 +296,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
@@ -380,12 +380,12 @@ void main() {
               TabData(name: 'Autonomous'),
             ],
             tabViews: [
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},
               ),
-              TabGrid(
+              TabGridModel(
                 ntConnection: mockNTConnection,
                 preferences: preferences,
                 onAddWidgetPressed: () {},

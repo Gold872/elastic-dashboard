@@ -19,7 +19,7 @@ class TabData {
 class EditableTabBar extends StatelessWidget {
   final SharedPreferences preferences;
 
-  final List<TabGrid> tabViews;
+  final List<TabGridModel> tabViews;
   final List<TabData> tabData;
 
   final Function(TabData tab) onTabCreate;
@@ -291,10 +291,10 @@ class EditableTabBar extends StatelessWidget {
                 curve: Curves.decelerate,
                 index: currentIndex,
                 children: [
-                  for (TabGrid grid in tabViews)
-                    ChangeNotifierProvider(
-                      create: (context) => TabGridModel(),
-                      child: grid,
+                  for (TabGridModel grid in tabViews)
+                    ChangeNotifierProvider<TabGridModel>.value(
+                      value: grid,
+                      child: const TabGrid(),
                     ),
                 ],
               ),

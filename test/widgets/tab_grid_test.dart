@@ -77,14 +77,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
               ntConnection: createMockOfflineNT4(),
               preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -126,14 +126,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
               ntConnection: createMockOfflineNT4(),
               preferences: preferences,
               jsonData: jsonData['tabs'][1]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -168,15 +168,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
               ntConnection: createMockOfflineNT4(),
               preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -246,15 +245,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
               ntConnection: createMockOfflineNT4(),
               preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
