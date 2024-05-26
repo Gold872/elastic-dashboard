@@ -90,11 +90,11 @@ class VoltageViewModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'divisions': _divisions,
-      'inverted': _inverted,
-      'orientation': _orientation,
+      'min_value': minValue,
+      'max_value': maxValue,
+      if (divisions != null) 'divisions': divisions,
+      'inverted': inverted,
+      'orientation': orientation,
     };
   }
 
