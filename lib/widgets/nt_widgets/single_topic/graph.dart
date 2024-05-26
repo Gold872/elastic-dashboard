@@ -97,8 +97,8 @@ class GraphModel extends NTWidgetModel {
     return {
       ...super.toJson(),
       'time_displayed': _timeDisplayed,
-      'min_value': _minValue,
-      'max_value': _maxValue,
+      if (_minValue != null) 'min_value': _minValue,
+      if (_maxValue != null) 'max_value': _maxValue,
       'color': _mainColor.value,
       'line_width': _lineWidth,
     };

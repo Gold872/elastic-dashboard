@@ -128,7 +128,7 @@ MockNTConnection createMockOnlineNT4({
 
     when(mockNT4Connection.getTopicFromName(topic.name)).thenReturn(topic);
 
-    when(topicSubscription.periodicStream())
+    when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
         .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
