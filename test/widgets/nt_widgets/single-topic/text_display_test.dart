@@ -182,6 +182,60 @@ void main() {
     expect(intNTConnection.getLastAnnouncedValue('Test/Display Value'), 3000);
   });
 
+  testWidgets('Text display widget test (boolean)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NTConnection boolNTConnection;
+
+    TextDisplayModel textDisplayModel = TextDisplayModel(
+      ntConnection: boolNTConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Display Value',
+            type: NT4TypeStr.kBool,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Display Value': false,
+        },
+      ),
+      preferences: preferences,
+      topic: 'Test/Display Value',
+      dataType: 'boolean',
+      period: 0.100,
+      showSubmitButton: true,
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetModel>.value(
+            value: textDisplayModel,
+            child: const TextDisplay(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('false'), findsOneWidget);
+    expect(find.byTooltip('Publish Data'), findsOneWidget);
+    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+
+    await widgetTester.enterText(find.byType(TextField), 'true');
+    expect(
+        boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isFalse);
+
+    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+    await widgetTester.pumpAndSettle();
+
+    expect(
+        boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isTrue);
+  });
+
   testWidgets('Text display widget test (string)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
@@ -288,6 +342,60 @@ void main() {
 
     expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
         [1, 2, 3]);
+  });
+
+  testWidgets('Text display widget test (boolean[])', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NTConnection boolArrNTConnection;
+
+    TextDisplayModel textDisplayModel = TextDisplayModel(
+      ntConnection: boolArrNTConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Display Value',
+            type: NT4TypeStr.kBoolArr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Display Value': [false, true],
+        },
+      ),
+      preferences: preferences,
+      topic: 'Test/Display Value',
+      dataType: 'boolean[]',
+      period: 0.100,
+      showSubmitButton: true,
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetModel>.value(
+            value: textDisplayModel,
+            child: const TextDisplay(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('[false, true]'), findsOneWidget);
+    expect(find.byTooltip('Publish Data'), findsOneWidget);
+    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+
+    await widgetTester.enterText(find.byType(TextField), '[true, false, true]');
+    expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        [false, true]);
+
+    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+    await widgetTester.pumpAndSettle();
+
+    expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        [true, false, true]);
   });
 
   testWidgets('Text display widget test (double[])', (widgetTester) async {
