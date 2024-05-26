@@ -194,7 +194,7 @@ class PreferenceSearch extends StatelessWidget {
             .toList();
       },
       initialList: preferenceTopicNames,
-      builder: (displayedList, itemIndex, item) {
+      itemBuilder: (item) {
         TextEditingController? textController = preferenceTextControllers[item];
 
         return _RobotPreference(
