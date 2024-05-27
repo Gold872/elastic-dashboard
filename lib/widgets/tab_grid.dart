@@ -716,13 +716,15 @@ class TabGrid extends StatelessWidget {
           value: widgetModel,
           child: DraggableNTWidgetContainer(
             key: widgetModel.key,
-            tabGrid: model,
-            onUpdate: model._ntContainerOnUpdate,
-            onDragBegin: model._ntContainerOnDragBegin,
-            onDragEnd: model._ntContainerOnDragEnd,
-            onDragCancel: model._ntContainerOnDragCancel,
-            onResizeBegin: model._ntContainerOnResizeBegin,
-            onResizeEnd: model._ntContainerOnResizeEnd,
+            updateFunctions: (
+              onUpdate: model._ntContainerOnUpdate,
+              onDragBegin: model._ntContainerOnDragBegin,
+              onDragEnd: model._ntContainerOnDragEnd,
+              onDragCancel: model._ntContainerOnDragCancel,
+              onResizeBegin: model._ntContainerOnResizeBegin,
+              onResizeEnd: model._ntContainerOnResizeEnd,
+              isValidMoveLocation: model.isValidMoveLocation,
+            ),
           ),
         );
       } else if (widgetModel is ListLayoutModel) {
@@ -730,13 +732,15 @@ class TabGrid extends StatelessWidget {
           value: widgetModel,
           child: DraggableListLayout(
             key: widgetModel.key,
-            tabGrid: model,
-            onUpdate: model._layoutContainerOnUpdate,
-            onDragBegin: model._layoutContainerOnDragBegin,
-            onDragEnd: model._layoutContainerOnDragEnd,
-            onDragCancel: model._layoutContainerOnDragCancel,
-            onResizeBegin: model._layoutContainerOnResizeBegin,
-            onResizeEnd: model._layoutContainerOnResizeEnd,
+            updateFunctions: (
+              onUpdate: model._layoutContainerOnUpdate,
+              onDragBegin: model._layoutContainerOnDragBegin,
+              onDragEnd: model._layoutContainerOnDragEnd,
+              onDragCancel: model._layoutContainerOnDragCancel,
+              onResizeBegin: model._layoutContainerOnResizeBegin,
+              onResizeEnd: model._layoutContainerOnResizeEnd,
+              isValidMoveLocation: model.isValidMoveLocation,
+            ),
           ),
         );
       }
