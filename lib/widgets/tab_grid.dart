@@ -82,9 +82,16 @@ class TabGridModel extends ChangeNotifier {
       switch (layoutData['type']) {
         case 'List Layout':
           widget = ListLayoutModel.fromJson(
-            ntConnection: ntConnection,
             preferences: preferences,
             jsonData: layoutData,
+            ntWidgetBuilder: (preferences, jsonData, enabled,
+                    {onJsonLoadingWarning}) =>
+                NTWidgetContainerModel.fromJson(
+              ntConnection: ntConnection,
+              jsonData: jsonData,
+              preferences: preferences,
+              onJsonLoadingWarning: onJsonLoadingWarning,
+            ),
             enabled: ntConnection.isNT4Connected,
             tabGrid: this,
             onDragCancel: _layoutContainerOnDragCancel,
@@ -525,7 +532,6 @@ class TabGridModel extends ChangeNotifier {
   ListLayoutModel createListLayout(
       {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
     return ListLayoutModel(
-      ntConnection: ntConnection,
       preferences: preferences,
       title: title,
       initialPosition: Rect.fromLTWH(
@@ -593,9 +599,16 @@ class TabGridModel extends ChangeNotifier {
         case 'List Layout':
           _widgetModels.add(
             ListLayoutModel.fromJson(
-              ntConnection: ntConnection,
               preferences: preferences,
               jsonData: widgetData,
+              ntWidgetBuilder: (preferences, jsonData, enabled,
+                      {onJsonLoadingWarning}) =>
+                  NTWidgetContainerModel.fromJson(
+                ntConnection: ntConnection,
+                jsonData: jsonData,
+                preferences: preferences,
+                onJsonLoadingWarning: onJsonLoadingWarning,
+              ),
               enabled: ntConnection.isNT4Connected,
               tabGrid: this,
               onDragCancel: _layoutContainerOnDragCancel,
