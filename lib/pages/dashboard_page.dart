@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,7 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:logger/logger.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -206,6 +209,61 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     });
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+
+    var notifications = ntConnection.subscribe("notifications");
+
+    //dont display a notification when we first connect
+    bool notificationFirstRun = true;
+    notifications.listen((p0, p1) {
+      List<String> data = p0.toString().replaceAll("[", "").replaceAll("]", "").split(",");
+      if(notificationFirstRun) {
+        notificationFirstRun = false;
+        return;
+      }
+      Icon icon;
+      if(data[0] == "INFO") {
+        icon = const Icon(Icons.info);
+      }
+      else if(data[0] == "WARNING") {
+        icon = const Icon(Icons.warning_amber, color: Colors.orange,);
+      }
+      else if(data[0] == "ERROR") {
+        icon = const Icon(Icons.error, color: Colors.red,);
+      }
+      else {
+        icon = const Icon(Icons.question_mark);
+      }
+
+      String title = data[1];
+      String description = data[2];
+      setState(() {
+        ColorScheme colorScheme = Theme.of(context).colorScheme;
+        TextTheme textTheme = Theme.of(context).textTheme;
+        ElegantNotification notification = ElegantNotification(
+          autoDismiss: true,
+          showProgressIndicator: true,
+          background: colorScheme.surface,
+          width: 350,
+          position: Alignment.bottomRight,
+          title: Text(
+            title,
+            style: textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          icon: icon,
+          description: Text(description),
+          stackedOptions: StackedOptions(
+            key: 'notification',
+            type: StackedType.above,
+            itemOffset: const Offset(0, 20),
+          ),
+        );
+        if (mounted) {
+          notification.show(context);
+        }
+      });
+    });
   }
 
   @override
@@ -271,7 +329,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
-        enableShadow: false,
         width: 150,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
@@ -291,7 +348,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 150,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
@@ -337,9 +393,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 350,
-        height: 100,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
@@ -365,9 +419,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         autoDismiss: false,
         showProgressIndicator: false,
         background: colorScheme.surface,
-        enableShadow: false,
-        width: 150,
-        height: 100,
+        width: 350,
         position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
@@ -384,7 +436,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             fontWeight: FontWeight.bold,
           ),
         ),
-        onActionPressed: () async {
+        onNotificationPressed: () async {
           Uri url = Uri.parse(Settings.releasesLink);
 
           if (await canLaunchUrl(url)) {
@@ -401,9 +453,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
-        enableShadow: false,
-        width: 150,
-        height: 100,
+        width: 350,
+        
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
@@ -613,7 +664,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
         position: Alignment.bottomRight,
@@ -640,7 +690,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: Colors.yellow,
-        enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
         position: Alignment.bottomRight,

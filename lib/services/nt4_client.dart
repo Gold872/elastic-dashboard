@@ -326,7 +326,7 @@ class NT4Client {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),
-      options: NT4SubscriptionOptions(periodicRateSeconds: period),
+      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: true),
     );
 
     if (_subscribedTopics.contains(newSub)) {
