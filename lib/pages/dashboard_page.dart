@@ -256,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           stackedOptions: StackedOptions(
             key: 'notification',
             type: StackedType.above,
-            itemOffset: const Offset(0, 20),
+            itemOffset: const Offset(0, 5),
           ),
         );
         if (mounted) {
