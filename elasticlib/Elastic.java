@@ -12,9 +12,7 @@ public final class Elastic {
     private static final StringArrayPublisher publisher = topic.publish(PubSubOption.sendAll(true));
 
     public static void sendAlert(AlertLevel level, String title, String description) {
-
         publisher.set(new String[] {level.toString(), title, description});
-        System.out.println("sent alert");
     }
     public enum AlertLevel {
         INFO,
