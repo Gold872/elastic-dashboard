@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
@@ -20,17 +22,19 @@ class RobotAlerts {
       _alertFirstRun = false;
       return;
     }
-    List<String> data =
-        alertData.toString().replaceAll("[", "").replaceAll("]", "").split(",");
+
+
+    Map<String, dynamic> data = jsonDecode(alertData.toString());
     Icon icon;
-    if (data[0] == "INFO") {
+
+    if (data["level"] == "INFO") {
       icon = const Icon(Icons.info);
-    } else if (data[0] == "WARNING") {
+    } else if (data["level"] == "WARNING") {
       icon = const Icon(
         Icons.warning_amber,
         color: Colors.orange,
       );
-    } else if (data[0] == "ERROR") {
+    } else if (data["level"] == "ERROR") {
       icon = const Icon(
         Icons.error,
         color: Colors.red,
@@ -39,9 +43,7 @@ class RobotAlerts {
       icon = const Icon(Icons.question_mark);
     }
 
-    String title = data[1];
-    String description = data[2];
-    _buildNotification(title, description, icon, context).show(context);
+    _buildNotification(data["title"], data["description"], icon, context).show(context);
   }
 
   ElegantNotification _buildNotification(
