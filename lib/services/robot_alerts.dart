@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class RobotAlerts {
@@ -22,7 +21,6 @@ class RobotAlerts {
       _alertFirstRun = false;
       return;
     }
-
 
     Map<String, dynamic> data = jsonDecode(alertData.toString());
     Icon icon;
@@ -43,7 +41,8 @@ class RobotAlerts {
       icon = const Icon(Icons.question_mark);
     }
 
-    _buildNotification(data["title"], data["description"], icon, context).show(context);
+    _buildNotification(data["title"], data["description"], icon, context)
+        .show(context);
   }
 
   ElegantNotification _buildNotification(
