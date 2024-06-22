@@ -5,17 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.PubSubOption;
-import edu.wpi.first.networktables.StringArrayPublisher;
-import edu.wpi.first.networktables.StringArrayTopic;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
-    private static final StringTopic topic = NetworkTableInstance.getDefault().getStringTopic("elastic/robotalerts");
+    private static final StringTopic topic = NetworkTableInstance.getDefault()
+            .getStringTopic("elastic/robotnotifications");
     private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true));
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static void sendAlert(RobotAlert alert) {
+    public static void sendAlert(ElasticNotification alert) {
         try {
             publisher.set(objectMapper.writeValueAsString(alert));
         } catch (JsonProcessingException e) {
@@ -23,18 +22,18 @@ public final class Elastic {
         }
     }
 
-    static class RobotAlert {
-        private final AlertLevel level;
-        private final String title;
-        private final String description;
+    public static class ElasticNotification {
+        private NotificationLevel level;
+        private String title;
+        private String description;
 
-        public RobotAlert(AlertLevel level, String title, String description) {
+        public ElasticNotification(NotificationLevel level, String title, String description) {
             this.level = level;
             this.title = title;
             this.description = description;
         }
 
-        public AlertLevel getLevel() {
+        public NotificationLevel getLevel() {
             return level;
         }
 
@@ -45,9 +44,12 @@ public final class Elastic {
         public String getDescription() {
             return description;
         }
+
+        public enum NotificationLevel {
+            INFO,
+            WARNING,
+            ERROR
+        }
     }
 
-    public enum AlertLevel {
-        INFO, WARNING, ERROR
-    }
 }

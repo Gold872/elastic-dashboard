@@ -5,11 +5,11 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:flutter/material.dart';
 
-class RobotAlerts {
+class RobotNotificationsListener {
   bool _alertFirstRun = true;
 
   void listen(NTConnection nt, BuildContext context) {
-    var notifications = ntConnection.subscribe("elastic/robotalerts");
+    var notifications = ntConnection.subscribe("elastic/robotnotifications");
     notifications.listen((alertData, alertTimestamp) {
       _onAlert(alertData!, alertTimestamp, context);
     });
@@ -64,7 +64,7 @@ class RobotAlerts {
       icon: icon,
       description: Text(description),
       stackedOptions: StackedOptions(
-        key: 'robotalert',
+        key: 'robotnotification',
         type: StackedType.above,
         itemOffset: const Offset(0, 5),
       ),
