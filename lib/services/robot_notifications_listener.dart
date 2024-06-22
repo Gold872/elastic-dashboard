@@ -1,21 +1,24 @@
 import 'dart:convert';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elegant_notification/elegant_notification.dart';
-import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:flutter/material.dart';
 
 class RobotNotificationsListener {
   bool _alertFirstRun = true;
+  final NTConnection connection;
+  final Function(String title, String description, Icon icon) onNotification;
 
-  void listen(NTConnection nt, BuildContext context) {
+  RobotNotificationsListener(
+      {required this.connection, required this.onNotification});
+
+  void listen() {
     var notifications = ntConnection.subscribe("elastic/robotnotifications");
     notifications.listen((alertData, alertTimestamp) {
-      _onAlert(alertData!, alertTimestamp, context);
+      _onAlert(alertData!, alertTimestamp);
     });
   }
 
-  void _onAlert(Object alertData, int timestamp, BuildContext context) {
+  void _onAlert(Object alertData, int timestamp) {
     //prevent showing a notification when we connect to NT
     if (_alertFirstRun) {
       _alertFirstRun = false;
@@ -40,34 +43,6 @@ class RobotNotificationsListener {
     } else {
       icon = const Icon(Icons.question_mark);
     }
-
-    _buildNotification(data["title"], data["description"], icon, context)
-        .show(context);
-  }
-
-  ElegantNotification _buildNotification(
-      String title, String description, Icon icon, BuildContext context) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
-    TextTheme textTheme = Theme.of(context).textTheme;
-    return ElegantNotification(
-      autoDismiss: true,
-      showProgressIndicator: true,
-      background: colorScheme.surface,
-      width: 350,
-      position: Alignment.bottomRight,
-      title: Text(
-        title,
-        style: textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      icon: icon,
-      description: Text(description),
-      stackedOptions: StackedOptions(
-        key: 'robotnotification',
-        type: StackedType.above,
-        itemOffset: const Offset(0, 5),
-      ),
-    );
+    onNotification(data["title"], data["description"], icon);
   }
 }

@@ -21,6 +21,7 @@ import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import 'package:elegant_notification/elegant_notification.dart';
+import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -52,7 +53,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences _preferences;
   late final UpdateChecker _updateChecker;
-  late final RobotNotificationsListener _robotAlerts;
+  late final RobotNotificationsListener _robotNotificationListener;
 
   final List<TabGrid> _grids = [];
 
@@ -208,8 +209,36 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
 
-    _robotAlerts = RobotNotificationsListener();
-    _robotAlerts.listen(ntConnection, context);
+    _robotNotificationListener = RobotNotificationsListener(
+        connection: ntConnection,
+        onNotification: (title, description, icon) {
+          setState(() {
+            ColorScheme colorScheme = Theme.of(context).colorScheme;
+            TextTheme textTheme = Theme.of(context).textTheme;
+            var widget = ElegantNotification(
+              autoDismiss: true,
+              showProgressIndicator: true,
+              background: colorScheme.surface,
+              width: 350,
+              position: Alignment.bottomRight,
+              title: Text(
+                title,
+                style: textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              icon: icon,
+              description: Text(description),
+              stackedOptions: StackedOptions(
+                key: 'robotnotification',
+                type: StackedType.above,
+                itemOffset: const Offset(0, 5),
+              ),
+            );
+            if (mounted) widget.show(context);
+          });
+        });
+    _robotNotificationListener.listen();
   }
 
   @override
