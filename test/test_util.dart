@@ -24,6 +24,8 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
+  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
   when(mockNT4Connection.connectionStatus())
@@ -39,6 +41,8 @@ MockNTConnection createMockOfflineNT4() {
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+  when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
@@ -79,6 +83,8 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
+  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
   when(mockNT4Connection.connectionStatus())
@@ -94,6 +100,8 @@ MockNTConnection createMockOnlineNT4({
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+  when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
@@ -131,10 +139,15 @@ MockNTConnection createMockOnlineNT4({
     when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
         .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
 
+    when(topicSubscription.listen(any)).thenAnswer((realInvocation) {});
+
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
         .thenAnswer((_) => virtualValues?[topic.name]);
 
     when(mockNT4Connection.subscribe(topic.name, any))
+        .thenReturn(topicSubscription);
+
+    when(mockNT4Connection.subscribeAll(topic.name, any))
         .thenReturn(topicSubscription);
   }
 

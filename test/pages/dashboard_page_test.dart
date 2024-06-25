@@ -358,6 +358,8 @@ void main() {
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
 
+    when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+
     when(mockNT4Connection.addTopicAnnounceListener(any))
         .thenAnswer((realInvocation) {
       fakeAnnounceCallbacks.add(realInvocation.positionalArguments[0]);
