@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,8 +24,11 @@ public final class Elastic {
     }
 
     public static class ElasticNotification {
+        @JsonProperty("level")
         private NotificationLevel level;
+        @JsonProperty("title")
         private String title;
+        @JsonProperty("description")
         private String description;
 
         public ElasticNotification(NotificationLevel level, String title, String description) {
