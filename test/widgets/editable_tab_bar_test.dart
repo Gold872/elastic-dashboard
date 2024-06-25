@@ -6,6 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
@@ -50,22 +51,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {},
+            onTabCreate: () {},
             onTabDestroy: (index) {},
             onTabMoveLeft: () {},
             onTabMoveRight: () {},
@@ -99,22 +102,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -159,22 +164,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -219,22 +226,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -292,22 +301,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -376,22 +387,24 @@ void main() {
             preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
-              TabGrid(
-                ntConnection: mockNTConnection,
-                preferences: preferences,
-                onAddWidgetPressed: () {},
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
               ),
             ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {

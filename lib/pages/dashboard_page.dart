@@ -24,6 +24,7 @@ import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
+import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
@@ -57,8 +58,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences preferences = widget.preferences;
   late final UpdateChecker _updateChecker;
   late final RobotNotificationsListener _robotNotificationListener;
-
-  final List<TabGrid> _grids = [];
 
   final List<TabData> _tabData = [];
 
@@ -114,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     widget.ntConnection.addConnectedListener(() {
       setState(() {
-        for (TabGrid grid in _grids) {
+        for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
           grid.onNTConnect();
         }
       });
@@ -122,7 +121,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     widget.ntConnection.addDisconnectedListener(() {
       setState(() {
-        for (TabGrid grid in _grids) {
+        for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
           grid.onNTDisconnect();
         }
       });
@@ -167,15 +166,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        _tabData.add(TabData(name: tab));
-        _grids.add(
-          TabGrid(
-            key: GlobalKey(),
+        _tabData.add(TabData(
+          name: tab,
+          tabGrid: TabGridModel(
             ntConnection: widget.ntConnection,
             preferences: widget.preferences,
             onAddWidgetPressed: _displayAddWidgetDialog,
           ),
-        );
+        ));
       },
       onWidgetAdded: (widgetData) {
         if (preferences.getBool(PrefKeys.layoutLocked) ??
@@ -193,13 +191,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         String tabName = widgetDataCopy['tab'];
 
         if (!tabNamesList.contains(tabName)) {
-          _tabData.add(TabData(name: tabName));
-          _grids.add(TabGrid(
-            key: GlobalKey(),
-            ntConnection: widget.ntConnection,
-            preferences: widget.preferences,
-            onAddWidgetPressed: _displayAddWidgetDialog,
-          ));
+          _tabData.add(
+            TabData(
+              name: tabName,
+              tabGrid: TabGridModel(
+                ntConnection: widget.ntConnection,
+                preferences: widget.preferences,
+                onAddWidgetPressed: _displayAddWidgetDialog,
+              ),
+            ),
+          );
 
           tabNamesList.add(tabName);
         }
@@ -210,7 +211,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        _grids[tabIndex].addWidgetFromTabJson(widgetDataCopy);
+        _tabData[tabIndex].tabGrid.addWidgetFromTabJson(widgetDataCopy);
 
         setState(() {});
       },
@@ -288,11 +289,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     for (int i = 0; i < _tabData.length; i++) {
       TabData data = _tabData[i];
-      TabGrid grid = _grids[i];
 
       gridData.add({
         'name': data.name,
-        'grid_layout': grid.toJson(),
+        'grid_layout': data.tabGrid.toJson(),
       });
     }
 
@@ -584,7 +584,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
 
     _tabData.clear();
-    _grids.clear();
 
     for (Map<String, dynamic> data in jsonData['tabs']) {
       if (tryCast(data['name']) == null) {
@@ -598,48 +597,47 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         continue;
       }
 
-      _tabData.add(TabData(name: data['name']));
-
-      _grids.add(
-        TabGrid.fromJson(
-          key: GlobalKey(),
-          ntConnection: widget.ntConnection,
-          preferences: widget.preferences,
-          jsonData: data['grid_layout'],
-          onAddWidgetPressed: _displayAddWidgetDialog,
-          onJsonLoadingWarning: _showJsonLoadingWarning,
+      _tabData.add(
+        TabData(
+          name: data['name'],
+          tabGrid: TabGridModel.fromJson(
+            ntConnection: widget.ntConnection,
+            preferences: widget.preferences,
+            jsonData: data['grid_layout'],
+            onAddWidgetPressed: _displayAddWidgetDialog,
+            onJsonLoadingWarning: _showJsonLoadingWarning,
+          ),
         ),
       );
     }
 
     _createDefaultTabs();
 
-    if (_currentTabIndex >= _grids.length) {
-      _currentTabIndex = _grids.length - 1;
+    if (_currentTabIndex >= _tabData.length) {
+      _currentTabIndex = _tabData.length - 1;
     }
   }
 
   void _createDefaultTabs() {
-    if (_tabData.isEmpty || _grids.isEmpty) {
+    if (_tabData.isEmpty) {
       logger.info('Creating default Teleoperated and Autonomous tabs');
       setState(() {
         _tabData.addAll([
-          TabData(name: 'Teleoperated'),
-          TabData(name: 'Autonomous'),
-        ]);
-
-        _grids.addAll([
-          TabGrid(
-            key: GlobalKey(),
-            ntConnection: widget.ntConnection,
-            preferences: widget.preferences,
-            onAddWidgetPressed: _displayAddWidgetDialog,
+          TabData(
+            name: 'Teleoperated',
+            tabGrid: TabGridModel(
+              ntConnection: widget.ntConnection,
+              preferences: widget.preferences,
+              onAddWidgetPressed: _displayAddWidgetDialog,
+            ),
           ),
-          TabGrid(
-            key: GlobalKey(),
-            ntConnection: widget.ntConnection,
-            preferences: widget.preferences,
-            onAddWidgetPressed: _displayAddWidgetDialog,
+          TabData(
+            name: 'Autonomous',
+            tabGrid: TabGridModel(
+              ntConnection: widget.ntConnection,
+              preferences: widget.preferences,
+              onAddWidgetPressed: _displayAddWidgetDialog,
+            ),
           ),
         ]);
       });
@@ -783,13 +781,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         String newTabName = 'Tab ${_tabData.length + 1}';
         int newTabIndex = _tabData.length;
 
-        _tabData.add(TabData(name: newTabName));
-        _grids.add(
-          TabGrid(
-            key: GlobalKey(),
-            ntConnection: widget.ntConnection,
-            preferences: widget.preferences,
-            onAddWidgetPressed: _displayAddWidgetDialog,
+        _tabData.add(
+          TabData(
+            name: newTabName,
+            tabGrid: TabGridModel(
+              ntConnection: widget.ntConnection,
+              preferences: widget.preferences,
+              onAddWidgetPressed: _displayAddWidgetDialog,
+            ),
           ),
         );
 
@@ -820,11 +819,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             _currentTabIndex--;
           }
 
-          _grids[oldTabIndex].onDestroy();
+          _tabData[oldTabIndex].tabGrid.onDestroy();
 
           setState(() {
             _tabData.removeAt(oldTabIndex);
-            _grids.removeAt(oldTabIndex);
           });
         });
       },
@@ -832,14 +830,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _lockLayout() async {
-    for (TabGrid grid in _grids) {
+    for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
       grid.lockLayout();
     }
     await preferences.setBool(PrefKeys.layoutLocked, true);
   }
 
   void _unlockLayout() async {
-    for (TabGrid grid in _grids) {
+    for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
       grid.unlockLayout();
     }
     await preferences.setBool(PrefKeys.layoutLocked, false);
@@ -1051,7 +1049,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
           await preferences.setInt(PrefKeys.gridSize, newGridSize);
 
-          for (TabGrid grid in _grids) {
+          for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
             grid.resizeGrid(_gridSize, _gridSize);
           }
         },
@@ -1070,7 +1068,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           await preferences.setDouble(PrefKeys.cornerRadius, newRadius);
 
           setState(() {
-            for (TabGrid grid in _grids) {
+            for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
               grid.refreshAllContainers();
             }
           });
@@ -1254,15 +1252,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     logger.info('Moving current tab at index $_currentTabIndex to the left');
 
     setState(() {
-      // Swap the tab data
+      // Swap the tabs
       TabData tempData = _tabData[_currentTabIndex - 1];
       _tabData[_currentTabIndex - 1] = _tabData[_currentTabIndex];
       _tabData[_currentTabIndex] = tempData;
-
-      // Swap the tab grids
-      TabGrid tempGrid = _grids[_currentTabIndex - 1];
-      _grids[_currentTabIndex - 1] = _grids[_currentTabIndex];
-      _grids[_currentTabIndex] = tempGrid;
 
       _currentTabIndex -= 1;
     });
@@ -1281,15 +1274,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     logger.info('Moving current tab at index $_currentTabIndex to the right');
 
     setState(() {
-      // Swap the tab data
+      // Swap the tabs
       TabData tempData = _tabData[_currentTabIndex + 1];
       _tabData[_currentTabIndex + 1] = _tabData[_currentTabIndex];
       _tabData[_currentTabIndex] = tempData;
-
-      // Swap the tab grids
-      TabGrid tempGrid = _grids[_currentTabIndex + 1];
-      _grids[_currentTabIndex + 1] = _grids[_currentTabIndex];
-      _grids[_currentTabIndex] = tempGrid;
 
       _currentTabIndex += 1;
     });
@@ -1379,7 +1367,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         Defaults.layoutLocked)
                     ? () {
                         setState(() {
-                          _grids[_currentTabIndex].clearWidgets(context);
+                          _tabData[_currentTabIndex]
+                              .tabGrid
+                              .clearWidgets(context);
                         });
                       }
                     : null,
@@ -1514,15 +1504,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         _tabData[index] = newData;
                       });
                     },
-                    onTabCreate: (tab) {
+                    onTabCreate: () {
+                      String tabName = 'Tab ${_tabData.length + 1}';
                       setState(() {
-                        _tabData.add(tab);
-                        _grids.add(TabGrid(
-                          key: GlobalKey(),
-                          ntConnection: widget.ntConnection,
-                          preferences: widget.preferences,
-                          onAddWidgetPressed: _displayAddWidgetDialog,
-                        ));
+                        _tabData.add(
+                          TabData(
+                              name: tabName,
+                              tabGrid: TabGridModel(
+                                ntConnection: widget.ntConnection,
+                                preferences: widget.preferences,
+                                onAddWidgetPressed: _displayAddWidgetDialog,
+                              )),
+                        );
                       });
                     },
                     onTabDestroy: (index) {
@@ -1537,11 +1530,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           _currentTabIndex--;
                         }
 
-                        _grids[index].onDestroy();
+                        _tabData[index].tabGrid.onDestroy();
 
                         setState(() {
                           _tabData.removeAt(index);
-                          _grids.removeAt(index);
                         });
                       });
                     },
@@ -1549,26 +1541,31 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       setState(() => _currentTabIndex = index);
                     },
                     tabData: _tabData,
-                    tabViews: _grids,
                   ),
                   _AddWidgetDialog(
                     ntConnection: widget.ntConnection,
                     preferences: widget.preferences,
-                    grid: () => _grids[_currentTabIndex],
+                    grid: () => _tabData[_currentTabIndex].tabGrid,
                     visible: _addWidgetDialogVisible,
                     onNTDragUpdate: (globalPosition, widget) {
-                      _grids[_currentTabIndex]
+                      _tabData[_currentTabIndex]
+                          .tabGrid
                           .addDragInWidget(widget, globalPosition);
                     },
                     onNTDragEnd: (widget) {
-                      _grids[_currentTabIndex].placeDragInWidget(widget);
+                      _tabData[_currentTabIndex]
+                          .tabGrid
+                          .placeDragInWidget(widget);
                     },
                     onLayoutDragUpdate: (globalPosition, widget) {
-                      _grids[_currentTabIndex]
+                      _tabData[_currentTabIndex]
+                          .tabGrid
                           .addDragInWidget(widget, globalPosition);
                     },
                     onLayoutDragEnd: (widget) {
-                      _grids[_currentTabIndex].placeDragInWidget(widget);
+                      _tabData[_currentTabIndex]
+                          .tabGrid
+                          .placeDragInWidget(widget);
                     },
                     onClose: () {
                       setState(() => _addWidgetDialogVisible = false);
@@ -1636,7 +1633,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 class _AddWidgetDialog extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final TabGrid Function() _grid;
+  final TabGridModel Function() _grid;
   final bool _visible;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)
@@ -1652,7 +1649,7 @@ class _AddWidgetDialog extends StatefulWidget {
   const _AddWidgetDialog({
     required this.ntConnection,
     required this.preferences,
-    required TabGrid Function() grid,
+    required TabGridModel Function() grid,
     required bool visible,
     required dynamic Function(Offset, WidgetContainerModel) onNTDragUpdate,
     required dynamic Function(WidgetContainerModel) onNTDragEnd,

@@ -7,22 +7,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
-
-class TabData {
-  String name;
-
-  TabData({required this.name});
-}
 
 class EditableTabBar extends StatelessWidget {
   final SharedPreferences preferences;
 
-  final List<TabGrid> tabViews;
   final List<TabData> tabData;
 
-  final Function(TabData tab) onTabCreate;
+  final Function() onTabCreate;
   final Function(int index) onTabDestroy;
   final Function() onTabMoveLeft;
   final Function() onTabMoveRight;
@@ -36,7 +30,6 @@ class EditableTabBar extends StatelessWidget {
     required this.preferences,
     required this.currentIndex,
     required this.tabData,
-    required this.tabViews,
     required this.onTabCreate,
     required this.onTabDestroy,
     required this.onTabMoveLeft,
@@ -79,10 +72,7 @@ class EditableTabBar extends StatelessWidget {
   }
 
   void createTab() {
-    String tabName = 'Tab ${tabData.length + 1}';
-    TabData data = TabData(name: tabName);
-
-    onTabCreate.call(data);
+    onTabCreate();
   }
 
   void closeTab(int index) {
@@ -291,10 +281,10 @@ class EditableTabBar extends StatelessWidget {
                 curve: Curves.decelerate,
                 index: currentIndex,
                 children: [
-                  for (TabGrid grid in tabViews)
-                    ChangeNotifierProvider(
-                      create: (context) => TabGridModel(),
-                      child: grid,
+                  for (TabGridModel grid in tabData.map((e) => e.tabGrid))
+                    ChangeNotifierProvider<TabGridModel>.value(
+                      value: grid,
+                      child: const TabGrid(),
                     ),
                 ],
               ),

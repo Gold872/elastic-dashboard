@@ -8,13 +8,7 @@ import 'models/nt_widget_container_model.dart';
 class DraggableNTWidgetContainer extends DraggableWidgetContainer {
   const DraggableNTWidgetContainer({
     super.key,
-    required super.tabGrid,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    super.updateFunctions,
   }) : super();
 
   @override
