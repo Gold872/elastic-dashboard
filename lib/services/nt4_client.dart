@@ -5,15 +5,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:elastic_dashboard/services/log.dart';
+import 'package:flutter/foundation.dart';
 import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import 'package:elastic_dashboard/services/log.dart';
 
 class NT4TypeStr {
   static final Map<String, int> typeMap = {
@@ -322,11 +320,12 @@ class NT4Client {
     _topicAnnounceListeners.remove(onAnnounce);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
+  NT4Subscription subscribe(String topic,
+      [double period = 0.1, bool all = false]) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),
-      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: true),
+      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: all),
     );
 
     if (_subscribedTopics.contains(newSub)) {
@@ -349,6 +348,10 @@ class NT4Client {
     }
 
     return newSub;
+  }
+
+  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
+    return subscribe(topic, period, true);
   }
 
   NT4Subscription subscribeAllSamples(String topic, [double period = 0.1]) {

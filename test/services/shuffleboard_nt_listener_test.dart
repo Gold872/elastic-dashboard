@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+
 import '../test_util.mocks.dart';
 
 void main() {
@@ -47,6 +47,10 @@ void main() {
     when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
 
     NTConnection.instance = mockNT4Connection;
 

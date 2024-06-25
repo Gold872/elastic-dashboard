@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart';
-
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:flutter/foundation.dart';
 
 NTConnection get ntConnection => NTConnection.instance;
 
@@ -130,6 +129,10 @@ class NTConnection {
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
     return _ntClient.subscribe(topic, period);
+  }
+
+  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
+    return _ntClient.subscribeAll(topic, period);
   }
 
   void unSubscribe(NT4Subscription subscription) {

@@ -1,14 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:titlebar_buttons/titlebar_buttons.dart';
-
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
@@ -26,6 +18,13 @@ import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_choos
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:titlebar_buttons/titlebar_buttons.dart';
+
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 
@@ -371,6 +370,10 @@ void main() {
     when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))

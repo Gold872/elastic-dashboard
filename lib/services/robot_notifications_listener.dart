@@ -12,7 +12,8 @@ class RobotNotificationsListener {
       {required this.connection, required this.onNotification});
 
   void listen() {
-    var notifications = ntConnection.subscribe("elastic/robotnotifications");
+    var notifications =
+        ntConnection.subscribeAll("elastic/robotnotifications", 0.2);
     notifications.listen((alertData, alertTimestamp) {
       _onAlert(alertData!, alertTimestamp);
     });
