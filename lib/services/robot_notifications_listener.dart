@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/material.dart';
 
@@ -44,6 +45,13 @@ class RobotNotificationsListener {
     } else {
       icon = const Icon(Icons.question_mark);
     }
-    onNotification(data["title"], data["description"], icon);
+    String? title = tryCast(data['title']);
+    String? description = tryCast(data['description']);
+
+    if (title == null || description == null) {
+      return;
+    }
+    
+    onNotification(title, description, icon);
   }
 }
