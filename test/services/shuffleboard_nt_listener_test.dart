@@ -48,6 +48,10 @@ void main() {
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
+    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
+
     NTConnection.instance = mockNT4Connection;
 
     Map<String, dynamic> announcedWidgetData = {};

@@ -41,6 +41,10 @@ void setupMockOfflineNT4() {
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
+  when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+  when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
+
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
 
@@ -86,6 +90,10 @@ void setupMockOnlineNT4() {
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+  when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+  when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.getTopicFromName(any))
       .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));

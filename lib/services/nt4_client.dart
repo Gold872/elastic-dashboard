@@ -322,11 +322,12 @@ class NT4Client {
     _topicAnnounceListeners.remove(onAnnounce);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
+  NT4Subscription subscribe(String topic,
+      [double period = 0.1, bool all = false]) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),
-      options: NT4SubscriptionOptions(periodicRateSeconds: period),
+      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: all),
     );
 
     if (_subscribedTopics.contains(newSub)) {
@@ -349,6 +350,10 @@ class NT4Client {
     }
 
     return newSub;
+  }
+
+  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
+    return subscribe(topic, period, true);
   }
 
   NT4Subscription subscribeAllSamples(String topic, [double period = 0.1]) {

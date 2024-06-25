@@ -372,6 +372,10 @@ void main() {
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
+    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
+
     when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))
         .thenAnswer((realInvocation) => Future.value([2.0, 0.0]));
