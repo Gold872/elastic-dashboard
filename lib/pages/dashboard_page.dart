@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
+import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -19,6 +20,7 @@ import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
@@ -54,6 +56,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences preferences = widget.preferences;
   late final UpdateChecker _updateChecker;
+  late final RobotNotificationsListener _robotNotificationListener;
 
   final List<TabGrid> _grids = [];
 
@@ -219,6 +222,37 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     });
 
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+
+    _robotNotificationListener = RobotNotificationsListener(
+        connection: ntConnection,
+        onNotification: (title, description, icon) {
+          setState(() {
+            ColorScheme colorScheme = Theme.of(context).colorScheme;
+            TextTheme textTheme = Theme.of(context).textTheme;
+            var widget = ElegantNotification(
+              autoDismiss: true,
+              showProgressIndicator: true,
+              background: colorScheme.surface,
+              width: 350,
+              position: Alignment.bottomRight,
+              title: Text(
+                title,
+                style: textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              icon: icon,
+              description: Text(description),
+              stackedOptions: StackedOptions(
+                key: 'robotnotification',
+                type: StackedType.above,
+                itemOffset: const Offset(0, 5),
+              ),
+            );
+            if (mounted) widget.show(context);
+          });
+        });
+    _robotNotificationListener.listen();
   }
 
   @override
@@ -284,7 +318,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
-        enableShadow: false,
         width: 150,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
@@ -304,7 +337,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 150,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
@@ -350,9 +382,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 350,
-        height: 100,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
@@ -378,9 +408,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         autoDismiss: false,
         showProgressIndicator: false,
         background: colorScheme.surface,
-        enableShadow: false,
-        width: 150,
-        height: 100,
+        width: 350,
         position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
@@ -397,7 +425,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             fontWeight: FontWeight.bold,
           ),
         ),
-        onActionPressed: () async {
+        onNotificationPressed: () async {
           Uri url = Uri.parse(Settings.releasesLink);
 
           if (await canLaunchUrl(url)) {
@@ -414,9 +442,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xff01CB67),
-        enableShadow: false,
-        width: 150,
-        height: 100,
+        width: 350,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
@@ -631,7 +657,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
-        enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
         position: Alignment.bottomRight,
@@ -658,7 +683,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         background: colorScheme.surface,
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: Colors.yellow,
-        enableShadow: false,
         width: 350,
         height: 100 + (lines - 1) * 10,
         position: Alignment.bottomRight,

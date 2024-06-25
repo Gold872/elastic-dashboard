@@ -172,6 +172,10 @@ class NTConnection {
     return newSubscription;
   }
 
+  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
+    return _ntClient.subscribeAll(topic, period);
+  }
+
   void unSubscribe(NT4Subscription subscription) {
     if (!subscriptionUseCount.containsKey(subscription)) {
       _ntClient.unSubscribe(subscription);
