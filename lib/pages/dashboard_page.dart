@@ -228,10 +228,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              toastDuration: const Duration(seconds: 3),
               icon: icon,
               description: Text(description),
               stackedOptions: StackedOptions(
-                key: 'robotnotification',
+                key: 'robot_notification',
                 type: StackedType.above,
                 itemOffset: const Offset(0, 5),
               ),

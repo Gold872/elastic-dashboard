@@ -18,30 +18,43 @@ class RobotNotificationsListener {
 
   void listen() {
     var notifications =
-        ntConnection.subscribeAll("elastic/robotnotifications", 0.2);
+        ntConnection.subscribeAll('/Elastic/robotnotifications', 0.2);
     notifications.listen((alertData, alertTimestamp) {
-      _onAlert(alertData!, alertTimestamp);
+      if (alertData == null) {
+        return;
+      }
+      _onAlert(alertData, alertTimestamp);
     });
+
+    ntConnection.addDisconnectedListener(() => _alertFirstRun = true);
   }
 
   void _onAlert(Object alertData, int timestamp) {
-    //prevent showing a notification when we connect to NT
+    // prevent showing a notification when we connect to NT
     if (_alertFirstRun) {
       _alertFirstRun = false;
       return;
     }
 
-    Map<String, dynamic> data = jsonDecode(alertData.toString());
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(alertData.toString());
+    } catch (e) {
+      return;
+    }
+
+    if (!data.containsKey('level')) {}
+
     Icon icon;
 
-    if (data["level"] == "INFO") {
+    if (data['level'] == 'INFO') {
       icon = const Icon(Icons.info);
-    } else if (data["level"] == "WARNING") {
+    } else if (data['level'] == 'WARNING') {
       icon = const Icon(
         Icons.warning_amber,
         color: Colors.orange,
       );
-    } else if (data["level"] == "ERROR") {
+    } else if (data['level'] == 'ERROR') {
       icon = const Icon(
         Icons.error,
         color: Colors.red,
