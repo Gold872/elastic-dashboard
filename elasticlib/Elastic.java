@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
     private static final StringTopic topic = NetworkTableInstance.getDefault()
-            .getStringTopic("elastic/robotnotifications");
+            .getStringTopic("/Elastic/robotnotifications");
     private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true));
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
