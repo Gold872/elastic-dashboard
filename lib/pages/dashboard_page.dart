@@ -224,7 +224,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
 
     _robotNotificationListener = RobotNotificationsListener(
-        connection: ntConnection,
+        ntConnection: widget.ntConnection,
         onNotification: (title, description, icon) {
           setState(() {
             ColorScheme colorScheme = Theme.of(context).colorScheme;

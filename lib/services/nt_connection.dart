@@ -173,7 +173,12 @@ class NTConnection {
   }
 
   NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
-    return _ntClient.subscribeAll(topic, period);
+    return _ntClient.subscribe(
+        topic: topic,
+        options: NT4SubscriptionOptions(
+          periodicRateSeconds: period,
+          all: true,
+        ));
   }
 
   void unSubscribe(NT4Subscription subscription) {
