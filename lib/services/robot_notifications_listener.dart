@@ -1,16 +1,20 @@
 import 'dart:convert';
 
-import 'package:dot_cast/dot_cast.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dot_cast/dot_cast.dart';
+
+import 'package:elastic_dashboard/services/nt_connection.dart';
 
 class RobotNotificationsListener {
   bool _alertFirstRun = true;
   final NTConnection connection;
   final Function(String title, String description, Icon icon) onNotification;
 
-  RobotNotificationsListener(
-      {required this.connection, required this.onNotification});
+  RobotNotificationsListener({
+    required this.connection,
+    required this.onNotification,
+  });
 
   void listen() {
     var notifications =
@@ -51,7 +55,7 @@ class RobotNotificationsListener {
     if (title == null || description == null) {
       return;
     }
-    
+
     onNotification(title, description, icon);
   }
 }
