@@ -55,7 +55,7 @@ void main() {
       PrefKeys.teamNumber: 353,
       PrefKeys.ipAddressMode: IPAddressMode.driverStation.index,
       PrefKeys.teamColor: Colors.blueAccent.value,
-      PrefKeys.showGrid: false,
+      PrefKeys.snapToGrid: false,
       PrefKeys.gridSize: 128,
       PrefKeys.cornerRadius: 15.0,
       PrefKeys.autoResizeToDS: false,
@@ -210,7 +210,7 @@ void main() {
           onGridToggle: (value) async {
             fakeSettings.changeShowGrid();
 
-            await preferences.setBool(PrefKeys.showGrid, value);
+            await preferences.setBool(PrefKeys.snapToGrid, value);
           },
           preferences: preferences,
         ),
@@ -233,12 +233,12 @@ void main() {
     switchWidget.onChanged?.call(true);
     await widgetTester.pumpAndSettle();
 
-    expect(preferences.getBool(PrefKeys.showGrid), true);
+    expect(preferences.getBool(PrefKeys.snapToGrid), true);
 
     switchWidget.onChanged?.call(false);
     await widgetTester.pumpAndSettle();
 
-    expect(preferences.getBool(PrefKeys.showGrid), false);
+    expect(preferences.getBool(PrefKeys.snapToGrid), false);
     verify(fakeSettings.changeShowGrid()).called(2);
   });
 

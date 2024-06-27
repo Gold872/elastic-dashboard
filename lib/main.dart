@@ -64,10 +64,16 @@ void main() async {
       preferences.getBool(PrefKeys.layoutLocked) ?? Settings.layoutLocked;
   Settings.gridSize =
       preferences.getInt(PrefKeys.gridSize) ?? Settings.gridSize;
-  Settings.showGrid =
-      preferences.getBool(PrefKeys.showGrid) ?? Settings.showGrid;
-  Settings.cornerRadius =
+  Settings.snapToGrid =
+      preferences.getBool(PrefKeys.snapToGrid) ?? Settings.snapToGrid;
+
+  double cornerRadius =
       preferences.getDouble(PrefKeys.cornerRadius) ?? Settings.cornerRadius;
+
+  Settings.cornerRadius = cornerRadius;
+
+  PrefKeys.cornerRadius = cornerRadius.toString();
+
   Settings.autoResizeToDS =
       preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
   Settings.defaultPeriod =

@@ -186,9 +186,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         children: [
           Flexible(
             child: DialogToggleSwitch(
-              initialValue: widget.preferences.getBool(PrefKeys.showGrid) ??
-                  Settings.showGrid,
-              label: 'Show Grid',
+              initialValue: widget.preferences.getBool(PrefKeys.snapToGrid) ??
+                  Settings.snapToGrid,
+              label: 'Snap To Grid',
               onToggle: (value) {
                 setState(() {
                   widget.onGridToggle?.call(value);
@@ -208,7 +208,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
             ),
-          )
+          ),
         ],
       ),
       const SizedBox(height: 5),

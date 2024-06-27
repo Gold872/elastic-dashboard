@@ -12,7 +12,7 @@ class Settings {
   static int gridSize = 128;
   static bool layoutLocked = false;
   static double cornerRadius = 15.0;
-  static bool showGrid = true;
+  static bool snapToGrid = true;
   static bool autoResizeToDS = false;
 
   // window_manager doesn't support drag disable/maximize
@@ -33,11 +33,10 @@ class PrefKeys {
   static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';
-  static String showGrid = 'show_grid';
+  static String snapToGrid = 'show_grid';
   static String autoResizeToDS = 'auto_resize_to_driver_station';
   static String rememberWindowPosition = 'remember_window_position';
   static String defaultPeriod = 'default_period';
   static String defaultGraphPeriod = 'default_graph_period';
-
   static String windowPosition = 'window_position';
 }

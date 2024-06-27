@@ -964,10 +964,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onGridToggle: (value) async {
           setState(() {
-            Settings.showGrid = value;
+            Settings.snapToGrid = value;
           });
 
-          await _preferences.setBool(PrefKeys.showGrid, value);
+          await _preferences.setBool(PrefKeys.snapToGrid, value);
         },
         onGridSizeChanged: (gridSize) async {
           if (gridSize == null) {
@@ -1578,7 +1578,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: Text(
-                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                        'Team # ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
                         textAlign: TextAlign.center,
                       ),
                     ),

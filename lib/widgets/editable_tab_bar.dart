@@ -262,7 +262,7 @@ class EditableTabBar extends StatelessWidget {
           child: Stack(
             children: [
               Visibility(
-                visible: Settings.showGrid,
+                visible: Settings.snapToGrid,
                 child: GridPaper(
                   color: const Color.fromARGB(50, 195, 232, 243),
                   interval: Settings.gridSize.toDouble(),
