@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/fms_info.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,8 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
+bool gIsRedAlliance = true;
+
 class FieldWidgetModel extends NTWidgetModel {
   @override
   String type = 'Field';
@@ -34,7 +37,6 @@ class FieldWidgetModel extends NTWidgetModel {
 
   final double _otherObjectSize = 0.55;
   final double _trajectoryPointSize = 0.08;
-
   Size? _widgetSize;
 
   late String _robotTopicName;
@@ -87,6 +89,11 @@ class FieldWidgetModel extends NTWidgetModel {
     super.init();
 
     _robotTopicName = '$topic/Robot';
+    bool redAlliance =
+        tryCast(ntConnection.getLastAnnouncedValue('$topic/IsRedAlliance')) ??
+            true;
+
+    gIsRedAlliance = redAlliance;
 
     topicAnnounceListener = (nt4Topic) {
       if (nt4Topic.name.contains(topic) &&
@@ -383,8 +390,9 @@ class FieldWidgetModel extends NTWidgetModel {
 
 class FieldWidget extends NTWidget {
   static const String widgetType = 'Field';
+  final bool isRedAlliance;
 
-  const FieldWidget({super.key});
+  FieldWidget({super.key}) : isRedAlliance = gIsRedAlliance;
 
   double _getBackgroundFitWidth(FieldWidgetModel model, Size size) {
     double fitWidth = size.width;
@@ -443,7 +451,7 @@ class FieldWidget extends NTWidget {
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.35),
         border: Border.all(
-          color: Colors.red,
+          color: gIsRedAlliance ? Colors.red : Colors.blue,
           width: 4.0,
         ),
       ),

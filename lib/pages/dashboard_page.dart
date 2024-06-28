@@ -1578,7 +1578,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     ),
                     Expanded(
                       child: Text(
-                        'Team # ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                        'Team ${_preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
                         textAlign: TextAlign.center,
                       ),
                     ),

@@ -27,6 +27,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
+  static ChangeNotifier? copy; // TODO: check if this is the right var type
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -648,6 +649,10 @@ class TabGrid extends StatelessWidget {
     );
   }
 
+  void copyWidget(ChangeNotifier widget) {
+    copy = widget; // TODO: idk if this logic is correct
+  }
+
   void lockLayout() {
     for (WidgetContainerModel container in _widgetModels) {
       container.setDraggable(false);
@@ -807,6 +812,13 @@ class TabGrid extends StatelessWidget {
                   onSelected: () {
                     removeWidget(container);
                   }),
+              MenuItem(
+                  label: 'Copy',
+                  icon: Icons.copy_outlined,
+                  onSelected: () {
+                    copyWidget(
+                        container); // TODO: idk if its the right var type
+                  })
             ];
 
             ContextMenu contextMenu = ContextMenu(
@@ -898,22 +910,37 @@ class TabGrid extends StatelessWidget {
         if (Settings.layoutLocked) {
           return;
         }
+
+        List<MenuItem> contextMenuEntries = [
+          MenuItem(
+            label: 'Add Widget',
+            icon: Icons.add,
+            onSelected: () => onAddWidgetPressed.call(),
+          ),
+          MenuItem(
+            label: 'Clear Layout',
+            icon: Icons.clear,
+            onSelected: () => clearWidgets(context),
+          ),
+        ];
+
+        if (copy != null) {
+          contextMenuEntries.add(
+            MenuItem(
+              label: 'Paste',
+              icon: Icons.paste_outlined,
+              onSelected: () {
+                //TODO: make paste logic
+              },
+            ),
+          );
+        }
+
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
-          entries: [
-            MenuItem(
-              label: 'Add Widget',
-              icon: Icons.add,
-              onSelected: () => onAddWidgetPressed.call(),
-            ),
-            MenuItem(
-              label: 'Clear Layout',
-              icon: Icons.clear,
-              onSelected: () => clearWidgets(context),
-            ),
-          ],
+          entries: contextMenuEntries,
         );
 
         showContextMenu(

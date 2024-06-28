@@ -7,7 +7,7 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 
-abstract class WidgetContainerModel extends ChangeNotifier {
+class WidgetContainerModel extends ChangeNotifier {
   final Key key = UniqueKey();
 
   String? title;
@@ -115,6 +115,27 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   List<ContextMenuEntry> getContextMenuItems() {
     return [];
+  }
+
+  WidgetContainerModel.copy(WidgetContainerModel other) {
+    title = other.title;
+    draggable = other.draggable;
+    _disposed = other._disposed;
+    _forceDispose = other._forceDispose;
+    draggingRect = other.draggingRect;
+    cursorGlobalLocation = other.cursorGlobalLocation;
+    displayRect = other.displayRect;
+    previewRect = other.previewRect;
+    enabled = other.enabled;
+    dragging = other.dragging;
+    resizing = other.resizing;
+    draggingIntoLayout = other.draggingIntoLayout;
+    previewVisible = other.previewVisible;
+    validLocation = other.validLocation;
+    minWidth = other.minWidth;
+    minHeight = other.minHeight;
+    dragStartLocation = other.dragStartLocation;
+    init();
   }
 
   void disposeModel({bool deleting = false}) {}
