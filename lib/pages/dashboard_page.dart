@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -52,6 +53,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
+  Timer? _timer;
   late final SharedPreferences _preferences;
   late final UpdateChecker _updateChecker;
   late final RobotNotificationsListener _robotNotificationListener;
@@ -68,10 +70,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   bool _addWidgetDialogVisible = false;
 
+  String _prevRobotState = "Unknown";
+
   @override
   void initState() {
     super.initState();
-
+    _startTimer();
     _preferences = widget.preferences;
     _updateChecker = UpdateChecker(currentVersion: widget.version);
 
@@ -1629,6 +1633,53 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     } else {
       print("auto - non active");
     }
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (Timer timer) {
+      switchTabsAuto();
+    });
+  }
+
+  void switchTabsAuto() {
+    int controlData = tryCast<int>(
+            ntConnection.getLastAnnouncedValue('/FMSInfo/FMSControlData')) ??
+        32;
+
+    String state = getRobotState(controlData);
+
+    if (_prevRobotState != state) {
+      for (int i = 0; i < _tabData.length; i++) {
+        if (state == _tabData[i].name) {
+          setState(() => _currentTabIndex = i);
+        }
+      }
+      _prevRobotState = state;
+    }
+  }
+
+  String getRobotState(int controlData) {
+    const int ENABLED_FLAG = 0x01;
+    const int AUTO_FLAG = 0x02;
+    const int TEST_FLAG = 0x04;
+
+    String robotControlState = 'Disabled';
+
+    if (_flagMatches(controlData, ENABLED_FLAG)) {
+      if (_flagMatches(controlData, TEST_FLAG)) {
+        robotControlState = 'Test';
+      } else if (_flagMatches(controlData, AUTO_FLAG)) {
+        robotControlState = 'Autonomous';
+      } else {
+        robotControlState = 'Teleoperated';
+      }
+    }
+
+    return robotControlState;
+  }
+
+  bool _flagMatches(int word, int flag) {
+    return (word & flag) != 0;
   }
 }
 
