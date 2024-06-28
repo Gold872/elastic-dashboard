@@ -162,6 +162,17 @@ class WidgetContainerModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  WidgetContainerModel copyWith() {
+    return WidgetContainerModel(
+      initialPosition: Rect.fromCenter(
+          center: const Offset(100, 100), width: 200, height: 200),
+      title: title,
+      enabled: enabled,
+      minWidth: minWidth,
+      minHeight: minHeight,
+    );
+  }
+
   void setTitle(String title) {
     this.title = title;
 
