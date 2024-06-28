@@ -1659,16 +1659,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   String getRobotState(int controlData) {
-    const int ENABLED_FLAG = 0x01;
-    const int AUTO_FLAG = 0x02;
-    const int TEST_FLAG = 0x04;
+    const int enabledFlag = 0x01;
+    const int autoFlag = 0x02;
+    const int testFlag = 0x04;
 
     String robotControlState = 'Disabled';
 
-    if (_flagMatches(controlData, ENABLED_FLAG)) {
-      if (_flagMatches(controlData, TEST_FLAG)) {
+    if (_flagMatches(controlData, enabledFlag)) {
+      if (_flagMatches(controlData, testFlag)) {
         robotControlState = 'Test';
-      } else if (_flagMatches(controlData, AUTO_FLAG)) {
+      } else if (_flagMatches(controlData, autoFlag)) {
         robotControlState = 'Autonomous';
       } else {
         robotControlState = 'Teleoperated';
