@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -27,7 +28,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
-  static ChangeNotifier? copy; // TODO: check if this is the right var type
+  static WidgetContainerModel? copy;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -452,6 +453,7 @@ class TabGrid extends StatelessWidget {
   }
 
   void addDragInWidget(WidgetContainerModel widget, Offset globalPosition) {
+    print("adding widget");
     Offset localPosition = getLocalPosition(globalPosition);
     widget.setDraggingRect(
       Rect.fromLTWH(
@@ -461,12 +463,14 @@ class TabGrid extends StatelessWidget {
         widget.draggingRect.height,
       ),
     );
+
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
 
   void placeDragInWidget(WidgetContainerModel widget,
       [bool fromLayout = false]) {
+    print("placing widget");
     if (_containerDraggingIn == null) {
       return;
     }
@@ -649,8 +653,8 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  void copyWidget(ChangeNotifier widget) {
-    copy = widget; // TODO: idk if this logic is correct
+  void copyWidget(WidgetContainerModel widget) {
+    copy = widget.copyWith();
   }
 
   void lockLayout() {
@@ -816,8 +820,7 @@ class TabGrid extends StatelessWidget {
                   label: 'Copy',
                   icon: Icons.copy_outlined,
                   onSelected: () {
-                    copyWidget(
-                        container); // TODO: idk if its the right var type
+                    copyWidget(container);
                   })
             ];
 
@@ -930,7 +933,7 @@ class TabGrid extends StatelessWidget {
               label: 'Paste',
               icon: Icons.paste_outlined,
               onSelected: () {
-                //TODO: make paste logic
+                pasteWidget(copy!, details.globalPosition);
               },
             ),
           );
@@ -965,5 +968,12 @@ class TabGrid extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void pasteWidget(WidgetContainerModel model, Offset globalPosition) {
+    model.setCursorGlobalLocation(globalPosition);
+    addDragInWidget(model, globalPosition);
+    placeDragInWidget(
+        model); // BUG: creates an invisible widget and does not display it, not sure why
   }
 }
