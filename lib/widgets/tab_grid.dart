@@ -453,7 +453,6 @@ class TabGrid extends StatelessWidget {
   }
 
   void addDragInWidget(WidgetContainerModel widget, Offset globalPosition) {
-    print("adding widget");
     Offset localPosition = getLocalPosition(globalPosition);
     widget.setDraggingRect(
       Rect.fromLTWH(
@@ -470,7 +469,6 @@ class TabGrid extends StatelessWidget {
 
   void placeDragInWidget(WidgetContainerModel widget,
       [bool fromLayout = false]) {
-    print("placing widget");
     if (_containerDraggingIn == null) {
       return;
     }
@@ -521,7 +519,6 @@ class TabGrid extends StatelessWidget {
     _containerDraggingIn = null;
 
     widget.disposeModel();
-
     refresh();
   }
 
@@ -654,7 +651,8 @@ class TabGrid extends StatelessWidget {
   }
 
   void copyWidget(WidgetContainerModel widget) {
-    copy = widget.copyWith();
+    WidgetContainerModel newWidget = WidgetContainerModel.copy(widget);
+    copy = widget;
   }
 
   void lockLayout() {
@@ -970,10 +968,27 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  void pasteWidget(WidgetContainerModel model, Offset globalPosition) {
-    model.setCursorGlobalLocation(globalPosition);
-    addDragInWidget(model, globalPosition);
-    placeDragInWidget(
-        model); // BUG: creates an invisible widget and does not display it, not sure why
+  void pasteWidget(WidgetContainerModel? widget, Offset globalPosition) {
+    // BUG: doesnt work on runtime, does work when quitting, will create another copy on top of the original
+    if (widget == null) return;
+
+    Offset localPosition = getLocalPosition(globalPosition);
+
+    widget.displayRect =
+        Rect.fromCenter(center: localPosition, width: 200, height: 200);
+    widget.setPreviewRect(widget.displayRect);
+    widget.setDraggingRect(widget.displayRect);
+
+    if (widget is NTWidgetContainerModel &&
+        isValidLayoutLocation(widget.cursorGlobalLocation)) {
+      LayoutContainerModel layoutContainer =
+          getLayoutAtLocation(widget.cursorGlobalLocation)!;
+
+      if (layoutContainer.willAcceptWidget(widget)) {
+        layoutContainer.addWidget(widget);
+      }
+    }
+
+    _widgetModels.add(widget);
   }
 }

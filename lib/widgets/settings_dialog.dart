@@ -28,23 +28,24 @@ class SettingsDialog extends StatefulWidget {
   final Function(bool value)? onLayoutLock;
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
+  final Function(bool value)? onAutoSaveChanged;
 
-  const SettingsDialog({
-    super.key,
-    required this.preferences,
-    this.onTeamNumberChanged,
-    this.onIPAddressModeChanged,
-    this.onIPAddressChanged,
-    this.onColorChanged,
-    this.onGridToggle,
-    this.onGridSizeChanged,
-    this.onCornerRadiusChanged,
-    this.onResizeToDSChanged,
-    this.onRememberWindowPositionChanged,
-    this.onLayoutLock,
-    this.onDefaultPeriodChanged,
-    this.onDefaultGraphPeriodChanged,
-  });
+  const SettingsDialog(
+      {super.key,
+      required this.preferences,
+      this.onTeamNumberChanged,
+      this.onIPAddressModeChanged,
+      this.onIPAddressChanged,
+      this.onColorChanged,
+      this.onGridToggle,
+      this.onGridSizeChanged,
+      this.onCornerRadiusChanged,
+      this.onResizeToDSChanged,
+      this.onRememberWindowPositionChanged,
+      this.onLayoutLock,
+      this.onDefaultPeriodChanged,
+      this.onDefaultGraphPeriodChanged,
+      this.onAutoSaveChanged});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -58,7 +59,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 275,
+          maxHeight: 275 + 80,
           maxWidth: 725,
         ),
         child: Row(
@@ -180,7 +181,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         alignment: Alignment.topLeft,
         child: Text('Grid Settings'),
       ),
-      const SizedBox(height: 5),
+      const SizedBox(height: 6),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -211,7 +212,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ],
       ),
-      const SizedBox(height: 5),
+      const SizedBox(height: 6),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -247,7 +248,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ],
       ),
-      const SizedBox(height: 5),
+      const SizedBox(height: 6),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -278,6 +279,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
             ),
           ),
+        ],
+      ),
+      const SizedBox(height: 6),
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text('Prefrences'),
+      ),
+      const SizedBox(height: 6),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Flexible(
+          //   flex: 5,
+          //   child: DialogToggleSwitch(
+          //     initialValue:
+          //         widget.preferences.getBool(PrefKeys.rememberWindowPosition) ??
+          //             false,
+          //     label: 'Auto Save',
+          //     onToggle: (value) {
+          //       setState(() {
+          //         widget.onAutoSaveChanged?.call(value);
+          //       });
+          //     },
+          //   ),
+          // ),
         ],
       ),
     ];

@@ -22,6 +22,7 @@ class Settings {
 
   static double defaultPeriod = 0.06;
   static double defaultGraphPeriod = 0.033;
+  static bool autoSave = false;
 }
 
 class PrefKeys {
@@ -39,4 +40,5 @@ class PrefKeys {
   static String defaultPeriod = 'default_period';
   static String defaultGraphPeriod = 'default_graph_period';
   static String windowPosition = 'window_position';
+  static String autoSave = "auto_save";
 }

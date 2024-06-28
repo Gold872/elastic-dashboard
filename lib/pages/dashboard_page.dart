@@ -125,6 +125,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     ShuffleboardNTListener apiListener = ShuffleboardNTListener(
       onTabChanged: (tab) {
+        resolveAutoSave();
+
         int? parsedTabIndex = int.tryParse(tab);
 
         bool isIndex = parsedTabIndex != null;
@@ -149,6 +151,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
       onTabCreated: (tab) {
+        resolveAutoSave();
+
         if (Settings.layoutLocked) {
           return;
         }
@@ -168,6 +172,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         );
       },
       onWidgetAdded: (widgetData) {
+        resolveAutoSave();
         if (Settings.layoutLocked) {
           return;
         }
@@ -245,6 +250,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   @override
   void onWindowClose() async {
+    resolveAutoSave();
+
     Map<String, dynamic> savedJson =
         jsonDecode(_preferences.getString(PrefKeys.layout) ?? '{}');
     Map<String, dynamic> currentJson = _toJson();
@@ -342,6 +349,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   Future<void> _saveWindowPosition() async {
+    resolveAutoSave();
+
     Rect bounds = await windowManager.getBounds();
 
     List<double> positionArray = [
@@ -888,6 +897,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _displaySettingsDialog(BuildContext context) {
+    resolveAutoSave();
+
     showDialog(
       context: context,
       builder: (context) => SettingsDialog(
@@ -1226,6 +1237,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabLeft() {
+    resolveAutoSave();
+
     if (Settings.layoutLocked) {
       return;
     }
@@ -1253,6 +1266,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _moveTabRight() {
+    resolveAutoSave();
     if (Settings.layoutLocked) {
       return;
     }
@@ -1281,6 +1295,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    resolveAutoSave();
     TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
@@ -1534,6 +1549,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     },
                     onNTDragEnd: (widget) {
                       _grids[_currentTabIndex].placeDragInWidget(widget);
+                      resolveAutoSave();
                     },
                     onLayoutDragUpdate: (globalPosition, widget) {
                       _grids[_currentTabIndex]
@@ -1541,9 +1557,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     },
                     onLayoutDragEnd: (widget) {
                       _grids[_currentTabIndex].placeDragInWidget(widget);
+                      resolveAutoSave();
                     },
                     onClose: () {
                       setState(() => _addWidgetDialogVisible = false);
+                      resolveAutoSave();
                     },
                   ),
                 ],
@@ -1603,6 +1621,15 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ),
     );
   }
+
+  void resolveAutoSave() {
+    if (Settings.autoSave) {
+      _saveLayout();
+      print("auto - Saved");
+    } else {
+      print("auto - non active");
+    }
+  }
 }
 
 class _AddWidgetDialog extends StatefulWidget {
@@ -1641,7 +1668,6 @@ class _AddWidgetDialog extends StatefulWidget {
 
 class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
-
   @override
   Widget build(BuildContext context) {
     return Visibility(
