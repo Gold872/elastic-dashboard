@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,17 +8,36 @@ import 'package:mockito/mockito.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 
-// Create a mock class for the onNotification callback
 class MockNotificationCallback extends Mock {
   void call(String? title, String? description, Icon? icon);
 }
 
 void main() {
-  test("Robot Notifications (No Connection) ", () {
-    MockNTConnection mockConnection = createMockOfflineNT4();
+  test("Robot Notifications (Initial Connection | No Existing Data) ", () {
+    MockNTConnection mockConnection = createMockOnlineNT4();
     MockNT4Subscription mockSub = MockNT4Subscription();
 
-    when(mockConnection.subscribeAll(any, any)).thenReturn(mockSub);
+    List<Function(Object?, int)> listeners = [];
+    when(mockSub.listen(any)).thenAnswer(
+      (realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+      },
+    );
+
+    when(mockSub.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in listeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
+
+    when(mockConnection.subscribeAll(any, any)).thenAnswer(
+      (realInvocation) {
+        return mockSub;
+      },
+    );
 
     // Create a mock for the onNotification callback
     MockNotificationCallback mockOnNotification = MockNotificationCallback();
@@ -42,122 +60,79 @@ void main() {
     // Verify that the onNotification callback was never called
     verifyNever(mockOnNotification.call(any, any, any));
   });
-  test(
-    "Robot Notifications (Initial Connection | No Notifications)",
-    () {
-      MockNTConnection mockConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-              name: '/Elastic/robotnotifications',
-              type: NT4TypeStr.kString,
-              properties: {})
-        ],
-      );
-      MockNT4Subscription mockSub = MockNT4Subscription();
 
-      when(mockConnection.subscribeAll(any, any)).thenReturn(mockSub);
+  test("Robot Notifications (Initial Connection | Existing Data) ", () {
+    MockNTConnection mockConnection = createMockOnlineNT4();
+    MockNT4Subscription mockSub = MockNT4Subscription();
 
-      // Create a mock for the onNotification callback
-      MockNotificationCallback mockOnNotification = MockNotificationCallback();
+    Map<String, dynamic> data = {
+      'title': 'Title1',
+      'description': 'Description1',
+      'level': 'Info'
+    };
 
-      RobotNotificationsListener notifications = RobotNotificationsListener(
-        ntConnection: mockConnection,
-        onNotification: mockOnNotification.call,
-      );
+    List<Function(Object?, int)> listeners = [];
+    when(mockSub.listen(any)).thenAnswer(
+      (realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+        mockSub.updateValue(jsonEncode(data), 0);
+      },
+    );
 
-      notifications.listen();
+    when(mockSub.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in listeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
 
-      // Verify that subscribeAll was called with the specific parameters
-      verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
-          .called(1);
-      verify(mockConnection.addDisconnectedListener(any)).called(1);
+    when(mockConnection.subscribeAll(any, any)).thenAnswer(
+      (realInvocation) {
+        mockSub.updateValue(jsonEncode(data), 0);
+        return mockSub;
+      },
+    );
 
-      // Verify that no other interactions have been made with the mockConnection
-      verifyNoMoreInteractions(mockConnection);
+    // Create a mock for the onNotification callback
+    MockNotificationCallback mockOnNotification = MockNotificationCallback();
 
-      // Verify that the onNotification callback was never called
-      verifyNever(mockOnNotification.call(any, any, any));
-    },
-  );
+    RobotNotificationsListener notifications = RobotNotificationsListener(
+      ntConnection: mockConnection,
+      onNotification: mockOnNotification.call,
+    );
 
-  test(
-    "Robot Notifications (Initial Connection | No Notifications)",
-    () {
-      MockNTConnection mockConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-              name: '/Elastic/robotnotifications',
-              type: NT4TypeStr.kString,
-              properties: {})
-        ],
-      );
-      MockNT4Subscription mockSub = MockNT4Subscription();
+    notifications.listen();
 
-      when(mockConnection.subscribeAll(any, any)).thenReturn(mockSub);
+    // Verify that subscribeAll was called with the specific parameters
+    verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
+        .called(1);
+    verify(mockConnection.addDisconnectedListener(any)).called(1);
 
-      // Create a mock for the onNotification callback
-      MockNotificationCallback mockOnNotification = MockNotificationCallback();
+    // Verify that no other interactions have been made with the mockConnection
+    verifyNoMoreInteractions(mockConnection);
 
-      RobotNotificationsListener notifications = RobotNotificationsListener(
-        ntConnection: mockConnection,
-        onNotification: mockOnNotification.call,
-      );
+    // Verify that the onNotification callback was never called
+    verifyNever(mockOnNotification(any, any, any));
 
-      notifications.listen();
+    //publish some data and expect an update
+    data['title'] = 'Title2';
+    data['description'] = 'Description2';
+    data['level'] = 'INFO';
+    mockSub.updateValue(jsonEncode(data), 2);
 
-      // Verify that subscribeAll was called with the specific parameters
-      verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
-          .called(1);
-      verify(mockConnection.addDisconnectedListener(any)).called(1);
+    verify(mockOnNotification(data['title'], data['description'], any));
 
-      // Verify that no other interactions have been made with the mockConnection
-      verifyNoMoreInteractions(mockConnection);
+    //try malformed data
+    data['title'] = null;
+    data['description'] = null;
+    data['level'] = 'malformedlevel';
 
-      // Verify that the onNotification callback was never called
-      verifyNever(mockOnNotification.call(any, any, any));
-    },
-  );
-  test(
-    "Robot Notifications (Initial Connection | Existing Notifications)",
-    () {
-      Map<String, dynamic> initData = {
-        'title': 'Title1',
-        'description': 'Description1',
-        'level': 'INFO'
-      };
-      print('${jsonEncode(initData)}');
-      MockNTConnection mockConnection = createMockOnlineNT4(virtualTopics: [
-        NT4Topic(
-            name: '/Elastic/robotnotifications',
-            type: NT4TypeStr.kString,
-            properties: {})
-      ]);
+    mockSub.updateValue(jsonEncode(data), 3);
+    reset(mockOnNotification);
+    verifyNever(mockOnNotification(any, any, any));
+  });
 
-      MockNT4Subscription mockSub = MockNT4Subscription();
 
-      when(mockConnection.subscribeAll(any, any)).thenReturn(mockSub);
-
-      // Create a mock for the onNotification callback
-      MockNotificationCallback mockOnNotification = MockNotificationCallback();
-
-      RobotNotificationsListener notifications = RobotNotificationsListener(
-        ntConnection: mockConnection,
-        onNotification: mockOnNotification.call,
-      );
-
-      notifications.listen();
-      //TODO add stuff
-
-      // Verify that subscribeAll was called with the specific parameters
-      verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
-          .called(1);
-      verify(mockConnection.addDisconnectedListener(any)).called(1);
-
-      // Verify that no other interactions have been made with the mockConnection
-      verifyNoMoreInteractions(mockConnection);
-
-      // Verify that the onNotification callback was never called
-      verifyNever(mockOnNotification.call(any, any, any));
-    },
-  );
 }
