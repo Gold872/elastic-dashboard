@@ -72,12 +72,17 @@ void main() async {
 
   Settings.cornerRadius = cornerRadius;
 
-  PrefKeys.cornerRadius = cornerRadius.toString();
+  Settings.autoSave = preferences.getBool(PrefKeys.autoSave) ?? false;
 
   Settings.autoResizeToDS =
       preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
+
   Settings.defaultPeriod =
       preferences.getDouble(PrefKeys.defaultPeriod) ?? Settings.defaultPeriod;
+
+  Settings.autoSwitchTabs =
+      preferences.getBool(PrefKeys.autoSwitchTabs) ?? Settings.autoSwitchTabs;
+
   Settings.defaultGraphPeriod =
       preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
           Settings.defaultGraphPeriod;
