@@ -78,7 +78,7 @@ jobs:
           - os: windows-latest
             build-option: "windows"
             artifact-path: "build/windows/x64/runner/Release"
-            artifact-name: Elastic-Windows
+            artifact-name: Elastic-Windows_portable
           - os: macos-latest
             build-option: "macos"
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
@@ -118,6 +118,13 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
 
+      - name: Create installer
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer_setup_script.iss
+          options: /O+
+
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
         run: |
@@ -129,4 +136,12 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Upload installer artifact
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Elastic-Windows_installer
+          path: build/windows/x64/installer
           if-no-files-found: error
