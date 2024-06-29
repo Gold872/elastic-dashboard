@@ -79,18 +79,22 @@ jobs:
             build-option: "windows"
             artifact-path: "build/windows/x64/runner/Release"
             artifact-name: Elastic-Windows_portable
+            executable-type: portable
           - os: windows-latest
-            build-option: "windows_installer"
+            build-option: "windows"
             artifact-path: "build/windows/x64/installer"
             artifact-name: Elastic-Windows_installer
+            executable-type: installer
           - os: macos-latest
             build-option: "macos"
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
             artifact-name: Elastic-macOS
+            executable-type: portable
           - os: ubuntu-latest
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+            executable-type: portable
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
@@ -123,7 +127,7 @@ jobs:
         run: flutter build ${{ matrix.build-option }}
 
       - name: Create installer
-        if: ${{ matrix.build-option == 'windows_installer' }}
+        if: ${{ matrix.executable-type == 'installer' }}
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: installer_setup_script.iss
