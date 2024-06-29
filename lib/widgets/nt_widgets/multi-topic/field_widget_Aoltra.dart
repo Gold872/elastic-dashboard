@@ -23,7 +23,7 @@ bool gIsRedAlliance = true;
 
 class FieldWidgetAoltraModel extends NTWidgetModel {
   @override
-  static const String widgetType = 'Field Aoltra';
+  String type = "Field Aoltra";
 
   static const String _defaultGame = 'Crescendo';
   String _fieldGame = _defaultGame;
