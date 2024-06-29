@@ -1336,8 +1336,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   (!Settings.layoutLocked) ? () => _importLayout() : null,
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyO, control: true),
-              child: const Text(
-                'Open Layout',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.folder_open_outlined),
+                  SizedBox(width: 8),
+                  Text('Open Layout'),
+                ],
               ),
             ),
             // Save
@@ -1348,22 +1353,32 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               },
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyS, control: true),
-              child: const Text(
-                'Save',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.save_outlined),
+                  SizedBox(width: 8),
+                  Text('Save'),
+                ],
               ),
             ),
+
             // Export layout
             MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _exportLayout();
-              },
-              shortcut: const SingleActivator(LogicalKeyboardKey.keyS,
-                  shift: true, control: true),
-              child: const Text(
-                'Save As',
-              ),
-            ),
+                style: menuButtonStyle,
+                onPressed: () {
+                  _exportLayout();
+                },
+                shortcut: const SingleActivator(LogicalKeyboardKey.keyS,
+                    shift: true, control: true),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.save_as_outlined),
+                    SizedBox(width: 8),
+                    Text('Save As'),
+                  ],
+                )),
           ],
           child: const Text(
             'File',
@@ -1418,8 +1433,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               onPressed: () {
                 _displayAboutDialog(context);
               },
-              child: const Text(
-                'About',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline),
+                  SizedBox(width: 8),
+                  Text('About'),
+                ],
               ),
             ),
             // Check for Updates
@@ -1428,8 +1448,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               onPressed: () {
                 _checkForUpdates();
               },
-              child: const Text(
-                'Check for Updates',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.update_outlined),
+                  SizedBox(width: 8),
+                  Text('Check for updates'),
+                ],
               ),
             ),
           ],
