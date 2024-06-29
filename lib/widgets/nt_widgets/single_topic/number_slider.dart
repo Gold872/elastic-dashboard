@@ -5,7 +5,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -58,6 +57,8 @@ class NumberSliderModel extends NTWidgetModel {
   set dragging(value) => _dragging = value;
 
   NumberSliderModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double minValue = -1.0,
     double maxValue = 1.0,
@@ -71,8 +72,11 @@ class NumberSliderModel extends NTWidgetModel {
         _maxValue = maxValue,
         super();
 
-  NumberSliderModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  NumberSliderModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _minValue =
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
     _maxValue =
@@ -81,7 +85,9 @@ class NumberSliderModel extends NTWidgetModel {
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    _updateContinuously = tryCast(jsonData['update_continuously']) ?? false;
+    _updateContinuously = tryCast(jsonData['update_continuously']) ??
+        tryCast(jsonData['publish_all']) ??
+        false;
   }
 
   @override
@@ -91,7 +97,7 @@ class NumberSliderModel extends NTWidgetModel {
       'min_value': _minValue,
       'max_value': _maxValue,
       'divisions': _divisions,
-      'publish_all': _updateContinuously,
+      'update_continuously': _updateContinuously,
     };
   }
 
@@ -180,7 +186,7 @@ class NumberSliderModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(ntTopic!);
+      ntConnection.publishTopic(ntTopic!);
     }
 
     ntConnection.updateDataFromTopic(ntTopic!, value);
@@ -198,7 +204,7 @@ class NumberSlider extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

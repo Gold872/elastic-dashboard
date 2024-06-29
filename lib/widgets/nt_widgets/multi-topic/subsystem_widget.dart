@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class SubsystemModel extends NTWidgetModel {
@@ -13,10 +12,19 @@ class SubsystemModel extends NTWidgetModel {
   String get defaultCommandTopic => '$topic/.default';
   String get currentCommandTopic => '$topic/.command';
 
-  SubsystemModel({required super.topic, super.dataType, super.period})
-      : super();
+  SubsystemModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  SubsystemModel.fromJson({required super.jsonData}) : super.fromJson();
+  SubsystemModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -43,10 +51,10 @@ class SubsystemWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        String defaultCommand = tryCast(ntConnection
+        String defaultCommand = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.defaultCommandTopic)) ??
             'none';
-        String currentCommand = tryCast(ntConnection
+        String currentCommand = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.currentCommandTopic)) ??
             'none';
 

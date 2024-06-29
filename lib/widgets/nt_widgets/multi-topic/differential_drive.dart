@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class DifferentialDriveModel extends NTWidgetModel {
@@ -42,10 +41,19 @@ class DifferentialDriveModel extends NTWidgetModel {
 
   set rightSpeedCurrentValue(value) => _rightSpeedCurrentValue = value;
 
-  DifferentialDriveModel({required super.topic, super.dataType, super.period})
-      : super();
+  DifferentialDriveModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  DifferentialDriveModel.fromJson({required super.jsonData}) : super.fromJson();
+  DifferentialDriveModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void resetSubscription() {
@@ -91,10 +99,10 @@ class DifferentialDrive extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double leftSpeed = tryCast(
-                ntConnection.getLastAnnouncedValue(model.leftSpeedTopicName)) ??
+        double leftSpeed = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.leftSpeedTopicName)) ??
             0.0;
-        double rightSpeed = tryCast(ntConnection
+        double rightSpeed = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.rightSpeedTopicName)) ??
             0.0;
 
@@ -134,19 +142,18 @@ class DifferentialDrive extends NTWidget {
                   onChangeEnd: (value) {
                     bool publishTopic = model.leftSpeedTopic == null;
 
-                    model.leftSpeedTopic ??=
-                        ntConnection.getTopicFromName(model.leftSpeedTopicName);
+                    model.leftSpeedTopic ??= model.ntConnection
+                        .getTopicFromName(model.leftSpeedTopicName);
 
                     if (model.leftSpeedTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client
-                          .publishTopic(model.leftSpeedTopic!);
+                      model.ntConnection.publishTopic(model.leftSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(
+                    model.ntConnection.updateDataFromTopic(
                         model.leftSpeedTopic!, model.leftSpeedCurrentValue);
 
                     model.leftSpeedPreviousValue = model.leftSpeedCurrentValue;
@@ -207,7 +214,7 @@ class DifferentialDrive extends NTWidget {
                   onChangeEnd: (value) {
                     bool publishTopic = model.rightSpeedTopic == null;
 
-                    model.rightSpeedTopic ??= ntConnection
+                    model.rightSpeedTopic ??= model.ntConnection
                         .getTopicFromName(model.rightSpeedTopicName);
 
                     if (model.rightSpeedTopic == null) {
@@ -215,11 +222,10 @@ class DifferentialDrive extends NTWidget {
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client
-                          .publishTopic(model.rightSpeedTopic!);
+                      model.ntConnection.publishTopic(model.rightSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(
+                    model.ntConnection.updateDataFromTopic(
                         model.rightSpeedTopic!, model.rightSpeedCurrentValue);
 
                     model.rightSpeedPreviousValue =

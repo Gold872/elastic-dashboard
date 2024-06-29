@@ -4,7 +4,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class FMSInfoModel extends NTWidgetModel {
@@ -19,9 +18,19 @@ class FMSInfoModel extends NTWidgetModel {
   String get replayNumberTopic => '$topic/ReplayNumber';
   String get stationNumberTopic => '$topic/StationNumber';
 
-  FMSInfoModel({required super.topic, super.dataType, super.period});
+  FMSInfoModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  });
 
-  FMSInfoModel.fromJson({required super.jsonData}) : super.fromJson();
+  FMSInfoModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -85,23 +94,23 @@ class FMSInfo extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        String eventName =
-            tryCast(ntConnection.getLastAnnouncedValue(model.eventNameTopic)) ??
-                '';
-        int controlData = tryCast(
-                ntConnection.getLastAnnouncedValue(model.controlDataTopic)) ??
+        String eventName = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.eventNameTopic)) ??
+            '';
+        int controlData = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.controlDataTopic)) ??
             32;
-        bool redAlliance =
-            tryCast(ntConnection.getLastAnnouncedValue(model.allianceTopic)) ??
-                true;
-        int matchNumber = tryCast(
-                ntConnection.getLastAnnouncedValue(model.matchNumberTopic)) ??
+        bool redAlliance = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.allianceTopic)) ??
+            true;
+        int matchNumber = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.matchNumberTopic)) ??
             0;
-        int matchType =
-            tryCast(ntConnection.getLastAnnouncedValue(model.matchTypeTopic)) ??
-                0;
-        int replayNumber = tryCast(
-                ntConnection.getLastAnnouncedValue(model.replayNumberTopic)) ??
+        int matchType = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.matchTypeTopic)) ??
+            0;
+        int replayNumber = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.replayNumberTopic)) ??
             0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';

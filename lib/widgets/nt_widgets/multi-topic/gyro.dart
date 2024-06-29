@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -26,16 +25,21 @@ class GyroModel extends NTWidgetModel {
     refresh();
   }
 
-  GyroModel(
-      {required super.topic,
-      bool counterClockwisePositive = false,
-      super.dataType,
-      super.period})
-      : _counterClockwisePositive = counterClockwisePositive,
+  GyroModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    bool counterClockwisePositive = false,
+    super.dataType,
+    super.period,
+  })  : _counterClockwisePositive = counterClockwisePositive,
         super();
 
-  GyroModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  GyroModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _counterClockwisePositive =
         tryCast(jsonData['counter_clockwise_positive']) ?? false;
   }
@@ -106,7 +110,7 @@ class Gyro extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

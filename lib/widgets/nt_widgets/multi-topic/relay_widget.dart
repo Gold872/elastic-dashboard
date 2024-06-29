@@ -4,7 +4,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class RelayModel extends NTWidgetModel {
@@ -18,9 +17,19 @@ class RelayModel extends NTWidgetModel {
 
   final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayModel({required super.topic, super.dataType, super.period}) : super();
+  RelayModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  RelayModel.fromJson({required super.jsonData}) : super.fromJson();
+  RelayModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -59,7 +68,8 @@ class RelayWidget extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopicName),
+      initialData:
+          model.ntConnection.getLastAnnouncedValue(model.valueTopicName),
       builder: (context, snapshot) {
         String selected = tryCast(snapshot.data) ?? 'Off';
 
@@ -84,18 +94,19 @@ class RelayWidget extends NTWidget {
 
                     bool publishTopic = model.valueTopic == null;
 
-                    model.valueTopic ??=
-                        ntConnection.getTopicFromName(model.valueTopicName);
+                    model.valueTopic ??= model.ntConnection
+                        .getTopicFromName(model.valueTopicName);
 
                     if (model.valueTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(model.valueTopic!);
+                      model.ntConnection.publishTopic(model.valueTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(model.valueTopic!, option);
+                    model.ntConnection
+                        .updateDataFromTopic(model.valueTopic!, option);
                   },
                   isSelected:
                       model.selectedOptions.map((e) => selected == e).toList(),

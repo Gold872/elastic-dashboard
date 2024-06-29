@@ -1,13 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import '../test_util.mocks.dart';
 
 void main() {
+  late SharedPreferences preferences;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    preferences = await SharedPreferences.getInstance();
+  });
+
   test('Shuffleboard NT listener', () async {
     List<Function(NT4Topic topic)> topicAnnounceListeners = [];
     Map<String, dynamic> lastAnnouncedValues = {
@@ -16,20 +23,14 @@ void main() {
     };
 
     final mockNT4Connection = MockNTConnection();
-    final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
-    when(mockNT4Client.lastAnnouncedValues).thenReturn(lastAnnouncedValues);
-    when(mockNT4Client.topicAnnounceListeners)
-        .thenReturn(topicAnnounceListeners);
-    when(mockNT4Client.addTopicAnnounceListener(any)).thenAnswer(
+    when(mockNT4Connection.addTopicAnnounceListener(any)).thenAnswer(
         (realInvocation) =>
             topicAnnounceListeners.add(realInvocation.positionalArguments[0]));
 
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
-
-    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
 
     when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
@@ -48,15 +49,13 @@ void main() {
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
 
-    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
-
-    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
-
-    NTConnection.instance = mockNT4Connection;
+    // NTConnection.instance = mockNT4Connection;
 
     Map<String, dynamic> announcedWidgetData = {};
 
     ShuffleboardNTListener ntListener = ShuffleboardNTListener(
+      ntConnection: mockNT4Connection,
+      preferences: preferences,
       onWidgetAdded: (widgetData) {
         widgetData.forEach(
             (key, value) => announcedWidgetData.putIfAbsent(key, () => value));
@@ -65,9 +64,9 @@ void main() {
       ..initializeSubscriptions()
       ..initializeListeners();
 
-    expect(ntConnection.nt4Client.topicAnnounceListeners.isNotEmpty, true);
+    expect(topicAnnounceListeners.isNotEmpty, true);
 
-    for (final callback in ntConnection.nt4Client.topicAnnounceListeners) {
+    for (final callback in topicAnnounceListeners) {
       callback.call(NT4Topic(
         name: '/Shuffleboard/.metadata/Test-Tab/Test Number/Position',
         type: NT4TypeStr.kFloat32Arr,
@@ -97,9 +96,9 @@ void main() {
     expect(announcedWidgetData.containsKey('width'), true);
     expect(announcedWidgetData.containsKey('height'), true);
 
-    expect(announcedWidgetData['x'], Settings.gridSize.toDouble());
-    expect(announcedWidgetData['y'], Settings.gridSize.toDouble());
-    expect(announcedWidgetData['width'], Settings.gridSize.toDouble() * 2.0);
-    expect(announcedWidgetData['height'], Settings.gridSize.toDouble() * 2.0);
+    expect(announcedWidgetData['x'], Defaults.gridSize.toDouble());
+    expect(announcedWidgetData['y'], Defaults.gridSize.toDouble());
+    expect(announcedWidgetData['width'], Defaults.gridSize.toDouble() * 2.0);
+    expect(announcedWidgetData['height'], Defaults.gridSize.toDouble() * 2.0);
   });
 }

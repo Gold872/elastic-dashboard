@@ -8,11 +8,11 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 
 class RobotNotificationsListener {
   bool _alertFirstRun = true;
-  final NTConnection connection;
+  final NTConnection ntConnection;
   final Function(String title, String description, Icon icon) onNotification;
 
   RobotNotificationsListener({
-    required this.connection,
+    required this.ntConnection,
     required this.onNotification,
   });
 

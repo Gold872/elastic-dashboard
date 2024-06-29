@@ -4,7 +4,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class AccelerometerModel extends NTWidgetModel {
@@ -15,10 +14,19 @@ class AccelerometerModel extends NTWidgetModel {
 
   String get valueTopic => '$topic/Value';
 
-  AccelerometerModel({required super.topic, super.dataType, super.period})
-      : super();
+  AccelerometerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  AccelerometerModel.fromJson({required super.jsonData}) : super.fromJson();
+  AccelerometerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -57,7 +65,7 @@ class AccelerometerWidget extends NTWidget {
 
     return StreamBuilder(
         stream: model.valueSubscription.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+        initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
         builder: (context, snapshot) {
           double value = tryCast(snapshot.data) ?? 0.0;
 

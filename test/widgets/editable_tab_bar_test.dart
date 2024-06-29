@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
+import '../test_util.mocks.dart';
 import 'editable_tab_bar_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<FakeTabBarFunctions>()])
@@ -28,9 +31,14 @@ class FakeTabBarFunctions {
 
 void main() {
   late MockFakeTabBarFunctions tabBarFunctions;
+  late MockNTConnection mockNTConnection;
+  late SharedPreferences preferences;
 
-  setUp(() {
+  setUp(() async {
     tabBarFunctions = MockFakeTabBarFunctions();
+    SharedPreferences.setMockInitialValues({});
+    preferences = await SharedPreferences.getInstance();
+    mockNTConnection = createMockOfflineNT4();
   });
 
   testWidgets('Editable tab bar', (widgetTester) async {
@@ -40,16 +48,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {},
+            onTabCreate: () {},
             onTabDestroy: (index) {},
             onTabMoveLeft: () {},
             onTabMoveRight: () {},
@@ -80,16 +99,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -131,16 +161,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -182,16 +223,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -246,16 +298,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {
@@ -321,16 +384,27 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
+            preferences: preferences,
             currentIndex: 0,
             tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
+              TabData(
+                name: 'Teleoperated',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
+              TabData(
+                name: 'Autonomous',
+                tabGrid: TabGridModel(
+                  ntConnection: mockNTConnection,
+                  preferences: preferences,
+                  onAddWidgetPressed: () {},
+                ),
+              ),
             ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {
+            onTabCreate: () {
               tabBarFunctions.onTabCreate();
             },
             onTabDestroy: (index) {

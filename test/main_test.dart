@@ -13,8 +13,6 @@ import 'test_util.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setupMockOfflineNT4();
-
   testWidgets('Full app test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
@@ -33,8 +31,9 @@ void main() {
 
     await widgetTester.pumpWidget(
       Elastic(
-        version: '0.0.0.0',
+        ntConnection: createMockOfflineNT4(),
         preferences: preferences,
+        version: '0.0.0.0',
       ),
     );
 

@@ -4,7 +4,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class UltrasonicModel extends NTWidgetModel {
@@ -15,10 +14,19 @@ class UltrasonicModel extends NTWidgetModel {
 
   late NT4Subscription valueSubscription;
 
-  UltrasonicModel({required super.topic, super.dataType, super.period})
-      : super();
+  UltrasonicModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  UltrasonicModel.fromJson({required super.jsonData}) : super.fromJson();
+  UltrasonicModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -55,7 +63,7 @@ class Ultrasonic extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

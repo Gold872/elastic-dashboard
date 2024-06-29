@@ -6,7 +6,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -37,6 +36,8 @@ class BasicSwerveModel extends NTWidgetModel {
   String _rotationUnit = 'Radians';
 
   BasicSwerveModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
@@ -46,8 +47,11 @@ class BasicSwerveModel extends NTWidgetModel {
         _showRobotRotation = showRobotRotation,
         super();
 
-  BasicSwerveModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  BasicSwerveModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _rotationUnit = tryCast(jsonData['rotation_unit']) ?? 'Degrees';
   }
@@ -193,36 +197,36 @@ class SwerveDriveWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double frontLeftAngle = tryCast(ntConnection
+        double frontLeftAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.frontLeftAngleTopic)) ??
             0.0;
-        double frontLeftVelocity = tryCast(ntConnection
+        double frontLeftVelocity = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.frontLeftVelocityTopic)) ??
             0.0;
 
-        double frontRightAngle = tryCast(ntConnection
+        double frontRightAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.frontRightAngleTopic)) ??
             0.0;
-        double frontRightVelocity = tryCast(ntConnection
+        double frontRightVelocity = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.frontRightVelocityTopic)) ??
             0.0;
 
-        double backLeftAngle = tryCast(
-                ntConnection.getLastAnnouncedValue(model.backLeftAngleTopic)) ??
+        double backLeftAngle = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.backLeftAngleTopic)) ??
             0.0;
-        double backLeftVelocity = tryCast(ntConnection
+        double backLeftVelocity = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.backLeftVelocityTopic)) ??
             0.0;
 
-        double backRightAngle = tryCast(ntConnection
+        double backRightAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.backRightAngleTopic)) ??
             0.0;
-        double backRightVelocity = tryCast(ntConnection
+        double backRightVelocity = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.backRightVelocityTopic)) ??
             0.0;
 
-        double robotAngle = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotAngleTopic)) ??
+        double robotAngle = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.robotAngleTopic)) ??
             0.0;
 
         if (model.rotationUnit == 'Degrees') {
