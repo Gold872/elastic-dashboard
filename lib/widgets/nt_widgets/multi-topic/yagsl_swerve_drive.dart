@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -13,6 +16,8 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 class YAGSLSwerveDriveModel extends NTWidgetModel {
   @override
   String type = YAGSLSwerveDrive.widgetType;
+
+  double _angleOffset = 0.0;
 
   String get measuredStatesTopic => '$topic/measuredStates';
   String get desiredStatesTopic => '$topic/desiredStates';
@@ -53,6 +58,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true;
+    _angleOffset = tryCast(jsonData['angle_offset']) ?? 0.0;
   }
 
   @override
@@ -61,11 +67,15 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       ...super.toJson(),
       'show_robot_rotation': _showRobotRotation,
       'show_desired_states': _showDesiredStates,
+      'angle_offset': _angleOffset,
     };
   }
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
+    String rotationUnit =
+        tryCast(ntConnection.getLastAnnouncedValue(rotationUnitTopic)) ??
+            'radians';
     return [
       Row(
         children: [
@@ -85,6 +95,22 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
               onToggle: (value) {
                 showDesiredStates = value;
               },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newOffset = double.tryParse(value);
+                _angleOffset = newOffset ?? 0.0;
+              },
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
+              label: 'Angle Offset ($rotationUnit)',
+              initialText: _angleOffset.toString(),
             ),
           ),
         ],
@@ -114,6 +140,8 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
     double robotAngle =
         tryCast(ntConnection.getLastAnnouncedValue(robotRotationTopic)) ?? 0.0;
+
+    robotAngle += _angleOffset;
 
     double maxSpeed =
         tryCast(ntConnection.getLastAnnouncedValue(maxSpeedTopic)) ?? 4.5;
@@ -180,9 +208,9 @@ class YAGSLSwerveDrive extends NTWidget {
             0.0;
 
         if (rotationUnit == 'degrees') {
-          robotAngle = radians(robotAngle);
+          robotAngle = radians(robotAngle + model._angleOffset);
         } else if (rotationUnit == 'rotations') {
-          robotAngle *= 2 * pi;
+          robotAngle *= 2 * pi + model._angleOffset;
         }
 
         double maxSpeed =
