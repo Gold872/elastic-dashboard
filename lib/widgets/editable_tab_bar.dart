@@ -176,7 +176,8 @@ class EditableTabBar extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: (currentIndex == index)
                                 ? theme.colorScheme.onPrimaryContainer
-                                : Colors.transparent,
+                                : theme.colorScheme.onPrimaryContainer
+                                    .withAlpha(20),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(10.0),
                               topRight: Radius.circular(10.0),
