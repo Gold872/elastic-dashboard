@@ -44,6 +44,9 @@ class FieldWidgetAoltraModel extends NTWidgetModel {
 
   bool rendered = false;
 
+  List<RobotPrartis> robots = [];
+
+
   late Function(NT4Topic topic) topicAnnounceListener;
 
   FieldWidgetAoltraModel({
@@ -321,6 +324,20 @@ class FieldWidgetAoltraModel extends NTWidgetModel {
     return data;
   }
 
+  void connect(
+      double scaleReduction,
+      {Size? objectSize}) {
+
+    double width = (objectSize?.width ?? otherObjectSize) *
+        field.pixelsPerMeterHorizontal *
+        scaleReduction;
+
+    double length = (objectSize?.height ?? otherObjectSize) *
+        field.pixelsPerMeterVertical *
+        scaleReduction;
+
+  }
+
   @override
   Stream<Object> get multiTopicPeriodicStream async* {
     final Duration delayTime = Duration(
@@ -442,27 +459,7 @@ class FieldWidgetAoltra extends NTWidget {
         positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0.0)
       ..rotateZ(-radians(objectPosition[2]));
 
-    Widget otherObject = Container(
-      alignment: Alignment.center,
-      constraints: const BoxConstraints(
-        minWidth: 4.0,
-        minHeight: 4.0,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.35),
-        border: Border.all(
-          color: gIsRedAlliance ? Colors.red : Colors.blue,
-          width: 4.0,
-        ),
-      ),
-      width: length,
-      height: width,
-      child: CustomPaint(
-        size: Size(width * 0.25, width * 0.25),
-        painter:
-            TrianglePainter(strokeColor: const Color.fromARGB(255, 0, 255, 0)),
-      ),
-    );
+    Widget otherObject = SwervePinat(lengthwheel: length,widthwheel: width);
 
     return Transform(
       origin: Offset(length, width) / 2,
@@ -703,3 +700,132 @@ class TrajectoryPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
+
+// Robot
+class RobotPinat extends StatelessWidget{
+
+  final Color backgraundColor;
+  final double lengthrobot;
+  final double widthrobot;
+  final Color baparsColor;
+  CustomPainter? centerPainter;
+  final Color? centerPainterColor; 
+
+  RobotPinat(
+    {this.backgraundColor = Colors.black, 
+    required this.lengthrobot, 
+    required this.widthrobot, 
+    this.baparsColor = Colors.red, 
+    CustomPainter? centerPainter1, 
+    this.centerPainterColor,
+    super.key}
+  )
+  {
+    centerPainter = centerPainter1 ?? TrianglePainter(strokeColor: centerPainterColor ?? Color.fromARGB(255, 0, 255, 0));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      constraints: const BoxConstraints(
+        minWidth: 4.0,
+        minHeight: 4.0,
+      ),
+      decoration: BoxDecoration(
+        color: backgraundColor,
+        border: Border.all(
+          color: baparsColor,
+          width: 4.0,
+        ),
+      ),
+      width: lengthrobot,
+      height: widthrobot,
+      child: CustomPaint(
+        size: Size(widthrobot * 0.25, lengthrobot * 0.25),
+        painter:
+            centerPainter,
+      ),
+    );
+  }
+}
+
+// Swerve
+class SwervePinat extends StatelessWidget{
+
+  final Color backgraundColor;
+  double lengthwheel;
+  double widthwheel;
+  final Color baparsColor;
+
+  SwervePinat(
+    {this.backgraundColor = Colors.black, 
+    required this.lengthwheel, 
+    required this.widthwheel, 
+    this.baparsColor = Colors.red, 
+    super.key}
+  )
+  {
+    widthwheel = widthwheel/2;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      constraints: const BoxConstraints(
+        minWidth: 4.0,
+        minHeight: 4.0,
+      ),
+      decoration: BoxDecoration(
+        color: backgraundColor,
+        border: Border.all(
+          color: baparsColor,
+          width: 4.0,
+        ),
+      ),
+      width: lengthwheel,
+      height: widthwheel,
+    );
+  }
+}
+
+class RobotPrartis{
+  String _name;
+  double _width;
+  double _length;
+  Widget _image;
+  bool hide;
+
+  RobotPrartis(this._name, this._length, this._width, this._image, {this.hide = false});
+
+  void setHide(bool hide){
+    hide = hide;
+  }
+
+  void setImage(Widget image){
+    _image = image;
+  }
+
+  Widget getImage(){
+    return _image;
+  }
+
+  String getName(){
+    return _name;
+  }
+
+  double getLength(){
+    return _length;
+  }
+
+  double getWidth(){
+    return _width;
+  }
+
+  bool getHide(){
+    return hide;
+  }
+}
+
+
