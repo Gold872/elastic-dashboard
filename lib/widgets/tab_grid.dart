@@ -26,7 +26,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
-  static WidgetContainerModel? copy;
+  static Map<String, dynamic>? _copyJsonData;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -649,7 +649,7 @@ class TabGrid extends StatelessWidget {
   }
 
   void copyWidget(WidgetContainerModel widget) {
-    copy = widget;
+    _copyJsonData = widget.toJson();
   }
 
   void lockLayout() {
@@ -922,13 +922,13 @@ class TabGrid extends StatelessWidget {
           ),
         ];
 
-        if (copy != null) {
+        if (_copyJsonData != null) {
           contextMenuEntries.add(
             MenuItem(
               label: 'Paste',
               icon: Icons.paste_outlined,
               onSelected: () {
-                pasteWidget(copy, details.globalPosition);
+                pasteWidget(_copyJsonData, details.globalPosition);
               },
             ),
           );
@@ -965,13 +965,13 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  void pasteWidget(WidgetContainerModel? widget, Offset globalPosition) {
-    if (widget == null) return;
-    Map<String, dynamic> jsonData = widget.toJson();
-    jsonData['x'] = getLocalPosition(globalPosition).dx;
-    jsonData['y'] = getLocalPosition(globalPosition).dy;
+  void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
+    if (widgetJson == null) return;
 
-    WidgetContainerModel createdWidget = createWidgetFromJson(jsonData);
+    widgetJson['x'] = getLocalPosition(globalPosition).dx;
+    widgetJson['y'] = getLocalPosition(globalPosition).dy;
+
+    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
 
     _widgetModels.add(createdWidget);
     refresh();
