@@ -1,6 +1,4 @@
 import 'dart:math';
-
-import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -28,7 +26,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
-  static WidgetContainerModel? copy;
+  static Map<String, dynamic>? _copyJsonData;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -651,8 +649,7 @@ class TabGrid extends StatelessWidget {
   }
 
   void copyWidget(WidgetContainerModel widget) {
-    WidgetContainerModel newWidget = WidgetContainerModel.copy(widget);
-    copy = widget;
+    _copyJsonData = widget.toJson();
   }
 
   void lockLayout() {
@@ -925,13 +922,13 @@ class TabGrid extends StatelessWidget {
           ),
         ];
 
-        if (copy != null) {
+        if (_copyJsonData != null) {
           contextMenuEntries.add(
             MenuItem(
               label: 'Paste',
               icon: Icons.paste_outlined,
               onSelected: () {
-                pasteWidget(copy!, details.globalPosition);
+                pasteWidget(_copyJsonData, details.globalPosition);
               },
             ),
           );
@@ -968,27 +965,34 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  void pasteWidget(WidgetContainerModel? widget, Offset globalPosition) {
-    // BUG: doesnt work on runtime, does work when quitting, will create another copy on top of the original
-    if (widget == null) return;
+  void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
+    if (widgetJson == null) return;
 
-    Offset localPosition = getLocalPosition(globalPosition);
+    widgetJson['x'] = getLocalPosition(globalPosition).dx;
+    widgetJson['y'] = getLocalPosition(globalPosition).dy;
 
-    widget.displayRect =
-        Rect.fromCenter(center: localPosition, width: 200, height: 200);
-    widget.setPreviewRect(widget.displayRect);
-    widget.setDraggingRect(widget.displayRect);
+    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
 
-    if (widget is NTWidgetContainerModel &&
-        isValidLayoutLocation(widget.cursorGlobalLocation)) {
-      LayoutContainerModel layoutContainer =
-          getLayoutAtLocation(widget.cursorGlobalLocation)!;
+    _widgetModels.add(createdWidget);
+    refresh();
+  }
 
-      if (layoutContainer.willAcceptWidget(widget)) {
-        layoutContainer.addWidget(widget);
+  WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
+    String type = json['type'];
+    if (json['type'] == 'List Layout') {
+      switch (type) {
+        case 'List Layout':
+          return ListLayoutModel.fromJson(
+              jsonData: json, tabGrid: this, onDragCancel: null);
+        default:
+          throw ArgumentError('Unknown type: $type');
       }
+    } else {
+      return NTWidgetContainerModel.fromJson(
+        enabled: ntConnection.isNT4Connected,
+        jsonData: json,
+        onJsonLoadingWarning: null,
+      );
     }
-
-    _widgetModels.add(widget);
   }
 }
