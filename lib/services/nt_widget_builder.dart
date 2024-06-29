@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget_Aoltra.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -101,6 +102,7 @@ class NTWidgetBuilder {
       'Differential Drivebase': DifferentialDriveModel.new,
       EncoderWidget.widgetType: EncoderModel.new,
       'Quadrature Encoder': EncoderModel.new,
+      FieldWidgetAoltra.widgetType: FieldWidgetAoltraModel.new,
       FieldWidget.widgetType: FieldWidgetModel.new,
       'Field2d': FieldWidgetModel.new,
       FMSInfo.widgetType: FMSInfoModel.new,
@@ -147,6 +149,7 @@ class NTWidgetBuilder {
       'Differential Drivebase': DifferentialDriveModel.fromJson,
       EncoderWidget.widgetType: EncoderModel.fromJson,
       'Quadrature Encoder': EncoderModel.fromJson,
+      FieldWidgetAoltra.widgetType: FieldWidgetAoltraModel.fromJson,
       FieldWidget.widgetType: FieldWidgetModel.fromJson,
       'Field2d': FieldWidgetModel.fromJson,
       FMSInfo.widgetType: FMSInfoModel.fromJson,
@@ -199,7 +202,8 @@ class NTWidgetBuilder {
       EncoderWidget.widgetType: EncoderWidget.new,
       'Quadrature Encoder': EncoderWidget.new,
       FieldWidget.widgetType: FieldWidget.new,
-      'Field2d': FieldWidget.new,
+      FieldWidgetAoltra.widgetType: FieldWidgetAoltra.new,
+      'Field2d': FieldWidgetAoltra.new,
       FMSInfo.widgetType: FMSInfo.new,
       Gyro.widgetType: Gyro.new,
       MotorController.widgetType: MotorController.new,
