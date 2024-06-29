@@ -1629,10 +1629,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   void resolveAutoSave() {
     if (Settings.autoSave) {
       _saveLayout();
-      print("auto - Saved");
-    } else {
-      print("auto - non active");
-    }
+    } else {}
+    // TODO
   }
 
   void _startTimer() {

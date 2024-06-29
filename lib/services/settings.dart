@@ -14,31 +14,102 @@ class Settings {
   static double cornerRadius = 15.0;
   static bool snapToGrid = true;
   static bool autoResizeToDS = false;
+  static bool autoSwitchTabs = false;
 
-  // window_manager doesn't support drag disable/maximize
-  // disable on some platforms, this is a dumb workaround for it
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
 
   static double defaultPeriod = 0.06;
   static double defaultGraphPeriod = 0.033;
   static bool autoSave = false;
+
+  static final Map<String, dynamic> _settings = {
+    'repositoryLink': repositoryLink,
+    'releasesLink': releasesLink,
+    'ipAddressMode': ipAddressMode,
+    'ipAddress': ipAddress,
+    'teamNumber': teamNumber,
+    'gridSize': gridSize,
+    'layoutLocked': layoutLocked,
+    'cornerRadius': cornerRadius,
+    'snapToGrid': snapToGrid,
+    'autoResizeToDS': autoResizeToDS,
+    'autoSwitchTabs': autoSwitchTabs,
+    'isWindowDraggable': isWindowDraggable,
+    'isWindowMaximizable': isWindowMaximizable,
+    'defaultPeriod': defaultPeriod,
+    'defaultGraphPeriod': defaultGraphPeriod,
+    'autoSave': autoSave,
+  };
+
+  static dynamic get(String key) => _settings[key];
+
+  static void set(String key, dynamic value) {
+    _settings[key] = value;
+    switch (key) {
+      case 'ipAddressMode':
+        ipAddressMode = value;
+        break;
+      case 'ipAddress':
+        ipAddress = value;
+        break;
+      case 'teamNumber':
+        teamNumber = value;
+        break;
+      case 'gridSize':
+        gridSize = value;
+        break;
+      case 'layoutLocked':
+        layoutLocked = value;
+        break;
+      case 'cornerRadius':
+        cornerRadius = value;
+        break;
+      case 'snapToGrid':
+        snapToGrid = value;
+        break;
+      case 'autoResizeToDS':
+        autoResizeToDS = value;
+        break;
+      case 'autoSwitchTabs': // Added case for autoSwitchTabs
+        autoSwitchTabs = value;
+        break;
+      case 'isWindowDraggable':
+        isWindowDraggable = value;
+        break;
+      case 'isWindowMaximizable':
+        isWindowMaximizable = value;
+        break;
+      case 'defaultPeriod':
+        defaultPeriod = value;
+        break;
+      case 'defaultGraphPeriod':
+        defaultGraphPeriod = value;
+        break;
+      case 'autoSave':
+        autoSave = value;
+        break;
+      default:
+        throw ArgumentError('Invalid settings key: $key');
+    }
+  }
 }
 
 class PrefKeys {
-  static String layout = 'layout';
-  static String ipAddress = 'ip_address';
-  static String ipAddressMode = 'ip_address_mode';
-  static String teamNumber = 'team_number';
-  static String teamColor = 'team_color';
-  static String layoutLocked = 'layout_locked';
-  static String gridSize = 'grid_size';
-  static String cornerRadius = 'corner_radius';
-  static String snapToGrid = 'show_grid';
-  static String autoResizeToDS = 'auto_resize_to_driver_station';
-  static String rememberWindowPosition = 'remember_window_position';
-  static String defaultPeriod = 'default_period';
-  static String defaultGraphPeriod = 'default_graph_period';
-  static String windowPosition = 'window_position';
-  static String autoSave = "auto_save";
+  static const layout = 'layout';
+  static const ipAddress = 'ip_address';
+  static const ipAddressMode = 'ip_address_mode';
+  static const teamNumber = 'team_number';
+  static const teamColor = 'team_color';
+  static const layoutLocked = 'layout_locked';
+  static const gridSize = 'grid_size';
+  static const cornerRadius = 'corner_radius';
+  static const snapToGrid = 'show_grid';
+  static const autoResizeToDS = 'auto_resize_to_driver_station';
+  static const rememberWindowPosition = 'remember_window_position';
+  static const defaultPeriod = 'default_period';
+  static const defaultGraphPeriod = 'default_graph_period';
+  static const windowPosition = 'window_position';
+  static const autoSave = 'auto_save';
+  static const autoSwitchTabs = 'auto_switch_tabs';
 }

@@ -29,6 +29,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(bool value)? onAutoSaveChanged;
+  final Function(bool value)? onAutoSwitchTabsChanged;
 
   const SettingsDialog(
       {super.key,
@@ -45,7 +46,8 @@ class SettingsDialog extends StatefulWidget {
       this.onLayoutLock,
       this.onDefaultPeriodChanged,
       this.onDefaultGraphPeriodChanged,
-      this.onAutoSaveChanged});
+      this.onAutoSaveChanged,
+      this.onAutoSwitchTabsChanged});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -59,7 +61,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 275 + 80,
+          maxHeight: 400,
           maxWidth: 725,
         ),
         child: Row(
@@ -71,8 +73,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ..._generalSettings(),
-                  const Divider(),
-                  ..._gridSettings(),
                 ],
               ),
             ),
@@ -81,7 +81,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ..._ipAddressSettings(),
+                  ...allRobotSettings(),
                   const Divider(),
                   ..._networkTablesSettings(),
                 ],
@@ -99,7 +99,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
-  List<Widget> _generalSettings() {
+  List<Widget> _robotPerf() {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
     return [
@@ -131,8 +131,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
   }
 
-  List<Widget> _ipAddressSettings() {
+  List<Widget> allRobotSettings() {
     return [
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text("Robot Settings",
+            style: TextStyle(
+              fontSize: 20.0,
+            )),
+      ),
+      const Divider(),
+      const SizedBox(height: 5),
+      ..._robotPerf(),
+      const Divider(),
+      const SizedBox(height: 5),
       const Align(
         alignment: Alignment.topLeft,
         child: Text('IP Address Settings'),
@@ -175,8 +187,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
   }
 
-  List<Widget> _gridSettings() {
+  List<Widget> _generalSettings() {
     return [
+      const Align(
+          alignment: Alignment.topLeft,
+          child: Text("General Settings", style: TextStyle(fontSize: 20.0))),
+      const Divider(),
       const Align(
         alignment: Alignment.topLeft,
         child: Text('Grid Settings'),
@@ -281,32 +297,73 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
         ],
       ),
-      const SizedBox(height: 6),
+      const Divider(),
       const Align(
         alignment: Alignment.topLeft,
-        child: Text('Prefrences'),
+        child: Text('Preferences'),
       ),
       const SizedBox(height: 6),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Flexible(
-          //   flex: 5,
-          //   child: DialogToggleSwitch(
-          //     initialValue:
-          //         widget.preferences.getBool(PrefKeys.rememberWindowPosition) ??
-          //             false,
-          //     label: 'Auto Save',
-          //     onToggle: (value) {
-          //       setState(() {
-          //         widget.onAutoSaveChanged?.call(value);
-          //       });
-          //     },
-          //   ),
-          // ),
+          Flexible(
+            flex: 4,
+            child: DialogToggleSwitch(
+              initialValue:
+                  widget.preferences.getBool(PrefKeys.autoSwitchTabs) ??
+                      Settings.autoSwitchTabs,
+              label: 'Auto-Switch tabs',
+              onToggle: (value) {
+                setState(() {
+                  Settings.set('autoSwitchTabs', value);
+                });
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Auto-Switch Tabs Info'),
+                    content: const Text(
+                        'Will automatically switch between tabs according to the according state of the robot: \n\t - Disabled \n\t - Autonomous \n\t - Teleoperated \n\t - Test \n\n * Will not switch if a tab with the according name does not exist.'),
+                    actions: [
+                      TextButton(
+                        child: const Text('Close'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
         ],
-      ),
+      )
     ];
+  }
+
+  void _showInfoDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   List<Widget> _networkTablesSettings() {
