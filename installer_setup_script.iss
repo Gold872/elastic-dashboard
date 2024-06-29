@@ -1,4 +1,5 @@
 #define MyAppName "Elastic"
+#define MyAppFolderName "FRC Elastic"
 #define MyAppPublisher "Gold87"
 #define MyAppURL "https://github.com/gold872/elastic-dashboard/"
 #define MyAppExeName "elastic_dashboard.exe"
@@ -16,7 +17,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={autopf}\{#MyAppFolderName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
