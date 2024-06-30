@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -786,8 +787,16 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            var widget = getWidgetFromContainer(container);
+            widget?.onTap();
+          },
+          onDoubleTap: () {
+            getWidgetFromContainer(container)?.onDoubleTap();
+          },
           onSecondaryTapUp: (details) {
+            getWidgetFromContainer(container)?.onSecondaryTap();
+
             if (Settings.layoutLocked) {
               return;
             }
@@ -840,7 +849,12 @@ class TabGrid extends StatelessWidget {
               },
             );
           },
-          child: getWidgetFromModel(container),
+          child: MouseRegion(
+              onHover: (event) {
+                getWidgetFromContainer(container)?.onHover(event);
+              },
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: getWidgetFromModel(container)),
         ),
       );
     }
@@ -968,31 +982,23 @@ class TabGrid extends StatelessWidget {
   void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
     if (widgetJson == null) return;
 
-    widgetJson['x'] = getLocalPosition(globalPosition).dx;
-    widgetJson['y'] = getLocalPosition(globalPosition).dy;
+    Offset localPosition = getLocalPosition(globalPosition);
 
-    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
+    widget.displayRect =
+        Rect.fromCenter(center: localPosition, width: 200, height: 200);
+    widget.setPreviewRect(widget.displayRect);
+    widget.setDraggingRect(widget.displayRect);
 
-    _widgetModels.add(createdWidget);
-    refresh();
-  }
+    if (widget is NTWidgetContainerModel &&
+        isValidLayoutLocation(widget.cursorGlobalLocation)) {
+      LayoutContainerModel layoutContainer =
+          getLayoutAtLocation(widget.cursorGlobalLocation)!;
 
-  WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
-    String type = json['type'];
-    if (json['type'] == 'List Layout') {
-      switch (type) {
-        case 'List Layout':
-          return ListLayoutModel.fromJson(
-              jsonData: json, tabGrid: this, onDragCancel: null);
-        default:
-          throw ArgumentError('Unknown type: $type');
+      if (layoutContainer.willAcceptWidget(widget)) {
+        layoutContainer.addWidget(widget);
       }
-    } else {
-      return NTWidgetContainerModel.fromJson(
-        enabled: ntConnection.isNT4Connected,
-        jsonData: json,
-        onJsonLoadingWarning: null,
-      );
     }
+
+    _widgetModels.add(widget);
   }
 }

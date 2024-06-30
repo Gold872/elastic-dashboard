@@ -1,5 +1,6 @@
 # ![Elastic Logo](assets/logos/logo_full.png)
 Modified by Team 9738
+
 [![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
 
 A simple and modern dashboard for FRC.

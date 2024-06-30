@@ -167,85 +167,88 @@ class YAGSLSwerveDrive extends NTWidget {
   Widget build(BuildContext context) {
     YAGSLSwerveDriveModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> measuredStatesRaw = tryCast(ntConnection
-                .getLastAnnouncedValue(model.measuredStatesTopic)) ??
-            [];
-        List<Object?> desiredStatesRaw = tryCast(
-                ntConnection.getLastAnnouncedValue(model.desiredStatesTopic)) ??
-            [];
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: StreamBuilder(
+        stream: model.multiTopicPeriodicStream,
+        builder: (context, snapshot) {
+          List<Object?> measuredStatesRaw = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.measuredStatesTopic)) ??
+              [];
+          List<Object?> desiredStatesRaw = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.desiredStatesTopic)) ??
+              [];
 
-        List<double> measuredStates =
-            measuredStatesRaw.whereType<double>().toList();
-        List<double> desiredStates =
-            desiredStatesRaw.whereType<double>().toList();
+          List<double> measuredStates =
+              measuredStatesRaw.whereType<double>().toList();
+          List<double> desiredStates =
+              desiredStatesRaw.whereType<double>().toList();
 
-        double width = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotWidthTopic)) ??
-            1.0;
-        double length = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotLengthTopic)) ??
-            width;
+          double width = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.robotWidthTopic)) ??
+              1.0;
+          double length = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.robotLengthTopic)) ??
+              width;
 
-        if (width <= 0.0) {
-          width = 1.0;
-        }
-        if (length <= 0.0) {
-          length = 0.0;
-        }
+          if (width <= 0.0) {
+            width = 1.0;
+          }
+          if (length <= 0.0) {
+            length = 0.0;
+          }
 
-        double sizeRatio = min(length, width) / max(length, width);
-        double lengthWidthRatio = length / width;
+          double sizeRatio = min(length, width) / max(length, width);
+          double lengthWidthRatio = length / width;
 
-        String rotationUnit = tryCast(
-                ntConnection.getLastAnnouncedValue(model.rotationUnitTopic)) ??
-            'radians';
+          String rotationUnit = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.rotationUnitTopic)) ??
+              'radians';
 
-        double robotAngle = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotRotationTopic)) ??
-            0.0;
+          double robotAngle = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.robotRotationTopic)) ??
+              0.0;
 
-        if (rotationUnit == 'degrees') {
-          robotAngle = radians(robotAngle + model._angleOffset);
-        } else if (rotationUnit == 'rotations') {
-          robotAngle *= 2 * pi + model._angleOffset;
-        }
+          if (rotationUnit == 'degrees') {
+            robotAngle = radians(robotAngle + model._angleOffset);
+          } else if (rotationUnit == 'rotations') {
+            robotAngle *= 2 * pi + model._angleOffset;
+          }
 
-        double maxSpeed =
-            tryCast(ntConnection.getLastAnnouncedValue(model.maxSpeedTopic)) ??
-                4.5;
+          double maxSpeed = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.maxSpeedTopic)) ??
+              4.5;
 
-        if (maxSpeed <= 0.0) {
-          maxSpeed = 4.5;
-        }
+          if (maxSpeed <= 0.0) {
+            maxSpeed = 4.5;
+          }
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            double maxSideLength =
-                min(constraints.maxWidth, constraints.maxHeight) *
-                    0.9 *
-                    sizeRatio;
-            return Transform.rotate(
-              angle: (model.showRobotRotation) ? -robotAngle : 0.0,
-              child: SizedBox(
-                width: maxSideLength / lengthWidthRatio,
-                height: maxSideLength * lengthWidthRatio,
-                child: CustomPaint(
-                  painter: SwerveDrivePainter(
-                    rotationUnit: rotationUnit,
-                    maxSpeed: maxSpeed,
-                    moduleStates: measuredStates,
-                    desiredStates:
-                        (model.showDesiredStates) ? desiredStates : [],
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double maxSideLength =
+                  min(constraints.maxWidth, constraints.maxHeight) *
+                      0.9 *
+                      sizeRatio;
+              return Transform.rotate(
+                angle: (model.showRobotRotation) ? -robotAngle : 0.0,
+                child: SizedBox(
+                  width: maxSideLength / lengthWidthRatio,
+                  height: maxSideLength * lengthWidthRatio,
+                  child: CustomPaint(
+                    painter: SwerveDrivePainter(
+                      rotationUnit: rotationUnit,
+                      maxSpeed: maxSpeed,
+                      moduleStates: measuredStates,
+                      desiredStates:
+                          (model.showDesiredStates) ? desiredStates : [],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
