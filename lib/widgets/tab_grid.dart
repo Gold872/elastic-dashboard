@@ -982,23 +982,40 @@ class TabGrid extends StatelessWidget {
   void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
     if (widgetJson == null) return;
 
-    Offset localPosition = getLocalPosition(globalPosition);
+    widgetJson['x'] = getLocalPosition(globalPosition).dx;
+    widgetJson['y'] = getLocalPosition(globalPosition).dy;
 
-    widget.displayRect =
-        Rect.fromCenter(center: localPosition, width: 200, height: 200);
-    widget.setPreviewRect(widget.displayRect);
-    widget.setDraggingRect(widget.displayRect);
+    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
 
-    if (widget is NTWidgetContainerModel &&
-        isValidLayoutLocation(widget.cursorGlobalLocation)) {
-      LayoutContainerModel layoutContainer =
-          getLayoutAtLocation(widget.cursorGlobalLocation)!;
+    _widgetModels.add(createdWidget);
+    refresh();
+  }
 
-      if (layoutContainer.willAcceptWidget(widget)) {
-        layoutContainer.addWidget(widget);
+  NTWidget? getWidgetFromNTContainer(NTWidgetContainerModel? container) {
+    return container?.child;
+  }
+
+  NTWidget? getWidgetFromContainer(WidgetContainerModel? container) {
+    NTWidgetContainerModel? w = tryCast<NTWidgetContainerModel>(container);
+    return w?.child;
+  }
+
+  WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
+    String type = json['type'];
+    if (json['type'] == 'List Layout') {
+      switch (type) {
+        case 'List Layout':
+          return ListLayoutModel.fromJson(
+              jsonData: json, tabGrid: this, onDragCancel: null);
+        default:
+          throw ArgumentError('Unknown type: $type');
       }
+    } else {
+      return NTWidgetContainerModel.fromJson(
+        enabled: ntConnection.isNT4Connected,
+        jsonData: json,
+        onJsonLoadingWarning: null,
+      );
     }
-
-    _widgetModels.add(widget);
   }
 }
