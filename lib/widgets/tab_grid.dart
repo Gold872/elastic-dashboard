@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -786,8 +787,16 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            var widget = getWidgetFromContainer(container);
+            widget?.onTap();
+          },
+          onDoubleTap: () {
+            getWidgetFromContainer(container)?.onDoubleTap();
+          },
           onSecondaryTapUp: (details) {
+            getWidgetFromContainer(container)?.onSecondaryTap();
+
             if (Settings.layoutLocked) {
               return;
             }
@@ -840,7 +849,12 @@ class TabGrid extends StatelessWidget {
               },
             );
           },
-          child: getWidgetFromModel(container),
+          child: MouseRegion(
+              onHover: (event) {
+                getWidgetFromContainer(container)?.onHover(event);
+              },
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: getWidgetFromModel(container)),
         ),
       );
     }
@@ -975,6 +989,15 @@ class TabGrid extends StatelessWidget {
 
     _widgetModels.add(createdWidget);
     refresh();
+  }
+
+  NTWidget? getWidgetFromNTContainer(NTWidgetContainerModel? container) {
+    return container?.child;
+  }
+
+  NTWidget? getWidgetFromContainer(WidgetContainerModel? container) {
+    NTWidgetContainerModel? w = tryCast<NTWidgetContainerModel>(container);
+    return w?.child;
   }
 
   WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
