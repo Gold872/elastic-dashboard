@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -13,6 +15,8 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 class YAGSLSwerveDriveModel extends NTWidgetModel {
   @override
   String type = YAGSLSwerveDrive.widgetType;
+
+  double _angleOffset = 0.0;
 
   String get measuredStatesTopic => '$topic/measuredStates';
   String get desiredStatesTopic => '$topic/desiredStates';
@@ -53,6 +57,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true;
+    _angleOffset = tryCast(jsonData['angle_offset']) ?? 0.0;
   }
 
   @override
@@ -61,11 +66,15 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       ...super.toJson(),
       'show_robot_rotation': _showRobotRotation,
       'show_desired_states': _showDesiredStates,
+      'angle_offset': _angleOffset,
     };
   }
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
+    String rotationUnit =
+        tryCast(ntConnection.getLastAnnouncedValue(rotationUnitTopic)) ??
+            'radians';
     return [
       Row(
         children: [
@@ -85,6 +94,22 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
               onToggle: (value) {
                 showDesiredStates = value;
               },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              onSubmit: (value) {
+                double? newOffset = double.tryParse(value);
+                _angleOffset = newOffset ?? 0.0;
+              },
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
+              label: 'Angle Offset ($rotationUnit)',
+              initialText: _angleOffset.toString(),
             ),
           ),
         ],
@@ -115,6 +140,8 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
     double robotAngle =
         tryCast(ntConnection.getLastAnnouncedValue(robotRotationTopic)) ?? 0.0;
 
+    robotAngle += _angleOffset;
+
     double maxSpeed =
         tryCast(ntConnection.getLastAnnouncedValue(maxSpeedTopic)) ?? 4.5;
 
@@ -139,85 +166,88 @@ class YAGSLSwerveDrive extends NTWidget {
   Widget build(BuildContext context) {
     YAGSLSwerveDriveModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> measuredStatesRaw = tryCast(ntConnection
-                .getLastAnnouncedValue(model.measuredStatesTopic)) ??
-            [];
-        List<Object?> desiredStatesRaw = tryCast(
-                ntConnection.getLastAnnouncedValue(model.desiredStatesTopic)) ??
-            [];
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: StreamBuilder(
+        stream: model.multiTopicPeriodicStream,
+        builder: (context, snapshot) {
+          List<Object?> measuredStatesRaw = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.measuredStatesTopic)) ??
+              [];
+          List<Object?> desiredStatesRaw = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.desiredStatesTopic)) ??
+              [];
 
-        List<double> measuredStates =
-            measuredStatesRaw.whereType<double>().toList();
-        List<double> desiredStates =
-            desiredStatesRaw.whereType<double>().toList();
+          List<double> measuredStates =
+              measuredStatesRaw.whereType<double>().toList();
+          List<double> desiredStates =
+              desiredStatesRaw.whereType<double>().toList();
 
-        double width = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotWidthTopic)) ??
-            1.0;
-        double length = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotLengthTopic)) ??
-            width;
+          double width = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.robotWidthTopic)) ??
+              1.0;
+          double length = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.robotLengthTopic)) ??
+              width;
 
-        if (width <= 0.0) {
-          width = 1.0;
-        }
-        if (length <= 0.0) {
-          length = 0.0;
-        }
+          if (width <= 0.0) {
+            width = 1.0;
+          }
+          if (length <= 0.0) {
+            length = 0.0;
+          }
 
-        double sizeRatio = min(length, width) / max(length, width);
-        double lengthWidthRatio = length / width;
+          double sizeRatio = min(length, width) / max(length, width);
+          double lengthWidthRatio = length / width;
 
-        String rotationUnit = tryCast(
-                ntConnection.getLastAnnouncedValue(model.rotationUnitTopic)) ??
-            'radians';
+          String rotationUnit = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.rotationUnitTopic)) ??
+              'radians';
 
-        double robotAngle = tryCast(
-                ntConnection.getLastAnnouncedValue(model.robotRotationTopic)) ??
-            0.0;
+          double robotAngle = tryCast(ntConnection
+                  .getLastAnnouncedValue(model.robotRotationTopic)) ??
+              0.0;
 
-        if (rotationUnit == 'degrees') {
-          robotAngle = radians(robotAngle);
-        } else if (rotationUnit == 'rotations') {
-          robotAngle *= 2 * pi;
-        }
+          if (rotationUnit == 'degrees') {
+            robotAngle = radians(robotAngle + model._angleOffset);
+          } else if (rotationUnit == 'rotations') {
+            robotAngle *= 2 * pi + model._angleOffset;
+          }
 
-        double maxSpeed =
-            tryCast(ntConnection.getLastAnnouncedValue(model.maxSpeedTopic)) ??
-                4.5;
+          double maxSpeed = tryCast(
+                  ntConnection.getLastAnnouncedValue(model.maxSpeedTopic)) ??
+              4.5;
 
-        if (maxSpeed <= 0.0) {
-          maxSpeed = 4.5;
-        }
+          if (maxSpeed <= 0.0) {
+            maxSpeed = 4.5;
+          }
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            double maxSideLength =
-                min(constraints.maxWidth, constraints.maxHeight) *
-                    0.9 *
-                    sizeRatio;
-            return Transform.rotate(
-              angle: (model.showRobotRotation) ? -robotAngle : 0.0,
-              child: SizedBox(
-                width: maxSideLength / lengthWidthRatio,
-                height: maxSideLength * lengthWidthRatio,
-                child: CustomPaint(
-                  painter: SwerveDrivePainter(
-                    rotationUnit: rotationUnit,
-                    maxSpeed: maxSpeed,
-                    moduleStates: measuredStates,
-                    desiredStates:
-                        (model.showDesiredStates) ? desiredStates : [],
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double maxSideLength =
+                  min(constraints.maxWidth, constraints.maxHeight) *
+                      0.9 *
+                      sizeRatio;
+              return Transform.rotate(
+                angle: (model.showRobotRotation) ? -robotAngle : 0.0,
+                child: SizedBox(
+                  width: maxSideLength / lengthWidthRatio,
+                  height: maxSideLength * lengthWidthRatio,
+                  child: CustomPaint(
+                    painter: SwerveDrivePainter(
+                      rotationUnit: rotationUnit,
+                      maxSpeed: maxSpeed,
+                      moduleStates: measuredStates,
+                      desiredStates:
+                          (model.showDesiredStates) ? desiredStates : [],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

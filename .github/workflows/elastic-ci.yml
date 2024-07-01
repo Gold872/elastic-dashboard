@@ -67,7 +67,7 @@ jobs:
         run: flutter test --coverage
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   build:
@@ -83,10 +83,12 @@ jobs:
             build-option: "macos"
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
             artifact-name: Elastic-macOS
+            executable-type: portable
           - os: ubuntu-latest
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+            executable-type: portable
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
@@ -118,6 +120,13 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
 
+      - name: Create installer
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer_setup_script.iss
+          options: /O+
+
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
         run: |
@@ -125,8 +134,25 @@ jobs:
           zip -r Elastic-macOS.zip elastic_dashboard.app --symlinks
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        if: ${{ matrix.build-option != 'windows' }}
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Upload artifact (Windows portable)
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_portable
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Upload artifact (Windows installer)
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_installer
+          path: "build/windows/x64/installer"
           if-no-files-found: error

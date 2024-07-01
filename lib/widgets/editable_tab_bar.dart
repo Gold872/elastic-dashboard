@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
@@ -9,27 +8,49 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
+/// Represents data for a tab.
 class TabData {
+  /// The name of the tab.
   String name;
 
+  /// Creates a [TabData] with the given name.
   TabData({required this.name});
 }
 
+/// A widget that provides an editable tab bar with associated tab views.
+///
+/// Allows for creating, renaming, moving, and closing tabs.
 class EditableTabBar extends StatelessWidget {
+  /// The list of tab views to display.
   final List<TabGrid> tabViews;
+
+  /// The list of data associated with each tab.
   final List<TabData> tabData;
 
+  /// Callback function when a new tab is created.
   final Function(TabData tab) onTabCreate;
+
+  /// Callback function when a tab is destroyed.
   final Function(int index) onTabDestroy;
+
+  /// Callback function to move a tab to the left.
   final Function() onTabMoveLeft;
+
+  /// Callback function to move a tab to the right.
   final Function() onTabMoveRight;
+
+  /// Callback function when a tab is renamed.
   final Function(int index, TabData newData) onTabRename;
+
+  /// Callback function when the current tab is changed.
   final Function(int index) onTabChanged;
   final Function(int index, TabData newData) onTabDuplicateTab;
 
 
+  /// The index of the currently selected tab.
   final int currentIndex;
 
+  /// Creates an [EditableTabBar] with the specified parameters.
   const EditableTabBar({
     super.key,
     required this.currentIndex,
@@ -44,6 +65,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabDuplicateTab,
   });
 
+  /// Displays a dialog to rename the tab at the given [index].
   void renameTab(BuildContext context, int index) {
     showDialog(
       context: context,
@@ -118,6 +140,7 @@ class EditableTabBar extends StatelessWidget {
 
   }
 
+  /// Creates a new tab with a default name.
   void createTab() {
     String tabName = 'Tab ${tabData.length + 1}';
     TabData data = TabData(name: tabName);
@@ -125,6 +148,7 @@ class EditableTabBar extends StatelessWidget {
     onTabCreate.call(data);
   }
 
+  /// Closes the tab at the given [index].
   void closeTab(int index) {
     if (tabData.length == 1) {
       return;
@@ -225,7 +249,8 @@ class EditableTabBar extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: (currentIndex == index)
                                 ? theme.colorScheme.onPrimaryContainer
-                                : Colors.transparent,
+                                : theme.colorScheme.onPrimaryContainer
+                                    .withAlpha(20),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(10.0),
                               topRight: Radius.circular(10.0),
