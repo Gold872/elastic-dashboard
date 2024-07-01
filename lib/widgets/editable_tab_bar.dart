@@ -78,44 +78,43 @@ class EditableTabBar extends StatelessWidget {
   }
 
   void duplicateTab(BuildContext context, int index) {
-    // TODO
-    //rename
-
     String tabName = 'Tab ${tabData.length + 1}';
     TabData data = TabData(name: tabName);
 
-    // showDialog(
-    //   context: context,
-    //   builder: (context) {
-    //     return AlertDialog(
-    //       title: const Text('name for duplicateTab Tab'),
-    //       content: Container(
-    //         constraints: const BoxConstraints(
-    //           maxWidth: 200,
-    //         ),
-    //         child: DialogTextInput(
-    //           onSubmit: (value) {
-    //             data.name = value;
-    //             onTabDuplicateTab.call(index, data);
-    //           },
-    //           initialText: data.name,
-    //           label: 'Name',
-    //           formatter: LengthLimitingTextInputFormatter(50),
-    //         ),
-    //       ),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //           },
-    //           child: const Text('Save'),
-    //         ),
-    //       ],
-    //     );
-    //   },
-    // ).then(onValue);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('name for duplicateTab Tab'),
+          content: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+            ),
+            child: DialogTextInput(
+              onSubmit: (value) {
+                data.name = value;
+              },
+              initialText: data.name,
+              label: 'Name',
+              formatter: LengthLimitingTextInputFormatter(50),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(()=> (
 
-    onTabDuplicateTab.call(index, data);
+      onTabDuplicateTab.call(index, data),
+
+    ));
+
 
   }
 

@@ -1567,9 +1567,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       setState(() => _currentTabIndex = index);
                     },
                     onTabDuplicateTab: (index, tab) {
-                      //TODO
-                      //rename
-
                       setState(() {
                         _tabData.add(tab);
                         _grids.add(TabGrid(
@@ -1578,10 +1575,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         ));
                         _grids.last.addAllWidget(_grids[index].getAllWidget());
                       });
-
-                      
-
-
                     },
                     tabData: _tabData,
                     tabViews: _grids,
