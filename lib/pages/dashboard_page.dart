@@ -1566,8 +1566,22 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     onTabChanged: (index) {
                       setState(() => _currentTabIndex = index);
                     },
-                    onTabDuplicateTab: (index, tab) => {
+                    onTabDuplicateTab: (index, tab) {
                       //TODO
+                      //rename
+
+                      setState(() {
+                        _tabData.add(tab);
+                        _grids.add(TabGrid(
+                          key: GlobalKey(),
+                          onAddWidgetPressed: _displayAddWidgetDialog,
+                        ));
+                        _grids.last.addAllWidget(_grids[index].getAllWidget());
+                      });
+
+                      
+
+
                     },
                     tabData: _tabData,
                     tabViews: _grids,
