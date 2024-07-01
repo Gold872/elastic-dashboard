@@ -1573,7 +1573,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           key: GlobalKey(),
                           onAddWidgetPressed: _displayAddWidgetDialog,
                         ));
-                        _grids.last.addAllWidget(_grids[index].getAllWidget());
+                        _grids.last.addAllWidget(TabGrid.fromJson(
+                                jsonData: _grids[index].toJson(),
+                                onAddWidgetPressed: () {})
+                            .getAllWidget());
                       });
                     },
                     tabData: _tabData,
