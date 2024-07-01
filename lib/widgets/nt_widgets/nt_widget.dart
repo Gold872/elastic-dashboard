@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -20,6 +18,10 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/services.dart';
 
+/// A model class for Network Tables (NT) widgets.
+///
+/// This class manages the subscription, topic, and data type for NT widgets,
+/// and provides methods for serialization and initialization.
 class NTWidgetModel extends ChangeNotifier {
   String _typeOverride = 'NTWidget';
   String get type => _typeOverride;
@@ -27,11 +29,9 @@ class NTWidgetModel extends ChangeNotifier {
   late String _topic;
   late double _period;
   get topic => _topic;
-
   set topic(value) => _topic = value;
 
   get period => _period;
-
   set period(value) => _period = value;
 
   String dataType = 'Unknown';
@@ -42,16 +42,26 @@ class NTWidgetModel extends ChangeNotifier {
   bool _disposed = false;
   bool _forceDispose = false;
 
+  /// Constructor for NTWidgetModel.
+  ///
+  /// [topic] is the NT topic to subscribe to.
+  /// [dataType] is the type of data to be handled by the widget, default is 'Unknown'.
+  /// [period] is the subscription period, default is Settings.defaultPeriod.
   NTWidgetModel({
     required String topic,
     this.dataType = 'Unknown',
     double? period,
   }) : _topic = topic {
     this.period = period ?? Settings.defaultPeriod;
-
     init();
   }
 
+  /// Creates a default NTWidgetModel with a specified type.
+  ///
+  /// [type] is the widget type.
+  /// [topic] is the NT topic to subscribe to.
+  /// [dataType] is the type of data to be handled by the widget, default is 'Unknown'.
+  /// [period] is the subscription period, default is Settings.defaultPeriod.
   NTWidgetModel.createDefault({
     required String type,
     required String topic,
@@ -60,18 +70,22 @@ class NTWidgetModel extends ChangeNotifier {
   })  : _typeOverride = type,
         _topic = topic {
     this.period = period ?? Settings.defaultPeriod;
-
     init();
   }
 
+  /// Creates an NTWidgetModel from JSON data.
+  ///
+  /// [jsonData] is the JSON data to initialize the model.
   NTWidgetModel.fromJson({required Map<String, dynamic> jsonData}) {
     _topic = tryCast(jsonData['topic']) ?? '';
     _period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
     dataType = tryCast(jsonData['data_type']) ?? dataType;
-
     init();
   }
 
+  /// Converts the NTWidgetModel to JSON format.
+  ///
+  /// Returns a JSON representation of the model.
   @mustCallSuper
   Map<String, dynamic> toJson() {
     if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
@@ -85,10 +99,17 @@ class NTWidgetModel extends ChangeNotifier {
     };
   }
 
+  /// Retrieves the editable properties of the widget.
+  ///
+  /// [context] is the BuildContext.
+  /// Returns a list of editable properties.
   List<Widget> getEditProperties(BuildContext context) {
     return const [];
   }
 
+  /// Retrieves the available display types for the widget.
+  ///
+  /// Returns a list of available display types.
   List<String> getAvailableDisplayTypes() {
     if (type == 'Field' || type == 'Field Aoltra') {
       return ['Field', 'Field Aoltra'];
@@ -143,15 +164,20 @@ class NTWidgetModel extends ChangeNotifier {
     return [type];
   }
 
+  /// Initializes the NTWidgetModel.
+  ///
+  /// This method is called in the constructors to set up the subscription.
   @mustCallSuper
   void init() async {
     subscription = ntConnection.subscribe(_topic, _period);
   }
 
+  /// Creates the NT topic if it is null.
   void createTopicIfNull() {
     ntTopic ??= ntConnection.getTopicFromName(_topic);
   }
 
+  /// Unsubscribes from the NT topic.
   void unSubscribe() {
     if (subscription != null) {
       ntConnection.unSubscribe(subscription!);
@@ -159,14 +185,16 @@ class NTWidgetModel extends ChangeNotifier {
     refresh();
   }
 
+  /// Disposes of the widget.
+  ///
+  /// [deleting] indicates if the widget is being deleted.
   void disposeWidget({bool deleting = false}) {}
 
+  /// Resets the subscription to the NT topic.
   void resetSubscription() {
     if (subscription == null) {
       subscription = ntConnection.subscribe(_topic, _period);
-
       ntTopic = null;
-
       refresh();
       return;
     }
@@ -175,10 +203,9 @@ class NTWidgetModel extends ChangeNotifier {
 
     ntConnection.unSubscribe(subscription!);
     subscription = ntConnection.subscribe(_topic, _period);
-
     ntTopic = null;
-
     createTopicIfNull();
+
     if (resetDataType) {
       if (ntTopic == null && ntConnection.isNT4Connected) {
         dataType = 'Unknown';
@@ -192,11 +219,17 @@ class NTWidgetModel extends ChangeNotifier {
 
   static final Function listEquals = const DeepCollectionEquality().equals;
 
+  /// Retrieves the current data for the widget.
+  ///
+  /// Returns a list of current data.
   @protected
   List<Object> getCurrentData() {
     return [];
   }
 
+  /// Retrieves a stream of periodic updates for multiple topics.
+  ///
+  /// Yields an Object when data changes.
   Stream<Object> get multiTopicPeriodicStream async* {
     final Duration delayTime = Duration(
         microseconds: ((subscription?.options.periodicRateSeconds ??
@@ -218,6 +251,7 @@ class NTWidgetModel extends ChangeNotifier {
     }
   }
 
+  /// Forces the disposal of the widget.
   void forceDispose() {
     disposeWidget(deleting: true);
     _forceDispose = true;
@@ -228,7 +262,6 @@ class NTWidgetModel extends ChangeNotifier {
   void dispose() {
     if (!hasListeners || _forceDispose) {
       super.dispose();
-
       _disposed = true;
     }
   }
@@ -240,16 +273,30 @@ class NTWidgetModel extends ChangeNotifier {
     }
   }
 
+  /// Refreshes the widget by notifying listeners.
   void refresh() {
     Future(() => notifyListeners());
   }
 }
 
+/// An abstract class for NT widgets.
+///
+/// This class provides the structure for NT widgets and includes methods for
+/// handling user interactions.
 abstract class NTWidget extends StatelessWidget {
   const NTWidget({super.key});
 
+  /// Called when the widget is tapped.
   void onTap() {}
+
+  /// Called when the widget is double-tapped.
   void onDoubleTap() {}
+
+  /// Called when the widget is hovered over.
+  ///
+  /// [event] is the hover event.
   void onHover(PointerHoverEvent event) {}
+
+  /// Called when the widget is tapped with a secondary button.
   void onSecondaryTap() {}
 }

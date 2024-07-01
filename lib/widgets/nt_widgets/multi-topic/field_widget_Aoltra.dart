@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/fms_info.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -725,7 +724,7 @@ class RobotPinat extends StatelessWidget {
       super.key}) {
     centerPainter = centerPainter1 ??
         TrianglePainter(
-            strokeColor: centerPainterColor ?? Color.fromARGB(255, 0, 255, 0));
+            strokeColor: centerPainterColor ?? const Color.fromARGB(255, 0, 255, 0));
   }
 
   @override
@@ -791,9 +790,9 @@ class SwervePinat extends StatelessWidget {
 }
 
 class RobotPropreties {
-  String _name;
-  double _width;
-  double _length;
+  final String _name;
+  final double _width;
+  final double _length;
   Widget _image;
   bool hide;
 

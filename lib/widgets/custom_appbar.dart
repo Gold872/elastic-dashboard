@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:window_manager/window_manager.dart';
-
 import 'package:elastic_dashboard/services/settings.dart';
 
+/// A custom app bar widget.
+///
+/// This widget provides a customizable app bar with a title, a menu bar, and window control buttons.
 class CustomAppBar extends AppBar {
   final String titleText;
   final Color? appBarColor;
@@ -14,13 +15,22 @@ class CustomAppBar extends AppBar {
   static const double _leadingSize = 500;
   static const ThemeType buttonType = ThemeType.materia;
 
-  CustomAppBar(
-      {super.key,
-      this.titleText = 'Elastic',
-      this.appBarColor,
-      this.onWindowClose,
-      required this.menuBar})
-      : super(
+  /// Creates a custom app bar.
+  ///
+  /// [titleText] specifies the text to display in the app bar title.
+  ///
+  /// [appBarColor] defines the background color of the app bar.
+  ///
+  /// [menuBar] is the menu bar widget to display in the leading position of the app bar.
+  ///
+  /// [onWindowClose] is the callback function to execute when the window close button is pressed.
+  CustomAppBar({
+    super.key,
+    this.titleText = 'Elastic',
+    this.appBarColor,
+    this.onWindowClose,
+    required this.menuBar,
+  }) : super(
           toolbarHeight: 36,
           backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
           elevation: 0.0,
@@ -106,6 +116,9 @@ class CustomAppBar extends AppBar {
         );
 }
 
+/// A widget that allows the window to be dragged by clicking and dragging.
+///
+/// This widget also supports double-tap to maximize/unmaximize the window.
 class _WindowDragArea extends StatelessWidget {
   final Widget? child;
 
