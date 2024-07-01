@@ -212,7 +212,7 @@ class EditableTabBar extends StatelessWidget {
                               ),
                               MenuItem(
                                 label: 'Duplicate',
-                                icon: Icons.control_point_duplicate_sharp,
+                                icon: Icons.copy_outlined,
                                 onSelected: () => duplicateTab(context, index),
                               ),
                               MenuItem(
