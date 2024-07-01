@@ -540,23 +540,19 @@ class TabGrid extends StatelessWidget {
   }
 
   void addWidget(WidgetContainerModel widget) {
-      _widgetModels.add(widget);
+    _widgetModels.add(widget);
   }
 
   List<WidgetContainerModel> getAllWidget() {
     return _widgetModels;
   }
 
-  void addAllWidget(List<WidgetContainerModel> widgets ) {
-
+  void addAllWidget(List<WidgetContainerModel> widgets) {
     for (var element in widgets) {
       _widgetModels.add(element);
     }
     refresh();
-    
   }
-
-  
 
   void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
     Rect newWidgetLocation = Rect.fromLTWH(
