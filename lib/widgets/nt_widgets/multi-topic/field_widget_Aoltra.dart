@@ -453,7 +453,7 @@ class FieldWidgetAoltra extends NTWidget {
         positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0.0)
       ..rotateZ(-radians(objectPosition[2]));
 
-    Widget otherObject = SwervePinat(lengthwheel: length, widthwheel: width);
+    Widget otherObject = SwervePainter(lengthwheel: length, widthwheel: width);
 
     return Transform(
       origin: Offset(length, width) / 2,
@@ -706,7 +706,7 @@ class TrajectoryPainter extends CustomPainter {
 }
 
 // Robot
-class RobotPinat extends StatelessWidget {
+class RobotPainter extends StatelessWidget {
   final Color backgraundColor;
   final double lengthrobot;
   final double widthrobot;
@@ -714,7 +714,7 @@ class RobotPinat extends StatelessWidget {
   CustomPainter? centerPainter;
   final Color? centerPainterColor;
 
-  RobotPinat(
+  RobotPainter(
       {this.backgraundColor = Colors.black,
       required this.lengthrobot,
       required this.widthrobot,
@@ -724,7 +724,8 @@ class RobotPinat extends StatelessWidget {
       super.key}) {
     centerPainter = centerPainter1 ??
         TrianglePainter(
-            strokeColor: centerPainterColor ?? const Color.fromARGB(255, 0, 255, 0));
+            strokeColor:
+                centerPainterColor ?? const Color.fromARGB(255, 0, 255, 0));
   }
 
   @override
@@ -753,13 +754,13 @@ class RobotPinat extends StatelessWidget {
 }
 
 // Swerve
-class SwervePinat extends StatelessWidget {
+class SwervePainter extends StatelessWidget {
   final Color backgraundColor;
   double lengthwheel;
   double widthwheel;
   final Color baparsColor;
 
-  SwervePinat(
+  SwervePainter(
       {this.backgraundColor = Colors.black,
       required this.lengthwheel,
       required this.widthwheel,
