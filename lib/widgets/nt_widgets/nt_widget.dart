@@ -111,8 +111,8 @@ class NTWidgetModel extends ChangeNotifier {
   ///
   /// Returns a list of available display types.
   List<String> getAvailableDisplayTypes() {
-    if (type == 'Field' || type == 'Field Aoltra') {
-      return ['Field', 'Field Aoltra'];
+    if (type == 'Field') {
+      return ['Field'];
     }
 
     if (type == 'ComboBox Chooser' || type == 'Split Button Chooser') {
