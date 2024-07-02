@@ -49,6 +49,8 @@ class Mjpeg extends HookWidget {
   final double? width;
   final double? height;
   final WidgetBuilder? loading;
+  final bool showBandwidthUsage;
+
   final Widget Function(BuildContext context, dynamic error, dynamic stack)?
       error;
 
@@ -60,6 +62,7 @@ class Mjpeg extends HookWidget {
     this.fit,
     this.error,
     this.loading,
+    required this.showBandwidthUsage,
     super.key,
   });
 
@@ -126,21 +129,30 @@ class Mjpeg extends HookWidget {
               ? const Center(child: CircularProgressIndicator())
               : loading!(context));
     }
+    double bandwidth = mjpegStream.bandwidth;
 
-    return VisibilityDetector(
-      key: key,
-      child: Image(
-        image: image.value ?? mjpegStream.previousImage!,
-        width: width,
-        height: height,
-        gaplessPlayback: true,
-        fit: fit,
-      ),
-      onVisibilityChanged: (VisibilityInfo info) {
-        if (visible.mounted) {
-          visible.visible = info.visibleFraction != 0;
-        }
-      },
+    return Column(
+      children: [
+        VisibilityDetector(
+          key: key,
+          child: Image(
+            image: image.value ?? mjpegStream.previousImage!,
+            width: width,
+            height: height,
+            gaplessPlayback: true,
+            fit: fit,
+          ),
+          onVisibilityChanged: (VisibilityInfo info) {
+            if (visible.mounted) {
+              visible.visible = info.visibleFraction != 0;
+            }
+          },
+        ),
+        showBandwidthUsage
+            ? Text('Bandwidth usage: ${bandwidth.toStringAsFixed(2)} KB/s',
+                style: const TextStyle(fontSize: 13))
+            : const SizedBox(height: 5),
+      ],
     );
   }
 }
@@ -150,7 +162,6 @@ class MjpegStreamState {
   static const _trigger = 0xFF;
   static const _soi = 0xD8;
   static const _eoi = 0xD9;
-
   final String stream;
   final bool isLive;
   final Duration timeout;
@@ -304,7 +315,6 @@ class MjpegStreamState {
         }
       }
     }
-
     if (byteStream == null) return;
 
     var carry = <int>[];
