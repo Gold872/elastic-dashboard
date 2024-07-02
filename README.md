@@ -1,5 +1,4 @@
 # ![Elastic Logo](assets/logos/logo_full.png)
-Modified by Team 9738
 
 [![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
 
@@ -13,7 +12,7 @@ _Important Notes/Warnings:_
 
 ## About
 
-Elastic is a simple and modern Shuffleboard alternative made by Team 353 (Modified by 9738). It is meant to serve as a dashboard for competition but can also be used for testing. Some features include
+Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. Some features include
 
 - Viewing data from different NT4 topics and widgets
 - Draggable and resizable card widgets
