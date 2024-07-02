@@ -46,7 +46,6 @@ class EditableTabBar extends StatelessWidget {
   final Function(int index) onTabChanged;
   final Function(int index, TabData newData) onTabDuplicateTab;
 
-
   /// The index of the currently selected tab.
   final int currentIndex;
 
@@ -131,13 +130,7 @@ class EditableTabBar extends StatelessWidget {
           ],
         );
       },
-    ).whenComplete(()=> (
-
-      onTabDuplicateTab.call(index, data),
-
-    ));
-
-
+    ).whenComplete(() => (onTabDuplicateTab.call(index, data),));
   }
 
   /// Creates a new tab with a default name.

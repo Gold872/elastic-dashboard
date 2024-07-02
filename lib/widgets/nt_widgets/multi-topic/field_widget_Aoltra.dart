@@ -724,7 +724,8 @@ class RobotPinat extends StatelessWidget {
       super.key}) {
     centerPainter = centerPainter1 ??
         TrianglePainter(
-            strokeColor: centerPainterColor ?? const Color.fromARGB(255, 0, 255, 0));
+            strokeColor:
+                centerPainterColor ?? const Color.fromARGB(255, 0, 255, 0));
   }
 
   @override
