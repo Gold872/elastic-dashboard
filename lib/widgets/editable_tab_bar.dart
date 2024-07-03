@@ -25,6 +25,7 @@ class EditableTabBar extends StatelessWidget {
   final Function() onTabMoveRight;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
+  final Function(int index, TabData newData) onTabDuplicateTab;
 
   final int currentIndex;
 
@@ -39,6 +40,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabMoveRight,
     required this.onTabRename,
     required this.onTabChanged,
+    required this.onTabDuplicateTab,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -72,6 +74,41 @@ class EditableTabBar extends StatelessWidget {
         );
       },
     );
+  }
+
+  void duplicateTab(BuildContext context, int index) {
+    String tabName = 'Tab ${tabData.length + 1}';
+    TabData data = TabData(name: tabName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('name for duplicateTab Tab'),
+          content: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+            ),
+            child: DialogTextInput(
+              onSubmit: (value) {
+                data.name = value;
+              },
+              initialText: data.name,
+              label: 'Name',
+              formatter: LengthLimitingTextInputFormatter(50),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(() => (onTabDuplicateTab.call(index, data),));
   }
 
   void createTab() {
@@ -141,6 +178,11 @@ class EditableTabBar extends StatelessWidget {
                                 label: 'Rename',
                                 icon: Icons.drive_file_rename_outline_outlined,
                                 onSelected: () => renameTab(context, index),
+                              ),
+                              MenuItem(
+                                label: 'Duplicate',
+                                icon: Icons.control_point_duplicate_sharp,
+                                onSelected: () => duplicateTab(context, index),
                               ),
                               MenuItem(
                                 label: 'Close',

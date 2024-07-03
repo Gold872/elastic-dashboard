@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -52,6 +53,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
+  Timer? _timer;
   late final SharedPreferences _preferences;
   late final UpdateChecker _updateChecker;
   late final RobotNotificationsListener _robotNotificationListener;
@@ -68,10 +70,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   bool _addWidgetDialogVisible = false;
 
+  String _prevRobotState = "Unknown";
+
   @override
   void initState() {
     super.initState();
-
+    _startTimer();
     _preferences = widget.preferences;
     _updateChecker = UpdateChecker(currentVersion: widget.version);
 
@@ -847,7 +851,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was created by Team 353, the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
+            'Elastic was created by Team 353 (Modified by 9738), the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
           ),
         ),
         Container(
@@ -1317,8 +1321,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   (!Settings.layoutLocked) ? () => _importLayout() : null,
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyO, control: true),
-              child: const Text(
-                'Open Layout',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.folder_open_outlined),
+                  SizedBox(width: 8),
+                  Text('Open Layout'),
+                ],
               ),
             ),
             // Save
@@ -1329,22 +1338,32 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               },
               shortcut:
                   const SingleActivator(LogicalKeyboardKey.keyS, control: true),
-              child: const Text(
-                'Save',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.save_outlined),
+                  SizedBox(width: 8),
+                  Text('Save'),
+                ],
               ),
             ),
+
             // Export layout
             MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _exportLayout();
-              },
-              shortcut: const SingleActivator(LogicalKeyboardKey.keyS,
-                  shift: true, control: true),
-              child: const Text(
-                'Save As',
-              ),
-            ),
+                style: menuButtonStyle,
+                onPressed: () {
+                  _exportLayout();
+                },
+                shortcut: const SingleActivator(LogicalKeyboardKey.keyS,
+                    shift: true, control: true),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.save_as_outlined),
+                    SizedBox(width: 8),
+                    Text('Save As'),
+                  ],
+                )),
           ],
           child: const Text(
             'File',
@@ -1399,8 +1418,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               onPressed: () {
                 _displayAboutDialog(context);
               },
-              child: const Text(
-                'About',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.info_outline),
+                  SizedBox(width: 8),
+                  Text('About'),
+                ],
               ),
             ),
             // Check for Updates
@@ -1409,8 +1433,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               onPressed: () {
                 _checkForUpdates();
               },
-              child: const Text(
-                'Check for Updates',
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.update_outlined),
+                  SizedBox(width: 8),
+                  Text('Check for updates'),
+                ],
               ),
             ),
           ],
@@ -1522,6 +1551,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     onTabChanged: (index) {
                       setState(() => _currentTabIndex = index);
                     },
+                    onTabDuplicateTab: (index, tab) {
+                      setState(() {
+                        _tabData.add(tab);
+                        _grids.add(TabGrid(
+                          key: GlobalKey(),
+                          onAddWidgetPressed: _displayAddWidgetDialog,
+                        ));
+                        _grids.last.addAllWidget(TabGrid.fromJson(
+                                jsonData: _grids[index].toJson(),
+                                onAddWidgetPressed: () {})
+                            .getAllWidget());
+                      });
+                    },
                     tabData: _tabData,
                     tabViews: _grids,
                   ),
@@ -1603,6 +1645,53 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ),
     );
   }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (Timer timer) {
+      switchTabsAuto();
+    });
+  }
+
+  void switchTabsAuto() {
+    int controlData = tryCast<int>(
+            ntConnection.getLastAnnouncedValue('/FMSInfo/FMSControlData')) ??
+        32;
+
+    String state = getRobotState(controlData);
+
+    if (_prevRobotState != state) {
+      for (int i = 0; i < _tabData.length; i++) {
+        if (state == _tabData[i].name) {
+          setState(() => _currentTabIndex = i);
+        }
+      }
+      _prevRobotState = state;
+    }
+  }
+
+  String getRobotState(int controlData) {
+    const int enabledFlag = 0x01;
+    const int autoFlag = 0x02;
+    const int testFlag = 0x04;
+
+    String robotControlState = 'Disabled';
+
+    if (_flagMatches(controlData, enabledFlag)) {
+      if (_flagMatches(controlData, testFlag)) {
+        robotControlState = 'Test';
+      } else if (_flagMatches(controlData, autoFlag)) {
+        robotControlState = 'Autonomous';
+      } else {
+        robotControlState = 'Teleoperated';
+      }
+    }
+
+    return robotControlState;
+  }
+
+  bool _flagMatches(int word, int flag) {
+    return (word & flag) != 0;
+  }
 }
 
 class _AddWidgetDialog extends StatefulWidget {
@@ -1641,7 +1730,6 @@ class _AddWidgetDialog extends StatefulWidget {
 
 class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
-
   @override
   Widget build(BuildContext context) {
     return Visibility(

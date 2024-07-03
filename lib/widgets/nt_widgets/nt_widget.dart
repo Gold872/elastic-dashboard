@@ -18,6 +18,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.d
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
+import 'package:flutter/services.dart';
 
 class NTWidgetModel extends ChangeNotifier {
   String _typeOverride = 'NTWidget';
@@ -89,6 +90,10 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   List<String> getAvailableDisplayTypes() {
+    if (type == 'Field' || type == 'Field Aoltra') {
+      return ['Field', 'Field Aoltra'];
+    }
+
     if (type == 'ComboBox Chooser' || type == 'Split Button Chooser') {
       return ['ComboBox Chooser', 'Split Button Chooser'];
     }
@@ -242,4 +247,9 @@ class NTWidgetModel extends ChangeNotifier {
 
 abstract class NTWidget extends StatelessWidget {
   const NTWidget({super.key});
+
+  void onTap() {}
+  void onDoubleTap() {}
+  void onHover(PointerHoverEvent event) {}
+  void onSecondaryTap() {}
 }

@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -27,6 +27,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
+  static Map<String, dynamic>? _copyJsonData;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -460,6 +461,7 @@ class TabGrid extends StatelessWidget {
         widget.draggingRect.height,
       ),
     );
+
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
@@ -516,7 +518,6 @@ class TabGrid extends StatelessWidget {
     _containerDraggingIn = null;
 
     widget.disposeModel();
-
     refresh();
   }
 
@@ -540,6 +541,17 @@ class TabGrid extends StatelessWidget {
 
   void addWidget(WidgetContainerModel widget) {
     _widgetModels.add(widget);
+  }
+
+  List<WidgetContainerModel> getAllWidget() {
+    return _widgetModels;
+  }
+
+  void addAllWidget(List<WidgetContainerModel> widgets) {
+    for (var element in widgets) {
+      _widgetModels.add(element);
+    }
+    refresh();
   }
 
   void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
@@ -646,6 +658,10 @@ class TabGrid extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void copyWidget(WidgetContainerModel widget) {
+    _copyJsonData = widget.toJson();
   }
 
   void lockLayout() {
@@ -782,8 +798,16 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            var widget = getWidgetFromContainer(container);
+            widget?.onTap();
+          },
+          onDoubleTap: () {
+            getWidgetFromContainer(container)?.onDoubleTap();
+          },
           onSecondaryTapUp: (details) {
+            getWidgetFromContainer(container)?.onSecondaryTap();
+
             if (Settings.layoutLocked) {
               return;
             }
@@ -807,6 +831,12 @@ class TabGrid extends StatelessWidget {
                   onSelected: () {
                     removeWidget(container);
                   }),
+              MenuItem(
+                  label: 'Copy',
+                  icon: Icons.copy_outlined,
+                  onSelected: () {
+                    copyWidget(container);
+                  })
             ];
 
             ContextMenu contextMenu = ContextMenu(
@@ -830,7 +860,12 @@ class TabGrid extends StatelessWidget {
               },
             );
           },
-          child: getWidgetFromModel(container),
+          child: MouseRegion(
+              onHover: (event) {
+                getWidgetFromContainer(container)?.onHover(event);
+              },
+              hitTestBehavior: HitTestBehavior.deferToChild,
+              child: getWidgetFromModel(container)),
         ),
       );
     }
@@ -898,22 +933,37 @@ class TabGrid extends StatelessWidget {
         if (Settings.layoutLocked) {
           return;
         }
+
+        List<MenuItem> contextMenuEntries = [
+          MenuItem(
+            label: 'Add Widget',
+            icon: Icons.add,
+            onSelected: () => onAddWidgetPressed.call(),
+          ),
+          MenuItem(
+            label: 'Clear Layout',
+            icon: Icons.clear,
+            onSelected: () => clearWidgets(context),
+          ),
+        ];
+
+        if (_copyJsonData != null) {
+          contextMenuEntries.add(
+            MenuItem(
+              label: 'Paste',
+              icon: Icons.paste_outlined,
+              onSelected: () {
+                pasteWidget(_copyJsonData, details.globalPosition);
+              },
+            ),
+          );
+        }
+
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
-          entries: [
-            MenuItem(
-              label: 'Add Widget',
-              icon: Icons.add,
-              onSelected: () => onAddWidgetPressed.call(),
-            ),
-            MenuItem(
-              label: 'Clear Layout',
-              icon: Icons.clear,
-              onSelected: () => clearWidgets(context),
-            ),
-          ],
+          entries: contextMenuEntries,
         );
 
         showContextMenu(
@@ -938,5 +988,47 @@ class TabGrid extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
+    if (widgetJson == null) return;
+
+    widgetJson['x'] = DraggableWidgetContainer.snapToGrid(
+        getLocalPosition(globalPosition).dx);
+    widgetJson['y'] = DraggableWidgetContainer.snapToGrid(
+        getLocalPosition(globalPosition).dy);
+
+    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
+
+    _widgetModels.add(createdWidget);
+    refresh();
+  }
+
+  NTWidget? getWidgetFromNTContainer(NTWidgetContainerModel? container) {
+    return container?.child;
+  }
+
+  NTWidget? getWidgetFromContainer(WidgetContainerModel? container) {
+    NTWidgetContainerModel? w = tryCast<NTWidgetContainerModel>(container);
+    return w?.child;
+  }
+
+  WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
+    String type = json['type'];
+    if (json['type'] == 'List Layout') {
+      switch (type) {
+        case 'List Layout':
+          return ListLayoutModel.fromJson(
+              jsonData: json, tabGrid: this, onDragCancel: null);
+        default:
+          throw ArgumentError('Unknown type: $type');
+      }
+    } else {
+      return NTWidgetContainerModel.fromJson(
+        enabled: ntConnection.isNT4Connected,
+        jsonData: json,
+        onJsonLoadingWarning: null,
+      );
+    }
   }
 }
