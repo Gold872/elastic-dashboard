@@ -826,17 +826,17 @@ class TabGrid extends StatelessWidget {
               ),
               ...container.getContextMenuItems(),
               MenuItem(
+                  label: 'Copy',
+                  icon: Icons.copy_outlined,
+                  onSelected: () {
+                    copyWidget(container);
+                  }),
+              MenuItem(
                   label: 'Remove',
                   icon: Icons.delete_outlined,
                   onSelected: () {
                     removeWidget(container);
                   }),
-              MenuItem(
-                  label: 'Copy',
-                  icon: Icons.copy_outlined,
-                  onSelected: () {
-                    copyWidget(container);
-                  })
             ];
 
             ContextMenu contextMenu = ContextMenu(
