@@ -847,7 +847,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was created by Team 353 (Modified by 9738), the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
+            'Elastic was created by Team 353, the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
           ),
         ),
         Container(
