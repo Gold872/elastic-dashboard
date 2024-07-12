@@ -928,7 +928,7 @@ class TabGrid extends StatelessWidget {
               label: 'Paste',
               icon: Icons.paste_outlined,
               onSelected: () {
-                pasteWidget(_copyJsonData, details.globalPosition);
+                pasteWidget(_copyJsonData, details.localPosition);
               },
             ),
           );
@@ -965,10 +965,8 @@ class TabGrid extends StatelessWidget {
     );
   }
 
-  void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
+  void pasteWidget(Map<String, dynamic>? widgetJson, Offset localPosition) {
     if (widgetJson == null) return;
-
-    Offset localPosition = getLocalPosition(globalPosition);
 
     // Put the top left corner of the widget in the square the user pastes it in
     double snappedX =
