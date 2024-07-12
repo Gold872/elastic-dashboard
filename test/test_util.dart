@@ -75,6 +75,8 @@ MockNTConnection createMockOnlineNT4({
 
   Map<int, NT4Topic> virtualTopicsMap = {};
 
+  List<Function(Object?, int)> subscriptionListeners = [];
+
   for (int i = 0; i < virtualTopics.length; i++) {
     virtualTopicsMap.addAll({i + 1: virtualTopics[i]});
   }
@@ -139,7 +141,18 @@ MockNTConnection createMockOnlineNT4({
     when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
         .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
 
-    when(topicSubscription.listen(any)).thenAnswer((realInvocation) {});
+    when(topicSubscription.listen(any)).thenAnswer((realInvocation) {
+      subscriptionListeners.add(realInvocation.positionalArguments[0]);
+    });
+
+    when(topicSubscription.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in subscriptionListeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
         .thenAnswer((_) => virtualValues?[topic.name]);

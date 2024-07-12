@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -912,4 +913,81 @@ void main() {
 
     expect(find.byType(SettingsDialog), findsOneWidget);
   });
+
+  testWidgets(
+    'Robot Notifications',
+    (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
+      final Map<String, dynamic> data = {
+        'title': 'Robot Notification Title',
+        'description': 'Robot Notification Description',
+        'level': 'INFO'
+      };
+
+      MockNTConnection connection = createMockOnlineNT4(virtualTopics: [
+        NT4Topic(
+          name: '/Elastic/RobotNotifications',
+          type: NT4TypeStr.kString,
+          properties: {},
+        )
+      ], virtualValues: {
+        '/Elastic/RobotNotifications': jsonEncode(data)
+      });
+      MockNT4Subscription mockSub = MockNT4Subscription();
+
+      List<Function(Object?, int)> listeners = [];
+      when(mockSub.listen(any)).thenAnswer(
+        (realInvocation) {
+          listeners.add(realInvocation.positionalArguments[0]);
+          mockSub.updateValue(jsonEncode(data), 0);
+        },
+      );
+
+      when(mockSub.updateValue(any, any)).thenAnswer(
+        (invoc) {
+          for (var value in listeners) {
+            value.call(
+                invoc.positionalArguments[0], invoc.positionalArguments[1]);
+          }
+        },
+      );
+
+      when(connection.subscribeAll(any, any)).thenAnswer(
+        (realInvocation) {
+          return mockSub;
+        },
+      );
+
+      final notificationWidget =
+          find.widgetWithText(ElegantNotification, data['title']);
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: DashboardPage(
+            ntConnection: connection,
+            preferences: preferences,
+            version: '0.0.0.0',
+          ),
+        ),
+      );
+      expect(notificationWidget, findsNothing);
+
+      await widgetTester.pumpAndSettle();
+      connection
+          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .updateValue(jsonEncode(data), 1);
+
+      await widgetTester.pump();
+
+      expect(notificationWidget, findsOneWidget);
+
+      await widgetTester.pumpAndSettle();
+
+      expect(notificationWidget, findsNothing);
+
+      connection
+          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .updateValue(jsonEncode(data), 1);
+    },
+  );
 }
