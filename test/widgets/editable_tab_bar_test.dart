@@ -27,6 +27,8 @@ class FakeTabBarFunctions {
   void onTabRename() {}
 
   void onTabChanged() {}
+
+  void onTabDuplicate() {}
 }
 
 void main() {
@@ -74,6 +76,7 @@ void main() {
             onTabMoveRight: () {},
             onTabRename: (tab, grid) {},
             onTabChanged: (index) {},
+            onTabDuplicate: (index) {},
           ),
         ),
       ),
@@ -137,6 +140,9 @@ void main() {
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
             },
+            onTabDuplicate: (index) {
+              tabBarFunctions.onTabDuplicate();
+            },
           ),
         ),
       ),
@@ -199,6 +205,9 @@ void main() {
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
             },
+            onTabDuplicate: (index) {
+              tabBarFunctions.onTabDuplicate();
+            },
           ),
         ),
       ),
@@ -260,6 +269,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
@@ -335,6 +347,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
@@ -421,6 +436,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),

@@ -237,6 +237,66 @@ void main() async {
     await widgetTester.pumpAndSettle();
   });
 
+  testWidgets('Editing properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
+              jsonData: jsonData['tabs'][0]['grid_layout'],
+              onAddWidgetPressed: () {},
+            ),
+            child: const TabGrid(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pump(Duration.zero);
+
+    await widgetTester.ensureVisible(find.text('Test Number'));
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tapAt(const Offset(320.0, 64.0),
+        buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Paste'), findsNothing);
+
+    // Dismiss context menu
+    await widgetTester.tapAt(const Offset(320.0, 64.0));
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tap(find.text('Test Number'),
+        buttons: kSecondaryMouseButton);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Test Number'), findsAtLeastNWidgets(2));
+    expect(find.text('Copy'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Copy'));
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tapAt(const Offset(320.0, 64.0),
+        buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Paste'), findsOneWidget);
+    await widgetTester.tap(find.text('Paste'));
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Test Number'), findsNWidgets(2));
+  });
+
   testWidgets('Dragging widgets', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);

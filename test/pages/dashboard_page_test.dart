@@ -718,6 +718,38 @@ void main() {
         findsOneWidget);
   });
 
+  testWidgets('Duplicating tab', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final teleopTab = find.widgetWithText(AnimatedContainer, 'Teleoperated');
+
+    expect(teleopTab, findsOneWidget);
+
+    await widgetTester.tap(teleopTab, buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    final duplicateButton = find.text('Duplicate');
+
+    expect(duplicateButton, findsOneWidget);
+
+    await widgetTester.tap(duplicateButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Teleoperated (Copy)'), findsOneWidget);
+  });
+
   testWidgets('Minimizing window', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
