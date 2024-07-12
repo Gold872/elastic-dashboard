@@ -53,7 +53,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
-  Timer? _timer;
   late final SharedPreferences _preferences;
   late final UpdateChecker _updateChecker;
   late final RobotNotificationsListener _robotNotificationListener;
@@ -70,12 +69,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   bool _addWidgetDialogVisible = false;
 
-  String _prevRobotState = "Unknown";
-
   @override
   void initState() {
     super.initState();
-    _startTimer();
     _preferences = widget.preferences;
     _updateChecker = UpdateChecker(currentVersion: widget.version);
 
@@ -1551,17 +1547,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     onTabChanged: (index) {
                       setState(() => _currentTabIndex = index);
                     },
-                    onTabDuplicateTab: (index, tab) {
+                    onTabDuplicate: (index, tab) {
                       setState(() {
-                        _tabData.add(tab);
-                        _grids.add(TabGrid(
-                          key: GlobalKey(),
-                          onAddWidgetPressed: _displayAddWidgetDialog,
-                        ));
-                        _grids.last.addAllWidget(TabGrid.fromJson(
-                                jsonData: _grids[index].toJson(),
-                                onAddWidgetPressed: () {})
-                            .getAllWidget());
+                        _tabData.insert(index + 1, tab);
+                        Map<String, dynamic> tabJson = _grids[index].toJson();
+                        _grids.insert(
+                            index + 1,
+                            TabGrid.fromJson(
+                              key: GlobalKey(),
+                              jsonData: tabJson,
+                              onAddWidgetPressed: _displayAddWidgetDialog,
+                              onJsonLoadingWarning: _showJsonLoadingWarning,
+                            ));
                       });
                     },
                     tabData: _tabData,
@@ -1644,53 +1641,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
       ),
     );
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (Timer timer) {
-      switchTabsAuto();
-    });
-  }
-
-  void switchTabsAuto() {
-    int controlData = tryCast<int>(
-            ntConnection.getLastAnnouncedValue('/FMSInfo/FMSControlData')) ??
-        32;
-
-    String state = getRobotState(controlData);
-
-    if (_prevRobotState != state) {
-      for (int i = 0; i < _tabData.length; i++) {
-        if (state == _tabData[i].name) {
-          setState(() => _currentTabIndex = i);
-        }
-      }
-      _prevRobotState = state;
-    }
-  }
-
-  String getRobotState(int controlData) {
-    const int enabledFlag = 0x01;
-    const int autoFlag = 0x02;
-    const int testFlag = 0x04;
-
-    String robotControlState = 'Disabled';
-
-    if (_flagMatches(controlData, enabledFlag)) {
-      if (_flagMatches(controlData, testFlag)) {
-        robotControlState = 'Test';
-      } else if (_flagMatches(controlData, autoFlag)) {
-        robotControlState = 'Autonomous';
-      } else {
-        robotControlState = 'Teleoperated';
-      }
-    }
-
-    return robotControlState;
-  }
-
-  bool _flagMatches(int word, int flag) {
-    return (word & flag) != 0;
   }
 }
 

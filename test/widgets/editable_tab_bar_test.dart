@@ -24,6 +24,8 @@ class FakeTabBarFunctions {
   void onTabRename() {}
 
   void onTabChanged() {}
+
+  void onTabDuplicate() {}
 }
 
 void main() {
@@ -40,22 +42,22 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: EditableTabBar(
-            currentIndex: 0,
-            tabData: [
-              TabData(name: 'Teleoperated'),
-              TabData(name: 'Autonomous'),
-            ],
-            tabViews: [
-              TabGrid(onAddWidgetPressed: () {}),
-              TabGrid(onAddWidgetPressed: () {}),
-            ],
-            onTabCreate: (tab) {},
-            onTabDestroy: (index) {},
-            onTabMoveLeft: () {},
-            onTabMoveRight: () {},
-            onTabRename: (tab, grid) {},
-            onTabChanged: (index) {},
-          ),
+              currentIndex: 0,
+              tabData: [
+                TabData(name: 'Teleoperated'),
+                TabData(name: 'Autonomous'),
+              ],
+              tabViews: [
+                TabGrid(onAddWidgetPressed: () {}),
+                TabGrid(onAddWidgetPressed: () {}),
+              ],
+              onTabCreate: (tab) {},
+              onTabDestroy: (index) {},
+              onTabMoveLeft: () {},
+              onTabMoveRight: () {},
+              onTabRename: (tab, grid) {},
+              onTabChanged: (index) {},
+              onTabDuplicate: (index, newData) {}),
         ),
       ),
     );
@@ -106,6 +108,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index, tab) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
@@ -158,6 +163,9 @@ void main() {
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
             },
+            onTabDuplicate: (index, tab) {
+              tabBarFunctions.onTabDuplicate();
+            },
           ),
         ),
       ),
@@ -208,6 +216,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index, tab) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
@@ -272,6 +283,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index, tab) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
@@ -347,6 +361,9 @@ void main() {
             },
             onTabChanged: (index) {
               tabBarFunctions.onTabChanged();
+            },
+            onTabDuplicate: (index, tab) {
+              tabBarFunctions.onTabDuplicate();
             },
           ),
         ),
