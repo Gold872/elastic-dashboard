@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -798,16 +798,7 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
-          onTap: () {
-            var widget = getWidgetFromContainer(container);
-            widget?.onTap();
-          },
-          onDoubleTap: () {
-            getWidgetFromContainer(container)?.onDoubleTap();
-          },
           onSecondaryTapUp: (details) {
-            getWidgetFromContainer(container)?.onSecondaryTap();
-
             if (Settings.layoutLocked) {
               return;
             }
@@ -860,12 +851,7 @@ class TabGrid extends StatelessWidget {
               },
             );
           },
-          child: MouseRegion(
-              onHover: (event) {
-                getWidgetFromContainer(container)?.onHover(event);
-              },
-              hitTestBehavior: HitTestBehavior.deferToChild,
-              child: getWidgetFromModel(container)),
+          child: getWidgetFromModel(container),
         ),
       );
     }
@@ -993,41 +979,43 @@ class TabGrid extends StatelessWidget {
   void pasteWidget(Map<String, dynamic>? widgetJson, Offset globalPosition) {
     if (widgetJson == null) return;
 
-    widgetJson['x'] = DraggableWidgetContainer.snapToGrid(
-        getLocalPosition(globalPosition).dx);
-    widgetJson['y'] = DraggableWidgetContainer.snapToGrid(
-        getLocalPosition(globalPosition).dy);
+    Offset localPosition = getLocalPosition(globalPosition);
 
-    WidgetContainerModel createdWidget = createWidgetFromJson(widgetJson);
+    // Put the top left corner of the widget in the square the user pastes it in
+    double snappedX =
+        (localPosition.dx ~/ Settings.gridSize) * Settings.gridSize.toDouble();
+    double snappedY =
+        (localPosition.dy ~/ Settings.gridSize) * Settings.gridSize.toDouble();
 
-    _widgetModels.add(createdWidget);
-    refresh();
-  }
+    widgetJson['x'] = snappedX;
+    widgetJson['y'] = snappedY;
 
-  NTWidget? getWidgetFromNTContainer(NTWidgetContainerModel? container) {
-    return container?.child;
-  }
+    Rect pasteLocation = Rect.fromLTWH(
+      snappedX,
+      snappedY,
+      widgetJson['width'],
+      widgetJson['height'],
+    );
 
-  NTWidget? getWidgetFromContainer(WidgetContainerModel? container) {
-    NTWidgetContainerModel? w = tryCast<NTWidgetContainerModel>(container);
-    return w?.child;
+    if (isValidLocation(pasteLocation)) {
+      WidgetContainerModel copiedWidget = createWidgetFromJson(widgetJson);
+
+      _widgetModels.add(copiedWidget);
+      refresh();
+    }
   }
 
   WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
-    String type = json['type'];
     if (json['type'] == 'List Layout') {
-      switch (type) {
-        case 'List Layout':
-          return ListLayoutModel.fromJson(
-              jsonData: json, tabGrid: this, onDragCancel: null);
-        default:
-          throw ArgumentError('Unknown type: $type');
-      }
+      return ListLayoutModel.fromJson(
+        jsonData: json,
+        tabGrid: this,
+        onDragCancel: _layoutContainerOnDragCancel,
+      );
     } else {
       return NTWidgetContainerModel.fromJson(
         enabled: ntConnection.isNT4Connected,
         jsonData: json,
-        onJsonLoadingWarning: null,
       );
     }
   }
