@@ -1,10 +1,11 @@
 import 'dart:convert';
 
-import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 
@@ -15,29 +16,6 @@ class MockNotificationCallback extends Mock {
 void main() {
   test("Robot Notifications (Initial Connection | No Existing Data) ", () {
     MockNTConnection mockConnection = createMockOnlineNT4();
-    MockNT4Subscription mockSub = MockNT4Subscription();
-
-    List<Function(Object?, int)> listeners = [];
-    when(mockSub.listen(any)).thenAnswer(
-      (realInvocation) {
-        listeners.add(realInvocation.positionalArguments[0]);
-      },
-    );
-
-    when(mockSub.updateValue(any, any)).thenAnswer(
-      (invoc) {
-        for (var value in listeners) {
-          value.call(
-              invoc.positionalArguments[0], invoc.positionalArguments[1]);
-        }
-      },
-    );
-
-    when(mockConnection.subscribeAll(any, any)).thenAnswer(
-      (realInvocation) {
-        return mockSub;
-      },
-    );
 
     // Create a mock for the onNotification callback
     MockNotificationCallback mockOnNotification = MockNotificationCallback();
@@ -116,7 +94,7 @@ void main() {
     // Verify that the onNotification callback was never called
     verifyNever(mockOnNotification(any, any, any));
 
-    //publish some data and expect an update
+    // Publish some data and expect an update
     data['title'] = 'Title2';
     data['description'] = 'Description2';
     data['level'] = 'INFO';
@@ -124,7 +102,7 @@ void main() {
 
     verify(mockOnNotification(data['title'], data['description'], any));
 
-    //try malformed data
+    // Try malformed data
     data['title'] = null;
     data['description'] = null;
     data['level'] = 'malformedlevel';
@@ -133,6 +111,4 @@ void main() {
     reset(mockOnNotification);
     verifyNever(mockOnNotification(any, any, any));
   });
-
-
 }
