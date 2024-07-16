@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
+import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -200,6 +202,11 @@ class Elastic extends StatefulWidget {
 class _ElasticState extends State<Elastic> {
   late Color teamColor = Color(
       widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+  late FlexSchemeVariant flexSchemeVariant = FlexSchemeVariant.values
+          .firstWhereOrNull((element) =>
+              element.variantName ==
+              widget.preferences.getString(PrefKeys.themeVariant)) ??
+      FlexSchemeVariant.material3Legacy;
 
   @override
   Widget build(BuildContext context) {
@@ -222,6 +229,17 @@ class _ElasticState extends State<Elastic> {
           teamColor = color;
           widget.preferences.setInt(PrefKeys.teamColor, color.value);
         }),
+        onThemeVariantChanged: (variant) async {
+          flexSchemeVariant = variant;
+          if (variant == SettingsDialog.defaultVariant) {
+            await widget.preferences.setString(
+                PrefKeys.themeVariant, SettingsDialog.defaultVariantName);
+          } else {
+            await widget.preferences
+                .setString(PrefKeys.themeVariant, variant.variantName);
+          }
+          setState(() {});
+        },
       ),
     );
   }

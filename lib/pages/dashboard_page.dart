@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -40,12 +41,14 @@ class DashboardPage extends StatefulWidget {
   final SharedPreferences preferences;
   final String version;
   final Function(Color color)? onColorChanged;
+  final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
   const DashboardPage({
     super.key,
     required this.preferences,
     required this.version,
     this.onColorChanged,
+    this.onThemeVariantChanged,
   });
 
   @override
@@ -1111,6 +1114,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           setState(() => Settings.defaultGraphPeriod = newPeriod);
         },
         onColorChanged: widget.onColorChanged,
+        onThemeVariantChanged: widget.onThemeVariantChanged,
       ),
     );
   }

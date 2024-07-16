@@ -34,7 +34,7 @@ class PrefKeys {
   static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
-  static String theme = 'theme';
+  static String themeVariant = 'theme_variant';
   static String darkMode = 'dark_mode';
   static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';

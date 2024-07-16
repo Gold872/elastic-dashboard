@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,16 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 
 class SettingsDialog extends StatefulWidget {
+  static const FlexSchemeVariant defaultVariant =
+      FlexSchemeVariant.material3Legacy;
+  static const String defaultVariantName = 'Material-3 Legacy (Default)';
+  static final List<String> themeVariants = FlexSchemeVariant.values
+      .whereNot((variant) => variant == defaultVariant)
+      .map((variant) => variant.variantName)
+      .toList()
+    ..add(defaultVariantName)
+    ..sort();
+
   final SharedPreferences preferences;
 
   final Function(String? data)? onIPAddressChanged;
@@ -29,24 +40,25 @@ class SettingsDialog extends StatefulWidget {
   final Function(bool value)? onLayoutLock;
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
-  final Function(FlexSchemeVariant? variant)? onThemeVariantChanged;
+  final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
-  const SettingsDialog(
-      {super.key,
-      required this.preferences,
-      this.onTeamNumberChanged,
-      this.onIPAddressModeChanged,
-      this.onIPAddressChanged,
-      this.onColorChanged,
-      this.onGridToggle,
-      this.onGridSizeChanged,
-      this.onCornerRadiusChanged,
-      this.onResizeToDSChanged,
-      this.onRememberWindowPositionChanged,
-      this.onLayoutLock,
-      this.onDefaultPeriodChanged,
-      this.onDefaultGraphPeriodChanged,
-      this.onThemeVariantChanged});
+  const SettingsDialog({
+    super.key,
+    required this.preferences,
+    this.onTeamNumberChanged,
+    this.onIPAddressModeChanged,
+    this.onIPAddressChanged,
+    this.onColorChanged,
+    this.onGridToggle,
+    this.onGridSizeChanged,
+    this.onCornerRadiusChanged,
+    this.onResizeToDSChanged,
+    this.onRememberWindowPositionChanged,
+    this.onLayoutLock,
+    this.onDefaultPeriodChanged,
+    this.onDefaultGraphPeriodChanged,
+    this.onThemeVariantChanged,
+  });
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -103,6 +115,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
   List<Widget> _generalSettings() {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
+
+    // Safety feature to prevent theme variants dropdown from not rendering if the current selection doesn't exist
+    List<String>? themeVariantsOverride;
+    if (!SettingsDialog.themeVariants
+            .contains(widget.preferences.getString(PrefKeys.themeVariant)) &&
+        widget.preferences.getString(PrefKeys.themeVariant) != null) {
+      // Weird way of copying the list
+      themeVariantsOverride = SettingsDialog.themeVariants.toList()
+        ..add(widget.preferences.getString(PrefKeys.themeVariant)!)
+        ..sort();
+      themeVariantsOverride = Set.of(themeVariantsOverride).toList();
+    }
+
     return [
       Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -133,18 +158,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ],
           ),
           const Text("Theme Variant"),
-          DialogDropdownChooser<FlexSchemeVariant>(
-            onSelectionChanged: (variant) {
-              if (variant == null) return;
+          DialogDropdownChooser<String>(
+              onSelectionChanged: (variantName) {
+                if (variantName == null) return;
+                FlexSchemeVariant variant = FlexSchemeVariant.values
+                        .firstWhereOrNull(
+                            (e) => e.variantName == variantName) ??
+                    FlexSchemeVariant.material3Legacy;
 
-              Settings.themeVariant = variant;
-              widget.onColorChanged?.call(
-                  currentColor); // Not sure how to call the main rebuild method, calling from this one instead of creating another one
-              setState(() {});
-            },
-            choices: FlexSchemeVariant.values,
-            initialValue: Settings.themeVariant,
-          ),
+                Settings.themeVariant = variant;
+                widget.onThemeVariantChanged?.call(variant);
+                setState(() {});
+              },
+              choices: themeVariantsOverride ?? SettingsDialog.themeVariants,
+              initialValue:
+                  widget.preferences.getString(PrefKeys.themeVariant) ??
+                      SettingsDialog.defaultVariantName),
           DialogToggleSwitch(
             initialValue: Settings.isDarkMode,
             label: 'Dark Mode',
