@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
-import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -21,6 +20,7 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +77,8 @@ void main() async {
   Settings.defaultGraphPeriod =
       preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
           Settings.defaultGraphPeriod;
+  Settings.isDarkMode =
+      preferences.getBool(PrefKeys.darkMode) ?? Settings.isDarkMode;
 
   NTWidgetBuilder.ensureInitialized();
 
@@ -207,6 +209,8 @@ class _ElasticState extends State<Elastic> {
               element.variantName ==
               widget.preferences.getString(PrefKeys.themeVariant)) ??
       FlexSchemeVariant.material3Legacy;
+  late bool darkMode =
+      widget.preferences.getBool(PrefKeys.darkMode) ?? Settings.isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +218,7 @@ class _ElasticState extends State<Elastic> {
       useMaterial3: true,
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
-        brightness: Settings.isDarkMode ? Brightness.dark : Brightness.light,
+        brightness: darkMode ? Brightness.dark : Brightness.light,
         variant: Settings.themeVariant,
       ),
     );
@@ -238,6 +242,12 @@ class _ElasticState extends State<Elastic> {
             await widget.preferences
                 .setString(PrefKeys.themeVariant, variant.variantName);
           }
+          setState(() {});
+        },
+        onDarkModeChanged: (darkMode) async {
+          await widget.preferences.setBool(PrefKeys.darkMode, darkMode);
+          this.darkMode = darkMode;
+          Settings.isDarkMode = darkMode;
           setState(() {});
         },
       ),

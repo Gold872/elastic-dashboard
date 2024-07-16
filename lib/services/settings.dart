@@ -1,5 +1,6 @@
-import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+
+import 'package:elastic_dashboard/services/ip_address_util.dart';
 
 class Settings {
   static const String repositoryLink =

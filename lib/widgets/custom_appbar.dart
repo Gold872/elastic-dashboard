@@ -25,7 +25,7 @@ class CustomAppBar extends AppBar {
           backgroundColor: appBarColor ??
               (Settings.isDarkMode
                   ? const Color.fromARGB(255, 25, 25, 25)
-                  : const Color.fromARGB(255, 180, 165, 165)),
+                  : const Color.fromARGB(255, 180, 180, 180)),
           elevation: 0.0,
           scrolledUnderElevation: 0.0,
           leading: menuBar,

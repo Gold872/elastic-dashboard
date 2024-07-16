@@ -1,9 +1,9 @@
-import 'package:collection/collection.dart';
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
@@ -41,6 +41,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function(bool darkMode)? onDarkModeChanged;
 
   const SettingsDialog({
     super.key,
@@ -58,6 +59,7 @@ class SettingsDialog extends StatefulWidget {
     this.onDefaultPeriodChanged,
     this.onDefaultGraphPeriodChanged,
     this.onThemeVariantChanged,
+    this.onDarkModeChanged,
   });
 
   @override
@@ -175,13 +177,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   widget.preferences.getString(PrefKeys.themeVariant) ??
                       SettingsDialog.defaultVariantName),
           DialogToggleSwitch(
-            initialValue: Settings.isDarkMode,
+            initialValue: widget.preferences.getBool(PrefKeys.darkMode) ??
+                Settings.isDarkMode,
             label: 'Dark Mode',
             onToggle: (value) {
-              widget.onColorChanged?.call(currentColor);
-              setState(() {
-                Settings.isDarkMode = value;
-              });
+              widget.onDarkModeChanged?.call(value);
+              setState(() {});
             },
           ),
         ],

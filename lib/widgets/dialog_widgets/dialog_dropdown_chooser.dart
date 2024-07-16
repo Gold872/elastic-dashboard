@@ -1,5 +1,6 @@
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
+
+import 'package:elastic_dashboard/services/settings.dart';
 
 class DialogDropdownChooser<T> extends StatefulWidget {
   final List<T>? choices;

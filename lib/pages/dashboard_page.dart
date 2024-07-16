@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +11,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +42,7 @@ class DashboardPage extends StatefulWidget {
   final String version;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function(bool darkMode)? onDarkModeChanged;
 
   const DashboardPage({
     super.key,
@@ -49,6 +50,7 @@ class DashboardPage extends StatefulWidget {
     required this.version,
     this.onColorChanged,
     this.onThemeVariantChanged,
+    this.onDarkModeChanged,
   });
 
   @override
@@ -1115,6 +1117,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onDarkModeChanged: (darkMode) {
+          widget.onDarkModeChanged?.call(darkMode);
+          setState(() {});
+        },
       ),
     );
   }
@@ -1292,7 +1298,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       textStyle: WidgetStateProperty.all(menuTextStyle),
       backgroundColor: WidgetStatePropertyAll(Settings.isDarkMode
           ? const Color.fromARGB(255, 25, 25, 25)
-          : const Color.fromARGB(255, 180, 165, 165)),
+          : const Color.fromARGB(255, 180, 180, 180)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
 
@@ -1300,7 +1306,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       style: MenuStyle(
         backgroundColor: WidgetStatePropertyAll(Settings.isDarkMode
             ? const Color.fromARGB(255, 25, 25, 25)
-            : const Color.fromARGB(255, 180, 165, 165)),
+            : const Color.fromARGB(255, 180, 180, 180)),
         elevation: const WidgetStatePropertyAll(0),
       ),
       children: [
