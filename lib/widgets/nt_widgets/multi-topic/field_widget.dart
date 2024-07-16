@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
@@ -137,51 +142,55 @@ class FieldWidgetModel extends NTWidgetModel {
   List<Widget> getEditProperties(BuildContext context) {
     return [
       Center(
-        child: RichText(
-          text: TextSpan(
-            text: 'Field Image (',
-            children: [
-              WidgetSpan(
-                child: Tooltip(
-                  waitDuration: const Duration(milliseconds: 750),
-                  richMessage: WidgetSpan(
-                    // Builder is used so the message updates when the field image is changed
-                    child: Builder(
-                      builder: (context) {
-                        return Text(
-                          _field.sourceURL ?? '',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(color: Colors.black),
-                        );
-                      },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RichText(
+              text: TextSpan(
+                text: 'Field Image (',
+                children: [
+                  WidgetSpan(
+                    child: Tooltip(
+                      waitDuration: const Duration(milliseconds: 750),
+                      richMessage: WidgetSpan(
+                        child: Builder(
+                          builder: (context) {
+                            return Text(
+                              _field.sourceURL ?? '',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .copyWith(color: Colors.black),
+                            );
+                          },
+                        ),
+                      ),
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Source',
+                          style: const TextStyle(color: Colors.blue),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              if (_field.sourceURL == null) {
+                                return;
+                              }
+                              Uri? url = Uri.tryParse(_field.sourceURL!);
+                              if (url == null) {
+                                return;
+                              }
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              }
+                            },
+                        ),
+                      ),
                     ),
                   ),
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Source',
-                      style: const TextStyle(color: Colors.blue),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          if (_field.sourceURL == null) {
-                            return;
-                          }
-                          Uri? url = Uri.tryParse(_field.sourceURL!);
-                          if (url == null) {
-                            return;
-                          }
-                          if (await canLaunchUrl(url)) {
-                            await launchUrl(url);
-                          }
-                        },
-                    ),
-                  ),
-                ),
+                  const TextSpan(text: ')'),
+                ],
               ),
-              const TextSpan(text: ')'),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       DialogDropdownChooser(
@@ -208,7 +217,14 @@ class FieldWidgetModel extends NTWidgetModel {
         choices: FieldImages.fields.map((e) => e.game).toList(),
         initialValue: _field.game,
       ),
-      const SizedBox(height: 5),
+      const SizedBox(width: 10),
+      ElevatedButton(
+        onPressed: () {
+          _onFieldDuplicated(field.jsonData, context);
+        },
+        child: const Text('Duplicate Current'),
+      ),
+      const SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
@@ -379,6 +395,68 @@ class FieldWidgetModel extends NTWidgetModel {
   }
 
   get field => _field;
+
+  void _onFieldDuplicated(
+      Map<String, dynamic> fieldJson, BuildContext context) {
+    final Map<String, dynamic> duplicate = <String, dynamic>{};
+    duplicate.addAll(fieldJson);
+
+    duplicate["game"] = "Duplicate of ${fieldJson["game"]}";
+
+    _saveField(duplicate, context);
+  }
+
+  Future<String> _getValidFilePath(
+      String initialPath, String fileExtension) async {
+    int counter = 1;
+    String newPath = initialPath;
+    while (await File("$newPath$fileExtension").exists()) {
+      newPath = "${initialPath}_${counter.toString()}";
+      counter++;
+    }
+    return newPath;
+  }
+
+  Future<void> _saveField(
+      Map<String, dynamic> jsonData, BuildContext context) async {
+    Directory dir = Directory("assets/fields");
+
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    } else {
+      dir = Directory(await _getValidFilePath(
+          ("${dir.path}/${jsonData["game"]}"), ".json"));
+    }
+
+    final fieldFile = File("${dir.path}.json");
+
+    if (context.mounted) {
+      ColorScheme colorScheme = Theme.of(context).colorScheme;
+      TextTheme textTheme = Theme.of(context).textTheme;
+      // Use JsonEncoder with indent for pretty printing
+      final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
+
+      await fieldFile.writeAsString(jsonString);
+      ElegantNotification notification = ElegantNotification(
+        background: colorScheme.surface,
+        progressIndicatorBackground: colorScheme.surface,
+        progressIndicatorColor: const Color(0xff01CB67),
+        width: 500,
+        position: Alignment.bottomRight,
+        toastDuration: const Duration(seconds: 3, milliseconds: 500),
+        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
+        title: Text(
+          'Duplicated',
+          style: textTheme.bodyMedium!.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        description: Text(
+            'Duplicated field data saved successfully at \n${fieldFile.path}'),
+      );
+      notification.show(context);
+    }
+  }
 }
 
 class FieldWidget extends NTWidget {
