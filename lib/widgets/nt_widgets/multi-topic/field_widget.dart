@@ -406,7 +406,7 @@ class FieldWidgetModel extends NTWidgetModel {
     _saveField(duplicate, context);
   }
 
-  Future<String> _getValidFilePath(
+  Future<(String, int)> _getValidFilePath(
       String initialPath, String fileExtension) async {
     int counter = 1;
     String newPath = initialPath;
@@ -414,21 +414,25 @@ class FieldWidgetModel extends NTWidgetModel {
       newPath = "${initialPath}_${counter.toString()}";
       counter++;
     }
-    return newPath;
+    return (newPath, counter);
   }
 
   Future<void> _saveField(
       Map<String, dynamic> jsonData, BuildContext context) async {
     Directory dir = Directory("assets/fields");
-
+    int counter = 0;
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     } else {
-      dir = Directory(await _getValidFilePath(
+      (String, int) t = (await _getValidFilePath(
           ("${dir.path}/${jsonData["game"]}"), ".json"));
+
+      dir = Directory(t.$1);
+      counter = t.$2;
     }
 
     final fieldFile = File("${dir.path}.json");
+    jsonData["game"] += " (${counter.toString()})";
 
     if (context.mounted) {
       ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -452,7 +456,7 @@ class FieldWidgetModel extends NTWidgetModel {
           ),
         ),
         description: Text(
-            'Duplicated field data saved successfully at \n${fieldFile.path}'),
+            'Duplicated field data saved successfully at \n${fieldFile.path}\n Will require to restart the app to take effect'),
       );
       notification.show(context);
     }
