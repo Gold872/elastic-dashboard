@@ -1,3 +1,4 @@
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,23 +29,24 @@ class SettingsDialog extends StatefulWidget {
   final Function(bool value)? onLayoutLock;
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
+  final Function(FlexSchemeVariant? variant)? onThemeVariantChanged;
 
-  const SettingsDialog({
-    super.key,
-    required this.preferences,
-    this.onTeamNumberChanged,
-    this.onIPAddressModeChanged,
-    this.onIPAddressChanged,
-    this.onColorChanged,
-    this.onGridToggle,
-    this.onGridSizeChanged,
-    this.onCornerRadiusChanged,
-    this.onResizeToDSChanged,
-    this.onRememberWindowPositionChanged,
-    this.onLayoutLock,
-    this.onDefaultPeriodChanged,
-    this.onDefaultGraphPeriodChanged,
-  });
+  const SettingsDialog(
+      {super.key,
+      required this.preferences,
+      this.onTeamNumberChanged,
+      this.onIPAddressModeChanged,
+      this.onIPAddressChanged,
+      this.onColorChanged,
+      this.onGridToggle,
+      this.onGridSizeChanged,
+      this.onCornerRadiusChanged,
+      this.onResizeToDSChanged,
+      this.onRememberWindowPositionChanged,
+      this.onLayoutLock,
+      this.onDefaultPeriodChanged,
+      this.onDefaultGraphPeriodChanged,
+      this.onThemeVariantChanged});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -58,7 +60,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 275,
+          maxHeight: 450,
           maxWidth: 725,
         ),
         child: Row(
@@ -102,28 +104,56 @@ class _SettingsDialogState extends State<SettingsDialog> {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
     return [
-      Row(
+      Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Flexible(
-            child: DialogTextInput(
-              initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
+          Row(
+            children: [
+              Expanded(
+                child: DialogTextInput(
+                  initialText: widget.preferences
+                          .getInt(PrefKeys.teamNumber)
+                          ?.toString() ??
                       Settings.teamNumber.toString(),
-              label: 'Team Number',
-              onSubmit: (data) async {
-                await widget.onTeamNumberChanged?.call(data);
-                setState(() {});
-              },
-              formatter: FilteringTextInputFormatter.digitsOnly,
-            ),
+                  label: 'Team Number',
+                  onSubmit: (data) async {
+                    await widget.onTeamNumberChanged?.call(data);
+                    setState(() {});
+                  },
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                ),
+              ),
+              Expanded(
+                child: DialogColorPicker(
+                  onColorPicked: (color) => widget.onColorChanged?.call(color),
+                  label: 'Team Color',
+                  initialColor: currentColor,
+                ),
+              ),
+            ],
           ),
-          Flexible(
-            child: DialogColorPicker(
-              onColorPicked: (color) => widget.onColorChanged?.call(color),
-              label: 'Team Color',
-              initialColor: currentColor,
-            ),
+          const Text("Theme Variant"),
+          DialogDropdownChooser<FlexSchemeVariant>(
+            onSelectionChanged: (variant) {
+              if (variant == null) return;
+
+              Settings.themeVariant = variant;
+              widget.onColorChanged?.call(
+                  currentColor); // Not sure how to call the main rebuild method, calling from this one instead of creating another one
+              setState(() {});
+            },
+            choices: FlexSchemeVariant.values,
+            initialValue: Settings.themeVariant,
+          ),
+          DialogToggleSwitch(
+            initialValue: Settings.isDarkMode,
+            label: 'Dark Mode',
+            onToggle: (value) {
+              widget.onColorChanged?.call(currentColor);
+              setState(() {
+                Settings.isDarkMode = value;
+              });
+            },
           ),
         ],
       ),

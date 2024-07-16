@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
 
 class DialogDropdownChooser<T> extends StatefulWidget {
@@ -43,7 +44,9 @@ class _DialogDropdownChooserState<T> extends State<DialogDropdownChooser<T>> {
             child: DropdownButton(
               isExpanded: true,
               borderRadius: BorderRadius.circular(8.0),
-              style: const TextStyle(fontWeight: FontWeight.normal),
+              style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  color: (Settings.isDarkMode ? Colors.white : Colors.black)),
               items: widget.choices?.map((T item) {
                 return DropdownMenuItem(
                   value: item,

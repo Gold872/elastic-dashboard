@@ -1,4 +1,5 @@
 import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 
 class Settings {
   static const String repositoryLink =
@@ -15,6 +16,9 @@ class Settings {
   static bool showGrid = true;
   static bool autoResizeToDS = false;
 
+  static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
+  static bool isDarkMode = true;
+
   // window_manager doesn't support drag disable/maximize
   // disable on some platforms, this is a dumb workaround for it
   static bool isWindowDraggable = true;
@@ -30,6 +34,8 @@ class PrefKeys {
   static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
+  static String theme = 'theme';
+  static String darkMode = 'dark_mode';
   static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';

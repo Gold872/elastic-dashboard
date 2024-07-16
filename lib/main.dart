@@ -207,8 +207,8 @@ class _ElasticState extends State<Elastic> {
       useMaterial3: true,
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
-        brightness: Brightness.dark,
-        variant: FlexSchemeVariant.material3Legacy,
+        brightness: Settings.isDarkMode ? Brightness.dark : Brightness.light,
+        variant: Settings.themeVariant,
       ),
     );
     return MaterialApp(
