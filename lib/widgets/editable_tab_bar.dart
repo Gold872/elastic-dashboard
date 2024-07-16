@@ -25,6 +25,7 @@ class EditableTabBar extends StatelessWidget {
   final Function() onTabMoveRight;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
+  final Function(int index, TabData newData) onTabDuplicate;
 
   final int currentIndex;
 
@@ -39,6 +40,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabMoveRight,
     required this.onTabRename,
     required this.onTabChanged,
+    required this.onTabDuplicate,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -72,6 +74,13 @@ class EditableTabBar extends StatelessWidget {
         );
       },
     );
+  }
+
+  void duplicateTab(BuildContext context, int index) {
+    String tabName = '${tabData[index].name} (Copy)';
+    TabData data = TabData(name: tabName);
+
+    onTabDuplicate.call(index, data);
   }
 
   void createTab() {
@@ -141,6 +150,11 @@ class EditableTabBar extends StatelessWidget {
                                 label: 'Rename',
                                 icon: Icons.drive_file_rename_outline_outlined,
                                 onSelected: () => renameTab(context, index),
+                              ),
+                              MenuItem(
+                                label: 'Duplicate',
+                                icon: Icons.control_point_duplicate_sharp,
+                                onSelected: () => duplicateTab(context, index),
                               ),
                               MenuItem(
                                 label: 'Close',

@@ -27,6 +27,7 @@ class TabGridModel extends ChangeNotifier {
 }
 
 class TabGrid extends StatelessWidget {
+  static Map<String, dynamic>? _copyJsonData;
   final List<WidgetContainerModel> _widgetModels = [];
 
   MapEntry<WidgetContainerModel, Offset>? _containerDraggingIn;
@@ -460,6 +461,7 @@ class TabGrid extends StatelessWidget {
         widget.draggingRect.height,
       ),
     );
+
     _containerDraggingIn = MapEntry(widget, globalPosition);
     refresh();
   }
@@ -516,7 +518,6 @@ class TabGrid extends StatelessWidget {
     _containerDraggingIn = null;
 
     widget.disposeModel();
-
     refresh();
   }
 
@@ -646,6 +647,10 @@ class TabGrid extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void copyWidget(WidgetContainerModel widget) {
+    _copyJsonData = widget.toJson();
   }
 
   void lockLayout() {
@@ -782,7 +787,6 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
-          onTap: () {},
           onSecondaryTapUp: (details) {
             if (Settings.layoutLocked) {
               return;
@@ -801,6 +805,12 @@ class TabGrid extends StatelessWidget {
                 },
               ),
               ...container.getContextMenuItems(),
+              MenuItem(
+                  label: 'Copy',
+                  icon: Icons.copy_outlined,
+                  onSelected: () {
+                    copyWidget(container);
+                  }),
               MenuItem(
                   label: 'Remove',
                   icon: Icons.delete_outlined,
@@ -898,22 +908,37 @@ class TabGrid extends StatelessWidget {
         if (Settings.layoutLocked) {
           return;
         }
+
+        List<MenuItem> contextMenuEntries = [
+          MenuItem(
+            label: 'Add Widget',
+            icon: Icons.add,
+            onSelected: () => onAddWidgetPressed.call(),
+          ),
+          MenuItem(
+            label: 'Clear Layout',
+            icon: Icons.clear,
+            onSelected: () => clearWidgets(context),
+          ),
+        ];
+
+        if (_copyJsonData != null) {
+          contextMenuEntries.add(
+            MenuItem(
+              label: 'Paste',
+              icon: Icons.paste_outlined,
+              onSelected: () {
+                pasteWidget(_copyJsonData, details.localPosition);
+              },
+            ),
+          );
+        }
+
         ContextMenu contextMenu = ContextMenu(
           position: details.globalPosition,
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
-          entries: [
-            MenuItem(
-              label: 'Add Widget',
-              icon: Icons.add,
-              onSelected: () => onAddWidgetPressed.call(),
-            ),
-            MenuItem(
-              label: 'Clear Layout',
-              icon: Icons.clear,
-              onSelected: () => clearWidgets(context),
-            ),
-          ],
+          entries: contextMenuEntries,
         );
 
         showContextMenu(
@@ -938,5 +963,47 @@ class TabGrid extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void pasteWidget(Map<String, dynamic>? widgetJson, Offset localPosition) {
+    if (widgetJson == null) return;
+
+    // Put the top left corner of the widget in the square the user pastes it in
+    double snappedX =
+        (localPosition.dx ~/ Settings.gridSize) * Settings.gridSize.toDouble();
+    double snappedY =
+        (localPosition.dy ~/ Settings.gridSize) * Settings.gridSize.toDouble();
+
+    widgetJson['x'] = snappedX;
+    widgetJson['y'] = snappedY;
+
+    Rect pasteLocation = Rect.fromLTWH(
+      snappedX,
+      snappedY,
+      widgetJson['width'],
+      widgetJson['height'],
+    );
+
+    if (isValidLocation(pasteLocation)) {
+      WidgetContainerModel copiedWidget = createWidgetFromJson(widgetJson);
+
+      _widgetModels.add(copiedWidget);
+      refresh();
+    }
+  }
+
+  WidgetContainerModel createWidgetFromJson(Map<String, dynamic> json) {
+    if (json['type'] == 'List Layout') {
+      return ListLayoutModel.fromJson(
+        jsonData: json,
+        tabGrid: this,
+        onDragCancel: _layoutContainerOnDragCancel,
+      );
+    } else {
+      return NTWidgetContainerModel.fromJson(
+        enabled: ntConnection.isNT4Connected,
+        jsonData: json,
+      );
+    }
   }
 }
