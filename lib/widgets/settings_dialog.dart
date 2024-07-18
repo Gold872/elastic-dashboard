@@ -17,14 +17,12 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.da
 
 class SettingsDialog extends StatefulWidget {
   final NTConnection ntConnection;
-  static const FlexSchemeVariant defaultVariant =
-      FlexSchemeVariant.material3Legacy;
-  static const String defaultVariantName = 'Material-3 Legacy (Default)';
+
   static final List<String> themeVariants = FlexSchemeVariant.values
-      .whereNot((variant) => variant == defaultVariant)
+      .whereNot((variant) => variant == Defaults.themeVariant)
       .map((variant) => variant.variantName)
       .toList()
-    ..add(defaultVariantName)
+    ..add(Defaults.defaultVariantName)
     ..sort();
 
   final SharedPreferences preferences;
@@ -172,7 +170,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   (e) => e.variantName == variantName) ??
                           FlexSchemeVariant.material3Legacy;
 
-                      Settings.themeVariant = variant;
                       widget.onThemeVariantChanged?.call(variant);
                       setState(() {});
                     },
@@ -180,7 +177,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         themeVariantsOverride ?? SettingsDialog.themeVariants,
                     initialValue:
                         widget.preferences.getString(PrefKeys.themeVariant) ??
-                            SettingsDialog.defaultVariantName),
+                            Defaults.defaultVariantName),
               ),
             ],
           ),

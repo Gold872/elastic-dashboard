@@ -19,7 +19,6 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -191,7 +190,7 @@ class Elastic extends StatefulWidget {
 class _ElasticState extends State<Elastic> {
   late Color teamColor = Color(
       widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
-  late FlexSchemeVariant flexSchemeVariant = FlexSchemeVariant.values
+  late FlexSchemeVariant themeVariant = FlexSchemeVariant.values
           .firstWhereOrNull((element) =>
               element.variantName ==
               widget.preferences.getString(PrefKeys.themeVariant)) ??
@@ -204,7 +203,7 @@ class _ElasticState extends State<Elastic> {
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
         brightness: Brightness.dark,
-        variant: Settings.themeVariant,
+        variant: themeVariant,
       ),
     );
     return MaterialApp(
@@ -220,10 +219,10 @@ class _ElasticState extends State<Elastic> {
           widget.preferences.setInt(PrefKeys.teamColor, color.value);
         }),
         onThemeVariantChanged: (variant) async {
-          flexSchemeVariant = variant;
-          if (variant == SettingsDialog.defaultVariant) {
-            await widget.preferences.setString(
-                PrefKeys.themeVariant, SettingsDialog.defaultVariantName);
+          themeVariant = variant;
+          if (variant == Defaults.themeVariant) {
+            await widget.preferences
+                .setString(PrefKeys.themeVariant, Defaults.defaultVariantName);
           } else {
             await widget.preferences
                 .setString(PrefKeys.themeVariant, variant.variantName);
