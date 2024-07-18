@@ -41,7 +41,6 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
-  final Function(bool darkMode)? onDarkModeChanged;
 
   const SettingsDialog({
     super.key,
@@ -59,7 +58,6 @@ class SettingsDialog extends StatefulWidget {
     this.onDefaultPeriodChanged,
     this.onDefaultGraphPeriodChanged,
     this.onThemeVariantChanged,
-    this.onDarkModeChanged,
   });
 
   @override
@@ -176,15 +174,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
               initialValue:
                   widget.preferences.getString(PrefKeys.themeVariant) ??
                       SettingsDialog.defaultVariantName),
-          DialogToggleSwitch(
-            initialValue: widget.preferences.getBool(PrefKeys.darkMode) ??
-                Settings.isDarkMode,
-            label: 'Dark Mode',
-            onToggle: (value) {
-              widget.onDarkModeChanged?.call(value);
-              setState(() {});
-            },
-          ),
         ],
       ),
     ];

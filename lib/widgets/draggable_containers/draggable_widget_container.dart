@@ -184,9 +184,7 @@ class WidgetContainer extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Settings.cornerRadius),
-              color: (Settings.isDarkMode)
-                  ? const Color.fromARGB(255, 40, 40, 40)
-                  : const Color.fromARGB(255, 225, 225, 225),
+              color: const Color.fromARGB(255, 40, 40, 40),
               boxShadow: const [
                 BoxShadow(
                   offset: Offset(2, 2),

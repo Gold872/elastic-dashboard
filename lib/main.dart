@@ -77,8 +77,6 @@ void main() async {
   Settings.defaultGraphPeriod =
       preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
           Settings.defaultGraphPeriod;
-  Settings.isDarkMode =
-      preferences.getBool(PrefKeys.darkMode) ?? Settings.isDarkMode;
 
   NTWidgetBuilder.ensureInitialized();
 
@@ -209,8 +207,6 @@ class _ElasticState extends State<Elastic> {
               element.variantName ==
               widget.preferences.getString(PrefKeys.themeVariant)) ??
       FlexSchemeVariant.material3Legacy;
-  late bool darkMode =
-      widget.preferences.getBool(PrefKeys.darkMode) ?? Settings.isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +214,7 @@ class _ElasticState extends State<Elastic> {
       useMaterial3: true,
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
-        brightness: darkMode ? Brightness.dark : Brightness.light,
+        brightness: Brightness.dark,
         variant: Settings.themeVariant,
       ),
     );
@@ -242,12 +238,6 @@ class _ElasticState extends State<Elastic> {
             await widget.preferences
                 .setString(PrefKeys.themeVariant, variant.variantName);
           }
-          setState(() {});
-        },
-        onDarkModeChanged: (darkMode) async {
-          await widget.preferences.setBool(PrefKeys.darkMode, darkMode);
-          this.darkMode = darkMode;
-          Settings.isDarkMode = darkMode;
           setState(() {});
         },
       ),

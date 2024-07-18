@@ -18,7 +18,6 @@ class Settings {
   static bool autoResizeToDS = false;
 
   static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
-  static bool isDarkMode = true;
 
   // window_manager doesn't support drag disable/maximize
   // disable on some platforms, this is a dumb workaround for it
@@ -36,7 +35,6 @@ class PrefKeys {
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
   static String themeVariant = 'theme_variant';
-  static String darkMode = 'dark_mode';
   static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';

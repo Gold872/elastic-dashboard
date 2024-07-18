@@ -42,7 +42,6 @@ class DashboardPage extends StatefulWidget {
   final String version;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
-  final Function(bool darkMode)? onDarkModeChanged;
 
   const DashboardPage({
     super.key,
@@ -50,7 +49,6 @@ class DashboardPage extends StatefulWidget {
     required this.version,
     this.onColorChanged,
     this.onThemeVariantChanged,
-    this.onDarkModeChanged,
   });
 
   @override
@@ -1117,10 +1115,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
-        onDarkModeChanged: (darkMode) {
-          widget.onDarkModeChanged?.call(darkMode);
-          setState(() {});
-        },
       ),
     );
   }
@@ -1296,18 +1290,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
       textStyle: WidgetStateProperty.all(menuTextStyle),
-      backgroundColor: WidgetStatePropertyAll(Settings.isDarkMode
-          ? const Color.fromARGB(255, 25, 25, 25)
-          : const Color.fromARGB(255, 180, 180, 180)),
+      backgroundColor:
+          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
 
     MenuBar menuBar = MenuBar(
-      style: MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(Settings.isDarkMode
-            ? const Color.fromARGB(255, 25, 25, 25)
-            : const Color.fromARGB(255, 180, 180, 180)),
-        elevation: const WidgetStatePropertyAll(0),
+      style: const MenuStyle(
+        backgroundColor:
+            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        elevation: WidgetStatePropertyAll(0),
       ),
       children: [
         Center(

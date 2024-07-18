@@ -520,9 +520,7 @@ class ListLayoutModel extends LayoutContainerModel {
                   const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7.5),
-                color: (Settings.isDarkMode)
-                    ? const Color.fromARGB(255, 45, 45, 45)
-                    : const Color.fromARGB(255, 225, 225, 225),
+                color: const Color.fromARGB(255, 45, 45, 45),
                 boxShadow: const [
                   BoxShadow(
                     offset: Offset(1.0, 1.0),
