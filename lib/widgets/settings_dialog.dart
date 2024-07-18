@@ -72,7 +72,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 450,
+          maxHeight: 350,
           maxWidth: 725,
         ),
         child: Row(
@@ -157,23 +157,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
               ),
             ],
           ),
-          const Text("Theme Variant"),
-          DialogDropdownChooser<String>(
-              onSelectionChanged: (variantName) {
-                if (variantName == null) return;
-                FlexSchemeVariant variant = FlexSchemeVariant.values
-                        .firstWhereOrNull(
-                            (e) => e.variantName == variantName) ??
-                    FlexSchemeVariant.material3Legacy;
+          Row(
+            children: [
+              const Text('Theme Variant'),
+              const SizedBox(width: 5),
+              Flexible(
+                child: DialogDropdownChooser<String>(
+                    onSelectionChanged: (variantName) {
+                      if (variantName == null) return;
+                      FlexSchemeVariant variant = FlexSchemeVariant.values
+                              .firstWhereOrNull(
+                                  (e) => e.variantName == variantName) ??
+                          FlexSchemeVariant.material3Legacy;
 
-                Settings.themeVariant = variant;
-                widget.onThemeVariantChanged?.call(variant);
-                setState(() {});
-              },
-              choices: themeVariantsOverride ?? SettingsDialog.themeVariants,
-              initialValue:
-                  widget.preferences.getString(PrefKeys.themeVariant) ??
-                      SettingsDialog.defaultVariantName),
+                      Settings.themeVariant = variant;
+                      widget.onThemeVariantChanged?.call(variant);
+                      setState(() {});
+                    },
+                    choices:
+                        themeVariantsOverride ?? SettingsDialog.themeVariants,
+                    initialValue:
+                        widget.preferences.getString(PrefKeys.themeVariant) ??
+                            SettingsDialog.defaultVariantName),
+              ),
+            ],
+          ),
         ],
       ),
     ];
