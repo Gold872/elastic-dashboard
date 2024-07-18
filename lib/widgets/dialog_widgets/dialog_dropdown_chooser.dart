@@ -43,8 +43,7 @@ class _DialogDropdownChooserState<T> extends State<DialogDropdownChooser<T>> {
             child: DropdownButton(
               isExpanded: true,
               borderRadius: BorderRadius.circular(8.0),
-              style: const TextStyle(
-                  fontWeight: FontWeight.normal, color: (Colors.white)),
+              style: const TextStyle(fontWeight: FontWeight.normal),
               items: widget.choices?.map((T item) {
                 return DropdownMenuItem(
                   value: item,
