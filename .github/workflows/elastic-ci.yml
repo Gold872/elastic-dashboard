@@ -40,6 +40,9 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib/* test/*
 
+      - name: Verify import sorting
+        run: dart run import_sorter:main --exit-if-changed
+
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
   test:
