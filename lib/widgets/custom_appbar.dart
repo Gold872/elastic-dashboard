@@ -22,8 +22,7 @@ class CustomAppBar extends AppBar {
       required this.menuBar})
       : super(
           toolbarHeight: 36,
-          backgroundColor:
-              appBarColor ?? (const Color.fromARGB(255, 25, 25, 25)),
+          backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
           elevation: 0.0,
           scrolledUnderElevation: 0.0,
           leading: menuBar,
