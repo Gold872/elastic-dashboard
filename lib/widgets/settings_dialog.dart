@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
@@ -14,6 +16,16 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 
 class SettingsDialog extends StatefulWidget {
+  static const FlexSchemeVariant defaultVariant =
+      FlexSchemeVariant.material3Legacy;
+  static const String defaultVariantName = 'Material-3 Legacy (Default)';
+  static final List<String> themeVariants = FlexSchemeVariant.values
+      .whereNot((variant) => variant == defaultVariant)
+      .map((variant) => variant.variantName)
+      .toList()
+    ..add(defaultVariantName)
+    ..sort();
+
   final SharedPreferences preferences;
 
   final Function(String? data)? onIPAddressChanged;
@@ -28,6 +40,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(bool value)? onLayoutLock;
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
+  final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
   const SettingsDialog({
     super.key,
@@ -44,6 +57,7 @@ class SettingsDialog extends StatefulWidget {
     this.onLayoutLock,
     this.onDefaultPeriodChanged,
     this.onDefaultGraphPeriodChanged,
+    this.onThemeVariantChanged,
   });
 
   @override
@@ -58,7 +72,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 275,
+          maxHeight: 350,
           maxWidth: 725,
         ),
         child: Row(
@@ -101,29 +115,72 @@ class _SettingsDialogState extends State<SettingsDialog> {
   List<Widget> _generalSettings() {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
+
+    // Safety feature to prevent theme variants dropdown from not rendering if the current selection doesn't exist
+    List<String>? themeVariantsOverride;
+    if (!SettingsDialog.themeVariants
+            .contains(widget.preferences.getString(PrefKeys.themeVariant)) &&
+        widget.preferences.getString(PrefKeys.themeVariant) != null) {
+      // Weird way of copying the list
+      themeVariantsOverride = SettingsDialog.themeVariants.toList()
+        ..add(widget.preferences.getString(PrefKeys.themeVariant)!)
+        ..sort();
+      themeVariantsOverride = Set.of(themeVariantsOverride).toList();
+    }
+
     return [
-      Row(
+      Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Flexible(
-            child: DialogTextInput(
-              initialText:
-                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
+          Row(
+            children: [
+              Expanded(
+                child: DialogTextInput(
+                  initialText: widget.preferences
+                          .getInt(PrefKeys.teamNumber)
+                          ?.toString() ??
                       Settings.teamNumber.toString(),
-              label: 'Team Number',
-              onSubmit: (data) async {
-                await widget.onTeamNumberChanged?.call(data);
-                setState(() {});
-              },
-              formatter: FilteringTextInputFormatter.digitsOnly,
-            ),
+                  label: 'Team Number',
+                  onSubmit: (data) async {
+                    await widget.onTeamNumberChanged?.call(data);
+                    setState(() {});
+                  },
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                ),
+              ),
+              Expanded(
+                child: DialogColorPicker(
+                  onColorPicked: (color) => widget.onColorChanged?.call(color),
+                  label: 'Team Color',
+                  initialColor: currentColor,
+                ),
+              ),
+            ],
           ),
-          Flexible(
-            child: DialogColorPicker(
-              onColorPicked: (color) => widget.onColorChanged?.call(color),
-              label: 'Team Color',
-              initialColor: currentColor,
-            ),
+          Row(
+            children: [
+              const Text('Theme Variant'),
+              const SizedBox(width: 5),
+              Flexible(
+                child: DialogDropdownChooser<String>(
+                    onSelectionChanged: (variantName) {
+                      if (variantName == null) return;
+                      FlexSchemeVariant variant = FlexSchemeVariant.values
+                              .firstWhereOrNull(
+                                  (e) => e.variantName == variantName) ??
+                          FlexSchemeVariant.material3Legacy;
+
+                      Settings.themeVariant = variant;
+                      widget.onThemeVariantChanged?.call(variant);
+                      setState(() {});
+                    },
+                    choices:
+                        themeVariantsOverride ?? SettingsDialog.themeVariants,
+                    initialValue:
+                        widget.preferences.getString(PrefKeys.themeVariant) ??
+                            SettingsDialog.defaultVariantName),
+              ),
+            ],
           ),
         ],
       ),

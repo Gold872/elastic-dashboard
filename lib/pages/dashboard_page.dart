@@ -11,6 +11,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,12 +41,14 @@ class DashboardPage extends StatefulWidget {
   final SharedPreferences preferences;
   final String version;
   final Function(Color color)? onColorChanged;
+  final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
   const DashboardPage({
     super.key,
     required this.preferences,
     required this.version,
     this.onColorChanged,
+    this.onThemeVariantChanged,
   });
 
   @override
@@ -1111,6 +1114,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           setState(() => Settings.defaultGraphPeriod = newPeriod);
         },
         onColorChanged: widget.onColorChanged,
+        onThemeVariantChanged: widget.onThemeVariantChanged,
       ),
     );
   }

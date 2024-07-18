@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -41,6 +42,8 @@ class FakeSettingsMethods {
   void changeDefaultPeriod() {}
 
   void changeDefaultGraphPeriod() {}
+
+  void changeThemeVariant() {}
 }
 
 void main() {
@@ -63,6 +66,7 @@ void main() {
       PrefKeys.layoutLocked: false,
       PrefKeys.defaultPeriod: 0.10,
       PrefKeys.defaultGraphPeriod: 0.033,
+      PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -101,6 +105,7 @@ void main() {
     expect(find.text('Lock Layout'), findsOneWidget);
     expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
+    expect(find.text('Theme Variant'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -198,6 +203,59 @@ void main() {
     expect(preferences.getInt(PrefKeys.teamColor),
         const Color.fromARGB(255, 0, 0, 255).value);
     verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change theme variant', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    setupMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          onThemeVariantChanged: (variant) async {
+            fakeSettings.changeThemeVariant();
+
+            await preferences.setString(
+                PrefKeys.themeVariant, variant.variantName);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final themeVariantDropdown =
+        find.widgetWithText(DialogDropdownChooser<String>, 'Chroma');
+
+    expect(themeVariantDropdown, findsOneWidget);
+
+    await widgetTester.tap(themeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Chroma'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
+    expect(find.text('Material-3 Legacy'), findsNothing);
+
+    await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getString(PrefKeys.themeVariant),
+        FlexSchemeVariant.material3Legacy.variantName);
+
+    verify(fakeSettings.changeThemeVariant()).called(1);
+
+    final newThemeVariantDropdown = find.widgetWithText(
+        DialogDropdownChooser<String>, 'Material-3 Legacy (Default)');
+
+    expect(newThemeVariantDropdown, findsOneWidget);
+
+    // Now the safety mecahnism to add unknown variants should activate
+    await widgetTester.tap(newThemeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy'), findsOneWidget);
   });
 
   testWidgets('Toggle grid', (widgetTester) async {
