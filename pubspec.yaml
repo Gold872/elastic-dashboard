@@ -67,6 +67,8 @@ flutter:
 
 import_sorter:
   comments: false
+  ignored_files:
+    - /*.mocks.dart
 
 flutter_launcher_icons:
   image_path: "assets/logos/logo.png"

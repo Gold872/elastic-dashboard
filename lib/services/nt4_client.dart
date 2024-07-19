@@ -270,7 +270,13 @@ class NT4Client {
   bool _serverConnectionActive = false;
   bool _rttConnectionActive = false;
 
+  bool get mainWebsocketActive =>
+      _mainWebsocket != null && _mainWebsocket!.closeCode == null;
+  bool get rttWebsocketActive =>
+      _rttWebsocket != null && _rttWebsocket!.closeCode == null;
+
   bool _useRTT = false;
+  bool _attemptingConnection = true;
 
   int _lastPongTime = 0;
 
@@ -290,7 +296,9 @@ class NT4Client {
 
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
-    _wsOnClose();
+    _wsOnClose(false);
+    _attemptingConnection = true;
+    Future.delayed(const Duration(milliseconds: 100), _connect);
   }
 
   Stream<double> latencyStream() async* {
@@ -448,8 +456,10 @@ class NT4Client {
           serialize([timeTopic.pubUID, 0, timeTopic.getTypeId(), timeToSend]);
 
       if (_useRTT) {
-        _rttWebsocket?.sink.add(rawData);
-      } else {
+        if (rttWebsocketActive && mainWebsocketActive) {
+          _rttWebsocket?.sink.add(rawData);
+        }
+      } else if (mainWebsocketActive) {
         _mainWebsocket?.sink.add(rawData);
       }
     }
@@ -488,6 +498,10 @@ class NT4Client {
   }
 
   void _wsSendJSON(String method, Map<String, dynamic> params) {
+    if (!mainWebsocketActive) {
+      return;
+    }
+
     _mainWebsocket?.sink.add(jsonEncode([
       {
         'method': method,
@@ -497,11 +511,15 @@ class NT4Client {
   }
 
   void _wsSendBinary(dynamic data) {
+    if (!mainWebsocketActive) {
+      return;
+    }
+
     _mainWebsocket?.sink.add(data);
   }
 
   void _connect() async {
-    if (_serverConnectionActive) {
+    if (_serverConnectionActive || !_attemptingConnection) {
       return;
     }
 
@@ -520,10 +538,13 @@ class NT4Client {
     } catch (e) {
       // Failed to connect... try again
       logger.info(
-          'Failed to connect to network tables, attempting to reconnect in 1 second');
-      Future.delayed(const Duration(seconds: 1), _connect);
+          'Failed to connect to network tables, attempting to reconnect in 500 ms');
+      if (_attemptingConnection) {
+        Future.delayed(const Duration(milliseconds: 500), _connect);
+      }
       return;
     }
+    _attemptingConnection = false;
 
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
@@ -538,7 +559,6 @@ class NT4Client {
       _useRTT = true;
       _pingInterval = _pingIntervalMsV41;
       _timeoutInterval = _pingTimeoutMsV41;
-      await _rttConnect();
     } else {
       _useRTT = false;
       _pingInterval = _pingIntervalMsV40;
@@ -560,6 +580,10 @@ class NT4Client {
       },
       cancelOnError: true,
     );
+
+    if (_useRTT) {
+      await _rttConnect();
+    }
 
     NT4Topic timeTopic = NT4Topic(
         name: 'Time',
@@ -601,8 +625,8 @@ class NT4Client {
       await _rttWebsocket!.ready;
     } catch (e) {
       logger.info(
-          'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 1 second');
-      Future.delayed(const Duration(seconds: 1), _rttConnect);
+          'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms');
+      Future.delayed(const Duration(milliseconds: 500), _rttConnect);
       return;
     }
 
@@ -620,7 +644,7 @@ class NT4Client {
           _rttConnectionActive = true;
         }
 
-        if (!_serverConnectionActive && _mainWebsocket != null) {
+        if (!_serverConnectionActive && mainWebsocketActive) {
           _onFirstMessageReceived();
         }
 
@@ -678,7 +702,9 @@ class NT4Client {
     logger.info('RTT Connection closed');
   }
 
-  void _wsOnClose() async {
+  void _wsOnClose([bool autoReconnect = true]) async {
+    _attemptingConnection = false;
+
     _pingTimer?.cancel();
     _pongTimer?.cancel();
 
@@ -706,9 +732,11 @@ class NT4Client {
 
     announcedTopics.clear();
 
-    logger.debug('[NT4] Connection closed. Attempting to reconnect in 1s');
-
-    Future.delayed(const Duration(seconds: 1), _connect);
+    logger.debug('[NT4] Connection closed. Attempting to reconnect in 500 ms');
+    if (autoReconnect && !_attemptingConnection) {
+      _attemptingConnection = true;
+      Future.delayed(const Duration(milliseconds: 500), _connect);
+    }
   }
 
   void _wsOnMessage(data) {
