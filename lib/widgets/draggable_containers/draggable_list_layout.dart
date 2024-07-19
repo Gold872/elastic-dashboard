@@ -8,13 +8,7 @@ import 'models/list_layout_model.dart';
 class DraggableListLayout extends DraggableLayoutContainer {
   const DraggableListLayout({
     super.key,
-    required super.tabGrid,
-    super.onUpdate,
-    super.onDragBegin,
-    super.onDragEnd,
-    super.onDragCancel,
-    super.onResizeBegin,
-    super.onResizeEnd,
+    super.updateFunctions,
   }) : super();
 
   @override

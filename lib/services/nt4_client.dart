@@ -58,8 +58,6 @@ class NT4Subscription {
   final NT4SubscriptionOptions options;
   final int uid;
 
-  int useCount = 0;
-
   Object? currentValue;
   int timestamp = 0;
 
@@ -153,7 +151,7 @@ class NT4Subscription {
       other.options == options;
 
   @override
-  int get hashCode => Object.hashAllUnordered([topic, options]);
+  int get hashCode => Object.hashAll([topic, options]);
 }
 
 class NT4SubscriptionOptions {
@@ -189,7 +187,7 @@ class NT4SubscriptionOptions {
 
   @override
   int get hashCode =>
-      Object.hashAllUnordered([periodicRateSeconds, all, topicsOnly, prefix]);
+      Object.hashAll([periodicRateSeconds, all, topicsOnly, prefix]);
 }
 
 class NT4Topic {
@@ -330,22 +328,15 @@ class NT4Client {
     _topicAnnounceListeners.remove(onAnnounce);
   }
 
-  NT4Subscription subscribe(String topic,
-      [double period = 0.1, bool all = false]) {
+  NT4Subscription subscribe({
+    required String topic,
+    NT4SubscriptionOptions options = const NT4SubscriptionOptions(),
+  }) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),
-      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: all),
+      options: options,
     );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
@@ -360,77 +351,28 @@ class NT4Client {
     return newSub;
   }
 
-  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
-    return subscribe(topic, period, true);
-  }
-
-  NT4Subscription subscribeAllSamples(String topic, [double period = 0.1]) {
-    NT4Subscription newSub = NT4Subscription(
-      topic: topic,
-      uid: getNewSubUID(),
-      options: const NT4SubscriptionOptions(all: true),
-    );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
-
-    _subscriptions[newSub.uid] = newSub;
-    _wsSubscribe(newSub);
-    return newSub;
-  }
-
-  NT4Subscription subscribeTopicsOnly(String topic) {
-    NT4Subscription newSub = NT4Subscription(
-      topic: topic,
-      uid: getNewSubUID(),
-      options: const NT4SubscriptionOptions(topicsOnly: true),
-    );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
-
-    _subscriptions[newSub.uid] = newSub;
-    _wsSubscribe(newSub);
-    return newSub;
-  }
-
   void unSubscribe(NT4Subscription sub) {
-    sub.useCount--;
+    _subscriptions.remove(sub.uid);
+    _subscribedTopics.remove(sub);
+    _wsUnsubscribe(sub);
 
-    if (sub.useCount <= 0) {
-      _subscriptions.remove(sub.uid);
-      _subscribedTopics.remove(sub);
-      _wsUnsubscribe(sub);
-
-      // If there are no other subscriptions that are in the same table/tree
-      if (!_subscribedTopics.any((element) =>
-          element.topic.startsWith('${sub.topic}/') ||
-          '${sub.topic}/'.startsWith(element.topic))) {
-        // If there are any topics associated with the table/tree, unpublish them
-        for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
-            element.name.startsWith('${sub.topic}/') ||
-            '${sub.topic}/'.startsWith(element.name))) {
-          Future(() => unpublishTopic(topic));
-        }
+    // If there are no other subscriptions that are in the same table/tree
+    if (!_subscribedTopics.any((element) =>
+        element.topic.startsWith('${sub.topic}/') ||
+        sub.topic.startsWith('${element.topic}/') ||
+        sub.topic == element.topic)) {
+      // If there are any topics associated with the table/tree, unpublish them
+      for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
+          element.name.startsWith('${sub.topic}/') ||
+          sub.topic.startsWith('${element.name}/') ||
+          sub.topic == element.name)) {
+        Future(() => unpublishTopic(topic));
       }
     }
   }
 
   void clearAllSubscriptions() {
     for (NT4Subscription sub in _subscriptions.values) {
-      sub.useCount = 0;
       unSubscribe(sub);
     }
     _subscriptions.clear();

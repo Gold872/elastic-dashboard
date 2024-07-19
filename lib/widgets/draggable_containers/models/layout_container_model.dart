@@ -9,6 +9,7 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
   String get type;
 
   LayoutContainerModel({
+    required super.preferences,
     required super.initialPosition,
     required super.title,
     super.minWidth,
@@ -17,6 +18,7 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
 
   LayoutContainerModel.fromJson({
     required super.jsonData,
+    required super.preferences,
     super.enabled,
     super.minWidth,
     super.minHeight,

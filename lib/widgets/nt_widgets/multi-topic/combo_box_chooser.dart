@@ -5,7 +5,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -20,7 +19,14 @@ class ComboBoxChooserModel extends NTWidgetModel {
 
   final TextEditingController _searchController = TextEditingController();
 
-  String? selectedChoice;
+  String? _selectedChoice;
+
+  String? get selectedChoice => _selectedChoice;
+
+  set selectedChoice(value) {
+    _selectedChoice = value;
+    refresh();
+  }
 
   StringChooserData? previousData;
 
@@ -37,6 +43,8 @@ class ComboBoxChooserModel extends NTWidgetModel {
   }
 
   ComboBoxChooserModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool sortOptions = false,
     super.dataType,
@@ -44,8 +52,11 @@ class ComboBoxChooserModel extends NTWidgetModel {
   })  : _sortOptions = sortOptions,
         super();
 
-  ComboBoxChooserModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  ComboBoxChooserModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _sortOptions = tryCast(jsonData['sort_options']) ?? _sortOptions;
   }
 
@@ -82,8 +93,8 @@ class ComboBoxChooserModel extends NTWidgetModel {
       return;
     }
 
-    _selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??=
+        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
@@ -102,7 +113,7 @@ class ComboBoxChooserModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_activeTopic!);
+      ntConnection.publishTopic(_activeTopic!);
     }
 
     ntConnection.updateDataFromTopic(_activeTopic!, active);
@@ -147,7 +158,7 @@ class ComboBoxChooser extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> rawOptions = ntConnection
+        List<Object?> rawOptions = model.ntConnection
                 .getLastAnnouncedValue(model.optionsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
@@ -158,25 +169,25 @@ class ComboBoxChooser extends NTWidget {
           options.sort();
         }
 
-        String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(model.activeTopicName));
+        String? active = tryCast(
+            model.ntConnection.getLastAnnouncedValue(model.activeTopicName));
         if (active != null && active == '') {
           active = null;
         }
 
         String? selected = tryCast(
-            ntConnection.getLastAnnouncedValue(model.selectedTopicName));
+            model.ntConnection.getLastAnnouncedValue(model.selectedTopicName));
         if (selected != null && selected == '') {
           selected = null;
         }
 
-        String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(model.defaultTopicName));
+        String? defaultOption = tryCast(
+            model.ntConnection.getLastAnnouncedValue(model.defaultTopicName));
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
 
-        if (!ntConnection.isNT4Connected) {
+        if (!model.ntConnection.isNT4Connected) {
           active = null;
           selected = null;
           defaultOption = null;

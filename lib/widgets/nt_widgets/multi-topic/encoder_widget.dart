@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class EncoderModel extends NTWidgetModel {
@@ -13,9 +12,19 @@ class EncoderModel extends NTWidgetModel {
   String get distanceTopic => '$topic/Distance';
   String get speedTopic => '$topic/Speed';
 
-  EncoderModel({required super.topic, super.dataType, super.period}) : super();
+  EncoderModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  EncoderModel.fromJson({required super.jsonData}) : super.fromJson();
+  EncoderModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   List<Object> getCurrentData() {
@@ -40,12 +49,12 @@ class EncoderWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double distance =
-            tryCast(ntConnection.getLastAnnouncedValue(model.distanceTopic)) ??
-                0.0;
-        double speed =
-            tryCast(ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
-                0.0;
+        double distance = tryCast(model.ntConnection
+                .getLastAnnouncedValue(model.distanceTopic)) ??
+            0.0;
+        double speed = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
+            0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

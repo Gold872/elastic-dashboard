@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
@@ -60,6 +59,8 @@ class CameraStreamModel extends NTWidgetModel {
   }
 
   CameraStreamModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     int? compression,
     int? fps,
@@ -71,8 +72,11 @@ class CameraStreamModel extends NTWidgetModel {
         _resolution = resolution,
         super();
 
-  CameraStreamModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  CameraStreamModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
 
@@ -257,9 +261,9 @@ class CameraStreamWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> rawStreams =
-            tryCast(ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
-                [];
+        List<Object?> rawStreams = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
+            [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
@@ -272,7 +276,7 @@ class CameraStreamWidget extends NTWidget {
           streams.add(stream.substring('mjpg:'.length));
         }
 
-        if (streams.isEmpty || !ntConnection.isNT4Connected) {
+        if (streams.isEmpty || !model.ntConnection.isNT4Connected) {
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -292,9 +296,9 @@ class CameraStreamWidget extends NTWidget {
                   CustomLoadingIndicator(),
                   const SizedBox(height: 10),
                   Text(
-                    (ntConnection.isNT4Connected)
+                    (model.ntConnection.isNT4Connected)
                         ? 'Waiting for Camera Stream connection...'
-                        : 'Waiting for Network Tables Connection...',
+                        : 'Waiting for Network Tables connection...',
                     textAlign: TextAlign.center,
                   ),
                 ],

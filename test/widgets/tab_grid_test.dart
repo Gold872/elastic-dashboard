@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -45,9 +46,9 @@ void main() async {
 
   late String jsonString;
   late Map<String, dynamic> jsonData;
+  late SharedPreferences preferences;
 
   setUpAll(() async {
-    setupMockOfflineNT4();
     await FieldImages.loadFields('assets/fields/');
 
     String filePath =
@@ -55,6 +56,9 @@ void main() async {
 
     jsonString = File(filePath).readAsStringSync();
     jsonData = jsonDecode(jsonString);
+
+    SharedPreferences.setMockInitialValues({});
+    preferences = await SharedPreferences.getInstance();
   });
 
   testWidgets('Tab grid loading (Tab 1)', (widgetTester) async {
@@ -73,12 +77,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -120,12 +126,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][1]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -160,13 +168,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -236,13 +245,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
@@ -295,13 +305,14 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),

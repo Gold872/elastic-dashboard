@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +13,6 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -55,11 +55,11 @@ void main() {
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -79,11 +79,11 @@ void main() {
 
   testWidgets('Dashboard page loading online', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -103,11 +103,11 @@ void main() {
 
   testWidgets('Save layout (button)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -135,11 +135,12 @@ void main() {
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
+    createMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -198,11 +199,11 @@ void main() {
 
   testWidgets('Add widget dialog (layouts)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -253,11 +254,11 @@ void main() {
 
   testWidgets('List Layouts', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -348,7 +349,6 @@ void main() {
 
     // A custom mock is set up to reproduce behavior when actually running
     final mockNT4Connection = MockNTConnection();
-    final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
     when(mockNT4Connection.isNT4Connected).thenReturn(true);
@@ -359,12 +359,12 @@ void main() {
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
 
-    when(mockNT4Client.addTopicAnnounceListener(any))
+    when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+
+    when(mockNT4Connection.addTopicAnnounceListener(any))
         .thenAnswer((realInvocation) {
       fakeAnnounceCallbacks.add(realInvocation.positionalArguments[0]);
     });
-
-    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
 
     when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
@@ -400,11 +400,10 @@ void main() {
             '/Shuffleboard/Test-Tab/Shuffleboard Test Layout/.type'))
         .thenAnswer((realInvocation) => Future.value('ShuffleboardLayout'));
 
-    NTConnection.instance = mockNT4Connection;
-
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: mockNT4Connection,
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -479,11 +478,11 @@ void main() {
 
   testWidgets('About dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -511,11 +510,11 @@ void main() {
 
   testWidgets('Changing tabs', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -540,11 +539,11 @@ void main() {
 
   testWidgets('Creating new tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -570,11 +569,11 @@ void main() {
 
   testWidgets('Closing tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -612,11 +611,11 @@ void main() {
 
   testWidgets('Reordering tabs', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -670,11 +669,11 @@ void main() {
 
   testWidgets('Renaming tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -722,11 +721,11 @@ void main() {
 
   testWidgets('Duplicating tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -754,11 +753,11 @@ void main() {
 
   testWidgets('Minimizing window', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -778,11 +777,11 @@ void main() {
 
   testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -810,11 +809,11 @@ void main() {
 
   testWidgets('Closing window (All changes saved)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -846,11 +845,11 @@ void main() {
 
   testWidgets('Closing window (Unsaved changes)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -888,11 +887,11 @@ void main() {
 
   testWidgets('Opening settings', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
         ),
@@ -914,4 +913,81 @@ void main() {
 
     expect(find.byType(SettingsDialog), findsOneWidget);
   });
+
+  testWidgets(
+    'Robot Notifications',
+    (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
+      final Map<String, dynamic> data = {
+        'title': 'Robot Notification Title',
+        'description': 'Robot Notification Description',
+        'level': 'INFO'
+      };
+
+      MockNTConnection connection = createMockOnlineNT4(virtualTopics: [
+        NT4Topic(
+          name: '/Elastic/RobotNotifications',
+          type: NT4TypeStr.kString,
+          properties: {},
+        )
+      ], virtualValues: {
+        '/Elastic/RobotNotifications': jsonEncode(data)
+      });
+      MockNT4Subscription mockSub = MockNT4Subscription();
+
+      List<Function(Object?, int)> listeners = [];
+      when(mockSub.listen(any)).thenAnswer(
+        (realInvocation) {
+          listeners.add(realInvocation.positionalArguments[0]);
+          mockSub.updateValue(jsonEncode(data), 0);
+        },
+      );
+
+      when(mockSub.updateValue(any, any)).thenAnswer(
+        (invoc) {
+          for (var value in listeners) {
+            value.call(
+                invoc.positionalArguments[0], invoc.positionalArguments[1]);
+          }
+        },
+      );
+
+      when(connection.subscribeAll(any, any)).thenAnswer(
+        (realInvocation) {
+          return mockSub;
+        },
+      );
+
+      final notificationWidget =
+          find.widgetWithText(ElegantNotification, data['title']);
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: DashboardPage(
+            ntConnection: connection,
+            preferences: preferences,
+            version: '0.0.0.0',
+          ),
+        ),
+      );
+      expect(notificationWidget, findsNothing);
+
+      await widgetTester.pumpAndSettle();
+      connection
+          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .updateValue(jsonEncode(data), 1);
+
+      await widgetTester.pump();
+
+      expect(notificationWidget, findsOneWidget);
+
+      await widgetTester.pumpAndSettle();
+
+      expect(notificationWidget, findsNothing);
+
+      connection
+          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .updateValue(jsonEncode(data), 1);
+    },
+  );
 }

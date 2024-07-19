@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class PowerDistributionModel extends NTWidgetModel {
@@ -17,10 +16,19 @@ class PowerDistributionModel extends NTWidgetModel {
   String get voltageTopic => '$topic/Voltage';
   String get currentTopic => '$topic/TotalCurrent';
 
-  PowerDistributionModel({required super.topic, super.dataType, super.period})
-      : super();
+  PowerDistributionModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  PowerDistributionModel.fromJson({required super.jsonData}) : super.fromJson();
+  PowerDistributionModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -71,7 +79,7 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current = tryCast(ntConnection
+      double current = tryCast(model.ntConnection
               .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
@@ -109,7 +117,7 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current = tryCast(ntConnection
+      double current = tryCast(model.ntConnection
               .getLastAnnouncedValue(model.channelTopics[channel])) ??
           0.0;
 
@@ -150,12 +158,12 @@ class PowerDistribution extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        double voltage =
-            tryCast(ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
-                0.0;
-        double totalCurrent =
-            tryCast(ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
-                0.0;
+        double voltage = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
+            0.0;
+        double totalCurrent = tryCast(
+                model.ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
+            0.0;
 
         return Column(
           children: [

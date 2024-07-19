@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -20,6 +21,9 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
 class NTWidgetModel extends ChangeNotifier {
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
+
   String _typeOverride = 'NTWidget';
   String get type => _typeOverride;
 
@@ -42,30 +46,44 @@ class NTWidgetModel extends ChangeNotifier {
   bool _forceDispose = false;
 
   NTWidgetModel({
+    required this.ntConnection,
+    required this.preferences,
     required String topic,
     this.dataType = 'Unknown',
     double? period,
   }) : _topic = topic {
-    this.period = period ?? Settings.defaultPeriod;
+    this.period = period ??
+        preferences.getDouble(PrefKeys.defaultPeriod) ??
+        Defaults.defaultPeriod;
 
     init();
   }
 
   NTWidgetModel.createDefault({
+    required this.ntConnection,
+    required this.preferences,
     required String type,
     required String topic,
     this.dataType = 'Unknown',
     double? period,
   })  : _typeOverride = type,
         _topic = topic {
-    this.period = period ?? Settings.defaultPeriod;
+    this.period = period ??
+        preferences.getDouble(PrefKeys.defaultPeriod) ??
+        Defaults.defaultPeriod;
 
     init();
   }
 
-  NTWidgetModel.fromJson({required Map<String, dynamic> jsonData}) {
+  NTWidgetModel.fromJson({
+    required this.ntConnection,
+    required this.preferences,
+    required Map<String, dynamic> jsonData,
+  }) {
     _topic = tryCast(jsonData['topic']) ?? '';
-    _period = tryCast(jsonData['period']) ?? Settings.defaultPeriod;
+    _period = tryCast(jsonData['period']) ??
+        preferences.getDouble(PrefKeys.defaultPeriod) ??
+        Defaults.defaultPeriod;
     dataType = tryCast(jsonData['data_type']) ?? dataType;
 
     init();
@@ -195,7 +213,8 @@ class NTWidgetModel extends ChangeNotifier {
   Stream<Object> get multiTopicPeriodicStream async* {
     final Duration delayTime = Duration(
         microseconds: ((subscription?.options.periodicRateSeconds ??
-                    Settings.defaultPeriod) *
+                    preferences.getDouble(PrefKeys.defaultPeriod) ??
+                    Defaults.defaultPeriod) *
                 1e6)
             .round());
 

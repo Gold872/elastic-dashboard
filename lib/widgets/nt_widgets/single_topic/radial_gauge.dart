@@ -5,7 +5,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -83,6 +82,8 @@ class RadialGaugeModel extends NTWidgetModel {
   }
 
   RadialGaugeModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double startAngle = -140.0,
     double endAngle = 140.0,
@@ -104,8 +105,11 @@ class RadialGaugeModel extends NTWidgetModel {
         _endAngle = endAngle,
         super();
 
-  RadialGaugeModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  RadialGaugeModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;
     _endAngle = tryCast(jsonData['end_angle']) ?? _endAngle;
     _minValue = tryCast(jsonData['min_value']) ?? _minValue;
@@ -298,7 +302,7 @@ class RadialGauge extends NTWidget {
 
     return StreamBuilder(
       stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

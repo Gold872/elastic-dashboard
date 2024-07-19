@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/accelerometer.dart';
@@ -49,6 +51,8 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
+        required NTConnection ntConnection,
+        required SharedPreferences preferences,
         required String topic,
         String dataType,
         double period,
@@ -57,6 +61,8 @@ class NTWidgetBuilder {
   static final Map<
       String,
       NTWidgetModel Function({
+        required NTConnection ntConnection,
+        required SharedPreferences preferences,
         required Map<String, dynamic> jsonData,
       })> _modelJsonBuildMap = {};
 
@@ -67,6 +73,8 @@ class NTWidgetBuilder {
   static final Map<String, double> _defaultHeightMap = {};
 
   static const double _normalSize = 128.0;
+
+  NTWidgetBuilder._();
 
   static bool _initialized = false;
   static void ensureInitialized() {
@@ -141,6 +149,7 @@ class NTWidgetBuilder {
       SwerveDriveWidget.widgetType: BasicSwerveModel.fromJson,
       CameraStreamWidget.widgetType: CameraStreamModel.fromJson,
       ComboBoxChooser.widgetType: ComboBoxChooserModel.fromJson,
+      'String Chooser': ComboBoxChooserModel.fromJson,
       CommandSchedulerWidget.widgetType: CommandSchedulerModel.fromJson,
       CommandWidget.widgetType: CommandModel.fromJson,
       DifferentialDrive.widgetType: DifferentialDriveModel.fromJson,
@@ -320,17 +329,22 @@ class NTWidgetBuilder {
   }
 
   static NTWidgetModel buildNTModelFromType(
+    NTConnection ntConnection,
+    SharedPreferences preferences,
     String type,
     String topic, {
     String dataType = 'Unknown',
     double? period,
   }) {
-    period ??= Settings.defaultPeriod;
+    period ??=
+        preferences.getDouble(PrefKeys.defaultPeriod) ?? Defaults.defaultPeriod;
 
     ensureInitialized();
 
     if (_modelNameBuildMap.containsKey(type)) {
       return _modelNameBuildMap[type]!(
+        ntConnection: ntConnection,
+        preferences: preferences,
         topic: topic,
         dataType: dataType,
         period: period,
@@ -338,6 +352,8 @@ class NTWidgetBuilder {
     }
 
     return NTWidgetModel.createDefault(
+      ntConnection: ntConnection,
+      preferences: preferences,
       type: type,
       topic: topic,
       dataType: dataType,
@@ -346,17 +362,27 @@ class NTWidgetBuilder {
   }
 
   static NTWidgetModel buildNTModelFromJson(
-      String type, Map<String, dynamic> jsonData,
-      {Function(String message)? onWidgetTypeNotFound}) {
+    NTConnection ntConnection,
+    SharedPreferences preferences,
+    String type,
+    Map<String, dynamic> jsonData, {
+    Function(String message)? onWidgetTypeNotFound,
+  }) {
     ensureInitialized();
 
     if (_modelJsonBuildMap.containsKey(type)) {
-      return _modelJsonBuildMap[type]!(jsonData: jsonData);
+      return _modelJsonBuildMap[type]!(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        jsonData: jsonData,
+      );
     }
 
     onWidgetTypeNotFound
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
     return NTWidgetModel.createDefault(
+      ntConnection: ntConnection,
+      preferences: preferences,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
       dataType: tryCast(jsonData['data_type']) ?? 'Unknown',
@@ -370,7 +396,8 @@ class NTWidgetBuilder {
     if (_minimumWidthMap.containsKey(widget.type)) {
       return _minimumWidthMap[widget.type]!;
     } else {
-      return Settings.gridSize.toDouble();
+      return (widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+          .toDouble();
     }
   }
 
@@ -380,7 +407,8 @@ class NTWidgetBuilder {
     if (_minimumHeightMap.containsKey(widget.type)) {
       return _minimumHeightMap[widget.type]!;
     } else {
-      return Settings.gridSize.toDouble();
+      return (widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+          .toDouble();
     }
   }
 
