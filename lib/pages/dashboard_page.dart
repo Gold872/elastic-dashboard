@@ -746,6 +746,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
       );
     }
+    // Move to next tab (Ctrl + Tab)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.tab,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          _moveToNextTab();
+        }
+      },
+    );
+    // Move to prevoius tab (Ctrl + Shift + Tab)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.tab,
+        modifiers: [KeyModifier.control, KeyModifier.shift],
+      ),
+      callback: () {
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          _moveToPreviousTab();
+        }
+      },
+    );
     // Move Tab Left (Ctrl + <-)
     hotKeyManager.register(
       HotKey(
@@ -1284,6 +1308,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       _tabData[_currentTabIndex] = tempData;
 
       _currentTabIndex += 1;
+    });
+  }
+
+  void _moveToNextTab() {
+    int moveIndex = _currentTabIndex + 1;
+
+    if (moveIndex >= _tabData.length) {
+      moveIndex = 0;
+    }
+
+    setState(() {
+      _currentTabIndex = moveIndex;
+    });
+  }
+
+  void _moveToPreviousTab() {
+    int moveIndex = _currentTabIndex - 1;
+
+    if (moveIndex < 0) {
+      moveIndex = _tabData.length - 1;
+    }
+
+    setState(() {
+      _currentTabIndex = moveIndex;
     });
   }
 
