@@ -815,7 +815,7 @@ void main() {
     expect(editableTabBarWidget().currentIndex, 0);
   });
 
-  testWidgets('Tab navigation (shortcut)', (widgetTester) async {
+  testWidgets('Navigate tabs left right (shortcut)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await widgetTester.pumpWidget(
@@ -873,6 +873,56 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('Navigate to specific tabs', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit1);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit1);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should remain at 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit2);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit2);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit5);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit5);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should remain at 1 since there is no tab at index 4');
   });
 
   testWidgets('Renaming tab', (widgetTester) async {
