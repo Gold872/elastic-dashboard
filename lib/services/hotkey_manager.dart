@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
@@ -43,6 +44,13 @@ class HotKeyManager {
   void _init() {
     HardwareKeyboard.instance.addHandler(_handleRawKeyEvent);
     _initialized = true;
+  }
+
+  @visibleForTesting
+  void tearDown() {
+    _initialized = false;
+    _hotKeyList.clear();
+    _callbackMap.clear();
   }
 
   int _getNumberModifiersPressed() {

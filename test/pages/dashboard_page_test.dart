@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
+import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
@@ -51,6 +53,10 @@ void main() {
     });
 
     preferences = await SharedPreferences.getInstance();
+  });
+
+  tearDown(() {
+    hotKeyManager.tearDown();
   });
 
   testWidgets('Dashboard page loading offline', (widgetTester) async {
@@ -128,6 +134,30 @@ void main() {
     expect(saveButton, findsOneWidget);
 
     await widgetTester.tap(saveButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(jsonString, preferences.getString(PrefKeys.layout));
+  });
+
+  testWidgets('Save layout (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
     await widgetTester.pumpAndSettle();
 
     expect(jsonString, preferences.getString(PrefKeys.layout));
@@ -567,6 +597,32 @@ void main() {
     expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(3));
   });
 
+  testWidgets('Creating new tab (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyT);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyT);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(3));
+  });
+
   testWidgets('Closing tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
@@ -594,6 +650,42 @@ void main() {
     expect(closeTabButton, findsOneWidget);
 
     await widgetTester.tap(closeTabButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
+
+    final confirmButton =
+        find.widgetWithText(TextButton, 'OK', skipOffstage: false);
+
+    expect(confirmButton, findsOneWidget);
+
+    await widgetTester.tap(confirmButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(1));
+  });
+
+  testWidgets('Closing tab (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
@@ -662,6 +754,122 @@ void main() {
             'Tab index should not change since index is equal to number of tabs');
 
     await widgetTester.tap(tabLeftButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('Reordering tabs (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should not change since index is 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should not change since index is equal to number of tabs');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('Tab navigation (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason: 'Tab index should roll over');
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should roll back over to 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason: 'Tab index should increase to 1 (no rollover)');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
     await widgetTester.pumpAndSettle();
 
     expect(editableTabBarWidget().currentIndex, 0);
