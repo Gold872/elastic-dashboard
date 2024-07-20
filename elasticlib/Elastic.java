@@ -11,7 +11,8 @@ import edu.wpi.first.networktables.StringTopic;
 public final class Elastic {
   private static final StringTopic topic =
       NetworkTableInstance.getDefault().getStringTopic("/Elastic/RobotNotifications");
-  private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true));
+  private static final StringPublisher publisher =
+      topic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static void sendAlert(ElasticNotification alert) {
