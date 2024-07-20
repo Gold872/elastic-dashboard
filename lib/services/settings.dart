@@ -1,3 +1,5 @@
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 
 class Settings {
@@ -5,23 +7,28 @@ class Settings {
       'https://github.com/Gold872/elastic-dashboard';
   static const String releasesLink = '$repositoryLink/releases/latest';
 
-  static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
-
-  static String ipAddress = '127.0.0.1';
-  static int teamNumber = 9999;
-  static int gridSize = 128;
-  static bool layoutLocked = false;
-  static double cornerRadius = 15.0;
-  static bool showGrid = true;
-  static bool autoResizeToDS = false;
-
   // window_manager doesn't support drag disable/maximize
   // disable on some platforms, this is a dumb workaround for it
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
+}
 
-  static double defaultPeriod = 0.06;
-  static double defaultGraphPeriod = 0.033;
+class Defaults {
+  static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
+
+  static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
+  static const String defaultVariantName = 'Material-3 Legacy (Default)';
+
+  static const String ipAddress = '127.0.0.1';
+  static const int teamNumber = 9999;
+  static const int gridSize = 128;
+  static const bool layoutLocked = false;
+  static const double cornerRadius = 15.0;
+  static const bool showGrid = true;
+  static const bool autoResizeToDS = false;
+
+  static const double defaultPeriod = 0.06;
+  static const double defaultGraphPeriod = 0.033;
 }
 
 class PrefKeys {
@@ -30,6 +37,7 @@ class PrefKeys {
   static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
+  static String themeVariant = 'theme_variant';
   static String layoutLocked = 'layout_locked';
   static String gridSize = 'grid_size';
   static String cornerRadius = 'corner_radius';

@@ -14,16 +14,17 @@ import 'test_util.mocks.dart';
   MockSpec<NT4Client>(),
   MockSpec<NT4Subscription>()
 ])
-void setupMockOfflineNT4() {
+MockNTConnection createMockOfflineNT4() {
   HttpOverrides.global = null;
 
   final mockNT4Connection = MockNTConnection();
-  final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
+
+  when(mockNT4Connection.announcedTopics()).thenReturn({});
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
-  when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
+  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
 
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
@@ -43,37 +44,48 @@ void setupMockOfflineNT4() {
 
   when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
 
-  when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
+  when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
-  when(mockNT4Connection.getTopicFromName(any))
-      .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
-
-  NTConnection.instance = mockNT4Connection;
+  return mockNT4Connection;
 }
 
-void setupMockOnlineNT4() {
+MockNTConnection createMockOnlineNT4({
+  List<NT4Topic>? virtualTopics,
+  Map<String, dynamic>? virtualValues,
+}) {
   HttpOverrides.global = null;
 
   final mockNT4Connection = MockNTConnection();
-  final mockNT4Client = MockNT4Client();
   final mockSubscription = MockNT4Subscription();
 
-  when(mockNT4Client.announcedTopics).thenReturn({
-    1: NT4Topic(
+  virtualTopics ??= [
+    NT4Topic(
       name: '/SmartDashboard/Test Value 1',
       type: NT4TypeStr.kInt,
       properties: {},
     ),
-    2: NT4Topic(
+    NT4Topic(
       name: '/SmartDashboard/Test Value 2',
       type: NT4TypeStr.kFloat32,
       properties: {},
     ),
-  });
+  ];
+
+  virtualValues ??= {};
+
+  Map<int, NT4Topic> virtualTopicsMap = {};
+
+  List<Function(Object?, int)> subscriptionListeners = [];
+
+  for (int i = 0; i < virtualTopics.length; i++) {
+    virtualTopicsMap.addAll({i + 1: virtualTopics[i]});
+  }
+
+  when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
-  when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
+  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
 
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
@@ -93,12 +105,66 @@ void setupMockOnlineNT4() {
 
   when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
 
-  when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
+  when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
-  when(mockNT4Connection.getTopicFromName(any))
-      .thenReturn(NT4Topic(name: '', type: NT4TypeStr.kString, properties: {}));
+  when(mockNT4Connection.publishNewTopic(any, any)).thenAnswer((invocation) {
+    NT4Topic newTopic = NT4Topic(
+        name: invocation.positionalArguments[0],
+        type: invocation.positionalArguments[1],
+        properties: {});
 
-  NTConnection.instance = mockNT4Connection;
+    virtualTopicsMap[virtualTopicsMap.length] = newTopic;
+    return newTopic;
+  });
+
+  when(mockNT4Connection.updateDataFromTopic(any, any))
+      .thenAnswer((invocation) {
+    NT4Topic topic = invocation.positionalArguments[0];
+    Object? data = invocation.positionalArguments[1];
+
+    virtualValues![topic.name] = data;
+  });
+
+  when(mockNT4Connection.updateDataFromTopicName(any, any))
+      .thenAnswer((invocation) {
+    String topic = invocation.positionalArguments[0];
+    Object? data = invocation.positionalArguments[1];
+
+    virtualValues![topic] = data;
+  });
+
+  for (NT4Topic topic in virtualTopics) {
+    MockNT4Subscription topicSubscription = MockNT4Subscription();
+
+    when(mockNT4Connection.getTopicFromName(topic.name)).thenReturn(topic);
+
+    when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
+        .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
+
+    when(topicSubscription.listen(any)).thenAnswer((realInvocation) {
+      subscriptionListeners.add(realInvocation.positionalArguments[0]);
+    });
+
+    when(topicSubscription.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in subscriptionListeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
+
+    when(mockNT4Connection.getLastAnnouncedValue(topic.name))
+        .thenAnswer((_) => virtualValues?[topic.name]);
+
+    when(mockNT4Connection.subscribe(topic.name, any))
+        .thenReturn(topicSubscription);
+
+    when(mockNT4Connection.subscribeAll(topic.name, any))
+        .thenReturn(topicSubscription);
+  }
+
+  return mockNT4Connection;
 }
 
 void ignoreOverflowErrors(

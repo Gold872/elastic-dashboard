@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class MotorControllerModel extends NTWidgetModel {
@@ -16,10 +15,19 @@ class MotorControllerModel extends NTWidgetModel {
 
   late NT4Subscription valueSubscription;
 
-  MotorControllerModel({required super.topic, super.dataType, super.period})
-      : super();
+  MotorControllerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  MotorControllerModel.fromJson({required super.jsonData}) : super.fromJson();
+  MotorControllerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void init() {
@@ -56,7 +64,7 @@ class MotorController extends NTWidget {
 
     return StreamBuilder(
       stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
+      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
       builder: (context, snapshot) {
         double value = tryCast(snapshot.data) ?? 0.0;
 

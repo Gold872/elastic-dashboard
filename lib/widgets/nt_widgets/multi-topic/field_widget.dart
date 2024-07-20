@@ -10,7 +10,6 @@ import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -45,6 +44,8 @@ class FieldWidgetModel extends NTWidgetModel {
   late Function(NT4Topic topic) topicAnnounceListener;
 
   FieldWidgetModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     String? fieldName,
     bool showOtherObjects = true,
@@ -63,8 +64,11 @@ class FieldWidgetModel extends NTWidgetModel {
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
   }
 
-  FieldWidgetModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  FieldWidgetModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
 
     _robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
@@ -97,7 +101,7 @@ class FieldWidgetModel extends NTWidgetModel {
       }
     };
 
-    ntConnection.nt4Client.addTopicAnnounceListener(topicAnnounceListener);
+    ntConnection.addTopicAnnounceListener(topicAnnounceListener);
   }
 
   @override
@@ -114,7 +118,7 @@ class FieldWidgetModel extends NTWidgetModel {
 
     if (deleting) {
       _field.dispose();
-      ntConnection.nt4Client.removeTopicAnnounceListener(topicAnnounceListener);
+      ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
     }
 
     _widgetSize = null;
@@ -318,7 +322,8 @@ class FieldWidgetModel extends NTWidgetModel {
   Stream<Object> get multiTopicPeriodicStream async* {
     final Duration delayTime = Duration(
         microseconds: ((subscription?.options.periodicRateSeconds ??
-                    Settings.defaultPeriod) *
+                    preferences.getDouble(PrefKeys.defaultPeriod) ??
+                    Defaults.defaultPeriod) *
                 1e6)
             .round());
 
@@ -497,7 +502,7 @@ class FieldWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> robotPositionRaw = ntConnection
+        List<Object?> robotPositionRaw = model.ntConnection
                 .getLastAnnouncedValue(model._robotTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
@@ -553,7 +558,7 @@ class FieldWidget extends NTWidget {
 
         if (model.showOtherObjects || model.showTrajectories) {
           for (String objectTopic in model._otherObjectTopics) {
-            List<Object?>? objectPositionRaw = ntConnection
+            List<Object?>? objectPositionRaw = model.ntConnection
                 .getLastAnnouncedValue(objectTopic)
                 ?.tryCast<List<Object?>>();
 

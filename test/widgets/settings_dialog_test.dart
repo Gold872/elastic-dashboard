@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -41,6 +42,8 @@ class FakeSettingsMethods {
   void changeDefaultPeriod() {}
 
   void changeDefaultGraphPeriod() {}
+
+  void changeThemeVariant() {}
 }
 
 void main() {
@@ -63,6 +66,7 @@ void main() {
       PrefKeys.layoutLocked: false,
       PrefKeys.defaultPeriod: 0.10,
       PrefKeys.defaultGraphPeriod: 0.033,
+      PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -76,11 +80,11 @@ void main() {
 
   testWidgets('Settings Dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
         ),
       ),
@@ -101,6 +105,7 @@ void main() {
     expect(find.text('Lock Layout'), findsOneWidget);
     expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
+    expect(find.text('Theme Variant'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -112,17 +117,17 @@ void main() {
 
   testWidgets('Change team number', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onTeamNumberChanged: (data) async {
             fakeSettings.changeTeamNumber();
 
             await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -146,17 +151,17 @@ void main() {
 
   testWidgets('Change team color', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
           onColorChanged: (color) async {
             fakeSettings.changeColor();
 
             await preferences.setInt(PrefKeys.teamColor, color.value);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -200,19 +205,72 @@ void main() {
     verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
   });
 
-  testWidgets('Toggle grid', (widgetTester) async {
+  testWidgets('Change theme variant', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          onThemeVariantChanged: (variant) async {
+            fakeSettings.changeThemeVariant();
+
+            await preferences.setString(
+                PrefKeys.themeVariant, variant.variantName);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final themeVariantDropdown =
+        find.widgetWithText(DialogDropdownChooser<String>, 'Chroma');
+
+    expect(themeVariantDropdown, findsOneWidget);
+
+    await widgetTester.tap(themeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Chroma'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
+    expect(find.text('Material-3 Legacy'), findsNothing);
+
+    await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getString(PrefKeys.themeVariant),
+        FlexSchemeVariant.material3Legacy.variantName);
+
+    verify(fakeSettings.changeThemeVariant()).called(1);
+
+    final newThemeVariantDropdown = find.widgetWithText(
+        DialogDropdownChooser<String>, 'Material-3 Legacy (Default)');
+
+    expect(newThemeVariantDropdown, findsOneWidget);
+
+    // Now the safety mecahnism to add unknown variants should activate
+    await widgetTester.tap(newThemeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy'), findsOneWidget);
+  });
+
+  testWidgets('Toggle grid', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onGridToggle: (value) async {
             fakeSettings.changeShowGrid();
 
             await preferences.setBool(PrefKeys.showGrid, value);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -244,17 +302,17 @@ void main() {
 
   testWidgets('Change grid size', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onGridSizeChanged: (gridSize) async {
             fakeSettings.changeGridSize();
 
             await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -275,18 +333,19 @@ void main() {
 
   testWidgets('Change corner radius', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
+    createMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onCornerRadiusChanged: (radius) async {
             fakeSettings.changeCornerRadius();
 
             await preferences.setDouble(
                 PrefKeys.cornerRadius, double.parse(radius!));
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -308,17 +367,17 @@ void main() {
 
   testWidgets('Toggle driver station auto resize', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onResizeToDSChanged: (value) async {
             fakeSettings.changeDSAutoResize();
 
             await preferences.setBool(PrefKeys.autoResizeToDS, value);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -351,17 +410,17 @@ void main() {
 
   testWidgets('Toggle remember window position', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onRememberWindowPositionChanged: (value) async {
             fakeSettings.changeRememberWindow();
 
             await preferences.setBool(PrefKeys.rememberWindowPosition, value);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -394,17 +453,17 @@ void main() {
 
   testWidgets('Toggle lock layout', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          preferences: preferences,
+          ntConnection: createMockOfflineNT4(),
           onLayoutLock: (value) async {
             fakeSettings.changeLockLayout();
 
             await preferences.setBool(PrefKeys.layoutLocked, value);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -437,11 +496,11 @@ void main() {
 
   testWidgets('Change IP address mode', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           onIPAddressModeChanged: (mode) {
             fakeSettings.changeIPAddressMode();
@@ -482,17 +541,17 @@ void main() {
 
   testWidgets('Change IP address', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onIPAddressChanged: (data) async {
             fakeSettings.changeIPAddress();
 
             await preferences.setString(PrefKeys.ipAddress, data!);
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -513,18 +572,18 @@ void main() {
 
   testWidgets('Change default period', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onDefaultPeriodChanged: (period) async {
             fakeSettings.changeDefaultPeriod();
 
             await preferences.setDouble(
                 PrefKeys.defaultPeriod, double.parse(period!));
           },
-          preferences: preferences,
         ),
       ),
     ));
@@ -545,18 +604,18 @@ void main() {
 
   testWidgets('Change default graph period', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
           onDefaultGraphPeriodChanged: (period) async {
             fakeSettings.changeDefaultGraphPeriod();
 
             await preferences.setDouble(
                 PrefKeys.defaultGraphPeriod, double.parse(period!));
           },
-          preferences: preferences,
         ),
       ),
     ));

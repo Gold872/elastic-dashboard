@@ -6,7 +6,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class CommandSchedulerModel extends NTWidgetModel {
@@ -19,10 +18,19 @@ class CommandSchedulerModel extends NTWidgetModel {
   String get idsTopicName => '$topic/Ids';
   String get cancelTopicName => '$topic/Cancel';
 
-  CommandSchedulerModel({required super.topic, super.dataType, super.period})
-      : super();
+  CommandSchedulerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  CommandSchedulerModel.fromJson({required super.jsonData}) : super.fromJson();
+  CommandSchedulerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
   void resetSubscription() {
@@ -42,8 +50,8 @@ class CommandSchedulerModel extends NTWidgetModel {
 
     currentCancellations.add(id);
 
-    _cancelTopic ??= ntConnection.nt4Client
-        .publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??=
+        ntConnection.publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
 
     if (_cancelTopic == null) {
       return;
@@ -83,12 +91,12 @@ class CommandSchedulerWidget extends NTWidget {
     return StreamBuilder(
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
-        List<Object?> rawNames = ntConnection
+        List<Object?> rawNames = model.ntConnection
                 .getLastAnnouncedValue(model.namesTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 
-        List<Object?> rawIds = ntConnection
+        List<Object?> rawIds = model.ntConnection
                 .getLastAnnouncedValue(model.idsTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];

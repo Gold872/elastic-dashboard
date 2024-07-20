@@ -1,61 +1,65 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 
 void main() {
   test('NT4 Client', () {
-    bool connected = false;
+    NTConnection ntConnection = NTConnection('10.3.5.32');
 
-    NT4Client client = NT4Client(
-      serverBaseAddress: '10.3.53.2',
-      onConnect: () => connected = true,
-      onDisconnect: () => connected = false,
-    );
-
-    expect(connected, false);
+    expect(ntConnection.isNT4Connected, false);
 
     // Subscribing
     NT4Subscription subscription1 =
-        client.subscribe('/SmartDashboard/Test Number');
+        ntConnection.subscribe('/SmartDashboard/Test Number');
 
-    expect(client.subscriptions.length, greaterThanOrEqualTo(1));
+    expect(ntConnection.subscriptions.length, greaterThanOrEqualTo(1));
 
-    expect(client.lastAnnouncedValues.isEmpty, true);
+    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+        isNull);
 
     // Publishing and adding to the last announced values
-    client.addSample(
+    ntConnection.updateDataFromSubscription(subscription1, 3.53);
+
+    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+        isNull);
+
+    ntConnection.updateDataFromTopic(
         NT4Topic(
             name: '/SmartDashboard/Test Number',
             type: NT4TypeStr.kFloat32,
             properties: {}),
         3.53);
 
-    expect(client.lastAnnouncedValues.isEmpty, false);
+    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+        3.53);
 
     expect(subscription1.currentValue != null, true);
 
     NT4Subscription subscription2 =
-        client.subscribe('/SmartDashboard/Test Number');
+        ntConnection.subscribe('/SmartDashboard/Test Number');
 
     // If the subscriptions are shared
-    expect(client.subscribedTopics.length, 1);
+    expect(ntConnection.subscriptions.length, 1);
 
-    client.unSubscribe(subscription1);
+    ntConnection.unSubscribe(subscription1);
 
-    expect(client.subscribedTopics.length, 1);
+    expect(ntConnection.subscriptions.length, 1);
 
-    client.unSubscribe(subscription2);
+    ntConnection.unSubscribe(subscription2);
 
-    expect(client.subscribedTopics.length, 0);
+    expect(ntConnection.subscriptions.length, 0);
 
     // Changing ip address
-    expect(client.lastAnnouncedValues.isEmpty, false);
+    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+        3.53);
 
-    client.setServerBaseAddreess('10.26.01.2');
+    ntConnection.changeIPAddress('10.30.15.2');
 
-    expect(client.serverBaseAddress, '10.26.01.2');
+    expect(ntConnection.serverBaseAddress, '10.30.15.2');
 
-    expect(client.announcedTopics.isEmpty, true);
-    expect(client.lastAnnouncedValues.isEmpty, false);
+    expect(ntConnection.announcedTopics().length, 0);
+    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+        3.53);
   });
 }
