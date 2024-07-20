@@ -172,6 +172,53 @@ void main() {
         LinearGaugeOrientation.vertical);
   });
 
+  testWidgets('Number bar widget test integer', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NTConnection ntConnection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: 'Test/Int Value',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ),
+      ],
+      virtualValues: {
+        'Test/Int Value': -1,
+      },
+    );
+
+    NTWidgetModel numberBarModel = NumberBarModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Int Value',
+      dataType: 'int',
+      period: 0.100,
+      minValue: -5.0,
+      maxValue: 5.0,
+      divisions: null,
+      inverted: false,
+      orientation: 'horizontal',
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetModel>.value(
+            value: numberBarModel,
+            child: const NumberBar(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('-1.00'), findsNothing);
+    expect(find.text('-1'), findsOneWidget);
+    expect(find.byType(SfLinearGauge), findsOneWidget);
+  });
+
   testWidgets('Number bar widget test with divisions', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 

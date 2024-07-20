@@ -5,6 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -304,11 +305,13 @@ class RadialGauge extends NTWidget {
       stream: model.subscription?.periodicStream(yieldAll: false),
       initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
-        double value = tryCast(snapshot.data) ?? 0.0;
+        double value = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
 
         if (model.wrapValue) {
           value = _getWrappedValue(value, model.minValue, model.maxValue);
         }
+
+        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
         return SfRadialGauge(
           axes: [
@@ -333,7 +336,7 @@ class RadialGauge extends NTWidget {
                   angle: 90.0,
                   positionFactor: (model.showPointer) ? 0.35 : 0.05,
                   widget: Text(
-                    value.toStringAsFixed(2),
+                    value.toStringAsFixed(fractionDigits),
                     style: TextStyle(
                       fontSize: (model.showPointer) ? 18.0 : 28.0,
                     ),
