@@ -499,9 +499,13 @@ class ListLayoutModel extends LayoutContainerModel {
             }
             Future(() => setDraggable(true));
 
+            int? gridSize = preferences.getInt(PrefKeys.gridSize);
+
             Rect previewLocation = Rect.fromLTWH(
-              DraggableWidgetContainer.snapToGrid(widget.draggingRect.left),
-              DraggableWidgetContainer.snapToGrid(widget.draggingRect.top),
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggingRect.left, gridSize),
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggingRect.top, gridSize),
               widget.displayRect.width,
               widget.displayRect.height,
             );

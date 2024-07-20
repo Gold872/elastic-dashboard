@@ -302,24 +302,31 @@ class TabGridModel extends ChangeNotifier {
       );
     }
 
-    double previewX = DraggableWidgetContainer.snapToGrid(constrainedRect.left);
-    double previewY = DraggableWidgetContainer.snapToGrid(constrainedRect.top);
+    int? gridSize = preferences.getInt(PrefKeys.gridSize);
+
+    double previewX =
+        DraggableWidgetContainer.snapToGrid(constrainedRect.left, gridSize);
+    double previewY =
+        DraggableWidgetContainer.snapToGrid(constrainedRect.top, gridSize);
 
     double previewWidth = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.width.clamp(model.minWidth, double.infinity));
+        constrainedRect.width.clamp(model.minWidth, double.infinity), gridSize);
     double previewHeight = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.height.clamp(model.minHeight, double.infinity));
+        constrainedRect.height.clamp(model.minHeight, double.infinity),
+        gridSize);
 
     if (previewWidth < model.minWidth) {
       previewWidth = DraggableWidgetContainer.snapToGrid(
           constrainedRect.width.clamp(model.minWidth, double.infinity) +
-              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+              (gridSize ?? Defaults.gridSize),
+          gridSize);
     }
 
     if (previewHeight < model.minHeight) {
       previewHeight = DraggableWidgetContainer.snapToGrid(
           constrainedRect.height.clamp(model.minHeight, double.infinity) +
-              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize),
+          gridSize);
     }
 
     Rect preview =
@@ -486,8 +493,12 @@ class TabGridModel extends ChangeNotifier {
 
     Offset localPosition = getLocalPosition(globalPosition);
 
-    double previewX = DraggableWidgetContainer.snapToGrid(localPosition.dx);
-    double previewY = DraggableWidgetContainer.snapToGrid(localPosition.dy);
+    int? gridSize = preferences.getInt(PrefKeys.gridSize);
+
+    double previewX =
+        DraggableWidgetContainer.snapToGrid(localPosition.dx, gridSize);
+    double previewY =
+        DraggableWidgetContainer.snapToGrid(localPosition.dy, gridSize);
 
     double width = widget.displayRect.width;
     double height = widget.displayRect.height;
@@ -895,10 +906,12 @@ class TabGrid extends StatelessWidget {
         ),
       );
 
-      double previewX =
-          DraggableWidgetContainer.snapToGrid(container.draggingRect.left);
-      double previewY =
-          DraggableWidgetContainer.snapToGrid(container.draggingRect.top);
+      int? gridSize = model.preferences.getInt(PrefKeys.gridSize);
+
+      double previewX = DraggableWidgetContainer.snapToGrid(
+          container.draggingRect.left, gridSize);
+      double previewY = DraggableWidgetContainer.snapToGrid(
+          container.draggingRect.top, gridSize);
 
       Rect previewLocation = Rect.fromLTWH(previewX, previewY,
           container.displayRect.width, container.displayRect.height);
