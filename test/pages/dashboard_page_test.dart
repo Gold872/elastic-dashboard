@@ -1182,15 +1182,17 @@ void main() {
         'level': 'INFO'
       };
 
-      MockNTConnection connection = createMockOnlineNT4(virtualTopics: [
-        NT4Topic(
-          name: '/Elastic/RobotNotifications',
-          type: NT4TypeStr.kString,
-          properties: {},
-        )
-      ], virtualValues: {
-        '/Elastic/RobotNotifications': jsonEncode(data)
-      });
+      MockNTConnection connection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: '/Elastic/RobotNotifications',
+            type: NT4TypeStr.kString,
+            properties: {},
+          )
+        ],
+        virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
+        serverTime: 5000000,
+      );
       MockNT4Subscription mockSub = MockNT4Subscription();
 
       List<Function(Object?, int)> listeners = [];
