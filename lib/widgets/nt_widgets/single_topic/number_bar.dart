@@ -5,6 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -209,13 +210,15 @@ class NumberBar extends NTWidget {
       stream: model.subscription?.periodicStream(yieldAll: false),
       initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
-        double value = tryCast(snapshot.data) ?? 0.0;
+        double value = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
 
         double clampedValue = value.clamp(model.minValue, model.maxValue);
 
         double? divisionInterval = (model.divisions != null)
             ? (model.maxValue - model.minValue) / (model.divisions! - 1)
             : null;
+
+        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
         LinearGaugeOrientation gaugeOrientation =
             (model.orientation == 'vertical')
@@ -224,7 +227,7 @@ class NumberBar extends NTWidget {
 
         List<Widget> children = [
           Text(
-            value.toStringAsFixed(2),
+            value.toStringAsFixed(fractionDigits),
             style: Theme.of(context).textTheme.bodyLarge,
             overflow: TextOverflow.ellipsis,
           ),
