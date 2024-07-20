@@ -29,6 +29,8 @@ class NetworkTableTree extends StatefulWidget {
 
   final bool hideMetadata;
 
+  static List<NT4Topic> allTopics = List.empty();
+
   const NetworkTableTree({
     super.key,
     required this.ntConnection,
@@ -132,15 +134,19 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   Widget build(BuildContext context) {
-    List<NT4Topic> topics = [];
+    List<NT4Topic> topics = NetworkTableTree.allTopics;
 
-    for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
-      if (topic.name == 'Time') {
-        continue;
+    if (widget.ntConnection.isNT4Connected) {
+      for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
+        if (topic.name == 'Time') {
+          continue;
+        }
+
+        topics.add(topic);
       }
-
-      topics.add(topic);
     }
+
+    NetworkTableTree.allTopics = topics;
 
     for (NT4Topic topic in topics) {
       createRows(topic);
