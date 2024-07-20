@@ -5,6 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -189,7 +190,11 @@ class NumberSliderModel extends NTWidgetModel {
       ntConnection.publishTopic(ntTopic!);
     }
 
-    ntConnection.updateDataFromTopic(ntTopic!, value);
+    if (dataType == NT4TypeStr.kInt) {
+      ntConnection.updateDataFromTopic(ntTopic!, value.round());
+    } else {
+      ntConnection.updateDataFromTopic(ntTopic!, value);
+    }
   }
 }
 
@@ -206,7 +211,7 @@ class NumberSlider extends NTWidget {
       stream: model.subscription?.periodicStream(),
       initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
       builder: (context, snapshot) {
-        double value = tryCast(snapshot.data) ?? 0.0;
+        double value = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
 
         double clampedValue = value.clamp(model.minValue, model.maxValue);
 
@@ -217,10 +222,12 @@ class NumberSlider extends NTWidget {
         double divisionSeparation =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
+        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+
         return Column(
           children: [
             Text(
-              model.currentValue.toStringAsFixed(2),
+              model.currentValue.toStringAsFixed(fractionDigits),
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),
@@ -249,7 +256,11 @@ class NumberSlider extends NTWidget {
                       model.dragging = true;
                     },
                     onChanged: (value) {
-                      model.currentValue = value;
+                      if (model.dataType == NT4TypeStr.kInt) {
+                        model.currentValue = value.roundToDouble();
+                      } else {
+                        model.currentValue = value;
+                      }
 
                       if (model.updateContinuously) {
                         model.publishValue(model.currentValue);
