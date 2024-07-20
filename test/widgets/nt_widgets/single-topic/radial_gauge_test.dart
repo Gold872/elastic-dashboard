@@ -179,6 +179,57 @@ void main() {
     expect(find.byType(NeedlePointer), findsOneWidget);
   });
 
+  testWidgets('Radial gauge widget test integer', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NTConnection ntConnection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: 'Test/Int Value',
+          type: NT4TypeStr.kInt,
+          properties: {},
+        ),
+      ],
+      virtualValues: {
+        'Test/Int Value': -1,
+      },
+    );
+
+    RadialGaugeModel radialGaugeModel = RadialGaugeModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Int Value',
+      dataType: 'int',
+      period: 0.100,
+      startAngle: -140.0,
+      endAngle: 140.0,
+      minValue: -1.0,
+      maxValue: 1.0,
+      numberOfLabels: 10,
+      wrapValue: false,
+      showPointer: true,
+      showTicks: true,
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetModel>.value(
+            value: radialGaugeModel,
+            child: const RadialGauge(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(SfRadialGauge), findsOneWidget);
+    expect(find.text('-1.00'), findsNothing);
+    expect(find.text('-1'), findsOneWidget);
+    expect(find.byType(NeedlePointer), findsOneWidget);
+  });
+
   testWidgets('Radial gauge widget test no pointer', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
