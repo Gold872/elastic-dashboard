@@ -1,13 +1,10 @@
 import 'dart:math';
-
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
-
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
-
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -17,31 +14,8 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
   String type = YAGSLSwerveDrive.widgetType;
 
   double _angleOffset = 0.0;
-
-  String get measuredStatesTopic => '$topic/measuredStates';
-  String get desiredStatesTopic => '$topic/desiredStates';
-  String get robotRotationTopic => '$topic/robotRotation';
-  String get maxSpeedTopic => '$topic/maxSpeed';
-  String get robotWidthTopic => '$topic/sizeLeftRight';
-  String get robotLengthTopic => '$topic/sizeFrontBack';
-  String get rotationUnitTopic => '$topic/rotationUnit';
-
-  bool _showRobotRotation = true;
-  bool _showDesiredStates = true;
-
-  get showRobotRotation => _showRobotRotation;
-
-  set showRobotRotation(value) {
-    _showRobotRotation = value;
-    refresh();
-  }
-
-  get showDesiredStates => _showDesiredStates;
-
-  set showDesiredStates(value) {
-    _showDesiredStates = value;
-    refresh();
-  }
+  bool _showRobotRotation;
+  bool _showDesiredStates;
 
   YAGSLSwerveDriveModel({
     required super.topic,
@@ -54,10 +28,29 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
         super();
 
   YAGSLSwerveDriveModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
-    _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
-    _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true;
-    _angleOffset = tryCast(jsonData['angle_offset']) ?? 0.0;
+      : _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true,
+        _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true,
+        _angleOffset = tryCast(jsonData['angle_offset']) ?? 0.0,
+        super.fromJson(jsonData: jsonData);
+
+  String get measuredStatesTopic => '$topic/measuredStates';
+  String get desiredStatesTopic => '$topic/desiredStates';
+  String get robotRotationTopic => '$topic/robotRotation';
+  String get maxSpeedTopic => '$topic/maxSpeed';
+  String get robotWidthTopic => '$topic/sizeLeftRight';
+  String get robotLengthTopic => '$topic/sizeFrontBack';
+  String get rotationUnitTopic => '$topic/rotationUnit';
+
+  bool get showRobotRotation => _showRobotRotation;
+  set showRobotRotation(bool value) {
+    _showRobotRotation = value;
+    refresh();
+  }
+
+  bool get showDesiredStates => _showDesiredStates;
+  set showDesiredStates(bool value) {
+    _showDesiredStates = value;
+    refresh();
   }
 
   @override
@@ -82,18 +75,14 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
             child: DialogToggleSwitch(
               initialValue: _showRobotRotation,
               label: 'Show Robot Rotation',
-              onToggle: (value) {
-                showRobotRotation = value;
-              },
+              onToggle: (value) => showRobotRotation = value,
             ),
           ),
           Flexible(
             child: DialogToggleSwitch(
               initialValue: _showDesiredStates,
               label: 'Show Desired States',
-              onToggle: (value) {
-                showDesiredStates = value;
-              },
+              onToggle: (value) => showDesiredStates = value,
             ),
           ),
         ],
@@ -105,7 +94,9 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
             child: DialogTextInput(
               onSubmit: (value) {
                 double? newOffset = double.tryParse(value);
-                _angleOffset = newOffset ?? 0.0;
+                if (newOffset != null) {
+                  _angleOffset = newOffset;
+                }
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(),
               label: 'Angle Offset ($rotationUnit)',
@@ -119,29 +110,27 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   @override
   List<Object> getCurrentData() {
-    List<Object?> measuredStatesRaw =
+    List<dynamic> rawMeasuredStates =
         tryCast(ntConnection.getLastAnnouncedValue(measuredStatesTopic)) ?? [];
-    List<Object?> desiredStatesRaw =
+    List<dynamic> rawDesiredStates =
         tryCast(ntConnection.getLastAnnouncedValue(desiredStatesTopic)) ?? [];
 
+    // Filter and cast to List<double>
     List<double> measuredStates =
-        measuredStatesRaw.whereType<double>().toList();
-    List<double> desiredStates = desiredStatesRaw.whereType<double>().toList();
+        List<double>.from(rawMeasuredStates.whereType<double>());
+    List<double> desiredStates =
+        List<double>.from(rawDesiredStates.whereType<double>());
 
     double width =
         tryCast(ntConnection.getLastAnnouncedValue(robotWidthTopic)) ?? 1.0;
     double length =
         tryCast(ntConnection.getLastAnnouncedValue(robotLengthTopic)) ?? width;
-
     String rotationUnit =
         tryCast(ntConnection.getLastAnnouncedValue(rotationUnitTopic)) ??
             'radians';
-
     double robotAngle =
         tryCast(ntConnection.getLastAnnouncedValue(robotRotationTopic)) ?? 0.0;
-
     robotAngle += _angleOffset;
-
     double maxSpeed =
         tryCast(ntConnection.getLastAnnouncedValue(maxSpeedTopic)) ?? 4.5;
 
@@ -171,17 +160,18 @@ class YAGSLSwerveDrive extends NTWidget {
       child: StreamBuilder(
         stream: model.multiTopicPeriodicStream,
         builder: (context, snapshot) {
-          List<Object?> measuredStatesRaw = tryCast(ntConnection
+          List<dynamic> rawMeasuredStates = tryCast(ntConnection
                   .getLastAnnouncedValue(model.measuredStatesTopic)) ??
               [];
-          List<Object?> desiredStatesRaw = tryCast(ntConnection
+          List<dynamic> rawDesiredStates = tryCast(ntConnection
                   .getLastAnnouncedValue(model.desiredStatesTopic)) ??
               [];
 
+          // Filter and cast to List<double>
           List<double> measuredStates =
-              measuredStatesRaw.whereType<double>().toList();
+              List<double>.from(rawMeasuredStates.whereType<double>());
           List<double> desiredStates =
-              desiredStatesRaw.whereType<double>().toList();
+              List<double>.from(rawDesiredStates.whereType<double>());
 
           double width = tryCast(
                   ntConnection.getLastAnnouncedValue(model.robotWidthTopic)) ??
@@ -190,12 +180,8 @@ class YAGSLSwerveDrive extends NTWidget {
                   ntConnection.getLastAnnouncedValue(model.robotLengthTopic)) ??
               width;
 
-          if (width <= 0.0) {
-            width = 1.0;
-          }
-          if (length <= 0.0) {
-            length = 0.0;
-          }
+          width = width > 0.0 ? width : 1.0;
+          length = length > 0.0 ? length : 0.0;
 
           double sizeRatio = min(length, width) / max(length, width);
           double lengthWidthRatio = length / width;
@@ -203,7 +189,6 @@ class YAGSLSwerveDrive extends NTWidget {
           String rotationUnit = tryCast(ntConnection
                   .getLastAnnouncedValue(model.rotationUnitTopic)) ??
               'radians';
-
           double robotAngle = tryCast(ntConnection
                   .getLastAnnouncedValue(model.robotRotationTopic)) ??
               0.0;
@@ -217,10 +202,7 @@ class YAGSLSwerveDrive extends NTWidget {
           double maxSpeed = tryCast(
                   ntConnection.getLastAnnouncedValue(model.maxSpeedTopic)) ??
               4.5;
-
-          if (maxSpeed <= 0.0) {
-            maxSpeed = 4.5;
-          }
+          maxSpeed = maxSpeed > 0.0 ? maxSpeed : 4.5;
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -229,7 +211,7 @@ class YAGSLSwerveDrive extends NTWidget {
                       0.9 *
                       sizeRatio;
               return Transform.rotate(
-                angle: (model.showRobotRotation) ? -robotAngle : 0.0,
+                angle: model.showRobotRotation ? -robotAngle : 0.0,
                 child: SizedBox(
                   width: maxSideLength / lengthWidthRatio,
                   height: maxSideLength * lengthWidthRatio,
@@ -239,7 +221,7 @@ class YAGSLSwerveDrive extends NTWidget {
                       maxSpeed: maxSpeed,
                       moduleStates: measuredStates,
                       desiredStates:
-                          (model.showDesiredStates) ? desiredStates : [],
+                          model.showDesiredStates ? desiredStates : [],
                     ),
                   ),
                 ),
