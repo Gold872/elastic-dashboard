@@ -144,9 +144,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
         topics.add(topic);
       }
-    }
 
-    NetworkTableTree.allTopics = topics;
+      NetworkTableTree.allTopics = topics;
+    }
 
     for (NT4Topic topic in topics) {
       createRows(topic);
