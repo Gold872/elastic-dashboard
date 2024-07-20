@@ -28,7 +28,7 @@ void main() {
     notifications.listen();
 
     // Verify that subscribeAll was called with the specific parameters
-    verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
+    verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
         .called(1);
     verify(mockConnection.addDisconnectedListener(any)).called(1);
 
@@ -84,7 +84,7 @@ void main() {
     notifications.listen();
 
     // Verify that subscribeAll was called with the specific parameters
-    verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
+    verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
         .called(1);
     verify(mockConnection.addDisconnectedListener(any)).called(1);
 
@@ -163,7 +163,7 @@ void main() {
     notifications.listen();
 
     // Verify that subscribeAll was called with the specific parameters
-    verify(mockConnection.subscribeAll('/Elastic/robotnotifications', 0.2))
+    verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
         .called(1);
     verify(mockConnection.addDisconnectedListener(any)).called(1);
 

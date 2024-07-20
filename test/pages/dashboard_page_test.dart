@@ -1234,7 +1234,7 @@ void main() {
 
       await widgetTester.pumpAndSettle();
       connection
-          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .subscribeAll('/Elastic/RobotNotifications', 0.2)
           .updateValue(jsonEncode(data), 1);
 
       await widgetTester.pump();
@@ -1246,7 +1246,7 @@ void main() {
       expect(notificationWidget, findsNothing);
 
       connection
-          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .subscribeAll('/Elastic/RobotNotifications', 0.2)
           .updateValue(jsonEncode(data), 1);
     },
   );

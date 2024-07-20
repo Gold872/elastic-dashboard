@@ -18,7 +18,7 @@ class RobotNotificationsListener {
 
   void listen() {
     var notifications =
-        ntConnection.subscribeAll('/Elastic/robotnotifications', 0.2);
+        ntConnection.subscribeAll('/Elastic/RobotNotifications', 0.2);
     notifications.listen((alertData, alertTimestamp) {
       if (alertData == null) {
         return;
