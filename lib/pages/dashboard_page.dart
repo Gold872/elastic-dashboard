@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -264,6 +265,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   void onWindowClose() async {
     Map<String, dynamic> savedJson =
         jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
+
     Map<String, dynamic> currentJson = _toJson();
 
     bool showConfirmation = !_mapEquals(savedJson, currentJson);
@@ -299,10 +301,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       });
     }
 
+    List<Map<String, dynamic>> topics =
+        encodeNT4TopicsToString(NetworkTableTree.allTopics);
     return {
       'version': 1.0,
       'grid_size': _gridSize,
       'tabs': gridData,
+      'topics': topics,
     };
   }
 
@@ -584,6 +589,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     if (jsonData.containsKey('grid_size')) {
       _gridSize = tryCast(jsonData['grid_size']) ?? _gridSize;
       preferences.setInt(PrefKeys.gridSize, _gridSize);
+    }
+
+    if (jsonData.containsKey('topics')) {
+      List<NT4Topic> topics = List.empty(growable: true);
+
+      for (dynamic topicJson in jsonData['topics']) {
+        topics.add(NT4Topic(
+            name: topicJson["name"],
+            type: topicJson["type"],
+            properties: topicJson["update"]));
+      }
+
+      NetworkTableTree.allTopics = topics;
     }
 
     _tabData.clear();
@@ -1722,6 +1740,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
       ),
     );
+  }
+
+  List<Map<String, dynamic>> encodeNT4TopicsToString(List<NT4Topic> allTopics) {
+    List<Map<String, dynamic>> topics = List.empty(growable: true);
+    for (NT4Topic topic in allTopics) {
+      topics.add({
+        "name": topic.name,
+        "type": topic.type,
+        "id": topic.id,
+        "pubID": topic.pubUID,
+        "update": topic.properties
+      });
+    }
+
+    return topics;
   }
 }
 
