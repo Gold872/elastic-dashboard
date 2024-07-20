@@ -26,8 +26,8 @@ class DraggableWidgetContainer extends StatelessWidget {
     this.updateFunctions,
   });
 
-  static double snapToGrid(double value, [double? gridSize]) {
-    gridSize ??= Defaults.gridSize.toDouble();
+  static double snapToGrid(double value, [int? gridSize]) {
+    gridSize ??= Defaults.gridSize;
     return (value / gridSize).roundToDouble() * gridSize;
   }
 
