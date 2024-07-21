@@ -122,11 +122,11 @@ class NT4Subscription {
   }
 
   void updateValue(Object? value, int timestamp) {
+    for (var listener in _listeners) {
+      listener(value, timestamp);
+    }
     currentValue = value;
     this.timestamp = timestamp;
-    for (var listener in _listeners) {
-      listener(currentValue, timestamp);
-    }
   }
 
   Map<String, dynamic> _toSubscribeJson() {
@@ -415,7 +415,7 @@ class NT4Client {
   }
 
   void addSample(NT4Topic topic, dynamic data, [int? timestamp]) {
-    timestamp ??= _getServerTimeUS();
+    timestamp ??= getServerTimeUS();
 
     _wsSendBinary(
         serialize([topic.pubUID, timestamp, topic.getTypeId(), data]));
@@ -443,7 +443,7 @@ class NT4Client {
     return DateTime.now().microsecondsSinceEpoch;
   }
 
-  int _getServerTimeUS() {
+  int getServerTimeUS() {
     return _getClientTimeUS() + _serverTimeOffsetUS;
   }
 
