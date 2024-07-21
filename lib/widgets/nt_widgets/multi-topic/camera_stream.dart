@@ -14,7 +14,7 @@ class CameraStreamModel extends NTWidgetModel {
   String type = CameraStreamWidget.widgetType;
 
   String get streamsTopic => '$topic/streams';
-
+  bool _showBandwidthUsage = true;
   int? _quality;
   int? _fps;
   Size? _resolution;
@@ -79,6 +79,7 @@ class CameraStreamModel extends NTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
+    _showBandwidthUsage = tryCast(jsonData["show_bandwidth_usage"]) ?? true;
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
         ?.whereType<num>()
@@ -107,6 +108,7 @@ class CameraStreamModel extends NTWidgetModel {
           resolution!.width,
           resolution!.height,
         ],
+      'show_bandwidth_usage': _showBandwidthUsage,
     };
   }
 
@@ -215,6 +217,18 @@ class CameraStreamModel extends NTWidgetModel {
         onPressed: () => refresh(),
         child: const Text('Apply Quality Settings'),
       ),
+      StatefulBuilder(builder: (context, setState) {
+        return Row(children: [
+          const Text('Show bandwidth usage'),
+          Checkbox(
+              value: _showBandwidthUsage,
+              onChanged: (bool? value) {
+                setState(() {
+                  _showBandwidthUsage = value ?? true;
+                });
+              }),
+        ]);
+      })
     ];
   }
 
@@ -327,6 +341,7 @@ class CameraStreamWidget extends NTWidget {
             Mjpeg(
               mjpegStream: model.mjpegStream!,
               fit: BoxFit.contain,
+              showBandwidthUsage: model._showBandwidthUsage,
             ),
           ],
         );
