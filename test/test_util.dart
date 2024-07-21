@@ -28,6 +28,8 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
+  when(mockNT4Connection.serverTime).thenReturn(0);
+
   when(mockNT4Connection.connectionStatus())
       .thenAnswer((_) => Stream.value(false));
 
@@ -52,6 +54,7 @@ MockNTConnection createMockOfflineNT4() {
 MockNTConnection createMockOnlineNT4({
   List<NT4Topic>? virtualTopics,
   Map<String, dynamic>? virtualValues,
+  int serverTime = 0,
 }) {
   HttpOverrides.global = null;
 
@@ -88,6 +91,8 @@ MockNTConnection createMockOnlineNT4({
   when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
 
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
+
+  when(mockNT4Connection.serverTime).thenReturn(serverTime);
 
   when(mockNT4Connection.connectionStatus())
       .thenAnswer((_) => Stream.value(true));

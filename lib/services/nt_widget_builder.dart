@@ -415,8 +415,13 @@ class NTWidgetBuilder {
   static double getDefaultWidth(NTWidgetModel widget) {
     ensureInitialized();
 
-    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
-        .clamp(128.0, double.infinity);
+    double snappedNormal = DraggableWidgetContainer.snapToGrid(
+        _normalSize, widget.preferences.getInt(PrefKeys.gridSize));
+
+    if (snappedNormal < _normalSize) {
+      snappedNormal +=
+          widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
+    }
 
     if (_defaultWidthMap.containsKey(widget.type)) {
       return snappedNormal * _defaultWidthMap[widget.type]!;
@@ -427,12 +432,21 @@ class NTWidgetBuilder {
   static double getDefaultHeight(NTWidgetModel widget) {
     ensureInitialized();
 
-    double snappedNormal = DraggableWidgetContainer.snapToGrid(_normalSize)
-        .clamp(128.0, double.infinity);
+    double snappedNormal = DraggableWidgetContainer.snapToGrid(
+        _normalSize, widget.preferences.getInt(PrefKeys.gridSize));
+
+    if (snappedNormal < _normalSize) {
+      snappedNormal +=
+          widget.preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
+    }
 
     if (_defaultHeightMap.containsKey(widget.type)) {
       return snappedNormal * _defaultHeightMap[widget.type]!;
     }
     return snappedNormal;
+  }
+
+  static double getNormalSize([int? gridSize]) {
+    return DraggableWidgetContainer.snapToGrid(_normalSize, gridSize);
   }
 }

@@ -18,7 +18,7 @@ class RobotNotificationsListener {
 
   void listen() {
     var notifications =
-        ntConnection.subscribeAll('/Elastic/robotnotifications', 0.2);
+        ntConnection.subscribeAll('/Elastic/RobotNotifications', 0.2);
     notifications.listen((alertData, alertTimestamp) {
       if (alertData == null) {
         return;
@@ -33,7 +33,20 @@ class RobotNotificationsListener {
     // prevent showing a notification when we connect to NT
     if (_alertFirstRun) {
       _alertFirstRun = false;
-      return;
+
+      // If the alert existed 3 or more seconds before the client connected, ignore it
+      Duration serverTime = Duration(microseconds: ntConnection.serverTime);
+      Duration alertTime = Duration(microseconds: timestamp);
+
+      // In theory if you had high enough latency and there was no existing data,
+      // this would not work as intended. However, if you find yourself with 3
+      // seconds of latency you have a much more serious issue to deal with as you
+      // cannot control your robot with that much network latency, not to mention
+      // that this code wouldn't even be executing since the RTT timestamp delay
+      // would be so high that it would automatically disconnect from NT
+      if ((serverTime - alertTime).inSeconds > 3) {
+        return;
+      }
     }
 
     Map<String, dynamic> data;
@@ -43,7 +56,9 @@ class RobotNotificationsListener {
       return;
     }
 
-    if (!data.containsKey('level')) {}
+    if (!data.containsKey('level')) {
+      return;
+    }
 
     Icon icon;
 
