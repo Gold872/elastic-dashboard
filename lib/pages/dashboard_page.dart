@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1765,6 +1766,9 @@ class _AddWidgetDialog extends StatefulWidget {
 
 class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
+  bool _searchVisible = false;
+  String _searchQuery = "";
+
   @override
   Widget build(BuildContext context) {
     return Visibility(
@@ -1796,12 +1800,25 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                     ],
                   ),
                   const SizedBox(height: 5),
+                  if (_searchVisible)
+                    SizedBox(
+                      height: 40,
+                      child: DialogTextInput(
+                        autoFocus: true,
+                        onSubmit: (value) =>
+                            {setState(() => _searchQuery = value)},
+                        initialText: _searchQuery,
+                        label: "Search",
+                      ),
+                    ),
+                  const SizedBox(height: 5),
                   Expanded(
                     child: TabBarView(
                       children: [
                         NetworkTableTree(
                           ntConnection: widget.ntConnection,
                           preferences: widget.preferences,
+                          searchQuery: _searchQuery,
                           listLayoutBuilder: (
                               {required title, required children}) {
                             return widget._grid().createListLayout(
@@ -1859,6 +1876,14 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                           },
                         );
                       }),
+                      IconButton(
+                          onPressed: () => {
+                                setState(() {
+                                  _searchVisible = !_searchVisible;
+                                  _searchQuery = "";
+                                })
+                              },
+                          icon: const Icon(Icons.search_outlined)),
                       const Spacer(),
                       TextButton(
                         onPressed: () {

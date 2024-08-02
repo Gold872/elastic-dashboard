@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -26,21 +27,30 @@ class NetworkTableTree extends StatefulWidget {
   final Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
   final Function(WidgetContainerModel widget)? onDragEnd;
-
+  final String searchQuery;
   final bool hideMetadata;
 
-  const NetworkTableTree({
-    super.key,
-    required this.ntConnection,
-    required this.preferences,
-    required this.listLayoutBuilder,
-    required this.hideMetadata,
-    this.onDragUpdate,
-    this.onDragEnd,
-  });
+  const NetworkTableTree(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      required this.listLayoutBuilder,
+      required this.hideMetadata,
+      this.onDragUpdate,
+      this.onDragEnd,
+      this.searchQuery = ""});
 
   @override
   State<NetworkTableTree> createState() => _NetworkTableTreeState();
+
+  List<String> filterTopics(List<String> topics) {
+    if (searchQuery.isEmpty) return topics;
+
+    return topics
+        .where((element) =>
+            element.toLowerCase().contains(searchQuery.toLowerCase()))
+        .toList();
+  }
 }
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
@@ -65,11 +75,22 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     treeController = TreeController<NetworkTableTreeRow>(
       roots: root.children,
       childrenProvider: (node) {
-        if (widget.hideMetadata) {
-          return node.children
-              .whereNot((element) => element.rowName.startsWith('.'));
+        List<NetworkTableTreeRow> nodes = node.children;
+
+        // Apply the filter to the children
+        List<NetworkTableTreeRow> filteredChildren = _filterChildren(nodes);
+
+        // If there are any filtered children, include the parent node
+        if (filteredChildren.isNotEmpty || _matchesFilter(node)) {
+          if (widget.hideMetadata) {
+            return filteredChildren
+                .whereNot((element) => element.rowName.startsWith('.'))
+                .toList();
+          } else {
+            return filteredChildren;
+          }
         } else {
-          return node.children;
+          return [];
         }
       },
     );
@@ -81,6 +102,23 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     });
   }
 
+  List<NetworkTableTreeRow> _filterChildren(
+      List<NetworkTableTreeRow> children) {
+    // Apply the filter to each child
+    return children.where((child) {
+      if (_matchesFilter(child)) {
+        return true;
+      }
+      // Recursively check if any descendant matches the filter
+      return _filterChildren(child.children).isNotEmpty;
+    }).toList();
+  }
+
+  bool _matchesFilter(NetworkTableTreeRow node) {
+    // Check if the node matches the filter
+    return widget.filterTopics([node.topic]).isNotEmpty;
+  }
+
   @override
   void dispose() {
     widget.ntConnection.removeTopicAnnounceListener(onNewTopicAnnounced);
@@ -90,7 +128,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void didUpdateWidget(NetworkTableTree oldWidget) {
-    if (widget.hideMetadata != oldWidget.hideMetadata) {
+    if (widget.hideMetadata != oldWidget.hideMetadata ||
+        widget.searchQuery != oldWidget.searchQuery) {
       treeController.rebuild();
     }
     super.didUpdateWidget(oldWidget);
