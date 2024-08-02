@@ -1182,15 +1182,17 @@ void main() {
         'level': 'INFO'
       };
 
-      MockNTConnection connection = createMockOnlineNT4(virtualTopics: [
-        NT4Topic(
-          name: '/Elastic/RobotNotifications',
-          type: NT4TypeStr.kString,
-          properties: {},
-        )
-      ], virtualValues: {
-        '/Elastic/RobotNotifications': jsonEncode(data)
-      });
+      MockNTConnection connection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: '/Elastic/RobotNotifications',
+            type: NT4TypeStr.kString,
+            properties: {},
+          )
+        ],
+        virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
+        serverTime: 5000000,
+      );
       MockNT4Subscription mockSub = MockNT4Subscription();
 
       List<Function(Object?, int)> listeners = [];
@@ -1232,7 +1234,7 @@ void main() {
 
       await widgetTester.pumpAndSettle();
       connection
-          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .subscribeAll('/Elastic/RobotNotifications', 0.2)
           .updateValue(jsonEncode(data), 1);
 
       await widgetTester.pump();
@@ -1244,7 +1246,7 @@ void main() {
       expect(notificationWidget, findsNothing);
 
       connection
-          .subscribeAll('/Elastic/robotnotifications', 0.2)
+          .subscribeAll('/Elastic/RobotNotifications', 0.2)
           .updateValue(jsonEncode(data), 1);
     },
   );

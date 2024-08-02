@@ -23,6 +23,8 @@ class NTConnection {
   bool get isDSConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
 
+  int get serverTime => _ntClient.getServerTimeUS();
+
   @visibleForTesting
   List<NT4Subscription> get subscriptions => subscriptionUseCount.keys.toList();
 
