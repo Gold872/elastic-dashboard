@@ -6,6 +6,8 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -23,18 +25,27 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   bool _showRobotRotation = true;
   bool _showDesiredStates = true;
+  double _angleOffset =
+      0; // Modifiable angle offset to allow all kinds of swerve libraries setups
 
-  get showRobotRotation => _showRobotRotation;
+  bool get showRobotRotation => _showRobotRotation;
 
   set showRobotRotation(value) {
     _showRobotRotation = value;
     refresh();
   }
 
-  get showDesiredStates => _showDesiredStates;
+  bool get showDesiredStates => _showDesiredStates;
 
   set showDesiredStates(value) {
     _showDesiredStates = value;
+    refresh();
+  }
+
+  double get angleOffset => _angleOffset;
+
+  set angleOffset(value) {
+    _angleOffset = value;
     refresh();
   }
 
@@ -44,10 +55,12 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
     required super.topic,
     bool showRobotRotation = true,
     bool showDesiredStates = true,
+    double angleOffset = 0.0,
     super.dataType,
     super.period,
   })  : _showDesiredStates = showDesiredStates,
         _showRobotRotation = showRobotRotation,
+        _angleOffset = angleOffset,
         super();
 
   YAGSLSwerveDriveModel.fromJson({
@@ -57,6 +70,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true;
+    _angleOffset = tryCast(jsonData['angle_offset']) ?? 0.0;
   }
 
   @override
@@ -65,11 +79,15 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
       ...super.toJson(),
       'show_robot_rotation': _showRobotRotation,
       'show_desired_states': _showDesiredStates,
+      'angle_offset': _angleOffset,
     };
   }
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
+    String angleUnit =
+        tryCast(ntConnection.getLastAnnouncedValue(rotationUnitTopic)) ??
+            "radians";
     return [
       Row(
         children: [
@@ -89,6 +107,21 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
               onToggle: (value) {
                 showDesiredStates = value;
               },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              initialText: _angleOffset.toString(),
+              label: 'Angle Offset ($angleUnit)',
+              onSubmit: (String value) async {
+                angleOffset = double.parse(value);
+              },
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
             ),
           ),
         ],
@@ -181,7 +214,7 @@ class YAGSLSwerveDrive extends NTWidget {
 
         double robotAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.robotRotationTopic)) ??
-            0.0;
+            0.0 + model.angleOffset;
 
         if (rotationUnit == 'degrees') {
           robotAngle = radians(robotAngle);
