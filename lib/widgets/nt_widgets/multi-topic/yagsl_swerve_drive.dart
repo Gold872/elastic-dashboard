@@ -1,13 +1,13 @@
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/text_formatter_builder.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
 
+import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -55,10 +55,12 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
     required super.topic,
     bool showRobotRotation = true,
     bool showDesiredStates = true,
+    double angleOffset = 0.0,
     super.dataType,
     super.period,
   })  : _showDesiredStates = showDesiredStates,
         _showRobotRotation = showRobotRotation,
+        _angleOffset = angleOffset,
         super();
 
   YAGSLSwerveDriveModel.fromJson({
