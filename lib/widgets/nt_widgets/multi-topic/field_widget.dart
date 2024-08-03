@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
@@ -87,8 +88,9 @@ class FieldWidgetModel extends NTWidgetModel {
 
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
 
-    _robotColor = tryCast(jsonData['robot_color']) ?? Colors.red;
-    _trajectoryColor = tryCast(jsonData['trajectory_color']) ?? Colors.white;
+    _robotColor = decodeHexToColor(jsonData['robot_color'] ?? "") ?? Colors.red;
+    _trajectoryColor =
+        decodeHexToColor(jsonData['trajectory_color'] ?? "") ?? Colors.white;
   }
 
   @override
@@ -139,9 +141,45 @@ class FieldWidgetModel extends NTWidgetModel {
       'robot_length': _robotLengthMeters,
       'show_other_objects': _showOtherObjects,
       'show_trajectories': _showTrajectories,
-      'robot_color': _robotColor,
-      'trajectory_color': _trajectoryColor,
+      'robot_color': _robotColor.toHexString(),
+      'trajectory_color': _trajectoryColor.toHexString(),
     };
+  }
+
+  Color? decodeHexToColor(String hexString) {
+    // Decode the hex string to an integer
+    final int? colorInt = decodeHexString(hexString);
+
+    // If the hex string is valid and decoded successfully, create a Color object
+    if (colorInt != null) {
+      return Color(colorInt);
+    }
+
+    // Return null if the input was not a valid HEX string
+    return null;
+  }
+
+  int? decodeHexString(String hexString) {
+    // Remove the hash if it exists
+    final cleanedHex = hexString.replaceFirst('#', '').toUpperCase();
+
+    // Check if the cleaned HEX string is valid
+    final RegExp hexValidator = RegExp(kCompleteValidHexPattern);
+    if (!hexValidator.hasMatch(cleanedHex)) return null;
+
+    // Handle 3-digit HEX (expand to 6 digits)
+    if (cleanedHex.length == 3) {
+      final expandedHex =
+          cleanedHex.split('').expand((char) => [char, char]).join();
+      return int.tryParse(expandedHex, radix: 16);
+    }
+
+    // Handle 6-digit and 8-digit HEX
+    if (cleanedHex.length == 6 || cleanedHex.length == 8) {
+      return int.tryParse(cleanedHex, radix: 16);
+    }
+
+    return null;
   }
 
   @override
