@@ -7,23 +7,22 @@ class DialogTextInput extends StatefulWidget {
   final String? label;
   final String? initialText;
   final bool allowEmptySubmission;
-  final FocusNode? focusNode;
   final bool autoFocus;
   final bool enabled;
 
   final TextEditingController? textEditingController;
 
-  const DialogTextInput(
-      {super.key,
-      required this.onSubmit,
-      this.label,
-      this.initialText,
-      this.allowEmptySubmission = false,
-      this.enabled = true,
-      this.formatter,
-      this.textEditingController,
-      this.focusNode,
-      this.autoFocus = false});
+  const DialogTextInput({
+    super.key,
+    required this.onSubmit,
+    this.label,
+    this.initialText,
+    this.allowEmptySubmission = false,
+    this.enabled = true,
+    this.formatter,
+    this.textEditingController,
+    this.autoFocus = false,
+  });
 
   @override
   State<DialogTextInput> createState() => _DialogTextInputState();
@@ -59,7 +58,6 @@ class _DialogTextInputState extends State<DialogTextInput> {
           focused = value;
         },
         child: TextField(
-          focusNode: widget.focusNode,
           autofocus: widget.autoFocus,
           enabled: widget.enabled,
           onSubmitted: (value) {

@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
@@ -30,27 +29,19 @@ class NetworkTableTree extends StatefulWidget {
   final String searchQuery;
   final bool hideMetadata;
 
-  const NetworkTableTree(
-      {super.key,
-      required this.ntConnection,
-      required this.preferences,
-      required this.listLayoutBuilder,
-      required this.hideMetadata,
-      this.onDragUpdate,
-      this.onDragEnd,
-      this.searchQuery = ""});
+  const NetworkTableTree({
+    super.key,
+    required this.ntConnection,
+    required this.preferences,
+    required this.listLayoutBuilder,
+    required this.hideMetadata,
+    this.onDragUpdate,
+    this.onDragEnd,
+    this.searchQuery = "",
+  });
 
   @override
   State<NetworkTableTree> createState() => _NetworkTableTreeState();
-
-  List<String> filterTopics(List<String> topics) {
-    if (searchQuery.isEmpty) return topics;
-
-    return topics
-        .where((element) =>
-            element.toLowerCase().contains(searchQuery.toLowerCase()))
-        .toList();
-  }
 }
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
@@ -115,8 +106,12 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   }
 
   bool _matchesFilter(NetworkTableTreeRow node) {
+    // Don't filter if there isn't a search
+    if (widget.searchQuery.isEmpty) {
+      return true;
+    }
     // Check if the node matches the filter
-    return widget.filterTopics([node.topic]).isNotEmpty;
+    return node.topic.toLowerCase().contains(widget.searchQuery.toLowerCase());
   }
 
   @override
@@ -130,6 +125,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   void didUpdateWidget(NetworkTableTree oldWidget) {
     if (widget.hideMetadata != oldWidget.hideMetadata ||
         widget.searchQuery != oldWidget.searchQuery) {
+      treeController.roots = _filterChildren(root.children);
       treeController.rebuild();
     }
     super.didUpdateWidget(oldWidget);

@@ -1806,8 +1806,9 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                       child: DialogTextInput(
                         autoFocus: true,
                         onSubmit: (value) =>
-                            {setState(() => _searchQuery = value)},
+                            setState(() => _searchQuery = value),
                         initialText: _searchQuery,
+                        allowEmptySubmission: true,
                         label: "Search",
                       ),
                     ),
