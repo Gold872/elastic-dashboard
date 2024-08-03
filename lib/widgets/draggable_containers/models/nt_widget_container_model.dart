@@ -131,7 +131,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         return AlertDialog(
           title: const Text('Edit Properties'),
           content: SizedBox(
-            width: 353,
+            width: 400,
             child: SingleChildScrollView(
               child: StatefulBuilder(
                 builder: (context, setState) {
