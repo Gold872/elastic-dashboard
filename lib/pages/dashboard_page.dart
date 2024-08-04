@@ -1766,8 +1766,7 @@ class _AddWidgetDialog extends StatefulWidget {
 
 class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
-  bool _searchVisible = false;
-  String _searchQuery = "";
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -1799,19 +1798,6 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                       Tab(text: 'Layouts'),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  if (_searchVisible)
-                    SizedBox(
-                      height: 40,
-                      child: DialogTextInput(
-                        autoFocus: true,
-                        onSubmit: (value) =>
-                            setState(() => _searchQuery = value),
-                        initialText: _searchQuery,
-                        allowEmptySubmission: true,
-                        label: "Search",
-                      ),
-                    ),
                   const SizedBox(height: 5),
                   Expanded(
                     child: TabBarView(
@@ -1877,15 +1863,27 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                           },
                         );
                       }),
-                      IconButton(
-                          onPressed: () => {
-                                setState(() {
-                                  _searchVisible = !_searchVisible;
-                                  _searchQuery = "";
-                                })
-                              },
-                          icon: const Icon(Icons.search_outlined)),
-                      const Spacer(),
+                      Expanded(
+                        child: SizedBox(
+                          height: 40.0,
+                          child: DialogTextInput(
+                            onSubmit: (value) =>
+                                setState(() => _searchQuery = value),
+                            initialText: _searchQuery,
+                            allowEmptySubmission: true,
+                            label: "Search",
+                          ),
+                        ),
+                      ),
+                      // IconButton(
+                      //     onPressed: () => {
+                      //           setState(() {
+                      //             _searchVisible = !_searchVisible;
+                      //             _searchQuery = "";
+                      //           })
+                      //         },
+                      //     icon: const Icon(Icons.search_outlined)),
+                      // const Spacer(),
                       TextButton(
                         onPressed: () {
                           widget._onClose?.call();
