@@ -97,6 +97,9 @@ class FieldWidgetModel extends NTWidgetModel {
   void init() {
     super.init();
 
+    logger.info(Colors.red.toHexString());
+    logger.info(Colors.white.toHexString());
+
     _robotTopicName = '$topic/Robot';
 
     topicAnnounceListener = (nt4Topic) {
