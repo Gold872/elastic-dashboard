@@ -88,9 +88,9 @@ class FieldWidgetModel extends NTWidgetModel {
 
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
 
-    _robotColor = decodeHexToColor(jsonData['robot_color'] ?? "") ?? Colors.red;
+    _robotColor = Color(tryCast(jsonData['robot_color']) ?? Colors.red.value);
     _trajectoryColor =
-        decodeHexToColor(jsonData['trajectory_color'] ?? "") ?? Colors.white;
+        Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.value);
   }
 
   @override
@@ -141,8 +141,8 @@ class FieldWidgetModel extends NTWidgetModel {
       'robot_length': _robotLengthMeters,
       'show_other_objects': _showOtherObjects,
       'show_trajectories': _showTrajectories,
-      'robot_color': _robotColor.toHexString(),
-      'trajectory_color': _trajectoryColor.toHexString(),
+      'robot_color': _robotColor.value,
+      'trajectory_color': _trajectoryColor.value,
     };
   }
 

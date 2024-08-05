@@ -93,8 +93,8 @@
               "robot_length": 1.0,
               "show_other_objects": true,
               "show_trajectories": true,
-              "robot_color": "FFF44336",
-              "trajectory_color": "FFFFFFFF"
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
             }
           },
           {
