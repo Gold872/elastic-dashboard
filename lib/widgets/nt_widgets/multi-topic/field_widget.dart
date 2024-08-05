@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
@@ -12,6 +13,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -40,6 +42,7 @@ class FieldWidgetModel extends NTWidgetModel {
   final List<String> _otherObjectTopics = [];
 
   bool rendered = false;
+  Color _robotColor = Colors.red, _trajectoryColor = Colors.white;
 
   late Function(NT4Topic topic) topicAnnounceListener;
 
@@ -84,6 +87,10 @@ class FieldWidgetModel extends NTWidgetModel {
     }
 
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
+
+    _robotColor = Color(tryCast(jsonData['robot_color']) ?? Colors.red.value);
+    _trajectoryColor =
+        Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.value);
   }
 
   @override
@@ -134,7 +141,45 @@ class FieldWidgetModel extends NTWidgetModel {
       'robot_length': _robotLengthMeters,
       'show_other_objects': _showOtherObjects,
       'show_trajectories': _showTrajectories,
+      'robot_color': _robotColor.value,
+      'trajectory_color': _trajectoryColor.value,
     };
+  }
+
+  Color? decodeHexToColor(String hexString) {
+    // Decode the hex string to an integer
+    final int? colorInt = decodeHexString(hexString);
+
+    // If the hex string is valid and decoded successfully, create a Color object
+    if (colorInt != null) {
+      return Color(colorInt);
+    }
+
+    // Return null if the input was not a valid HEX string
+    return null;
+  }
+
+  int? decodeHexString(String hexString) {
+    // Remove the hash if it exists
+    final cleanedHex = hexString.replaceFirst('#', '').toUpperCase();
+
+    // Check if the cleaned HEX string is valid
+    final RegExp hexValidator = RegExp(kCompleteValidHexPattern);
+    if (!hexValidator.hasMatch(cleanedHex)) return null;
+
+    // Handle 3-digit HEX (expand to 6 digits)
+    if (cleanedHex.length == 3) {
+      final expandedHex =
+          cleanedHex.split('').expand((char) => [char, char]).join();
+      return int.tryParse(expandedHex, radix: 16);
+    }
+
+    // Handle 6-digit and 8-digit HEX
+    if (cleanedHex.length == 6 || cleanedHex.length == 8) {
+      return int.tryParse(cleanedHex, radix: 16);
+    }
+
+    return null;
   }
 
   @override
@@ -270,6 +315,35 @@ class FieldWidgetModel extends NTWidgetModel {
               onToggle: (value) {
                 showTrajectories = value;
               },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: DialogColorPicker(
+              onColorPicked: (color) {
+                _robotColor = color;
+              },
+              label: 'Robot Color',
+              initialColor: _robotColor,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+            ),
+          ),
+          Expanded(
+            child: DialogColorPicker(
+              onColorPicked: (color) {
+                _trajectoryColor = color;
+              },
+              label: 'Trajectory Color',
+              initialColor: _trajectoryColor,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
             ),
           ),
         ],
@@ -448,7 +522,7 @@ class FieldWidget extends NTWidget {
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.35),
         border: Border.all(
-          color: Colors.red,
+          color: model._robotColor,
           width: 4.0,
         ),
       ),
@@ -668,10 +742,11 @@ class TrianglePainter extends CustomPainter {
 class TrajectoryPainter extends CustomPainter {
   final List<Offset> points;
   final double strokeWidth;
-
+  final Color color;
   TrajectoryPainter({
     required this.points,
     required this.strokeWidth,
+    this.color = Colors.white,
   });
 
   @override
@@ -680,7 +755,7 @@ class TrajectoryPainter extends CustomPainter {
       return;
     }
     Paint trajectoryPaint = Paint()
-      ..color = Colors.white
+      ..color = color
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;

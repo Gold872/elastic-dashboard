@@ -7,12 +7,18 @@ class DialogColorPicker extends StatefulWidget {
   final Function(Color color) onColorPicked;
   final String label;
   final Color initialColor;
-
-  const DialogColorPicker(
-      {super.key,
-      required this.onColorPicked,
-      required this.label,
-      required this.initialColor});
+  final double padding;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
+  const DialogColorPicker({
+    super.key,
+    required this.onColorPicked,
+    required this.label,
+    required this.initialColor,
+    this.padding = 32,
+    this.mainAxisAlignment = MainAxisAlignment.center,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+  });
 
   @override
   State<DialogColorPicker> createState() => _DialogColorPickerState();
@@ -34,12 +40,11 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: widget.mainAxisAlignment,
+      crossAxisAlignment: widget.crossAxisAlignment,
       children: [
         Text(widget.label),
-        const SizedBox(width: 5),
+        const SizedBox(width: 8), // Adjust the width as needed
         ElevatedButton(
           onPressed: () {
             showDialog(
@@ -49,8 +54,6 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                   title: const Text('Select Color'),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SingleChildScrollView(
                         child: ColorPicker(
@@ -84,14 +87,12 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                           ),
                           maxLength: 6,
                           inputFormatters: [
-                            // Any custom input formatter can be passed
-                            // here or use any Form validator you want.
                             UpperCaseTextFormatter(),
                             FilteringTextInputFormatter.allow(
                                 RegExp(kValidHexPattern)),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                   actions: [
@@ -138,7 +139,10 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
               borderRadius: BorderRadius.circular(7.5),
             ),
           ),
-          child: Container(),
+          child: SizedBox(
+            width: widget.padding,
+            height: widget.padding,
+          ),
         ),
       ],
     );
