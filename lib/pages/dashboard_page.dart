@@ -1875,15 +1875,6 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                           ),
                         ),
                       ),
-                      // IconButton(
-                      //     onPressed: () => {
-                      //           setState(() {
-                      //             _searchVisible = !_searchVisible;
-                      //             _searchQuery = "";
-                      //           })
-                      //         },
-                      //     icon: const Icon(Icons.search_outlined)),
-                      // const Spacer(),
                       TextButton(
                         onPressed: () {
                           widget._onClose?.call();
