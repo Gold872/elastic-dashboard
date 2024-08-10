@@ -32,16 +32,72 @@ class FieldWidgetModel extends NTWidgetModel {
   bool _showOtherObjects = true;
   bool _showTrajectories = true;
 
+  Color _robotColor = Colors.red;
+  Color _trajectoryColor = Colors.white;
+
   final double _otherObjectSize = 0.55;
   final double _trajectoryPointSize = 0.08;
 
   Size? _widgetSize;
 
+  get robotWidthMeters => _robotWidthMeters;
+
+  set robotWidthMeters(value) {
+    _robotWidthMeters = value;
+    refresh();
+  }
+
+  get robotLengthMeters => _robotLengthMeters;
+
+  set robotLengthMeters(value) {
+    _robotLengthMeters = value;
+    refresh();
+  }
+
+  get showOtherObjects => _showOtherObjects;
+
+  set showOtherObjects(value) {
+    _showOtherObjects = value;
+    refresh();
+  }
+
+  get showTrajectories => _showTrajectories;
+
+  set showTrajectories(value) {
+    _showTrajectories = value;
+    refresh();
+  }
+
+  get robotColor => _robotColor;
+
+  set robotColor(value) {
+    _robotColor = value;
+    refresh();
+  }
+
+  get trajectoryColor => _trajectoryColor;
+
+  set trajectoryColor(value) {
+    _trajectoryColor = value;
+    refresh();
+  }
+
+  get otherObjectSize => _otherObjectSize;
+
+  get trajectoryPointSize => _trajectoryPointSize;
+
+  get widgetSize => _widgetSize;
+
+  set widgetSize(value) {
+    _widgetSize = value;
+  }
+
+  get field => _field;
+
   late String _robotTopicName;
   final List<String> _otherObjectTopics = [];
 
   bool rendered = false;
-  Color _robotColor = Colors.red, _trajectoryColor = Colors.white;
 
   late Function(NT4Topic topic) topicAnnounceListener;
 
@@ -140,8 +196,8 @@ class FieldWidgetModel extends NTWidgetModel {
       'robot_length': _robotLengthMeters,
       'show_other_objects': _showOtherObjects,
       'show_trajectories': _showTrajectories,
-      'robot_color': _robotColor.value,
-      'trajectory_color': _trajectoryColor.value,
+      'robot_color': robotColor.value,
+      'trajectory_color': trajectoryColor.value,
     };
   }
 
@@ -292,10 +348,10 @@ class FieldWidgetModel extends NTWidgetModel {
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: DialogColorPicker(
                 onColorPicked: (color) {
-                  _robotColor = color;
+                  robotColor = color;
                 },
                 label: 'Robot Color',
-                initialColor: _robotColor,
+                initialColor: robotColor,
               ),
             ),
           ),
@@ -304,10 +360,10 @@ class FieldWidgetModel extends NTWidgetModel {
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: DialogColorPicker(
                 onColorPicked: (color) {
-                  _trajectoryColor = color;
+                  trajectoryColor = color;
                 },
                 label: 'Trajectory Color',
-                initialColor: _trajectoryColor,
+                initialColor: trajectoryColor,
               ),
             ),
           ),
@@ -383,46 +439,6 @@ class FieldWidgetModel extends NTWidgetModel {
       await Future.delayed(delayTime);
     }
   }
-
-  get robotWidthMeters => _robotWidthMeters;
-
-  set robotWidthMeters(value) {
-    _robotWidthMeters = value;
-    refresh();
-  }
-
-  get robotLengthMeters => _robotLengthMeters;
-
-  set robotLengthMeters(value) {
-    _robotLengthMeters = value;
-    refresh();
-  }
-
-  get showOtherObjects => _showOtherObjects;
-
-  set showOtherObjects(value) {
-    _showOtherObjects = value;
-    refresh();
-  }
-
-  get showTrajectories => _showTrajectories;
-
-  set showTrajectories(value) {
-    _showTrajectories = value;
-    refresh();
-  }
-
-  get otherObjectSize => _otherObjectSize;
-
-  get trajectoryPointSize => _trajectoryPointSize;
-
-  get widgetSize => _widgetSize;
-
-  set widgetSize(value) {
-    _widgetSize = value;
-  }
-
-  get field => _field;
 }
 
 class FieldWidget extends NTWidget {
@@ -487,7 +503,7 @@ class FieldWidget extends NTWidget {
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.35),
         border: Border.all(
-          color: model._robotColor,
+          color: model.robotColor,
           width: 4.0,
         ),
       ),
@@ -652,6 +668,7 @@ class FieldWidget extends NTWidget {
             for (List<Offset> points in trajectoryPoints)
               CustomPaint(
                 painter: TrajectoryPainter(
+                  color: model.trajectoryColor,
                   points: points,
                   strokeWidth: model.trajectoryPointSize *
                       model.field.pixelsPerMeterHorizontal *
@@ -708,6 +725,7 @@ class TrajectoryPainter extends CustomPainter {
   final List<Offset> points;
   final double strokeWidth;
   final Color color;
+
   TrajectoryPainter({
     required this.points,
     required this.strokeWidth,
