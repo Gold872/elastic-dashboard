@@ -108,10 +108,18 @@ class FieldWidgetModel extends NTWidgetModel {
     String? fieldName,
     bool showOtherObjects = true,
     bool showTrajectories = true,
+    double robotWidthMeters = 0.85,
+    double robotLengthMeters = 0.85,
+    Color robotColor = Colors.red,
+    Color trajectoryColor = Colors.white,
     super.dataType,
     super.period,
   })  : _showTrajectories = showTrajectories,
         _showOtherObjects = showOtherObjects,
+        _robotWidthMeters = robotWidthMeters,
+        _robotLengthMeters = robotLengthMeters,
+        _robotColor = robotColor,
+        _trajectoryColor = trajectoryColor,
         super() {
     _fieldGame = fieldName ?? _fieldGame;
 
