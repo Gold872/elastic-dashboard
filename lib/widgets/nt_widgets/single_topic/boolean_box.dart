@@ -140,6 +140,7 @@ class BooleanBoxModel extends NTWidgetModel {
             },
             label: 'True Color',
             initialColor: _trueColor,
+            defaultColor: Colors.green,
           ),
           const SizedBox(width: 10),
           DialogColorPicker(
@@ -148,6 +149,7 @@ class BooleanBoxModel extends NTWidgetModel {
             },
             label: 'False Color',
             initialColor: _falseColor,
+            defaultColor: Colors.red,
           ),
         ],
       ),
