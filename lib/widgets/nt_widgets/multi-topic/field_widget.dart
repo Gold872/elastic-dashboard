@@ -282,7 +282,7 @@ class FieldWidgetModel extends NTWidgetModel {
           ),
         ],
       ),
-      const SizedBox(height: 5),
+      const SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
@@ -290,42 +290,24 @@ class FieldWidgetModel extends NTWidgetModel {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border:
-                      Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: DialogColorPicker(
-                  onColorPicked: (color) {
-                    _robotColor = color;
-                  },
-                  label: 'Robot Color',
-                  initialColor: _robotColor,
-                ),
+              child: DialogColorPicker(
+                onColorPicked: (color) {
+                  _robotColor = color;
+                },
+                label: 'Robot Color',
+                initialColor: _robotColor,
               ),
             ),
           ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border:
-                      Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
-                child: DialogColorPicker(
-                  onColorPicked: (color) {
-                    _trajectoryColor = color;
-                  },
-                  label: 'Trajectory Color',
-                  initialColor: _trajectoryColor,
-                ),
+              child: DialogColorPicker(
+                onColorPicked: (color) {
+                  _trajectoryColor = color;
+                },
+                label: 'Trajectory Color',
+                initialColor: _trajectoryColor,
               ),
             ),
           ),
