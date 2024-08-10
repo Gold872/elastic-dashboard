@@ -4,7 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
@@ -146,42 +145,6 @@ class FieldWidgetModel extends NTWidgetModel {
     };
   }
 
-  Color? decodeHexToColor(String hexString) {
-    // Decode the hex string to an integer
-    final int? colorInt = decodeHexString(hexString);
-
-    // If the hex string is valid and decoded successfully, create a Color object
-    if (colorInt != null) {
-      return Color(colorInt);
-    }
-
-    // Return null if the input was not a valid HEX string
-    return null;
-  }
-
-  int? decodeHexString(String hexString) {
-    // Remove the hash if it exists
-    final cleanedHex = hexString.replaceFirst('#', '').toUpperCase();
-
-    // Check if the cleaned HEX string is valid
-    final RegExp hexValidator = RegExp(kCompleteValidHexPattern);
-    if (!hexValidator.hasMatch(cleanedHex)) return null;
-
-    // Handle 3-digit HEX (expand to 6 digits)
-    if (cleanedHex.length == 3) {
-      final expandedHex =
-          cleanedHex.split('').expand((char) => [char, char]).join();
-      return int.tryParse(expandedHex, radix: 16);
-    }
-
-    // Handle 6-digit and 8-digit HEX
-    if (cleanedHex.length == 6 || cleanedHex.length == 8) {
-      return int.tryParse(cleanedHex, radix: 16);
-    }
-
-    return null;
-  }
-
   @override
   List<Widget> getEditProperties(BuildContext context) {
     return [
@@ -319,31 +282,51 @@ class FieldWidgetModel extends NTWidgetModel {
           ),
         ],
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 5),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            child: DialogColorPicker(
-              onColorPicked: (color) {
-                _robotColor = color;
-              },
-              label: 'Robot Color',
-              initialColor: _robotColor,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  border:
+                      Border.all(color: Theme.of(context).colorScheme.outline),
+                ),
+                child: DialogColorPicker(
+                  onColorPicked: (color) {
+                    _robotColor = color;
+                  },
+                  label: 'Robot Color',
+                  initialColor: _robotColor,
+                ),
+              ),
             ),
           ),
           Expanded(
-            child: DialogColorPicker(
-              onColorPicked: (color) {
-                _trajectoryColor = color;
-              },
-              label: 'Trajectory Color',
-              initialColor: _trajectoryColor,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  border:
+                      Border.all(color: Theme.of(context).colorScheme.outline),
+                ),
+                child: DialogColorPicker(
+                  onColorPicked: (color) {
+                    _trajectoryColor = color;
+                  },
+                  label: 'Trajectory Color',
+                  initialColor: _trajectoryColor,
+                ),
+              ),
             ),
           ),
         ],
