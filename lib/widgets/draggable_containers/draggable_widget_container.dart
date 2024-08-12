@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_box_transform/flutter_box_transform.dart';
@@ -43,6 +45,10 @@ class DraggableWidgetContainer extends StatelessWidget {
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
         visibleHandles: const {},
+        supportedDragDevices: PointerDeviceKind.values.toSet()
+          ..remove(PointerDeviceKind.trackpad),
+        supportedResizeDevices: PointerDeviceKind.values.toSet()
+          ..remove(PointerDeviceKind.trackpad),
         draggable: model.draggable,
         resizable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {
