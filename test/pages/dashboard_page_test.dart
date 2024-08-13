@@ -193,6 +193,13 @@ void main() {
 
     expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
 
+    final smartDashboardTile = find.widgetWithText(TreeTile, 'SmartDashboard');
+
+    expect(smartDashboardTile, findsOneWidget);
+
+    await widgetTester.tap(smartDashboardTile);
+    await widgetTester.pumpAndSettle();
+
     final searchQuery = find.widgetWithText(DialogTextInput, "Search");
     expect(searchQuery, findsOneWidget);
 
