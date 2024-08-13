@@ -86,6 +86,16 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
+  when(mockNT4Connection.addTopicAnnounceListener(any))
+      .thenAnswer((realInvocation) {
+    if (virtualTopics == null) {
+      return;
+    }
+    for (NT4Topic topic in virtualTopics) {
+      realInvocation.positionalArguments[0].call(topic);
+    }
+  });
+
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
   when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});

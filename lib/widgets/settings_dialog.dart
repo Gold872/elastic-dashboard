@@ -153,6 +153,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   onColorPicked: (color) => widget.onColorChanged?.call(color),
                   label: 'Team Color',
                   initialColor: currentColor,
+                  defaultColor: Colors.blueAccent,
                 ),
               ),
             ],
