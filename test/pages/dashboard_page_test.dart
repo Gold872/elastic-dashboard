@@ -163,6 +163,46 @@ void main() {
     expect(jsonString, preferences.getString(PrefKeys.layout));
   });
 
+  testWidgets('Search query', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    createMockOnlineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final searchQuery = find.widgetWithText(DialogTextInput, "Search");
+    expect(searchQuery, findsOneWidget);
+
+    DialogTextInput searchQueryTextDialog =
+        searchQuery.evaluate().first.widget as DialogTextInput;
+
+    searchQueryTextDialog.onSubmit.call("Test Value 1");
+    expect(find.widgetWithText(TreeTile, "Test Value 1"), findsOne);
+  });
+
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     createMockOnlineNT4();
