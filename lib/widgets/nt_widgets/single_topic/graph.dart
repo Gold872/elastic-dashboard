@@ -113,11 +113,13 @@ class GraphModel extends NTWidgetModel {
         children: [
           Flexible(
             child: DialogColorPicker(
-                onColorPicked: (color) {
-                  mainColor = color;
-                },
-                label: 'Graph Color',
-                initialColor: _mainColor),
+              onColorPicked: (color) {
+                mainColor = color;
+              },
+              label: 'Graph Color',
+              initialColor: _mainColor,
+              defaultColor: Colors.cyan,
+            ),
           ),
           Flexible(
             child: DialogTextInput(
