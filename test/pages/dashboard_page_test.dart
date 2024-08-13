@@ -208,6 +208,7 @@ void main() {
 
     searchQueryTextDialog.onSubmit.call("Test Value 1");
     expect(find.widgetWithText(TreeTile, "Test Value 1"), findsOne);
+    expect(find.widgetWithText(TreeTile, "Test Value 2"), findsNothing);
   });
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
