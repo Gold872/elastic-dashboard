@@ -26,7 +26,7 @@ class NetworkTableTree extends StatefulWidget {
   final Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
   final Function(WidgetContainerModel widget)? onDragEnd;
-
+  final String searchQuery;
   final bool hideMetadata;
 
   const NetworkTableTree({
@@ -37,6 +37,7 @@ class NetworkTableTree extends StatefulWidget {
     required this.hideMetadata,
     this.onDragUpdate,
     this.onDragEnd,
+    this.searchQuery = "",
   });
 
   @override
@@ -65,20 +66,53 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     treeController = TreeController<NetworkTableTreeRow>(
       roots: root.children,
       childrenProvider: (node) {
-        if (widget.hideMetadata) {
-          return node.children
-              .whereNot((element) => element.rowName.startsWith('.'));
+        List<NetworkTableTreeRow> nodes = node.children;
+
+        // Apply the filter to the children
+        List<NetworkTableTreeRow> filteredChildren = _filterChildren(nodes);
+
+        // If there are any filtered children, include the parent node
+        if (filteredChildren.isNotEmpty || _matchesFilter(node)) {
+          if (widget.hideMetadata) {
+            return filteredChildren
+                .whereNot((element) => element.rowName.startsWith('.'))
+                .toList();
+          } else {
+            return filteredChildren;
+          }
         } else {
-          return node.children;
+          return [];
         }
       },
     );
 
     widget.ntConnection.addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
       setState(() {
+        treeController.roots = _filterChildren(root.children);
         treeController.rebuild();
       });
     });
+  }
+
+  List<NetworkTableTreeRow> _filterChildren(
+      List<NetworkTableTreeRow> children) {
+    // Apply the filter to each child
+    return children.where((child) {
+      if (_matchesFilter(child)) {
+        return true;
+      }
+      // Recursively check if any descendant matches the filter
+      return _filterChildren(child.children).isNotEmpty;
+    }).toList();
+  }
+
+  bool _matchesFilter(NetworkTableTreeRow node) {
+    // Don't filter if there isn't a search
+    if (widget.searchQuery.isEmpty) {
+      return true;
+    }
+    // Check if the node matches the filter
+    return node.topic.toLowerCase().contains(widget.searchQuery.toLowerCase());
   }
 
   @override
@@ -90,7 +124,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void didUpdateWidget(NetworkTableTree oldWidget) {
-    if (widget.hideMetadata != oldWidget.hideMetadata) {
+    if (widget.hideMetadata != oldWidget.hideMetadata ||
+        widget.searchQuery != oldWidget.searchQuery) {
+      treeController.roots = _filterChildren(root.children);
       treeController.rebuild();
     }
     super.didUpdateWidget(oldWidget);
@@ -148,6 +184,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     root.sort();
 
+    treeController.roots = _filterChildren(root.children);
+
     return TreeView<NetworkTableTreeRow>(
       treeController: treeController,
       nodeBuilder:
@@ -198,77 +236,80 @@ class TreeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle trailingStyle =
         Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: GestureDetector(
-            supportedDevices: PointerDeviceKind.values
-                .whereNot((element) => element == PointerDeviceKind.trackpad)
-                .toSet(),
-            onPanStart: (details) async {
-              if (draggingWidget != null) {
-                return;
-              }
+    // I have absolutely no idea why Material is needed, but otherwise the tiles start bleeding all over the place, it makes zero sense
+    return Material(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: onTap,
+            child: GestureDetector(
+              supportedDevices: PointerDeviceKind.values
+                  .whereNot((element) => element == PointerDeviceKind.trackpad)
+                  .toSet(),
+              onPanStart: (details) async {
+                if (draggingWidget != null) {
+                  return;
+                }
 
-              draggingWidget = await entry.node
-                  .toWidgetContainerModel(listLayoutBuilder: listLayoutBuilder);
-            },
-            onPanUpdate: (details) {
-              if (draggingWidget == null) {
-                return;
-              }
+                draggingWidget = await entry.node.toWidgetContainerModel(
+                    listLayoutBuilder: listLayoutBuilder);
+              },
+              onPanUpdate: (details) {
+                if (draggingWidget == null) {
+                  return;
+                }
 
-              draggingWidget!.cursorGlobalLocation = details.globalPosition;
+                draggingWidget!.cursorGlobalLocation = details.globalPosition;
 
-              Offset position = details.globalPosition -
-                  Offset(
-                        draggingWidget!.displayRect.width,
-                        draggingWidget!.displayRect.height,
-                      ) /
-                      2;
+                Offset position = details.globalPosition -
+                    Offset(
+                          draggingWidget!.displayRect.width,
+                          draggingWidget!.displayRect.height,
+                        ) /
+                        2;
 
-              onDragUpdate?.call(position, draggingWidget!);
-            },
-            onPanEnd: (details) {
-              if (draggingWidget == null) {
-                return;
-              }
+                onDragUpdate?.call(position, draggingWidget!);
+              },
+              onPanEnd: (details) {
+                if (draggingWidget == null) {
+                  return;
+                }
 
-              onDragEnd?.call(draggingWidget!);
+                onDragEnd?.call(draggingWidget!);
 
-              draggingWidget = null;
-            },
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(start: entry.level * 16.0),
-              child: Column(
-                children: [
-                  ListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.only(right: 20.0),
-                    leading:
-                        (entry.hasChildren || entry.node.containsOnlyMetadata())
-                            ? FolderButton(
-                                openedIcon: const Icon(Icons.arrow_drop_down),
-                                closedIcon: const Icon(Icons.arrow_right),
-                                iconSize: 24,
-                                isOpen: entry.hasChildren && entry.isExpanded,
-                                onPressed: entry.hasChildren ? onTap : null,
-                              )
-                            : const SizedBox(width: 8.0),
-                    title: Text(entry.node.rowName),
-                    trailing: (entry.node.ntTopic != null)
-                        ? Text(entry.node.ntTopic!.type, style: trailingStyle)
-                        : null,
-                  ),
-                ],
+                draggingWidget = null;
+              },
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(start: entry.level * 16.0),
+                child: Column(
+                  children: [
+                    ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.only(right: 20.0),
+                      leading: (entry.hasChildren ||
+                              entry.node.containsOnlyMetadata())
+                          ? FolderButton(
+                              openedIcon: const Icon(Icons.arrow_drop_down),
+                              closedIcon: const Icon(Icons.arrow_right),
+                              iconSize: 24,
+                              isOpen: entry.hasChildren && entry.isExpanded,
+                              onPressed: entry.hasChildren ? onTap : null,
+                            )
+                          : const SizedBox(width: 8.0),
+                      title: Text(entry.node.rowName),
+                      trailing: (entry.node.ntTopic != null)
+                          ? Text(entry.node.ntTopic!.type, style: trailingStyle)
+                          : null,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        const Divider(height: 0),
-      ],
+          const Divider(height: 0),
+        ],
+      ),
     );
   }
 }
