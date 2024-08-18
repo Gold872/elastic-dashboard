@@ -210,6 +210,7 @@ void main() {
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsOneWidget);
 
+    // Both match
     await widgetTester.enterText(searchQuery, 'Test Value');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
@@ -218,6 +219,7 @@ void main() {
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsOneWidget);
 
+    // One match
     await widgetTester.enterText(searchQuery, 'Test Value 1');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
@@ -226,6 +228,16 @@ void main() {
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsNothing);
 
+    // No matches
+    await widgetTester.enterText(searchQuery, 'no match');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsNothing);
+    expect(testValueTwo, findsNothing);
+
+    // Empty text (both should be visible)
     await widgetTester.enterText(searchQuery, '');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
