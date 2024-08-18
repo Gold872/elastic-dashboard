@@ -225,6 +225,14 @@ void main() {
 
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsNothing);
+
+    await widgetTester.enterText(searchQuery, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
   });
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
