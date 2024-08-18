@@ -227,6 +227,7 @@ void main() {
 
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsOneWidget);
 
     // No matches
     await widgetTester.enterText(searchQuery, 'no match');
@@ -236,6 +237,17 @@ void main() {
 
     expect(testValueOne, findsNothing);
     expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsNothing);
+
+    // Match only smart dashboard tile (all should show)
+    await widgetTester.enterText(searchQuery, 'Smart');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
 
     // Empty text (both should be visible)
     await widgetTester.enterText(searchQuery, '');
@@ -245,6 +257,7 @@ void main() {
 
     expect(testValueOne, findsOneWidget);
     expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
   });
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
