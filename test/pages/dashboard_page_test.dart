@@ -163,7 +163,7 @@ void main() {
     expect(jsonString, preferences.getString(PrefKeys.layout));
   });
 
-  testWidgets('Search query', (widgetTester) async {
+  testWidgets('Add widget dialog search', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     createMockOnlineNT4();
 
@@ -184,6 +184,7 @@ void main() {
     expect(addWidget, findsOneWidget);
     expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
 
+    // widgetTester.tap() doesn't work :shrug:
     MenuItemButton addWidgetButton =
         addWidget.evaluate().first.widget as MenuItemButton;
 
@@ -200,14 +201,30 @@ void main() {
     await widgetTester.tap(smartDashboardTile);
     await widgetTester.pumpAndSettle();
 
-    final searchQuery = find.widgetWithText(DialogTextInput, "Search");
+    final searchQuery = find.widgetWithText(DialogTextInput, 'Search');
     expect(searchQuery, findsOneWidget);
 
-    DialogTextInput searchQueryTextDialog =
-        searchQuery.evaluate().first.widget as DialogTextInput;
+    final testValueOne = find.widgetWithText(TreeTile, 'Test Value 1');
+    final testValueTwo = find.widgetWithText(TreeTile, 'Test Value 2');
 
-    searchQueryTextDialog.onSubmit.call("Test Value 1");
-    expect(find.widgetWithText(TreeTile, "Test Value 1"), findsOne);
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    await widgetTester.enterText(searchQuery, 'Test Value');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    await widgetTester.enterText(searchQuery, 'Test Value 1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsNothing);
   });
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
