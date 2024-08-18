@@ -165,7 +165,6 @@ void main() {
 
   testWidgets('Add widget dialog search', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    createMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
