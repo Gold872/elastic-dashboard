@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
@@ -284,7 +287,30 @@ class FieldWidgetModel extends NTWidgetModel {
         choices: FieldImages.fields.map((e) => e.game).toList(),
         initialValue: _field.game,
       ),
-      const SizedBox(height: 5),
+      Row(
+        children: [
+          IconButton(
+            onPressed: () async {
+              Uri uri = Uri.file(
+                  "${dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/fields");
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              }
+            },
+            icon: const Icon(Icons.folder_outlined),
+            tooltip: "Field Images Folder",
+          ),
+          IconButton(
+            onPressed: () async {
+              FieldImages.resetFields();
+              await FieldImages.loadFields('assets/fields/');
+              refresh();
+            },
+            icon: const Icon(Icons.refresh_outlined),
+            tooltip: "Refresh Field Images",
+          ),
+        ],
+      ),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
