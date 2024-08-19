@@ -44,7 +44,7 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   double get angleOffset => _angleOffset;
 
-  set angleOffset(value) {
+  set angleOffset(double value) {
     _angleOffset = value;
     refresh();
   }
@@ -85,9 +85,6 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
-    String angleUnit =
-        tryCast(ntConnection.getLastAnnouncedValue(rotationUnitTopic)) ??
-            "radians";
     return [
       Row(
         children: [
@@ -117,9 +114,13 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
           Flexible(
             child: DialogTextInput(
               initialText: _angleOffset.toString(),
-              label: 'Angle Offset ($angleUnit)',
+              label: 'Angle Offset (degrees)',
               onSubmit: (String value) async {
-                angleOffset = double.parse(value);
+                double? doubleValue = double.tryParse(value);
+
+                if (doubleValue != null) {
+                  angleOffset = doubleValue;
+                }
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(),
             ),
@@ -212,9 +213,15 @@ class YAGSLSwerveDrive extends NTWidget {
                 .getLastAnnouncedValue(model.rotationUnitTopic)) ??
             'radians';
 
+        double angleOffsetConverted = model.angleOffset;
+
+        if (rotationUnit == "radians") {
+          angleOffsetConverted *= (pi / 180);
+        }
+
         double robotAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.robotRotationTopic)) ??
-            0.0 + model.angleOffset;
+            0.0 + angleOffsetConverted;
 
         if (rotationUnit == 'degrees') {
           robotAngle = radians(robotAngle);
