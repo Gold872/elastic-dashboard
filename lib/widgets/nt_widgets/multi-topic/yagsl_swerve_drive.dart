@@ -213,21 +213,17 @@ class YAGSLSwerveDrive extends NTWidget {
                 .getLastAnnouncedValue(model.rotationUnitTopic)) ??
             'radians';
 
-        double angleOffsetConverted = model.angleOffset;
-
-        if (rotationUnit == "radians") {
-          angleOffsetConverted *= (pi / 180);
-        }
-
         double robotAngle = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.robotRotationTopic)) ??
-            0.0 + angleOffsetConverted;
+            0.0;
 
         if (rotationUnit == 'degrees') {
           robotAngle = radians(robotAngle);
         } else if (rotationUnit == 'rotations') {
           robotAngle *= 2 * pi;
         }
+
+        robotAngle += radians(model.angleOffset);
 
         double maxSpeed = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.maxSpeedTopic)) ??
