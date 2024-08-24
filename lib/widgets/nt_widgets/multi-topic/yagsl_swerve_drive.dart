@@ -113,16 +113,17 @@ class YAGSLSwerveDriveModel extends NTWidgetModel {
         children: [
           Flexible(
             child: DialogTextInput(
-              initialText: _angleOffset.toString(),
+              initialText: angleOffset.toString(),
               label: 'Angle Offset (degrees)',
-              onSubmit: (String value) async {
+              onSubmit: (String value) {
                 double? doubleValue = double.tryParse(value);
 
                 if (doubleValue != null) {
                   angleOffset = doubleValue;
                 }
               },
-              formatter: TextFormatterBuilder.decimalTextFormatter(),
+              formatter: TextFormatterBuilder.decimalTextFormatter(
+                  allowNegative: true),
             ),
           ),
         ],

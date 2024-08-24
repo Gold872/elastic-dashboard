@@ -53,13 +53,14 @@ void main() {
 
   test('YAGSL swerve drive to json', () {
     YAGSLSwerveDriveModel yagslSwerveModel = YAGSLSwerveDriveModel(
-        ntConnection: ntConnection,
-        preferences: preferences,
-        topic: 'Test/YAGSL Swerve Drive',
-        period: 0.100,
-        showRobotRotation: true,
-        showDesiredStates: true,
-        angleOffset: 90.0);
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/YAGSL Swerve Drive',
+      period: 0.100,
+      showRobotRotation: true,
+      showDesiredStates: true,
+      angleOffset: 90.0,
+    );
 
     expect(yagslSwerveModel.toJson(), yagslSwerveJson);
   });
