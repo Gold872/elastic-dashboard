@@ -224,7 +224,7 @@ class YAGSLSwerveDrive extends NTWidget {
           robotAngle *= 2 * pi;
         }
 
-        robotAngle += radians(model.angleOffset);
+        robotAngle -= radians(model.angleOffset);
 
         double maxSpeed = tryCast(model.ntConnection
                 .getLastAnnouncedValue(model.maxSpeedTopic)) ??
