@@ -65,11 +65,12 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  Size screenSize = (primaryDisplay.visibleSize ?? primaryDisplay.size) *
-      (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  Size screenSize =
+      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
 
-  double minimumWidth = min(screenSize.width * 0.60, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.60, 720.0);
+  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
+  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
 
   Size minimumSize = Size(minimumWidth, minimumHeight);
 

@@ -163,6 +163,102 @@ void main() {
     expect(jsonString, preferences.getString(PrefKeys.layout));
   });
 
+  testWidgets('Add widget dialog search', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    // widgetTester.tap() doesn't work :shrug:
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final smartDashboardTile = find.widgetWithText(TreeTile, 'SmartDashboard');
+
+    expect(smartDashboardTile, findsOneWidget);
+
+    await widgetTester.tap(smartDashboardTile);
+    await widgetTester.pumpAndSettle();
+
+    final searchQuery = find.widgetWithText(DialogTextInput, 'Search');
+    expect(searchQuery, findsOneWidget);
+
+    final testValueOne = find.widgetWithText(TreeTile, 'Test Value 1');
+    final testValueTwo = find.widgetWithText(TreeTile, 'Test Value 2');
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    // Both match
+    await widgetTester.enterText(searchQuery, 'Test Value');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    // One match
+    await widgetTester.enterText(searchQuery, 'Test Value 1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsOneWidget);
+
+    // No matches
+    await widgetTester.enterText(searchQuery, 'no match');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsNothing);
+    expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsNothing);
+
+    // Match only smart dashboard tile (all should show)
+    await widgetTester.enterText(searchQuery, 'Smart');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
+
+    // Empty text (both should be visible)
+    await widgetTester.enterText(searchQuery, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
+  });
+
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     createMockOnlineNT4();
