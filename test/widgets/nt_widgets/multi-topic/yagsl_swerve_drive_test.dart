@@ -18,6 +18,7 @@ void main() {
     'period': 0.100,
     'show_robot_rotation': true,
     'show_desired_states': true,
+    'angle_offset': 90.0,
   };
 
   late SharedPreferences preferences;
@@ -47,6 +48,7 @@ void main() {
 
     expect(yagslSwerveModel.showRobotRotation, isTrue);
     expect(yagslSwerveModel.showDesiredStates, isTrue);
+    expect(yagslSwerveModel.angleOffset, 90.0);
   });
 
   test('YAGSL swerve drive to json', () {
@@ -57,6 +59,7 @@ void main() {
       period: 0.100,
       showRobotRotation: true,
       showDesiredStates: true,
+      angleOffset: 90.0,
     );
 
     expect(yagslSwerveModel.toJson(), yagslSwerveJson);
