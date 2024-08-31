@@ -108,7 +108,7 @@ void main() {
     expect(find.text('Theme Variant'), findsOneWidget);
 
     final assetsFolderButton =
-        find.widgetWithIcon(IconButton, Icons.warning_outlined);
+        find.widgetWithIcon(IconButton, Icons.folder_outlined);
     expect(assetsFolderButton, findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
