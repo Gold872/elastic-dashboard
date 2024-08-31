@@ -107,6 +107,10 @@ void main() {
     expect(find.text('Default Graph Period'), findsOneWidget);
     expect(find.text('Theme Variant'), findsOneWidget);
 
+    final assetsFolderButton =
+        find.widgetWithIcon(IconButton, Icons.warning_outlined);
+    expect(assetsFolderButton, findsOneWidget);
+
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
     expect(closeButton, findsOneWidget);
