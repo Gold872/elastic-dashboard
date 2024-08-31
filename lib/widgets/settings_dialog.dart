@@ -124,7 +124,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           child: Column(
                             children: [
                               const Text(
-                                "Modifying the assets folder may cause erros and is not recommended.\nAre you still sure you want to open it?",
+                                "Modifying the assets folder may cause errorts and is not recommended.\nAre you still sure you want to open it?",
                                 style: TextStyle(
                                   color: Colors.amberAccent,
                                   fontWeight: FontWeight.bold,
