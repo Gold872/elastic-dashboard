@@ -288,30 +288,6 @@ class FieldWidgetModel extends NTWidgetModel {
         initialValue: _field.game,
       ),
       Row(
-        children: [
-          IconButton(
-            onPressed: () async {
-              Uri uri = Uri.file(
-                  "${dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/fields");
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri);
-              }
-            },
-            icon: const Icon(Icons.folder_outlined),
-            tooltip: "Field Images Folder",
-          ),
-          IconButton(
-            onPressed: () async {
-              FieldImages.resetFields();
-              await FieldImages.loadFields('assets/fields/');
-              refresh();
-            },
-            icon: const Icon(Icons.refresh_outlined),
-            tooltip: "Refresh Field Images",
-          ),
-        ],
-      ),
-      Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
         children: [
