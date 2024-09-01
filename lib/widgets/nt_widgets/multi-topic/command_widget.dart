@@ -123,7 +123,7 @@ class CommandWidget extends NTWidget {
               onTapUp: (_) {
                 bool publishTopic = model.runningTopic == null;
 
-                model.runningTopic =
+                model.runningTopic ??=
                     model.ntConnection.getTopicFromName(model.runningTopicName);
 
                 if (model.runningTopic == null) {
@@ -133,6 +133,12 @@ class CommandWidget extends NTWidget {
                 if (publishTopic) {
                   model.ntConnection.publishTopic(model.runningTopic!);
                 }
+
+                // Prevents widget from locking up if double pressed fast enough
+                bool running = model.ntConnection
+                        .getLastAnnouncedValue(model.runningTopicName)
+                        ?.tryCast<bool>() ??
+                    false;
 
                 model.ntConnection
                     .updateDataFromTopic(model.runningTopic!, !running);
