@@ -44,27 +44,28 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
+typedef NTModelJsonProvider = NTWidgetModel Function({
+  required Map<String, dynamic> jsonData,
+  required NTConnection ntConnection,
+  required SharedPreferences preferences,
+});
+
+typedef NTModelProvider = NTWidgetModel Function({
+  String dataType,
+  required NTConnection ntConnection,
+  double period,
+  required SharedPreferences preferences,
+  required String topic,
+});
+
+typedef NTWidgetProvider = NTWidget Function({Key? key});
+
 class NTWidgetBuilder {
-  static final Map<String, NTWidget Function({Key? key})> _widgetNameBuildMap =
-      {};
+  static final Map<String, NTWidgetProvider> _widgetNameBuildMap = {};
 
-  static final Map<
-      String,
-      NTWidgetModel Function({
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required String topic,
-        String dataType,
-        double period,
-      })> _modelNameBuildMap = {};
+  static final Map<String, NTModelProvider> _modelNameBuildMap = {};
 
-  static final Map<
-      String,
-      NTWidgetModel Function({
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required Map<String, dynamic> jsonData,
-      })> _modelJsonBuildMap = {};
+  static final Map<String, NTModelJsonProvider> _modelJsonBuildMap = {};
 
   static final Map<String, double> _minimumWidthMap = {};
   static final Map<String, double> _minimumHeightMap = {};
@@ -118,7 +119,7 @@ class NTWidgetBuilder {
         fromJson: NumberSliderModel.fromJson,
         minHeight: _normalSize);
 
-    registerMultiple(
+    registerWithAlias(
         names: {RadialGauge.widgetType, 'Simple Dial'},
         model: RadialGaugeModel.new,
         widget: RadialGauge.new,
@@ -126,7 +127,7 @@ class NTWidgetBuilder {
         minWidth: _normalSize * 1.6,
         minHeight: _normalSize * 1.6);
 
-    registerMultiple(
+    registerWithAlias(
         names: {TextDisplay.widgetType, 'Text View'},
         model: TextDisplayModel.new,
         widget: TextDisplay.new,
@@ -165,7 +166,7 @@ class NTWidgetBuilder {
         defaultWidth: 2,
         defaultHeight: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {ComboBoxChooser.widgetType, 'String Chooser'},
         model: ComboBoxChooserModel.new,
         widget: ComboBoxChooser.new,
@@ -191,7 +192,7 @@ class NTWidgetBuilder {
         minHeight: _normalSize * 0.90,
         defaultWidth: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {DifferentialDrive.widgetType, 'Differential Drivebase'},
         model: DifferentialDriveModel.new,
         widget: DifferentialDrive.new,
@@ -201,7 +202,7 @@ class NTWidgetBuilder {
         defaultWidth: 3,
         defaultHeight: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {EncoderWidget.widgetType, "Quadrature Encoder"},
         model: EncoderModel.new,
         widget: EncoderWidget.new,
@@ -210,7 +211,7 @@ class NTWidgetBuilder {
         minHeight: _normalSize * 0.86,
         defaultWidth: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {FieldWidget.widgetType, 'Field2d'},
         model: FieldWidgetModel.new,
         widget: FieldWidget.new,
@@ -239,7 +240,7 @@ class NTWidgetBuilder {
         defaultWidth: 2,
         defaultHeight: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {MotorController.widgetType, 'Nidec Brushless'},
         model: MotorControllerModel.new,
         widget: MotorController.new,
@@ -256,7 +257,7 @@ class NTWidgetBuilder {
         defaultWidth: 2,
         defaultHeight: 3);
 
-    registerMultiple(
+    registerWithAlias(
         names: {PIDControllerWidget.widgetType, 'PID Controller'},
         model: PIDControllerModel.new,
         widget: PIDControllerWidget.new,
@@ -266,7 +267,7 @@ class NTWidgetBuilder {
         defaultWidth: 2,
         defaultHeight: 3);
 
-    registerMultiple(
+    registerWithAlias(
         names: {PowerDistribution.widgetType, 'PDP'},
         model: PowerDistributionModel.new,
         widget: PowerDistribution.new,
@@ -318,7 +319,7 @@ class NTWidgetBuilder {
         minWidth: _normalSize * 2,
         defaultWidth: 2);
 
-    registerMultiple(
+    registerWithAlias(
         names: {ThreeAxisAccelerometer.widgetType, '3AxisAccelerometer'},
         model: ThreeAxisAccelerometerModel.new,
         widget: ThreeAxisAccelerometer.new,
@@ -486,19 +487,9 @@ class NTWidgetBuilder {
   static void
       register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
     required String name,
-    required ModelType Function(
-            {String dataType,
-            required NTConnection ntConnection,
-            double period,
-            required SharedPreferences preferences,
-            required String topic})
-        model,
-    required WidgetType Function({Key? key}) widget,
-    required NTWidgetModel Function(
-            {required Map<String, dynamic> jsonData,
-            required NTConnection ntConnection,
-            required SharedPreferences preferences})
-        fromJson,
+    required NTModelProvider model,
+    required NTWidgetProvider widget,
+    required NTModelJsonProvider fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
@@ -522,22 +513,12 @@ class NTWidgetBuilder {
     }
   }
 
-  static void registerMultiple<ModelType extends NTWidgetModel,
+  static void registerWithAlias<ModelType extends NTWidgetModel,
       WidgetType extends NTWidget>({
     required Set<String> names,
-    required ModelType Function(
-            {String dataType,
-            required NTConnection ntConnection,
-            double period,
-            required SharedPreferences preferences,
-            required String topic})
-        model,
-    required WidgetType Function({Key? key}) widget,
-    required NTWidgetModel Function(
-            {required Map<String, dynamic> jsonData,
-            required NTConnection ntConnection,
-            required SharedPreferences preferences})
-        fromJson,
+    required NTModelProvider model,
+    required NTWidgetProvider widget,
+    required NTModelJsonProvider fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
