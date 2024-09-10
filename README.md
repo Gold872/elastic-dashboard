@@ -1,6 +1,6 @@
 # ![Elastic Logo](assets/logos/logo_full.png)
 
-[![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
+[![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml) [![codecov](https://codecov.io/gh/Gold872/elastic-dashboard/graph/badge.svg?token=4MQYW8SMQI)](https://codecov.io/gh/Gold872/elastic-dashboard)
 
 A simple and modern dashboard for FRC.
 
