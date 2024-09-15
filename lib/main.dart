@@ -57,7 +57,7 @@ void main() async {
     preferences = await SharedPreferences.getInstance();
   }
 
-  if (!kIsWeb){
+  if (!kIsWeb) {
     await windowManager.ensureInitialized();
   }
 
@@ -71,7 +71,6 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   if (!kIsWeb) {
-
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
     double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
     Size screenSize =
@@ -86,14 +85,11 @@ void main() async {
     if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
       await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
     }
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-      windowButtonVisibility: false);
-  await windowManager.show();
-  await windowManager.focus();
+    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+        windowButtonVisibility: false);
+    await windowManager.show();
+    await windowManager.focus();
   }
-
-
-
 
   runApp(
     Elastic(
