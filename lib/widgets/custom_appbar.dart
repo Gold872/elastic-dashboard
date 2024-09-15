@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:titlebar_buttons/titlebar_buttons.dart';
@@ -14,13 +15,13 @@ class CustomAppBar extends AppBar {
   static const double _leadingSize = 500;
   static const ThemeType buttonType = ThemeType.materia;
 
-  CustomAppBar(
-      {super.key,
-      this.titleText = 'Elastic',
-      this.appBarColor,
-      this.onWindowClose,
-      required this.menuBar})
-      : super(
+  CustomAppBar({
+    super.key,
+    this.titleText = 'Elastic',
+    this.appBarColor,
+    this.onWindowClose,
+    required this.menuBar,
+  }) : super(
           toolbarHeight: 36,
           backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
           elevation: 0.0,
@@ -31,61 +32,63 @@ class CustomAppBar extends AppBar {
           actions: [
             SizedBox(
               width: _leadingSize,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Expanded(
-                    child: _WindowDragArea(),
-                  ),
-                  InkWell(
-                    canRequestFocus: false,
-                    onTap: () => {},
-                    child: const AbsorbPointer(
-                      child: DecoratedMinimizeButton(
-                        type: buttonType,
-                        onPressed: null,
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    canRequestFocus: false,
-                    onTap: () async {
-                      if (!Settings.isWindowMaximizable) {
-                        return;
-                      }
+              child: (kIsWeb)
+                  ? Container()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Expanded(
+                          child: _WindowDragArea(),
+                        ),
+                        InkWell(
+                          canRequestFocus: false,
+                          onTap: () => {},
+                          child: const AbsorbPointer(
+                            child: DecoratedMinimizeButton(
+                              type: buttonType,
+                              onPressed: null,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          canRequestFocus: false,
+                          onTap: () async {
+                            if (!Settings.isWindowMaximizable) {
+                              return;
+                            }
 
-                      if (await windowManager.isMaximized()) {
-                        windowManager.unmaximize();
-                      } else {
-                        windowManager.maximize();
-                      }
-                    },
-                    child: const AbsorbPointer(
-                      child: DecoratedMaximizeButton(
-                        type: buttonType,
-                        onPressed: null,
-                      ),
+                            if (await windowManager.isMaximized()) {
+                              windowManager.unmaximize();
+                            } else {
+                              windowManager.maximize();
+                            }
+                          },
+                          child: const AbsorbPointer(
+                            child: DecoratedMaximizeButton(
+                              type: buttonType,
+                              onPressed: null,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          canRequestFocus: false,
+                          hoverColor: Colors.red,
+                          onTap: () async {
+                            if (onWindowClose == null) {
+                              await windowManager.close();
+                            } else {
+                              onWindowClose.call();
+                            }
+                          },
+                          child: const AbsorbPointer(
+                            child: DecoratedCloseButton(
+                              type: buttonType,
+                              onPressed: null,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  InkWell(
-                    canRequestFocus: false,
-                    hoverColor: Colors.red,
-                    onTap: () async {
-                      if (onWindowClose == null) {
-                        await windowManager.close();
-                      } else {
-                        onWindowClose.call();
-                      }
-                    },
-                    child: const AbsorbPointer(
-                      child: DecoratedCloseButton(
-                        type: buttonType,
-                        onPressed: null,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
           title: _WindowDragArea(
@@ -116,14 +119,14 @@ class _WindowDragArea extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
-        if (!Settings.isWindowDraggable) {
+        if (!Settings.isWindowDraggable || kIsWeb) {
           return;
         }
 
         windowManager.startDragging();
       },
       onDoubleTap: () async {
-        if (!Settings.isWindowMaximizable) {
+        if (!Settings.isWindowMaximizable || kIsWeb) {
           return;
         }
 
