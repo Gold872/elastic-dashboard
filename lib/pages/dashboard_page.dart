@@ -291,7 +291,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   @override
   void dispose() async {
     windowManager.removeListener(this);
-    BrowserContextMenu.enableContextMenu();
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
     super.dispose();
   }
 
