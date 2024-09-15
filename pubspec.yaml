@@ -86,3 +86,6 @@ flutter_launcher_icons:
   linux:
     generate: true
     image_path: "assets/logos/logo.png"
+  web:
+    generate: true
+    image_path: "assets/logos/logo.png"
