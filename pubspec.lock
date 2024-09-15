@@ -659,10 +659,11 @@ packages:
   msgpack_dart:
     dependency: "direct main"
     description:
-      name: msgpack_dart
-      sha256: c2d235ed01f364719b5296aecf43ac330f0d7bc865fa134d0d7910a40454dffb
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: fix-cereal
+      resolved-ref: a4d54c1f704ff5a4d8f24b4e341f858f5caeefc2
+      url: "https://github.com/TheTripleV/msgpack_dart.git"
+    source: git
     version: "1.0.1"
   nested:
     dependency: transitive

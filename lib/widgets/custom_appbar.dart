@@ -39,7 +39,7 @@ class CustomAppBar extends AppBar {
                   ),
                   InkWell(
                     canRequestFocus: false,
-                    onTap: () async => await windowManager.minimize(),
+                    onTap: () => {},
                     child: const AbsorbPointer(
                       child: DecoratedMinimizeButton(
                         type: buttonType,

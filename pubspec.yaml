@@ -29,7 +29,11 @@ dependencies:
   intl: ^0.18.1
   logger: ^2.0.2+1
   messagepack: ^0.2.1
-  msgpack_dart: ^1.0.1
+  # msgpack_dart: ^1.0.1
+  msgpack_dart:
+    git:
+      url: https://github.com/TheTripleV/msgpack_dart.git
+      ref: fix-cereal
   package_info_plus: ^5.0.1
   path: ^1.8.3
   path_provider: ^2.0.15

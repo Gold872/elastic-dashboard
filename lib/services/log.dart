@@ -20,6 +20,11 @@ class Log {
   Logger? _logger;
 
   Future<void> initialize() async {
+
+    if (kIsWeb) {
+      return;
+    }
+
     Directory logPath = await getApplicationSupportDirectory();
     File logFile = File(join(logPath.path, 'elastic-log.txt'));
 

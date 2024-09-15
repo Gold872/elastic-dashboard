@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
@@ -34,7 +35,10 @@ void main() async {
     logger.error('Flutter Error', details.exception, details.stack);
   };
 
-  final String appFolderPath = (await getApplicationSupportDirectory()).path;
+  String appFolderPath = '';
+  if (!kIsWeb) {
+    appFolderPath = (await getApplicationSupportDirectory()).path;
+  }
 
   // Prevents data loss if shared_preferences.json gets corrupted
   // More info and original implementation: https://github.com/flutter/flutter/issues/89211#issuecomment-915096452
@@ -53,7 +57,9 @@ void main() async {
     preferences = await SharedPreferences.getInstance();
   }
 
-  await windowManager.ensureInitialized();
+  if (!kIsWeb){
+    await windowManager.ensureInitialized();
+  }
 
   NTWidgetBuilder.ensureInitialized();
 
@@ -64,26 +70,30 @@ void main() async {
 
   await FieldImages.loadFields('assets/fields/');
 
-  Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
-  Size screenSize =
-      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
+  if (!kIsWeb) {
 
-  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
+    Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+    double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+    Size screenSize =
+        (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
 
-  Size minimumSize = Size(minimumWidth, minimumHeight);
+    double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
+    double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
 
-  await windowManager.setMinimumSize(minimumSize);
+    Size minimumSize = Size(minimumWidth, minimumHeight);
+    await windowManager.setMinimumSize(minimumSize);
+
+    if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
+      await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
+    }
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
       windowButtonVisibility: false);
-
-  if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
-    await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
-  }
-
   await windowManager.show();
   await windowManager.focus();
+  }
+
+
+
 
   runApp(
     Elastic(
@@ -96,6 +106,9 @@ void main() async {
 
 Future<void> _restoreWindowPosition(SharedPreferences preferences,
     Display primaryDisplay, Size minimumSize) async {
+  if (kIsWeb) {
+    return;
+  }
   String? positionString = preferences.getString(PrefKeys.windowPosition);
 
   if (positionString == null) {
