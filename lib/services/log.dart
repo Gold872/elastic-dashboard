@@ -20,7 +20,6 @@ class Log {
   Logger? _logger;
 
   Future<void> initialize() async {
-
     if (kIsWeb) {
       return;
     }
