@@ -32,8 +32,7 @@ coverage/
 .packages
 .pub-cache/
 .pub/
-/build/
-!/build/web/
+/build/macos/
 
 # Symbolication related
 app.*.symbols
