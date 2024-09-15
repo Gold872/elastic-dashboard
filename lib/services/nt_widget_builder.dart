@@ -499,11 +499,11 @@ class NTWidgetBuilder {
     _modelJsonBuildMap.addAll({name: fromJson});
     _widgetNameBuildMap.addAll({name: widget});
 
+    if (minWidth != null) {
+      _minimumWidthMap.addAll({name: minWidth});
+    }
     if (minHeight != null) {
       _minimumHeightMap.addAll({name: minHeight});
-    }
-    if (minWidth != null) {
-      _minimumHeightMap.addAll({name: minWidth});
     }
     if (defaultWidth != null) {
       _defaultWidthMap.addAll({name: defaultWidth});
