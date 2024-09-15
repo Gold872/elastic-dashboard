@@ -33,6 +33,7 @@ coverage/
 .pub-cache/
 .pub/
 /build/
+!/build/web/
 
 # Symbolication related
 app.*.symbols
