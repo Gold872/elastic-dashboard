@@ -28,7 +28,11 @@ dependencies:
   import_sorter: ^4.6.0
   intl: ^0.18.1
   logger: ^2.0.2+1
-  messagepack: ^0.2.1
+  # messagepack: ^0.2.1
+  messagepack:
+    git:
+      url: https://github.com/TheTripleV/messagepack.git
+      ref: master
   # msgpack_dart: ^1.0.1
   msgpack_dart:
     git:

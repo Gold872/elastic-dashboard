@@ -627,11 +627,12 @@ packages:
   messagepack:
     dependency: "direct main"
     description:
-      name: messagepack
-      sha256: "11e69dd79ba84ba901261558881b42ac8b24155a7846a344875a32c8b0866d71"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
+      path: "."
+      ref: master
+      resolved-ref: "5b4c1d9acb3a6993b2c2203ea199cdd4f8ce5a43"
+      url: "https://github.com/TheTripleV/messagepack.git"
+    source: git
+    version: "0.2.0"
   meta:
     dependency: transitive
     description:
