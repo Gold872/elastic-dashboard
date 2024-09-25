@@ -44,27 +44,28 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
+typedef NTModelJsonProvider = NTWidgetModel Function({
+  required Map<String, dynamic> jsonData,
+  required NTConnection ntConnection,
+  required SharedPreferences preferences,
+});
+
+typedef NTModelProvider = NTWidgetModel Function({
+  String dataType,
+  required NTConnection ntConnection,
+  double period,
+  required SharedPreferences preferences,
+  required String topic,
+});
+
+typedef NTWidgetProvider = NTWidget Function({Key? key});
+
 class NTWidgetBuilder {
-  static final Map<String, NTWidget Function({Key? key})> _widgetNameBuildMap =
-      {};
+  static final Map<String, NTWidgetProvider> _widgetNameBuildMap = {};
 
-  static final Map<
-      String,
-      NTWidgetModel Function({
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required String topic,
-        String dataType,
-        double period,
-      })> _modelNameBuildMap = {};
+  static final Map<String, NTModelProvider> _modelNameBuildMap = {};
 
-  static final Map<
-      String,
-      NTWidgetModel Function({
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required Map<String, dynamic> jsonData,
-      })> _modelJsonBuildMap = {};
+  static final Map<String, NTModelJsonProvider> _modelJsonBuildMap = {};
 
   static final Map<String, double> _minimumWidthMap = {};
   static final Map<String, double> _minimumHeightMap = {};
@@ -84,236 +85,269 @@ class NTWidgetBuilder {
 
     logger.info('Configuring NT Widget Builder');
 
-    _modelNameBuildMap.addAll({
-      BooleanBox.widgetType: BooleanBoxModel.new,
-      GraphWidget.widgetType: GraphModel.new,
-      MatchTimeWidget.widgetType: MatchTimeModel.new,
-      NumberBar.widgetType: NumberBarModel.new,
-      NumberSlider.widgetType: NumberSliderModel.new,
-      RadialGauge.widgetType: RadialGaugeModel.new,
-      'Simple Dial': RadialGaugeModel.new,
-      TextDisplay.widgetType: TextDisplayModel.new,
-      'Text View': TextDisplayModel.new,
-      VoltageView.widgetType: VoltageViewModel.new,
-    });
+    register(
+        name: BooleanBox.widgetType,
+        model: BooleanBoxModel.new,
+        widget: BooleanBox.new,
+        fromJson: BooleanBoxModel.fromJson);
 
-    _modelNameBuildMap.addAll({
-      AccelerometerWidget.widgetType: AccelerometerModel.new,
-      SwerveDriveWidget.widgetType: BasicSwerveModel.new,
-      CameraStreamWidget.widgetType: CameraStreamModel.new,
-      ComboBoxChooser.widgetType: ComboBoxChooserModel.new,
-      'String Chooser': ComboBoxChooserModel.new,
-      CommandSchedulerWidget.widgetType: CommandSchedulerModel.new,
-      CommandWidget.widgetType: CommandModel.new,
-      DifferentialDrive.widgetType: DifferentialDriveModel.new,
-      'Differential Drivebase': DifferentialDriveModel.new,
-      EncoderWidget.widgetType: EncoderModel.new,
-      'Quadrature Encoder': EncoderModel.new,
-      FieldWidget.widgetType: FieldWidgetModel.new,
-      'Field2d': FieldWidgetModel.new,
-      FMSInfo.widgetType: FMSInfoModel.new,
-      Gyro.widgetType: GyroModel.new,
-      MotorController.widgetType: MotorControllerModel.new,
-      'Nidec Brushless': MotorControllerModel.new,
-      NetworkAlerts.widgetType: NetworkAlertsModel.new,
-      PIDControllerWidget.widgetType: PIDControllerModel.new,
-      'PID Controller': PIDControllerModel.new,
-      PowerDistribution.widgetType: PowerDistributionModel.new,
-      'PDP': PowerDistributionModel.new,
-      ProfiledPIDControllerWidget.widgetType: ProfiledPIDControllerModel.new,
-      RelayWidget.widgetType: RelayModel.new,
-      RobotPreferences.widgetType: RobotPreferencesModel.new,
-      SplitButtonChooser.widgetType: SplitButtonChooserModel.new,
-      SubsystemWidget.widgetType: SubsystemModel.new,
-      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometerModel.new,
-      '3AxisAccelerometer': ThreeAxisAccelerometerModel.new,
-      Ultrasonic.widgetType: UltrasonicModel.new,
-      YAGSLSwerveDrive.widgetType: YAGSLSwerveDriveModel.new,
-    });
+    register(
+        name: GraphWidget.widgetType,
+        model: GraphModel.new,
+        widget: GraphWidget.new,
+        fromJson: GraphModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2);
 
-    _modelJsonBuildMap.addAll({
-      BooleanBox.widgetType: BooleanBoxModel.fromJson,
-      GraphWidget.widgetType: GraphModel.fromJson,
-      MatchTimeWidget.widgetType: MatchTimeModel.fromJson,
-      NumberBar.widgetType: NumberBarModel.fromJson,
-      NumberSlider.widgetType: NumberSliderModel.fromJson,
-      RadialGauge.widgetType: RadialGaugeModel.fromJson,
-      'Simple Dial': RadialGaugeModel.fromJson,
-      TextDisplay.widgetType: TextDisplayModel.fromJson,
-      'Text View': TextDisplayModel.fromJson,
-      VoltageView.widgetType: VoltageViewModel.fromJson,
-    });
+    register(
+        name: MatchTimeWidget.widgetType,
+        model: MatchTimeModel.new,
+        widget: MatchTimeWidget.new,
+        fromJson: MatchTimeModel.fromJson);
 
-    _modelJsonBuildMap.addAll({
-      AccelerometerWidget.widgetType: AccelerometerModel.fromJson,
-      SwerveDriveWidget.widgetType: BasicSwerveModel.fromJson,
-      CameraStreamWidget.widgetType: CameraStreamModel.fromJson,
-      ComboBoxChooser.widgetType: ComboBoxChooserModel.fromJson,
-      'String Chooser': ComboBoxChooserModel.fromJson,
-      CommandSchedulerWidget.widgetType: CommandSchedulerModel.fromJson,
-      CommandWidget.widgetType: CommandModel.fromJson,
-      DifferentialDrive.widgetType: DifferentialDriveModel.fromJson,
-      'Differential Drivebase': DifferentialDriveModel.fromJson,
-      EncoderWidget.widgetType: EncoderModel.fromJson,
-      'Quadrature Encoder': EncoderModel.fromJson,
-      FieldWidget.widgetType: FieldWidgetModel.fromJson,
-      'Field2d': FieldWidgetModel.fromJson,
-      FMSInfo.widgetType: FMSInfoModel.fromJson,
-      Gyro.widgetType: GyroModel.fromJson,
-      MotorController.widgetType: MotorControllerModel.fromJson,
-      'Nidec Brushless': MotorControllerModel.fromJson,
-      NetworkAlerts.widgetType: NetworkAlertsModel.fromJson,
-      PIDControllerWidget.widgetType: PIDControllerModel.fromJson,
-      'PID Controller': PIDControllerModel.fromJson,
-      PowerDistribution.widgetType: PowerDistributionModel.fromJson,
-      'PDP': PowerDistributionModel.fromJson,
-      ProfiledPIDControllerWidget.widgetType:
-          ProfiledPIDControllerModel.fromJson,
-      RelayWidget.widgetType: RelayModel.fromJson,
-      RobotPreferences.widgetType: RobotPreferencesModel.fromJson,
-      SplitButtonChooser.widgetType: SplitButtonChooserModel.fromJson,
-      SubsystemWidget.widgetType: SubsystemModel.fromJson,
-      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometerModel.fromJson,
-      '3AxisAccelerometer': ThreeAxisAccelerometerModel.fromJson,
-      Ultrasonic.widgetType: UltrasonicModel.fromJson,
-      YAGSLSwerveDrive.widgetType: YAGSLSwerveDriveModel.fromJson,
-    });
+    register(
+        name: NumberBar.widgetType,
+        model: NumberBarModel.new,
+        widget: NumberBar.new,
+        fromJson: NumberBarModel.fromJson,
+        minHeight: _normalSize);
 
-    // Used when building widgets from network tables (drag and drop)
+    register(
+        name: NumberSlider.widgetType,
+        model: NumberSliderModel.new,
+        widget: NumberSlider.new,
+        fromJson: NumberSliderModel.fromJson,
+        minHeight: _normalSize);
+
+    registerWithAlias(
+        names: {RadialGauge.widgetType, 'Simple Dial'},
+        model: RadialGaugeModel.new,
+        widget: RadialGauge.new,
+        fromJson: RadialGaugeModel.fromJson,
+        minWidth: _normalSize * 1.6,
+        minHeight: _normalSize * 1.6);
+
+    registerWithAlias(
+        names: {TextDisplay.widgetType, 'Text View'},
+        model: TextDisplayModel.new,
+        widget: TextDisplay.new,
+        fromJson: TextDisplayModel.fromJson);
+
+    register(
+        name: VoltageView.widgetType,
+        model: VoltageViewModel.new,
+        widget: VoltageView.new,
+        fromJson: VoltageViewModel.fromJson,
+        minHeight: _normalSize);
+
+    register(
+        name: AccelerometerWidget.widgetType,
+        model: AccelerometerModel.new,
+        widget: AccelerometerWidget.new,
+        fromJson: AccelerometerModel.fromJson);
+
+    register(
+        name: SwerveDriveWidget.widgetType,
+        model: BasicSwerveModel.new,
+        widget: SwerveDriveWidget.new,
+        fromJson: BasicSwerveModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 2);
+
+    register(
+        name: CameraStreamWidget.widgetType,
+        model: CameraStreamModel.new,
+        widget: CameraStreamWidget.new,
+        fromJson: CameraStreamModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 2);
+
+    registerWithAlias(
+        names: {ComboBoxChooser.widgetType, 'String Chooser'},
+        model: ComboBoxChooserModel.new,
+        widget: ComboBoxChooser.new,
+        fromJson: ComboBoxChooserModel.fromJson,
+        minHeight: _normalSize * 0.85);
+
+    register(
+        name: CommandSchedulerWidget.widgetType,
+        model: CommandSchedulerModel.new,
+        widget: CommandSchedulerWidget.new,
+        fromJson: CommandSchedulerModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 3);
+
+    register(
+        name: CommandWidget.widgetType,
+        model: CommandModel.new,
+        widget: CommandWidget.new,
+        fromJson: CommandModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 0.90,
+        defaultWidth: 2);
+
+    registerWithAlias(
+        names: {DifferentialDrive.widgetType, 'Differential Drivebase'},
+        model: DifferentialDriveModel.new,
+        widget: DifferentialDrive.new,
+        fromJson: DifferentialDriveModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 3,
+        defaultHeight: 2);
+
+    registerWithAlias(
+        names: {EncoderWidget.widgetType, "Quadrature Encoder"},
+        model: EncoderModel.new,
+        widget: EncoderWidget.new,
+        fromJson: EncoderModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 0.86,
+        defaultWidth: 2);
+
+    registerWithAlias(
+        names: {FieldWidget.widgetType, 'Field2d'},
+        model: FieldWidgetModel.new,
+        widget: FieldWidget.new,
+        fromJson: FieldWidgetModel.fromJson,
+        minWidth: _normalSize * 3,
+        minHeight: _normalSize * 2,
+        defaultWidth: 3,
+        defaultHeight: 2);
+
+    register(
+        name: FMSInfo.widgetType,
+        model: FMSInfoModel.new,
+        widget: FMSInfo.new,
+        fromJson: FMSInfoModel.fromJson,
+        minWidth: _normalSize * 3,
+        minHeight: _normalSize,
+        defaultWidth: 3);
+
+    register(
+        name: Gyro.widgetType,
+        model: GyroModel.new,
+        widget: Gyro.new,
+        fromJson: GyroModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 2);
+
+    registerWithAlias(
+        names: {MotorController.widgetType, 'Nidec Brushless'},
+        model: MotorControllerModel.new,
+        widget: MotorController.new,
+        fromJson: MotorControllerModel.fromJson,
+        minHeight: _normalSize * 0.92);
+
+    register(
+        name: NetworkAlerts.widgetType,
+        model: NetworkAlertsModel.new,
+        widget: NetworkAlerts.new,
+        fromJson: NetworkAlertsModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 3);
+
+    registerWithAlias(
+        names: {PIDControllerWidget.widgetType, 'PID Controller'},
+        model: PIDControllerModel.new,
+        widget: PIDControllerWidget.new,
+        fromJson: PIDControllerModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 3,
+        defaultWidth: 2,
+        defaultHeight: 3);
+
+    registerWithAlias(
+        names: {PowerDistribution.widgetType, 'PDP'},
+        model: PowerDistributionModel.new,
+        widget: PowerDistribution.new,
+        fromJson: PowerDistributionModel.fromJson,
+        minWidth: _normalSize * 3,
+        minHeight: _normalSize * 3,
+        defaultWidth: 3,
+        defaultHeight: 4);
+
+    register(
+        name: ProfiledPIDControllerWidget.widgetType,
+        model: ProfiledPIDControllerModel.new,
+        widget: ProfiledPIDControllerWidget.new,
+        fromJson: ProfiledPIDControllerModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 3,
+        defaultWidth: 2,
+        defaultHeight: 3);
+
+    register(
+        name: RelayWidget.widgetType,
+        model: RelayModel.new,
+        widget: RelayWidget.new,
+        fromJson: RelayModel.fromJson,
+        minHeight: _normalSize * 2,
+        defaultHeight: 2);
+
+    register(
+        name: RobotPreferences.widgetType,
+        model: RobotPreferencesModel.new,
+        widget: RobotPreferences.new,
+        fromJson: RobotPreferencesModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 3);
+
+    register(
+        name: SplitButtonChooser.widgetType,
+        model: SplitButtonChooserModel.new,
+        widget: SplitButtonChooser.new,
+        fromJson: SplitButtonChooserModel.fromJson);
+
+    register(
+        name: SubsystemWidget.widgetType,
+        model: SubsystemModel.new,
+        widget: SubsystemWidget.new,
+        fromJson: SubsystemModel.fromJson,
+        minWidth: _normalSize * 2,
+        defaultWidth: 2);
+
+    registerWithAlias(
+        names: {ThreeAxisAccelerometer.widgetType, '3AxisAccelerometer'},
+        model: ThreeAxisAccelerometerModel.new,
+        widget: ThreeAxisAccelerometer.new,
+        fromJson: ThreeAxisAccelerometerModel.fromJson);
+
+    register(
+        name: Ultrasonic.widgetType,
+        model: UltrasonicModel.new,
+        widget: Ultrasonic.new,
+        fromJson: UltrasonicModel.fromJson,
+        minWidth: _normalSize * 2,
+        defaultWidth: 2);
+
+    register(
+        name: YAGSLSwerveDrive.widgetType,
+        model: YAGSLSwerveDriveModel.new,
+        widget: YAGSLSwerveDrive.new,
+        fromJson: YAGSLSwerveDriveModel.fromJson,
+        minWidth: _normalSize * 2,
+        minHeight: _normalSize * 2,
+        defaultWidth: 2,
+        defaultHeight: 2);
+
     _widgetNameBuildMap.addAll({
-      BooleanBox.widgetType: BooleanBox.new,
-      GraphWidget.widgetType: GraphWidget.new,
-      MatchTimeWidget.widgetType: MatchTimeWidget.new,
-      MultiColorView.widgetType: MultiColorView.new,
-      NumberBar.widgetType: NumberBar.new,
-      NumberSlider.widgetType: NumberSlider.new,
-      RadialGauge.widgetType: RadialGauge.new,
-      SingleColorView.widgetType: SingleColorView.new,
-      TextDisplay.widgetType: TextDisplay.new,
-      'Text View': TextDisplay.new,
       ToggleButton.widgetType: ToggleButton.new,
       ToggleSwitch.widgetType: ToggleSwitch.new,
-      VoltageView.widgetType: VoltageView.new,
-    });
-
-    _widgetNameBuildMap.addAll({
-      AccelerometerWidget.widgetType: AccelerometerWidget.new,
-      CameraStreamWidget.widgetType: CameraStreamWidget.new,
-      ComboBoxChooser.widgetType: ComboBoxChooser.new,
-      'String Chooser': ComboBoxChooser.new,
-      CommandSchedulerWidget.widgetType: CommandSchedulerWidget.new,
-      CommandWidget.widgetType: CommandWidget.new,
-      DifferentialDrive.widgetType: DifferentialDrive.new,
-      'Differential Drivebase': DifferentialDrive.new,
-      EncoderWidget.widgetType: EncoderWidget.new,
-      'Quadrature Encoder': EncoderWidget.new,
-      FieldWidget.widgetType: FieldWidget.new,
-      'Field2d': FieldWidget.new,
-      FMSInfo.widgetType: FMSInfo.new,
-      Gyro.widgetType: Gyro.new,
-      MotorController.widgetType: MotorController.new,
-      'Nidec Brushless': MotorController.new,
-      NetworkAlerts.widgetType: NetworkAlerts.new,
-      PIDControllerWidget.widgetType: PIDControllerWidget.new,
-      'PID Controller': PIDControllerWidget.new,
-      PowerDistribution.widgetType: PowerDistribution.new,
-      'PDP': PowerDistribution.new,
-      ProfiledPIDControllerWidget.widgetType: ProfiledPIDControllerWidget.new,
-      RelayWidget.widgetType: RelayWidget.new,
-      RobotPreferences.widgetType: RobotPreferences.new,
-      SplitButtonChooser.widgetType: SplitButtonChooser.new,
-      SubsystemWidget.widgetType: SubsystemWidget.new,
-      SwerveDriveWidget.widgetType: SwerveDriveWidget.new,
-      ThreeAxisAccelerometer.widgetType: ThreeAxisAccelerometer.new,
-      '3AxisAccelerometer': ThreeAxisAccelerometer.new,
-      Ultrasonic.widgetType: Ultrasonic.new,
-      YAGSLSwerveDrive.widgetType: YAGSLSwerveDrive.new,
-    });
-
-    // Min width and height
-    _minimumWidthMap.addAll({
-      CameraStreamWidget.widgetType: _normalSize * 2,
-      CommandSchedulerWidget.widgetType: _normalSize * 2,
-      CommandWidget.widgetType: _normalSize * 2,
-      DifferentialDrive.widgetType: _normalSize * 2,
-      EncoderWidget.widgetType: _normalSize * 2,
-      FieldWidget.widgetType: _normalSize * 3,
-      FMSInfo.widgetType: _normalSize * 3,
-      GraphWidget.widgetType: _normalSize * 2,
-      Gyro.widgetType: _normalSize * 2,
-      NetworkAlerts.widgetType: _normalSize * 2,
-      PIDControllerWidget.widgetType: _normalSize * 2,
-      PowerDistribution.widgetType: _normalSize * 3,
-      ProfiledPIDControllerWidget.widgetType: _normalSize * 2,
-      RadialGauge.widgetType: _normalSize * 1.6,
-      RobotPreferences.widgetType: _normalSize * 2,
-      SubsystemWidget.widgetType: _normalSize * 2,
-      SwerveDriveWidget.widgetType: _normalSize * 2,
-      Ultrasonic.widgetType: _normalSize * 2,
-      YAGSLSwerveDrive.widgetType: _normalSize * 2,
-    });
-
-    _minimumHeightMap.addAll({
-      YAGSLSwerveDrive.widgetType: _normalSize * 2,
-      CameraStreamWidget.widgetType: _normalSize * 2,
-      ComboBoxChooser.widgetType: _normalSize * 0.85,
-      CommandSchedulerWidget.widgetType: _normalSize * 2,
-      CommandWidget.widgetType: _normalSize * 0.90,
-      DifferentialDrive.widgetType: _normalSize * 2,
-      EncoderWidget.widgetType: _normalSize * 0.86,
-      FieldWidget.widgetType: _normalSize * 2,
-      FMSInfo.widgetType: _normalSize,
-      GraphWidget.widgetType: _normalSize * 2,
-      Gyro.widgetType: _normalSize * 2,
-      MotorController.widgetType: _normalSize * 0.92,
-      NetworkAlerts.widgetType: _normalSize * 2,
-      NumberBar.widgetType: _normalSize,
-      NumberSlider.widgetType: _normalSize,
-      PIDControllerWidget.widgetType: _normalSize * 3,
-      PowerDistribution.widgetType: _normalSize * 3,
-      ProfiledPIDControllerWidget.widgetType: _normalSize * 3,
-      RadialGauge.widgetType: _normalSize * 1.6,
-      RelayWidget.widgetType: _normalSize * 2,
-      RobotPreferences.widgetType: _normalSize * 2,
-      SwerveDriveWidget.widgetType: _normalSize * 2,
-      VoltageView.widgetType: _normalSize,
-    });
-
-    // Default width and height (when dragging and dropping)
-    _defaultWidthMap.addAll({
-      YAGSLSwerveDrive.widgetType: 2,
-      CameraStreamWidget.widgetType: 2,
-      CommandSchedulerWidget.widgetType: 2,
-      CommandWidget.widgetType: 2,
-      DifferentialDrive.widgetType: 3,
-      EncoderWidget.widgetType: 2,
-      FieldWidget.widgetType: 3,
-      FMSInfo.widgetType: 3,
-      Gyro.widgetType: 2,
-      NetworkAlerts.widgetType: 2,
-      PIDControllerWidget.widgetType: 2,
-      PowerDistribution.widgetType: 3,
-      ProfiledPIDControllerWidget.widgetType: 2,
-      RobotPreferences.widgetType: 2,
-      SubsystemWidget.widgetType: 2,
-      SwerveDriveWidget.widgetType: 2,
-      Ultrasonic.widgetType: 2,
-    });
-
-    _defaultHeightMap.addAll({
-      YAGSLSwerveDrive.widgetType: 2,
-      CameraStreamWidget.widgetType: 2,
-      CommandSchedulerWidget.widgetType: 3,
-      DifferentialDrive.widgetType: 2,
-      FieldWidget.widgetType: 2,
-      Gyro.widgetType: 2,
-      NetworkAlerts.widgetType: 3,
-      PIDControllerWidget.widgetType: 3,
-      PowerDistribution.widgetType: 4,
-      ProfiledPIDControllerWidget.widgetType: 3,
-      RelayWidget.widgetType: 2,
-      RobotPreferences.widgetType: 3,
-      SwerveDriveWidget.widgetType: 2,
+      SingleColorView.widgetType: SingleColorView.new,
+      MultiColorView.widgetType: MultiColorView.new,
     });
 
     _initialized = true;
@@ -448,5 +482,59 @@ class NTWidgetBuilder {
 
   static double getNormalSize([int? gridSize]) {
     return DraggableWidgetContainer.snapToGrid(_normalSize, gridSize);
+  }
+
+  static void
+      register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
+    required String name,
+    required NTModelProvider model,
+    required NTWidgetProvider widget,
+    required NTModelJsonProvider fromJson,
+    double? minWidth,
+    double? minHeight,
+    double? defaultWidth,
+    double? defaultHeight,
+  }) {
+    _modelNameBuildMap.addAll({name: model});
+    _modelJsonBuildMap.addAll({name: fromJson});
+    _widgetNameBuildMap.addAll({name: widget});
+
+    if (minWidth != null) {
+      _minimumWidthMap.addAll({name: minWidth});
+    }
+    if (minHeight != null) {
+      _minimumHeightMap.addAll({name: minHeight});
+    }
+    if (defaultWidth != null) {
+      _defaultWidthMap.addAll({name: defaultWidth});
+    }
+    if (defaultHeight != null) {
+      _defaultHeightMap.addAll({name: defaultHeight});
+    }
+  }
+
+  static void registerWithAlias<ModelType extends NTWidgetModel,
+      WidgetType extends NTWidget>({
+    required Set<String> names,
+    required NTModelProvider model,
+    required NTWidgetProvider widget,
+    required NTModelJsonProvider fromJson,
+    double? minWidth,
+    double? minHeight,
+    double? defaultWidth,
+    double? defaultHeight,
+  }) {
+    for (String name in names) {
+      register(
+        name: name,
+        model: model,
+        widget: widget,
+        fromJson: fromJson,
+        minHeight: minHeight,
+        minWidth: minWidth,
+        defaultHeight: defaultHeight,
+        defaultWidth: defaultWidth,
+      );
+    }
   }
 }
