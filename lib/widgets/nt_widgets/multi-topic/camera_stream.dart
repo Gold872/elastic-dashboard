@@ -280,7 +280,8 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (model.mjpegStream != null || model.lastDisplayedImage != null)
+              if (model.mjpegStream?.previousImage != null ||
+                  model.lastDisplayedImage != null)
                 Opacity(
                   opacity: 0.35,
                   child: Image(
