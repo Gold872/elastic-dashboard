@@ -106,7 +106,7 @@ class Field {
   void loadFieldImage() {
     fieldImage = Image.asset(jsonData['field-image']);
     fieldImage.image
-        .resolve(const ImageConfiguration())
+        .resolve(ImageConfiguration.empty)
         .addListener(ImageStreamListener((image, synchronousCall) {
       fieldImageWidth = image.image.width;
       fieldImageHeight = image.image.height;
@@ -115,11 +115,11 @@ class Field {
     }));
   }
 
-  void dispose() {
+  void dispose() async {
     instanceCounter--;
     if (instanceCounter <= 0) {
-      fieldImage.image.evict();
-      PaintingBinding.instance.imageCache.clear();
+      await fieldImage.image.evict();
+      imageCache.clear();
       fieldImageLoaded = false;
     }
   }
