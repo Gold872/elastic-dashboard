@@ -235,7 +235,7 @@ void main() {
 
     expect(find.text('Chroma'), findsNWidgets(2));
     expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
-    expect(find.text('Material-3 Legacy'), findsNothing);
+    expect(find.text('Material-3 legacy'), findsNothing);
 
     await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
     await widgetTester.pumpAndSettle();
@@ -255,7 +255,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
-    expect(find.text('Material-3 Legacy'), findsOneWidget);
+    expect(find.text('Material-3 legacy'), findsOneWidget);
   });
 
   testWidgets('Toggle grid', (widgetTester) async {
