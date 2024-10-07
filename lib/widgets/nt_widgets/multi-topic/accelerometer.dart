@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class AccelerometerModel extends NTWidgetModel {
+class AccelerometerModel extends SingleTopicNTWidgetModel {
   @override
   String type = AccelerometerWidget.widgetType;
 
@@ -63,11 +63,10 @@ class AccelerometerWidget extends NTWidget {
   Widget build(BuildContext context) {
     AccelerometerModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-        stream: model.valueSubscription.periodicStream(yieldAll: false),
-        initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
-        builder: (context, snapshot) {
-          double value = tryCast(snapshot.data) ?? 0.0;
+    return ValueListenableBuilder(
+        valueListenable: model.valueSubscription.value,
+        builder: (context, data, child) {
+          double value = tryCast(data) ?? 0.0;
 
           return Row(
             children: [

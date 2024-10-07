@@ -58,6 +58,8 @@ class NT4Subscription {
   final NT4SubscriptionOptions options;
   final int uid;
 
+  ValueNotifier<Object?> value = ValueNotifier<Object?>(null);
+
   Object? currentValue;
   int timestamp = 0;
 
@@ -125,6 +127,7 @@ class NT4Subscription {
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
+    this.value.value = value;
     currentValue = value;
     this.timestamp = timestamp;
   }

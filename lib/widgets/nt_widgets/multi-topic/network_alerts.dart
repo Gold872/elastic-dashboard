@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NetworkAlertsModel extends NTWidgetModel {
+class NetworkAlertsModel extends SingleTopicNTWidgetModel {
   @override
   String type = NetworkAlerts.widgetType;
 

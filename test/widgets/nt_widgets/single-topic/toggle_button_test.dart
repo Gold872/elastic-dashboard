@@ -62,7 +62,7 @@ void main() {
   });
 
   test('Toggle button to json', () {
-    NTWidgetModel toggleButtonModel = NTWidgetModel.createDefault(
+    NTWidgetModel toggleButtonModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: 'Toggle Button',

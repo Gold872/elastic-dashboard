@@ -12,7 +12,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NumberBarModel extends NTWidgetModel {
+class NumberBarModel extends SingleTopicNTWidgetModel {
   @override
   String type = NumberBar.widgetType;
 
@@ -206,11 +206,10 @@ class NumberBar extends NTWidget {
   Widget build(BuildContext context) {
     NumberBarModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double value = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!.value,
+      builder: (context, data, child) {
+        double value = tryCast<num>(data)?.toDouble() ?? 0.0;
 
         double clampedValue = value.clamp(model.minValue, model.maxValue);
 

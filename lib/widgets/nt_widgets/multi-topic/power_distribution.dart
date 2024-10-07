@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class PowerDistributionModel extends NTWidgetModel {
+class PowerDistributionModel extends SingleTopicNTWidgetModel {
   @override
   String type = PowerDistribution.widgetType;
 

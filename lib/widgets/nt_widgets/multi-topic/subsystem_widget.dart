@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class SubsystemModel extends NTWidgetModel {
+class SubsystemModel extends SingleTopicNTWidgetModel {
   @override
   String type = SubsystemWidget.widgetType;
 

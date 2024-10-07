@@ -18,7 +18,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class FieldWidgetModel extends NTWidgetModel {
+class FieldWidgetModel extends SingleTopicNTWidgetModel {
   @override
   String type = 'Field';
 
@@ -94,7 +94,7 @@ class FieldWidgetModel extends NTWidgetModel {
 
   get field => _field;
 
-  late String _robotTopicName;
+  String get robotTopicName => '$topic/Robot';
   final List<String> _otherObjectTopics = [];
 
   bool rendered = false;
@@ -160,8 +160,6 @@ class FieldWidgetModel extends NTWidgetModel {
   void init() {
     super.init();
 
-    _robotTopicName = '$topic/Robot';
-
     topicAnnounceListener = (nt4Topic) {
       if (nt4Topic.name.contains(topic) &&
           !nt4Topic.name.contains('Robot') &&
@@ -176,7 +174,6 @@ class FieldWidgetModel extends NTWidgetModel {
 
   @override
   void resetSubscription() {
-    _robotTopicName = '$topic/Robot';
     _otherObjectTopics.clear();
 
     super.resetSubscription();
@@ -387,7 +384,7 @@ class FieldWidgetModel extends NTWidgetModel {
     List<Object> data = [];
 
     List<Object?> robotPositionRaw = ntConnection
-            .getLastAnnouncedValue(_robotTopicName)
+            .getLastAnnouncedValue(robotTopicName)
             ?.tryCast<List<Object?>>() ??
         [];
 
@@ -568,7 +565,7 @@ class FieldWidget extends NTWidget {
       stream: model.multiTopicPeriodicStream,
       builder: (context, snapshot) {
         List<Object?> robotPositionRaw = model.ntConnection
-                .getLastAnnouncedValue(model._robotTopicName)
+                .getLastAnnouncedValue(model.robotTopicName)
                 ?.tryCast<List<Object?>>() ??
             [];
 

@@ -11,7 +11,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NumberSliderModel extends NTWidgetModel {
+class NumberSliderModel extends SingleTopicNTWidgetModel {
   @override
   String type = NumberSlider.widgetType;
 
@@ -20,9 +20,8 @@ class NumberSliderModel extends NTWidgetModel {
   int _divisions = 5;
   bool _updateContinuously = false;
 
-  double _currentValue = 0.0;
-
-  bool _dragging = false;
+  ValueNotifier<double> displayValue = ValueNotifier(0.0);
+  ValueNotifier<bool> dragging = ValueNotifier(false);
 
   double get minValue => _minValue;
 
@@ -48,14 +47,6 @@ class NumberSliderModel extends NTWidgetModel {
   bool get updateContinuously => _updateContinuously;
 
   set updateContinuously(value) => _updateContinuously = value;
-
-  double get currentValue => _currentValue;
-
-  set currentValue(value) => _currentValue = value;
-
-  bool get dragging => _dragging;
-
-  set dragging(value) => _dragging = value;
 
   NumberSliderModel({
     required super.ntConnection,
@@ -207,16 +198,20 @@ class NumberSlider extends NTWidget {
   Widget build(BuildContext context) {
     NumberSliderModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double value = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        model.subscription!.value,
+        model.displayValue,
+        model.dragging,
+      ]),
+      builder: (context, child) {
+        double value =
+            tryCast<num>(model.subscription!.value.value)?.toDouble() ?? 0.0;
 
         double clampedValue = value.clamp(model.minValue, model.maxValue);
 
-        if (!model.dragging) {
-          model.currentValue = clampedValue;
+        if (!model.dragging.value) {
+          model.displayValue.value = clampedValue;
         }
 
         double divisionSeparation =
@@ -227,7 +222,7 @@ class NumberSlider extends NTWidget {
         return Column(
           children: [
             Text(
-              model.currentValue.toStringAsFixed(fractionDigits),
+              model.displayValue.value.toStringAsFixed(fractionDigits),
               style: Theme.of(context).textTheme.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),
@@ -244,7 +239,7 @@ class NumberSlider extends NTWidget {
                 ),
                 markerPointers: [
                   LinearShapePointer(
-                    value: model.currentValue,
+                    value: model.displayValue.value,
                     color: Theme.of(context).colorScheme.primary,
                     height: 15.0,
                     width: 15.0,
@@ -253,23 +248,23 @@ class NumberSlider extends NTWidget {
                     position: LinearElementPosition.cross,
                     dragBehavior: LinearMarkerDragBehavior.free,
                     onChangeStart: (_) {
-                      model.dragging = true;
+                      model.dragging.value = true;
                     },
                     onChanged: (value) {
                       if (model.dataType == NT4TypeStr.kInt) {
-                        model.currentValue = value.roundToDouble();
+                        model.displayValue.value = value.roundToDouble();
                       } else {
-                        model.currentValue = value;
+                        model.displayValue.value = value;
                       }
 
                       if (model.updateContinuously) {
-                        model.publishValue(model.currentValue);
+                        model.publishValue(model.displayValue.value);
                       }
                     },
                     onChangeEnd: (value) {
-                      model.publishValue(model.currentValue);
+                      model.publishValue(model.displayValue.value);
 
-                      model.dragging = false;
+                      model.dragging.value = false;
                     },
                   ),
                 ],

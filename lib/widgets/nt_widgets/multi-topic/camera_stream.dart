@@ -9,7 +9,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CameraStreamModel extends NTWidgetModel {
+class CameraStreamModel extends SingleTopicNTWidgetModel {
   @override
   String type = CameraStreamWidget.widgetType;
 

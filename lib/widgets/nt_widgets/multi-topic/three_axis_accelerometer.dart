@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class ThreeAxisAccelerometerModel extends NTWidgetModel {
+class ThreeAxisAccelerometerModel extends SingleTopicNTWidgetModel {
   @override
   String type = ThreeAxisAccelerometer.widgetType;
 

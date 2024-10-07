@@ -7,7 +7,7 @@ import 'package:searchable_listview/searchable_listview.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class RobotPreferencesModel extends NTWidgetModel {
+class RobotPreferencesModel extends SingleTopicNTWidgetModel {
   @override
   String type = RobotPreferences.widgetType;
 

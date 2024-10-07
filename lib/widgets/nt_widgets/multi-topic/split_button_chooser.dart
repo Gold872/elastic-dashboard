@@ -7,7 +7,7 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class SplitButtonChooserModel extends NTWidgetModel {
+class SplitButtonChooserModel extends SingleTopicNTWidgetModel {
   @override
   String type = SplitButtonChooser.widgetType;
 

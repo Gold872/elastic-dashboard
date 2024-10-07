@@ -72,7 +72,7 @@ void main() {
   });
 
   test('Single color view to json', () {
-    NTWidgetModel singleColorViewModel = NTWidgetModel.createDefault(
+    NTWidgetModel singleColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: 'Single Color View',

@@ -11,7 +11,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class YAGSLSwerveDriveModel extends NTWidgetModel {
+class YAGSLSwerveDriveModel extends SingleTopicNTWidgetModel {
   @override
   String type = YAGSLSwerveDrive.widgetType;
 

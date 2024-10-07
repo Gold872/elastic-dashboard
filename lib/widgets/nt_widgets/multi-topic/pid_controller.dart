@@ -8,7 +8,7 @@ import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class PIDControllerModel extends NTWidgetModel {
+class PIDControllerModel extends SingleTopicNTWidgetModel {
   @override
   String type = PIDControllerWidget.widgetType;
 

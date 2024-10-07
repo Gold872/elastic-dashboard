@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class UltrasonicModel extends NTWidgetModel {
+class UltrasonicModel extends SingleTopicNTWidgetModel {
   @override
   String type = Ultrasonic.widgetType;
 

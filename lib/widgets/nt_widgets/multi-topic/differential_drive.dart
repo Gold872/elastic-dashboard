@@ -9,7 +9,7 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class DifferentialDriveModel extends NTWidgetModel {
+class DifferentialDriveModel extends SingleTopicNTWidgetModel {
   @override
   String type = DifferentialDrive.widgetType;
 

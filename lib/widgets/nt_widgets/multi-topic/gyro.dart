@@ -8,7 +8,7 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class GyroModel extends NTWidgetModel {
+class GyroModel extends SingleTopicNTWidgetModel {
   @override
   String type = Gyro.widgetType;
 
