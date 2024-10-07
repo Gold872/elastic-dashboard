@@ -52,70 +52,72 @@ class EncoderWidget extends NTWidget {
   Widget build(BuildContext context) {
     EncoderModel model = cast(context.watch<NTWidgetModel>());
 
-    return ListenableBuilder(
-      listenable: Listenable.merge(model.subscriptions),
-      builder: (context, child) {
-        double distance = tryCast(model.distanceSubscription.value) ?? 0.0;
-        double speed = tryCast(model.speedSubscription.value) ?? 0.0;
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const Text('Distance'),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Colors.grey.shade700,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    child: SelectableText(
-                      distance.toStringAsPrecision(10),
-                      maxLines: 1,
-                      showCursor: true,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            overflow: TextOverflow.ellipsis,
-                          ),
+            const Text('Distance'),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.grey.shade700,
+                      width: 1.5,
                     ),
                   ),
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                const Text('Speed'),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Colors.grey.shade700,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    child: SelectableText(
-                      speed.toStringAsPrecision(10),
-                      maxLines: 1,
-                      showCursor: true,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
+                child: ValueListenableBuilder(
+                    valueListenable: model.distanceSubscription,
+                    builder: (context, value, child) {
+                      double distance = tryCast(value) ?? 0.0;
+                      return SelectableText(
+                        distance.toStringAsPrecision(10),
+                        maxLines: 1,
+                        showCursor: true,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      );
+                    }),
+              ),
             ),
           ],
-        );
-      },
+        ),
+        Row(
+          children: [
+            const Text('Speed'),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.grey.shade700,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                child: ValueListenableBuilder(
+                    valueListenable: model.speedSubscription,
+                    builder: (context, value, child) {
+                      double speed = tryCast(value) ?? 0.0;
+                      return SelectableText(
+                        speed.toStringAsPrecision(10),
+                        maxLines: 1,
+                        showCursor: true,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      );
+                    }),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
