@@ -284,7 +284,6 @@ class FieldWidgetModel extends NTWidgetModel {
         choices: FieldImages.fields.map((e) => e.game).toList(),
         initialValue: _field.game,
       ),
-      const SizedBox(height: 5),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
