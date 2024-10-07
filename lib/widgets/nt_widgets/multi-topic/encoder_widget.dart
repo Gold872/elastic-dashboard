@@ -3,14 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class EncoderModel extends SingleTopicNTWidgetModel {
+class EncoderModel extends MultiTopicNTWidgetModel {
   @override
   String type = EncoderWidget.widgetType;
 
   String get distanceTopic => '$topic/Distance';
   String get speedTopic => '$topic/Speed';
+
+  late NT4Subscription distanceSubscription;
+  late NT4Subscription speedSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        distanceSubscription,
+        speedSubscription,
+      ];
 
   EncoderModel({
     required super.ntConnection,
@@ -27,13 +37,9 @@ class EncoderModel extends SingleTopicNTWidgetModel {
   }) : super.fromJson();
 
   @override
-  List<Object> getCurrentData() {
-    double distance =
-        tryCast(ntConnection.getLastAnnouncedValue(distanceTopic)) ?? 0.0;
-    double speed =
-        tryCast(ntConnection.getLastAnnouncedValue(speedTopic)) ?? 0.0;
-
-    return [distance, speed];
+  void initializeSubscriptions() {
+    distanceSubscription = ntConnection.subscribe(distanceTopic, super.period);
+    speedSubscription = ntConnection.subscribe(speedTopic, super.period);
   }
 }
 
@@ -46,15 +52,11 @@ class EncoderWidget extends NTWidget {
   Widget build(BuildContext context) {
     EncoderModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        double distance = tryCast(model.ntConnection
-                .getLastAnnouncedValue(model.distanceTopic)) ??
-            0.0;
-        double speed = tryCast(
-                model.ntConnection.getLastAnnouncedValue(model.speedTopic)) ??
-            0.0;
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        double distance = tryCast(model.distanceSubscription.value) ?? 0.0;
+        double speed = tryCast(model.speedSubscription.value) ?? 0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -207,7 +207,7 @@ class NumberBar extends NTWidget {
     NumberBarModel model = cast(context.watch<NTWidgetModel>());
 
     return ValueListenableBuilder(
-      valueListenable: model.subscription!.value,
+      valueListenable: model.subscription!,
       builder: (context, data, child) {
         double value = tryCast<num>(data)?.toDouble() ?? 0.0;
 

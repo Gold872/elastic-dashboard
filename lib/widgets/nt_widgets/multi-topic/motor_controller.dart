@@ -7,13 +7,16 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class MotorControllerModel extends SingleTopicNTWidgetModel {
+class MotorControllerModel extends MultiTopicNTWidgetModel {
   @override
   String type = MotorController.widgetType;
 
   String get valueTopic => '$topic/Value';
 
   late NT4Subscription valueSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [valueSubscription];
 
   MotorControllerModel({
     required super.ntConnection,
@@ -30,26 +33,8 @@ class MotorControllerModel extends SingleTopicNTWidgetModel {
   }) : super.fromJson();
 
   @override
-  void init() {
-    super.init();
-
+  void initializeSubscriptions() {
     valueSubscription = ntConnection.subscribe(valueTopic, super.period);
-  }
-
-  @override
-  void resetSubscription() {
-    ntConnection.unSubscribe(valueSubscription);
-
-    valueSubscription = ntConnection.subscribe(valueTopic, super.period);
-
-    super.resetSubscription();
-  }
-
-  @override
-  void unSubscribe() {
-    ntConnection.unSubscribe(valueSubscription);
-
-    super.unSubscribe();
   }
 }
 
@@ -62,11 +47,10 @@ class MotorController extends NTWidget {
   Widget build(BuildContext context) {
     MotorControllerModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.valueTopic),
-      builder: (context, snapshot) {
-        double value = tryCast(snapshot.data) ?? 0.0;
+    return ValueListenableBuilder(
+      valueListenable: model.valueSubscription,
+      builder: (context, data, child) {
+        double value = tryCast(data) ?? 0.0;
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,

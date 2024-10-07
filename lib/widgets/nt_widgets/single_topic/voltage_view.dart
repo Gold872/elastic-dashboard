@@ -207,7 +207,7 @@ class VoltageView extends NTWidget {
     VoltageViewModel model = cast(context.watch<NTWidgetModel>());
 
     return ValueListenableBuilder(
-      valueListenable: model.subscription!.value,
+      valueListenable: model.subscription!,
       builder: (context, data, child) {
         double voltage = tryCast<num>(data)?.toDouble() ?? 0.0;
 

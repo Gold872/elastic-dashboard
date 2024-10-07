@@ -53,12 +53,10 @@ class NT4TypeStr {
   static const kStringArr = 'string[]';
 }
 
-class NT4Subscription {
+class NT4Subscription extends ValueNotifier<Object?> {
   final String topic;
   final NT4SubscriptionOptions options;
   final int uid;
-
-  ValueNotifier<Object?> value = ValueNotifier<Object?>(null);
 
   Object? currentValue;
   int timestamp = 0;
@@ -69,7 +67,7 @@ class NT4Subscription {
     required this.topic,
     this.options = const NT4SubscriptionOptions(),
     this.uid = -1,
-  });
+  }) : super(null);
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
@@ -127,9 +125,9 @@ class NT4Subscription {
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
-    this.value.value = value;
     currentValue = value;
     this.timestamp = timestamp;
+    super.value = value;
   }
 
   Map<String, dynamic> _toSubscribeJson() {

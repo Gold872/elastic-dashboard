@@ -142,11 +142,11 @@ class TextDisplay extends NTWidget {
 
     return ListenableBuilder(
       listenable: Listenable.merge([
-        model.subscription!.value,
+        model.subscription!,
         model.controller,
       ]),
       builder: (context, child) {
-        Object? data = model.subscription!.value.value;
+        Object? data = model.subscription!.value;
 
         if (data?.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors

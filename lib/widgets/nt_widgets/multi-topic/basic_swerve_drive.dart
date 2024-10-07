@@ -64,10 +64,10 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
     super.period,
+    super.dataType,
   })  : _rotationUnit = rotationUnit,
         _showRobotRotation = showRobotRotation,
         super();
@@ -192,49 +192,6 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     ];
   }
 
-  @override
-  List<Object> getCurrentData() {
-    double frontLeftAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(frontLeftAngleTopic)) ?? 0.0;
-    double frontLeftVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(frontLeftVelocityTopic)) ??
-            0.0;
-
-    double frontRightAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(frontRightAngleTopic)) ??
-            0.0;
-    double frontRightVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(frontRightVelocityTopic)) ??
-            0.0;
-
-    double backLeftAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(backLeftAngleTopic)) ?? 0.0;
-    double backLeftVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(backLeftVelocityTopic)) ??
-            0.0;
-
-    double backRightAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(backRightAngleTopic)) ?? 0.0;
-    double backRightVelocity =
-        tryCast(ntConnection.getLastAnnouncedValue(backRightVelocityTopic)) ??
-            0.0;
-
-    double robotAngle =
-        tryCast(ntConnection.getLastAnnouncedValue(robotAngleTopic)) ?? 0.0;
-
-    return [
-      frontLeftAngle,
-      frontLeftVelocity,
-      frontRightAngle,
-      frontRightVelocity,
-      backLeftAngle,
-      backLeftVelocity,
-      backRightAngle,
-      backRightVelocity,
-      robotAngle,
-    ];
-  }
-
   get showRobotRotation => _showRobotRotation;
 
   set showRobotRotation(value) {
@@ -260,30 +217,29 @@ class SwerveDriveWidget extends NTWidget {
     BasicSwerveModel model = cast(context.watch<NTWidgetModel>());
 
     return ListenableBuilder(
-      listenable: Listenable.merge(model.subscriptions.map((e) => e.value)),
+      listenable: Listenable.merge(model.subscriptions),
       builder: (context, child) {
         double frontLeftAngle =
-            tryCast(model.frontLeftAngleSubscription.value.value) ?? 0.0;
+            tryCast(model.frontLeftAngleSubscription.value) ?? 0.0;
         double frontLeftVelocity =
-            tryCast(model.frontLeftVelocitySubscription.value.value) ?? 0.0;
+            tryCast(model.frontLeftVelocitySubscription.value) ?? 0.0;
 
         double frontRightAngle =
-            tryCast(model.frontRightAngleSubscription.value.value) ?? 0.0;
+            tryCast(model.frontRightAngleSubscription.value) ?? 0.0;
         double frontRightVelocity =
-            tryCast(model.frontRightVelocitySubscription.value.value) ?? 0.0;
+            tryCast(model.frontRightVelocitySubscription.value) ?? 0.0;
 
         double backLeftAngle =
-            tryCast(model.backLeftAngleSubscription.value.value) ?? 0.0;
+            tryCast(model.backLeftAngleSubscription.value) ?? 0.0;
         double backLeftVelocity =
-            tryCast(model.backLeftVelocitySubscription.value.value) ?? 0.0;
+            tryCast(model.backLeftVelocitySubscription.value) ?? 0.0;
 
         double backRightAngle =
-            tryCast(model.backRightAngleSubscription.value.value) ?? 0.0;
+            tryCast(model.backRightAngleSubscription.value) ?? 0.0;
         double backRightVelocity =
-            tryCast(model.backRightVelocitySubscription.value.value) ?? 0.0;
+            tryCast(model.backRightVelocitySubscription.value) ?? 0.0;
 
-        double robotAngle =
-            tryCast(model.robotAngleSubscription.value.value) ?? 0.0;
+        double robotAngle = tryCast(model.robotAngleSubscription.value) ?? 0.0;
 
         if (model.rotationUnit == 'Degrees') {
           frontLeftAngle = radians(frontLeftAngle);

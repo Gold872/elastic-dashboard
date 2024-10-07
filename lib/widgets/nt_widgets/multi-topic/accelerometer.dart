@@ -6,20 +6,24 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class AccelerometerModel extends SingleTopicNTWidgetModel {
+class AccelerometerModel extends MultiTopicNTWidgetModel {
   @override
   String type = AccelerometerWidget.widgetType;
 
   late NT4Subscription _valueSubscription;
+  NT4Subscription get valueSubscription => _valueSubscription;
 
   String get valueTopic => '$topic/Value';
+
+  @override
+  List<NT4Subscription> get subscriptions => [_valueSubscription];
 
   AccelerometerModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
+    super.dataType,
   }) : super();
 
   AccelerometerModel.fromJson({
@@ -29,29 +33,9 @@ class AccelerometerModel extends SingleTopicNTWidgetModel {
   }) : super.fromJson();
 
   @override
-  void init() {
-    super.init();
-
+  void initializeSubscriptions() {
     _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
   }
-
-  @override
-  void resetSubscription() {
-    ntConnection.unSubscribe(_valueSubscription);
-
-    _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
-
-    super.resetSubscription();
-  }
-
-  @override
-  void unSubscribe() {
-    ntConnection.unSubscribe(_valueSubscription);
-
-    super.unSubscribe();
-  }
-
-  NT4Subscription get valueSubscription => _valueSubscription;
 }
 
 class AccelerometerWidget extends NTWidget {
@@ -64,7 +48,7 @@ class AccelerometerWidget extends NTWidget {
     AccelerometerModel model = cast(context.watch<NTWidgetModel>());
 
     return ValueListenableBuilder(
-        valueListenable: model.valueSubscription.value,
+        valueListenable: model.valueSubscription,
         builder: (context, data, child) {
           double value = tryCast(data) ?? 0.0;
 
