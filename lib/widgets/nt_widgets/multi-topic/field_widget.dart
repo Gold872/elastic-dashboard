@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
@@ -566,7 +567,8 @@ class FieldWidget extends NTWidget {
         }
 
         // Try rebuilding again if the image isn't fully rendered
-        if (!model.rendered) {
+        if (!model.rendered &&
+            !Platform.environment.containsKey('FLUTTER_TEST')) {
           Future.delayed(const Duration(milliseconds: 100), model.refresh);
         }
 

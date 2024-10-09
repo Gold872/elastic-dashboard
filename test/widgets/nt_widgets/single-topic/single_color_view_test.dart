@@ -62,7 +62,7 @@ void main() {
     );
 
     expect(singleColorViewModel.type, 'Single Color View');
-    expect(singleColorViewModel.runtimeType, NTWidgetModel);
+    expect(singleColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         singleColorViewModel.getAvailableDisplayTypes(),
         unorderedEquals([

@@ -69,7 +69,7 @@ void main() {
     );
 
     expect(multiColorViewModel.type, 'Multi Color View');
-    expect(multiColorViewModel.runtimeType, NTWidgetModel);
+    expect(multiColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         multiColorViewModel.getAvailableDisplayTypes(),
         unorderedEquals([

@@ -50,7 +50,7 @@ void main() {
     );
 
     expect(toggleButtonModel.type, 'Toggle Button');
-    expect(toggleButtonModel.runtimeType, NTWidgetModel);
+    expect(toggleButtonModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         toggleButtonModel.getAvailableDisplayTypes(),
         unorderedEquals([

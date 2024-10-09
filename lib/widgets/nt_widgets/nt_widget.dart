@@ -215,11 +215,11 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(_topic, _period);
+    subscription = ntConnection.subscribe(topic, period);
   }
 
   void createTopicIfNull() {
-    ntTopic ??= ntConnection.getTopicFromName(_topic);
+    ntTopic ??= ntConnection.getTopicFromName(topic);
   }
 
   @override
@@ -236,7 +236,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   void resetSubscription() {
     if (subscription == null) {
-      subscription = ntConnection.subscribe(_topic, _period);
+      subscription = ntConnection.subscribe(topic, period);
 
       ntTopic = null;
 
@@ -247,7 +247,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     bool resetDataType = subscription!.topic != topic;
 
     ntConnection.unSubscribe(subscription!);
-    subscription = ntConnection.subscribe(_topic, _period);
+    subscription = ntConnection.subscribe(topic, period);
 
     ntTopic = null;
 

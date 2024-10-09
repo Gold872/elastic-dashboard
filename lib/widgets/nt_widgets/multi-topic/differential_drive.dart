@@ -148,7 +148,8 @@ class DifferentialDrive extends NTWidget {
                     model.ntConnection.updateDataFromTopic(
                         model.leftSpeedTopic!, model.leftSpeedCurrentValue);
 
-                    model.leftSpeedPreviousValue = model.leftSpeedCurrentValue;
+                    model.leftSpeedPreviousValue =
+                        model.leftSpeedCurrentValue.value;
                   },
                 ),
               ],
@@ -222,7 +223,7 @@ class DifferentialDrive extends NTWidget {
                         model.rightSpeedTopic!, model.rightSpeedCurrentValue);
 
                     model.rightSpeedPreviousValue =
-                        model.rightSpeedCurrentValue;
+                        model.rightSpeedCurrentValue.value;
                   },
                 ),
               ],
