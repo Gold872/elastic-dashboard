@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -600,6 +601,62 @@ void main() {
         findsOneWidget);
     expect(find.bySubtype<DraggableListLayout>(skipOffstage: false),
         findsOneWidget);
+  });
+
+  testWidgets('Switch tabs from Shuffleboard api', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NTConnection ntConnection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Shuffleboard/.metadata/Selected',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
+      ],
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: ntConnection,
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', 'Autonomous');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', 'Random Name');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should not change since selected tab doesn\'t exist');
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', '0');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
   });
 
   testWidgets('About dialog', (widgetTester) async {
