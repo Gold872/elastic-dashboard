@@ -567,6 +567,7 @@ class FieldWidget extends NTWidget {
         }
 
         // Try rebuilding again if the image isn't fully rendered
+        // Can't do it if it's in a unit test cause it causes issues with timers running
         if (!model.rendered &&
             !Platform.environment.containsKey('FLUTTER_TEST')) {
           Future.delayed(const Duration(milliseconds: 100), model.refresh);

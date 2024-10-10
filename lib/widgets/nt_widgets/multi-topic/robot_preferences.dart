@@ -167,10 +167,10 @@ class RobotPreferences extends NTWidget {
               if (formattedData == null) {
                 model.preferenceTextControllers[topic]?.text =
                     model.previousValues[topic].toString();
+                model.ntConnection.unpublishTopic(nt4Topic);
                 return;
               }
 
-              model.ntConnection.publishTopic(nt4Topic);
               model.ntConnection.updateDataFromTopic(nt4Topic, formattedData);
               model.ntConnection.unpublishTopic(nt4Topic);
 
@@ -178,10 +178,6 @@ class RobotPreferences extends NTWidget {
                   formattedData.toString();
             },
             model: model,
-            // searchTextController: model.searchTextController,
-            // preferenceTopicNames: model.preferenceTopicNames,
-            // preferenceTextControllers: model.preferenceTextControllers,
-            // preferenceTopics: model.preferenceTopics,
           );
         });
   }
@@ -192,18 +188,10 @@ class PreferenceSearch extends StatelessWidget {
     super.key,
     required this.model,
     required this.onSubmit,
-    // required this.searchTextController,
-    // required this.preferenceTopicNames,
-    // required this.preferenceTextControllers,
-    // required this.preferenceTopics,
   });
 
   final RobotPreferencesModel model;
   final Function(String topic, String? data) onSubmit;
-  // final TextEditingController searchTextController;
-  // final List<String> preferenceTopicNames;
-  // final Map<String, TextEditingController> preferenceTextControllers;
-  // final Map<String, NT4Topic> preferenceTopics;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +227,15 @@ class PreferenceSearch extends StatelessWidget {
         return _RobotPreference(
           label: item.split('/').last,
           textController: textController ?? TextEditingController(),
+          onFocusGained: () {
+            NT4Topic? nt4Topic = model.preferenceTopics[item];
+
+            if (nt4Topic == null) {
+              return;
+            }
+
+            model.ntConnection.publishTopic(nt4Topic);
+          },
           onSubmit: (data) {
             onSubmit.call(item, data);
           },
@@ -250,11 +247,13 @@ class PreferenceSearch extends StatelessWidget {
 
 class _RobotPreference extends StatelessWidget {
   final TextEditingController textController;
+  final Function() onFocusGained;
   final Function(String? data) onSubmit;
   final String label;
 
   const _RobotPreference({
     required this.textController,
+    required this.onFocusGained,
     required this.onSubmit,
     required this.label,
   });
@@ -267,6 +266,7 @@ class _RobotPreference extends StatelessWidget {
         onFocusChange: (value) {
           // Don't consider the text submitted when focus is gained
           if (value) {
+            onFocusGained.call();
             return;
           }
           String textValue = textController.text;
