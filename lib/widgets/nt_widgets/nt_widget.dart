@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -261,35 +260,6 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     }
 
     refresh();
-  }
-
-  static final Function listEquals = const DeepCollectionEquality().equals;
-
-  @protected
-  List<Object> getCurrentData() {
-    return [];
-  }
-
-  Stream<Object> get multiTopicPeriodicStream async* {
-    final Duration delayTime = Duration(
-        microseconds: ((subscription?.options.periodicRateSeconds ??
-                    preferences.getDouble(PrefKeys.defaultPeriod) ??
-                    Defaults.defaultPeriod) *
-                1e6)
-            .round());
-
-    int previousHash = Object.hashAll(getCurrentData());
-
-    while (true) {
-      int currentHash = Object.hashAll(getCurrentData());
-
-      if (previousHash != currentHash) {
-        yield Object();
-        previousHash = currentHash;
-      }
-
-      await Future.delayed(delayTime);
-    }
   }
 }
 

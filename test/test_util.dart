@@ -169,7 +169,7 @@ MockNTConnection createMockOnlineNT4({
     });
 
     when(topicSubscription.value = any).thenAnswer((invocation) {
-      virtualValues?[topic.name] = invocation.positionalArguments[0];
+      virtualValues![topic.name] = invocation.positionalArguments[0];
       for (var notifier in subscriptionNotifiers) {
         notifier.call();
       }
