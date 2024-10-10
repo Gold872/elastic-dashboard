@@ -1437,7 +1437,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         setState(() {
                           _tabData[_currentTabIndex]
                               .tabGrid
-                              .clearWidgets(context);
+                              .confirmClearWidgets(context);
                         });
                       }
                     : null,
