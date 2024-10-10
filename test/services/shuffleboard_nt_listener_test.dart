@@ -125,8 +125,8 @@ void main() {
       ..initializeListeners();
 
     ntConnection.updateDataFromTopicName(
-        '/Shuffleboard/.metadata/Selected', "Test Tab Selection");
+        '/Shuffleboard/.metadata/Selected', 'Test Tab Selection');
 
-    expect(selectedTab, "Test Tab Selection");
+    expect(selectedTab, 'Test Tab Selection');
   });
 }

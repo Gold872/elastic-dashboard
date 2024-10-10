@@ -1871,7 +1871,7 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                                 setState(() => _searchQuery = value),
                             initialText: _searchQuery,
                             allowEmptySubmission: true,
-                            label: "Search",
+                            label: 'Search',
                           ),
                         ),
                       ),

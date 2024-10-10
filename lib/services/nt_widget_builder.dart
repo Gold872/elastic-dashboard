@@ -203,7 +203,7 @@ class NTWidgetBuilder {
         defaultHeight: 2);
 
     registerWithAlias(
-        names: {EncoderWidget.widgetType, "Quadrature Encoder"},
+        names: {EncoderWidget.widgetType, 'Quadrature Encoder'},
         model: EncoderModel.new,
         widget: EncoderWidget.new,
         fromJson: EncoderModel.fromJson,
