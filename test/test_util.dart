@@ -82,6 +82,8 @@ MockNTConnection createMockOnlineNT4({
     virtualTopicsMap.addAll({i + 1: virtualTopics[i]});
   }
 
+  List<NT4Topic> publishedTopics = [];
+
   when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
   when(mockNT4Connection.addTopicAnnounceListener(any))
@@ -127,7 +129,20 @@ MockNTConnection createMockOnlineNT4({
         properties: {});
 
     virtualTopicsMap[virtualTopicsMap.length] = newTopic;
+    publishedTopics.add(newTopic);
     return newTopic;
+  });
+
+  when(mockNT4Connection.publishTopic(any)).thenAnswer((invocation) {
+    publishedTopics.add(invocation.positionalArguments[0]);
+  });
+
+  when(mockNT4Connection.unpublishTopic(any)).thenAnswer((invocation) {
+    publishedTopics.remove(invocation.positionalArguments[0]);
+  });
+
+  when(mockNT4Connection.isTopicPublished(any)).thenAnswer((invocation) {
+    return publishedTopics.contains(invocation.positionalArguments[0]);
   });
 
   when(mockNT4Connection.updateDataFromTopic(any, any))

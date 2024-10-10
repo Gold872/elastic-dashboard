@@ -133,13 +133,15 @@ class RobotPreferences extends NTWidget {
 
           return PreferenceSearch(
             onSubmit: (String topic, String? data) {
-              if (data == null) {
+              NT4Topic? nt4Topic = model.preferenceTopics[topic];
+
+              if (nt4Topic == null ||
+                  !model.ntConnection.isTopicPublished(nt4Topic)) {
                 return;
               }
 
-              NT4Topic? nt4Topic = model.preferenceTopics[topic];
-
-              if (nt4Topic == null) {
+              if (data == null) {
+                model.ntConnection.unpublishTopic(nt4Topic);
                 return;
               }
 
