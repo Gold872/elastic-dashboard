@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
+import '../../../test_util.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,7 @@ void main() {
   };
 
   late SharedPreferences preferences;
-  late NTConnection ntConnection;
+  late MockNTConnection ntConnection;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -109,35 +110,66 @@ void main() {
     expect(find.widgetWithText(TextField, 'Test Preference'), findsOneWidget);
     await widgetTester.enterText(
         find.widgetWithText(TextField, 'Test Preference'), '1');
+    // Focusing on the text field should publish the topic
+    verify(ntConnection.publishTopic(any)).called(1);
+
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(
         ntConnection.getLastAnnouncedValue('Test/Preferences/Test Preference'),
         1);
 
+    // After submitting topic should be unpublished
+    verify(ntConnection.unpublishTopic(any)).called(1);
+
+    clearInteractions(ntConnection);
+
     expect(find.widgetWithText(TextField, 'Preference 1'), findsOneWidget);
     await widgetTester.enterText(
         find.widgetWithText(TextField, 'Preference 1'), '0.250');
+    // Focusing on the text field should publish the topic
+    verify(ntConnection.publishTopic(any)).called(1);
+
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 1'),
         0.250);
 
+    // After submitting topic should be unpublished
+    verify(ntConnection.unpublishTopic(any)).called(1);
+
+    clearInteractions(ntConnection);
+
     expect(find.widgetWithText(TextField, 'Preference 2'), findsOneWidget);
     await widgetTester.enterText(
         find.widgetWithText(TextField, 'Preference 2'), 'true');
+    // Focusing on the text field should publish the topic
+    verify(ntConnection.publishTopic(any)).called(1);
+
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 2'),
         isTrue);
 
+    // After submitting topic should be unpublished
+    verify(ntConnection.unpublishTopic(any)).called(1);
+
+    clearInteractions(ntConnection);
+
     expect(find.widgetWithText(TextField, 'Preference 3'), findsOneWidget);
     await widgetTester.enterText(
         find.widgetWithText(TextField, 'Preference 3'), 'Edited String');
+    // Focusing on the text field should publish the topic
+    verify(ntConnection.publishTopic(any)).called(1);
+
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 3'),
         'Edited String');
+    // After submitting topic should be unpublished
+    verify(ntConnection.unpublishTopic(any)).called(1);
+
+    clearInteractions(ntConnection);
 
     // Searching
     final searchField = find.widgetWithText(TextField, 'Search');

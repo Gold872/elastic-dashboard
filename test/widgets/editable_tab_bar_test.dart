@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,32 +11,30 @@ import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
-import 'editable_tab_bar_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<FakeTabBarFunctions>()])
-class FakeTabBarFunctions {
-  void onTabCreate() {}
+class FakeTabBarFunctions extends Mock {
+  void onTabCreate();
 
-  void onTabDestroy() {}
+  void onTabDestroy();
 
-  void onTabMoveLeft() {}
+  void onTabMoveLeft();
 
-  void onTabMoveRight() {}
+  void onTabMoveRight();
 
-  void onTabRename() {}
+  void onTabRename();
 
-  void onTabChanged() {}
+  void onTabChanged();
 
-  void onTabDuplicate() {}
+  void onTabDuplicate();
 }
 
 void main() {
-  late MockFakeTabBarFunctions tabBarFunctions;
+  late FakeTabBarFunctions tabBarFunctions;
   late MockNTConnection mockNTConnection;
   late SharedPreferences preferences;
 
   setUp(() async {
-    tabBarFunctions = MockFakeTabBarFunctions();
+    tabBarFunctions = FakeTabBarFunctions();
     SharedPreferences.setMockInitialValues({});
     preferences = await SharedPreferences.getInstance();
     mockNTConnection = createMockOfflineNT4();

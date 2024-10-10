@@ -203,7 +203,7 @@ class NTWidgetBuilder {
         defaultHeight: 2);
 
     registerWithAlias(
-        names: {EncoderWidget.widgetType, "Quadrature Encoder"},
+        names: {EncoderWidget.widgetType, 'Quadrature Encoder'},
         model: EncoderModel.new,
         widget: EncoderWidget.new,
         fromJson: EncoderModel.fromJson,
@@ -385,7 +385,7 @@ class NTWidgetBuilder {
       );
     }
 
-    return NTWidgetModel.createDefault(
+    return SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: type,
@@ -414,7 +414,7 @@ class NTWidgetBuilder {
 
     onWidgetTypeNotFound
         ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
-    return NTWidgetModel.createDefault(
+    return SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: type,
@@ -513,7 +513,7 @@ class NTWidgetBuilder {
     }
   }
 
-  static void registerWithAlias<ModelType extends NTWidgetModel,
+  static void registerWithAlias<ModelType extends SingleTopicNTWidgetModel,
       WidgetType extends NTWidget>({
     required Set<String> names,
     required NTModelProvider model,

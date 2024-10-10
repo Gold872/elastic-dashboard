@@ -8,7 +8,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class MatchTimeModel extends NTWidgetModel {
+class MatchTimeModel extends SingleTopicNTWidgetModel {
   @override
   String type = MatchTimeWidget.widgetType;
 
@@ -180,11 +180,10 @@ class MatchTimeWidget extends NTWidget {
   Widget build(BuildContext context) {
     MatchTimeModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double time = tryCast(snapshot.data) ?? -1.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        double time = tryCast(data) ?? -1.0;
         time = time.floorToDouble();
 
         String timeDisplayString;

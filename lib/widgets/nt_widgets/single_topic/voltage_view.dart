@@ -12,7 +12,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class VoltageViewModel extends NTWidgetModel {
+class VoltageViewModel extends SingleTopicNTWidgetModel {
   @override
   String type = VoltageView.widgetType;
 
@@ -206,11 +206,10 @@ class VoltageView extends NTWidget {
   Widget build(BuildContext context) {
     VoltageViewModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double voltage = tryCast<num>(snapshot.data)?.toDouble() ?? 0.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        double voltage = tryCast<num>(data)?.toDouble() ?? 0.0;
 
         double clampedVoltage = voltage.clamp(model.minValue, model.maxValue);
 

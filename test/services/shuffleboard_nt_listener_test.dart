@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
+import '../test_util.dart';
 import '../test_util.mocks.dart';
 
 void main() {
@@ -48,8 +49,6 @@ void main() {
     when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
-
-    // NTConnection.instance = mockNT4Connection;
 
     Map<String, dynamic> announcedWidgetData = {};
 
@@ -100,5 +99,34 @@ void main() {
     expect(announcedWidgetData['y'], Defaults.gridSize.toDouble());
     expect(announcedWidgetData['width'], Defaults.gridSize.toDouble() * 2.0);
     expect(announcedWidgetData['height'], Defaults.gridSize.toDouble() * 2.0);
+  });
+
+  test('Tab selection change', () {
+    final ntConnection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Shuffleboard/.metadata/Selected',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
+      ],
+    );
+
+    String? selectedTab;
+
+    ShuffleboardNTListener(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      onTabChanged: (tab) {
+        selectedTab = tab;
+      },
+    )
+      ..initializeSubscriptions()
+      ..initializeListeners();
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', 'Test Tab Selection');
+
+    expect(selectedTab, 'Test Tab Selection');
   });
 }

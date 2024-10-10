@@ -113,8 +113,10 @@ class NetworkTableTreeRow {
     children.clear();
   }
 
-  static NTWidgetModel? getNTWidgetFromTopic(NTConnection ntConnection,
-      SharedPreferences preferences, NT4Topic ntTopic) {
+  static SingleTopicNTWidgetModel? getNTWidgetFromTopic(
+      NTConnection ntConnection,
+      SharedPreferences preferences,
+      NT4Topic ntTopic) {
     switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
@@ -192,7 +194,11 @@ class NetworkTableTreeRow {
     }
 
     return NTWidgetBuilder.buildNTModelFromType(
-        ntConnection, preferences, type, topic);
+      ntConnection,
+      preferences,
+      type,
+      topic,
+    );
   }
 
   Future<List<NTWidgetContainerModel>?> getListLayoutChildren() async {

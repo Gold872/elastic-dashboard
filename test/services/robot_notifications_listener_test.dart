@@ -14,7 +14,7 @@ class MockNotificationCallback extends Mock {
 }
 
 void main() {
-  test("Robot Notifications (Initial Connection | No Existing Data) ", () {
+  test('Robot Notifications (Initial Connection | No Existing Data) ', () {
     MockNTConnection mockConnection = createMockOnlineNT4();
 
     // Create a mock for the onNotification callback
@@ -39,7 +39,7 @@ void main() {
     verifyNever(mockOnNotification.call(any, any, any));
   });
 
-  test("Robot Notifications (Initial Connection | Old Existing Data) ", () {
+  test('Robot Notifications (Initial Connection | Old Existing Data) ', () {
     MockNTConnection mockConnection = createMockOnlineNT4(serverTime: 5000000);
     MockNT4Subscription mockSub = MockNT4Subscription();
 
@@ -118,7 +118,7 @@ void main() {
     verifyNever(mockOnNotification(any, any, any));
   });
 
-  test("Robot Notifications (Initial Connection | Newer Existing Data) ", () {
+  test('Robot Notifications (Initial Connection | Newer Existing Data) ', () {
     MockNTConnection mockConnection = createMockOnlineNT4(serverTime: 5000000);
     MockNT4Subscription mockSub = MockNT4Subscription();
 

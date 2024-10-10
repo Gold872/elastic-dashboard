@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,42 +14,40 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import '../test_util.dart';
-import 'settings_dialog_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<FakeSettingsMethods>()])
-class FakeSettingsMethods {
-  void changeColor() {}
+class FakeSettingsMethods extends Mock {
+  void changeColor();
 
-  void changeIPAddress() {}
+  void changeIPAddress();
 
-  void changeTeamNumber() {}
+  void changeTeamNumber();
 
-  void changeIPAddressMode() {}
+  void changeIPAddressMode();
 
-  void changeShowGrid() {}
+  void changeShowGrid();
 
-  void changeGridSize() {}
+  void changeGridSize();
 
-  void changeCornerRadius() {}
+  void changeCornerRadius();
 
-  void changeDSAutoResize() {}
+  void changeDSAutoResize();
 
-  void changeRememberWindow() {}
+  void changeRememberWindow();
 
-  void changeLockLayout() {}
+  void changeLockLayout();
 
-  void changeDefaultPeriod() {}
+  void changeDefaultPeriod();
 
-  void changeDefaultGraphPeriod() {}
+  void changeDefaultGraphPeriod();
 
-  void changeThemeVariant() {}
+  void changeThemeVariant();
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late SharedPreferences preferences;
-  late MockFakeSettingsMethods fakeSettings;
+  late FakeSettingsMethods fakeSettings;
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({
@@ -71,7 +68,7 @@ void main() {
 
     preferences = await SharedPreferences.getInstance();
 
-    fakeSettings = MockFakeSettingsMethods();
+    fakeSettings = FakeSettingsMethods();
   });
 
   setUp(() {

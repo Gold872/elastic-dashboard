@@ -3,15 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class NetworkAlertsModel extends NTWidgetModel {
+class NetworkAlertsModel extends MultiTopicNTWidgetModel {
   @override
   String type = NetworkAlerts.widgetType;
 
   String get errorsTopicName => '$topic/errors';
   String get warningsTopicName => '$topic/warnings';
   String get infosTopicName => '$topic/infos';
+
+  late NT4Subscription errorsSubscription;
+  late NT4Subscription warningsSubscription;
+  late NT4Subscription infosSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        errorsSubscription,
+        warningsSubscription,
+        infosSubscription,
+      ];
 
   NetworkAlertsModel({
     required super.ntConnection,
@@ -28,27 +40,11 @@ class NetworkAlertsModel extends NTWidgetModel {
   }) : super.fromJson();
 
   @override
-  List<Object> getCurrentData() {
-    List<Object?> errorsRaw = ntConnection
-            .getLastAnnouncedValue(errorsTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<Object?> warningsRaw = ntConnection
-            .getLastAnnouncedValue(warningsTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<Object?> infosRaw = ntConnection
-            .getLastAnnouncedValue(infosTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<String> errors = errorsRaw.whereType<String>().toList();
-    List<String> warnings = warningsRaw.whereType<String>().toList();
-    List<String> infos = infosRaw.whereType<String>().toList();
-
-    return [...errors, ...warnings, ...infos];
+  void initializeSubscriptions() {
+    errorsSubscription = ntConnection.subscribe(errorsTopicName, super.period);
+    warningsSubscription =
+        ntConnection.subscribe(warningsTopicName, super.period);
+    infosSubscription = ntConnection.subscribe(infosTopicName, super.period);
   }
 }
 
@@ -61,23 +57,17 @@ class NetworkAlerts extends NTWidget {
   Widget build(BuildContext context) {
     NetworkAlertsModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> errorsRaw = model.ntConnection
-                .getLastAnnouncedValue(model.errorsTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        List<Object?> errorsRaw =
+            model.errorsSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-        List<Object?> warningsRaw = model.ntConnection
-                .getLastAnnouncedValue(model.warningsTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+        List<Object?> warningsRaw =
+            model.warningsSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-        List<Object?> infosRaw = model.ntConnection
-                .getLastAnnouncedValue(model.infosTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+        List<Object?> infosRaw =
+            model.infosSubscription.value?.tryCast<List<Object?>>() ?? [];
 
         List<String> errors = errorsRaw.whereType<String>().toList();
         List<String> warnings = warningsRaw.whereType<String>().toList();

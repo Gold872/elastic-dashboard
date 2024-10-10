@@ -37,7 +37,7 @@ class NetworkTableTree extends StatefulWidget {
     required this.hideMetadata,
     this.onDragUpdate,
     this.onDragEnd,
-    this.searchQuery = "",
+    this.searchQuery = '',
   });
 
   @override
