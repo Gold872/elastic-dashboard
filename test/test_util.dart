@@ -24,7 +24,7 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
-  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+  when(mockSubscription.listen(any)).thenAnswer((invocation) {});
 
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
@@ -87,18 +87,15 @@ MockNTConnection createMockOnlineNT4({
   when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
   when(mockNT4Connection.addTopicAnnounceListener(any))
-      .thenAnswer((realInvocation) {
-    if (virtualTopics == null) {
-      return;
-    }
-    for (NT4Topic topic in virtualTopics) {
-      realInvocation.positionalArguments[0].call(topic);
+      .thenAnswer((invocation) {
+    for (NT4Topic topic in virtualTopics!) {
+      invocation.positionalArguments[0].call(topic);
     }
   });
 
   when(mockSubscription.periodicStream()).thenAnswer((_) => Stream.value(null));
 
-  when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+  when(mockSubscription.listen(any)).thenAnswer((_) {});
 
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
@@ -166,62 +163,66 @@ MockNTConnection createMockOnlineNT4({
     List<void Function()> subscriptionNotifiers = [];
 
     MockNT4Subscription topicSubscription = MockNT4Subscription();
+
     when(topicSubscription.value).thenAnswer((_) {
-      return virtualValues?[topic.name];
+      return virtualValues![topic.name];
     });
-    when(topicSubscription.value = any).thenAnswer((realInvocation) {
-      virtualValues?[topic.name] = realInvocation.positionalArguments[0];
+
+    when(topicSubscription.value = any).thenAnswer((invocation) {
+      virtualValues?[topic.name] = invocation.positionalArguments[0];
       for (var notifier in subscriptionNotifiers) {
         notifier.call();
       }
     });
-    when(topicSubscription.addListener(any)).thenAnswer((realInvocation) {
-      subscriptionNotifiers.add(realInvocation.positionalArguments[0]);
+
+    when(topicSubscription.addListener(any)).thenAnswer((invocation) {
+      subscriptionNotifiers.add(invocation.positionalArguments[0]);
     });
-    when(topicSubscription.removeListener(any)).thenAnswer((realInvocation) {
-      subscriptionNotifiers.remove(realInvocation.positionalArguments[0]);
+
+    when(topicSubscription.removeListener(any)).thenAnswer((invocation) {
+      subscriptionNotifiers.remove(invocation.positionalArguments[0]);
     });
 
     when(mockNT4Connection.updateDataFromTopic(topic, any))
-        .thenAnswer((realInvocation) {
-      virtualValues?[topic.name] = realInvocation.positionalArguments[1];
-      topicSubscription.value = realInvocation.positionalArguments[1];
+        .thenAnswer((invocation) {
+      virtualValues![topic.name] = invocation.positionalArguments[1];
+      topicSubscription.value = invocation.positionalArguments[1];
     });
 
     when(mockNT4Connection.updateDataFromTopicName(topic.name, any))
-        .thenAnswer((realInvocation) {
-      virtualValues?[topic.name] = realInvocation.positionalArguments[1];
-      topicSubscription.value = realInvocation.positionalArguments[1];
+        .thenAnswer((invocation) {
+      virtualValues![topic.name] = invocation.positionalArguments[1];
+      topicSubscription.value = invocation.positionalArguments[1];
     });
 
     when(mockNT4Connection.updateDataFromSubscription(topicSubscription, any))
-        .thenAnswer((realInvocation) {
-      virtualValues?[topic.name] = realInvocation.positionalArguments[1];
-      topicSubscription.value = realInvocation.positionalArguments[1];
+        .thenAnswer((invocation) {
+      virtualValues![topic.name] = invocation.positionalArguments[1];
+      topicSubscription.value = invocation.positionalArguments[1];
     });
 
     when(mockNT4Connection.getTopicFromName(topic.name)).thenReturn(topic);
 
     when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
-        .thenAnswer((_) => Stream.value(virtualValues?[topic.name]));
+        .thenAnswer((_) => Stream.value(virtualValues![topic.name]));
 
-    when(topicSubscription.listen(any)).thenAnswer((realInvocation) {
-      subscriptionListeners.add(realInvocation.positionalArguments[0]);
+    when(topicSubscription.listen(any)).thenAnswer((invocation) {
+      subscriptionListeners.add(invocation.positionalArguments[0]);
     });
 
     when(topicSubscription.updateValue(any, any)).thenAnswer(
-      (invoc) {
+      (invocation) {
         for (var value in subscriptionListeners) {
-          value.call(
-              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+          value.call(invocation.positionalArguments[0],
+              invocation.positionalArguments[1]);
         }
-        virtualValues?[topic.name] = invoc.positionalArguments[1];
-        topicSubscription.value = invoc.positionalArguments[1];
+        virtualValues![topic.name] = invocation.positionalArguments[1];
+        topicSubscription.value = invocation.positionalArguments[1];
       },
     );
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
-        .thenAnswer((_) => virtualValues?[topic.name]);
+        .thenAnswer((_) => virtualValues![topic.name]);
 
     when(mockNT4Connection.subscribe(topic.name, any))
         .thenAnswer((_) => topicSubscription);
