@@ -97,78 +97,77 @@ class CommandWidget extends NTWidget {
   Widget build(BuildContext context) {
     CommandModel model = cast(context.watch<NTWidgetModel>());
 
-    return ListenableBuilder(
-      listenable: Listenable.merge(model.subscriptions),
-      builder: (context, child) {
-        bool running =
-            model.runningSubscription.value?.tryCast<bool>() ?? false;
-        String name =
-            model.nameSubscription.value?.tryCast<String>() ?? 'Unknown';
+    String buttonText = model.topic.substring(model.topic.lastIndexOf('/') + 1);
 
-        String buttonText =
-            model.topic.substring(model.topic.lastIndexOf('/') + 1);
+    ThemeData theme = Theme.of(context);
 
-        ThemeData theme = Theme.of(context);
+    return Column(
+      children: [
+        Visibility(
+          visible: model.showType,
+          child: ValueListenableBuilder(
+              valueListenable: model.nameSubscription,
+              builder: (context, data, child) {
+                String name = tryCast(data) ?? 'Unknown';
 
-        return Column(
-          children: [
-            Visibility(
-              visible: model.showType,
-              child: Text('Type: $name',
-                  style: theme.textTheme.bodySmall,
-                  overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTapUp: (_) {
-                bool publishTopic = model.runningTopic == null;
+                return Text('Type: $name',
+                    style: theme.textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis);
+              }),
+        ),
+        const SizedBox(height: 10),
+        GestureDetector(
+          onTapUp: (_) {
+            bool publishTopic = model.runningTopic == null;
 
-                model.runningTopic ??=
-                    model.ntConnection.getTopicFromName(model.runningTopicName);
+            model.runningTopic ??=
+                model.ntConnection.getTopicFromName(model.runningTopicName);
 
-                if (model.runningTopic == null) {
-                  return;
-                }
+            if (model.runningTopic == null) {
+              return;
+            }
 
-                if (publishTopic) {
-                  model.ntConnection.publishTopic(model.runningTopic!);
-                }
+            if (publishTopic) {
+              model.ntConnection.publishTopic(model.runningTopic!);
+            }
 
-                // Prevents widget from locking up if double pressed fast enough
-                bool running = model.ntConnection
-                        .getLastAnnouncedValue(model.runningTopicName)
-                        ?.tryCast<bool>() ??
-                    false;
+            // Prevents widget from locking up if double pressed fast enough
+            bool running =
+                model.runningSubscription.value?.tryCast<bool>() ?? false;
 
-                model.ntConnection
-                    .updateDataFromTopic(model.runningTopic!, !running);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 50),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      offset: Offset(2, 2),
-                      blurRadius: 10.0,
-                      spreadRadius: -5,
-                      color: Colors.black,
-                    ),
-                  ],
-                  color: (running)
-                      ? theme.colorScheme.primaryContainer
-                      : const Color.fromARGB(255, 50, 50, 50),
-                ),
-                child: Text(buttonText,
-                    style: theme.textTheme.bodyLarge,
-                    overflow: TextOverflow.ellipsis),
-              ),
-            ),
-          ],
-        );
-      },
+            model.ntConnection
+                .updateDataFromTopic(model.runningTopic!, !running);
+          },
+          child: ValueListenableBuilder(
+              valueListenable: model.runningSubscription,
+              builder: (context, data, child) {
+                bool running = tryCast(data) ?? false;
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 50),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    boxShadow: const [
+                      BoxShadow(
+                        offset: Offset(2, 2),
+                        blurRadius: 10.0,
+                        spreadRadius: -5,
+                        color: Colors.black,
+                      ),
+                    ],
+                    color: (running)
+                        ? theme.colorScheme.primaryContainer
+                        : const Color.fromARGB(255, 50, 50, 50),
+                  ),
+                  child: Text(buttonText,
+                      style: theme.textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis),
+                );
+              }),
+        ),
+      ],
     );
   }
 }
