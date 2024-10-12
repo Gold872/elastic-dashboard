@@ -238,6 +238,7 @@ class ListLayoutModel extends LayoutContainerModel {
                                             container.unSubscribe();
                                             container.disposeModel(
                                                 deleting: true);
+                                            container.forceDispose();
 
                                             notifyListeners();
                                           });

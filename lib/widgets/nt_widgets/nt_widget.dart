@@ -233,7 +233,6 @@ class NTWidgetModel extends ChangeNotifier {
   }
 
   void forceDispose() {
-    disposeWidget(deleting: true);
     _forceDispose = true;
     dispose();
   }
