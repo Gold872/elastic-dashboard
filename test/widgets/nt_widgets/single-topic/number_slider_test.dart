@@ -133,7 +133,8 @@ void main() {
     Object? valueDuringDrag;
 
     Future.delayed(const Duration(milliseconds: 500), () {
-      draggingDuringDrag = (numberSliderModel as NumberSliderModel).dragging;
+      draggingDuringDrag =
+          (numberSliderModel as NumberSliderModel).dragging.value;
       valueDuringDrag = ntConnection.getLastAnnouncedValue('Test/Double Value');
     });
 
@@ -190,7 +191,7 @@ void main() {
     Object? valueDuringDrag;
 
     Future.delayed(const Duration(milliseconds: 500), () {
-      draggingDuringDrag = numberSliderModel.dragging;
+      draggingDuringDrag = numberSliderModel.dragging.value;
       valueDuringDrag = ntConnection.getLastAnnouncedValue('Test/Double Value');
     });
 
@@ -260,7 +261,7 @@ void main() {
     Object? valueDuringDrag;
 
     Future.delayed(const Duration(milliseconds: 500), () {
-      draggingDuringDrag = numberSliderModel.dragging;
+      draggingDuringDrag = numberSliderModel.dragging.value;
       valueDuringDrag = ntConnection.getLastAnnouncedValue('Test/Int Value');
     });
 

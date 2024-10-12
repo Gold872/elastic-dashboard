@@ -10,7 +10,7 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class TextDisplayModel extends NTWidgetModel {
+class TextDisplayModel extends SingleTopicNTWidgetModel {
   @override
   String type = TextDisplay.widgetType;
 
@@ -140,11 +140,13 @@ class TextDisplay extends NTWidget {
   Widget build(BuildContext context) {
     TextDisplayModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        Object? data = snapshot.data;
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        model.subscription!,
+        model.controller,
+      ]),
+      builder: (context, child) {
+        Object? data = model.subscription!.value;
 
         if (data?.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors

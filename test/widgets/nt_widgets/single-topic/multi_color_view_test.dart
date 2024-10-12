@@ -69,7 +69,7 @@ void main() {
     );
 
     expect(multiColorViewModel.type, 'Multi Color View');
-    expect(multiColorViewModel.runtimeType, NTWidgetModel);
+    expect(multiColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         multiColorViewModel.getAvailableDisplayTypes(),
         unorderedEquals([
@@ -79,7 +79,7 @@ void main() {
   });
 
   test('Multi color view to json', () {
-    NTWidgetModel multiColorViewModel = NTWidgetModel.createDefault(
+    NTWidgetModel multiColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: 'Multi Color View',

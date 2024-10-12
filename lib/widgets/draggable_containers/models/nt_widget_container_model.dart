@@ -319,7 +319,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       preferences,
       type,
       childModel.topic,
-      dataType: childModel.dataType,
+      dataType: (childModel is SingleTopicNTWidgetModel)
+          ? cast<SingleTopicNTWidgetModel>(childModel).dataType
+          : 'Unkown',
       period: (type != 'Graph')
           ? childModel.period
           : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??

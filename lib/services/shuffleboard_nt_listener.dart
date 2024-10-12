@@ -45,16 +45,16 @@ class ShuffleboardNTListener {
   }
 
   void initializeListeners() {
-    selectedSubscription.periodicStream(yieldAll: false).listen((data) {
-      if (data is! String?) {
+    selectedSubscription.addListener(() {
+      if (selectedSubscription.value is! String?) {
         return;
       }
 
-      if (data != previousSelection && data != null) {
-        _handleTabChange(data);
+      if (selectedSubscription.value != null) {
+        _handleTabChange(selectedSubscription.value! as String);
       }
 
-      previousSelection = data;
+      previousSelection = selectedSubscription.value! as String;
     });
 
     // Also clear data when connected in case if threads auto populate json after disconnection

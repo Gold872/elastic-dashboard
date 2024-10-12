@@ -12,13 +12,12 @@ class SingleColorView extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    NTWidgetModel model = context.watch<NTWidgetModel>();
+    SingleTopicNTWidgetModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        String hexString = tryCast(snapshot.data) ?? '';
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        String hexString = tryCast(data) ?? '';
 
         hexString = hexString.toUpperCase().replaceAll('#', '');
 
