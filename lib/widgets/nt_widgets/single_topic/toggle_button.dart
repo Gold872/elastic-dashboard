@@ -12,13 +12,12 @@ class ToggleButton extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    NTWidgetModel model = context.watch<NTWidgetModel>();
+    SingleTopicNTWidgetModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-        stream: model.subscription?.periodicStream(yieldAll: false),
-        initialData: model.ntConnection.getLastAnnouncedValue(model.topic),
-        builder: (context, snapshot) {
-          bool value = tryCast(snapshot.data) ?? false;
+    return ValueListenableBuilder(
+        valueListenable: model.subscription!,
+        builder: (context, data, child) {
+          bool value = tryCast(data) ?? false;
 
           String buttonText =
               model.topic.substring(model.topic.lastIndexOf('/') + 1);

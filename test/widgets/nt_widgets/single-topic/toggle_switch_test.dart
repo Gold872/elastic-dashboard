@@ -50,7 +50,7 @@ void main() {
     );
 
     expect(toggleSwitchModel.type, 'Toggle Switch');
-    expect(toggleSwitchModel.runtimeType, NTWidgetModel);
+    expect(toggleSwitchModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         toggleSwitchModel.getAvailableDisplayTypes(),
         unorderedEquals([
@@ -62,7 +62,7 @@ void main() {
   });
 
   test('Toggle switch to json', () {
-    NTWidgetModel toggleSwitchModel = NTWidgetModel.createDefault(
+    NTWidgetModel toggleSwitchModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: 'Toggle Switch',

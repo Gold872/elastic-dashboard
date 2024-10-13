@@ -4,16 +4,22 @@ import 'package:flutter/services.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CameraStreamModel extends NTWidgetModel {
+class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   String type = CameraStreamWidget.widgetType;
 
   String get streamsTopic => '$topic/streams';
+
+  late NT4Subscription streamsSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [streamsSubscription];
 
   int? _quality;
   int? _fps;
@@ -87,6 +93,11 @@ class CameraStreamModel extends NTWidgetModel {
     if (resolution != null && resolution.length > 1) {
       _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
     }
+  }
+
+  @override
+  void initializeSubscriptions() {
+    streamsSubscription = ntConnection.subscribe(streamsTopic, super.period);
   }
 
   @override
@@ -235,18 +246,6 @@ class CameraStreamModel extends NTWidgetModel {
     mjpegStream?.dispose();
     mjpegStream = null;
   }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object?> rawStreams =
-        tryCast(ntConnection.getLastAnnouncedValue(streamsTopic)) ?? [];
-    List<String> streams = rawStreams.whereType<String>().toList();
-
-    return [
-      ...streams,
-      ntConnection.isNT4Connected,
-    ];
-  }
 }
 
 class CameraStreamWidget extends NTWidget {
@@ -258,12 +257,11 @@ class CameraStreamWidget extends NTWidget {
   Widget build(BuildContext context) {
     CameraStreamModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> rawStreams = tryCast(
-                model.ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
-            [];
+    return ListenableBuilder(
+      listenable: model.streamsSubscription,
+      builder: (context, child) {
+        List<Object?> rawStreams =
+            tryCast(model.streamsSubscription.value) ?? [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {

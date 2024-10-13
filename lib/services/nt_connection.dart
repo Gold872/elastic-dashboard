@@ -86,8 +86,16 @@ class NTConnection {
     _ntClient.addTopicAnnounceListener(onAnnounce);
   }
 
-  void removeTopicAnnounceListener(Function(NT4Topic topic) onUnannounce) {
-    _ntClient.removeTopicAnnounceListener(onUnannounce);
+  void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
+    _ntClient.removeTopicAnnounceListener(onAnnounce);
+  }
+
+  void addTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _ntClient.addTopicUnannounceListener(onUnannounce);
+  }
+
+  void removeTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _ntClient.removeTopicUnannounceListener(onUnannounce);
   }
 
   Future<T?>? subscribeAndRetrieveData<T>(String topic,

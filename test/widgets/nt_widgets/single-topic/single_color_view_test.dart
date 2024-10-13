@@ -62,7 +62,7 @@ void main() {
     );
 
     expect(singleColorViewModel.type, 'Single Color View');
-    expect(singleColorViewModel.runtimeType, NTWidgetModel);
+    expect(singleColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
         singleColorViewModel.getAvailableDisplayTypes(),
         unorderedEquals([
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('Single color view to json', () {
-    NTWidgetModel singleColorViewModel = NTWidgetModel.createDefault(
+    NTWidgetModel singleColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
       type: 'Single Color View',

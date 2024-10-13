@@ -652,7 +652,18 @@ class TabGridModel extends ChangeNotifier {
     refresh();
   }
 
-  void clearWidgets(BuildContext context) {
+  @visibleForTesting
+  void clearWidgets() {
+    for (WidgetContainerModel container in _widgetModels) {
+      container.disposeModel(deleting: true);
+      container.unSubscribe();
+      container.forceDispose();
+    }
+    _widgetModels.clear();
+    refresh();
+  }
+
+  void confirmClearWidgets(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -664,13 +675,7 @@ class TabGridModel extends ChangeNotifier {
             onPressed: () {
               Navigator.of(context).pop();
 
-              for (WidgetContainerModel container in _widgetModels) {
-                container.disposeModel(deleting: true);
-                container.unSubscribe();
-                container.forceDispose();
-              }
-              _widgetModels.clear();
-              refresh();
+              clearWidgets();
             },
             child: const Text('Confirm'),
           ),
@@ -970,7 +975,7 @@ class TabGrid extends StatelessWidget {
           MenuItem(
             label: 'Clear Layout',
             icon: Icons.clear,
-            onSelected: () => model.clearWidgets(context),
+            onSelected: () => model.confirmClearWidgets(context),
           ),
         ];
 
