@@ -1,10 +1,8 @@
-
 #pragma once
 
 #include <iostream>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/StringTopic.h>
-#include <ntcore_cpp.h>
 #include <string>
 #include <wpi/json.h>
 
@@ -15,9 +13,7 @@ public:
   NotificationHandler() {
     topic = nt::NetworkTableInstance::GetDefault().GetStringTopic(
         "/Elastic/RobotNotifications");
-    publisher = topic.Publish(nt::PubSubOption::SendAll(true),
-                              nt::PubSubOption::KeepDuplicates(true));
-  }
+    publisher =  topic.Publish({.sendAll = true, .keepDuplicates = true}); }
 
   struct Notification {
     enum class Level { INFO, WARNING, ERROR };
