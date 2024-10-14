@@ -53,7 +53,7 @@ class NT4TypeStr {
   static const kStringArr = 'string[]';
 }
 
-class NT4Subscription {
+class NT4Subscription extends ValueNotifier<Object?> {
   final String topic;
   final NT4SubscriptionOptions options;
   final int uid;
@@ -67,7 +67,7 @@ class NT4Subscription {
     required this.topic,
     this.options = const NT4SubscriptionOptions(),
     this.uid = -1,
-  });
+  }) : super(null);
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
@@ -127,6 +127,7 @@ class NT4Subscription {
     }
     currentValue = value;
     this.timestamp = timestamp;
+    super.value = value;
   }
 
   Map<String, dynamic> _toSubscribeJson() {
@@ -243,6 +244,7 @@ class NT4Client {
   final VoidCallback? onConnect;
   final VoidCallback? onDisconnect;
   final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
+  final List<Function(NT4Topic topic)> _topicUnannounceListeners = [];
 
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
@@ -326,6 +328,14 @@ class NT4Client {
 
   void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
     _topicAnnounceListeners.remove(onAnnounce);
+  }
+
+  void addTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _topicUnannounceListeners.add(onUnannounce);
+  }
+
+  void removeTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _topicUnannounceListeners.add(onUnannounce);
   }
 
   NT4Subscription subscribe({
@@ -793,6 +803,10 @@ class NT4Client {
             return;
           }
           announcedTopics.remove(removedTopic.id);
+
+          for (final listener in _topicUnannounceListeners) {
+            listener.call(removedTopic);
+          }
         } else if (method == 'properties') {
           String topicName = params['name'];
           NT4Topic? topic = getTopicFromName(topicName);

@@ -3,7 +3,8 @@
 #define MyAppPublisher "Gold87"
 #define MyAppURL "https://github.com/gold872/elastic-dashboard/"
 #define MyAppExeName "elastic_dashboard.exe"
-#define ApplicationVersion GetStringFileInfo('build\windows\x64\runner\Release\elastic_dashboard.exe', 'ProductVersion')
+#define AppVersionName GetStringFileInfo('build\windows\x64\runner\Release\elastic_dashboard.exe', 'ProductVersion')
+#define ApplicationVersion GetVersionNumbersString('build\windows\x64\runner\Release\elastic_dashboard.exe')
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -11,7 +12,7 @@
 AppId={{2746922E-A2AC-4987-AF02-714F429C7C77}
 AppName={#MyAppName}
 AppVersion={#ApplicationVersion}
-AppVerName={#MyAppName} {#ApplicationVersion}
+AppVerName={#MyAppName} {#AppVersionName}
 VersionInfoVersion={#ApplicationVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}

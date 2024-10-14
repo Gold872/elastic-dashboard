@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
@@ -10,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -18,9 +18,25 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class FieldWidgetModel extends NTWidgetModel {
+class FieldWidgetModel extends MultiTopicNTWidgetModel {
   @override
   String type = 'Field';
+
+  String get robotTopicName => '$topic/Robot';
+  late NT4Subscription robotSubscription;
+
+  final List<String> _otherObjectTopics = [];
+  final List<NT4Subscription> _otherObjectSubscriptions = [];
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        robotSubscription,
+        ..._otherObjectSubscriptions,
+      ];
+
+  bool rendered = false;
+
+  late Function(NT4Topic topic) topicAnnounceListener;
 
   static const String _defaultGame = 'Crescendo';
   String _fieldGame = _defaultGame;
@@ -94,13 +110,6 @@ class FieldWidgetModel extends NTWidgetModel {
 
   get field => _field;
 
-  late String _robotTopicName;
-  final List<String> _otherObjectTopics = [];
-
-  bool rendered = false;
-
-  late Function(NT4Topic topic) topicAnnounceListener;
-
   FieldWidgetModel({
     required super.ntConnection,
     required super.preferences,
@@ -160,14 +169,14 @@ class FieldWidgetModel extends NTWidgetModel {
   void init() {
     super.init();
 
-    _robotTopicName = '$topic/Robot';
-
     topicAnnounceListener = (nt4Topic) {
       if (nt4Topic.name.contains(topic) &&
           !nt4Topic.name.contains('Robot') &&
           !nt4Topic.name.contains('.') &&
           !_otherObjectTopics.contains(nt4Topic.name)) {
         _otherObjectTopics.add(nt4Topic.name);
+        _otherObjectSubscriptions
+            .add(ntConnection.subscribe(nt4Topic.name, super.period));
       }
     };
 
@@ -175,11 +184,21 @@ class FieldWidgetModel extends NTWidgetModel {
   }
 
   @override
+  void initializeSubscriptions() {
+    _otherObjectSubscriptions.clear();
+
+    robotSubscription = ntConnection.subscribe(robotTopicName, super.period);
+  }
+
+  @override
   void resetSubscription() {
-    _robotTopicName = '$topic/Robot';
     _otherObjectTopics.clear();
 
     super.resetSubscription();
+
+    // If the topic changes the other objects need to be found under the new root table
+    ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
+    ntConnection.addTopicAnnounceListener(topicAnnounceListener);
   }
 
   @override
@@ -381,74 +400,6 @@ class FieldWidgetModel extends NTWidgetModel {
       ),
     ];
   }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object> data = [];
-
-    List<Object?> robotPositionRaw = ntConnection
-            .getLastAnnouncedValue(_robotTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<double> robotPosition = robotPositionRaw.whereType<double>().toList();
-
-    data.addAll(robotPosition);
-
-    if (_showOtherObjects || _showTrajectories) {
-      for (String objectTopic in _otherObjectTopics) {
-        List<Object?>? objectPositionRaw = ntConnection
-            .getLastAnnouncedValue(objectTopic)
-            ?.tryCast<List<Object?>>();
-
-        if (objectPositionRaw == null) {
-          continue;
-        }
-
-        bool isTrajectory = objectPositionRaw.length > 24;
-
-        if (isTrajectory && !_showTrajectories) {
-          continue;
-        } else if (!_showOtherObjects && !isTrajectory) {
-          continue;
-        }
-
-        List<double> objectPosition =
-            objectPositionRaw.whereType<double>().toList();
-
-        data.addAll(objectPosition);
-      }
-    }
-
-    return data;
-  }
-
-  @override
-  Stream<Object> get multiTopicPeriodicStream async* {
-    final Duration delayTime = Duration(
-        microseconds: ((subscription?.options.periodicRateSeconds ??
-                    preferences.getDouble(PrefKeys.defaultPeriod) ??
-                    Defaults.defaultPeriod) *
-                1e6)
-            .round());
-
-    yield Object();
-
-    int previousHash = Object.hashAll(getCurrentData());
-
-    while (true) {
-      int currentHash = Object.hashAll(getCurrentData());
-
-      if (previousHash != currentHash) {
-        yield Object();
-        previousHash = currentHash;
-      } else if (!rendered) {
-        yield Object();
-      }
-
-      await Future.delayed(delayTime);
-    }
-  }
 }
 
 class FieldWidget extends NTWidget {
@@ -564,13 +515,18 @@ class FieldWidget extends NTWidget {
   Widget build(BuildContext context) {
     FieldWidgetModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> robotPositionRaw = model.ntConnection
-                .getLastAnnouncedValue(model._robotTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+    List<NT4Subscription> listeners = [];
+    listeners.add(model.robotSubscription);
+    if (model._showOtherObjects || model._showTrajectories) {
+      listeners.addAll(model._otherObjectSubscriptions);
+    }
+
+    return ListenableBuilder(
+      listenable: Listenable.merge(listeners),
+      child: model.field.fieldImage,
+      builder: (context, child) {
+        List<Object?> robotPositionRaw =
+            model.robotSubscription.value?.tryCast<List<Object?>>() ?? [];
 
         List<double>? robotPosition = [];
         if (robotPositionRaw.isEmpty) {
@@ -610,6 +566,13 @@ class FieldWidget extends NTWidget {
           model.rendered = true;
         }
 
+        // Try rebuilding again if the image isn't fully rendered
+        // Can't do it if it's in a unit test cause it causes issues with timers running
+        if (!model.rendered &&
+            !Platform.environment.containsKey('FLUTTER_TEST')) {
+          Future.delayed(const Duration(milliseconds: 100), model.refresh);
+        }
+
         Widget robot = _getTransformedFieldObject(
             model,
             robotPosition ?? [0.0, 0.0, 0.0],
@@ -622,10 +585,10 @@ class FieldWidget extends NTWidget {
         List<List<Offset>> trajectoryPoints = [];
 
         if (model.showOtherObjects || model.showTrajectories) {
-          for (String objectTopic in model._otherObjectTopics) {
-            List<Object?>? objectPositionRaw = model.ntConnection
-                .getLastAnnouncedValue(objectTopic)
-                ?.tryCast<List<Object?>>();
+          for (NT4Subscription objectSubscription
+              in model._otherObjectSubscriptions) {
+            List<Object?>? objectPositionRaw =
+                objectSubscription.value?.tryCast<List<Object?>>();
 
             if (objectPositionRaw == null) {
               continue;
@@ -674,7 +637,7 @@ class FieldWidget extends NTWidget {
 
         return Stack(
           children: [
-            model.field.fieldImage,
+            child!,
             for (List<Offset> points in trajectoryPoints)
               CustomPaint(
                 painter: TrajectoryPainter(
