@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -209,7 +210,7 @@ class _ElasticState extends State<Elastic> {
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Elastic',
+      title: appTitle,
       theme: theme,
       home: DashboardPage(
         ntConnection: widget.ntConnection,

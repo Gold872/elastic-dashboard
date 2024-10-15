@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -226,7 +227,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       apiListener.initializeListeners();
     });
 
-    Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    if (!isWPILib) {
+      Future(
+          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    }
 
     _robotNotificationListener = RobotNotificationsListener(
         ntConnection: widget.ntConnection,
@@ -882,10 +886,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     showAboutDialog(
       context: context,
-      applicationName: 'Elastic',
+      applicationName: appTitle,
       applicationVersion: widget.version,
       applicationIcon: Image.asset(
-        'assets/logos/logo.png',
+        logoPath,
         width: iconTheme.size,
         height: iconTheme.size,
       ),
@@ -1357,7 +1361,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       children: [
         Center(
           child: Image.asset(
-            'assets/logos/logo.png',
+            logoPath,
             width: 24.0,
             height: 24.0,
           ),
@@ -1487,21 +1491,22 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 ],
               ),
             ),
-            // Check for Updates
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _checkForUpdates();
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.update_outlined),
-                  SizedBox(width: 8),
-                  Text('Check for updates'),
-                ],
+            // Check for Updates (not for WPILib distribution)
+            if (!isWPILib)
+              MenuItemButton(
+                style: menuButtonStyle,
+                onPressed: () {
+                  _checkForUpdates();
+                },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.update_outlined),
+                    SizedBox(width: 8),
+                    Text('Check for Updates'),
+                  ],
+                ),
               ),
-            ),
           ],
           child: const Text(
             'Help',
@@ -1554,6 +1559,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     return Scaffold(
       appBar: CustomAppBar(
+        titleText: appTitle,
         onWindowClose: onWindowClose,
         menuBar: menuBar,
       ),
