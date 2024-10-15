@@ -208,7 +208,7 @@ jobs:
 
       - name: Create installer
         if: ${{ matrix.build-option == 'windows' }}
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
         with:
           path: installer_setup_script.iss
           options: /O+
