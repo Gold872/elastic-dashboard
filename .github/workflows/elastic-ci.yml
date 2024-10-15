@@ -132,7 +132,7 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         run: |
           cd build/macos/Build/Products/Release
-          zip -r ${{ matrix-artifact-name }}.zip elastic_dashboard.app --symlinks
+          zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
 
       - name: Upload artifact
         if: ${{ matrix.build-option != 'windows' }}
