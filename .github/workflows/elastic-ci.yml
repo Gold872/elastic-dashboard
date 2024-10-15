@@ -176,7 +176,7 @@ jobs:
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-WPILib-Linux
 
-    name: "Build - ${{ matrix.artifact-name }} (WPILib)"
+    name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
