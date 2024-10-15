@@ -169,7 +169,7 @@ jobs:
             artifact-name: Elastic-WPILib-Windows
           - os: macos-latest
             build-option: "macos"
-            artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
+            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.zip"
             artifact-name: Elastic-WPILib-macOS
           - os: ubuntu-22.04
             build-option: "linux"
