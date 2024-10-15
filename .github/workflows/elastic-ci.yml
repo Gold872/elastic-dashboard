@@ -18,7 +18,7 @@ env:
 jobs:
   formatting-analysis:
     name: "Check Formatting & Analyze"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repo
@@ -47,7 +47,7 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
   test:
     name: "Run Tests"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repo
@@ -87,7 +87,7 @@ jobs:
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
             artifact-name: Elastic-macOS
             executable-type: portable
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
