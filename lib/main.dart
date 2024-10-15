@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -15,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
