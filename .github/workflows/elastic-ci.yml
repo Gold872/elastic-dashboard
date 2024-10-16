@@ -206,13 +206,6 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }} --dart-define=ELASTIC_WPILIB=true
 
-      - name: Create installer
-        if: ${{ matrix.build-option == 'windows' }}
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
-        with:
-          path: installer_setup_script.iss
-          options: /O+
-
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
         run: |
@@ -220,25 +213,8 @@ jobs:
           zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
 
       - name: Upload artifact
-        if: ${{ matrix.build-option != 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
-          if-no-files-found: error
-
-      - name: Upload artifact (Windows portable)
-        if: ${{ matrix.build-option == 'windows' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact-name }}_portable
-          path: ${{ matrix.artifact-path }}
-          if-no-files-found: error
-
-      - name: Upload artifact (Windows installer)
-        if: ${{ matrix.build-option == 'windows' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact-name }}_installer
-          path: "build/windows/x64/installer"
           if-no-files-found: error
