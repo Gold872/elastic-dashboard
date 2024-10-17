@@ -155,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: build/macos/Build/Products/Release/elastic-setup
+          path: build/macos/Build/Products/Release/elastic-setup.dmg
           if-no-files-found: error
 
       - name: Create windows installer
