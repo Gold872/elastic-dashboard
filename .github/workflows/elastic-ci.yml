@@ -121,13 +121,6 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
 
-      - name: Create installer
-        if: ${{ matrix.build-option == 'windows' }}
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
-        with:
-          path: installer_setup_script.iss
-          options: /O+
-
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
         run: |
@@ -142,7 +135,7 @@ jobs:
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
-      - name: Upload artifact (Windows portable)
+      - name: Upload windows portable
         if: ${{ matrix.build-option == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
@@ -150,7 +143,29 @@ jobs:
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
-      - name: Upload artifact (Windows installer)
+      - name: Create macOS installer
+        if: ${{ matrix.build-option == 'macos' }}
+        uses: L-Super/create-dmg-actions@v1.0.3
+        with:
+          dmg_name: build/macos/Build/Products/Release/elastic-setup
+          src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
+
+      - name: Upload macOS installer
+        if: ${{ matrix.build-option == 'macos' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_installer
+          path: build/macos/Build/Products/Release/elastic-setup.dmg
+          if-no-files-found: error
+
+      - name: Create windows installer
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+        with:
+          path: installer_setup_script.iss
+          options: /O+
+
+      - name: Upload windows installer
         if: ${{ matrix.build-option == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
