@@ -20,7 +20,8 @@ class Log {
   Logger? _logger;
 
   Future<void> initialize() async {
-    Directory logPath = await getApplicationSupportDirectory();
+    Directory logPath =
+        (!kIsWeb) ? await getApplicationSupportDirectory() : Directory('');
     File logFile = File(join(logPath.path, 'elastic-log.txt'));
 
     _logger = Logger(
@@ -31,7 +32,7 @@ class Log {
       ),
       output: MultiOutput([
         ConsoleOutput(),
-        if (kReleaseMode) FileOutput(file: logFile),
+        if (kReleaseMode && !kIsWeb) FileOutput(file: logFile),
       ]),
       level: kDebugMode ? Level.debug : Level.info,
       filter: ProductionFilter(),
