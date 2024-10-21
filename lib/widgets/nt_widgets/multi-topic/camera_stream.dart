@@ -258,7 +258,10 @@ class CameraStreamWidget extends NTWidget {
     CameraStreamModel model = cast(context.watch<NTWidgetModel>());
 
     return ListenableBuilder(
-      listenable: model.streamsSubscription,
+      listenable: Listenable.merge([
+        model.streamsSubscription,
+        model.ntConnection.ntConnected,
+      ]),
       builder: (context, child) {
         List<Object?> rawStreams =
             tryCast(model.streamsSubscription.value) ?? [];
@@ -274,7 +277,7 @@ class CameraStreamWidget extends NTWidget {
           streams.add(stream.substring('mjpg:'.length));
         }
 
-        if (streams.isEmpty || !model.ntConnection.isNT4Connected) {
+        if (streams.isEmpty || !model.ntConnection.ntConnected.value) {
           return Stack(
             fit: StackFit.expand,
             children: [

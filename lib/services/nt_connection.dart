@@ -15,10 +15,11 @@ class NTConnection {
   List<VoidCallback> onConnectedListeners = [];
   List<VoidCallback> onDisconnectedListeners = [];
 
-  bool _ntConnected = false;
+  ValueNotifier<bool> _ntConnected = ValueNotifier(false);
+  ValueNotifier<bool> get ntConnected => _ntConnected;
   bool _dsConnected = false;
 
-  bool get isNT4Connected => _ntConnected;
+  bool get isNT4Connected => _ntConnected.value;
 
   bool get isDSConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
@@ -42,14 +43,14 @@ class NTConnection {
     _ntClient = NT4Client(
         serverBaseAddress: ipAddress,
         onConnect: () {
-          _ntConnected = true;
+          _ntConnected.value = true;
 
           for (VoidCallback callback in onConnectedListeners) {
             callback.call();
           }
         },
         onDisconnect: () {
-          _ntConnected = false;
+          _ntConnected.value = false;
 
           for (VoidCallback callback in onDisconnectedListeners) {
             callback.call();
@@ -119,13 +120,13 @@ class NTConnection {
   }
 
   Stream<bool> connectionStatus() async* {
-    yield _ntConnected;
-    bool lastYielded = _ntConnected;
+    yield _ntConnected.value;
+    bool lastYielded = _ntConnected.value;
 
     while (true) {
-      if (_ntConnected != lastYielded) {
-        yield _ntConnected;
-        lastYielded = _ntConnected;
+      if (_ntConnected.value != lastYielded) {
+        yield _ntConnected.value;
+        lastYielded = _ntConnected.value;
       }
       await Future.delayed(const Duration(seconds: 1));
     }
