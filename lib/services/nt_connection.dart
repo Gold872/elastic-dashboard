@@ -15,7 +15,7 @@ class NTConnection {
   List<VoidCallback> onConnectedListeners = [];
   List<VoidCallback> onDisconnectedListeners = [];
 
-  ValueNotifier<bool> _ntConnected = ValueNotifier(false);
+  final ValueNotifier<bool> _ntConnected = ValueNotifier(false);
   ValueNotifier<bool> get ntConnected => _ntConnected;
   bool _dsConnected = false;
 

@@ -26,6 +26,7 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockSubscription.listen(any)).thenAnswer((invocation) {});
 
+  when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(false));
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
   when(mockNT4Connection.serverTime).thenReturn(0);
@@ -97,6 +98,7 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockSubscription.listen(any)).thenAnswer((_) {});
 
+  when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(true));
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
   when(mockNT4Connection.serverTime).thenReturn(serverTime);
