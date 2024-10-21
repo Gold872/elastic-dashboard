@@ -234,7 +234,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     if (deleting) {
       _lastDisplayedImage?.evict();
       mjpegStream?.previousImage?.evict();
-      mjpegStream?.dispose();
+      mjpegStream?.dispose(deleting: deleting);
     }
 
     super.disposeWidget(deleting: deleting);
@@ -318,7 +318,7 @@ class CameraStreamWidget extends NTWidget {
 
         if (createNewWidget) {
           model.lastDisplayedImage?.evict();
-          model.mjpegStream?.dispose();
+          model.mjpegStream?.dispose(deleting: true);
 
           model.mjpegStream = MjpegStreamState(stream: stream);
         }
