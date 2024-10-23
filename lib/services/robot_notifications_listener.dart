@@ -52,7 +52,7 @@ class RobotNotificationsListener {
     Map<String, dynamic> data;
     int displayTime = 3;
     double width = 350;
-    double? height = null;
+    double? height;
     try {
       data = jsonDecode(alertData.toString());
     } catch (e) {
