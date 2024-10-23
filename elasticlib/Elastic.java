@@ -1,4 +1,4 @@
-package frc.robot.util;
+package Elasticlib;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,10 +9,10 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
-  private static final StringTopic topic =
-      NetworkTableInstance.getDefault().getStringTopic("/Elastic/RobotNotifications");
-  private static final StringPublisher publisher =
-      topic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
+  private static final StringTopic topic = NetworkTableInstance.getDefault()
+      .getStringTopic("/Elastic/RobotNotifications");
+  private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true),
+      PubSubOption.keepDuplicates(true));
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static void sendAlert(ElasticNotification alert) {
@@ -33,10 +33,27 @@ public final class Elastic {
     @JsonProperty("description")
     private String description;
 
-    public ElasticNotification(NotificationLevel level, String title, String description) {
+    @JsonProperty
+    private int displayTime;
+
+    @JsonProperty
+    private double width;
+
+    @JsonProperty
+    private Double height;
+
+    public ElasticNotification(NotificationLevel level, String title, String description, int displayTime,
+        double width, Double height) {
       this.level = level;
       this.title = title;
+      this.displayTime = displayTime;
       this.description = description;
+      this.height = height;
+      this.width = width;
+    }
+
+    public ElasticNotification(NotificationLevel level, String title, String description) {
+      this(level, title, description, 3000, 350, null);
     }
 
     public void setLevel(NotificationLevel level) {
@@ -53,6 +70,17 @@ public final class Elastic {
 
     public String getTitle() {
       return title;
+    }
+
+    public int getDisplayTime() {
+      return displayTime;
+    }
+
+    /*
+     * Display time in miliseconds
+     */
+    public void setDisplayTime(int displayTime) {
+      this.displayTime = displayTime;
     }
 
     public void setDescription(String description) {

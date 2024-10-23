@@ -234,7 +234,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _robotNotificationListener = RobotNotificationsListener(
         ntConnection: widget.ntConnection,
-        onNotification: (title, description, icon) {
+        onNotification: (title, description, icon, time, width, height) {
           setState(() {
             ColorScheme colorScheme = Theme.of(context).colorScheme;
             TextTheme textTheme = Theme.of(context).textTheme;
@@ -242,7 +242,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               autoDismiss: true,
               showProgressIndicator: true,
               background: colorScheme.surface,
-              width: 350,
+              width: width,
+              height: height,
               position: Alignment.bottomRight,
               title: Text(
                 title,
@@ -250,7 +251,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              toastDuration: const Duration(seconds: 3),
+              toastDuration: Duration(milliseconds: time),
               icon: icon,
               description: Text(description),
               stackedOptions: StackedOptions(
