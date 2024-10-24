@@ -10,7 +10,7 @@ import '../test_util.dart';
 import '../test_util.mocks.dart';
 
 class MockNotificationCallback extends Mock {
-  void call(String? title, String? description, Icon? icon, int timeMillis,
+  void call(String? title, String? description, Icon? icon, Duration time,
       double width, double? height);
 }
 
@@ -37,7 +37,8 @@ void main() {
     verifyNoMoreInteractions(mockConnection);
 
     // Verify that the onNotification callback was never called
-    verifyNever(mockOnNotification.call(any, any, any, 3000, 350, 300.0));
+    verifyNever(mockOnNotification.call(
+        any, any, any, const Duration(seconds: 3), 350, 300.0));
   });
 
   test('Robot Notifications (Initial Connection | Old Existing Data) ', () {
@@ -93,7 +94,8 @@ void main() {
     verify(mockConnection.addDisconnectedListener(any)).called(1);
 
     // Verify that the onNotification callback was never called
-    verifyNever(mockOnNotification(any, any, any, 3000, 350, any));
+    verifyNever(mockOnNotification(
+        any, any, any, const Duration(seconds: 3), 350, any));
 
     // Publish some data and expect an update
     data['title'] = 'Title2';
@@ -101,8 +103,13 @@ void main() {
     data['level'] = 'INFO';
     mockSub.updateValue(jsonEncode(data), 2);
 
-    verify(mockOnNotification(data['title'], data['description'], any,
-        data['displayTime'], data['width'], data['height']));
+    verify(mockOnNotification(
+        data['title'],
+        data['description'],
+        any,
+        Duration(milliseconds: data['displayTime']),
+        data['width'],
+        data['height']));
 
     // Try malformed data
     data['title'] = null;
@@ -111,7 +118,8 @@ void main() {
 
     mockSub.updateValue(jsonEncode(data), 3);
     reset(mockOnNotification);
-    verifyNever(mockOnNotification(any, any, any, 3000, 350, any));
+    verifyNever(mockOnNotification(
+        any, any, any, const Duration(seconds: 3), 350, any));
 
     // Try with missing data
     data.remove('level');
@@ -121,7 +129,8 @@ void main() {
 
     mockSub.updateValue(jsonEncode(data), 4);
     reset(mockOnNotification);
-    verifyNever(mockOnNotification(any, any, any, 3000, 350, any));
+    verifyNever(mockOnNotification(
+        any, any, any, const Duration(seconds: 3), 350, any));
   });
 
   test('Robot Notifications (Initial Connection | Newer Existing Data) ', () {
@@ -177,7 +186,7 @@ void main() {
     verify(mockConnection.addDisconnectedListener(any)).called(1);
 
     // Verify that the onNotification callback was called
-    verify(mockOnNotification(
-        any, any, any, data['displayTime'], data['width'], any));
+    verify(mockOnNotification(any, any, any,
+        Duration(milliseconds: data['displayTime']), data['width'], any));
   });
 }

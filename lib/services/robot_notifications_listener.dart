@@ -9,8 +9,8 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 class RobotNotificationsListener {
   bool _alertFirstRun = true;
   final NTConnection ntConnection;
-  final Function(String title, String description, Icon icon, int displayTime,
-      double width, double? height) onNotification;
+  final Function(String title, String description, Icon icon,
+      Duration displayTime, double width, double? height) onNotification;
 
   RobotNotificationsListener({
     required this.ntConnection,
@@ -50,7 +50,7 @@ class RobotNotificationsListener {
     }
 
     Map<String, dynamic> data;
-    int displayTime = 3;
+    Duration displayTime = const Duration(seconds: 3);
     double width = 350;
     double? height;
     try {
@@ -64,11 +64,12 @@ class RobotNotificationsListener {
     }
 
     if (data.containsKey('displayTime')) {
-      displayTime = data['displayTime'];
+      displayTime =
+          Duration(milliseconds: (tryCast(data['displayTime']) ?? 3000));
     }
 
     if (data.containsKey('width')) {
-      width = data['width'];
+      width = tryCast(data['width']) ?? 350;
     }
     if (data.containsKey('height')) {
       height = data['height'];

@@ -251,7 +251,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              toastDuration: Duration(milliseconds: time),
+              toastDuration: time,
               icon: icon,
               description: Text(description),
               stackedOptions: StackedOptions(
