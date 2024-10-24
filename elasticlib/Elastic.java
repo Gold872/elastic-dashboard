@@ -9,10 +9,10 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
-  private static final StringTopic topic = NetworkTableInstance.getDefault()
-      .getStringTopic("/Elastic/RobotNotifications");
-  private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true),
-      PubSubOption.keepDuplicates(true));
+  private static final StringTopic topic =
+      NetworkTableInstance.getDefault().getStringTopic("/Elastic/RobotNotifications");
+  private static final StringPublisher publisher =
+      topic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static void sendAlert(ElasticNotification alert) {
@@ -33,17 +33,19 @@ public final class Elastic {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty
-    private int displayTime;
+    @JsonProperty private int displayTime;
 
-    @JsonProperty
-    private double width;
+    @JsonProperty private double width;
 
-    @JsonProperty
-    private Double height;
+    @JsonProperty private Double height;
 
-    public ElasticNotification(NotificationLevel level, String title, String description, int displayTime,
-        double width, Double height) {
+    public ElasticNotification(
+        NotificationLevel level,
+        String title,
+        String description,
+        int displayTime,
+        double width,
+        Double height) {
       this.level = level;
       this.title = title;
       this.displayTime = displayTime;
