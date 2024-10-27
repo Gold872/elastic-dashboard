@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +36,7 @@ void main() {
         .thenAnswer((_) => Stream.value(null));
 
     when(mockNT4Connection.isNT4Connected).thenReturn(true);
+    when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(true));
 
     when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 

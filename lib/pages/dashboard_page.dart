@@ -859,6 +859,51 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
     );
+    // Open settings dialog (Ctrl + ,)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.comma,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if ((ModalRoute.of(context)?.isCurrent ?? false) && mounted) {
+          _displaySettingsDialog(context);
+        }
+      },
+    );
+    // Connect to robot (Ctrl + K)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyK,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if (preferences.getInt(PrefKeys.ipAddressMode) ==
+            IPAddressMode.driverStation.index) {
+          return;
+        }
+        _updateIPAddress(IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        _changeIPAddressMode(IPAddressMode.driverStation);
+      },
+    );
+    // Connect to sim (Ctrl + Shift + K)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyK,
+        modifiers: [
+          KeyModifier.control,
+          KeyModifier.shift,
+        ],
+      ),
+      callback: () {
+        if (preferences.getInt(PrefKeys.ipAddressMode) ==
+            IPAddressMode.localhost.index) {
+          return;
+        }
+        _changeIPAddressMode(IPAddressMode.localhost);
+      },
+    );
   }
 
   void _lockLayout() async {
@@ -975,36 +1020,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
             return;
           }
-          await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
-          switch (mode) {
-            case IPAddressMode.driverStation:
-              String? lastAnnouncedIP =
-                  widget.ntConnection.dsClient.lastAnnouncedIP;
-
-              if (lastAnnouncedIP == null) {
-                break;
-              }
-
-              _updateIPAddress(lastAnnouncedIP);
-              break;
-            case IPAddressMode.roboRIOmDNS:
-              _updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
-                  preferences.getInt(PrefKeys.teamNumber) ??
-                      Defaults.teamNumber));
-              break;
-            case IPAddressMode.teamNumber:
-              _updateIPAddress(IPAddressUtil.teamNumberToIP(
-                  preferences.getInt(PrefKeys.teamNumber) ??
-                      Defaults.teamNumber));
-              break;
-            case IPAddressMode.localhost:
-              _updateIPAddress('localhost');
-              break;
-            default:
-              setState(() {});
-              break;
-          }
+          _changeIPAddressMode(mode);
         },
         onIPAddressChanged: (String? data) async {
           if (data == null ||
@@ -1161,6 +1178,35 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onThemeVariantChanged: widget.onThemeVariantChanged,
       ),
     );
+  }
+
+  void _changeIPAddressMode(IPAddressMode mode) async {
+    await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
+    switch (mode) {
+      case IPAddressMode.driverStation:
+        String? lastAnnouncedIP = widget.ntConnection.dsClient.lastAnnouncedIP;
+
+        if (lastAnnouncedIP == null) {
+          break;
+        }
+
+        _updateIPAddress(lastAnnouncedIP);
+        break;
+      case IPAddressMode.roboRIOmDNS:
+        _updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        break;
+      case IPAddressMode.teamNumber:
+        _updateIPAddress(IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        break;
+      case IPAddressMode.localhost:
+        _updateIPAddress('localhost');
+        break;
+      default:
+        setState(() {});
+        break;
+    }
   }
 
   void _updateIPAddress(String newIPAddress) async {
