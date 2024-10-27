@@ -1329,6 +1329,33 @@ void main() {
     expect(find.byType(SettingsDialog), findsOneWidget);
   });
 
+  testWidgets('Opening settings (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.comma);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.comma);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(SettingsDialog), findsOneWidget);
+  });
+
   testWidgets('IP Address shortcuts', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
