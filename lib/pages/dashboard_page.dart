@@ -859,6 +859,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
     );
+    // Open settings dialog (Ctrl + ,)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.comma,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if ((ModalRoute.of(context)?.isCurrent ?? false) && mounted) {
+          _displaySettingsDialog(context);
+        }
+      },
+    );
   }
 
   void _lockLayout() async {
