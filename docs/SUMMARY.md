@@ -4,6 +4,7 @@
 
 ## Getting Started
 
+* [Installation](getting-started/installation.md)
 * [App Navigation](getting-started/app-navigation.md)
 * [Connecting To Your Robot](getting-started/connecting-to-your-robot.md)
 
