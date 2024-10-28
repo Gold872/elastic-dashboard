@@ -14,6 +14,8 @@ The Elastic repository and documentation site are hosted by GitHub, which publis
 
 The Elastic application may connect to GitHub services to check for updates. These interactions are covered by the GitHub privacy policy.
 
+The documentation for Elastic is hosted on GitBook, which has a [privacy policy](https://policies.gitbook.com/privacy-and-security/statement) that applies when interacting with their services.
+
 ## Contact
 
 Questions about this policy can be directed to frc-elastic@outlook.com
