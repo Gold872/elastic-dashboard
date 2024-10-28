@@ -17,7 +17,7 @@ layout:
 
 Elastic is a simple and modern dashboard for FRC. It was built with the goal of being a drag & drop dashboard with an easy setup and elegant UI designed for a high pressure competition environment.
 
-<figure><img src="../screenshots/example_layout.png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/example_layout.png" alt=""><figcaption></figcaption></figure>
 
 ### Getting Started
 

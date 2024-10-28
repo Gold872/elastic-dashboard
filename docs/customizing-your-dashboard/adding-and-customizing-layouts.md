@@ -54,7 +54,7 @@ To change the order or properties of a widget in your layout, right click the la
 
 To move a widget to a different spot in the layout, click and drag the handle on the right.
 
-![Changing Order](<../.gitbook/assets/changing\_order (1).png>)
+![Changing Order](../.gitbook/assets/changing\_order.png)
 
 To change the properties of a widget that is in your layout, click the arrow on the left side of the tile for the widget. Doing so will reveal the editable properties of that specific widget.
 
