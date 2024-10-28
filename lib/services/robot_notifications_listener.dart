@@ -72,7 +72,11 @@ class RobotNotificationsListener {
       width = tryCast(data['width']) ?? 350;
     }
     if (data.containsKey('height')) {
-      height = data['height'];
+      height = tryCast(data['height']) ?? -1;
+
+      if (height < 0) {
+        height = null;
+      }
     }
 
     Icon icon;
