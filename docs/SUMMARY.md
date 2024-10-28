@@ -18,3 +18,8 @@
 * [Robot Notifications with ElasticLib](additional-features-and-references/robot-notifications-with-elasticlib.md)
 * [Shuffleboard API](additional-features-and-references/shuffleboard-api-integration.md)
 * [Custom Widget Examples](additional-features-and-references/custom-widget-examples.md)
+
+## Legal
+
+* [Open Source License](legal/open-source-license.md)
+* [Privacy Policy](legal/privacy-policy.md)
