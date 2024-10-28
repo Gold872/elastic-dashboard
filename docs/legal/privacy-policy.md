@@ -1,7 +1,5 @@
 # Privacy Policy
 
-## Privacy Policy
-
 Elastic is a volunteer-run project that is owned and published by Nadav from FIRST Robotics Competition Team 353 ("Elastic"), based in the United States.
 
 ### Information We Collect
