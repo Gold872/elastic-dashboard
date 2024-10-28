@@ -26,7 +26,7 @@ Some widgets such as number sliders can be difficult to control as the widget mi
 
 To lock the layout, click on `Edit` -> `Lock Layout`.
 
-<figure><img src="../.gitbook/assets/locking_layout (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/locking_layout.png" alt=""><figcaption><p>Locking Layout</p></figcaption></figure>
 
 When the layout is locked, there will be a lock icon next to the menu bar. When the layout is locked, you will be unable to add, move, modify widgets, or manage tabs. It's important to note that you also cannot add widgets via the Shuffleboard API as well.
 
@@ -34,4 +34,4 @@ When the layout is locked, there will be a lock icon next to the menu bar. When 
 
 To unlock the layout, simply click the lock icon at the top of the screen.
 
-<figure><img src="../.gitbook/assets/unlocking_layout.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/unlocking_layout.png" alt=""><figcaption><p>Unlocking Layout</p></figcaption></figure>
