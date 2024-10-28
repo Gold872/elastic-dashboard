@@ -1,16 +1,16 @@
 # Table of contents
 
-* [🏠 Home](README.md)
+* [Home](README.md)
 
 ## Getting Started
 
 * [App Navigation](getting-started/app-navigation.md)
 * [Connecting To Your Robot](getting-started/connecting-to-your-robot.md)
 
-## Creating and Customizing your Dashboard
+## Customizing your Dashboard
 
-* [Adding and Customizing Widgets](creating-and-customizing-your-dashboard/adding-and-customizing-widgets.md)
-* [Adding and Customizing Layouts](creating-and-customizing-your-dashboard/adding-and-customizing-layouts.md)
+* [Adding and Customizing Widgets](customizing-your-dashboard/adding-and-customizing-widgets.md)
+* [Adding and Customizing Layouts](customizing-your-dashboard/adding-and-customizing-layouts.md)
 
 ## Additional Features and References
 
