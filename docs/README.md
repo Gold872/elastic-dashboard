@@ -4,6 +4,8 @@ Elastic is a simple and modern dashboard for FRC. It was built with the goal of 
 
 <figure><img src="../screenshots/example_layout.png" alt=""><figcaption></figcaption></figure>
 
+### Getting Started
+
 <table data-view="cards"><thead><tr><th align="center"></th><th></th><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td align="center">App Navigation</td><td></td><td></td><td><a href="getting-started/app-navigation.md">app-navigation.md</a></td></tr><tr><td align="center">Connecting to your Robot</td><td></td><td>              </td><td><a href="getting-started/connecting-to-your-robot.md">connecting-to-your-robot.md</a></td></tr></tbody></table>
 
 ### Creating and Customizing your Dashboard
