@@ -1452,7 +1452,10 @@ void main() {
       final Map<String, dynamic> data = {
         'title': 'Robot Notification Title',
         'description': 'Robot Notification Description',
-        'level': 'INFO'
+        'level': 'INFO',
+        'displayTime': 350,
+        'width': 300.0,
+        'height': 300.0,
       };
 
       MockNTConnection connection = createMockOnlineNT4(
