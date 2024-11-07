@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -302,77 +304,81 @@ class _StringChooserDropdown extends StatelessWidget {
       child: Tooltip(
         message: selected ?? '',
         waitDuration: const Duration(milliseconds: 250),
-        child: DropdownButton2<String>(
-          isExpanded: true,
-          value: selected,
-          selectedItemBuilder: (context) => [
-            ...options.map((String option) {
-              return Container(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  option,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  overflow: TextOverflow.ellipsis,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return DropdownButton2<String>(
+              isExpanded: true,
+              value: selected,
+              selectedItemBuilder: (context) => [
+                ...options.map((String option) {
+                  return Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      option,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }),
+              ],
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              );
-            }),
-          ],
-          dropdownStyleData: DropdownStyleData(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            maxHeight: 250,
-            width: 250,
-          ),
-          dropdownSearchData: DropdownSearchData(
-            searchController: textController,
-            searchMatchFn: (item, searchValue) {
-              return item.value
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchValue.toLowerCase());
-            },
-            searchInnerWidgetHeight: 50,
-            searchInnerWidget: Container(
-              color: Theme.of(context).colorScheme.surface,
-              height: 50,
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 4,
-                right: 8,
-                left: 8,
+                maxHeight: 250,
+                width: max(constraints.maxWidth, 250),
               ),
-              child: TextFormField(
-                expands: true,
-                maxLines: null,
-                controller: textController,
-                decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
+              dropdownSearchData: DropdownSearchData(
+                searchController: textController,
+                searchMatchFn: (item, searchValue) {
+                  return item.value
+                      .toString()
+                      .toLowerCase()
+                      .contains(searchValue.toLowerCase());
+                },
+                searchInnerWidgetHeight: 50,
+                searchInnerWidget: Container(
+                  color: Theme.of(context).colorScheme.surface,
+                  height: 50,
+                  padding: const EdgeInsets.only(
+                    top: 8,
+                    bottom: 4,
+                    right: 8,
+                    left: 8,
                   ),
-                  label: const Text('Search'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  child: TextFormField(
+                    expands: true,
+                    maxLines: null,
+                    controller: textController,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      label: const Text('Search'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          items: options.map((String option) {
-            return DropdownMenuItem(
-              value: option,
-              child:
-                  Text(option, style: Theme.of(context).textTheme.bodyMedium),
+              items: options.map((String option) {
+                return DropdownMenuItem(
+                  value: option,
+                  child: Text(option,
+                      style: Theme.of(context).textTheme.bodyMedium),
+                );
+              }).toList(),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textController.clear();
+                }
+              },
+              onChanged: onValueChanged,
             );
-          }).toList(),
-          onMenuStateChange: (isOpen) {
-            if (!isOpen) {
-              textController.clear();
-            }
           },
-          onChanged: onValueChanged,
         ),
       ),
     );
