@@ -16,7 +16,9 @@ layout:
 
 ### Information about Properties
 
-Every widget has properties, with settings such as where to receive information, update frequency, and customization options. By default, every topic has 2 properties, `topic` (String), and `period` (double).
+Every widget has properties, with settings such as where to receive information, update frequency, and unique customization options. By default, every widget has 2 properties, `topic` (String), and `period` (double).
+
+The `topic` property specifies where to stream data from on NetworkTables, and `period` determines the update frequency of the widget.
 
 ## Single-Topic Widgets
 
@@ -50,7 +52,7 @@ Displays a number in the form of a slider. The slider can be dragged to edit the
 
 #### Properties
 
-* `min_value` - The minimum value of the number slider (Defaults to -1.0)
+* `min_value` - The minimum value of the number slider (defaults to -1.0)
   * Decimal number
 * `max_value` - The maximum value of the number slider (defaults to 1.0)
   * Decimal number
@@ -67,7 +69,7 @@ Similar to the Number Slider, but does not support editing values.
 
 #### Properties
 
-* `min_value` - The minimum value of the number bar (Defaults to -1.0)
+* `min_value` - The minimum value of the number bar (defaults to -1.0)
   * Decimal number
 * `max_value` - The maximum value of the number bar (defaults to 1.0)
   * Decimal number
@@ -86,7 +88,7 @@ Displays a yellow number bar with the V units next to it, which is particularly 
 
 #### Properties
 
-* `min_value` - The minimum value of the number bar (Defaults to 4.0)
+* `min_value` - The minimum value of the number bar (defaults to 4.0)
   * Decimal number
 * `max_value` - The maximum value of the number bar (defaults to 13.0)
   * Decimal number
@@ -213,7 +215,7 @@ This widget will show as an option on any widget displaying data that is a Strin
 
 ## Multi-Topic Widgets
 
-These widgets display data from multiple topics. Most of these are built from Sendables in robot code, which is the recommended way of having these be added to Network Tables.
+These widgets display data from multiple topics. Most of these are built from Sendables in robot code, which is the recommended way of having these added to Network Tables.
 
 ### 3-Axis Accelerometer
 
@@ -373,8 +375,8 @@ Built from the WPILib Ultrasonic ([Java](https://github.wpilib.org/allwpilib/doc
 
 ### Alerts
 
-_This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](https://github.com/Gold872/elastic-dashboard/wiki/Custom-Widget-Examples)
+Displays data from WPILib [Network Alerts](https://docs.wpilib.org/en/latest/docs/software/telemetry/persistent-alerts.html).
 
-Displays data from Team 6328's Network Alerts.
+_NetworkAlerts is being added to WPILib in 2025, robot code using a WPILib version from pre-2025 beta will not have access to the NetworkAlerts API._
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/0cc63cdd-f7e0-4c52-8785-24db45d86b48)
