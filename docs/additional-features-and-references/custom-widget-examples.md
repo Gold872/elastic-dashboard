@@ -1,11 +1,13 @@
-## Single Color View
+# Custom Widget Examples
+
+### Single Color View
 
 ```java
 Color exampleColor = new Color(68, 238, 255);
 SmartDashboard.putString("Example Color", exampleColor.toHexString());
 ```
 
-## SwerveDrive
+### SwerveDrive
 
 _Note: Velocity must be in meters per second, and angles must be in either radians, degrees, or rotations, and CCW+_
 
@@ -32,10 +34,12 @@ SmartDashboard.putData("Swerve Drive", new Sendable() {
 });
 ```
 
-## YAGSL Swerve Drive
+### YAGSL Swerve Drive
 
 If you are using the YAGSL Swerve Library, you can create a Swerve Drive widget without even modifying your code. Simply head to the `SmartDashboard` table, and drag the `swerve` table onto the grid, and you will have created a Swerve widget that shows your current and desired module states.
 
-## Alerts
+### Alerts
 
 This displays data from the NetworkAlerts by [Team 6328](https://github.com/Mechanical-Advantage). For examples and implementation, see [Mechanical Advantage 2023 Robot Code](https://github.com/Mechanical-Advantage/RobotCode2023/blob/main/src/main/java/org/littletonrobotics/frc2023/util/Alert.java)
+
+For robot code using a WPILib version after 2024, this will be available in all WPILib projects and no additional files need to be added.
