@@ -535,7 +535,7 @@ class NT4Client {
 
     _clientId = Random().nextInt(99999999);
 
-    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
+    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
     _mainWebsocket =
         WebSocketChannel.connect(Uri.parse(mainServerAddr), protocols: [
