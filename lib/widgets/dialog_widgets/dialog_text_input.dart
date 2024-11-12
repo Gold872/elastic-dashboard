@@ -60,7 +60,7 @@ class _DialogTextInputState extends State<DialogTextInput> {
         child: TextField(
           autofocus: widget.autoFocus,
           enabled: widget.enabled,
-          onSubmitted: (value) {
+          onChanged: (value) {
             if (value.isNotEmpty || widget.allowEmptySubmission) {
               widget.onSubmit.call(value);
               focused = false;
