@@ -240,5 +240,5 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         with:
           name: ${{ matrix.artifact-name }}.tar.gz
-          path: ${{ matrix.artifact-name }}.tar.gz
+          path: ${{ matrix.artifact-path }}/${{ matrix.artifact-name }}.tar.gz
           if-no-files-found: error
