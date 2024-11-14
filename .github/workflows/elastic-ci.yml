@@ -184,7 +184,7 @@ jobs:
             artifact-name: Elastic-WPILib-Windows
           - os: macos-latest
             build-option: "macos"
-            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.zip"
+            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.tar.gz"
             artifact-name: Elastic-WPILib-macOS
           - os: ubuntu-22.04
             build-option: "linux"
@@ -225,7 +225,7 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         run: |
           cd build/macos/Build/Products/Release
-          zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
+          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
