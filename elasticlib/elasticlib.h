@@ -1,20 +1,28 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 #pragma once
 
-#include <iostream>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/StringTopic.h>
-#include <string>
 #include <wpi/json.h>
+
+#include <cmath>
+#include <iostream>
+#include <string>
 
 namespace elastic {
 /**
  * @class NotificationHandler
- * @brief Handles publishing notifications to the Elastic Robot Notifications topic on NetworkTables.
+ * @brief Handles publishing notifications to the Elastic Robot Notifications
+ * topic on NetworkTables.
  */
 class NotificationHandler {
-public:
+ public:
   /**
-   * @brief Constructor that initializes the NetworkTables topic and publisher for notifications.
+   * @brief Constructor that initializes the NetworkTables topic and publisher
+   * for notifications.
    */
   NotificationHandler() {
     topic = nt::NetworkTableInstance::GetDefault().GetStringTopic(
@@ -33,43 +41,61 @@ public:
      */
     enum class Level { INFO, WARNING, ERROR };
 
+    Notification() : level(Level::INFO), title(""), description("") {}
+
     /**
-     * @brief Constructs a Notification with default display time and dimensions.
+     * @brief Constructs a Notification with default display time and
+     * dimensions.
      * @param level The severity level of the notification.
      * @param title The title of the notification.
      * @param description The description of the notification.
      */
-    Notification(Level level, const std::string &title,
-                 const std::string &description)
-        : level(level), title(title), description(description),
-          displayTimeMillis(3000), width(350), height(-1) {}
+    Notification(Level level, const std::string& title,
+                 const std::string& description)
+        : level(level),
+          title(title),
+          description(description),
+          displayTimeMillis(3000),
+          width(350),
+          height(-1) {}
 
     /**
      * @brief Constructs a Notification with specified display time.
      * @param level The severity level of the notification.
      * @param title The title of the notification.
      * @param description The description of the notification.
-     * @param displayTimeInMillis Duration to display the notification, in milliseconds.
+     * @param displayTimeInMillis Duration to display the notification, in
+     * milliseconds.
      */
-    Notification(Level level, const std::string &title,
-                 const std::string &description, int displayTimeInMillis)
-        : level(level), title(title), description(description),
-          displayTimeMillis(displayTimeInMillis), width(350), height(-1) {}
+    Notification(Level level, const std::string& title,
+                 const std::string& description, int displayTimeInMillis)
+        : level(level),
+          title(title),
+          description(description),
+          displayTimeMillis(displayTimeInMillis),
+          width(350),
+          height(-1) {}
 
     /**
-     * @brief Constructs a Notification with specified display time and dimensions.
+     * @brief Constructs a Notification with specified display time and
+     * dimensions.
      * @param level The severity level of the notification.
      * @param title The title of the notification.
      * @param description The description of the notification.
-     * @param displayTimeInMillis Duration to display the notification, in milliseconds.
+     * @param displayTimeInMillis Duration to display the notification, in
+     * milliseconds.
      * @param width Width of the notification display.
      * @param height Height of the notification display.
      */
-    Notification(Level level, const std::string &title,
-                 const std::string &description, int displayTimeInMillis,
+    Notification(Level level, const std::string& title,
+                 const std::string& description, int displayTimeInMillis,
                  double width, double height)
-        : level(level), title(title), description(description),
-          displayTimeMillis(displayTimeInMillis), width(width), height(height) {}
+        : level(level),
+          title(title),
+          description(description),
+          displayTimeMillis(displayTimeInMillis),
+          width(width),
+          height(height) {}
 
     /**
      * @brief Sets the notification level.
@@ -87,7 +113,7 @@ public:
      * @brief Sets the title of the notification.
      * @param title The new title.
      */
-    void SetTitle(const std::string &title) { this->title = title; }
+    void SetTitle(const std::string& title) { this->title = title; }
 
     /**
      * @brief Gets the title of the notification.
@@ -99,7 +125,7 @@ public:
      * @brief Sets the description of the notification.
      * @param description The new description.
      */
-    void SetDescription(const std::string &description) {
+    void SetDescription(const std::string& description) {
       this->description = description;
     }
 
@@ -113,14 +139,18 @@ public:
      * @brief Gets the display duration of the notification.
      * @return Display time in milliseconds.
      */
-    int GetDisplayTime() const { return displayTimeMillis; }
+    int GetDisplayTimeMillis() const { return displayTimeMillis; }
 
     /**
      * @brief Sets the display duration of the notification.
      * @param newDisplayTimeMillis New display time in milliseconds.
      */
-    void SetDisplayTime(int newDisplayTimeMillis) {
+    void SetDisplayTimeMillis(int newDisplayTimeMillis) {
       this->displayTimeMillis = newDisplayTimeMillis;
+    }
+
+    void SetDisplayTimeSeconds(double seconds) {
+      SetDisplayTimeMillis((int)std::round(seconds * 1000));
     }
 
     /**
@@ -148,6 +178,119 @@ public:
     void SetHeight(double height) { this->height = height; }
 
     /**
+     * Modifies the notification's level and returns itself to allow for method
+     * chaining
+     *
+     * @param level the level to set the notification to
+     * @return the current notification
+     */
+    Notification withLevel(Level level) {
+      this->level = level;
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's title and returns itself to allow for method
+     * chaining
+     *
+     * @param title the title to set the notification to
+     * @return the current notification
+     */
+    Notification WithTitle(const std::string& title) {
+      SetTitle(title);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's description and returns itself to allow for
+     * method chaining
+     *
+     * @param description the description to set the notification to
+     * @return the current notification
+     */
+    Notification WithDescription(const std::string& description) {
+      SetDescription(description);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's display time and returns itself to allow for
+     * method chaining
+     *
+     * @param seconds the number of seconds to display the notification for
+     * @return the current notification
+     */
+    Notification WithDisplaySeconds(double seconds) {
+      return WithDisplayMilliseconds(seconds);
+    }
+
+    /**
+     * Modifies the notification's display time and returns itself to allow for
+     * method chaining
+     *
+     * @param displayTimeMillis the number of milliseconds to display the
+     * notification for
+     * @return the current notification
+     */
+    Notification WithDisplayMilliseconds(int displayTimeMillis) {
+      SetDisplayTimeMillis(displayTimeMillis);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's width and returns itself to allow for method
+     * chaining
+     *
+     * @param width the width to set the notification to
+     * @return the current notification
+     */
+    Notification WithWidth(double width) {
+      SetWidth(width);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's height and returns itself to allow for method
+     * chaining
+     *
+     * @param height the height to set the notification to
+     * @return the current notification
+     */
+    Notification WithHeight(double height) {
+      SetHeight(height);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification's height and returns itself to allow for method
+     * chaining
+     *
+     * <p>This will set the height to -1 to have it automatically determined by
+     * the dashboard
+     *
+     * @return the current notification
+     */
+    Notification WithAutomaticHeight() {
+      SetHeight(-1);
+      return *this;
+    }
+
+    /**
+     * Modifies the notification to disable the auto dismiss behavior
+     *
+     * <p>This sets the display time to 0 milliseconds
+     *
+     * <p>The auto dismiss behavior can be re-enabled by setting the display
+     * time to a number greater than 0
+     *
+     * @return the current notification
+     */
+    Notification WithNoAutoDismiss() {
+      SetDisplayTimeMillis(0);
+      return *this;
+    }
+
+    /**
      * @brief Converts the notification to a JSON string for publishing.
      * @return JSON string representing the notification.
      */
@@ -169,42 +312,43 @@ public:
      */
     static std::string LevelToString(Level level) {
       switch (level) {
-      case Level::INFO:
-        return "INFO";
-      case Level::WARNING:
-        return "WARNING";
-      case Level::ERROR:
-        return "ERROR";
-      default:
-        return "UNKNOWN";
+        case Level::INFO:
+          return "INFO";
+        case Level::WARNING:
+          return "WARNING";
+        case Level::ERROR:
+          return "ERROR";
+        default:
+          return "UNKNOWN";
       }
     }
 
-  private:
-    Level level;                  ///< Notification severity level.
-    std::string title;            ///< Title of the notification.
-    std::string description;      ///< Description of the notification.
-    int displayTimeMillis;        ///< Display time in milliseconds.
-    double width;                 ///< Display width in pixels.
-    double height;                ///< Display height in pixels.
+   private:
+    Level level;              ///< Notification severity level.
+    std::string title;        ///< Title of the notification.
+    std::string description;  ///< Description of the notification.
+    int displayTimeMillis;    ///< Display time in milliseconds.
+    double width;             ///< Display width in pixels.
+    double height;            ///< Display height in pixels.
   };
 
   /**
-   * @brief Publishes a notification as a JSON string to the NetworkTables topic.
+   * @brief Publishes a notification as a JSON string to the NetworkTables
+   * topic.
    * @param alert The notification to send.
    */
-  void SendAlert(const Notification &alert) {
+  void SendAlert(const Notification& alert) {
     try {
       std::string jsonString = alert.ToJson();
       publisher.Set(jsonString);
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       std::cerr << "Error processing JSON: " << e.what() << std::endl;
     }
   }
 
-private:
+ private:
   nt::StringTopic topic;          ///< NetworkTables topic for notifications.
   nt::StringPublisher publisher;  ///< Publisher for sending notifications.
 };
 
-} // namespace elastic
+}  // namespace elastic
