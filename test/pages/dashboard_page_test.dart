@@ -14,6 +14,7 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -46,7 +47,9 @@ void main() {
     await FieldImages.loadFields('assets/fields/');
 
     jsonString = jsonEncode(jsonDecode(File(jsonFilePath).readAsStringSync()));
+  });
 
+  setUp(() async {
     SharedPreferences.setMockInitialValues({
       PrefKeys.layout: jsonString,
       PrefKeys.teamNumber: 353,
@@ -479,6 +482,7 @@ void main() {
     final mockSubscription = MockNT4Subscription();
 
     when(mockNT4Connection.isNT4Connected).thenReturn(true);
+    when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(true));
     when(mockNT4Connection.connectionStatus())
         .thenAnswer((_) => Stream.value(true));
     when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
@@ -1325,6 +1329,122 @@ void main() {
     expect(find.byType(SettingsDialog), findsOneWidget);
   });
 
+  testWidgets('Opening settings (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.comma);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.comma);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(SettingsDialog), findsOneWidget);
+  });
+
+  testWidgets('IP Address shortcuts', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    SharedPreferences.setMockInitialValues({
+      PrefKeys.ipAddressMode: IPAddressMode.custom.index,
+      PrefKeys.ipAddress: '127.0.0.1',
+      PrefKeys.teamNumber: 353,
+    });
+
+    MockNTConnection ntConnection = createMockOfflineNT4();
+    MockDSInteropClient dsClient = MockDSInteropClient();
+    when(dsClient.lastAnnouncedIP).thenReturn(null);
+    when(ntConnection.dsClient).thenReturn(dsClient);
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: ntConnection,
+          preferences: preferences,
+          version: '0.0.0.0',
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
+
+    await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    // IP Address shouldn't change since it's already driver station
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index);
+    expect(preferences.getString(PrefKeys.ipAddress), 'localhost');
+
+    await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.pumpAndSettle();
+
+    // IP address shouldn't change since mode is set to localhost
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
+  });
+
   testWidgets(
     'Robot Notifications',
     (widgetTester) async {
@@ -1332,7 +1452,10 @@ void main() {
       final Map<String, dynamic> data = {
         'title': 'Robot Notification Title',
         'description': 'Robot Notification Description',
-        'level': 'INFO'
+        'level': 'INFO',
+        'displayTime': 350,
+        'width': 300.0,
+        'height': 300.0,
       };
 
       MockNTConnection connection = createMockOnlineNT4(
