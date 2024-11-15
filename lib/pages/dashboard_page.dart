@@ -239,8 +239,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             ColorScheme colorScheme = Theme.of(context).colorScheme;
             TextTheme textTheme = Theme.of(context).textTheme;
             var widget = ElegantNotification(
-              autoDismiss: true,
-              showProgressIndicator: true,
+              autoDismiss: time.inMilliseconds > 0,
+              showProgressIndicator: time.inMilliseconds > 0,
               background: colorScheme.surface,
               width: width,
               height: height,
