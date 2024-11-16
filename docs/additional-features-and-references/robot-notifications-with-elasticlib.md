@@ -2,11 +2,13 @@
 
 Elastic supports sending notifications to the dashboard via robot code. This could be helpful in situations where you want to grab the attention of the user when something goes wrong or if there's an important warning to display.
 
-Sending notifications via robot code requires the use of ElasticLib. Currently the only supported language is Java, but contributions for a C++ or Python port are open.
+Sending notifications via robot code requires the use of ElasticLib. Currently the only supported languages are Java and C++, but contributions for a Python port are open.
 
 ### Installing ElasticLib
 
-First, copy this file into your robot project: https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java
+First, copy this file into your robot project: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java)
+
+If you are using C++, you will have to copy this file instead: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h)
 
 It is recommended to put this in a folder called `util`, however any location within a robot project works. Depending on where the file is located, you may need to change the top line of the file.
 
