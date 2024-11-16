@@ -336,7 +336,7 @@ class Elastic {
   }
 
  private:
-  static nt::StringPublisher GetPublisher() {
+  static nt::StringPublisher& GetPublisher() {
     static nt::StringTopic topic =
         nt::NetworkTableInstance::GetDefault().GetStringTopic(
             "/Elastic/RobotNotifications");
