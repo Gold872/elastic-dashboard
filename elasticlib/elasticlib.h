@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include <networktables/NetworkTableInstance.h>
@@ -345,8 +343,9 @@ class Elastic {
 
     static nt::StringPublisher publisher =
         topic.Publish({.sendAll = true, .keepDuplicates = true});
-    ;
 
     return publisher;
   }
 };
+
+using ElasticNotification = Elastic::Notification;
