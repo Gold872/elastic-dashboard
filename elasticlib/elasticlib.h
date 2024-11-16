@@ -1,3 +1,5 @@
+
+
 #pragma once
 
 #include <networktables/NetworkTableInstance.h>
@@ -6,26 +8,16 @@
 
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
-namespace elastic {
 /**
- * @class NotificationHandler
+ * @class Elastic
  * @brief Handles publishing notifications to the Elastic Robot Notifications
  * topic on NetworkTables.
  */
-class NotificationHandler {
+class Elastic {
  public:
-  /**
-   * @brief Constructor that initializes the NetworkTables topic and publisher
-   * for notifications.
-   */
-  NotificationHandler() {
-    topic = nt::NetworkTableInstance::GetDefault().GetStringTopic(
-        "/Elastic/RobotNotifications");
-    publisher = topic.Publish({.sendAll = true, .keepDuplicates = true});
-  }
-
   /**
    * @struct Notification
    * @brief Represents a notification with various display properties.
@@ -333,18 +325,28 @@ class NotificationHandler {
    * topic.
    * @param alert The notification to send.
    */
-  void SendAlert(const Notification& alert) {
+  static void SendAlert(const Notification& alert) {
     try {
-      std::string jsonString = alert.ToJson();
-      publisher.Set(jsonString);
+      std::string jsonString =
+          alert.ToJson();              // Convert Notification to JSON string
+      GetPublisher().Set(jsonString);  // Publish the JSON string
     } catch (const std::exception& e) {
       std::cerr << "Error processing JSON: " << e.what() << std::endl;
+    } catch (...) {
+      std::cerr << "Unknown error occurred while processing JSON." << std::endl;
     }
   }
 
  private:
-  nt::StringTopic topic;          ///< NetworkTables topic for notifications.
-  nt::StringPublisher publisher;  ///< Publisher for sending notifications.
-};
+  static nt::StringPublisher GetPublisher() {
+    static nt::StringTopic topic =
+        nt::NetworkTableInstance::GetDefault().GetStringTopic(
+            "/Elastic/RobotNotifications");
 
-}  // namespace elastic
+    static nt::StringPublisher publisher =
+        topic.Publish({.sendAll = true, .keepDuplicates = true});
+    ;
+
+    return publisher;
+  }
+};
