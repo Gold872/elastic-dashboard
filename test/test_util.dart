@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'test_util.mocks.dart';
@@ -12,7 +13,8 @@ import 'test_util.mocks.dart';
 @GenerateNiceMocks([
   MockSpec<NTConnection>(),
   MockSpec<NT4Client>(),
-  MockSpec<NT4Subscription>()
+  MockSpec<NT4Subscription>(),
+  MockSpec<DSInteropClient>(),
 ])
 MockNTConnection createMockOfflineNT4() {
   HttpOverrides.global = null;
@@ -26,6 +28,7 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockSubscription.listen(any)).thenAnswer((invocation) {});
 
+  when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(false));
   when(mockNT4Connection.isNT4Connected).thenReturn(false);
 
   when(mockNT4Connection.serverTime).thenReturn(0);
@@ -97,6 +100,7 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockSubscription.listen(any)).thenAnswer((_) {});
 
+  when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(true));
   when(mockNT4Connection.isNT4Connected).thenReturn(true);
 
   when(mockNT4Connection.serverTime).thenReturn(serverTime);

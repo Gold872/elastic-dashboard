@@ -9,7 +9,8 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 class RobotNotificationsListener {
   bool _alertFirstRun = true;
   final NTConnection ntConnection;
-  final Function(String title, String description, Icon icon) onNotification;
+  final Function(String title, String description, Icon icon,
+      Duration displayTime, double width, double? height) onNotification;
 
   RobotNotificationsListener({
     required this.ntConnection,
@@ -37,7 +38,6 @@ class RobotNotificationsListener {
       // If the alert existed 3 or more seconds before the client connected, ignore it
       Duration serverTime = Duration(microseconds: ntConnection.serverTime);
       Duration alertTime = Duration(microseconds: timestamp);
-
       // In theory if you had high enough latency and there was no existing data,
       // this would not work as intended. However, if you find yourself with 3
       // seconds of latency you have a much more serious issue to deal with as you
@@ -50,6 +50,9 @@ class RobotNotificationsListener {
     }
 
     Map<String, dynamic> data;
+    Duration displayTime = const Duration(seconds: 3);
+    double width = 350;
+    double? height;
     try {
       data = jsonDecode(alertData.toString());
     } catch (e) {
@@ -58,6 +61,22 @@ class RobotNotificationsListener {
 
     if (!data.containsKey('level')) {
       return;
+    }
+
+    if (data.containsKey('displayTime')) {
+      displayTime =
+          Duration(milliseconds: (tryCast(data['displayTime']) ?? 3000));
+    }
+
+    if (data.containsKey('width')) {
+      width = tryCast(data['width']) ?? 350;
+    }
+    if (data.containsKey('height')) {
+      height = tryCast(data['height']) ?? -1;
+
+      if (height < 0) {
+        height = null;
+      }
     }
 
     Icon icon;
@@ -84,6 +103,6 @@ class RobotNotificationsListener {
       return;
     }
 
-    onNotification(title, description, icon);
+    onNotification(title, description, icon, displayTime, width, height);
   }
 }

@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
@@ -226,19 +227,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       apiListener.initializeListeners();
     });
 
-    Future(() => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    if (!isWPILib) {
+      Future(
+          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    }
 
     _robotNotificationListener = RobotNotificationsListener(
         ntConnection: widget.ntConnection,
-        onNotification: (title, description, icon) {
+        onNotification: (title, description, icon, time, width, height) {
           setState(() {
             ColorScheme colorScheme = Theme.of(context).colorScheme;
             TextTheme textTheme = Theme.of(context).textTheme;
             var widget = ElegantNotification(
-              autoDismiss: true,
-              showProgressIndicator: true,
+              autoDismiss: time.inMilliseconds > 0,
+              showProgressIndicator: time.inMilliseconds > 0,
               background: colorScheme.surface,
-              width: 350,
+              width: width,
+              height: height,
               position: Alignment.bottomRight,
               title: Text(
                 title,
@@ -246,7 +251,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              toastDuration: const Duration(seconds: 3),
+              toastDuration: time,
               icon: icon,
               description: Text(description),
               stackedOptions: StackedOptions(
@@ -855,6 +860,51 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
     );
+    // Open settings dialog (Ctrl + ,)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.comma,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if ((ModalRoute.of(context)?.isCurrent ?? false) && mounted) {
+          _displaySettingsDialog(context);
+        }
+      },
+    );
+    // Connect to robot (Ctrl + K)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyK,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if (preferences.getInt(PrefKeys.ipAddressMode) ==
+            IPAddressMode.driverStation.index) {
+          return;
+        }
+        _updateIPAddress(IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        _changeIPAddressMode(IPAddressMode.driverStation);
+      },
+    );
+    // Connect to sim (Ctrl + Shift + K)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyK,
+        modifiers: [
+          KeyModifier.control,
+          KeyModifier.shift,
+        ],
+      ),
+      callback: () {
+        if (preferences.getInt(PrefKeys.ipAddressMode) ==
+            IPAddressMode.localhost.index) {
+          return;
+        }
+        _changeIPAddressMode(IPAddressMode.localhost);
+      },
+    );
   }
 
   void _lockLayout() async {
@@ -882,10 +932,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     showAboutDialog(
       context: context,
-      applicationName: 'Elastic',
+      applicationName: appTitle,
       applicationVersion: widget.version,
       applicationIcon: Image.asset(
-        'assets/logos/logo.png',
+        logoPath,
         width: iconTheme.size,
         height: iconTheme.size,
       ),
@@ -971,36 +1021,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
             return;
           }
-          await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
 
-          switch (mode) {
-            case IPAddressMode.driverStation:
-              String? lastAnnouncedIP =
-                  widget.ntConnection.dsClient.lastAnnouncedIP;
-
-              if (lastAnnouncedIP == null) {
-                break;
-              }
-
-              _updateIPAddress(lastAnnouncedIP);
-              break;
-            case IPAddressMode.roboRIOmDNS:
-              _updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
-                  preferences.getInt(PrefKeys.teamNumber) ??
-                      Defaults.teamNumber));
-              break;
-            case IPAddressMode.teamNumber:
-              _updateIPAddress(IPAddressUtil.teamNumberToIP(
-                  preferences.getInt(PrefKeys.teamNumber) ??
-                      Defaults.teamNumber));
-              break;
-            case IPAddressMode.localhost:
-              _updateIPAddress('localhost');
-              break;
-            default:
-              setState(() {});
-              break;
-          }
+          _changeIPAddressMode(mode);
         },
         onIPAddressChanged: (String? data) async {
           if (data == null ||
@@ -1157,6 +1179,35 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onThemeVariantChanged: widget.onThemeVariantChanged,
       ),
     );
+  }
+
+  void _changeIPAddressMode(IPAddressMode mode) async {
+    await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
+    switch (mode) {
+      case IPAddressMode.driverStation:
+        String? lastAnnouncedIP = widget.ntConnection.dsClient.lastAnnouncedIP;
+
+        if (lastAnnouncedIP == null) {
+          break;
+        }
+
+        _updateIPAddress(lastAnnouncedIP);
+        break;
+      case IPAddressMode.roboRIOmDNS:
+        _updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        break;
+      case IPAddressMode.teamNumber:
+        _updateIPAddress(IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        break;
+      case IPAddressMode.localhost:
+        _updateIPAddress('localhost');
+        break;
+      default:
+        setState(() {});
+        break;
+    }
   }
 
   void _updateIPAddress(String newIPAddress) async {
@@ -1357,7 +1408,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       children: [
         Center(
           child: Image.asset(
-            'assets/logos/logo.png',
+            logoPath,
             width: 24.0,
             height: 24.0,
           ),
@@ -1487,21 +1538,22 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 ],
               ),
             ),
-            // Check for Updates
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _checkForUpdates();
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.update_outlined),
-                  SizedBox(width: 8),
-                  Text('Check for updates'),
-                ],
+            // Check for Updates (not for WPILib distribution)
+            if (!isWPILib)
+              MenuItemButton(
+                style: menuButtonStyle,
+                onPressed: () {
+                  _checkForUpdates();
+                },
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.update_outlined),
+                    SizedBox(width: 8),
+                    Text('Check for Updates'),
+                  ],
+                ),
               ),
-            ),
           ],
           child: const Text(
             'Help',
@@ -1554,6 +1606,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     return Scaffold(
       appBar: CustomAppBar(
+        titleText: appTitle,
         onWindowClose: onWindowClose,
         menuBar: menuBar,
       ),

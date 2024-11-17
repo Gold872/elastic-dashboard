@@ -535,7 +535,7 @@ class NT4Client {
 
     _clientId = Random().nextInt(99999999);
 
-    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
+    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
     _mainWebsocket =
         WebSocketChannel.connect(Uri.parse(mainServerAddr), protocols: [
@@ -627,7 +627,7 @@ class NT4Client {
       return;
     }
 
-    String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
+    String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
     _rttWebsocket = WebSocketChannel.connect(Uri.parse(rttServerAddr),
         protocols: ['rtt.networktables.first.wpi.edu']);
 

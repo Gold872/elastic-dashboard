@@ -234,7 +234,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     if (deleting) {
       _lastDisplayedImage?.evict();
       mjpegStream?.previousImage?.evict();
-      mjpegStream?.dispose();
+      mjpegStream?.dispose(deleting: deleting);
     }
 
     super.disposeWidget(deleting: deleting);
@@ -258,7 +258,10 @@ class CameraStreamWidget extends NTWidget {
     CameraStreamModel model = cast(context.watch<NTWidgetModel>());
 
     return ListenableBuilder(
-      listenable: model.streamsSubscription,
+      listenable: Listenable.merge([
+        model.streamsSubscription,
+        model.ntConnection.ntConnected,
+      ]),
       builder: (context, child) {
         List<Object?> rawStreams =
             tryCast(model.streamsSubscription.value) ?? [];
@@ -274,7 +277,7 @@ class CameraStreamWidget extends NTWidget {
           streams.add(stream.substring('mjpg:'.length));
         }
 
-        if (streams.isEmpty || !model.ntConnection.isNT4Connected) {
+        if (streams.isEmpty || !model.ntConnection.ntConnected.value) {
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -315,7 +318,7 @@ class CameraStreamWidget extends NTWidget {
 
         if (createNewWidget) {
           model.lastDisplayedImage?.evict();
-          model.mjpegStream?.dispose();
+          model.mjpegStream?.dispose(deleting: true);
 
           model.mjpegStream = MjpegStreamState(stream: stream);
         }

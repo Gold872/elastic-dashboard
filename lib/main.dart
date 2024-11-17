@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -209,7 +210,7 @@ class _ElasticState extends State<Elastic> {
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Elastic',
+      title: appTitle,
       theme: theme,
       home: DashboardPage(
         ntConnection: widget.ntConnection,

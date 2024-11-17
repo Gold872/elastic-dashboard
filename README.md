@@ -23,7 +23,7 @@ Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is 
 ![Example Layout](/screenshots/example_layout.png)
 
 ## Documentation
-View the online documentation [here](https://github.com/Gold872/elastic-dashboard/wiki)
+View the online documentation [here](https://frc-elastic.gitbook.io/docs)
 
 ## Special Thanks
 
