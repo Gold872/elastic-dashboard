@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 from ntcore import NetworkTableInstance, PubSubOptions
 
 
@@ -11,11 +12,11 @@ class ElasticNotification:
     def __init__(
         self,
         level=NotificationLevel.INFO,
-        title="",
-        description="",
-        display_time=3000,
-        width=350,
-        height=-1,
+        title: str = "",
+        description: str = "",
+        display_time: int = 3000,
+        width: float = 350,
+        height: float = -1,
     ):
         self.level = level
         self.title = title
@@ -24,7 +25,7 @@ class ElasticNotification:
         self.width = width
         self.height = height
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, str | float | int | NotificationLevel]:
         """
         Converts the notification to a dictionary for JSON serialization.
         """
@@ -71,7 +72,88 @@ class ElasticNotification:
 
     def with_no_auto_dismiss(self):
         self.display_time = 0
-        return self
+
+    def get_level(self) -> str:
+        """Returns the level of this notification."""
+        return self.level
+
+    def set_level(self, level: str):
+        """
+        Updates the level of this notification.
+
+        :param level: The level to set the notification to.
+        """
+        self.level = level
+
+    def get_title(self) -> str:
+        """Returns the title of this notification."""
+        return self.title
+
+    def set_title(self, title: str):
+        """
+        Updates the title of this notification.
+
+        :param title: The title to set the notification to.
+        """
+        self.title = title
+
+    def get_description(self) -> str:
+        """Returns the description of this notification."""
+        return self.description
+
+    def set_description(self, description: str):
+        """
+        Updates the description of this notification.
+
+        :param description: The description to set the notification to.
+        """
+        self.description = description
+
+    def get_display_time_millis(self) -> int:
+        """Returns the number of milliseconds the notification is displayed for."""
+        return self.display_time_millis
+
+    def set_display_time_seconds(self, seconds: float):
+        """
+        Updates the display time of the notification in seconds.
+
+        :param seconds: The number of seconds to display the notification for.
+        """
+        self.display_time_millis = int(round(seconds * 1000))
+
+    def set_display_time_millis(self, display_time_millis: int):
+        """
+        Updates the display time of the notification in milliseconds.
+
+        :param display_time_millis: The number of milliseconds to display the notification for.
+        """
+        self.display_time_millis = display_time_millis
+
+    def get_width(self) -> float:
+        """Returns the width of the notification."""
+        return self.width
+
+    def set_width(self, width: float):
+        """
+        Updates the width of the notification.
+
+        :param width: The width to set the notification to.
+        """
+        self.width = width
+
+    def get_height(self) -> float:
+        """Returns the height of the notification."""
+        return self.height
+
+    def set_height(self, height: float):
+        """
+        Updates the height of the notification.
+
+        If the height is set to -1, the height will be determined automatically by the dashboard.
+
+        :param height: The height to set the notification to.
+        """
+        self.height = height
 
 
 class Elastic:
