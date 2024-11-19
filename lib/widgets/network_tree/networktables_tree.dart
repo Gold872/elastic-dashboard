@@ -21,7 +21,7 @@ typedef ListLayoutBuilder = ListLayoutModel Function({
 class NetworkTableTree extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final ListLayoutBuilder listLayoutBuilder;
+  final ListLayoutBuilder? listLayoutBuilder;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
@@ -33,7 +33,7 @@ class NetworkTableTree extends StatefulWidget {
     super.key,
     required this.ntConnection,
     required this.preferences,
-    required this.listLayoutBuilder,
+    this.listLayoutBuilder,
     required this.hideMetadata,
     this.onDragUpdate,
     this.onDragEnd,
@@ -134,6 +134,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   void createRows(NT4Topic nt4Topic) {
     String topic = nt4Topic.name;
+    if (!topic.startsWith('/')) {
+      topic = '/$topic';
+    }
 
     List<String> rows = topic.substring(1).split('/');
     NetworkTableTreeRow? current;
@@ -214,7 +217,7 @@ class TreeTile extends StatelessWidget {
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
 
-  final ListLayoutBuilder listLayoutBuilder;
+  final ListLayoutBuilder? listLayoutBuilder;
 
   final Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
@@ -227,7 +230,7 @@ class TreeTile extends StatelessWidget {
     required this.preferences,
     required this.entry,
     required this.onTap,
-    required this.listLayoutBuilder,
+    this.listLayoutBuilder,
     this.onDragUpdate,
     this.onDragEnd,
   });
