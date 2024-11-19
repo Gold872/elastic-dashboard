@@ -134,6 +134,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   void createRows(NT4Topic nt4Topic) {
     String topic = nt4Topic.name;
+    if (!topic.startsWith('/')) {
+      topic = '/$topic';
+    }
 
     List<String> rows = topic.substring(1).split('/');
     NetworkTableTreeRow? current;
