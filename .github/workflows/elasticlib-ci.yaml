@@ -17,7 +17,6 @@ jobs:
         run: |
           git checkout -b pr
           git branch -f main origin/main
-          cd elasticlib
       - name: Set up Python 3.8
         uses: actions/setup-python@v5
         with:
@@ -26,9 +25,12 @@ jobs:
         run: pip3 install wpiformat==2024.44
       - name: Format Java
         run: wpiformat -f Elastic.java
+        working-directory: ./elasticlib
       - name: Format C++
         run: wpiformat -f elasticlib.h
+        working-directory: ./elasticlib
       - name: Format Python
         run: wpiformat -f elasticlib.py
+        working-directory: ./elasticlib
       - name: Check output
         run: git --no-pager diff --exit-code HEAD
