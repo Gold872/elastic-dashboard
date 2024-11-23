@@ -1,5 +1,5 @@
 // Copyright (c) 2023-2024 Gold87 and other Elastic contributors
-// This Software can be modified and/or shared under the terms
+// This software can be modified and/or shared under the terms
 // defined by the Elastic license:
 // https://github.com/Gold872/elastic-dashboard/blob/main/LICENSE
 
