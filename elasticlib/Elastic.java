@@ -1,26 +1,7 @@
-/*
-MIT License
-
-Copyright (c) 2023-2024 Gold87
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+// Copyright (c) 2023-2024 Gold87 and other Elastic contributors
+// This Software can be modified and/or shared under the terms
+// defined by the Elastic license:
+// https://github.com/Gold872/elastic-dashboard/blob/main/LICENSE
 
 package frc.robot.util;
 
@@ -33,14 +14,15 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
-  private static final StringTopic topic =
-      NetworkTableInstance.getDefault().getStringTopic("/Elastic/RobotNotifications");
-  private static final StringPublisher publisher =
-      topic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
+  private static final StringTopic topic = NetworkTableInstance.getDefault()
+      .getStringTopic("/Elastic/RobotNotifications");
+  private static final StringPublisher publisher = topic.publish(PubSubOption.sendAll(true),
+      PubSubOption.keepDuplicates(true));
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
-   * Sends an alert notification to the Elastic dashboard. The alert is serialized as a JSON string
+   * Sends an alert notification to the Elastic dashboard. The alert is serialized
+   * as a JSON string
    * before being published.
    *
    * @param alert the {@link ElasticNotification} object containing alert details
@@ -54,8 +36,10 @@ public final class Elastic {
   }
 
   /**
-   * Represents a notification object to be sent to the Elastic dashboard. This object holds
-   * properties such as level, title, description, display time, and dimensions to control how the
+   * Represents a notification object to be sent to the Elastic dashboard. This
+   * object holds
+   * properties such as level, title, description, display time, and dimensions to
+   * control how the
    * alert is displayed on the dashboard.
    */
   public static class ElasticNotification {
@@ -78,10 +62,12 @@ public final class Elastic {
     private double height;
 
     /**
-     * Creates a new ElasticNotification with all default parameters. This constructor is intended
+     * Creates a new ElasticNotification with all default parameters. This
+     * constructor is intended
      * to be used with the chainable decorator methods
      *
-     * <p>Title and description fields are empty.
+     * <p>
+     * Title and description fields are empty.
      */
     public ElasticNotification() {
       this(NotificationLevel.INFO, "", "");
@@ -90,12 +76,15 @@ public final class Elastic {
     /**
      * Creates a new ElasticNotification with all properties specified.
      *
-     * @param level the level of the notification (e.g., INFO, WARNING, ERROR)
-     * @param title the title text of the notification
-     * @param description the descriptive text of the notification
-     * @param displayTimeMillis the time in milliseconds for which the notification is displayed
-     * @param width the width of the notification display area
-     * @param height the height of the notification display area, inferred if below zero
+     * @param level             the level of the notification (e.g., INFO, WARNING,
+     *                          ERROR)
+     * @param title             the title text of the notification
+     * @param description       the descriptive text of the notification
+     * @param displayTimeMillis the time in milliseconds for which the notification
+     *                          is displayed
+     * @param width             the width of the notification display area
+     * @param height            the height of the notification display area,
+     *                          inferred if below zero
      */
     public ElasticNotification(
         NotificationLevel level,
@@ -115,8 +104,8 @@ public final class Elastic {
     /**
      * Creates a new ElasticNotification with default display time and dimensions.
      *
-     * @param level the level of the notification
-     * @param title the title text of the notification
+     * @param level       the level of the notification
+     * @param title       the title text of the notification
      * @param description the descriptive text of the notification
      */
     public ElasticNotification(NotificationLevel level, String title, String description) {
@@ -124,11 +113,12 @@ public final class Elastic {
     }
 
     /**
-     * Creates a new ElasticNotification with a specified display time and default dimensions.
+     * Creates a new ElasticNotification with a specified display time and default
+     * dimensions.
      *
-     * @param level the level of the notification
-     * @param title the title text of the notification
-     * @param description the descriptive text of the notification
+     * @param level             the level of the notification
+     * @param title             the title text of the notification
+     * @param description       the descriptive text of the notification
      * @param displayTimeMillis the display time in milliseconds
      */
     public ElasticNotification(
@@ -137,14 +127,16 @@ public final class Elastic {
     }
 
     /**
-     * Creates a new ElasticNotification with specified dimensions and default display time. If the
+     * Creates a new ElasticNotification with specified dimensions and default
+     * display time. If the
      * height is below zero, it is automatically inferred based on screen size.
      *
-     * @param level the level of the notification
-     * @param title the title text of the notification
+     * @param level       the level of the notification
+     * @param title       the title text of the notification
      * @param description the descriptive text of the notification
-     * @param width the width of the notification display area
-     * @param height the height of the notification display area, inferred if below zero
+     * @param width       the width of the notification display area
+     * @param height      the height of the notification display area, inferred if
+     *                    below zero
      */
     public ElasticNotification(
         NotificationLevel level, String title, String description, double width, double height) {
@@ -210,7 +202,8 @@ public final class Elastic {
     /**
      * Updates the display time of the notification in milliseconds
      *
-     * @param displayTimeMillis the number of milliseconds to display the notification for
+     * @param displayTimeMillis the number of milliseconds to display the
+     *                          notification for
      */
     public void setDisplayTimeMillis(int displayTimeMillis) {
       this.displayTimeMillis = displayTimeMillis;
@@ -246,7 +239,9 @@ public final class Elastic {
     /**
      * Updates the height of the notification
      *
-     * <p>If the height is set to -1, the height will be determined automatically by the dashboard
+     * <p>
+     * If the height is set to -1, the height will be determined automatically by
+     * the dashboard
      *
      * @param height the height to set the notification to
      */
@@ -264,7 +259,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's level and returns itself to allow for method chaining
+     * Modifies the notification's level and returns itself to allow for method
+     * chaining
      *
      * @param level the level to set the notification to
      * @return the current notification
@@ -275,7 +271,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's title and returns itself to allow for method chaining
+     * Modifies the notification's title and returns itself to allow for method
+     * chaining
      *
      * @param title the title to set the notification to
      * @return the current notification
@@ -286,7 +283,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's description and returns itself to allow for method chaining
+     * Modifies the notification's description and returns itself to allow for
+     * method chaining
      *
      * @param description the description to set the notification to
      * @return the current notification
@@ -297,7 +295,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's display time and returns itself to allow for method chaining
+     * Modifies the notification's display time and returns itself to allow for
+     * method chaining
      *
      * @param seconds the number of seconds to display the notification for
      * @return the current notification
@@ -307,9 +306,11 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's display time and returns itself to allow for method chaining
+     * Modifies the notification's display time and returns itself to allow for
+     * method chaining
      *
-     * @param displayTimeMillis the number of milliseconds to display the notification for
+     * @param displayTimeMillis the number of milliseconds to display the
+     *                          notification for
      * @return the current notification
      */
     public ElasticNotification withDisplayMilliseconds(int displayTimeMillis) {
@@ -318,7 +319,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's width and returns itself to allow for method chaining
+     * Modifies the notification's width and returns itself to allow for method
+     * chaining
      *
      * @param width the width to set the notification to
      * @return the current notification
@@ -329,7 +331,8 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's height and returns itself to allow for method chaining
+     * Modifies the notification's height and returns itself to allow for method
+     * chaining
      *
      * @param height the height to set the notification to
      * @return the current notification
@@ -340,9 +343,12 @@ public final class Elastic {
     }
 
     /**
-     * Modifies the notification's height and returns itself to allow for method chaining
+     * Modifies the notification's height and returns itself to allow for method
+     * chaining
      *
-     * <p>This will set the height to -1 to have it automatically determined by the dashboard
+     * <p>
+     * This will set the height to -1 to have it automatically determined by the
+     * dashboard
      *
      * @return the current notification
      */
@@ -354,9 +360,12 @@ public final class Elastic {
     /**
      * Modifies the notification to disable the auto dismiss behavior
      *
-     * <p>This sets the display time to 0 milliseconds
+     * <p>
+     * This sets the display time to 0 milliseconds
      *
-     * <p>The auto dismiss behavior can be re-enabled by setting the display time to a number
+     * <p>
+     * The auto dismiss behavior can be re-enabled by setting the display time to a
+     * number
      * greater than 0
      *
      * @return the current notification
@@ -367,7 +376,8 @@ public final class Elastic {
     }
 
     /**
-     * Represents the possible levels of notifications for the Elastic dashboard. These levels are
+     * Represents the possible levels of notifications for the Elastic dashboard.
+     * These levels are
      * used to indicate the severity or type of notification.
      */
     public enum NotificationLevel {
