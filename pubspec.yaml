@@ -28,8 +28,16 @@ dependencies:
   import_sorter: ^4.6.0
   intl: ^0.18.1
   logger: ^2.0.2+1
-  messagepack: ^0.2.1
-  msgpack_dart: ^1.0.1
+  # messagepack: ^0.2.1
+  messagepack:
+    git:
+      url: https://github.com/TheTripleV/messagepack.git
+      ref: master
+  # msgpack_dart: ^1.0.1
+  msgpack_dart:
+    git:
+      url: https://github.com/TheTripleV/msgpack_dart.git
+      ref: fix-cereal
   package_info_plus: ^5.0.1
   path: ^1.8.3
   path_provider: ^2.0.15
@@ -80,5 +88,8 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/logos/logo.png"
   linux:
+    generate: true
+    image_path: "assets/logos/logo.png"
+  web:
     generate: true
     image_path: "assets/logos/logo.png"

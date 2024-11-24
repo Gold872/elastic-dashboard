@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -79,10 +80,15 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   @override
   void initState() {
     super.initState();
+
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
+
     _updateChecker = UpdateChecker(currentVersion: widget.version);
 
     windowManager.addListener(this);
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
@@ -290,6 +296,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   @override
   void dispose() async {
     windowManager.removeListener(this);
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
     super.dispose();
   }
 
@@ -1222,18 +1231,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   void _onDriverStationDocked() async {
-    Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-    double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
-    Size screenSize =
-        (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
-
-    await windowManager.unmaximize();
-
-    Size newScreenSize =
-        Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
-            pixelRatio;
-
-    await windowManager.setSize(newScreenSize);
+    if (!kIsWeb) {
+      Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+      double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
+      Size screenSize =
+          (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
+      Size newScreenSize =
+          Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
+              pixelRatio;
+      await windowManager.setSize(newScreenSize);
+      await windowManager.unmaximize();
+    }
 
     await windowManager.setAlignment(Alignment.topCenter);
 
@@ -1249,9 +1257,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Settings.isWindowDraggable = true;
     await windowManager.setResizable(true);
 
-    // Re-adds the window frame, window manager's API for this is weird
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-        windowButtonVisibility: false);
+    if (!kIsWeb) {
+      // Re-adds the window frame, window manager's API for this is weird
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+          windowButtonVisibility: false);
+    }
   }
 
   void _showWindowCloseConfirmation(BuildContext context) {
