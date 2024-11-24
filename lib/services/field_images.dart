@@ -24,6 +24,8 @@ class FieldImages {
     return fields.map((e) => e.game).contains(game);
   }
 
+  static void resetFields() => fields = [];
+
   static Future loadFields(String directory) async {
     AssetManifest assetManifest =
         await AssetManifest.loadFromAssetBundle(rootBundle);
