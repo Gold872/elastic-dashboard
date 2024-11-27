@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:mockito/annotations.dart';
@@ -236,6 +237,25 @@ MockNTConnection createMockOnlineNT4({
   }
 
   return mockNT4Connection;
+}
+
+@GenerateNiceMocks([
+  MockSpec<UpdateChecker>(),
+])
+MockUpdateChecker createMockUpdateChecker(
+    {bool updateAvailable = false, String latestVersion = '0.0.0.0'}) {
+  MockUpdateChecker updateChecker = MockUpdateChecker();
+
+  when(updateChecker.isUpdateAvailable()).thenAnswer(
+    (_) => Future.value(
+      UpdateCheckerResponse(
+          updateAvailable: updateAvailable,
+          error: false,
+          latestVersion: latestVersion),
+    ),
+  );
+
+  return updateChecker;
 }
 
 void ignoreOverflowErrors(

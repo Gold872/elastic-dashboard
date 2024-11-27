@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -216,6 +217,7 @@ class _ElasticState extends State<Elastic> {
         ntConnection: widget.ntConnection,
         preferences: widget.preferences,
         version: widget.version,
+        updateChecker: UpdateChecker(currentVersion: widget.version),
         onColorChanged: (color) => setState(() {
           teamColor = color;
           widget.preferences.setInt(PrefKeys.teamColor, color.value);
