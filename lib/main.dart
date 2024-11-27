@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -21,6 +20,7 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
