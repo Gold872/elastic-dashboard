@@ -987,6 +987,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     showDialog(
       context: context,
       builder: (context) => SettingsDialog(
+        getLayout: () {
+          return jsonEncode(_toJson());
+        },
+        loadRobotLayout: _loadLayoutFromJsonData,
         ntConnection: widget.ntConnection,
         preferences: widget.preferences,
         onTeamNumberChanged: (String? data) async {

@@ -1,6 +1,8 @@
+import 'dart:io';
+
+import 'package:elastic_dashboard/util/local_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
@@ -40,11 +42,15 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function(String json)? loadRobotLayout;
+  final String Function()? getLayout;
 
   const SettingsDialog({
     super.key,
     required this.ntConnection,
     required this.preferences,
+    required this.getLayout,
+    required this.loadRobotLayout,
     this.onTeamNumberChanged,
     this.onIPAddressModeChanged,
     this.onIPAddressChanged,
@@ -230,6 +236,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 setState(() {});
               },
             );
+          }),
+      TextButton(
+        child: const Text("Save Layout To Robot"),
+        onPressed: () async {
+          await transferStringToFile(
+              widget.getLayout!.call(), PrefKeys.layoutPathOnRobot);
+        },
+      ),
+      TextButton(
+          child: const Text("Load Layout From Robot"),
+          onPressed: () async {
+            String layoutString = await loadFile(PrefKeys.layoutPathOnRobot);
+            print(layoutString);
+            widget.loadRobotLayout?.call(layoutString);
           })
     ];
   }
