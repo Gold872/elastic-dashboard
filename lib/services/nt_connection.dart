@@ -59,7 +59,7 @@ class NTConnection {
 
     // Allows all published topics to be announced
     _ntClient.subscribe(
-      topic: '/',
+      topic: '',
       options: const NT4SubscriptionOptions(topicsOnly: true),
     );
   }
