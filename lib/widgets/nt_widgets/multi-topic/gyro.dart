@@ -1,3 +1,10 @@
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/radial_gauge.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -15,9 +22,10 @@ class GyroModel extends MultiTopicNTWidgetModel {
   String get valueTopic => '$topic/Value';
 
   late NT4Subscription valueSubscription;
+  late NT4Subscription doubleSubscription;
 
   @override
-  List<NT4Subscription> get subscriptions => [valueSubscription];
+  List<NT4Subscription> get subscriptions => [valueSubscription, doubleSubscription];
 
   bool _counterClockwisePositive = false;
 
@@ -50,6 +58,25 @@ class GyroModel extends MultiTopicNTWidgetModel {
   @override
   void initializeSubscriptions() {
     valueSubscription = ntConnection.subscribe(valueTopic, super.period);
+    doubleSubscription = ntConnection.subscribe(topic, super.period);
+  }
+
+  @override
+  List<String> getAvailableDisplayTypes() {
+    if (doubleSubscription.value != null) {
+      return [
+          TextDisplay.widgetType,
+          NumberBar.widgetType,
+          NumberSlider.widgetType,
+          VoltageView.widgetType,
+          RadialGauge.widgetType,
+          Gyro.widgetType,
+          GraphWidget.widgetType,
+          MatchTimeWidget.widgetType,
+        ];
+    }
+
+    return [type];
   }
 
   @override
@@ -93,10 +120,10 @@ class Gyro extends NTWidget {
   Widget build(BuildContext context) {
     GyroModel model = cast(context.watch<NTWidgetModel>());
 
-    return ValueListenableBuilder(
-      valueListenable: model.valueSubscription,
-      builder: (context, data, child) {
-        double value = tryCast(data) ?? 0.0;
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        double value = tryCast(model.valueSubscription.value) ?? tryCast(model.doubleSubscription.value) ?? 0.0;
 
         if (model.counterClockwisePositive) {
           value *= -1;
