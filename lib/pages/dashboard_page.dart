@@ -44,6 +44,7 @@ class DashboardPage extends StatefulWidget {
   final String version;
   final NTConnection ntConnection;
   final SharedPreferences preferences;
+  final UpdateChecker updateChecker;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
@@ -52,6 +53,7 @@ class DashboardPage extends StatefulWidget {
     required this.ntConnection,
     required this.preferences,
     required this.version,
+    required this.updateChecker,
     this.onColorChanged,
     this.onThemeVariantChanged,
   });
@@ -62,7 +64,6 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences preferences = widget.preferences;
-  late final UpdateChecker _updateChecker;
   late final RobotNotificationsListener _robotNotificationListener;
 
   final List<TabData> _tabData = [];
@@ -72,6 +73,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late int _gridSize =
       preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
 
+  UpdateCheckerResponse lastUpdateResponse =
+      UpdateCheckerResponse(updateAvailable: false, error: false);
+
   int _currentTabIndex = 0;
 
   bool _addWidgetDialogVisible = false;
@@ -79,7 +83,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   @override
   void initState() {
     super.initState();
-    _updateChecker = UpdateChecker(currentVersion: widget.version);
 
     windowManager.addListener(this);
     if (!Platform.environment.containsKey('FLUTTER_TEST')) {
@@ -385,7 +388,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
     UpdateCheckerResponse updateResponse =
-        await _updateChecker.isUpdateAvailable();
+        await widget.updateChecker.isUpdateAvailable();
+
+    if (mounted) {
+      setState(() => lastUpdateResponse = updateResponse);
+    }
 
     if (updateResponse.error && notifyIfError) {
       ElegantNotification notification = ElegantNotification(
@@ -428,20 +435,20 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
         icon: const Icon(Icons.info, color: Color(0xff0066FF)),
         description: const Text('A new update is available!'),
-        action: Text(
-          'Update',
-          style: textTheme.bodyMedium!.copyWith(
-            color: buttonTheme.colorScheme?.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        onNotificationPressed: () async {
-          Uri url = Uri.parse(Settings.releasesLink);
+        action: TextButton(
+          onPressed: () async {
+            Uri url = Uri.parse(Settings.releasesLink);
 
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url);
-          }
-        },
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url);
+            }
+          },
+          child: Text('Update',
+              style: textTheme.bodyMedium!.copyWith(
+                color: buttonTheme.colorScheme?.primary,
+                fontWeight: FontWeight.bold,
+              )),
+        ),
       );
 
       if (mounted) {
@@ -1580,35 +1587,65 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               : null,
           child: const Text('Add Widget'),
         ),
-        if ((preferences.getBool(PrefKeys.layoutLocked) ??
-            Defaults.layoutLocked)) ...[
-          const VerticalDivider(),
-          // Unlock Layout
-          Tooltip(
-            message: 'Unlock Layout',
-            child: MenuItemButton(
-              style: menuButtonStyle.copyWith(
-                minimumSize:
-                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-                maximumSize:
-                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-              ),
-              onPressed: () {
-                _unlockLayout();
-                setState(() {});
-              },
-              child: const Icon(Icons.lock_outline),
-            ),
-          ),
-        ],
       ],
     );
+
+    final List<Widget> trailing = [
+      if ((preferences.getBool(PrefKeys.layoutLocked) ??
+          Defaults.layoutLocked)) ...[
+        const VerticalDivider(),
+        // Unlock Layout
+        Tooltip(
+          message: 'Unlock Layout',
+          child: MenuItemButton(
+            style: menuButtonStyle.copyWith(
+              minimumSize:
+                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
+              maximumSize:
+                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
+            ),
+            onPressed: () {
+              _unlockLayout();
+              setState(() {});
+            },
+            child: const Icon(Icons.lock_outline),
+          ),
+        ),
+      ],
+      if (lastUpdateResponse.updateAvailable) ...[
+        const VerticalDivider(),
+        Tooltip(
+          message: 'Download version ${lastUpdateResponse.latestVersion}',
+          child: MenuItemButton(
+            style: menuButtonStyle.copyWith(
+              minimumSize:
+                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
+              maximumSize:
+                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
+            ),
+            onPressed: () async {
+              Uri url = Uri.parse(Settings.releasesLink);
+
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url);
+              }
+            },
+            child: const Icon(Icons.update, color: Colors.orange),
+          ),
+        ),
+      ],
+    ];
+
+    if (trailing.isNotEmpty) {
+      trailing.add(const VerticalDivider());
+    }
 
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
-        menuBar: menuBar,
+        leading: menuBar,
+        trailing: trailing,
       ),
       body: Focus(
         autofocus: true,

@@ -72,6 +72,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -96,6 +97,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -120,6 +122,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -152,6 +155,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -176,6 +180,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -273,6 +278,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -336,6 +342,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -391,6 +398,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -537,6 +545,7 @@ void main() {
           ntConnection: mockNT4Connection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -626,6 +635,7 @@ void main() {
           ntConnection: ntConnection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -672,6 +682,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -704,6 +715,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -733,6 +745,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -763,6 +776,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -789,6 +803,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -831,6 +846,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -867,6 +883,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -925,6 +942,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -981,6 +999,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1041,6 +1060,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1091,6 +1111,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1143,6 +1164,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1175,6 +1197,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1199,6 +1222,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1231,6 +1255,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1267,6 +1292,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1309,6 +1335,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1338,6 +1365,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1376,6 +1404,7 @@ void main() {
           ntConnection: ntConnection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1445,85 +1474,108 @@ void main() {
     expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
   });
 
-  testWidgets(
-    'Robot Notifications',
-    (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-      final Map<String, dynamic> data = {
-        'title': 'Robot Notification Title',
-        'description': 'Robot Notification Description',
-        'level': 'INFO',
-        'displayTime': 350,
-        'width': 300.0,
-        'height': 300.0,
-      };
+  testWidgets('Robot Notifications', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    final Map<String, dynamic> data = {
+      'title': 'Robot Notification Title',
+      'description': 'Robot Notification Description',
+      'level': 'INFO',
+      'displayTime': 350,
+      'width': 300.0,
+      'height': 300.0,
+    };
 
-      MockNTConnection connection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: '/Elastic/RobotNotifications',
-            type: NT4TypeStr.kString,
-            properties: {},
-          )
-        ],
-        virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
-        serverTime: 5000000,
-      );
-      MockNT4Subscription mockSub = MockNT4Subscription();
+    MockNTConnection connection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Elastic/RobotNotifications',
+          type: NT4TypeStr.kString,
+          properties: {},
+        )
+      ],
+      virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
+      serverTime: 5000000,
+    );
+    MockNT4Subscription mockSub = MockNT4Subscription();
 
-      List<Function(Object?, int)> listeners = [];
-      when(mockSub.listen(any)).thenAnswer(
-        (realInvocation) {
-          listeners.add(realInvocation.positionalArguments[0]);
-          mockSub.updateValue(jsonEncode(data), 0);
-        },
-      );
+    List<Function(Object?, int)> listeners = [];
+    when(mockSub.listen(any)).thenAnswer(
+      (realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+        mockSub.updateValue(jsonEncode(data), 0);
+      },
+    );
 
-      when(mockSub.updateValue(any, any)).thenAnswer(
-        (invoc) {
-          for (var value in listeners) {
-            value.call(
-                invoc.positionalArguments[0], invoc.positionalArguments[1]);
-          }
-        },
-      );
+    when(mockSub.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in listeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
 
-      when(connection.subscribeAll(any, any)).thenAnswer(
-        (realInvocation) {
-          return mockSub;
-        },
-      );
+    when(connection.subscribeAll(any, any)).thenAnswer(
+      (realInvocation) {
+        return mockSub;
+      },
+    );
 
-      final notificationWidget =
-          find.widgetWithText(ElegantNotification, data['title']);
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, data['title']);
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: connection,
-            preferences: preferences,
-            version: '0.0.0.0',
-          ),
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: connection,
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
-      );
-      expect(notificationWidget, findsNothing);
+      ),
+    );
+    expect(notificationWidget, findsNothing);
 
-      await widgetTester.pumpAndSettle();
-      connection
-          .subscribeAll('/Elastic/RobotNotifications', 0.2)
-          .updateValue(jsonEncode(data), 1);
+    await widgetTester.pumpAndSettle();
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
 
-      await widgetTester.pump();
+    await widgetTester.pump();
 
-      expect(notificationWidget, findsOneWidget);
+    expect(notificationWidget, findsOneWidget);
 
-      await widgetTester.pumpAndSettle();
+    await widgetTester.pumpAndSettle();
 
-      expect(notificationWidget, findsNothing);
+    expect(notificationWidget, findsNothing);
 
-      connection
-          .subscribeAll('/Elastic/RobotNotifications', 0.2)
-          .updateValue(jsonEncode(data), 1);
-    },
-  );
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
+  });
+
+  testWidgets('Update Notification', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(
+              updateAvailable: true, latestVersion: '2025.0.1'),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, 'Version 2025.0.1 Available');
+    final notificationIcon = find.byIcon(Icons.update);
+
+    expect(notificationWidget, findsOneWidget);
+    expect(notificationIcon, findsOneWidget);
+  });
 }
