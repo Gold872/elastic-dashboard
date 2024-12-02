@@ -9,6 +9,7 @@ environment:
 dependencies:
   animations: ^2.0.7
   collection: ^1.17.1
+  dartssh2: ^2.11.0
   decimal: ^2.3.3
   dot_cast: ^1.2.0
   dropdown_button2: ^2.3.9
