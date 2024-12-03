@@ -5,7 +5,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -39,15 +41,16 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../test_util.dart';
+import '../test_util.mocks.dart';
 
 void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late String jsonString;
   late Map<String, dynamic> jsonData;
+  late SharedPreferences preferences;
 
   setUpAll(() async {
-    setupMockOfflineNT4();
     await FieldImages.loadFields('assets/fields/');
 
     String filePath =
@@ -55,6 +58,9 @@ void main() async {
 
     jsonString = File(filePath).readAsStringSync();
     jsonData = jsonDecode(jsonString);
+
+    SharedPreferences.setMockInitialValues({});
+    preferences = await SharedPreferences.getInstance();
   });
 
   testWidgets('Tab grid loading (Tab 1)', (widgetTester) async {
@@ -73,18 +79,20 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
     );
 
-    await widgetTester.pump(Duration.zero);
+    await widgetTester.pumpAndSettle();
 
     expect(find.bySubtype<DraggableNTWidgetContainer>(), findsNWidgets(10));
     expect(find.bySubtype<DraggableWidgetContainer>(), findsNWidgets(11));
@@ -120,18 +128,20 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][1]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
     );
 
-    await widgetTester.pump(Duration.zero);
+    await widgetTester.pumpAndSettle();
 
     expect(find.bySubtype<DraggableNTWidgetContainer>(), findsNWidgets(14));
     expect(find.bySubtype<NTWidget>(), findsNWidgets(14));
@@ -160,19 +170,20 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
     );
 
-    await widgetTester.pump(Duration.zero);
+    await widgetTester.pumpAndSettle();
 
     await widgetTester.ensureVisible(find.text('Test Number'));
 
@@ -228,6 +239,66 @@ void main() async {
     await widgetTester.pumpAndSettle();
   });
 
+  testWidgets('Editing properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
+              jsonData: jsonData['tabs'][0]['grid_layout'],
+              onAddWidgetPressed: () {},
+            ),
+            child: const TabGrid(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.ensureVisible(find.text('Test Number'));
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tapAt(const Offset(320.0, 64.0),
+        buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Paste'), findsNothing);
+
+    // Dismiss context menu
+    await widgetTester.tapAt(const Offset(320.0, 64.0));
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tap(find.text('Test Number'),
+        buttons: kSecondaryMouseButton);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Test Number'), findsAtLeastNWidgets(2));
+    expect(find.text('Copy'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Copy'));
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tapAt(const Offset(320.0, 64.0),
+        buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Paste'), findsOneWidget);
+    await widgetTester.tap(find.text('Paste'));
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Test Number'), findsNWidgets(2));
+  });
+
   testWidgets('Dragging widgets', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
     widgetTester.view.physicalSize = const Size(1920, 1080);
@@ -236,19 +307,20 @@ void main() async {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: ChangeNotifierProvider(
-            create: (context) => TabGridModel(),
-            child: TabGrid.fromJson(
-              key: GlobalKey(),
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: TabGridModel.fromJson(
+              ntConnection: createMockOfflineNT4(),
+              preferences: preferences,
               jsonData: jsonData['tabs'][0]['grid_layout'],
               onAddWidgetPressed: () {},
             ),
+            child: const TabGrid(),
           ),
         ),
       ),
     );
 
-    await widgetTester.pump(Duration.zero);
+    await widgetTester.pumpAndSettle();
 
     final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
 
@@ -274,5 +346,51 @@ void main() async {
     await widgetTester.pumpAndSettle();
 
     expect(gyroWidget, findsOneWidget);
+  });
+
+  testWidgets('Disposing properly unsubscribes', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    widgetTester.view.physicalSize = const Size(1920, 1080);
+    widgetTester.view.devicePixelRatio = 1.0;
+
+    expect(jsonData.containsKey('tabs'), true);
+
+    expect(jsonData['tabs'][0].containsValue('Teleoperated'), true);
+    expect(jsonData['tabs'][0].containsKey('grid_layout'), true);
+
+    expect(jsonData['tabs'][1].containsValue('Autonomous'), true);
+    expect(jsonData['tabs'][1].containsKey('grid_layout'), true);
+
+    MockNTConnection ntConnection = createMockOnlineNT4();
+
+    TabGridModel tabGridModel = TabGridModel.fromJson(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      jsonData: jsonData['tabs'][0]['grid_layout'],
+      onAddWidgetPressed: () {},
+    );
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<TabGridModel>.value(
+            value: tabGridModel,
+            child: const TabGrid(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    int subscribeCallCount = verify(ntConnection.subscribe(any, any)).callCount;
+
+    expect(subscribeCallCount, greaterThan(10));
+
+    tabGridModel.clearWidgets();
+
+    await widgetTester.pumpAndSettle();
+
+    verify(ntConnection.unSubscribe(any)).called(subscribeCallCount);
   });
 }

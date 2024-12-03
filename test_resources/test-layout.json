@@ -92,7 +92,9 @@
               "robot_width": 0.82,
               "robot_length": 1.0,
               "show_other_objects": true,
-              "show_trajectories": true
+              "show_trajectories": true,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
             }
           },
           {
@@ -362,7 +364,7 @@
               "min_value": -1.0,
               "max_value": 1.0,
               "divisions": 5,
-              "publish_all": false
+              "update_continuously": false
             }
           },
           {
@@ -376,8 +378,6 @@
               "topic": "/SmartDashboard/Voltage",
               "period": 0.033,
               "time_displayed": 5.0,
-              "min_value": null,
-              "max_value": null,
               "color": 4278238420,
               "line_width": 2.0
             }

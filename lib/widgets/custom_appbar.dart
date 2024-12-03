@@ -8,26 +8,28 @@ import 'package:elastic_dashboard/services/settings.dart';
 class CustomAppBar extends AppBar {
   final String titleText;
   final Color? appBarColor;
-  final MenuBar menuBar;
   final VoidCallback? onWindowClose;
+
+  final List<Widget> trailing;
 
   static const double _leadingSize = 500;
   static const ThemeType buttonType = ThemeType.materia;
 
-  CustomAppBar(
-      {super.key,
-      this.titleText = 'Elastic',
-      this.appBarColor,
-      this.onWindowClose,
-      required this.menuBar})
-      : super(
+  CustomAppBar({
+    super.key,
+    this.titleText = 'Elastic',
+    this.appBarColor,
+    this.onWindowClose,
+    this.trailing = const [],
+    required super.leading,
+  }) : super(
           toolbarHeight: 36,
           backgroundColor: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
           elevation: 0.0,
           scrolledUnderElevation: 0.0,
-          leading: menuBar,
           leadingWidth: _leadingSize,
           centerTitle: true,
+          notificationPredicate: (_) => false,
           actions: [
             SizedBox(
               width: _leadingSize,
@@ -37,6 +39,7 @@ class CustomAppBar extends AppBar {
                   const Expanded(
                     child: _WindowDragArea(),
                   ),
+                  ...trailing.map((e) => ExcludeFocus(child: e)),
                   InkWell(
                     canRequestFocus: false,
                     onTap: () async => await windowManager.minimize(),

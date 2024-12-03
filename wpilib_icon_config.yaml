@@ -1,0 +1,12 @@
+flutter_launcher_icons:
+  image_path: "assets/logos/wpilib_logo.png"
+  windows:
+    generate: true
+    image_path: "assets/logos/wpilib_logo.png"
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: "assets/logos/wpilib_logo.png"
+  linux:
+    generate: true
+    image_path: "assets/logos/wpilib_logo.png"

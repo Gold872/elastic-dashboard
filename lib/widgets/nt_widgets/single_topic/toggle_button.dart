@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class ToggleButton extends NTWidget {
@@ -13,13 +12,12 @@ class ToggleButton extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    NTWidgetModel model = context.watch<NTWidgetModel>();
+    SingleTopicNTWidgetModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-        stream: model.subscription?.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(model.topic),
-        builder: (context, snapshot) {
-          bool value = tryCast(snapshot.data) ?? false;
+    return ValueListenableBuilder(
+        valueListenable: model.subscription!,
+        builder: (context, data, child) {
+          bool value = tryCast(data) ?? false;
 
           String buttonText =
               model.topic.substring(model.topic.lastIndexOf('/') + 1);
@@ -31,7 +29,7 @@ class ToggleButton extends NTWidget {
           return GestureDetector(
             onTapUp: (_) {
               bool publishTopic = model.ntTopic == null ||
-                  !ntConnection.isTopicPublished(model.ntTopic);
+                  !model.ntConnection.isTopicPublished(model.ntTopic);
 
               model.createTopicIfNull();
 
@@ -40,10 +38,10 @@ class ToggleButton extends NTWidget {
               }
 
               if (publishTopic) {
-                ntConnection.nt4Client.publishTopic(model.ntTopic!);
+                model.ntConnection.publishTopic(model.ntTopic!);
               }
 
-              ntConnection.updateDataFromTopic(model.ntTopic!, !value);
+              model.ntConnection.updateDataFromTopic(model.ntTopic!, !value);
             },
             child: Padding(
               padding: EdgeInsets.symmetric(

@@ -53,12 +53,10 @@ class NT4TypeStr {
   static const kStringArr = 'string[]';
 }
 
-class NT4Subscription {
+class NT4Subscription extends ValueNotifier<Object?> {
   final String topic;
   final NT4SubscriptionOptions options;
   final int uid;
-
-  int useCount = 0;
 
   Object? currentValue;
   int timestamp = 0;
@@ -69,7 +67,7 @@ class NT4Subscription {
     required this.topic,
     this.options = const NT4SubscriptionOptions(),
     this.uid = -1,
-  });
+  }) : super(null);
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
@@ -124,11 +122,12 @@ class NT4Subscription {
   }
 
   void updateValue(Object? value, int timestamp) {
+    for (var listener in _listeners) {
+      listener(value, timestamp);
+    }
     currentValue = value;
     this.timestamp = timestamp;
-    for (var listener in _listeners) {
-      listener(currentValue, timestamp);
-    }
+    super.value = value;
   }
 
   Map<String, dynamic> _toSubscribeJson() {
@@ -153,7 +152,7 @@ class NT4Subscription {
       other.options == options;
 
   @override
-  int get hashCode => Object.hashAllUnordered([topic, options]);
+  int get hashCode => Object.hashAll([topic, options]);
 }
 
 class NT4SubscriptionOptions {
@@ -189,7 +188,7 @@ class NT4SubscriptionOptions {
 
   @override
   int get hashCode =>
-      Object.hashAllUnordered([periodicRateSeconds, all, topicsOnly, prefix]);
+      Object.hashAll([periodicRateSeconds, all, topicsOnly, prefix]);
 }
 
 class NT4Topic {
@@ -245,6 +244,7 @@ class NT4Client {
   final VoidCallback? onConnect;
   final VoidCallback? onDisconnect;
   final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
+  final List<Function(NT4Topic topic)> _topicUnannounceListeners = [];
 
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
@@ -272,7 +272,13 @@ class NT4Client {
   bool _serverConnectionActive = false;
   bool _rttConnectionActive = false;
 
+  bool get mainWebsocketActive =>
+      _mainWebsocket != null && _mainWebsocket!.closeCode == null;
+  bool get rttWebsocketActive =>
+      _rttWebsocket != null && _rttWebsocket!.closeCode == null;
+
   bool _useRTT = false;
+  bool _attemptingConnection = true;
 
   int _lastPongTime = 0;
 
@@ -292,7 +298,9 @@ class NT4Client {
 
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
-    _wsOnClose();
+    _wsOnClose(false);
+    _attemptingConnection = true;
+    Future.delayed(const Duration(milliseconds: 100), _connect);
   }
 
   Stream<double> latencyStream() async* {
@@ -312,35 +320,33 @@ class NT4Client {
 
   void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
     _topicAnnounceListeners.add(onAnnounce);
+
+    for (NT4Topic topic in announcedTopics.values) {
+      onAnnounce(topic);
+    }
   }
 
   void removeTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {
     _topicAnnounceListeners.remove(onAnnounce);
   }
 
-  void recallAnnounceListeners() {
-    for (NT4Topic topic in announcedTopics.values) {
-      for (var callback in _topicAnnounceListeners) {
-        callback.call(topic);
-      }
-    }
+  void addTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _topicUnannounceListeners.add(onUnannounce);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
+  void removeTopicUnannounceListener(Function(NT4Topic topic) onUnannounce) {
+    _topicUnannounceListeners.add(onUnannounce);
+  }
+
+  NT4Subscription subscribe({
+    required String topic,
+    NT4SubscriptionOptions options = const NT4SubscriptionOptions(),
+  }) {
     NT4Subscription newSub = NT4Subscription(
       topic: topic,
       uid: getNewSubUID(),
-      options: NT4SubscriptionOptions(periodicRateSeconds: period),
+      options: options,
     );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
@@ -355,73 +361,28 @@ class NT4Client {
     return newSub;
   }
 
-  NT4Subscription subscribeAllSamples(String topic, [double period = 0.1]) {
-    NT4Subscription newSub = NT4Subscription(
-      topic: topic,
-      uid: getNewSubUID(),
-      options: const NT4SubscriptionOptions(all: true),
-    );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
-
-    _subscriptions[newSub.uid] = newSub;
-    _wsSubscribe(newSub);
-    return newSub;
-  }
-
-  NT4Subscription subscribeTopicsOnly(String topic) {
-    NT4Subscription newSub = NT4Subscription(
-      topic: topic,
-      uid: getNewSubUID(),
-      options: const NT4SubscriptionOptions(topicsOnly: true),
-    );
-
-    if (_subscribedTopics.contains(newSub)) {
-      NT4Subscription subscription = _subscribedTopics.lookup(newSub)!;
-      subscription.useCount++;
-
-      return subscription;
-    }
-
-    newSub.useCount++;
-
-    _subscriptions[newSub.uid] = newSub;
-    _wsSubscribe(newSub);
-    return newSub;
-  }
-
   void unSubscribe(NT4Subscription sub) {
-    sub.useCount--;
+    _subscriptions.remove(sub.uid);
+    _subscribedTopics.remove(sub);
+    _wsUnsubscribe(sub);
 
-    if (sub.useCount <= 0) {
-      _subscriptions.remove(sub.uid);
-      _subscribedTopics.remove(sub);
-      _wsUnsubscribe(sub);
-
-      // If there are no other subscriptions that are in the same table/tree
-      if (!_subscribedTopics.any((element) =>
-          element.topic.startsWith('${sub.topic}/') ||
-          '${sub.topic}/'.startsWith(element.topic))) {
-        // If there are any topics associated with the table/tree, unpublish them
-        for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
-            element.name.startsWith('${sub.topic}/') ||
-            '${sub.topic}/'.startsWith(element.name))) {
-          Future(() => unpublishTopic(topic));
-        }
+    // If there are no other subscriptions that are in the same table/tree
+    if (!_subscribedTopics.any((element) =>
+        element.topic.startsWith('${sub.topic}/') ||
+        sub.topic.startsWith('${element.topic}/') ||
+        sub.topic == element.topic)) {
+      // If there are any topics associated with the table/tree, unpublish them
+      for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
+          element.name.startsWith('${sub.topic}/') ||
+          sub.topic.startsWith('${element.name}/') ||
+          sub.topic == element.name)) {
+        Future(() => unpublishTopic(topic));
       }
     }
   }
 
   void clearAllSubscriptions() {
     for (NT4Subscription sub in _subscriptions.values) {
-      sub.useCount = 0;
       unSubscribe(sub);
     }
     _subscriptions.clear();
@@ -464,7 +425,7 @@ class NT4Client {
   }
 
   void addSample(NT4Topic topic, dynamic data, [int? timestamp]) {
-    timestamp ??= _getServerTimeUS();
+    timestamp ??= getServerTimeUS();
 
     _wsSendBinary(
         serialize([topic.pubUID, timestamp, topic.getTypeId(), data]));
@@ -492,7 +453,7 @@ class NT4Client {
     return DateTime.now().microsecondsSinceEpoch;
   }
 
-  int _getServerTimeUS() {
+  int getServerTimeUS() {
     return _getClientTimeUS() + _serverTimeOffsetUS;
   }
 
@@ -505,8 +466,10 @@ class NT4Client {
           serialize([timeTopic.pubUID, 0, timeTopic.getTypeId(), timeToSend]);
 
       if (_useRTT) {
-        _rttWebsocket?.sink.add(rawData);
-      } else {
+        if (rttWebsocketActive && mainWebsocketActive) {
+          _rttWebsocket?.sink.add(rawData);
+        }
+      } else if (mainWebsocketActive) {
         _mainWebsocket?.sink.add(rawData);
       }
     }
@@ -545,6 +508,10 @@ class NT4Client {
   }
 
   void _wsSendJSON(String method, Map<String, dynamic> params) {
+    if (!mainWebsocketActive) {
+      return;
+    }
+
     _mainWebsocket?.sink.add(jsonEncode([
       {
         'method': method,
@@ -554,17 +521,21 @@ class NT4Client {
   }
 
   void _wsSendBinary(dynamic data) {
+    if (!mainWebsocketActive) {
+      return;
+    }
+
     _mainWebsocket?.sink.add(data);
   }
 
   void _connect() async {
-    if (_serverConnectionActive) {
+    if (_serverConnectionActive || !_attemptingConnection) {
       return;
     }
 
     _clientId = Random().nextInt(99999999);
 
-    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
+    String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
     _mainWebsocket =
         WebSocketChannel.connect(Uri.parse(mainServerAddr), protocols: [
@@ -577,10 +548,13 @@ class NT4Client {
     } catch (e) {
       // Failed to connect... try again
       logger.info(
-          'Failed to connect to network tables, attempting to reconnect in 1 second');
-      Future.delayed(const Duration(seconds: 1), _connect);
+          'Failed to connect to network tables, attempting to reconnect in 500 ms');
+      if (_attemptingConnection) {
+        Future.delayed(const Duration(milliseconds: 500), _connect);
+      }
       return;
     }
+    _attemptingConnection = false;
 
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
@@ -595,7 +569,6 @@ class NT4Client {
       _useRTT = true;
       _pingInterval = _pingIntervalMsV41;
       _timeoutInterval = _pingTimeoutMsV41;
-      await _rttConnect();
     } else {
       _useRTT = false;
       _pingInterval = _pingIntervalMsV40;
@@ -617,6 +590,10 @@ class NT4Client {
       },
       cancelOnError: true,
     );
+
+    if (_useRTT) {
+      await _rttConnect();
+    }
 
     NT4Topic timeTopic = NT4Topic(
         name: 'Time',
@@ -650,7 +627,7 @@ class NT4Client {
       return;
     }
 
-    String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/elastic';
+    String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
     _rttWebsocket = WebSocketChannel.connect(Uri.parse(rttServerAddr),
         protocols: ['rtt.networktables.first.wpi.edu']);
 
@@ -658,8 +635,8 @@ class NT4Client {
       await _rttWebsocket!.ready;
     } catch (e) {
       logger.info(
-          'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 1 second');
-      Future.delayed(const Duration(seconds: 1), _rttConnect);
+          'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms');
+      Future.delayed(const Duration(milliseconds: 500), _rttConnect);
       return;
     }
 
@@ -677,7 +654,7 @@ class NT4Client {
           _rttConnectionActive = true;
         }
 
-        if (!_serverConnectionActive && _mainWebsocket != null) {
+        if (!_serverConnectionActive && mainWebsocketActive) {
           _onFirstMessageReceived();
         }
 
@@ -735,7 +712,9 @@ class NT4Client {
     logger.info('RTT Connection closed');
   }
 
-  void _wsOnClose() async {
+  void _wsOnClose([bool autoReconnect = true]) async {
+    _attemptingConnection = false;
+
     _pingTimer?.cancel();
     _pongTimer?.cancel();
 
@@ -763,9 +742,11 @@ class NT4Client {
 
     announcedTopics.clear();
 
-    logger.debug('[NT4] Connection closed. Attempting to reconnect in 1s');
-
-    Future.delayed(const Duration(seconds: 1), _connect);
+    logger.debug('[NT4] Connection closed. Attempting to reconnect in 500 ms');
+    if (autoReconnect && !_attemptingConnection) {
+      _attemptingConnection = true;
+      Future.delayed(const Duration(milliseconds: 500), _connect);
+    }
   }
 
   void _wsOnMessage(data) {
@@ -822,6 +803,10 @@ class NT4Client {
             return;
           }
           announcedTopics.remove(removedTopic.id);
+
+          for (final listener in _topicUnannounceListeners) {
+            listener.call(removedTopic);
+          }
         } else if (method == 'properties') {
           String topicName = params['name'];
           NT4Topic? topic = getTopicFromName(topicName);

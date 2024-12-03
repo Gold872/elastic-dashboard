@@ -1,0 +1,22 @@
+cppHeaderFileInclude {
+   \.h$
+   \.hpp$
+   \.inc$
+   \.inl$
+}
+
+cppSrcFileInclude {
+   \.cpp$
+}
+
+modifiableFileExclude {
+   gradle/
+   assets/
+   macos/
+   windows/
+   linux/
+   test_resources/
+   screenshots/
+   installer_setup_script.iss
+   README.md
+}

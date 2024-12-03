@@ -13,12 +13,12 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: 3.22.0
+  FLUTTER_VERSION: 3.22.3
 
 jobs:
   formatting-analysis:
     name: "Check Formatting & Analyze"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repo
@@ -40,11 +40,14 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib/* test/*
 
+      - name: Verify import sorting
+        run: dart run import_sorter:main --exit-if-changed
+
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
   test:
     name: "Run Tests"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repo
@@ -67,7 +70,7 @@ jobs:
         run: flutter test --coverage
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   build:
@@ -83,7 +86,7 @@ jobs:
             build-option: "macos"
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
             artifact-name: Elastic-macOS
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
@@ -96,11 +99,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install flutter dependencies
+      - name: Install flutter build dependencies
         if: ${{ matrix.build-option == 'linux' }}
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install -y libglu1-mesa ninja-build libgtk-3-dev liblzma-dev
 
       - name: Setup flutter
         uses: subosito/flutter-action@v2
@@ -122,10 +125,110 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         run: |
           cd build/macos/Build/Products/Release
-          zip -r Elastic-macOS.zip elastic_dashboard.app --symlinks
+          zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        if: ${{ matrix.build-option != 'windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Upload windows portable
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_portable
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Create macOS installer
+        if: ${{ matrix.build-option == 'macos' }}
+        uses: L-Super/create-dmg-actions@v1.0.3
+        with:
+          dmg_name: build/macos/Build/Products/Release/elastic-setup
+          src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
+
+      - name: Upload macOS installer
+        if: ${{ matrix.build-option == 'macos' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_installer
+          path: build/macos/Build/Products/Release/elastic-setup.dmg
+          if-no-files-found: error
+
+      - name: Create windows installer
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+        with:
+          path: installer_setup_script.iss
+          options: /O+
+
+      - name: Upload windows installer
+        if: ${{ matrix.build-option == 'windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_installer
+          path: "build/windows/x64/installer"
+          if-no-files-found: error
+
+  build-wpilib:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build-option: "windows"
+            artifact-path: "build/windows/x64/runner/Release"
+            artifact-name: Elastic-WPILib-Windows
+          - os: macos-latest
+            build-option: "macos"
+            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.tar.gz"
+            artifact-name: Elastic-WPILib-macOS
+          - os: ubuntu-22.04
+            build-option: "linux"
+            artifact-path: "build/linux/x64/release/bundle"
+            artifact-name: Elastic-WPILib-Linux
+
+    name: "Build - ${{ matrix.artifact-name }}"
+    needs: [formatting-analysis, test]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install flutter build dependencies
+        if: ${{ matrix.build-option == 'linux' }}
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libglu1-mesa ninja-build libgtk-3-dev liblzma-dev
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-path: ${{ runner.tool_cache }}/flutter/${{ matrix.build-option }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate icons
+        run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
+
+      - name: Build app
+        run: flutter build ${{ matrix.build-option }} --dart-define=ELASTIC_WPILIB=true
+
+      - name: Zip release
+        if: ${{ matrix.build-option == 'macos' }}
+        run: |
+          cd build/macos/Build/Products/Release
+          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}

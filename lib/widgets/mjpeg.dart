@@ -175,7 +175,7 @@ class MjpegStreamState {
     });
   }
 
-  void dispose() {
+  void dispose({bool deleting = false}) {
     for (StreamSubscription subscription in _subscriptions.values) {
       subscription.cancel();
     }
@@ -186,6 +186,10 @@ class MjpegStreamState {
     httpClient.close();
     httpClient = Client();
     bitCount = 0;
+
+    if (deleting) {
+      bandwidthTimer.cancel();
+    }
   }
 
   void cancelSubscription(Key key) {

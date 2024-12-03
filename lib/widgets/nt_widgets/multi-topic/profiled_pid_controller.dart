@@ -4,12 +4,10 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class ProfiledPIDControllerModel extends NTWidgetModel {
+class ProfiledPIDControllerModel extends MultiTopicNTWidgetModel {
   @override
   String type = ProfiledPIDControllerWidget.widgetType;
 
@@ -22,6 +20,19 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
   NT4Topic? _kiTopic;
   NT4Topic? _kdTopic;
   NT4Topic? _goalTopic;
+
+  late NT4Subscription kpSubscription;
+  late NT4Subscription kiSubscription;
+  late NT4Subscription kdSubscription;
+  late NT4Subscription goalSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        kpSubscription,
+        kiSubscription,
+        kdSubscription,
+        goalSubscription,
+      ];
 
   TextEditingController? kpTextController;
   TextEditingController? kiTextController;
@@ -49,12 +60,27 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
 
   set goalLastValue(value) => _goalLastValue = value;
 
-  ProfiledPIDControllerModel(
-      {required super.topic, super.dataType, super.period})
-      : super();
+  ProfiledPIDControllerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  ProfiledPIDControllerModel.fromJson({required super.jsonData})
-      : super.fromJson();
+  ProfiledPIDControllerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    kpSubscription = ntConnection.subscribe(kpTopicName, super.period);
+    kiSubscription = ntConnection.subscribe(kiTopicName, super.period);
+    kdSubscription = ntConnection.subscribe(kdTopicName, super.period);
+    goalSubscription = ntConnection.subscribe(goalTopicName, super.period);
+  }
 
   @override
   void resetSubscription() {
@@ -78,7 +104,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kpTopic!);
+      ntConnection.publishTopic(_kpTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kpTopic!, data);
@@ -96,7 +122,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kiTopic!);
+      ntConnection.publishTopic(_kiTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kiTopic!, data);
@@ -114,7 +140,7 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_kdTopic!);
+      ntConnection.publishTopic(_kdTopic!);
     }
 
     ntConnection.updateDataFromTopic(_kdTopic!, data);
@@ -132,34 +158,10 @@ class ProfiledPIDControllerModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_goalTopic!);
+      ntConnection.publishTopic(_goalTopic!);
     }
 
     ntConnection.updateDataFromTopic(_goalTopic!, data);
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    double kP = tryCast(ntConnection.getLastAnnouncedValue(kpTopicName)) ?? 0.0;
-    double kI = tryCast(ntConnection.getLastAnnouncedValue(kiTopicName)) ?? 0.0;
-    double kD = tryCast(ntConnection.getLastAnnouncedValue(kdTopicName)) ?? 0.0;
-    double goal =
-        tryCast(ntConnection.getLastAnnouncedValue(goalTopicName)) ?? 0.0;
-
-    return [
-      kP,
-      kI,
-      kD,
-      goal,
-      _kpLastValue,
-      _kiLastValue,
-      _kdLastValue,
-      _goalLastValue,
-      kpTextController?.text ?? '',
-      kiTextController?.text ?? '',
-      kdTextController?.text ?? '',
-      goalTextController?.text ?? '',
-    ];
   }
 }
 
@@ -172,28 +174,36 @@ class ProfiledPIDControllerWidget extends NTWidget {
   Widget build(BuildContext context) {
     ProfiledPIDControllerModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-        stream: model.multiTopicPeriodicStream,
-        builder: (context, snapshot) {
-          double kP =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kpTopicName)) ??
-                  0.0;
-          double kI =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kiTopicName)) ??
-                  0.0;
-          double kD =
-              tryCast(ntConnection.getLastAnnouncedValue(model.kdTopicName)) ??
-                  0.0;
-          double goal = tryCast(
-                  ntConnection.getLastAnnouncedValue(model.goalTopicName)) ??
-              0.0;
+    return ListenableBuilder(
+        listenable: Listenable.merge([
+          ...model.subscriptions,
+          model.kpTextController,
+          model.kiTextController,
+          model.kdTextController,
+          model.goalTextController,
+        ]),
+        builder: (context, child) {
+          double kP = tryCast(model.kpSubscription.value) ?? 0.0;
+          double kI = tryCast(model.kiSubscription.value) ?? 0.0;
+          double kD = tryCast(model.kdSubscription.value) ?? 0.0;
+          double goal = tryCast(model.goalSubscription.value) ?? 0.0;
 
           // Creates the text editing controllers if they are null
+          bool wasNull = model.kpTextController == null ||
+              model.kiTextController == null ||
+              model.kdTextController == null ||
+              model.goalTextController == null;
+
           model.kpTextController ??= TextEditingController(text: kP.toString());
           model.kiTextController ??= TextEditingController(text: kI.toString());
           model.kdTextController ??= TextEditingController(text: kD.toString());
           model.goalTextController ??=
               TextEditingController(text: goal.toString());
+
+          // Since they were null they're not being listened to when created during build
+          if (wasNull) {
+            model.refresh();
+          }
 
           // Updates the text of the text editing controller if the kp value has changed
           if (kP != model.kpLastValue) {
@@ -230,6 +240,8 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   kD != double.tryParse(model.kdTextController!.text) ||
                   goal != double.tryParse(model.goalTextController!.text);
 
+          // The text fields can't be DialogTextInput since DialogTextInput
+          // manages its own state which causes setState() while build errors
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -242,12 +254,19 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   const Spacer(),
                   Flexible(
                     flex: 5,
-                    child: DialogTextInput(
-                      textEditingController: model.kpTextController,
-                      initialText: model.kpTextController!.text,
-                      label: 'kP',
-                      formatter: TextFormatterBuilder.decimalTextFormatter(),
-                      onSubmit: (value) {},
+                    child: TextField(
+                      controller: model.kpTextController,
+                      textAlign: TextAlign.left,
+                      inputFormatters: [
+                        TextFormatterBuilder.decimalTextFormatter()
+                      ],
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        labelText: 'kP',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onSubmitted: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -262,12 +281,19 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   const Spacer(),
                   Flexible(
                     flex: 5,
-                    child: DialogTextInput(
-                      textEditingController: model.kiTextController,
-                      initialText: model.kiTextController!.text,
-                      label: 'kI',
-                      formatter: TextFormatterBuilder.decimalTextFormatter(),
-                      onSubmit: (value) {},
+                    child: TextField(
+                      controller: model.kiTextController,
+                      textAlign: TextAlign.left,
+                      inputFormatters: [
+                        TextFormatterBuilder.decimalTextFormatter()
+                      ],
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        labelText: 'kI',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onSubmitted: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -282,12 +308,19 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   const Spacer(),
                   Flexible(
                     flex: 5,
-                    child: DialogTextInput(
-                      textEditingController: model.kdTextController,
-                      initialText: model.kdTextController!.text,
-                      label: 'kD',
-                      formatter: TextFormatterBuilder.decimalTextFormatter(),
-                      onSubmit: (value) {},
+                    child: TextField(
+                      controller: model.kdTextController,
+                      textAlign: TextAlign.left,
+                      inputFormatters: [
+                        TextFormatterBuilder.decimalTextFormatter()
+                      ],
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        labelText: 'kD',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onSubmitted: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -300,13 +333,19 @@ class ProfiledPIDControllerWidget extends NTWidget {
                   const Spacer(),
                   Flexible(
                     flex: 5,
-                    child: DialogTextInput(
-                      textEditingController: model.goalTextController,
-                      initialText: model.goalTextController!.text,
-                      label: 'Goal',
-                      formatter: TextFormatterBuilder.decimalTextFormatter(
-                          allowNegative: true),
-                      onSubmit: (value) {},
+                    child: TextField(
+                      controller: model.goalTextController,
+                      textAlign: TextAlign.left,
+                      inputFormatters: [
+                        TextFormatterBuilder.decimalTextFormatter()
+                      ],
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        labelText: 'Goal',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onSubmitted: (value) {},
                     ),
                   ),
                   const Spacer(),
@@ -323,7 +362,7 @@ class ProfiledPIDControllerWidget extends NTWidget {
                       model.publishGoal();
                     },
                     style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5.0),
                         ),

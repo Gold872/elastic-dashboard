@@ -4,11 +4,10 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class SplitButtonChooserModel extends NTWidgetModel {
+class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
   @override
   String type = SplitButtonChooser.widgetType;
 
@@ -16,6 +15,19 @@ class SplitButtonChooserModel extends NTWidgetModel {
   String get selectedTopicName => '$topic/selected';
   String get activeTopicName => '$topic/active';
   String get defaultTopicName => '$topic/default';
+
+  late NT4Subscription optionsSubscription;
+  late NT4Subscription selectedSubscription;
+  late NT4Subscription activeSubscription;
+  late NT4Subscription defaultSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        optionsSubscription,
+        selectedSubscription,
+        activeSubscription,
+        defaultSubscription,
+      ];
 
   String? selectedChoice;
 
@@ -25,13 +37,29 @@ class SplitButtonChooserModel extends NTWidgetModel {
   NT4Topic? _activeTopic;
 
   SplitButtonChooserModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     super.dataType,
     super.period,
   }) : super();
 
-  SplitButtonChooserModel.fromJson({required super.jsonData})
-      : super.fromJson();
+  SplitButtonChooserModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    optionsSubscription =
+        ntConnection.subscribe(optionsTopicName, super.period);
+    selectedSubscription =
+        ntConnection.subscribe(selectedTopicName, super.period);
+    activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
+    defaultSubscription =
+        ntConnection.subscribe(defaultTopicName, super.period);
+  }
 
   @override
   void resetSubscription() {
@@ -45,8 +73,8 @@ class SplitButtonChooserModel extends NTWidgetModel {
       return;
     }
 
-    _selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??=
+        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
@@ -65,31 +93,10 @@ class SplitButtonChooserModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_activeTopic!);
+      ntConnection.publishTopic(_activeTopic!);
     }
 
     ntConnection.updateDataFromTopic(_activeTopic!, active);
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object?> rawOptions = ntConnection
-            .getLastAnnouncedValue(optionsTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<String> options = rawOptions.whereType<String>().toList();
-
-    String active =
-        tryCast(ntConnection.getLastAnnouncedValue(activeTopicName)) ?? '';
-
-    String selected =
-        tryCast(ntConnection.getLastAnnouncedValue(selectedTopicName)) ?? '';
-
-    String defaultOption =
-        tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName)) ?? '';
-
-    return [...options, active, selected, defaultOption];
   }
 }
 
@@ -102,35 +109,30 @@ class SplitButtonChooser extends NTWidget {
   Widget build(BuildContext context) {
     SplitButtonChooserModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> rawOptions = ntConnection
-                .getLastAnnouncedValue(model.optionsTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        List<Object?> rawOptions =
+            model.optionsSubscription.value?.tryCast<List<Object?>>() ?? [];
 
         List<String> options = rawOptions.whereType<String>().toList();
 
-        String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(model.activeTopicName));
+        String? active = tryCast(model.activeSubscription.value);
         if (active != null && active == '') {
           active = null;
         }
 
-        String? selected = tryCast(
-            ntConnection.getLastAnnouncedValue(model.selectedTopicName));
+        String? selected = tryCast(model.selectedSubscription.value);
         if (selected != null && selected == '') {
           selected = null;
         }
 
-        String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(model.defaultTopicName));
+        String? defaultOption = tryCast(model.defaultSubscription.value);
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
 
-        if (!ntConnection.isNT4Connected) {
+        if (!model.ntConnection.isNT4Connected) {
           active = null;
           selected = null;
           defaultOption = null;

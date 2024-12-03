@@ -3,42 +3,41 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
-class TabData {
-  String name;
-
-  TabData({required this.name});
-}
-
 class EditableTabBar extends StatelessWidget {
-  final List<TabGrid> tabViews;
+  final SharedPreferences preferences;
+
   final List<TabData> tabData;
 
-  final Function(TabData tab) onTabCreate;
+  final Function() onTabCreate;
   final Function(int index) onTabDestroy;
   final Function() onTabMoveLeft;
   final Function() onTabMoveRight;
   final Function(int index, TabData newData) onTabRename;
   final Function(int index) onTabChanged;
+  final Function(int index) onTabDuplicate;
 
   final int currentIndex;
 
   const EditableTabBar({
     super.key,
+    required this.preferences,
     required this.currentIndex,
     required this.tabData,
-    required this.tabViews,
     required this.onTabCreate,
     required this.onTabDestroy,
     required this.onTabMoveLeft,
     required this.onTabMoveRight,
     required this.onTabRename,
     required this.onTabChanged,
+    required this.onTabDuplicate,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -74,11 +73,12 @@ class EditableTabBar extends StatelessWidget {
     );
   }
 
-  void createTab() {
-    String tabName = 'Tab ${tabData.length + 1}';
-    TabData data = TabData(name: tabName);
+  void duplicateTab(BuildContext context, int index) {
+    onTabDuplicate.call(index);
+  }
 
-    onTabCreate.call(data);
+  void createTab() {
+    onTabCreate();
   }
 
   void closeTab(int index) {
@@ -93,11 +93,11 @@ class EditableTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     ButtonStyle endButtonStyle = const ButtonStyle(
-      shape: MaterialStatePropertyAll(RoundedRectangleBorder()),
-      maximumSize: MaterialStatePropertyAll(Size.square(34.0)),
-      minimumSize: MaterialStatePropertyAll(Size.zero),
-      padding: MaterialStatePropertyAll(EdgeInsets.all(4.0)),
-      iconSize: MaterialStatePropertyAll(24.0),
+      shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+      maximumSize: WidgetStatePropertyAll(Size.square(34.0)),
+      minimumSize: WidgetStatePropertyAll(Size.zero),
+      padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+      iconSize: WidgetStatePropertyAll(24.0),
     );
 
     return Column(
@@ -124,7 +124,8 @@ class EditableTabBar extends StatelessWidget {
                           onTabChanged.call(index);
                         },
                         onSecondaryTapUp: (details) {
-                          if (Settings.layoutLocked) {
+                          if (preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked) {
                             return;
                           }
                           ContextMenu contextMenu = ContextMenu(
@@ -141,6 +142,11 @@ class EditableTabBar extends StatelessWidget {
                                 label: 'Rename',
                                 icon: Icons.drive_file_rename_outline_outlined,
                                 onSelected: () => renameTab(context, index),
+                              ),
+                              MenuItem(
+                                label: 'Duplicate',
+                                icon: Icons.control_point_duplicate_sharp,
+                                onSelected: () => duplicateTab(context, index),
                               ),
                               MenuItem(
                                 label: 'Close',
@@ -166,6 +172,7 @@ class EditableTabBar extends StatelessWidget {
                             },
                           );
                         },
+                        // The tab itself
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeOutExpo,
@@ -193,12 +200,18 @@ class EditableTabBar extends StatelessWidget {
                                         : theme.colorScheme.onPrimaryContainer,
                                   ),
                                 ),
+                                // Spacing for close button
                                 Visibility(
-                                  visible: !Settings.layoutLocked,
+                                  visible: !(preferences
+                                          .getBool(PrefKeys.layoutLocked) ??
+                                      Defaults.layoutLocked),
                                   child: const SizedBox(width: 10),
                                 ),
+                                // Close button
                                 Visibility(
-                                  visible: !Settings.layoutLocked,
+                                  visible: !(preferences
+                                          .getBool(PrefKeys.layoutLocked) ??
+                                      Defaults.layoutLocked),
                                   child: IconButton(
                                     onPressed: () {
                                       closeTab(index);
@@ -225,11 +238,13 @@ class EditableTabBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
+                // Tab movement buttons (move left, close, move right)
                 Row(
                   children: [
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: (!Settings.layoutLocked)
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
                           ? () => onTabMoveLeft.call()
                           : null,
                       alignment: Alignment.center,
@@ -237,14 +252,17 @@ class EditableTabBar extends StatelessWidget {
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed:
-                          (!Settings.layoutLocked) ? () => createTab() : null,
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
+                          ? () => createTab()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.add),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: (!Settings.layoutLocked)
+                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                              Defaults.layoutLocked)
                           ? () => onTabMoveRight.call()
                           : null,
                       alignment: Alignment.center,
@@ -262,10 +280,13 @@ class EditableTabBar extends StatelessWidget {
           child: Stack(
             children: [
               Visibility(
-                visible: Settings.showGrid,
+                visible:
+                    preferences.getBool(PrefKeys.showGrid) ?? Defaults.showGrid,
                 child: GridPaper(
                   color: const Color.fromARGB(50, 195, 232, 243),
-                  interval: Settings.gridSize.toDouble(),
+                  interval: (preferences.getInt(PrefKeys.gridSize) ??
+                          Defaults.gridSize)
+                      .toDouble(),
                   divisions: 1,
                   subdivisions: 1,
                   child: Container(),
@@ -275,10 +296,10 @@ class EditableTabBar extends StatelessWidget {
                 curve: Curves.decelerate,
                 index: currentIndex,
                 children: [
-                  for (TabGrid grid in tabViews)
-                    ChangeNotifierProvider(
-                      create: (context) => TabGridModel(),
-                      child: grid,
+                  for (TabGridModel grid in tabData.map((e) => e.tabGrid))
+                    ChangeNotifierProvider<TabGridModel>.value(
+                      value: grid,
+                      child: const TabGrid(),
                     ),
                 ],
               ),

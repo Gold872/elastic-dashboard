@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class BooleanBoxModel extends NTWidgetModel {
+class BooleanBoxModel extends SingleTopicNTWidgetModel {
   @override
   String type = BooleanBox.widgetType;
 
@@ -56,22 +55,27 @@ class BooleanBoxModel extends NTWidgetModel {
     refresh();
   }
 
-  BooleanBoxModel(
-      {required super.topic,
-      Color trueColor = Colors.green,
-      Color falseColor = Colors.red,
-      String trueIcon = 'None',
-      String falseIcon = 'None',
-      super.dataType,
-      super.period})
-      : _falseColor = falseColor,
+  BooleanBoxModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    Color trueColor = Colors.green,
+    Color falseColor = Colors.red,
+    String trueIcon = 'None',
+    String falseIcon = 'None',
+    super.dataType,
+    super.period,
+  })  : _falseColor = falseColor,
         _trueColor = trueColor,
         _trueIcon = trueIcon,
         _falseIcon = falseIcon,
         super();
 
-  BooleanBoxModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  BooleanBoxModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =
         tryCast(jsonData['true_color']) ?? tryCast(jsonData['colorWhenTrue']);
     int? falseColorValue =
@@ -136,6 +140,7 @@ class BooleanBoxModel extends NTWidgetModel {
             },
             label: 'True Color',
             initialColor: _trueColor,
+            defaultColor: Colors.green,
           ),
           const SizedBox(width: 10),
           DialogColorPicker(
@@ -144,6 +149,7 @@ class BooleanBoxModel extends NTWidgetModel {
             },
             label: 'False Color',
             initialColor: _falseColor,
+            defaultColor: Colors.red,
           ),
         ],
       ),
@@ -198,11 +204,10 @@ class BooleanBox extends NTWidget {
   Widget build(BuildContext context) {
     BooleanBoxModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        bool value = tryCast(snapshot.data) ?? false;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        bool value = tryCast(data) ?? false;
 
         Widget defaultWidget() => Container(
               decoration: BoxDecoration(
@@ -242,13 +247,6 @@ class BooleanBox extends NTWidget {
         }
 
         return widgetToDisplay ?? defaultWidget();
-
-        // return Container(
-        //   decoration: BoxDecoration(
-        //     borderRadius: BorderRadius.circular(15.0),
-        //     color: (value) ? model.trueColor : model.falseColor,
-        //   ),
-        // );
       },
     );
   }

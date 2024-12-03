@@ -5,14 +5,14 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class VoltageViewModel extends NTWidgetModel {
+class VoltageViewModel extends SingleTopicNTWidgetModel {
   @override
   String type = VoltageView.widgetType;
 
@@ -58,6 +58,8 @@ class VoltageViewModel extends NTWidgetModel {
   }
 
   VoltageViewModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double minValue = 4.0,
     double maxValue = 13.0,
@@ -73,8 +75,11 @@ class VoltageViewModel extends NTWidgetModel {
         _minValue = minValue,
         super();
 
-  VoltageViewModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  VoltageViewModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? 4.0;
     _maxValue = tryCast(jsonData['max_value']) ?? 13.0;
     _divisions = tryCast(jsonData['divisions']);
@@ -86,11 +91,11 @@ class VoltageViewModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'divisions': _divisions,
-      'inverted': _inverted,
-      'orientation': _orientation,
+      'min_value': minValue,
+      'max_value': maxValue,
+      if (divisions != null) 'divisions': divisions,
+      'inverted': inverted,
+      'orientation': orientation,
     };
   }
 
@@ -201,17 +206,18 @@ class VoltageView extends NTWidget {
   Widget build(BuildContext context) {
     VoltageViewModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double voltage = tryCast(snapshot.data) ?? 0.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        double voltage = tryCast<num>(data)?.toDouble() ?? 0.0;
 
         double clampedVoltage = voltage.clamp(model.minValue, model.maxValue);
 
         double? divisionInterval = (model.divisions != null)
             ? (model.maxValue - model.minValue) / (model.divisions! - 1)
             : null;
+
+        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
         LinearGaugeOrientation gaugeOrientation =
             (model.orientation == 'vertical')
@@ -220,7 +226,7 @@ class VoltageView extends NTWidget {
 
         List<Widget> children = [
           Text(
-            '${voltage.toStringAsFixed(2)} V',
+            '${voltage.toStringAsFixed(fractionDigits)} V',
             style: Theme.of(context).textTheme.bodyLarge,
             overflow: TextOverflow.ellipsis,
           ),

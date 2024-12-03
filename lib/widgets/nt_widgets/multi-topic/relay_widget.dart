@@ -4,36 +4,44 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class RelayModel extends NTWidgetModel {
+class RelayModel extends MultiTopicNTWidgetModel {
   @override
   String type = RelayWidget.widgetType;
 
   String get valueTopicName => '$topic/Value';
 
   late NT4Subscription valueSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [valueSubscription];
+
   NT4Topic? valueTopic;
 
   final List<String> selectedOptions = ['Off', 'On', 'Forward', 'Reverse'];
 
-  RelayModel({required super.topic, super.dataType, super.period}) : super();
+  RelayModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  RelayModel.fromJson({required super.jsonData}) : super.fromJson();
+  RelayModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
-  void init() {
-    super.init();
-
+  void initializeSubscriptions() {
     valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
   }
 
   @override
   void resetSubscription() {
-    ntConnection.unSubscribe(valueSubscription);
-
-    valueSubscription = ntConnection.subscribe(valueTopicName, super.period);
     valueTopic = null;
 
     super.resetSubscription();
@@ -41,10 +49,9 @@ class RelayModel extends NTWidgetModel {
 
   @override
   void unSubscribe() {
-    super.unSubscribe();
-
-    ntConnection.unSubscribe(valueSubscription);
     valueTopic = null;
+
+    super.unSubscribe();
   }
 }
 
@@ -57,11 +64,10 @@ class RelayWidget extends NTWidget {
   Widget build(BuildContext context) {
     RelayModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.valueSubscription.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.valueTopicName),
-      builder: (context, snapshot) {
-        String selected = tryCast(snapshot.data) ?? 'Off';
+    return ValueListenableBuilder(
+      valueListenable: model.valueSubscription,
+      builder: (context, data, child) {
+        String selected = tryCast(data) ?? 'Off';
 
         if (!model.selectedOptions.contains(selected)) {
           selected = 'Off';
@@ -84,18 +90,19 @@ class RelayWidget extends NTWidget {
 
                     bool publishTopic = model.valueTopic == null;
 
-                    model.valueTopic ??=
-                        ntConnection.getTopicFromName(model.valueTopicName);
+                    model.valueTopic ??= model.ntConnection
+                        .getTopicFromName(model.valueTopicName);
 
                     if (model.valueTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client.publishTopic(model.valueTopic!);
+                      model.ntConnection.publishTopic(model.valueTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(model.valueTopic!, option);
+                    model.ntConnection
+                        .updateDataFromTopic(model.valueTopic!, option);
                   },
                   isSelected:
                       model.selectedOptions.map((e) => selected == e).toList(),

@@ -1,4 +1,5 @@
 import 'package:dot_cast/dot_cast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -13,6 +14,8 @@ class ShuffleboardNTListener {
   static const String tabsEntry = '$metadataTable/Tabs';
   static const String selectedEntry = '$metadataTable/Selected';
 
+  final NTConnection ntConnection;
+  final SharedPreferences preferences;
   final Function(Map<String, dynamic> widgetData)? onWidgetAdded;
   final Function(String tab)? onTabChanged;
   final Function(String tab)? onTabCreated;
@@ -23,27 +26,35 @@ class ShuffleboardNTListener {
 
   Map<String, Map<String, dynamic>> currentJsonData = {};
 
-  final NetworkTableTreeRow shuffleboardTreeRoot =
-      NetworkTableTreeRow(topic: '/', rowName: '');
+  late final NetworkTableTreeRow shuffleboardTreeRoot = NetworkTableTreeRow(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: '/',
+      rowName: '');
 
-  ShuffleboardNTListener(
-      {this.onTabChanged, this.onTabCreated, this.onWidgetAdded});
+  ShuffleboardNTListener({
+    required this.ntConnection,
+    required this.preferences,
+    this.onTabChanged,
+    this.onTabCreated,
+    this.onWidgetAdded,
+  });
 
   void initializeSubscriptions() {
     selectedSubscription = ntConnection.subscribe(selectedEntry);
   }
 
   void initializeListeners() {
-    selectedSubscription.periodicStream(yieldAll: false).listen((data) {
-      if (data is! String?) {
+    selectedSubscription.addListener(() {
+      if (selectedSubscription.value is! String?) {
         return;
       }
 
-      if (data != previousSelection && data != null) {
-        _handleTabChange(data);
+      if (selectedSubscription.value != null) {
+        _handleTabChange(selectedSubscription.value! as String);
       }
 
-      previousSelection = data;
+      previousSelection = selectedSubscription.value! as String;
     });
 
     // Also clear data when connected in case if threads auto populate json after disconnection
@@ -60,7 +71,7 @@ class ShuffleboardNTListener {
       previousSelection = null;
     });
 
-    ntConnection.nt4Client.addTopicAnnounceListener((topic) async {
+    ntConnection.addTopicAnnounceListener((topic) async {
       if (!topic.name.contains(shuffleboardTableRoot)) {
         return;
       }
@@ -107,10 +118,6 @@ class ShuffleboardNTListener {
 
       Object? subProperty =
           await ntConnection.subscribeAndRetrieveData(propertyTopic);
-
-      if (subProperty == null) {
-        return;
-      }
 
       String real = realHierarchy[realHierarchy.length - 1];
       List<String> realTopics = real.split('/');
@@ -187,10 +194,6 @@ class ShuffleboardNTListener {
       String? type =
           await ntConnection.subscribeAndRetrieveData(componentTopic);
 
-      if (type == null) {
-        return;
-      }
-
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
@@ -215,13 +218,27 @@ class ShuffleboardNTListener {
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
-        child.putIfAbsent('width', () => size[0] * Settings.gridSize);
-        child.putIfAbsent('height', () => size[1] * Settings.gridSize);
+        child.putIfAbsent(
+            'width',
+            () =>
+                size[0] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+        child.putIfAbsent(
+            'height',
+            () =>
+                size[1] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
       } else {
-        currentJsonData[jsonKey]!
-            .putIfAbsent('width', () => size[0] * Settings.gridSize);
-        currentJsonData[jsonKey]!
-            .putIfAbsent('height', () => size[1] * Settings.gridSize);
+        currentJsonData[jsonKey]!.putIfAbsent(
+            'width',
+            () =>
+                size[0] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+        currentJsonData[jsonKey]!.putIfAbsent(
+            'height',
+            () =>
+                size[1] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
       }
     }
 
@@ -240,13 +257,27 @@ class ShuffleboardNTListener {
       if (inLayout) {
         Map<String, dynamic> child = _createOrGetChild(jsonKey, widgetName);
 
-        child.putIfAbsent('x', () => position[0] * Settings.gridSize);
-        child.putIfAbsent('y', () => position[1] * Settings.gridSize);
+        child.putIfAbsent(
+            'x',
+            () =>
+                position[0] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+        child.putIfAbsent(
+            'y',
+            () =>
+                position[1] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
       } else {
-        currentJsonData[jsonKey]!
-            .putIfAbsent('x', () => position[0] * Settings.gridSize);
-        currentJsonData[jsonKey]!
-            .putIfAbsent('y', () => position[1] * Settings.gridSize);
+        currentJsonData[jsonKey]!.putIfAbsent(
+            'x',
+            () =>
+                position[0] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
+        currentJsonData[jsonKey]!.putIfAbsent(
+            'y',
+            () =>
+                position[1] *
+                (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize));
       }
     }
   }
@@ -304,10 +335,6 @@ class ShuffleboardNTListener {
 
       String? type = await ntConnection.subscribeAndRetrieveData(typeTopic,
           timeout: const Duration(seconds: 3));
-
-      if (type == null) {
-        return;
-      }
 
       if (type == 'ShuffleboardLayout') {
         currentJsonData[jsonKey]!['layout'] = true;
@@ -375,12 +402,14 @@ class ShuffleboardNTListener {
           'width',
           () => (!isCameraStream)
               ? widget!.displayRect.width
-              : Settings.gridSize * 2);
+              : (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize) *
+                  2);
       currentJsonData[jsonKey]!.putIfAbsent(
           'height',
           () => (!isCameraStream)
               ? widget!.displayRect.height
-              : Settings.gridSize * 2);
+              : (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize) *
+                  2);
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonKey]!.putIfAbsent('type', () => type);
       currentJsonData[jsonKey]!
@@ -390,8 +419,10 @@ class ShuffleboardNTListener {
       currentJsonData[jsonKey]!['properties'].putIfAbsent(
           'period',
           () => (type != 'Graph')
-              ? Settings.defaultPeriod
-              : Settings.defaultGraphPeriod);
+              ? preferences.getDouble(PrefKeys.defaultPeriod) ??
+                  Defaults.defaultPeriod
+              : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
+                  Defaults.defaultGraphPeriod);
 
       if (ntConnection.isNT4Connected) {
         onWidgetAdded?.call(currentJsonData[jsonKey]!);
@@ -421,10 +452,14 @@ class ShuffleboardNTListener {
       currentJsonData[jsonKey]!.putIfAbsent('title', () => componentName);
       currentJsonData[jsonKey]!.putIfAbsent('x', () => 0.0);
       currentJsonData[jsonKey]!.putIfAbsent('y', () => 0.0);
-      currentJsonData[jsonKey]!
-          .putIfAbsent('width', () => Settings.gridSize.toDouble());
-      currentJsonData[jsonKey]!
-          .putIfAbsent('height', () => Settings.gridSize.toDouble());
+      currentJsonData[jsonKey]!.putIfAbsent(
+          'width',
+          () => (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+              .toDouble());
+      currentJsonData[jsonKey]!.putIfAbsent(
+          'height',
+          () => (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize)
+              .toDouble());
       currentJsonData[jsonKey]!.putIfAbsent('type', () => 'List Layout');
       currentJsonData[jsonKey]!.putIfAbsent('tab', () => tabName);
       currentJsonData[jsonKey]!
@@ -483,19 +518,23 @@ class ShuffleboardNTListener {
             'width',
             () => (!isCameraStream)
                 ? widget!.displayRect.width
-                : Settings.gridSize * 2);
+                : (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize) *
+                    2);
         child.putIfAbsent(
             'height',
             () => (!isCameraStream)
                 ? widget!.displayRect.height
-                : Settings.gridSize * 2);
+                : (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize) *
+                    2);
 
         child['properties']!.putIfAbsent('topic', () => childRow.topic);
         child['properties']!.putIfAbsent(
             'period',
             () => (type != 'Graph')
-                ? Settings.defaultPeriod
-                : Settings.defaultGraphPeriod);
+                ? preferences.getDouble(PrefKeys.defaultPeriod) ??
+                    Defaults.defaultPeriod
+                : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
+                    Defaults.defaultGraphPeriod);
 
         widget?.unSubscribe();
         widget?.disposeModel(deleting: true);

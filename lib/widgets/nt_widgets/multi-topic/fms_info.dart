@@ -4,10 +4,10 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class FMSInfoModel extends NTWidgetModel {
+class FMSInfoModel extends MultiTopicNTWidgetModel {
   @override
   String type = FMSInfo.widgetType;
 
@@ -19,33 +19,50 @@ class FMSInfoModel extends NTWidgetModel {
   String get replayNumberTopic => '$topic/ReplayNumber';
   String get stationNumberTopic => '$topic/StationNumber';
 
-  FMSInfoModel({required super.topic, super.dataType, super.period});
-
-  FMSInfoModel.fromJson({required super.jsonData}) : super.fromJson();
+  late NT4Subscription eventNameSubscription;
+  late NT4Subscription controlDataSubscription;
+  late NT4Subscription allianceSubscription;
+  late NT4Subscription matchNumberSubscription;
+  late NT4Subscription matchTypeSubscription;
+  late NT4Subscription replayNumberSubscription;
 
   @override
-  List<Object> getCurrentData() {
-    String eventName =
-        tryCast(ntConnection.getLastAnnouncedValue(eventNameTopic)) ?? '';
-    int controlData =
-        tryCast(ntConnection.getLastAnnouncedValue(controlDataTopic)) ?? 32;
-    bool redAlliance =
-        tryCast(ntConnection.getLastAnnouncedValue(allianceTopic)) ?? true;
-    int matchNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(matchNumberTopic)) ?? 0;
-    int matchType =
-        tryCast(ntConnection.getLastAnnouncedValue(matchTypeTopic)) ?? 0;
-    int replayNumber =
-        tryCast(ntConnection.getLastAnnouncedValue(replayNumberTopic)) ?? 0;
+  List<NT4Subscription> get subscriptions => [
+        eventNameSubscription,
+        controlDataSubscription,
+        allianceSubscription,
+        matchNumberSubscription,
+        matchTypeSubscription,
+        replayNumberSubscription,
+      ];
 
-    return [
-      eventName,
-      controlData,
-      redAlliance,
-      matchNumber,
-      matchType,
-      replayNumber,
-    ];
+  FMSInfoModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  });
+
+  FMSInfoModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    eventNameSubscription =
+        ntConnection.subscribe(eventNameTopic, super.period);
+    controlDataSubscription =
+        ntConnection.subscribe(controlDataTopic, super.period);
+    allianceSubscription = ntConnection.subscribe(allianceTopic, super.period);
+    matchNumberSubscription =
+        ntConnection.subscribe(matchNumberTopic, super.period);
+    matchTypeSubscription =
+        ntConnection.subscribe(matchTypeTopic, super.period);
+    replayNumberSubscription =
+        ntConnection.subscribe(replayNumberTopic, super.period);
   }
 }
 
@@ -82,27 +99,15 @@ class FMSInfo extends NTWidget {
   Widget build(BuildContext context) {
     FMSInfoModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        String eventName =
-            tryCast(ntConnection.getLastAnnouncedValue(model.eventNameTopic)) ??
-                '';
-        int controlData = tryCast(
-                ntConnection.getLastAnnouncedValue(model.controlDataTopic)) ??
-            32;
-        bool redAlliance =
-            tryCast(ntConnection.getLastAnnouncedValue(model.allianceTopic)) ??
-                true;
-        int matchNumber = tryCast(
-                ntConnection.getLastAnnouncedValue(model.matchNumberTopic)) ??
-            0;
-        int matchType =
-            tryCast(ntConnection.getLastAnnouncedValue(model.matchTypeTopic)) ??
-                0;
-        int replayNumber = tryCast(
-                ntConnection.getLastAnnouncedValue(model.replayNumberTopic)) ??
-            0;
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        String eventName = tryCast(model.eventNameSubscription.value) ?? '';
+        int controlData = tryCast(model.controlDataSubscription.value) ?? 32;
+        bool redAlliance = tryCast(model.allianceSubscription.value) ?? true;
+        int matchNumber = tryCast(model.matchNumberSubscription.value) ?? 0;
+        int matchType = tryCast(model.matchTypeSubscription.value) ?? 0;
+        int replayNumber = tryCast(model.replayNumberSubscription.value) ?? 0;
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class PowerDistributionModel extends NTWidgetModel {
+class PowerDistributionModel extends MultiTopicNTWidgetModel {
   @override
   String type = PowerDistribution.widgetType;
 
@@ -17,47 +17,47 @@ class PowerDistributionModel extends NTWidgetModel {
   String get voltageTopic => '$topic/Voltage';
   String get currentTopic => '$topic/TotalCurrent';
 
-  PowerDistributionModel({required super.topic, super.dataType, super.period})
-      : super();
+  late NT4Subscription voltageSubscription;
+  late NT4Subscription currentSubscription;
 
-  PowerDistributionModel.fromJson({required super.jsonData}) : super.fromJson();
-
-  @override
-  void init() {
-    super.init();
-
-    for (int channel = 0; channel <= numberOfChannels; channel++) {
-      channelTopics.add('$topic/Chan$channel');
-    }
-  }
+  final List<NT4Subscription> channelSubscriptions = [];
 
   @override
-  void resetSubscription() {
+  List<NT4Subscription> get subscriptions => [
+        voltageSubscription,
+        currentSubscription,
+        ...channelSubscriptions,
+      ];
+
+  PowerDistributionModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
+
+  PowerDistributionModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    voltageSubscription = ntConnection.subscribe(voltageTopic, super.period);
+    currentSubscription = ntConnection.subscribe(currentTopic, super.period);
+
     channelTopics.clear();
+    channelSubscriptions.clear();
 
     for (int channel = 0; channel <= numberOfChannels; channel++) {
       channelTopics.add('$topic/Chan$channel');
     }
 
-    super.resetSubscription();
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object> data = [];
-
-    double voltage =
-        tryCast(ntConnection.getLastAnnouncedValue(voltageTopic)) ?? 0.0;
-    double totalCurrent =
-        tryCast(ntConnection.getLastAnnouncedValue(currentTopic)) ?? 0.0;
-
-    data.addAll([voltage, totalCurrent]);
-
-    for (String channel in channelTopics) {
-      data.add(tryCast(ntConnection.getLastAnnouncedValue(channel)) ?? 0.0);
+    for (String topic in channelTopics) {
+      channelSubscriptions.add(ntConnection.subscribe(topic, super.period));
     }
-
-    return data;
   }
 }
 
@@ -71,24 +71,27 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
-      double current = tryCast(ntConnection
-              .getLastAnnouncedValue(model.channelTopics[channel])) ??
-          0.0;
-
       channels.add(
         Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-              child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface)),
+            ValueListenableBuilder(
+              valueListenable: model.channelSubscriptions[channel],
+              builder: (context, value, child) {
+                double current = tryCast(value) ?? 0.0;
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 4.0),
+                  child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface)),
+                );
+              },
             ),
             const SizedBox(width: 10),
             Text('Ch. ${channel.toString().padRight(2)}'),
@@ -109,10 +112,6 @@ class PowerDistribution extends NTWidget {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
-      double current = tryCast(ntConnection
-              .getLastAnnouncedValue(model.channelTopics[channel])) ??
-          0.0;
-
       channels.add(
         Row(
           mainAxisSize: MainAxisSize.max,
@@ -120,17 +119,23 @@ class PowerDistribution extends NTWidget {
           children: [
             Text('Ch. $channel'),
             const SizedBox(width: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-              child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface)),
-            ),
+            ValueListenableBuilder(
+                valueListenable: model.channelSubscriptions[channel],
+                builder: (context, value, child) {
+                  double current = tryCast(value) ?? 0.0;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 4.0),
+                    child: Text(
+                        '${current.toStringAsFixed(2).padLeft(5, '0')} A',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface)),
+                  );
+                }),
           ],
         ),
       );
@@ -147,80 +152,80 @@ class PowerDistribution extends NTWidget {
   Widget build(BuildContext context) {
     PowerDistributionModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        double voltage =
-            tryCast(ntConnection.getLastAnnouncedValue(model.voltageTopic)) ??
-                0.0;
-        double totalCurrent =
-            tryCast(ntConnection.getLastAnnouncedValue(model.currentTopic)) ??
-                0.0;
-
-        return Column(
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // Voltage
+            Column(
               children: [
-                // Voltage
-                Column(
-                  children: [
-                    const Text('Voltage'),
-                    const SizedBox(height: 2.5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 48.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Text(
-                        '${voltage.toStringAsFixed(2).padLeft(5, '0')} V',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
+                const Text('Voltage'),
+                const SizedBox(height: 2.5),
+                ValueListenableBuilder(
+                    valueListenable: model.voltageSubscription,
+                    builder: (context, value, child) {
+                      double voltage = tryCast(value) ?? 0.0;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 48.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Current
-                Column(
-                  children: [
-                    const Text('Total Current'),
-                    const SizedBox(height: 2.5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 48.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Text(
-                        '${totalCurrent.toStringAsFixed(2).padLeft(5, '0')} A',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
+                        child: Text(
+                          '${voltage.toStringAsFixed(2).padLeft(5, '0')} V',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
+                      );
+                    }),
               ],
             ),
-            const SizedBox(height: 5),
-            // Channel current
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // First 12 channels
-                  _getChannelsColumn(model, context, 0, 11),
-                  _getReversedChannelsColumn(model, context, 23, 12),
-                ],
-              ),
+            // Current
+            Column(
+              children: [
+                const Text('Total Current'),
+                const SizedBox(height: 2.5),
+                ValueListenableBuilder(
+                    valueListenable: model.currentSubscription,
+                    builder: (context, value, child) {
+                      double totalCurrent = tryCast(value) ?? 0.0;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 48.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Text(
+                          '${totalCurrent.toStringAsFixed(2).padLeft(5, '0')} A',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      );
+                    }),
+              ],
             ),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 5),
+        // Channel current
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // First 12 channels
+              _getChannelsColumn(model, context, 0, 11),
+              _getReversedChannelsColumn(model, context, 23, 12),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

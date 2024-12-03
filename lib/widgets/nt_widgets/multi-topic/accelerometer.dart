@@ -4,46 +4,38 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class AccelerometerModel extends NTWidgetModel {
+class AccelerometerModel extends MultiTopicNTWidgetModel {
   @override
   String type = AccelerometerWidget.widgetType;
 
   late NT4Subscription _valueSubscription;
+  NT4Subscription get valueSubscription => _valueSubscription;
 
   String get valueTopic => '$topic/Value';
 
-  AccelerometerModel({required super.topic, super.dataType, super.period})
-      : super();
+  @override
+  List<NT4Subscription> get subscriptions => [_valueSubscription];
 
-  AccelerometerModel.fromJson({required super.jsonData}) : super.fromJson();
+  AccelerometerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.period,
+    super.dataType,
+  }) : super();
+
+  AccelerometerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
   @override
-  void init() {
-    super.init();
-
+  void initializeSubscriptions() {
     _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
   }
-
-  @override
-  void resetSubscription() {
-    ntConnection.unSubscribe(_valueSubscription);
-
-    _valueSubscription = ntConnection.subscribe(valueTopic, super.period);
-
-    super.resetSubscription();
-  }
-
-  @override
-  void unSubscribe() {
-    ntConnection.unSubscribe(_valueSubscription);
-
-    super.unSubscribe();
-  }
-
-  NT4Subscription get valueSubscription => _valueSubscription;
 }
 
 class AccelerometerWidget extends NTWidget {
@@ -55,11 +47,10 @@ class AccelerometerWidget extends NTWidget {
   Widget build(BuildContext context) {
     AccelerometerModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-        stream: model.valueSubscription.periodicStream(yieldAll: false),
-        initialData: ntConnection.getLastAnnouncedValue(model.valueTopic),
-        builder: (context, snapshot) {
-          double value = tryCast(snapshot.data) ?? 0.0;
+    return ValueListenableBuilder(
+        valueListenable: model.valueSubscription,
+        builder: (context, data, child) {
+          double value = tryCast(data) ?? 0.0;
 
           return Row(
             children: [

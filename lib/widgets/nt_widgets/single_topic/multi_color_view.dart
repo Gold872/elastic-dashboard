@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class MultiColorView extends NTWidget {
@@ -13,14 +12,12 @@ class MultiColorView extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
-    NTWidgetModel model = context.watch<NTWidgetModel>();
+    SingleTopicNTWidgetModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        List<Object?> hexStringsRaw =
-            snapshot.data?.tryCast<List<Object?>>() ?? [];
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        List<Object?> hexStringsRaw = data?.tryCast<List<Object?>>() ?? [];
         List<String> hexStrings = hexStringsRaw.whereType<String>().toList();
 
         List<Color> colors = [];

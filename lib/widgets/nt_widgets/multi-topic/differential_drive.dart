@@ -7,15 +7,23 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class DifferentialDriveModel extends NTWidgetModel {
+class DifferentialDriveModel extends MultiTopicNTWidgetModel {
   @override
   String type = DifferentialDrive.widgetType;
 
   String get leftSpeedTopicName => '$topic/Left Motor Speed';
   String get rightSpeedTopicName => '$topic/Right Motor Speed';
+
+  late NT4Subscription leftSpeedSubscription;
+  late NT4Subscription rightSpeedSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        leftSpeedSubscription,
+        rightSpeedSubscription,
+      ];
 
   NT4Topic? leftSpeedTopic;
   NT4Topic? rightSpeedTopic;
@@ -23,8 +31,8 @@ class DifferentialDriveModel extends NTWidgetModel {
   double _leftSpeedPreviousValue = 0.0;
   double _rightSpeedPreviousValue = 0.0;
 
-  double _leftSpeedCurrentValue = 0.0;
-  double _rightSpeedCurrentValue = 0.0;
+  ValueNotifier<double> leftSpeedCurrentValue = ValueNotifier<double>(0.0);
+  ValueNotifier<double> rightSpeedCurrentValue = ValueNotifier<double>(0.0);
 
   get leftSpeedPreviousValue => _leftSpeedPreviousValue;
 
@@ -34,18 +42,27 @@ class DifferentialDriveModel extends NTWidgetModel {
 
   set rightSpeedPreviousValue(value) => _rightSpeedPreviousValue = value;
 
-  get leftSpeedCurrentValue => _leftSpeedCurrentValue;
+  DifferentialDriveModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
 
-  set leftSpeedCurrentValue(value) => _leftSpeedCurrentValue = value;
+  DifferentialDriveModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
 
-  get rightSpeedCurrentValue => _rightSpeedCurrentValue;
-
-  set rightSpeedCurrentValue(value) => _rightSpeedCurrentValue = value;
-
-  DifferentialDriveModel({required super.topic, super.dataType, super.period})
-      : super();
-
-  DifferentialDriveModel.fromJson({required super.jsonData}) : super.fromJson();
+  @override
+  void initializeSubscriptions() {
+    leftSpeedSubscription =
+        ntConnection.subscribe(leftSpeedTopicName, super.period);
+    rightSpeedSubscription =
+        ntConnection.subscribe(rightSpeedTopicName, super.period);
+  }
 
   @override
   void resetSubscription() {
@@ -53,29 +70,12 @@ class DifferentialDriveModel extends NTWidgetModel {
     rightSpeedTopic = null;
 
     leftSpeedPreviousValue = 0.0;
-    leftSpeedCurrentValue = 0.0;
+    leftSpeedCurrentValue.value = 0.0;
 
-    rightSpeedPreviousValue = 0.0;
-    rightSpeedCurrentValue = 0.0;
+    rightSpeedPreviousValue.value = 0.0;
+    rightSpeedCurrentValue.value = 0.0;
 
     super.resetSubscription();
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    double leftSpeed =
-        tryCast(ntConnection.getLastAnnouncedValue(leftSpeedTopicName)) ?? 0.0;
-    double rightSpeed =
-        tryCast(ntConnection.getLastAnnouncedValue(rightSpeedTopicName)) ?? 0.0;
-
-    return [
-      leftSpeed,
-      rightSpeed,
-      _leftSpeedPreviousValue,
-      _rightSpeedPreviousValue,
-      _leftSpeedCurrentValue,
-      _rightSpeedCurrentValue,
-    ];
   }
 }
 
@@ -88,23 +88,23 @@ class DifferentialDrive extends NTWidget {
   Widget build(BuildContext context) {
     DifferentialDriveModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        double leftSpeed = tryCast(
-                ntConnection.getLastAnnouncedValue(model.leftSpeedTopicName)) ??
-            0.0;
-        double rightSpeed = tryCast(ntConnection
-                .getLastAnnouncedValue(model.rightSpeedTopicName)) ??
-            0.0;
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        ...model.subscriptions,
+        model.leftSpeedCurrentValue,
+        model.rightSpeedCurrentValue,
+      ]),
+      builder: (context, child) {
+        double leftSpeed = tryCast(model.leftSpeedSubscription.value) ?? 0.0;
+        double rightSpeed = tryCast(model.rightSpeedSubscription.value) ?? 0.0;
 
         if (leftSpeed != model.leftSpeedPreviousValue) {
-          model.leftSpeedCurrentValue = leftSpeed;
+          model.leftSpeedCurrentValue.value = leftSpeed;
         }
         model.leftSpeedPreviousValue = leftSpeed;
 
         if (rightSpeed != model.rightSpeedPreviousValue) {
-          model.rightSpeedCurrentValue = rightSpeed;
+          model.rightSpeedCurrentValue.value = rightSpeed;
         }
         model.rightSpeedPreviousValue = rightSpeed;
 
@@ -120,7 +120,7 @@ class DifferentialDrive extends NTWidget {
               tickPosition: LinearElementPosition.inside,
               markerPointers: [
                 LinearShapePointer(
-                  value: model.leftSpeedCurrentValue.clamp(-1.0, 1.0),
+                  value: model.leftSpeedCurrentValue.value.clamp(-1.0, 1.0),
                   color: Theme.of(context).colorScheme.primary,
                   height: 12.5,
                   width: 12.5,
@@ -129,27 +129,27 @@ class DifferentialDrive extends NTWidget {
                   position: LinearElementPosition.outside,
                   dragBehavior: LinearMarkerDragBehavior.free,
                   onChanged: (value) {
-                    model.leftSpeedCurrentValue = value;
+                    model.leftSpeedCurrentValue.value = value;
                   },
                   onChangeEnd: (value) {
                     bool publishTopic = model.leftSpeedTopic == null;
 
-                    model.leftSpeedTopic ??=
-                        ntConnection.getTopicFromName(model.leftSpeedTopicName);
+                    model.leftSpeedTopic ??= model.ntConnection
+                        .getTopicFromName(model.leftSpeedTopicName);
 
                     if (model.leftSpeedTopic == null) {
                       return;
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client
-                          .publishTopic(model.leftSpeedTopic!);
+                      model.ntConnection.publishTopic(model.leftSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(
+                    model.ntConnection.updateDataFromTopic(
                         model.leftSpeedTopic!, model.leftSpeedCurrentValue);
 
-                    model.leftSpeedPreviousValue = model.leftSpeedCurrentValue;
+                    model.leftSpeedPreviousValue =
+                        model.leftSpeedCurrentValue.value;
                   },
                 ),
               ],
@@ -174,9 +174,10 @@ class DifferentialDrive extends NTWidget {
                     height: sideLength,
                     child: CustomPaint(
                       painter: _DifferentialDrivePainter(
-                        leftSpeed: model.leftSpeedCurrentValue.clamp(-1.0, 1.0),
+                        leftSpeed:
+                            model.leftSpeedCurrentValue.value.clamp(-1.0, 1.0),
                         rightSpeed:
-                            model.rightSpeedCurrentValue.clamp(-1.0, 1.0),
+                            model.rightSpeedCurrentValue.value.clamp(-1.0, 1.0),
                       ),
                     ),
                   );
@@ -193,7 +194,7 @@ class DifferentialDrive extends NTWidget {
               tickPosition: LinearElementPosition.outside,
               markerPointers: [
                 LinearShapePointer(
-                  value: model.rightSpeedCurrentValue.clamp(-1.0, 1.0),
+                  value: model.rightSpeedCurrentValue.value.clamp(-1.0, 1.0),
                   color: Theme.of(context).colorScheme.primary,
                   height: 12.5,
                   width: 12.5,
@@ -202,12 +203,12 @@ class DifferentialDrive extends NTWidget {
                   position: LinearElementPosition.inside,
                   dragBehavior: LinearMarkerDragBehavior.free,
                   onChanged: (value) {
-                    model.rightSpeedCurrentValue = value;
+                    model.rightSpeedCurrentValue.value = value;
                   },
                   onChangeEnd: (value) {
                     bool publishTopic = model.rightSpeedTopic == null;
 
-                    model.rightSpeedTopic ??= ntConnection
+                    model.rightSpeedTopic ??= model.ntConnection
                         .getTopicFromName(model.rightSpeedTopicName);
 
                     if (model.rightSpeedTopic == null) {
@@ -215,15 +216,14 @@ class DifferentialDrive extends NTWidget {
                     }
 
                     if (publishTopic) {
-                      ntConnection.nt4Client
-                          .publishTopic(model.rightSpeedTopic!);
+                      model.ntConnection.publishTopic(model.rightSpeedTopic!);
                     }
 
-                    ntConnection.updateDataFromTopic(
+                    model.ntConnection.updateDataFromTopic(
                         model.rightSpeedTopic!, model.rightSpeedCurrentValue);
 
                     model.rightSpeedPreviousValue =
-                        model.rightSpeedCurrentValue;
+                        model.rightSpeedCurrentValue.value;
                   },
                 ),
               ],

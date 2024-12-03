@@ -6,10 +6,9 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CommandSchedulerModel extends NTWidgetModel {
+class CommandSchedulerModel extends MultiTopicNTWidgetModel {
   @override
   String type = CommandSchedulerWidget.widgetType;
 
@@ -19,10 +18,37 @@ class CommandSchedulerModel extends NTWidgetModel {
   String get idsTopicName => '$topic/Ids';
   String get cancelTopicName => '$topic/Cancel';
 
-  CommandSchedulerModel({required super.topic, super.dataType, super.period})
-      : super();
+  late NT4Subscription namesSubscription;
+  late NT4Subscription idsSubscription;
+  late NT4Subscription cancelSubscription;
 
-  CommandSchedulerModel.fromJson({required super.jsonData}) : super.fromJson();
+  @override
+  List<NT4Subscription> get subscriptions => [
+        namesSubscription,
+        idsSubscription,
+        cancelSubscription,
+      ];
+
+  CommandSchedulerModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
+
+  CommandSchedulerModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    namesSubscription = ntConnection.subscribe(namesTopicName, super.period);
+    idsSubscription = ntConnection.subscribe(idsTopicName, super.period);
+    cancelSubscription = ntConnection.subscribe(cancelTopicName, super.period);
+  }
 
   @override
   void resetSubscription() {
@@ -32,42 +58,22 @@ class CommandSchedulerModel extends NTWidgetModel {
   }
 
   void cancelCommand(int id) {
-    List<Object?> currentCancellationsRaw = ntConnection
-            .getLastAnnouncedValue(cancelTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
+    List<Object?> currentCancellationsRaw =
+        cancelSubscription.value?.tryCast<List<Object?>>() ?? [];
 
     List<int> currentCancellations =
         currentCancellationsRaw.whereType<int>().toList();
 
     currentCancellations.add(id);
 
-    _cancelTopic ??= ntConnection.nt4Client
-        .publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??=
+        ntConnection.publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
 
     if (_cancelTopic == null) {
       return;
     }
 
     ntConnection.updateDataFromTopic(_cancelTopic!, currentCancellations);
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object?> rawNames = ntConnection
-            .getLastAnnouncedValue(namesTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<Object?> rawIds = ntConnection
-            .getLastAnnouncedValue(idsTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<String> names = rawNames.whereType<String>().toList();
-    List<int> ids = rawIds.whereType<int>().toList();
-
-    return [...names, ...ids];
   }
 }
 
@@ -80,18 +86,14 @@ class CommandSchedulerWidget extends NTWidget {
   Widget build(BuildContext context) {
     CommandSchedulerModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> rawNames = ntConnection
-                .getLastAnnouncedValue(model.namesTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        List<Object?> rawNames =
+            model.namesSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-        List<Object?> rawIds = ntConnection
-                .getLastAnnouncedValue(model.idsTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+        List<Object?> rawIds =
+            model.idsSubscription.value?.tryCast<List<Object?>>() ?? [];
 
         List<String> names = rawNames.whereType<String>().toList();
         List<int> ids = rawIds.whereType<int>().toList();

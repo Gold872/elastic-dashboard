@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:elegant_notification/elegant_notification.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +13,8 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
+import 'package:elastic_dashboard/services/hotkey_manager.dart';
+import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -43,7 +47,9 @@ void main() {
     await FieldImages.loadFields('assets/fields/');
 
     jsonString = jsonEncode(jsonDecode(File(jsonFilePath).readAsStringSync()));
+  });
 
+  setUp(() async {
     SharedPreferences.setMockInitialValues({
       PrefKeys.layout: jsonString,
       PrefKeys.teamNumber: 353,
@@ -53,15 +59,20 @@ void main() {
     preferences = await SharedPreferences.getInstance();
   });
 
+  tearDown(() {
+    hotKeyManager.tearDown();
+  });
+
   testWidgets('Dashboard page loading offline', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -79,13 +90,14 @@ void main() {
 
   testWidgets('Dashboard page loading online', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -103,13 +115,14 @@ void main() {
 
   testWidgets('Save layout (button)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -133,15 +146,139 @@ void main() {
     expect(jsonString, preferences.getString(PrefKeys.layout));
   });
 
-  testWidgets('Add widget dialog (widgets)', (widgetTester) async {
+  testWidgets('Save layout (shortcut)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
+    await widgetTester.pumpAndSettle();
+
+    expect(jsonString, preferences.getString(PrefKeys.layout));
+  });
+
+  testWidgets('Add widget dialog search', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    // widgetTester.tap() doesn't work :shrug:
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final smartDashboardTile = find.widgetWithText(TreeTile, 'SmartDashboard');
+
+    expect(smartDashboardTile, findsOneWidget);
+
+    await widgetTester.tap(smartDashboardTile);
+    await widgetTester.pumpAndSettle();
+
+    final searchQuery = find.widgetWithText(DialogTextInput, 'Search');
+    expect(searchQuery, findsOneWidget);
+
+    final testValueOne = find.widgetWithText(TreeTile, 'Test Value 1');
+    final testValueTwo = find.widgetWithText(TreeTile, 'Test Value 2');
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    // Both match
+    await widgetTester.enterText(searchQuery, 'Test Value');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+
+    // One match
+    await widgetTester.enterText(searchQuery, 'Test Value 1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsOneWidget);
+
+    // No matches
+    await widgetTester.enterText(searchQuery, 'no match');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsNothing);
+    expect(testValueTwo, findsNothing);
+    expect(smartDashboardTile, findsNothing);
+
+    // Match only smart dashboard tile (all should show)
+    await widgetTester.enterText(searchQuery, 'Smart');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
+
+    // Empty text (both should be visible)
+    await widgetTester.enterText(searchQuery, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(testValueOne, findsOneWidget);
+    expect(testValueTwo, findsOneWidget);
+    expect(smartDashboardTile, findsOneWidget);
+  });
+
+  testWidgets('Add widget dialog (widgets)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    createMockOnlineNT4();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -198,13 +335,14 @@ void main() {
 
   testWidgets('Add widget dialog (layouts)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -253,13 +391,14 @@ void main() {
 
   testWidgets('List Layouts', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -348,10 +487,10 @@ void main() {
 
     // A custom mock is set up to reproduce behavior when actually running
     final mockNT4Connection = MockNTConnection();
-    final mockNT4Client = MockNT4Client();
     final mockSubscription = MockNT4Subscription();
 
     when(mockNT4Connection.isNT4Connected).thenReturn(true);
+    when(mockNT4Connection.ntConnected).thenReturn(ValueNotifier(true));
     when(mockNT4Connection.connectionStatus())
         .thenAnswer((_) => Stream.value(true));
     when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
@@ -359,18 +498,22 @@ void main() {
     when(mockSubscription.periodicStream())
         .thenAnswer((_) => Stream.value(null));
 
-    when(mockNT4Client.addTopicAnnounceListener(any))
+    when(mockSubscription.listen(any)).thenAnswer((realInvocation) {});
+
+    when(mockNT4Connection.addTopicAnnounceListener(any))
         .thenAnswer((realInvocation) {
       fakeAnnounceCallbacks.add(realInvocation.positionalArguments[0]);
     });
-
-    when(mockNT4Connection.nt4Client).thenReturn(mockNT4Client);
 
     when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
     when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any, any)).thenReturn(mockSubscription);
+
+    when(mockNT4Connection.subscribeAll(any)).thenReturn(mockSubscription);
 
     when(mockNT4Connection.subscribeAndRetrieveData<List<Object?>>(
             '/Shuffleboard/.metadata/Test-Tab/Shuffleboard Test Number/Position'))
@@ -396,13 +539,13 @@ void main() {
             '/Shuffleboard/Test-Tab/Shuffleboard Test Layout/.type'))
         .thenAnswer((realInvocation) => Future.value('ShuffleboardLayout'));
 
-    NTConnection.instance = mockNT4Connection;
-
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: mockNT4Connection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -473,15 +616,73 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('About dialog', (widgetTester) async {
+  testWidgets('Switch tabs from Shuffleboard api', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
+
+    NTConnection ntConnection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Shuffleboard/.metadata/Selected',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
+      ],
+    );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: ntConnection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', 'Autonomous');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', 'Random Name');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should not change since selected tab doesn\'t exist');
+
+    ntConnection.updateDataFromTopicName(
+        '/Shuffleboard/.metadata/Selected', '0');
+
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('About dialog', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -507,13 +708,14 @@ void main() {
 
   testWidgets('Changing tabs', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -536,13 +738,14 @@ void main() {
 
   testWidgets('Creating new tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -564,15 +767,43 @@ void main() {
     expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(3));
   });
 
-  testWidgets('Closing tab', (widgetTester) async {
+  testWidgets('Creating new tab (shortcut)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyT);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyT);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(3));
+  });
+
+  testWidgets('Closing tab', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -606,15 +837,53 @@ void main() {
     expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(1));
   });
 
-  testWidgets('Reordering tabs', (widgetTester) async {
+  testWidgets('Closing tab (shortcut)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
+
+    final confirmButton =
+        find.widgetWithText(TextButton, 'OK', skipOffstage: false);
+
+    expect(confirmButton, findsOneWidget);
+
+    await widgetTester.tap(confirmButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(1));
+  });
+
+  testWidgets('Reordering tabs', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -664,15 +933,185 @@ void main() {
     expect(editableTabBarWidget().currentIndex, 0);
   });
 
-  testWidgets('Renaming tab', (widgetTester) async {
+  testWidgets('Reordering tabs (shortcut)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should not change since index is 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should not change since index is equal to number of tabs');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('Navigate tabs left right (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason: 'Tab index should roll over');
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should roll back over to 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason: 'Tab index should increase to 1 (no rollover)');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0);
+  });
+
+  testWidgets('Navigate to specific tabs', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
+
+    final editableTabBar = find.byType(EditableTabBar);
+
+    expect(editableTabBar, findsOneWidget);
+
+    editableTabBarWidget() =>
+        (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+    expect(editableTabBarWidget().currentIndex, 0);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit1);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit1);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 0,
+        reason: 'Tab index should remain at 0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit2);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit2);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit5);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit5);
+    await widgetTester.pumpAndSettle();
+
+    expect(editableTabBarWidget().currentIndex, 1,
+        reason:
+            'Tab index should remain at 1 since there is no tab at index 4');
+  });
+
+  testWidgets('Renaming tab', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -716,15 +1155,49 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('Minimizing window', (widgetTester) async {
+  testWidgets('Duplicating tab', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final teleopTab = find.widgetWithText(AnimatedContainer, 'Teleoperated');
+
+    expect(teleopTab, findsOneWidget);
+
+    await widgetTester.tap(teleopTab, buttons: kSecondaryButton);
+    await widgetTester.pumpAndSettle();
+
+    final duplicateButton = find.text('Duplicate');
+
+    expect(duplicateButton, findsOneWidget);
+
+    await widgetTester.tap(duplicateButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Teleoperated (Copy)'), findsOneWidget);
+  });
+
+  testWidgets('Minimizing window', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -742,13 +1215,14 @@ void main() {
 
   testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -774,13 +1248,14 @@ void main() {
 
   testWidgets('Closing window (All changes saved)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -810,13 +1285,14 @@ void main() {
 
   testWidgets('Closing window (Unsaved changes)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -852,13 +1328,14 @@ void main() {
 
   testWidgets('Opening settings', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    setupMockOfflineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -877,5 +1354,228 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(SettingsDialog), findsOneWidget);
+  });
+
+  testWidgets('Opening settings (shortcut)', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.comma);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.comma);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.byType(SettingsDialog), findsOneWidget);
+  });
+
+  testWidgets('IP Address shortcuts', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    SharedPreferences.setMockInitialValues({
+      PrefKeys.ipAddressMode: IPAddressMode.custom.index,
+      PrefKeys.ipAddress: '127.0.0.1',
+      PrefKeys.teamNumber: 353,
+    });
+
+    MockNTConnection ntConnection = createMockOfflineNT4();
+    MockDSInteropClient dsClient = MockDSInteropClient();
+    when(dsClient.lastAnnouncedIP).thenReturn(null);
+    when(ntConnection.dsClient).thenReturn(dsClient);
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: ntConnection,
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
+
+    await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+
+    await widgetTester.pumpAndSettle();
+
+    // IP Address shouldn't change since it's already driver station
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index);
+    expect(preferences.getString(PrefKeys.ipAddress), 'localhost');
+
+    await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyK);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyK);
+
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+
+    await widgetTester.pumpAndSettle();
+
+    // IP address shouldn't change since mode is set to localhost
+    expect(preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index);
+    expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
+  });
+
+  testWidgets('Robot Notifications', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    final Map<String, dynamic> data = {
+      'title': 'Robot Notification Title',
+      'description': 'Robot Notification Description',
+      'level': 'INFO',
+      'displayTime': 350,
+      'width': 300.0,
+      'height': 300.0,
+    };
+
+    MockNTConnection connection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Elastic/RobotNotifications',
+          type: NT4TypeStr.kString,
+          properties: {},
+        )
+      ],
+      virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
+      serverTime: 5000000,
+    );
+    MockNT4Subscription mockSub = MockNT4Subscription();
+
+    List<Function(Object?, int)> listeners = [];
+    when(mockSub.listen(any)).thenAnswer(
+      (realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+        mockSub.updateValue(jsonEncode(data), 0);
+      },
+    );
+
+    when(mockSub.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in listeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
+
+    when(connection.subscribeAll(any, any)).thenAnswer(
+      (realInvocation) {
+        return mockSub;
+      },
+    );
+
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, data['title']);
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: connection,
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+    expect(notificationWidget, findsNothing);
+
+    await widgetTester.pumpAndSettle();
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
+
+    await widgetTester.pump();
+
+    expect(notificationWidget, findsOneWidget);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(notificationWidget, findsNothing);
+
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
+  });
+
+  testWidgets('Update Notification', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(
+              updateAvailable: true, latestVersion: '2025.0.1'),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, 'Version 2025.0.1 Available');
+    final notificationIcon = find.byIcon(Icons.update);
+
+    expect(notificationWidget, findsOneWidget);
+    expect(notificationIcon, findsOneWidget);
   });
 }

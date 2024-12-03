@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -25,7 +26,14 @@ class ListLayoutModel extends LayoutContainerModel {
 
   String labelPosition = 'TOP';
 
-  final TabGrid tabGrid;
+  final TabGridModel tabGrid;
+  final NTWidgetContainerModel? Function(
+    SharedPreferences preferences,
+    Map<String, dynamic> jsonData,
+    bool enabled, {
+    Function(String errorMessage)? onJsonLoadingWarning,
+  })? ntWidgetBuilder;
+
   final Function(WidgetContainerModel model)? onDragCancel;
 
   static List<String> labelPositions = const [
@@ -37,10 +45,12 @@ class ListLayoutModel extends LayoutContainerModel {
   ];
 
   ListLayoutModel({
+    required super.preferences,
     required super.initialPosition,
     required super.title,
     required this.tabGrid,
     required this.onDragCancel,
+    this.ntWidgetBuilder,
     List<NTWidgetContainerModel>? children,
     super.minWidth,
     super.minHeight,
@@ -53,6 +63,8 @@ class ListLayoutModel extends LayoutContainerModel {
 
   ListLayoutModel.fromJson({
     required super.jsonData,
+    required super.preferences,
+    required this.ntWidgetBuilder,
     required this.tabGrid,
     required this.onDragCancel,
     super.enabled,
@@ -119,13 +131,13 @@ class ListLayoutModel extends LayoutContainerModel {
     }
 
     for (Map<String, dynamic> childData in jsonData['children']) {
-      children.add(
-        NTWidgetContainerModel.fromJson(
-          jsonData: childData,
-          enabled: enabled,
-          onJsonLoadingWarning: onJsonLoadingWarning,
-        ),
-      );
+      NTWidgetContainerModel? widgetModel = ntWidgetBuilder!(
+          preferences, childData, enabled,
+          onJsonLoadingWarning: onJsonLoadingWarning);
+
+      if (widgetModel != null) {
+        children.add(widgetModel);
+      }
     }
   }
 
@@ -226,6 +238,7 @@ class ListLayoutModel extends LayoutContainerModel {
                                             container.unSubscribe();
                                             container.disposeModel(
                                                 deleting: true);
+                                            container.forceDispose();
 
                                             notifyListeners();
                                           });
@@ -454,7 +467,8 @@ class ListLayoutModel extends LayoutContainerModel {
               .whereNot((element) => element == PointerDeviceKind.trackpad)
               .toSet(),
           onPanDown: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             widget.cursorGlobalLocation = details.globalPosition;
@@ -468,7 +482,8 @@ class ListLayoutModel extends LayoutContainerModel {
             });
           },
           onPanUpdate: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             widget.cursorGlobalLocation = details.globalPosition;
@@ -479,14 +494,19 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             Future(() => setDraggable(true));
 
+            int? gridSize = preferences.getInt(PrefKeys.gridSize);
+
             Rect previewLocation = Rect.fromLTWH(
-              DraggableWidgetContainer.snapToGrid(widget.draggingRect.left),
-              DraggableWidgetContainer.snapToGrid(widget.draggingRect.top),
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggingRect.left, gridSize),
+              DraggableWidgetContainer.snapToGrid(
+                  widget.draggingRect.top, gridSize),
               widget.displayRect.width,
               widget.displayRect.height,
             );
@@ -502,7 +522,8 @@ class ListLayoutModel extends LayoutContainerModel {
             tabGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
-            if (Settings.layoutLocked) {
+            if (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked) {
               return;
             }
             Future(() {
@@ -545,6 +566,8 @@ class ListLayoutModel extends LayoutContainerModel {
       title: title,
       width: draggingRect.width,
       height: draggingRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
       horizontalPadding: 5.0,
       verticalPadding: 5.0,
@@ -572,6 +595,8 @@ class ListLayoutModel extends LayoutContainerModel {
       title: title,
       width: displayRect.width,
       height: displayRect.height,
+      cornerRadius:
+          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: (previewVisible) ? 0.25 : 1.00,
       horizontalPadding: 5.0,
       verticalPadding: 5.0,

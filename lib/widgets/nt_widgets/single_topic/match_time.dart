@@ -4,12 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class MatchTimeModel extends NTWidgetModel {
+class MatchTimeModel extends SingleTopicNTWidgetModel {
   @override
   String type = MatchTimeWidget.widgetType;
 
@@ -44,20 +43,25 @@ class MatchTimeModel extends NTWidgetModel {
     refresh();
   }
 
-  MatchTimeModel(
-      {required super.topic,
-      String timeDisplayMode = 'Minutes and Seconds',
-      int redStartTime = 15,
-      int yellowStartTime = 30,
-      super.dataType,
-      super.period})
-      : _timeDisplayMode = timeDisplayMode,
+  MatchTimeModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    String timeDisplayMode = 'Minutes and Seconds',
+    int redStartTime = 15,
+    int yellowStartTime = 30,
+    super.dataType,
+    super.period,
+  })  : _timeDisplayMode = timeDisplayMode,
         _yellowStartTime = yellowStartTime,
         _redStartTime = redStartTime,
         super();
 
-  MatchTimeModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  MatchTimeModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _timeDisplayMode =
         tryCast(jsonData['time_display_mode']) ?? 'Minutes and Seconds';
 
@@ -176,11 +180,10 @@ class MatchTimeWidget extends NTWidget {
   Widget build(BuildContext context) {
     MatchTimeModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double time = tryCast(snapshot.data) ?? -1.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        double time = tryCast(data) ?? -1.0;
         time = time.floorToDouble();
 
         String timeDisplayString;

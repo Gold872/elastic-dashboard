@@ -7,11 +7,10 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class TextDisplayModel extends NTWidgetModel {
+class TextDisplayModel extends SingleTopicNTWidgetModel {
   @override
   String type = TextDisplay.widgetType;
 
@@ -29,6 +28,8 @@ class TextDisplayModel extends NTWidgetModel {
   }
 
   TextDisplayModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool showSubmitButton = false,
     super.dataType,
@@ -36,8 +37,11 @@ class TextDisplayModel extends NTWidgetModel {
   })  : _showSubmitButton = showSubmitButton,
         super();
 
-  TextDisplayModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  TextDisplayModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _showSubmitButton =
         tryCast(jsonData['show_submit_button']) ?? _showSubmitButton;
   }
@@ -59,7 +63,7 @@ class TextDisplayModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'show_submit_button': _showSubmitButton,
+      'show_submit_button': showSubmitButton,
     };
   }
 
@@ -116,7 +120,7 @@ class TextDisplayModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(ntTopic!);
+      ntConnection.publishTopic(ntTopic!);
     }
 
     if (formattedData != null) {
@@ -136,14 +140,15 @@ class TextDisplay extends NTWidget {
   Widget build(BuildContext context) {
     TextDisplayModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        Object? data = snapshot.data;
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        model.subscription!,
+        model.controller,
+      ]),
+      builder: (context, child) {
+        Object? data = model.subscription!.value;
 
-        if (data?.toString() != model.previousValue?.toString() &&
-            data != null) {
+        if (data?.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors
           Future(() async {
             String displayString = data.toString();

@@ -12,7 +12,7 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dar
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class GraphModel extends NTWidgetModel {
+class GraphModel extends SingleTopicNTWidgetModel {
   @override
   String type = GraphWidget.widgetType;
 
@@ -61,6 +61,8 @@ class GraphModel extends NTWidgetModel {
   _GraphWidgetGraph? _graphWidget;
 
   GraphModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double timeDisplayed = 5.0,
     double? minValue,
@@ -76,8 +78,11 @@ class GraphModel extends NTWidgetModel {
         _lineWidth = lineWidth,
         super();
 
-  GraphModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  GraphModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _timeDisplayed = tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
         5.0;
@@ -92,8 +97,8 @@ class GraphModel extends NTWidgetModel {
     return {
       ...super.toJson(),
       'time_displayed': _timeDisplayed,
-      'min_value': _minValue,
-      'max_value': _maxValue,
+      if (_minValue != null) 'min_value': _minValue,
+      if (_maxValue != null) 'max_value': _maxValue,
       'color': _mainColor.value,
       'line_width': _lineWidth,
     };
@@ -108,11 +113,13 @@ class GraphModel extends NTWidgetModel {
         children: [
           Flexible(
             child: DialogColorPicker(
-                onColorPicked: (color) {
-                  mainColor = color;
-                },
-                label: 'Graph Color',
-                initialColor: _mainColor),
+              onColorPicked: (color) {
+                mainColor = color;
+              },
+              label: 'Graph Color',
+              initialColor: _mainColor,
+              defaultColor: Colors.cyan,
+            ),
           ),
           Flexible(
             child: DialogTextInput(

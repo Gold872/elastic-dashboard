@@ -1,20 +1,25 @@
-import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class CameraStreamModel extends NTWidgetModel {
+class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   String type = CameraStreamWidget.widgetType;
 
   String get streamsTopic => '$topic/streams';
+
+  late NT4Subscription streamsSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [streamsSubscription];
 
   int? _quality;
   int? _fps;
@@ -60,6 +65,8 @@ class CameraStreamModel extends NTWidgetModel {
   }
 
   CameraStreamModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     int? compression,
     int? fps,
@@ -71,8 +78,11 @@ class CameraStreamModel extends NTWidgetModel {
         _resolution = resolution,
         super();
 
-  CameraStreamModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  CameraStreamModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
 
@@ -83,6 +93,11 @@ class CameraStreamModel extends NTWidgetModel {
     if (resolution != null && resolution.length > 1) {
       _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
     }
+  }
+
+  @override
+  void initializeSubscriptions() {
+    streamsSubscription = ntConnection.subscribe(streamsTopic, super.period);
   }
 
   @override
@@ -219,7 +234,7 @@ class CameraStreamModel extends NTWidgetModel {
     if (deleting) {
       _lastDisplayedImage?.evict();
       mjpegStream?.previousImage?.evict();
-      mjpegStream?.dispose();
+      mjpegStream?.dispose(deleting: deleting);
     }
 
     super.disposeWidget(deleting: deleting);
@@ -230,18 +245,6 @@ class CameraStreamModel extends NTWidgetModel {
     _lastDisplayedImage = mjpegStream?.previousImage;
     mjpegStream?.dispose();
     mjpegStream = null;
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object?> rawStreams =
-        tryCast(ntConnection.getLastAnnouncedValue(streamsTopic)) ?? [];
-    List<String> streams = rawStreams.whereType<String>().toList();
-
-    return [
-      ...streams,
-      ntConnection.isNT4Connected,
-    ];
   }
 }
 
@@ -254,12 +257,14 @@ class CameraStreamWidget extends NTWidget {
   Widget build(BuildContext context) {
     CameraStreamModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        model.streamsSubscription,
+        model.ntConnection.ntConnected,
+      ]),
+      builder: (context, child) {
         List<Object?> rawStreams =
-            tryCast(ntConnection.getLastAnnouncedValue(model.streamsTopic)) ??
-                [];
+            tryCast(model.streamsSubscription.value) ?? [];
 
         List<String> streams = [];
         for (Object? stream in rawStreams) {
@@ -272,11 +277,12 @@ class CameraStreamWidget extends NTWidget {
           streams.add(stream.substring('mjpg:'.length));
         }
 
-        if (streams.isEmpty || !ntConnection.isNT4Connected) {
+        if (streams.isEmpty || !model.ntConnection.ntConnected.value) {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (model.mjpegStream != null || model.lastDisplayedImage != null)
+              if (model.mjpegStream?.previousImage != null ||
+                  model.lastDisplayedImage != null)
                 Opacity(
                   opacity: 0.35,
                   child: Image(
@@ -292,9 +298,9 @@ class CameraStreamWidget extends NTWidget {
                   CustomLoadingIndicator(),
                   const SizedBox(height: 10),
                   Text(
-                    (ntConnection.isNT4Connected)
+                    (model.ntConnection.isNT4Connected)
                         ? 'Waiting for Camera Stream connection...'
-                        : 'Waiting for Network Tables Connection...',
+                        : 'Waiting for Network Tables connection...',
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -312,7 +318,7 @@ class CameraStreamWidget extends NTWidget {
 
         if (createNewWidget) {
           model.lastDisplayedImage?.evict();
-          model.mjpegStream?.dispose();
+          model.mjpegStream?.dispose(deleting: true);
 
           model.mjpegStream = MjpegStreamState(stream: stream);
         }

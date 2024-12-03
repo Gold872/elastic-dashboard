@@ -3,31 +3,45 @@ import 'package:flutter/material.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class SubsystemModel extends NTWidgetModel {
+class SubsystemModel extends MultiTopicNTWidgetModel {
   @override
   String type = SubsystemWidget.widgetType;
 
   String get defaultCommandTopic => '$topic/.default';
   String get currentCommandTopic => '$topic/.command';
 
-  SubsystemModel({required super.topic, super.dataType, super.period})
-      : super();
-
-  SubsystemModel.fromJson({required super.jsonData}) : super.fromJson();
+  late NT4Subscription defaultCommandSubscription;
+  late NT4Subscription currentCommandSubscription;
 
   @override
-  List<Object> getCurrentData() {
-    String defaultCommand =
-        tryCast(ntConnection.getLastAnnouncedValue(defaultCommandTopic)) ??
-            'none';
-    String currentCommand =
-        tryCast(ntConnection.getLastAnnouncedValue(currentCommandTopic)) ??
-            'none';
+  List<NT4Subscription> get subscriptions => [
+        defaultCommandSubscription,
+        currentCommandSubscription,
+      ];
 
-    return [defaultCommand, currentCommand];
+  SubsystemModel({
+    required super.ntConnection,
+    required super.preferences,
+    required super.topic,
+    super.dataType,
+    super.period,
+  }) : super();
+
+  SubsystemModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required super.jsonData,
+  }) : super.fromJson();
+
+  @override
+  void initializeSubscriptions() {
+    defaultCommandSubscription =
+        ntConnection.subscribe(defaultCommandTopic, super.period);
+    currentCommandSubscription =
+        ntConnection.subscribe(currentCommandTopic, super.period);
   }
 }
 
@@ -40,27 +54,29 @@ class SubsystemWidget extends NTWidget {
   Widget build(BuildContext context) {
     SubsystemModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        String defaultCommand = tryCast(ntConnection
-                .getLastAnnouncedValue(model.defaultCommandTopic)) ??
-            'none';
-        String currentCommand = tryCast(ntConnection
-                .getLastAnnouncedValue(model.currentCommandTopic)) ??
-            'none';
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ValueListenableBuilder(
+          valueListenable: model.defaultCommandSubscription,
+          builder: (context, value, child) {
+            String defaultCommand = tryCast(value) ?? 'none';
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text('Default Command: $defaultCommand',
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 5),
-            Text('Current Command: $currentCommand',
-                overflow: TextOverflow.ellipsis),
-          ],
-        );
-      },
+            return Text('Default Command: $defaultCommand',
+                overflow: TextOverflow.ellipsis);
+          },
+        ),
+        const SizedBox(height: 5),
+        ValueListenableBuilder(
+          valueListenable: model.currentCommandSubscription,
+          builder: (context, value, child) {
+            String currentCommand = tryCast(value) ?? 'none';
+
+            return Text('Current Command: $currentCommand',
+                overflow: TextOverflow.ellipsis);
+          },
+        ),
+      ],
     );
   }
 }

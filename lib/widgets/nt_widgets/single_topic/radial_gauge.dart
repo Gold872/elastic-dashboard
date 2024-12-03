@@ -5,13 +5,13 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class RadialGaugeModel extends NTWidgetModel {
+class RadialGaugeModel extends SingleTopicNTWidgetModel {
   @override
   String type = RadialGauge.widgetType;
 
@@ -83,6 +83,8 @@ class RadialGaugeModel extends NTWidgetModel {
   }
 
   RadialGaugeModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     double startAngle = -140.0,
     double endAngle = 140.0,
@@ -104,8 +106,11 @@ class RadialGaugeModel extends NTWidgetModel {
         _endAngle = endAngle,
         super();
 
-  RadialGaugeModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  RadialGaugeModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;
     _endAngle = tryCast(jsonData['end_angle']) ?? _endAngle;
     _minValue = tryCast(jsonData['min_value']) ?? _minValue;
@@ -296,15 +301,16 @@ class RadialGauge extends NTWidget {
   Widget build(BuildContext context) {
     RadialGaugeModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.subscription?.periodicStream(yieldAll: false),
-      initialData: ntConnection.getLastAnnouncedValue(model.topic),
-      builder: (context, snapshot) {
-        double value = tryCast(snapshot.data) ?? 0.0;
+    return ValueListenableBuilder(
+      valueListenable: model.subscription!,
+      builder: (context, data, child) {
+        double value = tryCast<num>(data)?.toDouble() ?? 0.0;
 
         if (model.wrapValue) {
           value = _getWrappedValue(value, model.minValue, model.maxValue);
         }
+
+        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
         return SfRadialGauge(
           axes: [
@@ -329,7 +335,7 @@ class RadialGauge extends NTWidget {
                   angle: 90.0,
                   positionFactor: (model.showPointer) ? 0.35 : 0.05,
                   widget: Text(
-                    value.toStringAsFixed(2),
+                    value.toStringAsFixed(fractionDigits),
                     style: TextStyle(
                       fontSize: (model.showPointer) ? 18.0 : 28.0,
                     ),

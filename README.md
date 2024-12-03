@@ -1,6 +1,6 @@
 # ![Elastic Logo](assets/logos/logo_full.png)
 
-[![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml)
+[![Elastic](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml/badge.svg)](https://github.com/Gold872/elastic-dashboard/actions/workflows/elastic-ci.yml) [![codecov](https://codecov.io/gh/Gold872/elastic-dashboard/graph/badge.svg?token=4MQYW8SMQI)](https://codecov.io/gh/Gold872/elastic-dashboard)
 
 A simple and modern dashboard for FRC.
 
@@ -23,7 +23,7 @@ Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is 
 ![Example Layout](/screenshots/example_layout.png)
 
 ## Documentation
-View the online documentation [here](https://github.com/Gold872/elastic-dashboard/wiki)
+View the online documentation [here](https://frc-elastic.gitbook.io/docs)
 
 ## Special Thanks
 

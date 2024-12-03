@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -13,12 +14,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
-import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,42 +57,22 @@ void main() async {
 
   await windowManager.ensureInitialized();
 
-  Settings.teamNumber =
-      preferences.getInt(PrefKeys.teamNumber) ?? Settings.teamNumber;
-  Settings.ipAddressMode =
-      IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode));
-
-  Settings.layoutLocked =
-      preferences.getBool(PrefKeys.layoutLocked) ?? Settings.layoutLocked;
-  Settings.gridSize =
-      preferences.getInt(PrefKeys.gridSize) ?? Settings.gridSize;
-  Settings.showGrid =
-      preferences.getBool(PrefKeys.showGrid) ?? Settings.showGrid;
-  Settings.cornerRadius =
-      preferences.getDouble(PrefKeys.cornerRadius) ?? Settings.cornerRadius;
-  Settings.autoResizeToDS =
-      preferences.getBool(PrefKeys.autoResizeToDS) ?? Settings.autoResizeToDS;
-  Settings.defaultPeriod =
-      preferences.getDouble(PrefKeys.defaultPeriod) ?? Settings.defaultPeriod;
-  Settings.defaultGraphPeriod =
-      preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
-          Settings.defaultGraphPeriod;
-
   NTWidgetBuilder.ensureInitialized();
 
-  Settings.ipAddress =
-      preferences.getString(PrefKeys.ipAddress) ?? Settings.ipAddress;
+  String ipAddress =
+      preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
 
-  ntConnection.nt4Connect(Settings.ipAddress);
+  NTConnection ntConnection = NTConnection(ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  Size screenSize = (primaryDisplay.visibleSize ?? primaryDisplay.size) *
-      (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  Size screenSize =
+      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
 
-  double minimumWidth = min(screenSize.width * 0.60, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.60, 720.0);
+  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
+  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
 
   Size minimumSize = Size(minimumWidth, minimumHeight);
 
@@ -105,7 +87,13 @@ void main() async {
   await windowManager.show();
   await windowManager.focus();
 
-  runApp(Elastic(version: packageInfo.version, preferences: preferences));
+  runApp(
+    Elastic(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      version: packageInfo.version,
+    ),
+  );
 }
 
 Future<void> _restoreWindowPosition(SharedPreferences preferences,
@@ -188,10 +176,15 @@ Future<void> _restorePreferencesFromBackup(String appFolderPath) async {
 }
 
 class Elastic extends StatefulWidget {
+  final NTConnection ntConnection;
   final SharedPreferences preferences;
   final String version;
 
-  const Elastic({super.key, required this.version, required this.preferences});
+  const Elastic(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      required this.version});
 
   @override
   State<Elastic> createState() => _ElasticState();
@@ -200,6 +193,11 @@ class Elastic extends StatefulWidget {
 class _ElasticState extends State<Elastic> {
   late Color teamColor = Color(
       widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+  late FlexSchemeVariant themeVariant = FlexSchemeVariant.values
+          .firstWhereOrNull((element) =>
+              element.variantName ==
+              widget.preferences.getString(PrefKeys.themeVariant)) ??
+      FlexSchemeVariant.material3Legacy;
 
   @override
   Widget build(BuildContext context) {
@@ -208,20 +206,33 @@ class _ElasticState extends State<Elastic> {
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
         brightness: Brightness.dark,
-        variant: FlexSchemeVariant.material3Legacy,
+        variant: themeVariant,
       ),
     );
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Elastic',
+      title: appTitle,
       theme: theme,
       home: DashboardPage(
+        ntConnection: widget.ntConnection,
         preferences: widget.preferences,
         version: widget.version,
+        updateChecker: UpdateChecker(currentVersion: widget.version),
         onColorChanged: (color) => setState(() {
           teamColor = color;
           widget.preferences.setInt(PrefKeys.teamColor, color.value);
         }),
+        onThemeVariantChanged: (variant) async {
+          themeVariant = variant;
+          if (variant == Defaults.themeVariant) {
+            await widget.preferences
+                .setString(PrefKeys.themeVariant, Defaults.defaultVariantName);
+          } else {
+            await widget.preferences
+                .setString(PrefKeys.themeVariant, variant.variantName);
+          }
+          setState(() {});
+        },
       ),
     );
   }

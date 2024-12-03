@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -5,11 +7,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-class ComboBoxChooserModel extends NTWidgetModel {
+class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   @override
   String type = ComboBoxChooser.widgetType;
 
@@ -18,9 +19,29 @@ class ComboBoxChooserModel extends NTWidgetModel {
   String get activeTopicName => '$topic/active';
   String get defaultTopicName => '$topic/default';
 
+  late NT4Subscription optionsSubscription;
+  late NT4Subscription selectedSubscription;
+  late NT4Subscription activeSubscription;
+  late NT4Subscription defaultSubscription;
+
+  @override
+  List<NT4Subscription> get subscriptions => [
+        optionsSubscription,
+        selectedSubscription,
+        activeSubscription,
+        defaultSubscription,
+      ];
+
   final TextEditingController _searchController = TextEditingController();
 
-  String? selectedChoice;
+  String? _selectedChoice;
+
+  String? get selectedChoice => _selectedChoice;
+
+  set selectedChoice(value) {
+    _selectedChoice = value;
+    refresh();
+  }
 
   StringChooserData? previousData;
 
@@ -37,6 +58,8 @@ class ComboBoxChooserModel extends NTWidgetModel {
   }
 
   ComboBoxChooserModel({
+    required super.ntConnection,
+    required super.preferences,
     required super.topic,
     bool sortOptions = false,
     super.dataType,
@@ -44,9 +67,23 @@ class ComboBoxChooserModel extends NTWidgetModel {
   })  : _sortOptions = sortOptions,
         super();
 
-  ComboBoxChooserModel.fromJson({required Map<String, dynamic> jsonData})
-      : super.fromJson(jsonData: jsonData) {
+  ComboBoxChooserModel.fromJson({
+    required super.ntConnection,
+    required super.preferences,
+    required Map<String, dynamic> jsonData,
+  }) : super.fromJson(jsonData: jsonData) {
     _sortOptions = tryCast(jsonData['sort_options']) ?? _sortOptions;
+  }
+
+  @override
+  void initializeSubscriptions() {
+    optionsSubscription =
+        ntConnection.subscribe(optionsTopicName, super.period);
+    selectedSubscription =
+        ntConnection.subscribe(selectedTopicName, super.period);
+    activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
+    defaultSubscription =
+        ntConnection.subscribe(defaultTopicName, super.period);
   }
 
   @override
@@ -82,8 +119,8 @@ class ComboBoxChooserModel extends NTWidgetModel {
       return;
     }
 
-    _selectedTopic ??= ntConnection.nt4Client
-        .publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??=
+        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
@@ -102,36 +139,10 @@ class ComboBoxChooserModel extends NTWidgetModel {
     }
 
     if (publishTopic) {
-      ntConnection.nt4Client.publishTopic(_activeTopic!);
+      ntConnection.publishTopic(_activeTopic!);
     }
 
     ntConnection.updateDataFromTopic(_activeTopic!, active);
-  }
-
-  @override
-  List<Object> getCurrentData() {
-    List<Object?> rawOptions = ntConnection
-            .getLastAnnouncedValue(optionsTopicName)
-            ?.tryCast<List<Object?>>() ??
-        [];
-
-    List<String> options = rawOptions.whereType<String>().toList();
-
-    String active =
-        tryCast(ntConnection.getLastAnnouncedValue(activeTopicName)) ?? '';
-
-    String selected =
-        tryCast(ntConnection.getLastAnnouncedValue(selectedTopicName)) ?? '';
-
-    String defaultOption =
-        tryCast(ntConnection.getLastAnnouncedValue(defaultTopicName)) ?? '';
-
-    return [
-      ...options,
-      active,
-      selected,
-      defaultOption,
-    ];
   }
 }
 
@@ -144,13 +155,11 @@ class ComboBoxChooser extends NTWidget {
   Widget build(BuildContext context) {
     ComboBoxChooserModel model = cast(context.watch<NTWidgetModel>());
 
-    return StreamBuilder(
-      stream: model.multiTopicPeriodicStream,
-      builder: (context, snapshot) {
-        List<Object?> rawOptions = ntConnection
-                .getLastAnnouncedValue(model.optionsTopicName)
-                ?.tryCast<List<Object?>>() ??
-            [];
+    return ListenableBuilder(
+      listenable: Listenable.merge(model.subscriptions),
+      builder: (context, child) {
+        List<Object?> rawOptions =
+            model.optionsSubscription.value?.tryCast<List<Object?>>() ?? [];
 
         List<String> options = rawOptions.whereType<String>().toList();
 
@@ -158,25 +167,22 @@ class ComboBoxChooser extends NTWidget {
           options.sort();
         }
 
-        String? active =
-            tryCast(ntConnection.getLastAnnouncedValue(model.activeTopicName));
+        String? active = tryCast(model.activeSubscription.value);
         if (active != null && active == '') {
           active = null;
         }
 
-        String? selected = tryCast(
-            ntConnection.getLastAnnouncedValue(model.selectedTopicName));
+        String? selected = tryCast(model.selectedSubscription.value);
         if (selected != null && selected == '') {
           selected = null;
         }
 
-        String? defaultOption =
-            tryCast(ntConnection.getLastAnnouncedValue(model.defaultTopicName));
+        String? defaultOption = tryCast(model.defaultSubscription.value);
         if (defaultOption != null && defaultOption == '') {
           defaultOption = null;
         }
 
-        if (!ntConnection.isNT4Connected) {
+        if (!model.ntConnection.isNT4Connected) {
           active = null;
           selected = null;
           defaultOption = null;
@@ -298,77 +304,81 @@ class _StringChooserDropdown extends StatelessWidget {
       child: Tooltip(
         message: selected ?? '',
         waitDuration: const Duration(milliseconds: 250),
-        child: DropdownButton2<String>(
-          isExpanded: true,
-          value: selected,
-          selectedItemBuilder: (context) => [
-            ...options.map((String option) {
-              return Container(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(
-                  option,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  overflow: TextOverflow.ellipsis,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return DropdownButton2<String>(
+              isExpanded: true,
+              value: selected,
+              selectedItemBuilder: (context) => [
+                ...options.map((String option) {
+                  return Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      option,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }),
+              ],
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              );
-            }),
-          ],
-          dropdownStyleData: DropdownStyleData(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            maxHeight: 250,
-            width: 250,
-          ),
-          dropdownSearchData: DropdownSearchData(
-            searchController: textController,
-            searchMatchFn: (item, searchValue) {
-              return item.value
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchValue.toLowerCase());
-            },
-            searchInnerWidgetHeight: 50,
-            searchInnerWidget: Container(
-              color: Theme.of(context).colorScheme.surface,
-              height: 50,
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 4,
-                right: 8,
-                left: 8,
+                maxHeight: 250,
+                width: max(constraints.maxWidth, 250),
               ),
-              child: TextFormField(
-                expands: true,
-                maxLines: null,
-                controller: textController,
-                decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
+              dropdownSearchData: DropdownSearchData(
+                searchController: textController,
+                searchMatchFn: (item, searchValue) {
+                  return item.value
+                      .toString()
+                      .toLowerCase()
+                      .contains(searchValue.toLowerCase());
+                },
+                searchInnerWidgetHeight: 50,
+                searchInnerWidget: Container(
+                  color: Theme.of(context).colorScheme.surface,
+                  height: 50,
+                  padding: const EdgeInsets.only(
+                    top: 8,
+                    bottom: 4,
+                    right: 8,
+                    left: 8,
                   ),
-                  label: const Text('Search'),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  child: TextFormField(
+                    expands: true,
+                    maxLines: null,
+                    controller: textController,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      label: const Text('Search'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          items: options.map((String option) {
-            return DropdownMenuItem(
-              value: option,
-              child:
-                  Text(option, style: Theme.of(context).textTheme.bodyMedium),
+              items: options.map((String option) {
+                return DropdownMenuItem(
+                  value: option,
+                  child: Text(option,
+                      style: Theme.of(context).textTheme.bodyMedium),
+                );
+              }).toList(),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textController.clear();
+                }
+              },
+              onChanged: onValueChanged,
             );
-          }).toList(),
-          onMenuStateChange: (isOpen) {
-            if (!isOpen) {
-              textController.clear();
-            }
           },
-          onChanged: onValueChanged,
         ),
       ),
     );
