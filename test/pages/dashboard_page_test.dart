@@ -270,7 +270,6 @@ void main() {
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    createMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
@@ -387,6 +386,147 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(listLayoutContainer, findsOneWidget);
+  });
+
+  testWidgets('Add widget dialog (list layout sub-table)',
+      (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(
+            virtualTopics: [
+              NT4Topic(
+                name: '/Non-Typed/Value 1',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Typed/Value 2',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Typed/Value 3',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+            ],
+          ),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final nonTypedTile = find.widgetWithText(TreeTile, 'Non-Typed');
+
+    expect(nonTypedTile, findsOneWidget);
+
+    final nonTypedContainer = find.widgetWithText(WidgetContainer, 'Non-Typed');
+    expect(nonTypedContainer, findsNothing);
+
+    await widgetTester.drag(
+      nonTypedTile,
+      const Offset(250, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(nonTypedContainer, findsOneWidget);
+  });
+
+  testWidgets('Add widget dialog (unregistered sendable)',
+      (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(
+            virtualTopics: [
+              NT4Topic(
+                name: '/Non-Registered/.type',
+                type: NT4TypeStr.kString,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 1',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 2',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 3',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+            ],
+            virtualValues: {
+              '/Non-Registered/.type': 'Non Registered Type',
+            },
+          ),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final nonRegisteredTile = find.widgetWithText(TreeTile, 'Non-Registered');
+
+    expect(nonRegisteredTile, findsOneWidget);
+
+    final nonRegistered =
+        find.widgetWithText(WidgetContainer, 'Non-Registered');
+    expect(nonRegistered, findsNothing);
+
+    await widgetTester.drag(
+      nonRegisteredTile,
+      const Offset(250, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(nonRegistered, findsOneWidget);
   });
 
   testWidgets('List Layouts', (widgetTester) async {
