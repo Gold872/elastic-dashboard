@@ -44,7 +44,7 @@ jobs:
         run: dart run import_sorter:main --exit-if-changed
 
       - name: Analyze project source
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze --no-fatal-infos
   test:
     name: "Run Tests"
     runs-on: ubuntu-22.04
