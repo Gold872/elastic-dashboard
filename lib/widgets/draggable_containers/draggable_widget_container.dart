@@ -54,29 +54,29 @@ class DraggableWidgetContainer extends StatelessWidget {
           );
         },
         onDragStart: (event) {
-          model.setDragging(true);
-          model.setPreviewVisible(true);
-          model.setDraggingIntoLayout(false);
-          model.setDragStartLocation(model.displayRect);
-          model.setPreviewRect(model.dragStartLocation);
-          model.setValidLocation(
+          model.dragging = true;
+          model.previewVisible = true;
+          model.draggingIntoLayout = false;
+          model.dragStartLocation = model.displayRect;
+          model.previewRect = model.dragStartLocation;
+          model.validLocation =
               updateFunctions?.isValidMoveLocation(model, model.previewRect) ??
-                  true);
+                  true;
 
           updateFunctions?.onDragBegin(model);
 
           controller?.setRect(model.draggingRect);
         },
         onResizeStart: (handle, event) {
-          model.setDragging(true);
-          model.setResizing(true);
-          model.setPreviewVisible(true);
-          model.setDraggingIntoLayout(false);
-          model.setDragStartLocation(model.displayRect);
-          model.setPreviewRect(model.dragStartLocation);
-          model.setValidLocation(
+          model.dragging = true;
+          model.resizing = true;
+          model.previewVisible = true;
+          model.draggingIntoLayout = false;
+          model.dragStartLocation = model.displayRect;
+          model.previewRect = model.dragStartLocation;
+          model.validLocation =
               updateFunctions?.isValidMoveLocation(model, model.previewRect) ??
-                  true);
+                  true;
 
           updateFunctions?.onResizeBegin.call(model);
 
@@ -88,7 +88,7 @@ class DraggableWidgetContainer extends StatelessWidget {
             return;
           }
 
-          model.setCursorGlobalLocation(event.globalPosition);
+          model.cursorGlobalLocation = event.globalPosition;
 
           updateFunctions?.onUpdate(model, result.rect, result);
 
@@ -98,7 +98,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           if (!model.dragging) {
             return;
           }
-          model.setDragging(false);
+          model.dragging = false;
 
           updateFunctions?.onDragEnd(model, model.draggingRect,
               globalPosition: model.cursorGlobalLocation);
@@ -107,7 +107,7 @@ class DraggableWidgetContainer extends StatelessWidget {
         },
         onDragCancel: () {
           Future(() {
-            model.setDragging(false);
+            model.dragging = false;
           });
 
           updateFunctions?.onDragCancel(model);
@@ -118,16 +118,16 @@ class DraggableWidgetContainer extends StatelessWidget {
           if (!model.dragging && !model.resizing) {
             return;
           }
-          model.setDragging(false);
-          model.setResizing(false);
+          model.dragging = false;
+          model.resizing = false;
 
           updateFunctions?.onResizeEnd(model, model.draggingRect);
 
           controller?.setRect(model.draggingRect);
         },
         onResizeCancel: (handle) {
-          model.setDragging(false);
-          model.setResizing(false);
+          model.dragging = false;
+          model.resizing = false;
 
           updateFunctions?.onDragCancel(model);
 
