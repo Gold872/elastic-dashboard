@@ -272,9 +272,6 @@ class NetworkTableTreeRow {
     NTWidget? widget = NTWidgetBuilder.buildNTWidgetFromModel(primary);
 
     if (widget == null) {
-      primary.unSubscribe();
-      primary.disposeWidget(deleting: true);
-      primary.forceDispose();
 
       return null;
     }
