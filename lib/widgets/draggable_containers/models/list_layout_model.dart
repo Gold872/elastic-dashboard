@@ -14,9 +14,14 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/layout_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
-import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import 'nt_widget_container_model.dart';
 import 'widget_container_model.dart';
+
+typedef DragOutFunctions = ({
+  bool Function(WidgetContainerModel widget) dragOutEnd,
+  void Function(
+      WidgetContainerModel widget, Offset globalPosition) dragOutUpdate
+});
 
 class ListLayoutModel extends LayoutContainerModel {
   @override
@@ -26,7 +31,7 @@ class ListLayoutModel extends LayoutContainerModel {
 
   String labelPosition = 'TOP';
 
-  final TabGridModel tabGrid;
+  final DragOutFunctions? dragOutFunctions;
   final NTWidgetContainerModel? Function(
     SharedPreferences preferences,
     Map<String, dynamic> jsonData,
@@ -48,7 +53,7 @@ class ListLayoutModel extends LayoutContainerModel {
     required super.preferences,
     required super.initialPosition,
     required super.title,
-    required this.tabGrid,
+    this.dragOutFunctions,
     required this.onDragCancel,
     this.ntWidgetBuilder,
     List<NTWidgetContainerModel>? children,
@@ -65,7 +70,7 @@ class ListLayoutModel extends LayoutContainerModel {
     required super.jsonData,
     required super.preferences,
     required this.ntWidgetBuilder,
-    required this.tabGrid,
+    this.dragOutFunctions,
     required this.onDragCancel,
     super.enabled,
     super.minWidth,
@@ -332,8 +337,14 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  void addWidget(NTWidgetContainerModel model) {
-    children.add(model);
+  void addWidget(WidgetContainerModel widget) {
+    children.add(widget as NTWidgetContainerModel);
+    notifyListeners();
+  }
+
+  @override
+  void removeWidget(WidgetContainerModel widget) {
+    children.remove(widget);
     notifyListeners();
   }
 
@@ -491,7 +502,7 @@ class ListLayoutModel extends LayoutContainerModel {
             Offset location = details.globalPosition -
                 Offset(widget.displayRect.width, widget.displayRect.height) / 2;
 
-            tabGrid.layoutDragOutUpdate(widget, location);
+            dragOutFunctions?.dragOutUpdate(widget, location);
           },
           onPanEnd: (details) {
             if (preferences.getBool(PrefKeys.layoutLocked) ??
@@ -500,26 +511,10 @@ class ListLayoutModel extends LayoutContainerModel {
             }
             Future(() => draggable = true);
 
-            int? gridSize = preferences.getInt(PrefKeys.gridSize);
-
-            Rect previewLocation = Rect.fromLTWH(
-              DraggableWidgetContainer.snapToGrid(
-                  widget.draggingRect.left, gridSize),
-              DraggableWidgetContainer.snapToGrid(
-                  widget.draggingRect.top, gridSize),
-              widget.displayRect.width,
-              widget.displayRect.height,
-            );
-
-            if ((tabGrid.isValidMoveLocation(widget, previewLocation) ||
-                    tabGrid
-                        .isValidLayoutLocation(widget.cursorGlobalLocation)) &&
-                tabGrid.isDraggingInContainer()) {
+            if (dragOutFunctions?.dragOutEnd(widget) ?? false) {
               children.remove(widget);
               notifyListeners();
             }
-
-            tabGrid.layoutDragOutEnd(widget);
           },
           onPanCancel: () {
             if (preferences.getBool(PrefKeys.layoutLocked) ??

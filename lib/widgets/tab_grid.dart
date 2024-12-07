@@ -100,7 +100,10 @@ class TabGridModel extends ChangeNotifier {
               onJsonLoadingWarning: onJsonLoadingWarning,
             ),
             enabled: ntConnection.isNT4Connected,
-            tabGrid: this,
+            dragOutFunctions: (
+              dragOutUpdate: layoutDragOutUpdate,
+              dragOutEnd: layoutDragOutEnd,
+            ),
             onDragCancel: _layoutContainerOnDragCancel,
             minWidth: 128.0 * 2,
             minHeight: 128.0 * 2,
@@ -413,10 +416,11 @@ class TabGridModel extends ChangeNotifier {
     onWidgetResizeEnd(widget);
   }
 
-  void layoutDragOutEnd(WidgetContainerModel widget) {
+  bool layoutDragOutEnd(WidgetContainerModel widget) {
     if (widget is NTWidgetContainerModel) {
-      placeDragInWidget(widget, true);
+      return placeDragInWidget(widget, true);
     }
+    return false;
   }
 
   void layoutDragOutUpdate(WidgetContainerModel model, Offset globalPosition) {
@@ -456,10 +460,10 @@ class TabGridModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void placeDragInWidget(WidgetContainerModel widget,
+  bool placeDragInWidget(WidgetContainerModel widget,
       [bool fromLayout = false]) {
     if (_containerDraggingIn == null) {
-      return;
+      return false;
     }
 
     Offset globalPosition = _containerDraggingIn!.value;
@@ -498,7 +502,7 @@ class TabGridModel extends ChangeNotifier {
         }
 
         notifyListeners();
-        return;
+        return false;
       }
     } else if (!isValidMoveLocation(widget, previewLocation)) {
       _containerDraggingIn = null;
@@ -510,7 +514,7 @@ class TabGridModel extends ChangeNotifier {
       }
 
       notifyListeners();
-      return;
+      return false;
     } else {
       widget.displayRect = previewLocation;
       widget.draggingRect = Rect.fromLTWH(previewX, previewY, width, height);
@@ -522,6 +526,8 @@ class TabGridModel extends ChangeNotifier {
 
     widget.disposeModel();
     notifyListeners();
+
+    return true;
   }
 
   ListLayoutModel createListLayout(
@@ -540,7 +546,10 @@ class TabGridModel extends ChangeNotifier {
       children: children,
       minWidth: 128.0,
       minHeight: 128.0,
-      tabGrid: this,
+      dragOutFunctions: (
+        dragOutUpdate: layoutDragOutUpdate,
+        dragOutEnd: layoutDragOutEnd,
+      ),
       onDragCancel: _layoutContainerOnDragCancel,
     );
   }
@@ -605,7 +614,10 @@ class TabGridModel extends ChangeNotifier {
                 onJsonLoadingWarning: onJsonLoadingWarning,
               ),
               enabled: ntConnection.isNT4Connected,
-              tabGrid: this,
+              dragOutFunctions: (
+                dragOutUpdate: layoutDragOutUpdate,
+                dragOutEnd: layoutDragOutEnd,
+              ),
               onDragCancel: _layoutContainerOnDragCancel,
               minWidth: 128.0 * 2,
               minHeight: 128.0 * 2,
@@ -1038,7 +1050,10 @@ class TabGrid extends StatelessWidget {
       return ListLayoutModel.fromJson(
         preferences: grid.preferences,
         jsonData: json,
-        tabGrid: grid,
+        dragOutFunctions: (
+          dragOutUpdate: grid.layoutDragOutUpdate,
+          dragOutEnd: grid.layoutDragOutEnd,
+        ),
         ntWidgetBuilder: (preferences, jsonData, enabled,
                 {onJsonLoadingWarning}) =>
             NTWidgetContainerModel.fromJson(
