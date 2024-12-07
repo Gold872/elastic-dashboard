@@ -484,13 +484,11 @@ class ListLayoutModel extends LayoutContainerModel {
             }
             widget.cursorGlobalLocation = details.globalPosition;
 
-            Future(() {
-              if (dragging || resizing) {
-                onDragCancel?.call(this);
-              }
+            if (dragging || resizing) {
+              onDragCancel?.call(this);
+            }
 
-              draggable = false;
-            });
+            draggable = false;
           },
           onPanUpdate: (details) {
             if (preferences.getBool(PrefKeys.layoutLocked) ??
@@ -509,12 +507,13 @@ class ListLayoutModel extends LayoutContainerModel {
                 Defaults.layoutLocked) {
               return;
             }
-            Future(() => draggable = true);
 
             if (dragOutFunctions?.dragOutEnd(widget) ?? false) {
               children.remove(widget);
               notifyListeners();
             }
+
+            draggable = true;
           },
           onPanCancel: () {
             if (preferences.getBool(PrefKeys.layoutLocked) ??
@@ -522,13 +521,11 @@ class ListLayoutModel extends LayoutContainerModel {
               return;
             }
 
-            Future(() {
-              if (dragging || resizing) {
-                onDragCancel?.call(this);
-              }
+            if (dragging || resizing) {
+              onDragCancel?.call(this);
+            }
 
-              draggable = true;
-            });
+            draggable = true;
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
