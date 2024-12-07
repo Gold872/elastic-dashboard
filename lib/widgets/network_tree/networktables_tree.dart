@@ -212,7 +212,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   }
 }
 
-class TreeTile extends StatelessWidget {
+class TreeTile extends StatefulWidget {
   final SharedPreferences preferences;
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
@@ -223,9 +223,7 @@ class TreeTile extends StatelessWidget {
       onDragUpdate;
   final Function(WidgetContainerModel widget)? onDragEnd;
 
-  WidgetContainerModel? draggingWidget;
-
-  TreeTile({
+  const TreeTile({
     super.key,
     required this.preferences,
     required this.entry,
@@ -234,6 +232,23 @@ class TreeTile extends StatelessWidget {
     this.onDragUpdate,
     this.onDragEnd,
   });
+
+  @override
+  State<TreeTile> createState() => _TreeTileState();
+}
+
+class _TreeTileState extends State<TreeTile> {
+  WidgetContainerModel? draggingWidget;
+  bool dragging = false;
+
+  @override
+  void dispose() {
+    draggingWidget?.unSubscribe();
+    draggingWidget?.disposeModel(deleting: true);
+    draggingWidget?.forceDispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +260,7 @@ class TreeTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InkWell(
-            onTap: onTap,
+            onTap: widget.onTap,
             child: GestureDetector(
               supportedDevices: PointerDeviceKind.values
                   .whereNot((element) => element == PointerDeviceKind.trackpad)
@@ -254,9 +269,17 @@ class TreeTile extends StatelessWidget {
                 if (draggingWidget != null) {
                   return;
                 }
+                dragging = true;
 
-                draggingWidget = await entry.node.toWidgetContainerModel(
-                    listLayoutBuilder: listLayoutBuilder);
+                draggingWidget = await widget.entry.node.toWidgetContainerModel(
+                    listLayoutBuilder: widget.listLayoutBuilder);
+                if (!dragging) {
+                  draggingWidget?.unSubscribe();
+                  draggingWidget?.disposeModel(deleting: true);
+                  draggingWidget?.forceDispose();
+
+                  draggingWidget = null;
+                }
               },
               onPanUpdate: (details) {
                 if (draggingWidget == null) {
@@ -272,37 +295,45 @@ class TreeTile extends StatelessWidget {
                         ) /
                         2;
 
-                onDragUpdate?.call(position, draggingWidget!);
+                widget.onDragUpdate?.call(position, draggingWidget!);
               },
               onPanEnd: (details) {
                 if (draggingWidget == null) {
+                  dragging = false;
                   return;
                 }
 
-                onDragEnd?.call(draggingWidget!);
+                widget.onDragEnd?.call(draggingWidget!);
 
                 draggingWidget = null;
+
+                dragging = false;
               },
               child: Padding(
-                padding: EdgeInsetsDirectional.only(start: entry.level * 16.0),
+                padding: EdgeInsetsDirectional.only(
+                    start: widget.entry.level * 16.0),
                 child: Column(
                   children: [
                     ListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.only(right: 20.0),
-                      leading: (entry.hasChildren ||
-                              entry.node.containsOnlyMetadata())
+                      leading: (widget.entry.hasChildren ||
+                              widget.entry.node.containsOnlyMetadata())
                           ? FolderButton(
                               openedIcon: const Icon(Icons.arrow_drop_down),
                               closedIcon: const Icon(Icons.arrow_right),
                               iconSize: 24,
-                              isOpen: entry.hasChildren && entry.isExpanded,
-                              onPressed: entry.hasChildren ? onTap : null,
+                              isOpen: widget.entry.hasChildren &&
+                                  widget.entry.isExpanded,
+                              onPressed: widget.entry.hasChildren
+                                  ? widget.onTap
+                                  : null,
                             )
                           : const SizedBox(width: 8.0),
-                      title: Text(entry.node.rowName),
-                      trailing: (entry.node.ntTopic != null)
-                          ? Text(entry.node.ntTopic!.type, style: trailingStyle)
+                      title: Text(widget.entry.node.rowName),
+                      trailing: (widget.entry.node.ntTopic != null)
+                          ? Text(widget.entry.node.ntTopic!.type,
+                              style: trailingStyle)
                           : null,
                     ),
                   ],

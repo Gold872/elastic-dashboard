@@ -484,6 +484,11 @@ class NTWidgetBuilder {
     return DraggableWidgetContainer.snapToGrid(_normalSize, gridSize);
   }
 
+  static bool isRegistered(String name) =>
+      (_modelNameBuildMap.containsKey(name) &&
+          _modelJsonBuildMap.containsKey(name)) ||
+      _widgetNameBuildMap.containsKey(name);
+
   static void
       register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
     required String name,
