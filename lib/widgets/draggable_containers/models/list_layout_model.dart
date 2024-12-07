@@ -160,12 +160,12 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  void setEnabled(bool enabled) {
+  set enabled(bool enabled) {
     for (var container in children) {
-      container.setEnabled(enabled);
+      container.enabled = enabled;
     }
 
-    super.setEnabled(enabled);
+    super.enabled = enabled;
   }
 
   @override
@@ -300,7 +300,7 @@ class ListLayoutModel extends LayoutContainerModel {
       DialogTextInput(
         onSubmit: (value) {
           setState(() {
-            container.setTitle(value);
+            container.title = value;
 
             notifyListeners();
           });
@@ -478,7 +478,7 @@ class ListLayoutModel extends LayoutContainerModel {
                 onDragCancel?.call(this);
               }
 
-              setDraggable(false);
+              draggable = false;
             });
           },
           onPanUpdate: (details) {
@@ -498,7 +498,7 @@ class ListLayoutModel extends LayoutContainerModel {
                 Defaults.layoutLocked) {
               return;
             }
-            Future(() => setDraggable(true));
+            Future(() => draggable = true);
 
             int? gridSize = preferences.getInt(PrefKeys.gridSize);
 
@@ -526,12 +526,13 @@ class ListLayoutModel extends LayoutContainerModel {
                 Defaults.layoutLocked) {
               return;
             }
+
             Future(() {
               if (dragging || resizing) {
                 onDragCancel?.call(this);
               }
 
-              setDraggable(true);
+              draggable = true;
             });
           },
           child: Padding(
