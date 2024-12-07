@@ -576,7 +576,7 @@ class TabGridModel extends ChangeNotifier {
       tryCast(widgetData['height']) ?? 0.0,
     );
     // If the widget is already in the tab, don't add it
-    if (!widgetData['layout']) {
+    if (!(widgetData.containsKey('layout') && widgetData['layout'])) {
       for (NTWidgetContainerModel container
           in _widgetModels.whereType<NTWidgetContainerModel>()) {
         String? title = container.title;
@@ -606,7 +606,7 @@ class TabGridModel extends ChangeNotifier {
       }
     }
 
-    if (widgetData['layout']) {
+    if (widgetData.containsKey('layout') && widgetData['layout']) {
       switch (widgetData['type']) {
         case 'List Layout':
           _widgetModels.add(
