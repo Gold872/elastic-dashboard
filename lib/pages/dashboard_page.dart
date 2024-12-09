@@ -12,6 +12,7 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1173,6 +1174,52 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onOpenAssetsFolderPressed: (context) async {
+          Uri uri = Uri.file(
+              "${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/");
+          if (await canLaunchUrl(uri)) {
+            showDialog(
+                // ignore: use_build_context_synchronously
+                context: context,
+                builder: (context) => AlertDialog(
+                      icon: const Icon(Icons.warning_outlined),
+                      content: SizedBox(
+                        width: 400,
+                        height: 100,
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Modifying the assets folder may cause errorts and is not recommended.\nAre you still sure you want to open it?",
+                              style: TextStyle(
+                                color: Colors.amberAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    launchUrl(uri); // Open assets folder
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("Yes"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("No"),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ));
+          }
+        },
       ),
     );
   }

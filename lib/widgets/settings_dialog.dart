@@ -1,14 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
-import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -44,25 +40,26 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function(BuildContext context)? onOpenAssetsFolderPressed;
 
-  const SettingsDialog({
-    super.key,
-    required this.ntConnection,
-    required this.preferences,
-    this.onTeamNumberChanged,
-    this.onIPAddressModeChanged,
-    this.onIPAddressChanged,
-    this.onColorChanged,
-    this.onGridToggle,
-    this.onGridSizeChanged,
-    this.onCornerRadiusChanged,
-    this.onResizeToDSChanged,
-    this.onRememberWindowPositionChanged,
-    this.onLayoutLock,
-    this.onDefaultPeriodChanged,
-    this.onDefaultGraphPeriodChanged,
-    this.onThemeVariantChanged,
-  });
+  const SettingsDialog(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      this.onTeamNumberChanged,
+      this.onIPAddressModeChanged,
+      this.onIPAddressChanged,
+      this.onColorChanged,
+      this.onGridToggle,
+      this.onGridSizeChanged,
+      this.onCornerRadiusChanged,
+      this.onResizeToDSChanged,
+      this.onRememberWindowPositionChanged,
+      this.onLayoutLock,
+      this.onDefaultPeriodChanged,
+      this.onDefaultGraphPeriodChanged,
+      this.onThemeVariantChanged,
+      this.onOpenAssetsFolderPressed});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -123,51 +120,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
       title: const Text("Advanced Settings"),
       children: [
         IconButton(
-          onPressed: () async {
-            Uri uri = Uri.file(
-                "${dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/");
-            if (await canLaunchUrl(uri)) {
-              showDialog(
-                  // ignore: use_build_context_synchronously
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        icon: const Icon(Icons.warning_outlined),
-                        content: SizedBox(
-                          width: 400,
-                          height: 100,
-                          child: Column(
-                            children: [
-                              const Text(
-                                "Modifying the assets folder may cause errorts and is not recommended.\nAre you still sure you want to open it?",
-                                style: TextStyle(
-                                  color: Colors.amberAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      launchUrl(uri); // Open assets folder
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("Yes"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("No"),
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ));
-            }
+          onPressed: () {
+            widget.onOpenAssetsFolderPressed?.call(context);
           },
           icon: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
