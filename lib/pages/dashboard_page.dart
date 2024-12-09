@@ -1189,11 +1189,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         child: Column(
                           children: [
                             const Text(
-                              "Modifying the assets folder may cause errorts and is not recommended.\nAre you still sure you want to open it?",
+                              "Modifying the assets folder may cause errors and is not recommended.\nAre you still sure you want to open it?",
                               style: TextStyle(
                                 color: Colors.amberAccent,
                                 fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Row(
