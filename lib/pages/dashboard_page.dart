@@ -68,6 +68,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final RobotNotificationsListener _robotNotificationListener;
   late final ElasticLayoutDownloader _layoutDownloader;
 
+  bool _seenShuffleboardWarning = false;
+
   final List<TabData> _tabData = [];
 
   final Function _mapEquals = const DeepCollectionEquality().equals;
@@ -141,6 +143,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ntConnection: widget.ntConnection,
       preferences: widget.preferences,
       onTabChanged: (tab) {
+        _showShuffleboardWarningMessage();
         int? parsedTabIndex = int.tryParse(tab);
 
         bool isIndex = parsedTabIndex != null;
@@ -165,6 +168,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
       onTabCreated: (tab) {
+        _showShuffleboardWarningMessage();
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
           return;
@@ -186,6 +190,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ));
       },
       onWidgetAdded: (widgetData) {
+        _showShuffleboardWarningMessage();
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
           return;
@@ -427,11 +432,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               await launchUrl(url);
             }
           },
-          child: Text('Update',
-              style: textTheme.bodyMedium!.copyWith(
-                color: buttonTheme.colorScheme?.primary,
-                fontWeight: FontWeight.bold,
-              )),
+          child: Text(
+            'Update',
+            style: textTheme.bodyMedium!.copyWith(
+              color: buttonTheme.colorScheme?.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       );
 
@@ -700,6 +707,58 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ]);
       });
     }
+  }
+
+  void _showShuffleboardWarningMessage() {
+    if (_seenShuffleboardWarning) {
+      return;
+    }
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
+    ButtonThemeData buttonTheme = ButtonTheme.of(context);
+
+    ElegantNotification notification = ElegantNotification(
+      autoDismiss: false,
+      background: colorScheme.surface,
+      showProgressIndicator: false,
+      width: 450,
+      height: 160,
+      position: Alignment.bottomRight,
+      icon: const Icon(Icons.warning, color: Colors.yellow),
+      action: TextButton(
+        onPressed: () async {
+          Uri url = Uri.parse(
+              'https://frc-elastic.gitbook.io/docs/additional-features-and-references/shuffleboard-api-integration');
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+        child: Text(
+          'Documentation',
+          style: textTheme.bodyMedium!.copyWith(
+            color: buttonTheme.colorScheme?.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      title: Text(
+        'Shuffleboard API Deprecation',
+        style: textTheme.bodyMedium!.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      description: const Text(
+        'Support for the Shuffleboard API is deprecated in favor of remote layout downloading and will be removed after the 2025 season. See the documentation for more details about migration.',
+        overflow: TextOverflow.ellipsis,
+        maxLines: 4,
+      ),
+    );
+
+    if (mounted) {
+      notification.show(context);
+    }
+    _seenShuffleboardWarning = true;
   }
 
   void _showJsonLoadingError(String errorMessage) {
