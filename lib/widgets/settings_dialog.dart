@@ -76,7 +76,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Container(
         constraints: const BoxConstraints(
-          maxHeight: 350,
+          maxHeight: 370,
           maxWidth: 725,
         ),
         child: Row(
@@ -101,6 +101,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   ..._ipAddressSettings(),
                   const Divider(),
                   ..._networkTablesSettings(),
+                  const Divider(),
+                  _advancedSettings(context),
                 ],
               ),
             ),
@@ -108,6 +110,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ),
       ),
       actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+
+  Widget _advancedSettings(BuildContext context) {
+    return ExpansionTile(
+      title: const Text("Advanced Settings"),
+      children: [
         IconButton(
           onPressed: () async {
             Uri uri = Uri.file(
@@ -155,12 +169,13 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ));
             }
           },
-          icon: const Icon(Icons.folder_outlined),
-          tooltip: "Open Assets Folder",
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          icon: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Open Assets Folder"),
+                SizedBox(width: 5),
+                Icon(Icons.folder_outlined)
+              ]),
         ),
       ],
     );
