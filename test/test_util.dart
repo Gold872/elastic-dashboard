@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'test_util.mocks.dart';
 
 @GenerateNiceMocks([
@@ -236,6 +237,25 @@ MockNTConnection createMockOnlineNT4({
   }
 
   return mockNT4Connection;
+}
+
+@GenerateNiceMocks([
+  MockSpec<UpdateChecker>(),
+])
+MockUpdateChecker createMockUpdateChecker(
+    {bool updateAvailable = false, String latestVersion = '0.0.0.0'}) {
+  MockUpdateChecker updateChecker = MockUpdateChecker();
+
+  when(updateChecker.isUpdateAvailable()).thenAnswer(
+    (_) => Future.value(
+      UpdateCheckerResponse(
+          updateAvailable: updateAvailable,
+          error: false,
+          latestVersion: latestVersion),
+    ),
+  );
+
+  return updateChecker;
 }
 
 void ignoreOverflowErrors(

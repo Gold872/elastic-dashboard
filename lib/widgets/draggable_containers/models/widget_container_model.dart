@@ -12,67 +12,165 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   final Key key = UniqueKey();
   final SharedPreferences preferences;
 
-  String? title;
+  String? _title;
 
-  late bool draggable =
+  String? get title => _title;
+
+  set title(String? value) {
+    _title = value;
+    notifyListeners();
+  }
+
+  late bool _draggable =
       !(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked);
+
+  bool get draggable => _draggable;
+
+  set draggable(bool value) {
+    _draggable = value;
+    notifyListeners();
+  }
+
   bool _disposed = false;
   bool _forceDispose = false;
 
-  late Rect draggingRect = Rect.fromLTWH(
+  late Rect _draggingRect = Rect.fromLTWH(
       0,
       0,
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
-  Offset cursorGlobalLocation = const Offset(double.nan, double.nan);
+  Rect get draggingRect => _draggingRect;
 
-  late Rect displayRect = Rect.fromLTWH(
+  set draggingRect(Rect value) {
+    _draggingRect = value;
+    notifyListeners();
+  }
+
+  Offset _cursorGlobalLocation = const Offset(double.nan, double.nan);
+
+  Offset get cursorGlobalLocation => _cursorGlobalLocation;
+
+  set cursorGlobalLocation(Offset value) {
+    _cursorGlobalLocation = value;
+    notifyListeners();
+  }
+
+  late Rect _displayRect = Rect.fromLTWH(
       0,
       0,
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
-  late Rect previewRect = Rect.fromLTWH(
+  Rect get displayRect => _displayRect;
+
+  set displayRect(Rect value) {
+    _displayRect = value;
+    notifyListeners();
+  }
+
+  late Rect _previewRect = Rect.fromLTWH(
       0,
       0,
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
 
-  bool enabled = false;
-  bool dragging = false;
-  bool resizing = false;
-  bool draggingIntoLayout = false;
-  bool previewVisible = false;
-  bool validLocation = true;
+  Rect get previewRect => _previewRect;
+
+  set previewRect(Rect value) {
+    _previewRect = value;
+    notifyListeners();
+  }
+
+  bool _enabled = false;
+
+  bool get enabled => _enabled;
+
+  set enabled(bool value) {
+    _enabled = value;
+    notifyListeners();
+  }
+
+  bool _dragging = false;
+
+  bool get dragging => _dragging;
+
+  set dragging(bool value) {
+    _dragging = value;
+    notifyListeners();
+  }
+
+  bool _resizing = false;
+
+  bool get resizing => _resizing;
+
+  set resizing(bool value) {
+    _resizing = value;
+    notifyListeners();
+  }
+
+  bool _draggingIntoLayout = false;
+
+  bool get draggingIntoLayout => _draggingIntoLayout;
+
+  set draggingIntoLayout(bool value) {
+    _draggingIntoLayout = value;
+    notifyListeners();
+  }
+
+  bool _previewVisible = false;
+
+  bool get previewVisible => _previewVisible;
+
+  set previewVisible(bool value) {
+    _previewVisible = value;
+    notifyListeners();
+  }
+
+  bool _validLocation = true;
+
+  bool get validLocation => _validLocation;
+
+  set validLocation(bool value) {
+    _validLocation = value;
+    notifyListeners();
+  }
 
   late double minWidth =
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
   late double minHeight =
       (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
-  late Rect dragStartLocation;
+  late Rect _dragStartLocation;
+
+  Rect get dragStartLocation => _dragStartLocation;
+
+  set dragStartLocation(Rect value) {
+    _dragStartLocation = value;
+    notifyListeners();
+  }
 
   WidgetContainerModel({
     required this.preferences,
     required Rect initialPosition,
-    required this.title,
-    this.enabled = false,
+    required String? title,
+    bool enabled = false,
     this.minWidth = 128.0,
     this.minHeight = 128.0,
-  }) {
-    displayRect = initialPosition;
+  })  : _title = title,
+        _enabled = enabled {
+    _displayRect = initialPosition;
     init();
   }
 
   WidgetContainerModel.fromJson({
     required Map<String, dynamic> jsonData,
     required this.preferences,
-    this.enabled = false,
+    bool enabled = false,
     this.minWidth = 128.0,
     this.minHeight = 128.0,
     Function(String errorMessage)? onJsonLoadingWarning,
-  }) {
+  }) : _enabled = enabled {
     fromJson(jsonData);
     init();
   }
@@ -159,72 +257,6 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTitle(String title) {
-    this.title = title;
-
-    notifyListeners();
-  }
-
-  void setDraggable(bool draggable) {
-    this.draggable = draggable;
-    notifyListeners();
-  }
-
-  void setDragging(bool dragging) {
-    this.dragging = dragging;
-    notifyListeners();
-  }
-
-  void setResizing(bool resizing) {
-    this.resizing = resizing;
-    notifyListeners();
-  }
-
-  void setPreviewVisible(bool previewVisible) {
-    this.previewVisible = previewVisible;
-    notifyListeners();
-  }
-
-  void setValidLocation(bool validLocation) {
-    this.validLocation = validLocation;
-    notifyListeners();
-  }
-
-  void setDraggingIntoLayout(bool draggingIntoLayout) {
-    this.draggingIntoLayout = draggingIntoLayout;
-    notifyListeners();
-  }
-
-  void setEnabled(bool enabled) {
-    this.enabled = enabled;
-    notifyListeners();
-  }
-
-  void setDisplayRect(Rect displayRect) {
-    this.displayRect = displayRect;
-    notifyListeners();
-  }
-
-  void setDraggingRect(Rect draggingRect) {
-    this.draggingRect = draggingRect;
-    notifyListeners();
-  }
-
-  void setPreviewRect(Rect previewRect) {
-    this.previewRect = previewRect;
-    notifyListeners();
-  }
-
-  void setDragStartLocation(Rect dragStartLocation) {
-    this.dragStartLocation = dragStartLocation;
-    notifyListeners();
-  }
-
-  void setCursorGlobalLocation(Offset globalLocation) {
-    cursorGlobalLocation = globalLocation;
-    notifyListeners();
-  }
-
   void showEditProperties(BuildContext context) {
     showDialog(
       context: context,
@@ -261,7 +293,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
       const SizedBox(height: 5),
       DialogTextInput(
         onSubmit: (value) {
-          setTitle(value);
+          title = value;
         },
         label: 'Title',
         initialText: title,

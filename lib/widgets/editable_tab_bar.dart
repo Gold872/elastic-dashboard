@@ -172,6 +172,7 @@ class EditableTabBar extends StatelessWidget {
                             },
                           );
                         },
+                        // The tab itself
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeOutExpo,
@@ -199,12 +200,14 @@ class EditableTabBar extends StatelessWidget {
                                         : theme.colorScheme.onPrimaryContainer,
                                   ),
                                 ),
+                                // Spacing for close button
                                 Visibility(
                                   visible: !(preferences
                                           .getBool(PrefKeys.layoutLocked) ??
                                       Defaults.layoutLocked),
                                   child: const SizedBox(width: 10),
                                 ),
+                                // Close button
                                 Visibility(
                                   visible: !(preferences
                                           .getBool(PrefKeys.layoutLocked) ??
@@ -235,6 +238,7 @@ class EditableTabBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
+                // Tab movement buttons (move left, close, move right)
                 Row(
                   children: [
                     IconButton(

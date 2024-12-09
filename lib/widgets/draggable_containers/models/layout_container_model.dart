@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-import 'nt_widget_container_model.dart';
 import 'widget_container_model.dart';
 
 abstract class LayoutContainerModel extends WidgetContainerModel {
@@ -41,5 +40,7 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
 
   bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition});
 
-  void addWidget(NTWidgetContainerModel model);
+  void addWidget(WidgetContainerModel widget);
+
+  void removeWidget(WidgetContainerModel widget);
 }
