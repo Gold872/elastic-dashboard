@@ -17,11 +17,12 @@ class NTConnection {
 
   final ValueNotifier<bool> _ntConnected = ValueNotifier(false);
   ValueNotifier<bool> get ntConnected => _ntConnected;
-  bool _dsConnected = false;
 
   bool get isNT4Connected => _ntConnected.value;
 
-  bool get isDSConnected => _dsConnected;
+  final ValueNotifier<bool> _dsConnected = ValueNotifier(false);
+  bool get isDSConnected => _dsConnected.value;
+  ValueNotifier<bool> get dsConnected => _dsConnected;
   DSInteropClient get dsClient => _dsClient;
 
   int get serverTime => _ntClient.getServerTimeUS();
@@ -70,8 +71,8 @@ class NTConnection {
     _dsClient = DSInteropClient(
       onNewIPAnnounced: onIPAnnounced,
       onDriverStationDockChanged: onDriverStationDockChanged,
-      onConnect: () => _dsConnected = true,
-      onDisconnect: () => _dsConnected = false,
+      onConnect: () => _dsConnected.value = true,
+      onDisconnect: () => _dsConnected.value = false,
     );
   }
 
@@ -127,19 +128,6 @@ class NTConnection {
       if (_ntConnected.value != lastYielded) {
         yield _ntConnected.value;
         lastYielded = _ntConnected.value;
-      }
-      await Future.delayed(const Duration(seconds: 1));
-    }
-  }
-
-  Stream<bool> dsConnectionStatus() async* {
-    yield _dsConnected;
-    bool lastYielded = _dsConnected;
-
-    while (true) {
-      if (_dsConnected != lastYielded) {
-        yield _dsConnected;
-        lastYielded = _dsConnected;
       }
       await Future.delayed(const Duration(seconds: 1));
     }
