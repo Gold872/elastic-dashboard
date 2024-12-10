@@ -104,6 +104,16 @@ void main() {
     expect(find.text('Default Graph Period'), findsOneWidget);
     expect(find.text('Theme Variant'), findsOneWidget);
 
+    final advancedSettings =
+        find.widgetWithText(ExpansionTile, "Advanced Settings");
+
+    expect(advancedSettings, findsOneWidget);
+
+    await widgetTester.tap(advancedSettings);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text("Open Assets Folder"), findsOneWidget);
+
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
     expect(closeButton, findsOneWidget);
