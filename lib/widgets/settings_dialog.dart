@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
-import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,7 +39,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
-  final Function(BuildContext context)? onOpenAssetsFolderPressed;
+  final Function()? onOpenAssetsFolderPressed;
 
   const SettingsDialog(
       {super.key,
@@ -71,43 +70,34 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return DefaultTabController(
       length: 3,
       child: AlertDialog(
+        scrollable: true,
         title: const Text('Settings'),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        content: Container(
-          constraints: const BoxConstraints(
-            maxHeight: 400,
-            maxWidth: 725,
-            minWidth: 725,
-            minHeight: 400,
-          ),
+        content: SizedBox(
+          width: 450,
+          height: 400,
           child: Column(
             children: [
               const TabBar(
                 tabs: [
                   Tab(
-                    icon: Tooltip(
-                      message: "Network",
-                      child: Icon(
-                        Icons.wifi_outlined,
-                      ),
+                    icon: Icon(
+                      Icons.wifi_outlined,
                     ),
+                    child: Text('Network'),
                   ),
                   Tab(
-                    icon: Tooltip(
-                      message: "Appearance",
-                      child: Icon(
-                        Icons.color_lens_outlined,
-                      ),
+                    icon: Icon(
+                      Icons.color_lens_outlined,
                     ),
+                    child: Text('Appearance'),
                   ),
                   Tab(
-                    icon: Tooltip(
-                      message: "Developer (Advanced)",
-                      child: Icon(
-                        Icons.code_outlined,
-                      ),
+                    icon: Icon(
+                      Icons.code,
                     ),
+                    child: Text('Developer'),
                   ),
                 ],
               ),
@@ -126,17 +116,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       ],
                     ),
                     // Style Preferences Tab
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 7),
-                        ..._generalSettings(),
-                        const Divider(),
-                        ..._gridSettings(),
-                      ],
+                    SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 350),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 7),
+                            ..._generalSettings(),
+                            const Divider(),
+                            ..._gridSettings(),
+                          ],
+                        ),
+                      ),
                     ),
                     // Advanced Settings Tab
-                    _advancedSettings(context),
+                    Column(
+                      children: [
+                        ..._advancedSettings(context),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -153,23 +152,46 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
-  Widget _advancedSettings(BuildContext context) {
-    return Column(
-      children: [
-        IconButton(
-          onPressed: () {
-            widget.onOpenAssetsFolderPressed?.call(context);
-          },
-          icon: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Open Assets Folder"),
-                SizedBox(width: 5),
-                Icon(Icons.folder_outlined)
-              ]),
+  List<Widget> _advancedSettings(BuildContext context) {
+    return [
+      Row(
+        children: [
+          const Icon(
+            Icons.warning,
+            color: Colors.yellow,
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              'WARNING: These are advanced settings that could cause errors if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+              maxLines: 4,
+            ),
+          ),
+          const SizedBox(width: 5),
+          const Icon(
+            Icons.warning,
+            color: Colors.yellow,
+          ),
+        ],
+      ),
+      const Divider(),
+      IconButton(
+        onPressed: () {
+          widget.onOpenAssetsFolderPressed?.call();
+        },
+        icon: const Row(
+          children: [
+            Text("Open Assets Folder"),
+            SizedBox(width: 5),
+            Icon(Icons.folder_outlined)
+          ],
         ),
-      ],
-    );
+      ),
+    ];
   }
 
   List<Widget> _generalSettings() {
@@ -270,26 +292,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
             widget.preferences.getInt(PrefKeys.ipAddressMode)),
       ),
       const SizedBox(height: 5),
-      // StreamBuilder(
-      //   stream: widget.ntConnection.dsConnectionStatus(),
-      //  initialData: widget.ntConnection.isDSConnected,
-      // builder: (context, snapshot) {
-      //  bool dsConnected = tryCast(snapshot.data) ?? false;
-      //   return DialogTextInput(
-      //    enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-      //           IPAddressMode.custom.index ||
-      //      (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-      //             IPAddressMode.driverStation.index &&
-      //            !dsConnected),
-      //  initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
-      //     Defaults.ipAddress,
-      // label: 'IP Address',
-      //  onSubmit: (String? data) async {
-      //   await widget.onIPAddressChanged?.call(data);
-      //   setState(() {});
-      //  },
-      // );
-      // })
+      ValueListenableBuilder(
+          valueListenable: widget.ntConnection.dsConnected,
+          builder: (context, connected, child) {
+            return DialogTextInput(
+              enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                      IPAddressMode.custom.index ||
+                  (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                          IPAddressMode.driverStation.index &&
+                      !connected),
+              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
+                  Defaults.ipAddress,
+              label: 'IP Address',
+              onSubmit: (String? data) async {
+                await widget.onIPAddressChanged?.call(data);
+                setState(() {});
+              },
+            );
+          })
     ];
   }
 
