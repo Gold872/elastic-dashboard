@@ -68,56 +68,93 @@ class SettingsDialog extends StatefulWidget {
 class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Settings'),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      content: Container(
-        constraints: const BoxConstraints(
-          maxHeight: 370,
-          maxWidth: 725,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ..._generalSettings(),
-                  const Divider(),
-                  ..._gridSettings(),
+    return DefaultTabController(
+      length: 3,
+      child: AlertDialog(
+        title: const Text('Settings'),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+        content: Container(
+          constraints: const BoxConstraints(
+            maxHeight: 400,
+            maxWidth: 725,
+            minWidth: 725,
+            minHeight: 400,
+          ),
+          child: Column(
+            children: [
+              const TabBar(
+                tabs: [
+                  Tab(
+                    icon: Tooltip(
+                      message: "Network",
+                      child: Icon(
+                        Icons.wifi_outlined,
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    icon: Tooltip(
+                      message: "Appearance",
+                      child: Icon(
+                        Icons.color_lens_outlined,
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    icon: Tooltip(
+                      message: "Developer (Advanced)",
+                      child: Icon(
+                        Icons.code_outlined,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const VerticalDivider(),
-            Flexible(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ..._ipAddressSettings(),
-                  const Divider(),
-                  ..._networkTablesSettings(),
-                  const Divider(),
-                  _advancedSettings(context),
-                ],
+              const SizedBox(height: 10),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // Network Tab
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 7),
+                        ..._ipAddressSettings(),
+                        const Divider(),
+                        ..._networkTablesSettings(),
+                      ],
+                    ),
+                    // Style Preferences Tab
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 7),
+                        ..._generalSettings(),
+                        const Divider(),
+                        ..._gridSettings(),
+                      ],
+                    ),
+                    // Advanced Settings Tab
+                    _advancedSettings(context),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
-        ),
-      ],
     );
   }
 
   Widget _advancedSettings(BuildContext context) {
-    return ExpansionTile(
-      title: const Text("Advanced Settings"),
+    return Column(
       children: [
         IconButton(
           onPressed: () {
@@ -233,27 +270,26 @@ class _SettingsDialogState extends State<SettingsDialog> {
             widget.preferences.getInt(PrefKeys.ipAddressMode)),
       ),
       const SizedBox(height: 5),
-      StreamBuilder(
-          stream: widget.ntConnection.dsConnectionStatus(),
-          initialData: widget.ntConnection.isDSConnected,
-          builder: (context, snapshot) {
-            bool dsConnected = tryCast(snapshot.data) ?? false;
-
-            return DialogTextInput(
-              enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                      IPAddressMode.custom.index ||
-                  (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                          IPAddressMode.driverStation.index &&
-                      !dsConnected),
-              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
-                  Defaults.ipAddress,
-              label: 'IP Address',
-              onSubmit: (String? data) async {
-                await widget.onIPAddressChanged?.call(data);
-                setState(() {});
-              },
-            );
-          })
+      // StreamBuilder(
+      //   stream: widget.ntConnection.dsConnectionStatus(),
+      //  initialData: widget.ntConnection.isDSConnected,
+      // builder: (context, snapshot) {
+      //  bool dsConnected = tryCast(snapshot.data) ?? false;
+      //   return DialogTextInput(
+      //    enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+      //           IPAddressMode.custom.index ||
+      //      (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+      //             IPAddressMode.driverStation.index &&
+      //            !dsConnected),
+      //  initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
+      //     Defaults.ipAddress,
+      // label: 'IP Address',
+      //  onSubmit: (String? data) async {
+      //   await widget.onIPAddressChanged?.call(data);
+      //   setState(() {});
+      //  },
+      // );
+      // })
     ];
   }
 
