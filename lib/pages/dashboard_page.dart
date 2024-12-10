@@ -1176,7 +1176,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         onThemeVariantChanged: widget.onThemeVariantChanged,
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
-              "${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/");
+              '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
           if (await canLaunchUrl(uri)) {
             launchUrl(uri);
           }

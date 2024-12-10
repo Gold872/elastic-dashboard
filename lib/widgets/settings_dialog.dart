@@ -67,14 +67,12 @@ class SettingsDialog extends StatefulWidget {
 class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: AlertDialog(
-        scrollable: true,
-        title: const Text('Settings'),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        content: SizedBox(
+    return AlertDialog(
+      title: const Text('Settings'),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      content: DefaultTabController(
+        length: 3,
+        child: SizedBox(
           width: 450,
           height: 400,
           child: Column(
@@ -106,35 +104,42 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 child: TabBarView(
                   children: [
                     // Network Tab
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 7),
-                        ..._ipAddressSettings(),
-                        const Divider(),
-                        ..._networkTablesSettings(),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ..._ipAddressSettings(),
+                          const Divider(),
+                          ..._networkTablesSettings(),
+                        ],
+                      ),
                     ),
                     // Style Preferences Tab
-                    SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 350),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 7),
-                            ..._generalSettings(),
-                            const Divider(),
-                            ..._gridSettings(),
-                          ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 350),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ..._generalSettings(),
+                              const Divider(),
+                              ..._gridSettings(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     // Advanced Settings Tab
-                    Column(
-                      children: [
-                        ..._advancedSettings(context),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        children: [
+                          ..._advancedSettings(),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -142,33 +147,30 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 
-  List<Widget> _advancedSettings(BuildContext context) {
+  List<Widget> _advancedSettings() {
     return [
       Row(
         children: [
-          const Icon(
-            Icons.warning,
-            color: Colors.yellow,
-          ),
+          const Icon(Icons.warning, color: Colors.yellow),
           const SizedBox(width: 5),
           Flexible(
             child: Text(
-              'WARNING: These are advanced settings that could cause errors if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
+              'WARNING: These are advanced settings that could cause issues if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
-              maxLines: 4,
+              maxLines: 3,
             ),
           ),
           const SizedBox(width: 5),
@@ -179,17 +181,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ],
       ),
       const Divider(),
-      IconButton(
-        onPressed: () {
-          widget.onOpenAssetsFolderPressed?.call();
-        },
-        icon: const Row(
-          children: [
-            Text("Open Assets Folder"),
-            SizedBox(width: 5),
-            Icon(Icons.folder_outlined)
-          ],
-        ),
+      Row(
+        children: [
+          TextButton.icon(
+            onPressed: () {
+              widget.onOpenAssetsFolderPressed?.call();
+            },
+            icon: const Icon(Icons.folder_outlined),
+            label: const Text('Open Assets Folder'),
+          ),
+          const Spacer(),
+        ],
       ),
     ];
   }
