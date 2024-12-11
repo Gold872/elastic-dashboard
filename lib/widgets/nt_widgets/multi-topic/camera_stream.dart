@@ -25,13 +25,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   int? _fps;
   Size? _resolution;
 
-  MemoryImage? _lastDisplayedImage;
-
-  MjpegStreamState? mjpegStream;
-
-  MemoryImage? get lastDisplayedImage => _lastDisplayedImage;
-
-  set lastDisplayedImage(value) => _lastDisplayedImage = value;
+  MjpegController? controller;
 
   int? get quality => _quality;
 
@@ -232,19 +226,15 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   void disposeWidget({bool deleting = false}) {
     if (deleting) {
-      _lastDisplayedImage?.evict();
-      mjpegStream?.previousImage?.evict();
-      mjpegStream?.dispose(deleting: deleting);
+      controller?.dispose();
     }
 
     super.disposeWidget(deleting: deleting);
   }
 
   void closeClient() {
-    _lastDisplayedImage?.evict();
-    _lastDisplayedImage = mjpegStream?.previousImage;
-    mjpegStream?.dispose();
-    mjpegStream = null;
+    controller?.dispose();
+    controller = null;
   }
 }
 
@@ -281,13 +271,11 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (model.mjpegStream?.previousImage != null ||
-                  model.lastDisplayedImage != null)
+              if (model.controller?.previousImage != null)
                 Opacity(
                   opacity: 0.35,
-                  child: Image(
-                    image: model.mjpegStream?.previousImage ??
-                        model.lastDisplayedImage!,
+                  child: Image.memory(
+                    Uint8List.fromList(model.controller!.previousImage!),
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -309,25 +297,25 @@ class CameraStreamWidget extends NTWidget {
           );
         }
 
-        bool createNewWidget = model.mjpegStream == null;
+        bool createNewWidget = model.controller == null;
 
         String stream = model.getUrlWithParameters(streams.last);
 
         createNewWidget =
-            createNewWidget || (model.mjpegStream?.stream != stream);
+            createNewWidget || (model.controller?.stream != stream);
 
         if (createNewWidget) {
-          model.lastDisplayedImage?.evict();
-          model.mjpegStream?.dispose(deleting: true);
+          model.controller?.dispose();
 
-          model.mjpegStream = MjpegStreamState(stream: stream);
+          model.controller = MjpegController(stream: stream);
         }
 
         return Stack(
           fit: StackFit.expand,
           children: [
             Mjpeg(
-              mjpegStream: model.mjpegStream!,
+              controller: model.controller!,
+              // mjpegStream: model.mjpegStream!,
               fit: BoxFit.contain,
             ),
           ],
