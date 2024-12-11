@@ -60,6 +60,21 @@ class _MjpegState extends State<Mjpeg> {
   }
 
   @override
+  void didUpdateWidget(Mjpeg oldWidget) {
+    final controller = widget.controller;
+    final oldController = oldWidget.controller;
+
+    if (oldController != controller) {
+      oldController.removeListener(listener);
+      controller.addListener(listener);
+
+      controller.setMounted(streamKey, oldController.isMounted(streamKey));
+      controller.setVisible(streamKey, oldController.isVisible(streamKey));
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
 
@@ -104,12 +119,36 @@ class _MjpegState extends State<Mjpeg> {
               );
             }
 
-            return Image.memory(
-              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-              width: widget.width,
-              height: widget.height,
-              gaplessPlayback: true,
-              fit: widget.fit,
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    ValueListenableBuilder(
+                      valueListenable: controller.framesPerSecond,
+                      builder: (context, value, child) => Text('FPS: $value'),
+                    ),
+                    const Spacer(),
+                    ValueListenableBuilder(
+                      valueListenable: controller.bandwidth,
+                      builder: (context, value, child) =>
+                          Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
+                    ),
+                  ],
+                ),
+                Flexible(
+                  child: Image.memory(
+                    Uint8List.fromList(
+                        snapshot.data ?? controller.previousImage!),
+                    width: widget.width,
+                    height: widget.height,
+                    gaplessPlayback: true,
+                    fit: widget.fit,
+                  ),
+                ),
+                // To keep the image centered in the widget
+                const Text(''),
+              ],
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
@@ -133,6 +172,14 @@ class MjpegController extends ChangeNotifier {
   Client httpClient = Client();
 
   StreamSubscription<List<int>>? _rawSubscription;
+
+  ValueNotifier<double> bandwidth = ValueNotifier(0);
+  ValueNotifier<int> framesPerSecond = ValueNotifier(0);
+
+  Timer? _metricsTimer;
+
+  int _bitCount = 0;
+  int _frameCount = 0;
 
   ValueNotifier<List<dynamic>?> errorState = ValueNotifier(null);
   StreamController<List<int>?> imageStream = StreamController.broadcast();
@@ -237,13 +284,25 @@ class MjpegController extends ChangeNotifier {
 
     var buffer = <int>[];
     _rawSubscription = byteStream.listen((data) {
+      _bitCount += data.length * Uint8List.bytesPerElement * 8;
       _handleData(buffer, data);
     });
+
+    _metricsTimer = Timer.periodic(const Duration(seconds: 1), _updateMetrics);
+  }
+
+  void _updateMetrics(_) {
+    bandwidth.value = _bitCount / 1e6;
+    framesPerSecond.value = _frameCount;
+
+    _bitCount = 0;
+    _frameCount = 0;
   }
 
   void stopStream() async {
     logger.debug('Stopping camera stream for $stream');
     await _rawSubscription?.cancel();
+    _metricsTimer?.cancel();
     _rawSubscription = null;
     httpClient.close();
     httpClient = Client();
@@ -254,6 +313,7 @@ class MjpegController extends ChangeNotifier {
     previousImage = packet;
     List<int> imageData = preprocessor?.process(packet) ?? packet;
     imageStream.add(imageData);
+    _frameCount++;
   }
 
   void _handleData(List<int> buffer, List<int> data) {

@@ -315,7 +315,6 @@ class CameraStreamWidget extends NTWidget {
           children: [
             Mjpeg(
               controller: model.controller!,
-              // mjpegStream: model.mjpegStream!,
               fit: BoxFit.contain,
             ),
           ],
