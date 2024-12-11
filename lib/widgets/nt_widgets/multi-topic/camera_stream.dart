@@ -310,14 +310,38 @@ class CameraStreamWidget extends NTWidget {
           model.controller = MjpegController(stream: stream);
         }
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Mjpeg(
-              controller: model.controller!,
-              fit: BoxFit.contain,
-            ),
-          ],
+        return IntrinsicWidth(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      ValueListenableBuilder(
+                        valueListenable: model.controller!.framesPerSecond,
+                        builder: (context, value, child) => Text('FPS: $value'),
+                      ),
+                      const Spacer(),
+                      ValueListenableBuilder(
+                        valueListenable: model.controller!.bandwidth,
+                        builder: (context, value, child) =>
+                            Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
+                      ),
+                    ],
+                  ),
+                  Flexible(
+                    child: Mjpeg(
+                      controller: model.controller!,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const Text(''),
+                ],
+              ),
+            ],
+          ),
         );
       },
     );

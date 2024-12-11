@@ -119,36 +119,12 @@ class _MjpegState extends State<Mjpeg> {
               );
             }
 
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    ValueListenableBuilder(
-                      valueListenable: controller.framesPerSecond,
-                      builder: (context, value, child) => Text('FPS: $value'),
-                    ),
-                    const Spacer(),
-                    ValueListenableBuilder(
-                      valueListenable: controller.bandwidth,
-                      builder: (context, value, child) =>
-                          Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
-                    ),
-                  ],
-                ),
-                Flexible(
-                  child: Image.memory(
-                    Uint8List.fromList(
-                        snapshot.data ?? controller.previousImage!),
-                    width: widget.width,
-                    height: widget.height,
-                    gaplessPlayback: true,
-                    fit: widget.fit,
-                  ),
-                ),
-                // To keep the image centered in the widget
-                const Text(''),
-              ],
+            return Image.memory(
+              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+              width: widget.width,
+              height: widget.height,
+              gaplessPlayback: true,
+              fit: widget.fit,
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
