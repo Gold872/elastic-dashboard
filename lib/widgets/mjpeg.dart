@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -45,14 +46,12 @@ class _MjpegState extends State<Mjpeg> {
   void initState() {
     listener = () => setState(() {});
     widget.controller.addListener(listener);
-    widget.controller.errorState.addListener(listener);
     super.initState();
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(listener);
-    widget.controller.errorState.removeListener(listener);
 
     widget.controller.setMounted(streamKey, false);
     widget.controller.setVisible(streamKey, false);
@@ -147,11 +146,14 @@ class MjpegController extends ChangeNotifier {
   bool isVisible(Key key) => _visibleKeys.contains(key);
 
   void setVisible(Key key, bool value) {
+    logger.trace('Setting visibility to $value for $stream');
     if (value) {
       bool hasChanged = !_visibleKeys.contains(key);
       _visibleKeys.add(key);
 
       if (hasChanged) {
+        logger.trace(
+            'Visibility changed to true, notifying listeners for mjpeg stream');
         notifyListeners();
       }
     } else {
@@ -166,6 +168,7 @@ class MjpegController extends ChangeNotifier {
   bool isMounted(Key key) => _mountedKeys.contains(key);
 
   void setMounted(Key key, bool value) {
+    logger.trace('Setting mounted to $value for $stream');
     if (value) {
       _mountedKeys.add(key);
     } else {
@@ -181,10 +184,13 @@ class MjpegController extends ChangeNotifier {
     this.timeout = const Duration(seconds: 5),
     this.headers = const {},
     this.preprocessor,
-  });
+  }) {
+    errorState.addListener(notifyListeners);
+  }
 
   @override
   void dispose() {
+    errorState.removeListener(notifyListeners);
     stopStream();
     imageStream.close();
     super.dispose();
@@ -236,6 +242,7 @@ class MjpegController extends ChangeNotifier {
   }
 
   void stopStream() async {
+    logger.debug('Stopping camera stream for $stream');
     await _rawSubscription?.cancel();
     _rawSubscription = null;
     httpClient.close();
@@ -243,6 +250,7 @@ class MjpegController extends ChangeNotifier {
   }
 
   void _handleNewPacket(List<int> packet) {
+    logger.trace('Handling a ${packet.length} byte packet');
     previousImage = packet;
     List<int> imageData = preprocessor?.process(packet) ?? packet;
     imageStream.add(imageData);

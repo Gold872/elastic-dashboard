@@ -62,6 +62,10 @@ class Log {
   void debug(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     log(Level.debug, message, error, stackTrace);
   }
+
+  void trace(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    log(Level.trace, message, error, stackTrace);
+  }
 }
 
 Log get logger => Log.instance;
