@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
@@ -219,10 +219,14 @@ class VoltageView extends NTWidget {
 
         int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
-        LinearGaugeOrientation gaugeOrientation =
-            (model.orientation == 'vertical')
-                ? LinearGaugeOrientation.vertical
-                : LinearGaugeOrientation.horizontal;
+        GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
+            ? GaugeOrientation.vertical
+            : GaugeOrientation.horizontal;
+
+        RulerPosition rulerPosition =
+            (gaugeOrientation == GaugeOrientation.vertical)
+                ? RulerPosition.right
+                : RulerPosition.bottom;
 
         List<Widget> children = [
           Text(
@@ -233,29 +237,44 @@ class VoltageView extends NTWidget {
           const Flexible(
             child: SizedBox(width: 5.0, height: 5.0),
           ),
-          SfLinearGauge(
+          LinearGauge(
             key: UniqueKey(),
-            maximum: model.maxValue,
-            minimum: model.minValue,
-            barPointers: [
-              LinearBarPointer(
+            rulers: RulerStyle(
+              rulerPosition: rulerPosition,
+              inverseRulers: model.inverted,
+              showLabel: true,
+              textStyle: Theme.of(context).textTheme.bodyMedium,
+              primaryRulerColor: Colors.grey,
+              secondaryRulerColor: Colors.grey,
+            ),
+            gaugeOrientation: gaugeOrientation,
+            valueBar: [
+              ValueBar(
+                color: Colors.yellow,
                 value: clampedVoltage,
-                color: Colors.yellow.shade600,
+                borderRadius: 5,
+                valueBarThickness: 7.5,
+                enableAnimation: false,
                 animationDuration: 0,
-                thickness: 7.5,
               ),
             ],
-            axisTrackStyle: const LinearAxisTrackStyle(
-              thickness: 7.5,
-            ),
-            labelFormatterCallback: (value) => '$value V',
-            orientation: gaugeOrientation,
-            isAxisInversed: model.inverted,
-            interval: divisionInterval,
+            customLabels: [
+              if (model.divisions != null)
+                for (int i = 0; i < model.divisions!; i++)
+                  CustomRulerLabel(
+                    text:
+                        '${(model.minValue + divisionInterval! * i).toStringAsFixed(2)} V',
+                    value: model.minValue + divisionInterval * i,
+                  ),
+            ],
+            enableGaugeAnimation: false,
+            start: model.minValue,
+            end: model.maxValue,
+            steps: divisionInterval,
           ),
         ];
 
-        if (gaugeOrientation == LinearGaugeOrientation.vertical) {
+        if (gaugeOrientation == GaugeOrientation.vertical) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: children,
