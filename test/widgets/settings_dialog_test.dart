@@ -101,31 +101,31 @@ void main() {
     expect(appearanceSettings, findsOneWidget);
     expect(devSettings, findsOneWidget);
 
+    expect(find.text('Team Number'), findsOneWidget);
     expect(find.text('IP Address Mode'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
     expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
 
-    expect(find.text('Team Number'), findsNothing);
     expect(find.text('Team Color'), findsNothing);
+    expect(find.text('Theme Variant'), findsNothing);
     expect(find.text('Show Grid'), findsNothing);
     expect(find.text('Grid Size'), findsNothing);
     expect(find.text('Corner Radius'), findsNothing);
     expect(find.text('Resize to Driver Station Height'), findsNothing);
     expect(find.text('Remember Window Position'), findsNothing);
     expect(find.text('Lock Layout'), findsNothing);
-    expect(find.text('Theme Variant'), findsNothing);
 
     expect(appearanceSettings, findsOneWidget);
     await widgetTester.tap(appearanceSettings);
     await widgetTester.pumpAndSettle();
 
+    expect(find.text('Team Number'), findsNothing);
     expect(find.text('IP Address Mode'), findsNothing);
     expect(find.text('IP Address'), findsNothing);
     expect(find.text('Default Period'), findsNothing);
     expect(find.text('Default Graph Period'), findsNothing);
 
-    expect(find.text('Team Number'), findsOneWidget);
     expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('Show Grid'), findsWidgets);
     expect(find.text('Grid Size'), findsWidgets);
@@ -148,6 +148,40 @@ void main() {
 
     await widgetTester.tap(closeButton);
     await widgetTester.pumpAndSettle();
+  });
+
+  testWidgets('Change team number', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onTeamNumberChanged: (data) async {
+            fakeSettings.changeTeamNumber();
+
+            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    final teamNumberField = find.widgetWithText(DialogTextInput, 'Team Number');
+
+    expect(teamNumberField, findsOneWidget);
+    expect(find.descendant(of: teamNumberField, matching: find.text('353')),
+        findsOneWidget);
+
+    await widgetTester.enterText(teamNumberField, '2601');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pump();
+
+    expect(preferences.getInt(PrefKeys.teamNumber), 2601);
+    expect(preferences.getString(PrefKeys.ipAddress), '127.0.0.1');
+    verify(fakeSettings.changeTeamNumber()).called(greaterThanOrEqualTo(1));
   });
 
   testWidgets('Change IP address mode', (widgetTester) async {
@@ -290,44 +324,6 @@ void main() {
     expect(preferences.getDouble(PrefKeys.defaultGraphPeriod), 0.05);
     verify(fakeSettings.changeDefaultGraphPeriod())
         .called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Change team number', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
-
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    expect(appearanceSettings, findsOneWidget);
-    await widgetTester.tap(appearanceSettings);
-    await widgetTester.pumpAndSettle();
-
-    final teamNumberField = find.widgetWithText(DialogTextInput, 'Team Number');
-
-    expect(teamNumberField, findsOneWidget);
-    expect(find.descendant(of: teamNumberField, matching: find.text('353')),
-        findsOneWidget);
-
-    await widgetTester.enterText(teamNumberField, '2601');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pump();
-
-    expect(preferences.getInt(PrefKeys.teamNumber), 2601);
-    expect(preferences.getString(PrefKeys.ipAddress), '127.0.0.1');
-    verify(fakeSettings.changeTeamNumber()).called(greaterThanOrEqualTo(1));
   });
 
   testWidgets('Change team color', (widgetTester) async {
