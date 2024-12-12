@@ -8,12 +8,14 @@ class DialogColorPicker extends StatefulWidget {
   final String label;
   final Color initialColor;
   final Color? defaultColor;
+  final MainAxisSize rowSize;
 
   const DialogColorPicker({
     super.key,
     required this.onColorPicked,
     required this.label,
     required this.initialColor,
+    this.rowSize = MainAxisSize.min,
     this.defaultColor,
   });
 
@@ -39,7 +41,7 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: widget.rowSize,
       children: [
         Text(widget.label),
         const SizedBox(width: 5),

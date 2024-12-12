@@ -124,7 +124,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              ..._generalSettings(),
+                              ..._themeSettings(),
                               const Divider(),
                               ..._gridSettings(),
                             ],
@@ -196,7 +196,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
   }
 
-  List<Widget> _generalSettings() {
+  List<Widget> _themeSettings() {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
 
@@ -213,60 +213,54 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
 
     return [
-      Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: DialogTextInput(
-                  initialText: widget.preferences
-                          .getInt(PrefKeys.teamNumber)
-                          ?.toString() ??
-                      Defaults.teamNumber.toString(),
-                  label: 'Team Number',
-                  onSubmit: (data) async {
-                    await widget.onTeamNumberChanged?.call(data);
-                    setState(() {});
-                  },
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                ),
-              ),
-              Expanded(
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text('Theme Settings'),
+      ),
+      IntrinsicHeight(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Flexible(
+              flex: 2,
+              child: UnconstrainedBox(
+                constrainedAxis: Axis.horizontal,
                 child: DialogColorPicker(
                   onColorPicked: (color) => widget.onColorChanged?.call(color),
                   label: 'Team Color',
                   initialColor: currentColor,
                   defaultColor: Colors.blueAccent,
+                  rowSize: MainAxisSize.max,
                 ),
               ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Theme Variant'),
-              const SizedBox(width: 5),
-              Flexible(
-                child: DialogDropdownChooser<String>(
-                    onSelectionChanged: (variantName) {
-                      if (variantName == null) return;
-                      FlexSchemeVariant variant = FlexSchemeVariant.values
-                              .firstWhereOrNull(
-                                  (e) => e.variantName == variantName) ??
-                          FlexSchemeVariant.material3Legacy;
+            ),
+            const VerticalDivider(),
+            Flexible(
+              flex: 4,
+              child: Column(
+                children: [
+                  const Text('Theme Variant'),
+                  DialogDropdownChooser<String>(
+                      onSelectionChanged: (variantName) {
+                        if (variantName == null) return;
+                        FlexSchemeVariant variant = FlexSchemeVariant.values
+                                .firstWhereOrNull(
+                                    (e) => e.variantName == variantName) ??
+                            FlexSchemeVariant.material3Legacy;
 
-                      widget.onThemeVariantChanged?.call(variant);
-                      setState(() {});
-                    },
-                    choices:
-                        themeVariantsOverride ?? SettingsDialog.themeVariants,
-                    initialValue:
-                        widget.preferences.getString(PrefKeys.themeVariant) ??
-                            Defaults.defaultVariantName),
+                        widget.onThemeVariantChanged?.call(variant);
+                        setState(() {});
+                      },
+                      choices:
+                          themeVariantsOverride ?? SettingsDialog.themeVariants,
+                      initialValue:
+                          widget.preferences.getString(PrefKeys.themeVariant) ??
+                              Defaults.defaultVariantName),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     ];
   }
@@ -275,43 +269,73 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return [
       const Align(
         alignment: Alignment.topLeft,
-        child: Text('IP Address Settings'),
+        child: Text('Connection Settings'),
       ),
       const SizedBox(height: 5),
-      const Text('IP Address Mode'),
-      DialogDropdownChooser<IPAddressMode>(
-        onSelectionChanged: (mode) {
-          if (mode == null) {
-            return;
-          }
-
-          widget.onIPAddressModeChanged?.call(mode);
-
-          setState(() {});
-        },
-        choices: IPAddressMode.values,
-        initialValue: IPAddressMode.fromIndex(
-            widget.preferences.getInt(PrefKeys.ipAddressMode)),
-      ),
-      const SizedBox(height: 5),
-      ValueListenableBuilder(
-          valueListenable: widget.ntConnection.dsConnected,
-          builder: (context, connected, child) {
-            return DialogTextInput(
-              enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                      IPAddressMode.custom.index ||
-                  (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                          IPAddressMode.driverStation.index &&
-                      !connected),
-              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
-                  Defaults.ipAddress,
-              label: 'IP Address',
-              onSubmit: (String? data) async {
-                await widget.onIPAddressChanged?.call(data);
+      Row(
+        children: [
+          Flexible(
+            flex: 2,
+            child: DialogTextInput(
+              initialText:
+                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
+                      Defaults.teamNumber.toString(),
+              label: 'Team Number',
+              onSubmit: (data) async {
+                await widget.onTeamNumberChanged?.call(data);
                 setState(() {});
               },
-            );
-          })
+              formatter: FilteringTextInputFormatter.digitsOnly,
+            ),
+          ),
+          Flexible(
+            flex: 3,
+            child: ValueListenableBuilder(
+              valueListenable: widget.ntConnection.dsConnected,
+              builder: (context, connected, child) {
+                return DialogTextInput(
+                  enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                          IPAddressMode.custom.index ||
+                      (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                              IPAddressMode.driverStation.index &&
+                          !connected),
+                  initialText:
+                      widget.preferences.getString(PrefKeys.ipAddress) ??
+                          Defaults.ipAddress,
+                  label: 'IP Address',
+                  onSubmit: (String? data) async {
+                    await widget.onIPAddressChanged?.call(data);
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          const Text('IP Address Mode'),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogDropdownChooser<IPAddressMode>(
+              onSelectionChanged: (mode) {
+                if (mode == null) {
+                  return;
+                }
+
+                widget.onIPAddressModeChanged?.call(mode);
+
+                setState(() {});
+              },
+              choices: IPAddressMode.values,
+              initialValue: IPAddressMode.fromIndex(
+                  widget.preferences.getInt(PrefKeys.ipAddressMode)),
+            ),
+          ),
+        ],
+      ),
     ];
   }
 
