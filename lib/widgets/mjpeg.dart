@@ -17,6 +17,7 @@ class MjpegPreprocessor {
 class Mjpeg extends StatefulWidget {
   final MjpegController controller;
   final BoxFit? fit;
+  final bool expandToFit;
   final double? width;
   final double? height;
   final WidgetBuilder? loading;
@@ -28,6 +29,7 @@ class Mjpeg extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
+    this.expandToFit = false,
     this.error,
     this.loading,
     super.key,
@@ -125,6 +127,7 @@ class _MjpegState extends State<Mjpeg> {
               height: widget.height,
               gaplessPlayback: true,
               fit: widget.fit,
+              scale: (widget.expandToFit) ? 1e-100 : 1.0,
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
