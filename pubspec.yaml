@@ -23,6 +23,10 @@ dependencies:
   flutter_fancy_tree_view: ^1.1.1
   flutter_hooks: ^0.20.0
   flutter_launcher_icons: ^0.13.1
+  geekyants_flutter_gauges:
+    git:
+      url: https://github.com/Gold872/GaugesFlutter.git
+      ref: drag-improvements
   github: ^9.17.0
   http: ^1.2.0
   import_sorter: ^4.6.0
