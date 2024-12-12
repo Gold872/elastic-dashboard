@@ -46,7 +46,6 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   StringChooserData? previousData;
 
   NT4Topic? _selectedTopic;
-  NT4Topic? _activeTopic;
 
   bool _sortOptions = false;
 
@@ -123,26 +122,6 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
         ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
     ntConnection.updateDataFromTopic(_selectedTopic!, selected);
-  }
-
-  void _publishActiveValue(String? active) {
-    if (active == null || !ntConnection.isNT4Connected) {
-      return;
-    }
-
-    bool publishTopic = _activeTopic == null;
-
-    _activeTopic ??= ntConnection.getTopicFromName(activeTopicName);
-
-    if (_activeTopic == null) {
-      return;
-    }
-
-    if (publishTopic) {
-      ntConnection.publishTopic(_activeTopic!);
-    }
-
-    ntConnection.updateDataFromTopic(_activeTopic!, active);
   }
 }
 
