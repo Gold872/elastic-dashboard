@@ -26,7 +26,7 @@ dependencies:
   geekyants_flutter_gauges:
     git:
       url: https://github.com/Gold872/GaugesFlutter.git
-      ref: drag-improvements
+      ref: elastic-version
   github: ^9.17.0
   http: ^1.2.0
   import_sorter: ^4.6.0
@@ -44,7 +44,6 @@ dependencies:
   searchable_listview: ^2.7.0
   shared_preferences: ^2.1.2
   syncfusion_flutter_charts: ^23.1.44
-  syncfusion_flutter_gauges: ^23.1.44
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
   url_launcher: ^6.3.0

@@ -460,8 +460,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: drag-improvements
-      resolved-ref: f8cf625d24784c6f56b6fee1da43ebad405ca15c
+      ref: elastic-version
+      resolved-ref: f03016e68144420d5388e673d19861b95550ed5b
       url: "https://github.com/Gold872/GaugesFlutter.git"
     source: git
     version: "1.0.4"
@@ -1019,14 +1019,6 @@ packages:
     description:
       name: syncfusion_flutter_core
       sha256: a2427697bfad5b611db78ea4c4daef82d3350b83c729a8dc37959662a31547f9
-      url: "https://pub.dev"
-    source: hosted
-    version: "23.2.7"
-  syncfusion_flutter_gauges:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_gauges
-      sha256: a559712b476b05ad2506925b5031dbba3c9e7ce83f482191a8185a3de054e7e6
       url: "https://pub.dev"
     source: hosted
     version: "23.2.7"

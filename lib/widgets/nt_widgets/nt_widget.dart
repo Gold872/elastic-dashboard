@@ -185,7 +185,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
           NumberBar.widgetType,
           NumberSlider.widgetType,
           VoltageView.widgetType,
-          RadialGauge.widgetType,
+          RadialGaugeWidget.widgetType,
           GraphWidget.widgetType,
           MatchTimeWidget.widgetType,
         ];
