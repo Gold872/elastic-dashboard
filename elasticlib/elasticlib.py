@@ -1,6 +1,5 @@
 import json
 from enum import Enum
-from typing import Dict
 
 from ntcore import NetworkTableInstance, PubSubOptions
 

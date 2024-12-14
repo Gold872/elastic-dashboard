@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <units/time.h>
+
+#include <string>
 
 namespace elastic {
 

@@ -5,12 +5,12 @@
 
 #include "elasticlib.h"
 
-#include <exception>
-
 #include <fmt/core.h>
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/StringTopic.h>
 #include <wpi/json.h>
+
+#include <exception>
 
 namespace elastic {
 
