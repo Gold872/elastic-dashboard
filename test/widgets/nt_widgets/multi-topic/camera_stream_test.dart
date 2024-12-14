@@ -69,6 +69,47 @@ void main() {
     expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'), '0.0.0.0?');
   });
 
+  test('Camera stream from json (with invalid resolution)', () {
+    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Camera Stream',
+      {...cameraStreamJson}..update('resolution', (_) => [101.0, 100.0]),
+    );
+
+    expect(cameraStreamModel.type, 'Camera Stream');
+    expect(cameraStreamModel.runtimeType, CameraStreamModel);
+
+    if (cameraStreamModel is! CameraStreamModel) {
+      return;
+    }
+    expect(cameraStreamModel.resolution, const Size(102.0, 100.0));
+
+    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+        '0.0.0.0?resolution=102x100&fps=60&compression=50');
+  });
+
+  test('Camera stream from json (with negative resolution)', () {
+    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Camera Stream',
+      {...cameraStreamJson}..update('resolution', (_) => [-1, 100.0]),
+    );
+
+    expect(cameraStreamModel.type, 'Camera Stream');
+    expect(cameraStreamModel.runtimeType, CameraStreamModel);
+
+    if (cameraStreamModel is! CameraStreamModel) {
+      return;
+    }
+
+    expect(cameraStreamModel.resolution, isNull);
+
+    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+        '0.0.0.0?fps=60&compression=50');
+  });
+
   test('Camera stream to json', () {
     CameraStreamModel cameraStreamModel = CameraStreamModel(
       ntConnection: ntConnection,
