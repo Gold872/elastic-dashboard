@@ -6,15 +6,18 @@ Sending notifications via robot code requires the use of ElasticLib. Currently t
 
 ### Installing ElasticLib
 
-First, copy this file into your robot project: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java)
+For Java projects, copy this file into your robot project: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java)
 
-If you are using C++, you will have to copy this file instead: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h)
+If you are using C++, you will have to copy these 2 files instead:&#x20;
+
+1. [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h)
+2. [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.cpp](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.cpp)
 
 It is recommended to put this in a folder called `util`, however any location within a robot project works. Depending on where the file is located, you may need to change the top line of the file.
 
 ### Creating a Notification
 
-Notification data is stored in an object called `ElasticNotification`. Currently, this has the following properties:
+Notification data is stored in an object called `Notification`. Currently, this has the following properties:
 
 * `level` for the type of notification
 * `title` for the notification title
@@ -29,44 +32,55 @@ There are 3 notification levels:
 2. Warning
 3. Info
 
-An example of an `ElasticNotification` for an error notification would be
+An example of a `Notification` for an error notification would be
 
 {% tabs %}
 {% tab title="Java" %}
-```java
-ElasticNotification notification = new ElasticNotification(NotificationLevel.ERROR, "Error Notification", "This is an example error notification.");
-```
+<pre class="language-java"><code class="lang-java"><strong>Elastic.Notification notification = new Elastic.Notification(Elastic.NotificationLevel.ERROR, "Error Notification", "This is an example error notification.");
+</strong></code></pre>
 {% endtab %}
 
 {% tab title="C++" %}
-<pre class="language-cpp"><code class="lang-cpp"><strong>ElasticNotification notification = ElasticNotification(ElasticNotification::Level::ERROR, "Error Notification", "This is an example error notification");
+<pre class="language-cpp"><code class="lang-cpp"><strong>elastic::Notification notification = {.level = elastic::NotificationLevel::ERROR, .title = "Error Notification", .description = "This is an example error notification"};
 </strong></code></pre>
+{% endtab %}
+
+{% tab title="Python" %}
+```python
+notification = Notification(level=NotificationLevel.ERROR, title="Error Notification", description="This is an example error notification")
+```
 {% endtab %}
 {% endtabs %}
 
 ### Sending a notification
 
-In order to send a notification, there is a method called `sendAlert` in the `Elastic` class to send an `ElasticNotification`.
+In order to send a notification, there is a method called `sendNotification`in the `Elastic` class to send a `Notification`.
 
 To send the error notification that was declared above, you would call
 
 {% tabs %}
 {% tab title="Java" %}
 ```java
-Elastic.sendAlert(notification);
+Elastic.sendNotification(notification);
 ```
 {% endtab %}
 
 {% tab title="C++" %}
 ```cpp
-Elastic::SendAlert(notification);
+elastic::SendNotification(notification);
+```
+{% endtab %}
+
+{% tab title="Python" %}
+```python
+send_notification(notification)
 ```
 {% endtab %}
 {% endtabs %}
 
 When this is called, a popup will appear on the dashboard that looks like this
 
-![Error Notification](../.gitbook/assets/error\_notification.png)
+![Error Notification](../.gitbook/assets/error_notification.png)
 
 ### Customizing a Notification
 
@@ -87,47 +101,37 @@ notification.setDescription("This is an example warning notification");
 {% tab title="C++" %}
 ```cpp
 /* code that created the notification */
-notification.SetLevel(ElasticNotification::Level::WARNING);
-notification.SetTitle("Warning Notification");
-notification.SetDescription("This is an example warning notification");
+notification.level = elastic::NotificationLevel::WARNING;
+notification.title = "Warning Notification";
+notification.description = "This is an example warning notification";
+```
+{% endtab %}
+
+{% tab title="Python" %}
+```python
+# code that created the notification
+notification.level = NotificationLevel.WARNING
+notification.title = "Warning Notification"
+notification.description = "This is an example warning notification"
 ```
 {% endtab %}
 {% endtabs %}
 
-### Customizing with Method Chaining
+### Customizing with Method Chaining (Java Only)
 
-The simpler and recommended way to customize notifications is with method chaining. This allows for customizing multiple properties with just one line of code.
+For Java, method chaining is the simpler and recommended way to customize notifications. This allows for customizing multiple properties with just one line of code, as well as reusing only one notification object, which is better for the Java Garbage Collector performance (see [WPILib docs](https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-gc.html) for more details)
 
 For example, here's how a notification can be entirely customized and sent with just one line of code.
 
-{% tabs %}
-{% tab title="Java" %}
 ```java
-ElasticNotification notification = new ElasticNotification();
+Elastic.Notification notification = new Elastic.Notification();
 
 /* ... */
 
-Elastic.sendAlert(notification
-    .withLevel(NotificationLevel.INFO)
+Elastic.sendNotification(notification
+    .withLevel(Elastic.NotificationLevel.INFO)
     .withTitle("Some Information")
     .withDescription("Your robot is doing fantastic!")
     .withDisplaySeconds(5.0)
 );
 ```
-{% endtab %}
-
-{% tab title="C++" %}
-```cpp
-ElasticNotification notification = ElasticNotification();
-
-/* ... */
-
-Elastic::SendAlert(notification
-    .WithLevel(ElasticNotification::Level::INFO)
-    .WithTitle("Some Information")
-    .WithDescription("Your robot is doing fantastic!")
-    .WithDisplaySeconds(5.0)
-);
-```
-{% endtab %}
-{% endtabs %}
