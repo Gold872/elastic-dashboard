@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -127,7 +128,7 @@ class _MjpegState extends State<Mjpeg> {
               height: widget.height,
               gaplessPlayback: true,
               fit: widget.fit,
-              scale: (widget.expandToFit) ? 1e-100 : 1.0,
+              scale: (widget.expandToFit) ? 1e-6 : 1.0,
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
@@ -226,6 +227,7 @@ class MjpegController extends ChangeNotifier {
     if (isStreaming) {
       return;
     }
+    logger.debug('Starting camera stream on URL $stream');
     Stream<List<int>>? byteStream;
     try {
       final request = Request('GET', Uri.parse(stream));
@@ -279,10 +281,12 @@ class MjpegController extends ChangeNotifier {
   }
 
   void stopStream() async {
-    logger.debug('Stopping camera stream for $stream');
+    logger.debug('Stopping camera stream on URL $stream');
     await _rawSubscription?.cancel();
     _metricsTimer?.cancel();
     _rawSubscription = null;
+    _bitCount = 0;
+    _frameCount = 0;
     httpClient.close();
     httpClient = Client();
   }
