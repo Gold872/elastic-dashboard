@@ -41,6 +41,8 @@ class FakeSettingsMethods extends Mock {
   void changeDefaultGraphPeriod();
 
   void changeThemeVariant();
+
+  void openAssetsFolder();
 }
 
 void main() {
@@ -49,7 +51,15 @@ void main() {
   late SharedPreferences preferences;
   late FakeSettingsMethods fakeSettings;
 
-  setUpAll(() async {
+  final networkSettings = find.widgetWithText(Tab, 'Network');
+  final appearanceSettings = find.widgetWithText(Tab, 'Appearance');
+  final devSettings = find.widgetWithText(Tab, 'Developer');
+
+  setUpAll(() {
+    fakeSettings = FakeSettingsMethods();
+  });
+
+  setUp(() async {
     SharedPreferences.setMockInitialValues({
       PrefKeys.ipAddress: '127.0.0.1',
       PrefKeys.teamNumber: 353,
@@ -68,10 +78,6 @@ void main() {
 
     preferences = await SharedPreferences.getInstance();
 
-    fakeSettings = FakeSettingsMethods();
-  });
-
-  setUp(() {
     reset(fakeSettings);
   });
 
@@ -90,19 +96,51 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Settings'), findsOneWidget);
+
+    expect(networkSettings, findsOneWidget);
+    expect(appearanceSettings, findsOneWidget);
+    expect(devSettings, findsOneWidget);
+
     expect(find.text('Team Number'), findsOneWidget);
-    expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('IP Address Mode'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
+    expect(find.text('Default Period'), findsOneWidget);
+    expect(find.text('Default Graph Period'), findsOneWidget);
+
+    expect(find.text('Team Color'), findsNothing);
+    expect(find.text('Theme Variant'), findsNothing);
+    expect(find.text('Show Grid'), findsNothing);
+    expect(find.text('Grid Size'), findsNothing);
+    expect(find.text('Corner Radius'), findsNothing);
+    expect(find.text('Resize to Driver Station Height'), findsNothing);
+    expect(find.text('Remember Window Position'), findsNothing);
+    expect(find.text('Lock Layout'), findsNothing);
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Team Number'), findsNothing);
+    expect(find.text('IP Address Mode'), findsNothing);
+    expect(find.text('IP Address'), findsNothing);
+    expect(find.text('Default Period'), findsNothing);
+    expect(find.text('Default Graph Period'), findsNothing);
+
+    expect(find.text('Team Color'), findsOneWidget);
     expect(find.text('Show Grid'), findsWidgets);
     expect(find.text('Grid Size'), findsWidgets);
     expect(find.text('Corner Radius'), findsOneWidget);
     expect(find.text('Resize to Driver Station Height'), findsOneWidget);
     expect(find.text('Remember Window Position'), findsOneWidget);
     expect(find.text('Lock Layout'), findsOneWidget);
-    expect(find.text('Default Period'), findsOneWidget);
-    expect(find.text('Default Graph Period'), findsOneWidget);
     expect(find.text('Theme Variant'), findsOneWidget);
+
+    expect(devSettings, findsOneWidget);
+
+    await widgetTester.tap(devSettings);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Open Assets Folder'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
@@ -144,351 +182,6 @@ void main() {
     expect(preferences.getInt(PrefKeys.teamNumber), 2601);
     expect(preferences.getString(PrefKeys.ipAddress), '127.0.0.1');
     verify(fakeSettings.changeTeamNumber()).called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Change team color', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOnlineNT4(),
-          preferences: preferences,
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
-
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final teamColorBox = find.byType(DialogColorPicker);
-
-    expect(teamColorBox, findsOneWidget);
-
-    final teamColorButton = find.byType(ElevatedButton);
-
-    expect(teamColorButton, findsOneWidget);
-
-    // For some reason the widgetTester.tap() won't work...
-    ElevatedButton elevatedColorButton =
-        teamColorButton.evaluate().first.widget as ElevatedButton;
-
-    elevatedColorButton.onPressed?.call();
-
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Select Color', skipOffstage: false), findsOneWidget);
-    expect(find.byType(ColorPicker), findsOneWidget);
-
-    final hexInput = find.widgetWithText(TextField, 'Hex Code');
-
-    expect(hexInput, findsOneWidget);
-
-    await widgetTester.enterText(hexInput, '0000FF');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pump();
-
-    final saveButton = find.text('Save');
-
-    expect(saveButton, findsOneWidget);
-    await widgetTester.tap(saveButton);
-
-    expect(preferences.getInt(PrefKeys.teamColor),
-        const Color.fromARGB(255, 0, 0, 255).value);
-    verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Change theme variant', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          onThemeVariantChanged: (variant) async {
-            fakeSettings.changeThemeVariant();
-
-            await preferences.setString(
-                PrefKeys.themeVariant, variant.variantName);
-          },
-          preferences: preferences,
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final themeVariantDropdown =
-        find.widgetWithText(DialogDropdownChooser<String>, 'Chroma');
-
-    expect(themeVariantDropdown, findsOneWidget);
-
-    await widgetTester.tap(themeVariantDropdown);
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Chroma'), findsNWidgets(2));
-    expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
-    expect(find.text('Material-3 Legacy'), findsNothing);
-
-    await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getString(PrefKeys.themeVariant),
-        FlexSchemeVariant.material3Legacy.variantName);
-
-    verify(fakeSettings.changeThemeVariant()).called(1);
-
-    final newThemeVariantDropdown = find.widgetWithText(
-        DialogDropdownChooser<String>, 'Material-3 Legacy (Default)');
-
-    expect(newThemeVariantDropdown, findsOneWidget);
-
-    // Now the safety mecahnism to add unknown variants should activate
-    await widgetTester.tap(newThemeVariantDropdown);
-    await widgetTester.pumpAndSettle();
-
-    expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
-    expect(find.text('Material-3 Legacy'), findsOneWidget);
-  });
-
-  testWidgets('Toggle grid', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onGridToggle: (value) async {
-            fakeSettings.changeShowGrid();
-
-            await preferences.setBool(PrefKeys.showGrid, value);
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final gridSwitch = find.widgetWithText(DialogToggleSwitch, 'Show Grid');
-
-    expect(gridSwitch, findsOneWidget);
-
-    // Widget tester.tap will not work for some reason
-    final switchWidget = find
-        .descendant(of: gridSwitch, matching: find.byType(Switch))
-        .evaluate()
-        .first
-        .widget as Switch;
-
-    switchWidget.onChanged?.call(true);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.showGrid), true);
-
-    switchWidget.onChanged?.call(false);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.showGrid), false);
-    verify(fakeSettings.changeShowGrid()).called(2);
-  });
-
-  testWidgets('Change grid size', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onGridSizeChanged: (gridSize) async {
-            fakeSettings.changeGridSize();
-
-            await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final gridSizeField = find.widgetWithText(DialogTextInput, 'Grid Size');
-
-    expect(gridSizeField, findsOneWidget);
-
-    await widgetTester.enterText(gridSizeField, '64');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getInt(PrefKeys.gridSize), 64);
-    verify(fakeSettings.changeGridSize()).called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Change corner radius', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-    createMockOfflineNT4();
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onCornerRadiusChanged: (radius) async {
-            fakeSettings.changeCornerRadius();
-
-            await preferences.setDouble(
-                PrefKeys.cornerRadius, double.parse(radius!));
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final cornerRadiusField =
-        find.widgetWithText(DialogTextInput, 'Corner Radius');
-
-    expect(cornerRadiusField, findsOneWidget);
-
-    await widgetTester.enterText(cornerRadiusField, '25.0');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getDouble(PrefKeys.cornerRadius), 25.0);
-    verify(fakeSettings.changeCornerRadius()).called(greaterThanOrEqualTo(1));
-  });
-
-  testWidgets('Toggle driver station auto resize', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onResizeToDSChanged: (value) async {
-            fakeSettings.changeDSAutoResize();
-
-            await preferences.setBool(PrefKeys.autoResizeToDS, value);
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final autoResizeSwitch = find.widgetWithText(
-        DialogToggleSwitch, 'Resize to Driver Station Height');
-
-    expect(autoResizeSwitch, findsOneWidget);
-
-    // Widget tester.tap will not work for some reason
-    final switchWidget = find
-        .descendant(of: autoResizeSwitch, matching: find.byType(Switch))
-        .evaluate()
-        .first
-        .widget as Switch;
-
-    switchWidget.onChanged?.call(true);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.autoResizeToDS), true);
-
-    switchWidget.onChanged?.call(false);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.autoResizeToDS), false);
-    verify(fakeSettings.changeDSAutoResize()).called(2);
-  });
-
-  testWidgets('Toggle remember window position', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onRememberWindowPositionChanged: (value) async {
-            fakeSettings.changeRememberWindow();
-
-            await preferences.setBool(PrefKeys.rememberWindowPosition, value);
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final windowSwitch =
-        find.widgetWithText(DialogToggleSwitch, 'Remember Window Position');
-
-    expect(windowSwitch, findsOneWidget);
-
-    // Widget tester.tap will not work for some reason
-    final switchWidget = find
-        .descendant(of: windowSwitch, matching: find.byType(Switch))
-        .evaluate()
-        .first
-        .widget as Switch;
-
-    switchWidget.onChanged?.call(true);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.rememberWindowPosition), true);
-
-    switchWidget.onChanged?.call(false);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.rememberWindowPosition), false);
-    verify(fakeSettings.changeRememberWindow()).called(2);
-  });
-
-  testWidgets('Toggle lock layout', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          preferences: preferences,
-          ntConnection: createMockOfflineNT4(),
-          onLayoutLock: (value) async {
-            fakeSettings.changeLockLayout();
-
-            await preferences.setBool(PrefKeys.layoutLocked, value);
-          },
-        ),
-      ),
-    ));
-
-    await widgetTester.pumpAndSettle();
-
-    final lockLayoutSwitch =
-        find.widgetWithText(DialogToggleSwitch, 'Lock Layout');
-
-    expect(lockLayoutSwitch, findsOneWidget);
-
-    // Widget tester.tap will not work for some reason
-    final switchWidget = find
-        .descendant(of: lockLayoutSwitch, matching: find.byType(Switch))
-        .evaluate()
-        .first
-        .widget as Switch;
-
-    switchWidget.onChanged?.call(true);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.layoutLocked), true);
-
-    switchWidget.onChanged?.call(false);
-    await widgetTester.pumpAndSettle();
-
-    expect(preferences.getBool(PrefKeys.layoutLocked), false);
-    verify(fakeSettings.changeLockLayout()).called(2);
   });
 
   testWidgets('Change IP address mode', (widgetTester) async {
@@ -631,5 +324,412 @@ void main() {
     expect(preferences.getDouble(PrefKeys.defaultGraphPeriod), 0.05);
     verify(fakeSettings.changeDefaultGraphPeriod())
         .called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change team color', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOnlineNT4(),
+          preferences: preferences,
+          onColorChanged: (color) async {
+            fakeSettings.changeColor();
+
+            await preferences.setInt(PrefKeys.teamColor, color.value);
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final teamColorBox = find.byType(DialogColorPicker);
+
+    expect(teamColorBox, findsOneWidget);
+
+    final teamColorButton = find.byType(ElevatedButton);
+
+    expect(teamColorButton, findsOneWidget);
+
+    // For some reason the widgetTester.tap() won't work...
+    ElevatedButton elevatedColorButton =
+        teamColorButton.evaluate().first.widget as ElevatedButton;
+
+    elevatedColorButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Select Color', skipOffstage: false), findsOneWidget);
+    expect(find.byType(ColorPicker), findsOneWidget);
+
+    final hexInput = find.widgetWithText(TextField, 'Hex Code');
+
+    expect(hexInput, findsOneWidget);
+
+    await widgetTester.enterText(hexInput, '0000FF');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pump();
+
+    final saveButton = find.text('Save');
+
+    expect(saveButton, findsOneWidget);
+    await widgetTester.tap(saveButton);
+
+    expect(preferences.getInt(PrefKeys.teamColor),
+        const Color.fromARGB(255, 0, 0, 255).value);
+    verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change theme variant', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          onThemeVariantChanged: (variant) async {
+            fakeSettings.changeThemeVariant();
+
+            await preferences.setString(
+                PrefKeys.themeVariant, variant.variantName);
+          },
+          preferences: preferences,
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final themeVariantDropdown =
+        find.widgetWithText(DialogDropdownChooser<String>, 'Chroma');
+
+    expect(themeVariantDropdown, findsOneWidget);
+
+    await widgetTester.tap(themeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Chroma'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
+    expect(find.text('Material-3 Legacy'), findsNothing);
+
+    await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getString(PrefKeys.themeVariant),
+        FlexSchemeVariant.material3Legacy.variantName);
+
+    verify(fakeSettings.changeThemeVariant()).called(1);
+
+    final newThemeVariantDropdown = find.widgetWithText(
+        DialogDropdownChooser<String>, 'Material-3 Legacy (Default)');
+
+    expect(newThemeVariantDropdown, findsOneWidget);
+
+    // Now the safety mecahnism to add unknown variants should activate
+    await widgetTester.tap(newThemeVariantDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
+    expect(find.text('Material-3 Legacy'), findsOneWidget);
+  });
+
+  testWidgets('Toggle grid', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onGridToggle: (value) async {
+            fakeSettings.changeShowGrid();
+
+            await preferences.setBool(PrefKeys.showGrid, value);
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final gridSwitch = find.widgetWithText(DialogToggleSwitch, 'Show Grid');
+
+    expect(gridSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: gridSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.showGrid), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.showGrid), false);
+    verify(fakeSettings.changeShowGrid()).called(2);
+  });
+
+  testWidgets('Change grid size', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onGridSizeChanged: (gridSize) async {
+            fakeSettings.changeGridSize();
+
+            await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final gridSizeField = find.widgetWithText(DialogTextInput, 'Grid Size');
+
+    expect(gridSizeField, findsOneWidget);
+
+    await widgetTester.enterText(gridSizeField, '64');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getInt(PrefKeys.gridSize), 64);
+    verify(fakeSettings.changeGridSize()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Change corner radius', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    createMockOfflineNT4();
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onCornerRadiusChanged: (radius) async {
+            fakeSettings.changeCornerRadius();
+
+            await preferences.setDouble(
+                PrefKeys.cornerRadius, double.parse(radius!));
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final cornerRadiusField =
+        find.widgetWithText(DialogTextInput, 'Corner Radius');
+
+    expect(cornerRadiusField, findsOneWidget);
+
+    await widgetTester.enterText(cornerRadiusField, '25.0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getDouble(PrefKeys.cornerRadius), 25.0);
+    verify(fakeSettings.changeCornerRadius()).called(greaterThanOrEqualTo(1));
+  });
+
+  testWidgets('Toggle driver station auto resize', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onResizeToDSChanged: (value) async {
+            fakeSettings.changeDSAutoResize();
+
+            await preferences.setBool(PrefKeys.autoResizeToDS, value);
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final autoResizeSwitch = find.widgetWithText(
+        DialogToggleSwitch, 'Resize to Driver Station Height');
+
+    expect(autoResizeSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: autoResizeSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoResizeToDS), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoResizeToDS), false);
+    verify(fakeSettings.changeDSAutoResize()).called(2);
+  });
+
+  testWidgets('Toggle remember window position', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          onRememberWindowPositionChanged: (value) async {
+            fakeSettings.changeRememberWindow();
+
+            await preferences.setBool(PrefKeys.rememberWindowPosition, value);
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final windowSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Remember Window Position');
+
+    expect(windowSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: windowSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.rememberWindowPosition), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.rememberWindowPosition), false);
+    verify(fakeSettings.changeRememberWindow()).called(2);
+  });
+
+  testWidgets('Toggle lock layout', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          preferences: preferences,
+          ntConnection: createMockOfflineNT4(),
+          onLayoutLock: (value) async {
+            fakeSettings.changeLockLayout();
+
+            await preferences.setBool(PrefKeys.layoutLocked, value);
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final lockLayoutSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Lock Layout');
+
+    expect(lockLayoutSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: lockLayoutSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.layoutLocked), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.layoutLocked), false);
+    verify(fakeSettings.changeLockLayout()).called(2);
+  });
+
+  testWidgets('Open assets', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          preferences: preferences,
+          ntConnection: createMockOfflineNT4(),
+          onOpenAssetsFolderPressed: () {
+            fakeSettings.openAssetsFolder();
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(devSettings, findsOneWidget);
+    await widgetTester.tap(devSettings);
+    await widgetTester.pumpAndSettle();
+
+    final openAssetsButton = find.text('Open Assets Folder');
+
+    expect(openAssetsButton, findsOneWidget);
+
+    await widgetTester.tap(openAssetsButton);
+
+    verify(fakeSettings.openAssetsFolder()).called(1);
   });
 }

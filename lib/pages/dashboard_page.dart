@@ -12,6 +12,7 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1173,6 +1174,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onOpenAssetsFolderPressed: () async {
+          Uri uri = Uri.file(
+              '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
+          if (await canLaunchUrl(uri)) {
+            launchUrl(uri);
+          }
+        },
       ),
     );
   }
@@ -1942,6 +1950,7 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                                 setState(() => _searchQuery = value),
                             initialText: _searchQuery,
                             allowEmptySubmission: true,
+                            updateOnChanged: true,
                             label: 'Search',
                           ),
                         ),
