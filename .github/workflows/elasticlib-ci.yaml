@@ -1,0 +1,32 @@
+﻿name: ElasticLib
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  wpiformat-analyze:
+    name: "Verify Formatting"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch all history and metadata
+        run: |
+          git checkout -b pr
+          git branch -f main origin/main
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+      - name: Install wpiformat
+        run: pip3 install wpiformat==2024.50
+      - name: Run wpiformat
+        run: wpiformat -f Elastic.java elasticlib.h elasticlib.cpp elasticlib.py
+        working-directory: ./elasticlib
+      - name: Check output
+        run: git --no-pager diff --exit-code HEAD
