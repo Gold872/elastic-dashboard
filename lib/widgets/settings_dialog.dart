@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
-import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,25 +39,26 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function()? onOpenAssetsFolderPressed;
 
-  const SettingsDialog({
-    super.key,
-    required this.ntConnection,
-    required this.preferences,
-    this.onTeamNumberChanged,
-    this.onIPAddressModeChanged,
-    this.onIPAddressChanged,
-    this.onColorChanged,
-    this.onGridToggle,
-    this.onGridSizeChanged,
-    this.onCornerRadiusChanged,
-    this.onResizeToDSChanged,
-    this.onRememberWindowPositionChanged,
-    this.onLayoutLock,
-    this.onDefaultPeriodChanged,
-    this.onDefaultGraphPeriodChanged,
-    this.onThemeVariantChanged,
-  });
+  const SettingsDialog(
+      {super.key,
+      required this.ntConnection,
+      required this.preferences,
+      this.onTeamNumberChanged,
+      this.onIPAddressModeChanged,
+      this.onIPAddressChanged,
+      this.onColorChanged,
+      this.onGridToggle,
+      this.onGridSizeChanged,
+      this.onCornerRadiusChanged,
+      this.onResizeToDSChanged,
+      this.onRememberWindowPositionChanged,
+      this.onLayoutLock,
+      this.onDefaultPeriodChanged,
+      this.onDefaultGraphPeriodChanged,
+      this.onThemeVariantChanged,
+      this.onOpenAssetsFolderPressed});
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -70,37 +70,82 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return AlertDialog(
       title: const Text('Settings'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      content: Container(
-        constraints: const BoxConstraints(
-          maxHeight: 350,
-          maxWidth: 725,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ..._generalSettings(),
-                  const Divider(),
-                  ..._gridSettings(),
+      content: DefaultTabController(
+        length: 3,
+        child: SizedBox(
+          width: 450,
+          height: 400,
+          child: Column(
+            children: [
+              const TabBar(
+                tabs: [
+                  Tab(
+                    icon: Icon(
+                      Icons.wifi_outlined,
+                    ),
+                    child: Text('Network'),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.color_lens_outlined,
+                    ),
+                    child: Text('Appearance'),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.code,
+                    ),
+                    child: Text('Developer'),
+                  ),
                 ],
               ),
-            ),
-            const VerticalDivider(),
-            Flexible(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ..._ipAddressSettings(),
-                  const Divider(),
-                  ..._networkTablesSettings(),
-                ],
+              const SizedBox(height: 10),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // Network Tab
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ..._ipAddressSettings(),
+                          const Divider(),
+                          ..._networkTablesSettings(),
+                        ],
+                      ),
+                    ),
+                    // Style Preferences Tab
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 350),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ..._themeSettings(),
+                              const Divider(),
+                              ..._gridSettings(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Advanced Settings Tab
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Column(
+                        children: [
+                          ..._advancedSettings(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
@@ -112,7 +157,46 @@ class _SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
-  List<Widget> _generalSettings() {
+  List<Widget> _advancedSettings() {
+    return [
+      Row(
+        children: [
+          const Icon(Icons.warning, color: Colors.yellow),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              'WARNING: These are advanced settings that could cause issues if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+              maxLines: 3,
+            ),
+          ),
+          const SizedBox(width: 5),
+          const Icon(
+            Icons.warning,
+            color: Colors.yellow,
+          ),
+        ],
+      ),
+      const Divider(),
+      Row(
+        children: [
+          TextButton.icon(
+            onPressed: () {
+              widget.onOpenAssetsFolderPressed?.call();
+            },
+            icon: const Icon(Icons.folder_outlined),
+            label: const Text('Open Assets Folder'),
+          ),
+          const Spacer(),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> _themeSettings() {
     Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
         Colors.blueAccent.value);
 
@@ -129,60 +213,54 @@ class _SettingsDialogState extends State<SettingsDialog> {
     }
 
     return [
-      Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: DialogTextInput(
-                  initialText: widget.preferences
-                          .getInt(PrefKeys.teamNumber)
-                          ?.toString() ??
-                      Defaults.teamNumber.toString(),
-                  label: 'Team Number',
-                  onSubmit: (data) async {
-                    await widget.onTeamNumberChanged?.call(data);
-                    setState(() {});
-                  },
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                ),
-              ),
-              Expanded(
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text('Theme Settings'),
+      ),
+      IntrinsicHeight(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Flexible(
+              flex: 2,
+              child: UnconstrainedBox(
+                constrainedAxis: Axis.horizontal,
                 child: DialogColorPicker(
                   onColorPicked: (color) => widget.onColorChanged?.call(color),
                   label: 'Team Color',
                   initialColor: currentColor,
                   defaultColor: Colors.blueAccent,
+                  rowSize: MainAxisSize.max,
                 ),
               ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text('Theme Variant'),
-              const SizedBox(width: 5),
-              Flexible(
-                child: DialogDropdownChooser<String>(
-                    onSelectionChanged: (variantName) {
-                      if (variantName == null) return;
-                      FlexSchemeVariant variant = FlexSchemeVariant.values
-                              .firstWhereOrNull(
-                                  (e) => e.variantName == variantName) ??
-                          FlexSchemeVariant.material3Legacy;
+            ),
+            const VerticalDivider(),
+            Flexible(
+              flex: 4,
+              child: Column(
+                children: [
+                  const Text('Theme Variant'),
+                  DialogDropdownChooser<String>(
+                      onSelectionChanged: (variantName) {
+                        if (variantName == null) return;
+                        FlexSchemeVariant variant = FlexSchemeVariant.values
+                                .firstWhereOrNull(
+                                    (e) => e.variantName == variantName) ??
+                            FlexSchemeVariant.material3Legacy;
 
-                      widget.onThemeVariantChanged?.call(variant);
-                      setState(() {});
-                    },
-                    choices:
-                        themeVariantsOverride ?? SettingsDialog.themeVariants,
-                    initialValue:
-                        widget.preferences.getString(PrefKeys.themeVariant) ??
-                            Defaults.defaultVariantName),
+                        widget.onThemeVariantChanged?.call(variant);
+                        setState(() {});
+                      },
+                      choices:
+                          themeVariantsOverride ?? SettingsDialog.themeVariants,
+                      initialValue:
+                          widget.preferences.getString(PrefKeys.themeVariant) ??
+                              Defaults.defaultVariantName),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     ];
   }
@@ -191,46 +269,73 @@ class _SettingsDialogState extends State<SettingsDialog> {
     return [
       const Align(
         alignment: Alignment.topLeft,
-        child: Text('IP Address Settings'),
+        child: Text('Connection Settings'),
       ),
       const SizedBox(height: 5),
-      const Text('IP Address Mode'),
-      DialogDropdownChooser<IPAddressMode>(
-        onSelectionChanged: (mode) {
-          if (mode == null) {
-            return;
-          }
-
-          widget.onIPAddressModeChanged?.call(mode);
-
-          setState(() {});
-        },
-        choices: IPAddressMode.values,
-        initialValue: IPAddressMode.fromIndex(
-            widget.preferences.getInt(PrefKeys.ipAddressMode)),
-      ),
-      const SizedBox(height: 5),
-      StreamBuilder(
-          stream: widget.ntConnection.dsConnectionStatus(),
-          initialData: widget.ntConnection.isDSConnected,
-          builder: (context, snapshot) {
-            bool dsConnected = tryCast(snapshot.data) ?? false;
-
-            return DialogTextInput(
-              enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                      IPAddressMode.custom.index ||
-                  (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                          IPAddressMode.driverStation.index &&
-                      !dsConnected),
-              initialText: widget.preferences.getString(PrefKeys.ipAddress) ??
-                  Defaults.ipAddress,
-              label: 'IP Address',
-              onSubmit: (String? data) async {
-                await widget.onIPAddressChanged?.call(data);
+      Row(
+        children: [
+          Flexible(
+            flex: 2,
+            child: DialogTextInput(
+              initialText:
+                  widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
+                      Defaults.teamNumber.toString(),
+              label: 'Team Number',
+              onSubmit: (data) async {
+                await widget.onTeamNumberChanged?.call(data);
                 setState(() {});
               },
-            );
-          })
+              formatter: FilteringTextInputFormatter.digitsOnly,
+            ),
+          ),
+          Flexible(
+            flex: 3,
+            child: ValueListenableBuilder(
+              valueListenable: widget.ntConnection.dsConnected,
+              builder: (context, connected, child) {
+                return DialogTextInput(
+                  enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                          IPAddressMode.custom.index ||
+                      (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
+                              IPAddressMode.driverStation.index &&
+                          !connected),
+                  initialText:
+                      widget.preferences.getString(PrefKeys.ipAddress) ??
+                          Defaults.ipAddress,
+                  label: 'IP Address',
+                  onSubmit: (String? data) async {
+                    await widget.onIPAddressChanged?.call(data);
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          const Text('IP Address Mode'),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogDropdownChooser<IPAddressMode>(
+              onSelectionChanged: (mode) {
+                if (mode == null) {
+                  return;
+                }
+
+                widget.onIPAddressModeChanged?.call(mode);
+
+                setState(() {});
+              },
+              choices: IPAddressMode.values,
+              initialValue: IPAddressMode.fromIndex(
+                  widget.preferences.getInt(PrefKeys.ipAddressMode)),
+            ),
+          ),
+        ],
+      ),
     ];
   }
 

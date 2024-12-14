@@ -72,6 +72,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -96,6 +97,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -120,6 +122,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -152,6 +155,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -176,6 +180,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -265,7 +270,6 @@ void main() {
 
   testWidgets('Add widget dialog (widgets)', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
-    createMockOnlineNT4();
 
     await widgetTester.pumpWidget(
       MaterialApp(
@@ -273,6 +277,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -336,6 +341,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -382,6 +388,147 @@ void main() {
     expect(listLayoutContainer, findsOneWidget);
   });
 
+  testWidgets('Add widget dialog (list layout sub-table)',
+      (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(
+            virtualTopics: [
+              NT4Topic(
+                name: '/Non-Typed/Value 1',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Typed/Value 2',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Typed/Value 3',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+            ],
+          ),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final nonTypedTile = find.widgetWithText(TreeTile, 'Non-Typed');
+
+    expect(nonTypedTile, findsOneWidget);
+
+    final nonTypedContainer = find.widgetWithText(WidgetContainer, 'Non-Typed');
+    expect(nonTypedContainer, findsNothing);
+
+    await widgetTester.drag(
+      nonTypedTile,
+      const Offset(250, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(nonTypedContainer, findsOneWidget);
+  });
+
+  testWidgets('Add widget dialog (unregistered sendable)',
+      (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOnlineNT4(
+            virtualTopics: [
+              NT4Topic(
+                name: '/Non-Registered/.type',
+                type: NT4TypeStr.kString,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 1',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 2',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+              NT4Topic(
+                name: '/Non-Registered/Value 3',
+                type: NT4TypeStr.kInt,
+                properties: {},
+              ),
+            ],
+            virtualValues: {
+              '/Non-Registered/.type': 'Non Registered Type',
+            },
+          ),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
+
+    expect(addWidget, findsOneWidget);
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsNothing);
+
+    MenuItemButton addWidgetButton =
+        addWidget.evaluate().first.widget as MenuItemButton;
+
+    addWidgetButton.onPressed?.call();
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+
+    final nonRegisteredTile = find.widgetWithText(TreeTile, 'Non-Registered');
+
+    expect(nonRegisteredTile, findsOneWidget);
+
+    final nonRegistered =
+        find.widgetWithText(WidgetContainer, 'Non-Registered');
+    expect(nonRegistered, findsNothing);
+
+    await widgetTester.drag(
+      nonRegisteredTile,
+      const Offset(250, 0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(nonRegistered, findsOneWidget);
+  });
+
   testWidgets('List Layouts', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
@@ -391,6 +538,7 @@ void main() {
           ntConnection: createMockOnlineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -537,6 +685,7 @@ void main() {
           ntConnection: mockNT4Connection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -626,6 +775,7 @@ void main() {
           ntConnection: ntConnection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -672,6 +822,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -704,6 +855,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -733,6 +885,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -763,6 +916,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -789,6 +943,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -831,6 +986,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -867,6 +1023,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -925,6 +1082,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -981,6 +1139,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1041,6 +1200,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1091,6 +1251,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1143,6 +1304,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1175,6 +1337,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1199,6 +1362,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1231,6 +1395,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1267,6 +1432,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1309,6 +1475,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1338,6 +1505,7 @@ void main() {
           ntConnection: createMockOfflineNT4(),
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1376,6 +1544,7 @@ void main() {
           ntConnection: ntConnection,
           preferences: preferences,
           version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
       ),
     );
@@ -1445,85 +1614,108 @@ void main() {
     expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
   });
 
-  testWidgets(
-    'Robot Notifications',
-    (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-      final Map<String, dynamic> data = {
-        'title': 'Robot Notification Title',
-        'description': 'Robot Notification Description',
-        'level': 'INFO',
-        'displayTime': 350,
-        'width': 300.0,
-        'height': 300.0,
-      };
+  testWidgets('Robot Notifications', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+    final Map<String, dynamic> data = {
+      'title': 'Robot Notification Title',
+      'description': 'Robot Notification Description',
+      'level': 'INFO',
+      'displayTime': 350,
+      'width': 300.0,
+      'height': 300.0,
+    };
 
-      MockNTConnection connection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: '/Elastic/RobotNotifications',
-            type: NT4TypeStr.kString,
-            properties: {},
-          )
-        ],
-        virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
-        serverTime: 5000000,
-      );
-      MockNT4Subscription mockSub = MockNT4Subscription();
+    MockNTConnection connection = createMockOnlineNT4(
+      virtualTopics: [
+        NT4Topic(
+          name: '/Elastic/RobotNotifications',
+          type: NT4TypeStr.kString,
+          properties: {},
+        )
+      ],
+      virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
+      serverTime: 5000000,
+    );
+    MockNT4Subscription mockSub = MockNT4Subscription();
 
-      List<Function(Object?, int)> listeners = [];
-      when(mockSub.listen(any)).thenAnswer(
-        (realInvocation) {
-          listeners.add(realInvocation.positionalArguments[0]);
-          mockSub.updateValue(jsonEncode(data), 0);
-        },
-      );
+    List<Function(Object?, int)> listeners = [];
+    when(mockSub.listen(any)).thenAnswer(
+      (realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+        mockSub.updateValue(jsonEncode(data), 0);
+      },
+    );
 
-      when(mockSub.updateValue(any, any)).thenAnswer(
-        (invoc) {
-          for (var value in listeners) {
-            value.call(
-                invoc.positionalArguments[0], invoc.positionalArguments[1]);
-          }
-        },
-      );
+    when(mockSub.updateValue(any, any)).thenAnswer(
+      (invoc) {
+        for (var value in listeners) {
+          value.call(
+              invoc.positionalArguments[0], invoc.positionalArguments[1]);
+        }
+      },
+    );
 
-      when(connection.subscribeAll(any, any)).thenAnswer(
-        (realInvocation) {
-          return mockSub;
-        },
-      );
+    when(connection.subscribeAll(any, any)).thenAnswer(
+      (realInvocation) {
+        return mockSub;
+      },
+    );
 
-      final notificationWidget =
-          find.widgetWithText(ElegantNotification, data['title']);
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, data['title']);
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: connection,
-            preferences: preferences,
-            version: '0.0.0.0',
-          ),
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: connection,
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(),
         ),
-      );
-      expect(notificationWidget, findsNothing);
+      ),
+    );
+    expect(notificationWidget, findsNothing);
 
-      await widgetTester.pumpAndSettle();
-      connection
-          .subscribeAll('/Elastic/RobotNotifications', 0.2)
-          .updateValue(jsonEncode(data), 1);
+    await widgetTester.pumpAndSettle();
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
 
-      await widgetTester.pump();
+    await widgetTester.pump();
 
-      expect(notificationWidget, findsOneWidget);
+    expect(notificationWidget, findsOneWidget);
 
-      await widgetTester.pumpAndSettle();
+    await widgetTester.pumpAndSettle();
 
-      expect(notificationWidget, findsNothing);
+    expect(notificationWidget, findsNothing);
 
-      connection
-          .subscribeAll('/Elastic/RobotNotifications', 0.2)
-          .updateValue(jsonEncode(data), 1);
-    },
-  );
+    connection
+        .subscribeAll('/Elastic/RobotNotifications', 0.2)
+        .updateValue(jsonEncode(data), 1);
+  });
+
+  testWidgets('Update Notification', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: DashboardPage(
+          ntConnection: createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: createMockUpdateChecker(
+              updateAvailable: true, latestVersion: '2025.0.1'),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    final notificationWidget =
+        find.widgetWithText(ElegantNotification, 'Version 2025.0.1 Available');
+    final notificationIcon = find.byIcon(Icons.update);
+
+    expect(notificationWidget, findsOneWidget);
+    expect(notificationIcon, findsOneWidget);
+  });
 }

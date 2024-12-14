@@ -25,13 +25,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   int? _fps;
   Size? _resolution;
 
-  MemoryImage? _lastDisplayedImage;
-
-  MjpegStreamState? mjpegStream;
-
-  MemoryImage? get lastDisplayedImage => _lastDisplayedImage;
-
-  set lastDisplayedImage(value) => _lastDisplayedImage = value;
+  MjpegController? controller;
 
   int? get quality => _quality;
 
@@ -91,7 +85,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         .toList();
 
     if (resolution != null && resolution.length > 1) {
-      _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+      if (resolution[0] % 2 != 0) {
+        resolution[0] += 1;
+      }
+      if (resolution[0] > 0 && resolution[1] > 0) {
+        _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+      }
     }
   }
 
@@ -164,7 +163,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       return;
                     }
 
-                    resolution = Size(newWidth.toDouble(),
+                    if (newWidth! % 2 != 0) {
+                      // Won't allow += for some reason
+                      newWidth = newWidth! + 1;
+                    }
+
+                    resolution = Size(newWidth!.toDouble(),
                         resolution?.height.toDouble() ?? 0);
                   });
                 },
@@ -232,19 +236,15 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   void disposeWidget({bool deleting = false}) {
     if (deleting) {
-      _lastDisplayedImage?.evict();
-      mjpegStream?.previousImage?.evict();
-      mjpegStream?.dispose(deleting: deleting);
+      controller?.dispose();
     }
 
     super.disposeWidget(deleting: deleting);
   }
 
   void closeClient() {
-    _lastDisplayedImage?.evict();
-    _lastDisplayedImage = mjpegStream?.previousImage;
-    mjpegStream?.dispose();
-    mjpegStream = null;
+    controller?.dispose();
+    controller = null;
   }
 }
 
@@ -281,13 +281,11 @@ class CameraStreamWidget extends NTWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              if (model.mjpegStream?.previousImage != null ||
-                  model.lastDisplayedImage != null)
+              if (model.controller?.previousImage != null)
                 Opacity(
                   opacity: 0.35,
-                  child: Image(
-                    image: model.mjpegStream?.previousImage ??
-                        model.lastDisplayedImage!,
+                  child: Image.memory(
+                    Uint8List.fromList(model.controller!.previousImage!),
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -309,28 +307,47 @@ class CameraStreamWidget extends NTWidget {
           );
         }
 
-        bool createNewWidget = model.mjpegStream == null;
+        bool createNewWidget = model.controller == null;
 
         String stream = model.getUrlWithParameters(streams.last);
 
         createNewWidget =
-            createNewWidget || (model.mjpegStream?.stream != stream);
+            createNewWidget || (model.controller?.stream != stream);
 
         if (createNewWidget) {
-          model.lastDisplayedImage?.evict();
-          model.mjpegStream?.dispose(deleting: true);
+          model.controller?.dispose();
 
-          model.mjpegStream = MjpegStreamState(stream: stream);
+          model.controller = MjpegController(stream: stream);
         }
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Mjpeg(
-              mjpegStream: model.mjpegStream!,
-              fit: BoxFit.contain,
-            ),
-          ],
+        return IntrinsicWidth(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: model.controller!.framesPerSecond,
+                    builder: (context, value, child) => Text('FPS: $value'),
+                  ),
+                  const Spacer(),
+                  ValueListenableBuilder(
+                    valueListenable: model.controller!.bandwidth,
+                    builder: (context, value, child) =>
+                        Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
+                  ),
+                ],
+              ),
+              Flexible(
+                child: Mjpeg(
+                  controller: model.controller!,
+                  fit: BoxFit.contain,
+                  expandToFit: true,
+                ),
+              ),
+              const Text(''),
+            ],
+          ),
         );
       },
     );
