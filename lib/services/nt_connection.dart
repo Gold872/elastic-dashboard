@@ -76,6 +76,14 @@ class NTConnection {
     );
   }
 
+  void startDBModeServer() {
+    _dsClient.startDBModeServer();
+  }
+
+  void stopDBModeServer() {
+    _dsClient.stopDBModeServer();
+  }
+
   void addConnectedListener(VoidCallback callback) {
     onConnectedListeners.add(callback);
   }
