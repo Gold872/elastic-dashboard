@@ -13,6 +13,8 @@ If you are using C++, you will have to copy these 2 files instead:&#x20;
 1. [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.h)
 2. [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.cpp](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.cpp)
 
+For Python projects, you will have to copy this file: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.py](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/elasticlib.py)
+
 It is recommended to put this in a folder called `util`, however any location within a robot project works. Depending on where the file is located, you may need to change the top line of the file.
 
 ### Creating a Notification
