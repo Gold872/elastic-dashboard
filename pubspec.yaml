@@ -42,7 +42,7 @@ dependencies:
   syncfusion_flutter_gauges: ^23.1.44
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
-  url_launcher: ^6.1.14
+  url_launcher: ^6.3.0
   uuid: ^4.2.2
   vector_math: ^2.1.4
   version: ^3.0.2
