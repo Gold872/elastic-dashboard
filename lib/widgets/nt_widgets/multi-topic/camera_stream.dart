@@ -85,7 +85,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         .toList();
 
     if (resolution != null && resolution.length > 1) {
-      _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+      if (resolution[0] % 2 != 0) {
+        resolution[0] += 1;
+      }
+      if (resolution[0] > 0 && resolution[1] > 0) {
+        _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+      }
     }
   }
 
@@ -158,7 +163,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       return;
                     }
 
-                    resolution = Size(newWidth.toDouble(),
+                    if (newWidth! % 2 != 0) {
+                      // Won't allow += for some reason
+                      newWidth = newWidth! + 1;
+                    }
+
+                    resolution = Size(newWidth!.toDouble(),
                         resolution?.height.toDouble() ?? 0);
                   });
                 },
