@@ -4,32 +4,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class _MjpegStateNotifier extends ChangeNotifier {
-  bool _mounted = true;
-  bool _visible = true;
-
-  _MjpegStateNotifier() : super();
-
-  bool get mounted => _mounted;
-
-  bool get visible => _visible;
-
-  set visible(value) {
-    _visible = value;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _mounted = false;
-    notifyListeners();
-    super.dispose();
-  }
-}
+import 'package:elastic_dashboard/services/log.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -37,107 +15,132 @@ class MjpegPreprocessor {
 }
 
 /// An Mjpeg.
-class Mjpeg extends HookWidget {
-  final streamKey = UniqueKey();
-  final MjpegStreamState mjpegStream;
+class Mjpeg extends StatefulWidget {
+  final MjpegController controller;
   final BoxFit? fit;
+  final bool expandToFit;
   final double? width;
   final double? height;
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
       error;
 
-  Mjpeg({
-    required this.mjpegStream,
+  const Mjpeg({
+    required this.controller,
     this.width,
     this.height,
     this.fit,
+    this.expandToFit = false,
     this.error,
     this.loading,
     super.key,
   });
 
   @override
+  State<Mjpeg> createState() => _MjpegState();
+}
+
+class _MjpegState extends State<Mjpeg> {
+  final streamKey = UniqueKey();
+
+  late void Function() listener;
+
+  @override
+  void initState() {
+    listener = () => setState(() {});
+    widget.controller.addListener(listener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(listener);
+
+    widget.controller.setMounted(streamKey, false);
+    widget.controller.setVisible(streamKey, false);
+
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(Mjpeg oldWidget) {
+    final controller = widget.controller;
+    final oldController = oldWidget.controller;
+
+    if (oldController != controller) {
+      oldController.removeListener(listener);
+      controller.addListener(listener);
+
+      controller.setMounted(streamKey, oldController.isMounted(streamKey));
+      controller.setVisible(streamKey, oldController.isVisible(streamKey));
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final image = useState<MemoryImage?>(null);
-    final state = useMemoized(() => _MjpegStateNotifier());
-    final visible = useListenable(state);
-    final errorState = useState<List<dynamic>?>(null);
-    isMounted() => context.mounted;
+    final controller = widget.controller;
 
-    final manager = useMemoized(
-        () => _StreamManager(
-              mjpegStream: mjpegStream,
-              mounted: isMounted,
-              visible: () => visible.visible,
-            ),
-        [
-          visible.visible,
-          isMounted(),
-          mjpegStream,
-        ]);
+    controller.setMounted(streamKey, context.mounted);
 
-    final key = useMemoized(() => UniqueKey(), [manager]);
+    if (controller.isVisible(streamKey)) {
+      controller.startStream();
+    }
 
-    useEffect(() {
-      errorState.value = null;
-      manager.updateStream(streamKey, image, errorState);
-      return () {
-        if (visible.visible && isMounted()) {
-          return;
-        }
-        mjpegStream.cancelSubscription(streamKey);
-      };
-    }, [manager]);
-
-    if (errorState.value != null && kDebugMode) {
+    if (controller.errorState.value != null && kDebugMode) {
       return SizedBox(
-        width: width,
-        height: height,
-        child: error == null
+        width: widget.width,
+        height: widget.height,
+        child: widget.error == null
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    '${errorState.value}',
+                    '${controller.errorState.value}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
               )
-            : error!(context, errorState.value!.first, errorState.value!.last),
+            : widget.error!(context, controller.errorState.value!.first,
+                controller.errorState.value!.last),
       );
     }
 
-    if ((image.value == null && mjpegStream.previousImage == null) ||
-        errorState.value != null) {
-      return SizedBox(
-          width: width,
-          height: height,
-          child: loading == null
-              ? const Center(child: CircularProgressIndicator())
-              : loading!(context));
-    }
-
     return VisibilityDetector(
-      key: key,
-      child: Image(
-        image: image.value ?? mjpegStream.previousImage!,
-        width: width,
-        height: height,
-        gaplessPlayback: true,
-        fit: fit,
-      ),
+      key: streamKey,
+      child: StreamBuilder<List<int>?>(
+          stream: controller.imageStream.stream,
+          builder: (context, snapshot) {
+            if ((snapshot.data == null && controller.previousImage == null) ||
+                controller.errorState.value != null) {
+              return SizedBox(
+                width: widget.width,
+                height: widget.height,
+                child: widget.loading?.call(context) ??
+                    const Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            return Image.memory(
+              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+              width: widget.width,
+              height: widget.height,
+              gaplessPlayback: true,
+              fit: widget.fit,
+              scale: (widget.expandToFit) ? 1e-6 : 1.0,
+            );
+          }),
       onVisibilityChanged: (VisibilityInfo info) {
-        if (visible.mounted) {
-          visible.visible = info.visibleFraction != 0;
+        if (controller.isMounted(streamKey)) {
+          controller.setVisible(streamKey, info.visibleFraction != 0);
         }
       },
     );
   }
 }
 
-class MjpegStreamState {
+class MjpegController extends ChangeNotifier {
   static const _trigger = 0xFF;
   static const _soi = 0xD8;
   static const _eoi = 0xD9;
@@ -147,169 +150,111 @@ class MjpegStreamState {
   final Duration timeout;
   final Map<String, String> headers;
   Client httpClient = Client();
-  Stream<List<int>>? byteStream;
+
+  StreamSubscription<List<int>>? _rawSubscription;
+
+  ValueNotifier<double> bandwidth = ValueNotifier(0);
+  ValueNotifier<int> framesPerSecond = ValueNotifier(0);
+
+  Timer? _metricsTimer;
+
+  int _bitCount = 0;
+  int _frameCount = 0;
+
+  ValueNotifier<List<dynamic>?> errorState = ValueNotifier(null);
+  StreamController<List<int>?> imageStream = StreamController.broadcast();
+  List<int>? previousImage;
 
   final MjpegPreprocessor? preprocessor;
 
-  MemoryImage? previousImage;
+  final Set<Key> _mountedKeys = {};
+  final Set<Key> _visibleKeys = {};
 
-  final Map<Key, StreamSubscription> _subscriptions = {};
+  bool isVisible(Key key) => _visibleKeys.contains(key);
 
-  StreamSubscription? _bitSubscription;
-  int bitCount = 0;
-  double bandwidth = 0.0;
+  void setVisible(Key key, bool value) {
+    logger.trace('Setting visibility to $value for $stream');
+    if (value) {
+      bool hasChanged = !_visibleKeys.contains(key);
+      _visibleKeys.add(key);
 
-  late final Timer bandwidthTimer;
+      if (hasChanged) {
+        logger.trace(
+            'Visibility changed to true, notifying listeners for mjpeg stream');
+        notifyListeners();
+      }
+    } else {
+      _visibleKeys.remove(key);
 
-  MjpegStreamState({
+      if (_visibleKeys.isEmpty) {
+        stopStream();
+      }
+    }
+  }
+
+  bool isMounted(Key key) => _mountedKeys.contains(key);
+
+  void setMounted(Key key, bool value) {
+    logger.trace('Setting mounted to $value for $stream');
+    if (value) {
+      _mountedKeys.add(key);
+    } else {
+      _mountedKeys.remove(key);
+    }
+  }
+
+  bool get isStreaming => _rawSubscription != null;
+
+  MjpegController({
     required this.stream,
     this.isLive = true,
     this.timeout = const Duration(seconds: 5),
     this.headers = const {},
     this.preprocessor,
   }) {
-    bandwidthTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      bandwidth = bitCount / 1e6;
-
-      bitCount = 0;
-    });
+    errorState.addListener(notifyListeners);
   }
 
-  void dispose({bool deleting = false}) {
-    for (StreamSubscription subscription in _subscriptions.values) {
-      subscription.cancel();
-    }
-    _subscriptions.clear();
-    _bitSubscription?.cancel();
-    _bitSubscription = null;
-    byteStream = null;
-    httpClient.close();
-    httpClient = Client();
-    bitCount = 0;
-
-    if (deleting) {
-      bandwidthTimer.cancel();
-    }
+  @override
+  void dispose() {
+    errorState.removeListener(notifyListeners);
+    stopStream();
+    imageStream.close();
+    super.dispose();
   }
 
-  void cancelSubscription(Key key) {
-    if (_subscriptions.containsKey(key)) {
-      _subscriptions.remove(key)!.cancel();
+  void startStream() async {
+    if (isStreaming) {
+      return;
+    }
+    logger.debug('Starting camera stream on URL $stream');
+    Stream<List<int>>? byteStream;
+    try {
+      final request = Request('GET', Uri.parse(stream));
+      request.headers.addAll(headers);
+      final response = await httpClient.send(request).timeout(
+          timeout); //timeout is to prevent process to hang forever in some case
 
-      if (_subscriptions.isEmpty) {
-        dispose();
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        byteStream = response.stream;
+      } else {
+        if (_mountedKeys.isNotEmpty) {
+          errorState.value = [
+            HttpException('Stream returned ${response.statusCode} status'),
+            StackTrace.current
+          ];
+          imageStream.add(null);
+        }
+        stopStream();
       }
-    }
-  }
-
-  void sendImage(
-    ValueNotifier<MemoryImage?> image,
-    ValueNotifier<dynamic> errorState,
-    List<int> chunks, {
-    required bool Function() mounted,
-  }) async {
-    // pass image through preprocessor sending to [Image] for rendering
-    final List<int>? imageData;
-
-    if (preprocessor != null) {
-      imageData = preprocessor?.process(chunks);
-    } else {
-      imageData = chunks;
-    }
-
-    if (imageData == null) return;
-
-    final imageMemory = MemoryImage(Uint8List.fromList(imageData));
-    previousImage?.evict();
-    previousImage = imageMemory;
-    if (mounted()) {
-      errorState.value = null;
-      image.value = imageMemory;
-    }
-  }
-
-  void _onDataReceived({
-    required List<int> carry,
-    required List<int> chunk,
-    required ValueNotifier<MemoryImage?> image,
-    required ValueNotifier<List<dynamic>?> errorState,
-    required bool Function() mounted,
-  }) async {
-    if (carry.isNotEmpty && carry.last == _trigger) {
-      if (chunk.first == _eoi) {
-        carry.add(chunk.first);
-        sendImage(image, errorState, carry, mounted: mounted);
-        carry = [];
-        if (!isLive) {
-          dispose();
-        }
-      }
-    }
-
-    for (var i = 0; i < chunk.length - 1; i++) {
-      final d = chunk[i];
-      final d1 = chunk[i + 1];
-
-      if (d == _trigger && d1 == _soi) {
-        carry = [];
-        carry.add(d);
-      } else if (d == _trigger && d1 == _eoi && carry.isNotEmpty) {
-        carry.add(d);
-        carry.add(d1);
-
-        sendImage(image, errorState, carry, mounted: mounted);
-        carry = [];
-        if (!isLive) {
-          dispose();
-        }
-      } else if (carry.isNotEmpty) {
-        carry.add(d);
-        if (i == chunk.length - 2) {
-          carry.add(d1);
-        }
-      }
-    }
-  }
-
-  void updateStream(
-    Key key,
-    ValueNotifier<MemoryImage?> image,
-    ValueNotifier<List<dynamic>?> errorState, {
-    required bool Function() visible,
-    required bool Function() mounted,
-  }) async {
-    if (byteStream == null && visible() && mounted()) {
-      try {
-        final request = Request('GET', Uri.parse(stream));
-        request.headers.addAll(headers);
-        final response = await httpClient.send(request).timeout(
-            timeout); //timeout is to prevent process to hang forever in some case
-
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          byteStream = response.stream.asBroadcastStream();
-
-          _bitSubscription = byteStream!.listen((data) {
-            bitCount += data.length * Uint8List.bytesPerElement * 8;
-          });
-        } else {
-          if (mounted()) {
-            errorState.value = [
-              HttpException('Stream returned ${response.statusCode} status'),
-              StackTrace.current
-            ];
-            image.value = null;
-          }
-          dispose();
-        }
-      } catch (error, stack) {
-        // we ignore those errors in case play/pause is triggers
-        if (!error
-            .toString()
-            .contains('Connection closed before full header was received')) {
-          if (mounted()) {
-            errorState.value = [error, stack];
-            image.value = null;
-          }
+    } catch (error, stack) {
+      // we ignore those errors in case play/pause is triggers
+      if (!error
+          .toString()
+          .contains('Connection closed before full header was received')) {
+        if (_mountedKeys.isNotEmpty) {
+          errorState.value = [error, stack];
+          imageStream.add(null);
         }
       }
     }
@@ -318,49 +263,75 @@ class MjpegStreamState {
       return;
     }
 
-    var carry = <int>[];
-    _subscriptions.putIfAbsent(
-        key,
-        () => byteStream!.listen((chunk) {
-              if (!visible() || !mounted()) {
-                carry.clear();
-                return;
-              }
-              _onDataReceived(
-                carry: carry,
-                chunk: chunk,
-                image: image,
-                errorState: errorState,
-                mounted: mounted,
-              );
-            }, onError: (error, stack) {
-              try {
-                if (mounted()) {
-                  errorState.value = [error, stack];
-                  image.value = null;
-                }
-              } finally {
-                dispose();
-              }
-            }, cancelOnError: true));
+    var buffer = <int>[];
+    _rawSubscription = byteStream.listen((data) {
+      _bitCount += data.length * Uint8List.bytesPerElement * 8;
+      _handleData(buffer, data);
+    });
+
+    _metricsTimer = Timer.periodic(const Duration(seconds: 1), _updateMetrics);
   }
-}
 
-class _StreamManager {
-  final MjpegStreamState mjpegStream;
+  void _updateMetrics(_) {
+    bandwidth.value = _bitCount / 1e6;
+    framesPerSecond.value = _frameCount;
 
-  final bool Function() mounted;
-  final bool Function() visible;
+    _bitCount = 0;
+    _frameCount = 0;
+  }
 
-  _StreamManager({
-    required this.mjpegStream,
-    required this.mounted,
-    required this.visible,
-  });
+  void stopStream() async {
+    logger.debug('Stopping camera stream on URL $stream');
+    await _rawSubscription?.cancel();
+    _metricsTimer?.cancel();
+    _rawSubscription = null;
+    _bitCount = 0;
+    _frameCount = 0;
+    httpClient.close();
+    httpClient = Client();
+  }
 
-  void updateStream(Key key, ValueNotifier<MemoryImage?> image,
-      ValueNotifier<List<dynamic>?> errorState) async {
-    mjpegStream.updateStream(key, image, errorState,
-        visible: visible, mounted: mounted);
+  void _handleNewPacket(List<int> packet) {
+    logger.trace('Handling a ${packet.length} byte packet');
+    previousImage = packet;
+    List<int> imageData = preprocessor?.process(packet) ?? packet;
+    imageStream.add(imageData);
+    _frameCount++;
+  }
+
+  void _handleData(List<int> buffer, List<int> data) {
+    if (buffer.isNotEmpty && buffer.last == _trigger) {
+      if (data.first == _eoi) {
+        buffer.add(data.first);
+        _handleNewPacket(buffer);
+        buffer = [];
+        if (!isLive) {
+          dispose();
+        }
+      }
+    }
+    for (var i = 0; i < data.length - 1; i++) {
+      final d = data[i];
+      final d1 = data[i + 1];
+
+      if (d == _trigger && d1 == _soi) {
+        buffer = [];
+        buffer.add(d);
+      } else if (d == _trigger && d1 == _eoi && buffer.isNotEmpty) {
+        buffer.add(d);
+        buffer.add(d1);
+
+        _handleNewPacket(buffer);
+        buffer = [];
+        if (!isLive) {
+          dispose();
+        }
+      } else if (buffer.isNotEmpty) {
+        buffer.add(d);
+        if (i == buffer.length - 2) {
+          buffer.add(d1);
+        }
+      }
+    }
   }
 }
