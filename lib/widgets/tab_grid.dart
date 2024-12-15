@@ -78,17 +78,22 @@ class TabGridModel extends ChangeNotifier {
 
         bool valid = true;
 
-        for (NTWidgetContainerModel container
-            in _widgetModels.whereType<NTWidgetContainerModel>()) {
+        for (WidgetContainerModel container in _widgetModels) {
           String? title = container.title;
-          String? type = container.childModel.type;
-          String? topic = container.childModel.topic;
+          if (container is NTWidgetContainerModel) {
+            String? type = container.childModel.type;
+            String? topic = container.childModel.topic;
+
+            if (title == widgetData['title'] &&
+                type == widgetData['type'] &&
+                topic == widgetData['properties']['topic']) {
+              valid = false;
+              break;
+            }
+          }
           bool validLocation = isValidLocation(newWidgetLocation);
 
-          if (title == widgetData['title'] &&
-                  type == widgetData['type'] &&
-                  topic == widgetData['properties']['topic'] ||
-              !validLocation) {
+          if (!validLocation) {
             valid = false;
             break;
           }
@@ -119,14 +124,18 @@ class TabGridModel extends ChangeNotifier {
 
         bool valid = true;
 
-        for (LayoutContainerModel container
-            in _widgetModels.whereType<LayoutContainerModel>()) {
+        for (WidgetContainerModel container in _widgetModels) {
           String? title = container.title;
-          String type = container.type;
+          if (container is ListLayoutModel) {
+            String type = container.type;
+            if (title == widgetData['title'] && type == widgetData['type']) {
+              valid = false;
+              break;
+            }
+          }
           bool validLocation = isValidLocation(newWidgetLocation);
 
-          if (title == widgetData['title'] && type == widgetData['type'] ||
-              !validLocation) {
+          if (!validLocation) {
             valid = false;
             break;
           }
