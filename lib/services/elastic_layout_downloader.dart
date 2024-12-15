@@ -23,7 +23,7 @@ class ElasticLayoutDownloader {
     String robotIP =
         preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
     Uri robotUri = Uri.parse(
-      'http://$robotIP:5800/elastic_layout.json',
+      'http://$robotIP:5800/elastic-layout.json',
     );
     Response response;
     try {
@@ -34,7 +34,7 @@ class ElasticLayoutDownloader {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String errorMessage = switch (response.statusCode) {
         404 =>
-          'File "elastic_layout.json" was not found, ensure that you have deployed a file named "elastic_layout.json" in the deploy directory',
+          'File "elastic-layout.json" was not found, ensure that you have deployed a file named "elastic_layout.json" in the deploy directory',
         _ => 'Request returned status code ${response.statusCode}',
       };
 

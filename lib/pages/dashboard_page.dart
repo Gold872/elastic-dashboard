@@ -144,7 +144,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ntConnection: widget.ntConnection,
       preferences: widget.preferences,
       onTabChanged: (tab) {
-        _showShuffleboardWarningMessage();
         int? parsedTabIndex = int.tryParse(tab);
 
         bool isIndex = parsedTabIndex != null;
@@ -651,11 +650,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         TabGridModel existingTab =
             _tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
         existingTab.mergeFromJson(
-          jsonData: tabJson,
+          jsonData: tabJson['grid_layout'],
           onJsonLoadingWarning: _showJsonLoadingWarning,
         );
       }
     }
+
+    _showNotification(
+      title: 'Successfully Downloaded Layout',
+      message: 'Remote layout has been successfully downloaded and merged!',
+      color: const Color(0xff01CB67),
+      icon: const Icon(Icons.error, color: Color(0xff01CB67)),
+      width: 350,
+    );
+
+    setState(() {});
 
     return true;
   }
