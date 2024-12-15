@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -256,6 +257,21 @@ MockUpdateChecker createMockUpdateChecker(
   );
 
   return updateChecker;
+}
+
+@GenerateNiceMocks([
+  MockSpec<Client>(),
+])
+MockClient createHttpClient({Map<String, Response>? mockGetResponses}) {
+  MockClient mockClient = MockClient();
+
+  if (mockGetResponses != null) {
+    for (MapEntry<String, Response> mockRequest in mockGetResponses.entries) {
+      when(mockClient.get(Uri.parse(mockRequest.key)))
+          .thenAnswer((_) => Future.value(mockRequest.value));
+    }
+  }
+  return mockClient;
 }
 
 void ignoreOverflowErrors(

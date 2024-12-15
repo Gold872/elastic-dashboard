@@ -12,6 +12,7 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -31,6 +32,7 @@ import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/layout_drag_tile.dart';
@@ -278,7 +280,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
     _robotNotificationListener.listen();
 
-    _layoutDownloader = ElasticLayoutDownloader();
+    _layoutDownloader = ElasticLayoutDownloader(Client());
   }
 
   @override
@@ -669,14 +671,96 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     return true;
   }
 
+  Future<String?> _showRemoteLayoutSelection(List<String> fileNames) async {
+    if (!mounted) {
+      return null;
+    }
+    ValueNotifier<String?> currentSelection = ValueNotifier(null);
+    return await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Layout'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: currentSelection,
+              builder: (_, value, child) => DialogDropdownChooser(
+                choices: fileNames,
+                initialValue: value,
+                onSelectionChanged: (selection) {
+                  setState(() => currentSelection.value = selection);
+                },
+              ),
+            )
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Cancel'),
+          ),
+          ValueListenableBuilder(
+            valueListenable: currentSelection,
+            builder: (_, value, child) => TextButton(
+              onPressed: (value != null)
+                  ? () => Navigator.of(context).pop(value)
+                  : null,
+              child: const Text('Download'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _loadLayoutFromRobot() async {
     if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
+      return;
+    }
+
+    LayoutDownloadResponse<List<String>> layoutsResponse =
+        await _layoutDownloader.getAvailableLayouts(
+      ntConnection: widget.ntConnection,
+      preferences: preferences,
+    );
+
+    if (!layoutsResponse.successful) {
+      _showNotification(
+        title: 'Failed to Retrieve Layout List',
+        message: layoutsResponse.data.firstOrNull ??
+            'Unable to retrieve list of available layouts',
+        color: const Color(0xffFE355C),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        width: 400,
+      );
+      return;
+    }
+
+    if (layoutsResponse.data.isEmpty) {
+      _showNotification(
+        title: 'Failed to Retrieve Layout List',
+        message:
+            'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
+        color: const Color(0xffFE355C),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        width: 400,
+      );
+      return;
+    }
+
+    String? selectedLayout = await _showRemoteLayoutSelection(
+      layoutsResponse.data.sorted((a, b) => a.compareTo(b)),
+    );
+
+    if (selectedLayout == null) {
       return;
     }
 
     LayoutDownloadResponse response = await _layoutDownloader.downloadLayout(
       ntConnection: widget.ntConnection,
       preferences: preferences,
+      layoutName: selectedLayout,
     );
 
     if (!response.successful) {
