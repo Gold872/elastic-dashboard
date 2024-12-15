@@ -738,7 +738,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       action: TextButton(
         onPressed: () async {
           Uri url = Uri.parse(
-              'https://frc-elastic.gitbook.io/docs/additional-features-and-references/shuffleboard-api-integration');
+              'https://frc-elastic.gitbook.io/docs/additional-features-and-references/remote-layout-downloading#shuffleboard-api-migration-guide');
 
           if (await canLaunchUrl(url)) {
             await launchUrl(url);
