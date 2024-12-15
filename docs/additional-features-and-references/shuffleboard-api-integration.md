@@ -1,5 +1,11 @@
 # Shuffleboard API
 
+{% hint style="warning" %}
+Support for the Shuffleboard API is deprecated in favor of downloading full layouts from the robot, see the [migration guide](remote-layout-downloading.md#shuffleboard-api-migration-guide) for more information\
+\
+Shuffleboard API support will be removed after the 2025 season
+{% endhint %}
+
 Elastic supports generating layouts with code via the Shuffleboard API. Most features of the API work the same way as they do with Shuffleboard. However, some features are either not supported, or behave in different ways. The documentation for how to use the Shuffleboard API can be found [here](https://docs.wpilib.org/en/stable/docs/software/dashboards/shuffleboard/layouts-with-code/index.html).
 
 **Tabs**

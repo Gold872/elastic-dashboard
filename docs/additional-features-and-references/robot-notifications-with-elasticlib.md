@@ -4,7 +4,7 @@ Elastic supports sending notifications to the dashboard via robot code. This cou
 
 Sending notifications via robot code requires the use of ElasticLib. Currently the only supported languages are Java and C++, but contributions for a Python port are open.
 
-### Installing ElasticLib
+## Installing ElasticLib
 
 For Java projects, copy this file into your robot project: [https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java](https://github.com/Gold872/elastic-dashboard/blob/main/elasticlib/Elastic.java)
 
@@ -17,7 +17,7 @@ For Python projects, you will have to copy this file: [https://github.com/Gold87
 
 It is recommended to put this in a folder called `util`, however any location within a robot project works. Depending on where the file is located, you may need to change the top line of the file.
 
-### Creating a Notification
+## Creating a Notification
 
 Notification data is stored in an object called `Notification`. Currently, this has the following properties:
 
@@ -54,7 +54,7 @@ notification = Notification(level=NotificationLevel.ERROR, title="Error Notifica
 {% endtab %}
 {% endtabs %}
 
-### Sending a notification
+## Sending a notification
 
 In order to send a notification, there is a method called `sendNotification`in the `Elastic` class to send a `Notification`.
 
@@ -84,7 +84,7 @@ When this is called, a popup will appear on the dashboard that looks like this
 
 ![Error Notification](../.gitbook/assets/error_notification.png)
 
-### Customizing a Notification
+## Customizing a Notification
 
 Notifications and their settings can be customized after being created, allowing them to be reused.
 
