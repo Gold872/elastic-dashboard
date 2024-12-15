@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
+import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/elastic_layout_downloader.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import '../test_util.dart';
+import '../test_util.mocks.dart';
 
 const Map<String, dynamic> layoutFiles = {
   'dirs': [],
@@ -121,7 +123,7 @@ void main() {
     Client mockClient = createHttpClient(
       mockGetResponses: {
         'http://127.0.0.1:5800/?format=json':
-            Response(jsonEncode(layoutFiles), 200)
+            Response(jsonEncode(layoutFiles), 200),
       },
     );
 
@@ -145,7 +147,7 @@ void main() {
     Client mockClient = createHttpClient(
       mockGetResponses: {
         'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-            Response(jsonEncode(layoutOne), 200)
+            Response(jsonEncode(layoutOne), 200),
       },
     );
 
@@ -161,5 +163,94 @@ void main() {
 
     expect(downloadResponse.successful, isTrue);
     expect(downloadResponse.data, jsonEncode(layoutOne));
+  });
+
+  group('Unsuccessful if', () {
+    test('network tables is disconnected', () async {
+      Client mockClient = createHttpClient(
+        mockGetResponses: {
+          'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+              Response(jsonEncode(layoutOne), 200),
+        },
+      );
+
+      ElasticLayoutDownloader layoutDownloader =
+          ElasticLayoutDownloader(mockClient);
+
+      LayoutDownloadResponse downloadResponse =
+          await layoutDownloader.downloadLayout(
+        ntConnection: createMockOfflineNT4(),
+        preferences: preferences,
+        layoutName: 'elastic-layout 1',
+      );
+
+      expect(downloadResponse.successful, false);
+      expect(downloadResponse.data,
+          'Cannot download a remote layout while disconnected from the robot.');
+    });
+
+    test('client response throws an error', () async {
+      MockClient mockClient = MockClient();
+      when(mockClient.get(any))
+          .thenAnswer((_) => throw ClientException('Client Exception'));
+
+      ElasticLayoutDownloader layoutDownloader =
+          ElasticLayoutDownloader(mockClient);
+
+      LayoutDownloadResponse downloadResponse =
+          await layoutDownloader.downloadLayout(
+        ntConnection: createMockOnlineNT4(),
+        preferences: preferences,
+        layoutName: 'elastic-layout 1',
+      );
+
+      expect(downloadResponse.successful, false);
+      expect(downloadResponse.data, 'Client Exception');
+    });
+
+    test('file is not found', () async {
+      Client mockClient = createHttpClient(
+        mockGetResponses: {
+          'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+              Response(jsonEncode(layoutOne), 404),
+        },
+      );
+
+      ElasticLayoutDownloader layoutDownloader =
+          ElasticLayoutDownloader(mockClient);
+
+      LayoutDownloadResponse downloadResponse =
+          await layoutDownloader.downloadLayout(
+        ntConnection: createMockOnlineNT4(),
+        preferences: preferences,
+        layoutName: 'elastic-layout 1',
+      );
+
+      expect(downloadResponse.successful, false);
+      expect(
+          downloadResponse.data, 'File "elastic-layout 1.json" was not found');
+    });
+
+    test('http request gives invalid status code', () async {
+      Client mockClient = createHttpClient(
+        mockGetResponses: {
+          'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+              Response(jsonEncode(layoutOne), 353),
+        },
+      );
+
+      ElasticLayoutDownloader layoutDownloader =
+          ElasticLayoutDownloader(mockClient);
+
+      LayoutDownloadResponse downloadResponse =
+          await layoutDownloader.downloadLayout(
+        ntConnection: createMockOnlineNT4(),
+        preferences: preferences,
+        layoutName: 'elastic-layout 1',
+      );
+
+      expect(downloadResponse.successful, false);
+      expect(downloadResponse.data, 'Request returned status code 353');
+    });
   });
 }
