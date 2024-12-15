@@ -20,6 +20,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/services/app_distributor.dart';
+import 'package:elastic_dashboard/services/elastic_layout_downloader.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
@@ -66,6 +67,9 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final SharedPreferences preferences = widget.preferences;
   late final RobotNotificationsListener _robotNotificationListener;
+  late final ElasticLayoutDownloader _layoutDownloader;
+
+  bool _seenShuffleboardWarning = false;
 
   final List<TabData> _tabData = [];
 
@@ -164,6 +168,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
       },
       onTabCreated: (tab) {
+        _showShuffleboardWarningMessage();
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
           return;
@@ -185,42 +190,46 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ));
       },
       onWidgetAdded: (widgetData) {
+        _showShuffleboardWarningMessage();
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
           return;
         }
-        // Needs to be done in case if widget data gets erased by the listener
-        Map<String, dynamic> widgetDataCopy = {};
+        // Needs to be converted into the tab json format
+        Map<String, dynamic> tabJson = {};
 
-        widgetData.forEach(
-            (key, value) => widgetDataCopy.putIfAbsent(key, () => value));
+        String tabName = widgetData['tab'];
+        tabJson.addAll({'containers': <Map<String, dynamic>>[]});
+        tabJson.addAll({'layouts': <Map<String, dynamic>>[]});
 
-        List<String> tabNamesList = _tabData.map((data) => data.name).toList();
+        if (!(widgetData.containsKey('layout') && widgetData['layout'])) {
+          tabJson['containers']!.add(widgetData);
+        } else {
+          tabJson['layouts']!.add(widgetData);
+        }
 
-        String tabName = widgetDataCopy['tab'];
-
-        if (!tabNamesList.contains(tabName)) {
+        if (!_tabData.any((tab) => tab.name == tabName)) {
           _tabData.add(
             TabData(
               name: tabName,
-              tabGrid: TabGridModel(
+              tabGrid: TabGridModel.fromJson(
                 ntConnection: widget.ntConnection,
                 preferences: widget.preferences,
+                jsonData: tabJson,
+                onJsonLoadingWarning: _showJsonLoadingWarning,
                 onAddWidgetPressed: _displayAddWidgetDialog,
               ),
             ),
           );
-
-          tabNamesList.add(tabName);
+        } else {
+          _tabData
+              .firstWhere((tab) => tab.name == tabName)
+              .tabGrid
+              .mergeFromJson(
+                jsonData: tabJson,
+                onJsonLoadingWarning: _showJsonLoadingWarning,
+              );
         }
-
-        int tabIndex = tabNamesList.indexOf(tabName);
-
-        if (tabIndex == -1) {
-          return;
-        }
-
-        _tabData[tabIndex].tabGrid.addWidgetFromTabJson(widgetDataCopy);
 
         setState(() {});
       },
@@ -268,6 +277,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           });
         });
     _robotNotificationListener.listen();
+
+    _layoutDownloader = ElasticLayoutDownloader();
   }
 
   @override
@@ -421,11 +432,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               await launchUrl(url);
             }
           },
-          child: Text('Update',
-              style: textTheme.bodyMedium!.copyWith(
-                color: buttonTheme.colorScheme?.primary,
-                fontWeight: FontWeight.bold,
-              )),
+          child: Text(
+            'Update',
+            style: textTheme.bodyMedium!.copyWith(
+              color: buttonTheme.colorScheme?.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       );
 
@@ -609,6 +622,77 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
+  bool _mergeLayoutFromJsonData(String jsonString) {
+    logger.info('Merging layout from json');
+
+    Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
+
+    if (!_validateJsonData(jsonData)) {
+      return false;
+    }
+
+    for (Map<String, dynamic> tabJson in jsonData!['tabs']) {
+      String tabName = tabJson['name'];
+      if (!_tabData.any((tab) => tab.name == tabName)) {
+        _tabData.add(
+          TabData(
+            name: tabName,
+            tabGrid: TabGridModel.fromJson(
+              ntConnection: widget.ntConnection,
+              preferences: widget.preferences,
+              jsonData: tabJson['grid_layout'],
+              onAddWidgetPressed: _displayAddWidgetDialog,
+              onJsonLoadingWarning: _showJsonLoadingWarning,
+            ),
+          ),
+        );
+      } else {
+        TabGridModel existingTab =
+            _tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        existingTab.mergeFromJson(
+          jsonData: tabJson['grid_layout'],
+          onJsonLoadingWarning: _showJsonLoadingWarning,
+        );
+      }
+    }
+
+    _showNotification(
+      title: 'Successfully Downloaded Layout',
+      message: 'Remote layout has been successfully downloaded and merged!',
+      color: const Color(0xff01CB67),
+      icon: const Icon(Icons.error, color: Color(0xff01CB67)),
+      width: 350,
+    );
+
+    setState(() {});
+
+    return true;
+  }
+
+  void _loadLayoutFromRobot() async {
+    if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
+      return;
+    }
+
+    LayoutDownloadResponse response = await _layoutDownloader.downloadLayout(
+      ntConnection: widget.ntConnection,
+      preferences: preferences,
+    );
+
+    if (!response.successful) {
+      _showNotification(
+        title: 'Failed to Download Layout',
+        message: response.data,
+        color: const Color(0xffFE355C),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        width: 400,
+      );
+      return;
+    }
+
+    _mergeLayoutFromJsonData(response.data);
+  }
+
   void _createDefaultTabs() {
     if (_tabData.isEmpty) {
       logger.info('Creating default Teleoperated and Autonomous tabs');
@@ -633,6 +717,58 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ]);
       });
     }
+  }
+
+  void _showShuffleboardWarningMessage() {
+    if (_seenShuffleboardWarning) {
+      return;
+    }
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    TextTheme textTheme = Theme.of(context).textTheme;
+    ButtonThemeData buttonTheme = ButtonTheme.of(context);
+
+    ElegantNotification notification = ElegantNotification(
+      autoDismiss: false,
+      background: colorScheme.surface,
+      showProgressIndicator: false,
+      width: 450,
+      height: 160,
+      position: Alignment.bottomRight,
+      icon: const Icon(Icons.warning, color: Colors.yellow),
+      action: TextButton(
+        onPressed: () async {
+          Uri url = Uri.parse(
+              'https://frc-elastic.gitbook.io/docs/additional-features-and-references/shuffleboard-api-integration');
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+        child: Text(
+          'Documentation',
+          style: textTheme.bodyMedium!.copyWith(
+            color: buttonTheme.colorScheme?.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      title: Text(
+        'Shuffleboard API Deprecation',
+        style: textTheme.bodyMedium!.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      description: const Text(
+        'Support for the Shuffleboard API is deprecated in favor of remote layout downloading and will be removed after the 2025 season. See the documentation for more details about migration.',
+        overflow: TextOverflow.ellipsis,
+        maxLines: 4,
+      ),
+    );
+
+    if (mounted) {
+      notification.show(context);
+    }
+    _seenShuffleboardWarning = true;
   }
 
   void _showJsonLoadingError(String errorMessage) {
@@ -727,6 +863,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         modifiers: [KeyModifier.control, KeyModifier.shift],
       ),
       callback: _exportLayout,
+    );
+    // Download from robot (Ctrl + D)
+    hotKeyManager.register(
+      HotKey(
+        LogicalKeyboardKey.keyD,
+        modifiers: [KeyModifier.control],
+      ),
+      callback: () {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
+          return;
+        }
+
+        _loadLayoutFromRobot();
+      },
     );
     // Switch to Tab (Ctrl + Tab #)
     for (int i = 1; i <= 9; i++) {
@@ -1457,18 +1608,42 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             ),
             // Export layout
             MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: _exportLayout,
-                shortcut: const SingleActivator(LogicalKeyboardKey.keyS,
-                    shift: true, control: true),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.save_as_outlined),
-                    SizedBox(width: 8),
-                    Text('Save As'),
-                  ],
-                )),
+              style: menuButtonStyle,
+              onPressed: _exportLayout,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyS,
+                shift: true,
+                control: true,
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.save_as_outlined),
+                  SizedBox(width: 8),
+                  Text('Save As'),
+                ],
+              ),
+            ),
+            // Download layout
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked)
+                  ? _loadLayoutFromRobot
+                  : null,
+              shortcut: const SingleActivator(
+                LogicalKeyboardKey.keyD,
+                control: true,
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.download),
+                  SizedBox(width: 8),
+                  Text('Download From Robot'),
+                ],
+              ),
+            ),
           ],
           child: const Text(
             'File',
