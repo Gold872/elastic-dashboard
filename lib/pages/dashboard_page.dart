@@ -49,6 +49,7 @@ class DashboardPage extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
   final UpdateChecker updateChecker;
+  final ElasticLayoutDownloader? layoutDownloader;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
 
@@ -58,6 +59,7 @@ class DashboardPage extends StatefulWidget {
     required this.preferences,
     required this.version,
     required this.updateChecker,
+    this.layoutDownloader,
     this.onColorChanged,
     this.onThemeVariantChanged,
   });
@@ -67,7 +69,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
-  late final SharedPreferences preferences = widget.preferences;
+  SharedPreferences get preferences => widget.preferences;
   late final RobotNotificationsListener _robotNotificationListener;
   late final ElasticLayoutDownloader _layoutDownloader;
 
@@ -280,7 +282,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         });
     _robotNotificationListener.listen();
 
-    _layoutDownloader = ElasticLayoutDownloader(Client());
+    _layoutDownloader =
+        widget.layoutDownloader ?? ElasticLayoutDownloader(Client());
   }
 
   @override
@@ -685,7 +688,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           children: [
             ValueListenableBuilder(
               valueListenable: currentSelection,
-              builder: (_, value, child) => DialogDropdownChooser(
+              builder: (_, value, child) => DialogDropdownChooser<String>(
                 choices: fileNames,
                 initialValue: value,
                 onSelectionChanged: (selection) {

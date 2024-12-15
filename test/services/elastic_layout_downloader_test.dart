@@ -9,100 +9,100 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import '../test_util.dart';
 
-void main() {
-  Map<String, dynamic> filesResponseBody = {
-    'dirs': [],
-    'files': [
-      {
-        'name': 'elastic-layout 1.json',
-        'size': 1000,
-      },
-      {
-        'name': 'elastic-layout 2.json',
-        'size': 1000,
-      },
-      {
-        'name': 'example.txt',
-        'size': 1,
-      },
-    ],
-  };
+const Map<String, dynamic> layoutFiles = {
+  'dirs': [],
+  'files': [
+    {
+      'name': 'elastic-layout 1.json',
+      'size': 1000,
+    },
+    {
+      'name': 'elastic-layout 2.json',
+      'size': 1000,
+    },
+    {
+      'name': 'example.txt',
+      'size': 1,
+    },
+  ],
+};
 
-  Map<String, dynamic> layout1Body = {
-    'version': 1.0,
-    'grid_size': 128.0,
-    'tabs': [
-      {
-        'name': 'Test Tab',
-        'grid_layout': {
-          'layouts': [
-            {
-              'title': 'Subsystem',
-              'x': 384.0,
-              'y': 128.0,
-              'width': 256.0,
-              'height': 384.0,
-              'type': 'List Layout',
-              'properties': {'label_position': 'TOP'},
-              'children': [
-                {
-                  'title': 'ExampleSubsystem',
-                  'x': 0.0,
-                  'y': 0.0,
-                  'width': 256.0,
-                  'height': 128.0,
-                  'type': 'Subsystem',
-                  'properties': {
-                    'topic': '/Test Tab/ExampleSubsystem',
-                    'period': 0.06
-                  },
+const Map<String, dynamic> layoutOne = {
+  'version': 1.0,
+  'grid_size': 128.0,
+  'tabs': [
+    {
+      'name': 'Test Tab',
+      'grid_layout': {
+        'layouts': [
+          {
+            'title': 'Subsystem',
+            'x': 384.0,
+            'y': 128.0,
+            'width': 256.0,
+            'height': 384.0,
+            'type': 'List Layout',
+            'properties': {'label_position': 'TOP'},
+            'children': [
+              {
+                'title': 'ExampleSubsystem',
+                'x': 0.0,
+                'y': 0.0,
+                'width': 256.0,
+                'height': 128.0,
+                'type': 'Subsystem',
+                'properties': {
+                  'topic': '/Test Tab/ExampleSubsystem',
+                  'period': 0.06
                 },
-                {
-                  'title': 'Gyro',
-                  'x': 0.0,
-                  'y': 0.0,
-                  'width': 256.0,
-                  'height': 256.0,
-                  'type': 'Gyro',
-                  'properties': {
-                    'topic': '/Test Tab/Gyro',
-                    'period': 0.06,
-                    'counter_clockwise_positive': false
-                  },
-                },
-              ]
-            },
-            {
-              'title': 'Empty Layout',
-              'x': 640.0,
-              'y': 0.0,
-              'width': 256.0,
-              'height': 256.0,
-              'type': 'List Layout',
-              'properties': {'label_position': 'TOP'},
-              'children': [],
-            },
-          ],
-          'containers': [
-            {
-              'title': 'Test Widget',
-              'x': 128.0,
-              'y': 128.0,
-              'width': 256.0,
-              'height': 256.0,
-              'type': 'Gyro',
-              'properties': {
-                'topic': '/Test Tab/Gyro',
-                'period': 0.06,
-                'counter_clockwise_positive': false
               },
+              {
+                'title': 'Gyro',
+                'x': 0.0,
+                'y': 0.0,
+                'width': 256.0,
+                'height': 256.0,
+                'type': 'Gyro',
+                'properties': {
+                  'topic': '/Test Tab/Gyro',
+                  'period': 0.06,
+                  'counter_clockwise_positive': false
+                },
+              },
+            ]
+          },
+          {
+            'title': 'Empty Layout',
+            'x': 640.0,
+            'y': 0.0,
+            'width': 256.0,
+            'height': 256.0,
+            'type': 'List Layout',
+            'properties': {'label_position': 'TOP'},
+            'children': [],
+          },
+        ],
+        'containers': [
+          {
+            'title': 'Test Widget',
+            'x': 128.0,
+            'y': 128.0,
+            'width': 256.0,
+            'height': 256.0,
+            'type': 'Gyro',
+            'properties': {
+              'topic': '/Test Tab/Gyro',
+              'period': 0.06,
+              'counter_clockwise_positive': false
             },
-          ],
-        },
+          },
+        ],
       },
-    ],
-  };
+    },
+  ],
+};
 
+void main() {
   late SharedPreferences preferences;
   late NTConnection ntConnection;
 
@@ -121,7 +121,7 @@ void main() {
     Client mockClient = createHttpClient(
       mockGetResponses: {
         'http://127.0.0.1:5800/?format=json':
-            Response(jsonEncode(filesResponseBody), 200)
+            Response(jsonEncode(layoutFiles), 200)
       },
     );
 
@@ -145,7 +145,7 @@ void main() {
     Client mockClient = createHttpClient(
       mockGetResponses: {
         'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-            Response(jsonEncode(layout1Body), 200)
+            Response(jsonEncode(layoutOne), 200)
       },
     );
 
@@ -160,6 +160,6 @@ void main() {
     );
 
     expect(downloadResponse.successful, isTrue);
-    expect(downloadResponse.data, jsonEncode(layout1Body));
+    expect(downloadResponse.data, jsonEncode(layoutOne));
   });
 }
