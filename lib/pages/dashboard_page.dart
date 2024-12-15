@@ -691,9 +691,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               builder: (_, value, child) => DialogDropdownChooser<String>(
                 choices: fileNames,
                 initialValue: value,
-                onSelectionChanged: (selection) {
-                  setState(() => currentSelection.value = selection);
-                },
+                onSelectionChanged: (selection) =>
+                    currentSelection.value = selection,
               ),
             )
           ],
