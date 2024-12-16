@@ -34,10 +34,11 @@ class TabGridModel extends ChangeNotifier {
 
   final VoidCallback onAddWidgetPressed;
 
-  TabGridModel(
-      {required this.ntConnection,
-      required this.preferences,
-      required this.onAddWidgetPressed});
+  TabGridModel({
+    required this.ntConnection,
+    required this.preferences,
+    required this.onAddWidgetPressed,
+  });
 
   TabGridModel.fromJson({
     required this.ntConnection,
@@ -47,8 +48,10 @@ class TabGridModel extends ChangeNotifier {
     Function(String message)? onJsonLoadingWarning,
   }) {
     if (jsonData['containers'] != null) {
-      loadContainersFromJson(jsonData,
-          onJsonLoadingWarning: onJsonLoadingWarning);
+      loadContainersFromJson(
+        jsonData,
+        onJsonLoadingWarning: onJsonLoadingWarning,
+      );
     }
 
     if (jsonData['layouts'] != null) {
@@ -57,6 +60,112 @@ class TabGridModel extends ChangeNotifier {
 
     for (WidgetContainerModel model in _widgetModels) {
       model.addListener(notifyListeners);
+    }
+  }
+
+  void mergeFromJson({
+    required Map<String, dynamic> jsonData,
+    Function(String message)? onJsonLoadingWarning,
+  }) {
+    if (jsonData['containers'] != null) {
+      for (Map<String, dynamic> widgetData in jsonData['containers']) {
+        Rect newWidgetLocation = Rect.fromLTWH(
+          tryCast(widgetData['x']) ?? 0.0,
+          tryCast(widgetData['y']) ?? 0.0,
+          tryCast(widgetData['width']) ?? 0.0,
+          tryCast(widgetData['height']) ?? 0.0,
+        );
+
+        bool valid = true;
+
+        for (WidgetContainerModel container in _widgetModels) {
+          String? title = container.title;
+          if (container is NTWidgetContainerModel) {
+            String? type = container.childModel.type;
+            String? topic = container.childModel.topic;
+
+            if (title == widgetData['title'] &&
+                type == widgetData['type'] &&
+                topic == widgetData['properties']['topic']) {
+              valid = false;
+              break;
+            }
+          }
+          bool validLocation = isValidLocation(newWidgetLocation);
+
+          if (!validLocation) {
+            valid = false;
+            break;
+          }
+        }
+
+        if (valid) {
+          addWidget(
+            NTWidgetContainerModel.fromJson(
+              ntConnection: ntConnection,
+              jsonData: widgetData,
+              preferences: preferences,
+              enabled: ntConnection.isNT4Connected,
+              onJsonLoadingWarning: onJsonLoadingWarning,
+            ),
+          );
+        }
+      }
+    }
+
+    if (jsonData['layouts'] != null) {
+      for (Map<String, dynamic> widgetData in jsonData['layouts']) {
+        Rect newWidgetLocation = Rect.fromLTWH(
+          tryCast(widgetData['x']) ?? 0.0,
+          tryCast(widgetData['y']) ?? 0.0,
+          tryCast(widgetData['width']) ?? 0.0,
+          tryCast(widgetData['height']) ?? 0.0,
+        );
+
+        bool valid = true;
+
+        for (WidgetContainerModel container in _widgetModels) {
+          String? title = container.title;
+          if (container is ListLayoutModel) {
+            String type = container.type;
+            if (title == widgetData['title'] && type == widgetData['type']) {
+              valid = false;
+              break;
+            }
+          }
+          bool validLocation = isValidLocation(newWidgetLocation);
+
+          if (!validLocation) {
+            valid = false;
+            break;
+          }
+        }
+
+        if (valid && widgetData['type'] == 'List Layout') {
+          addWidget(
+            ListLayoutModel.fromJson(
+              jsonData: widgetData,
+              preferences: preferences,
+              ntWidgetBuilder: (preferences, jsonData, enabled,
+                      {onJsonLoadingWarning}) =>
+                  NTWidgetContainerModel.fromJson(
+                ntConnection: ntConnection,
+                jsonData: jsonData,
+                preferences: preferences,
+                onJsonLoadingWarning: onJsonLoadingWarning,
+              ),
+              enabled: ntConnection.isNT4Connected,
+              dragOutFunctions: (
+                dragOutUpdate: layoutDragOutUpdate,
+                dragOutEnd: layoutDragOutEnd,
+              ),
+              onDragCancel: _layoutContainerOnDragCancel,
+              minWidth: 128.0 * 2,
+              minHeight: 128.0 * 2,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -558,83 +667,6 @@ class TabGridModel extends ChangeNotifier {
     _widgetModels.add(widget);
     widget.addListener(notifyListeners);
     notifyListeners();
-  }
-
-  void addWidgetFromTabJson(Map<String, dynamic> widgetData) {
-    Rect newWidgetLocation = Rect.fromLTWH(
-      tryCast(widgetData['x']) ?? 0.0,
-      tryCast(widgetData['y']) ?? 0.0,
-      tryCast(widgetData['width']) ?? 0.0,
-      tryCast(widgetData['height']) ?? 0.0,
-    );
-    // If the widget is already in the tab, don't add it
-    if (!(widgetData.containsKey('layout') && widgetData['layout'])) {
-      for (NTWidgetContainerModel container
-          in _widgetModels.whereType<NTWidgetContainerModel>()) {
-        String? title = container.title;
-        String? type = container.childModel.type;
-        String? topic = container.childModel.topic;
-        bool validLocation = isValidLocation(newWidgetLocation);
-
-        if (title == widgetData['title'] &&
-            type == widgetData['type'] &&
-            topic == widgetData['properties']['topic'] &&
-            !validLocation) {
-          return;
-        }
-      }
-    } else {
-      for (LayoutContainerModel container
-          in _widgetModels.whereType<LayoutContainerModel>()) {
-        String? title = container.title;
-        String type = container.type;
-        bool validLocation = isValidLocation(newWidgetLocation);
-
-        if (title == widgetData['title'] &&
-            type == widgetData['type'] &&
-            !validLocation) {
-          return;
-        }
-      }
-    }
-
-    if (widgetData.containsKey('layout') && widgetData['layout']) {
-      switch (widgetData['type']) {
-        case 'List Layout':
-          addWidget(
-            ListLayoutModel.fromJson(
-              preferences: preferences,
-              jsonData: widgetData,
-              ntWidgetBuilder: (preferences, jsonData, enabled,
-                      {onJsonLoadingWarning}) =>
-                  NTWidgetContainerModel.fromJson(
-                ntConnection: ntConnection,
-                jsonData: jsonData,
-                preferences: preferences,
-                onJsonLoadingWarning: onJsonLoadingWarning,
-              ),
-              enabled: ntConnection.isNT4Connected,
-              dragOutFunctions: (
-                dragOutUpdate: layoutDragOutUpdate,
-                dragOutEnd: layoutDragOutEnd,
-              ),
-              onDragCancel: _layoutContainerOnDragCancel,
-              minWidth: 128.0 * 2,
-              minHeight: 128.0 * 2,
-            ),
-          );
-          break;
-      }
-    } else {
-      addWidget(
-        NTWidgetContainerModel.fromJson(
-          ntConnection: ntConnection,
-          preferences: preferences,
-          enabled: ntConnection.isNT4Connected,
-          jsonData: widgetData,
-        ),
-      );
-    }
   }
 
   void removeWidget(WidgetContainerModel widget) {

@@ -12,11 +12,19 @@ cppSrcFileInclude {
 modifiableFileExclude {
    gradle/
    assets/
+   build/
+   linux/
    macos/
    windows/
-   linux/
    test_resources/
    screenshots/
    installer_setup_script.iss
    README.md
+}
+
+includeOtherLibs {
+  ^fmt/
+  ^networktables/
+  ^units/
+  ^wpi/
 }

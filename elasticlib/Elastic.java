@@ -21,25 +21,25 @@ public final class Elastic {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
-   * Sends an alert notification to the Elastic dashboard. The alert is serialized as a JSON string
+   * Sends an notification to the Elastic dashboard. The notification is serialized as a JSON string
    * before being published.
    *
-   * @param alert the {@link ElasticNotification} object containing alert details
+   * @param notification the {@link Notification} object containing notification details
    */
-  public static void sendAlert(ElasticNotification alert) {
+  public static void sendNotification(Notification notification) {
     try {
-      publisher.set(objectMapper.writeValueAsString(alert));
+      publisher.set(objectMapper.writeValueAsString(notification));
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
   }
 
   /**
-   * Represents a notification object to be sent to the Elastic dashboard. This object holds
+   * Represents an notification object to be sent to the Elastic dashboard. This object holds
    * properties such as level, title, description, display time, and dimensions to control how the
-   * alert is displayed on the dashboard.
+   * notification is displayed on the dashboard.
    */
-  public static class ElasticNotification {
+  public static class Notification {
     @JsonProperty("level")
     private NotificationLevel level;
 
@@ -59,17 +59,17 @@ public final class Elastic {
     private double height;
 
     /**
-     * Creates a new ElasticNotification with all default parameters. This constructor is intended
+     * Creates a new Notification with all default parameters. This constructor is intended
      * to be used with the chainable decorator methods
      *
      * <p>Title and description fields are empty.
      */
-    public ElasticNotification() {
+    public Notification() {
       this(NotificationLevel.INFO, "", "");
     }
 
     /**
-     * Creates a new ElasticNotification with all properties specified.
+     * Creates a new Notification with all properties specified.
      *
      * @param level the level of the notification (e.g., INFO, WARNING, ERROR)
      * @param title the title text of the notification
@@ -78,7 +78,7 @@ public final class Elastic {
      * @param width the width of the notification display area
      * @param height the height of the notification display area, inferred if below zero
      */
-    public ElasticNotification(
+    public Notification(
         NotificationLevel level,
         String title,
         String description,
@@ -94,32 +94,32 @@ public final class Elastic {
     }
 
     /**
-     * Creates a new ElasticNotification with default display time and dimensions.
+     * Creates a new Notification with default display time and dimensions.
      *
      * @param level the level of the notification
      * @param title the title text of the notification
      * @param description the descriptive text of the notification
      */
-    public ElasticNotification(NotificationLevel level, String title, String description) {
+    public Notification(NotificationLevel level, String title, String description) {
       this(level, title, description, 3000, 350, -1);
     }
 
     /**
-     * Creates a new ElasticNotification with a specified display time and default dimensions.
+     * Creates a new Notification with a specified display time and default dimensions.
      *
      * @param level the level of the notification
      * @param title the title text of the notification
      * @param description the descriptive text of the notification
      * @param displayTimeMillis the display time in milliseconds
      */
-    public ElasticNotification(
+    public Notification(
         NotificationLevel level, String title, String description, int displayTimeMillis) {
       this(level, title, description, displayTimeMillis, 350, -1);
     }
 
     /**
-     * Creates a new ElasticNotification with specified dimensions and default display time. If the
-     * height is below zero, it is automatically inferred based on screen size.
+     * Creates a new Notification with specified dimensions and default display time. If the height
+     * is below zero, it is automatically inferred based on screen size.
      *
      * @param level the level of the notification
      * @param title the title text of the notification
@@ -127,7 +127,7 @@ public final class Elastic {
      * @param width the width of the notification display area
      * @param height the height of the notification display area, inferred if below zero
      */
-    public ElasticNotification(
+    public Notification(
         NotificationLevel level, String title, String description, double width, double height) {
       this(level, title, description, 3000, width, height);
     }
@@ -250,7 +250,7 @@ public final class Elastic {
      * @param level the level to set the notification to
      * @return the current notification
      */
-    public ElasticNotification withLevel(NotificationLevel level) {
+    public Notification withLevel(NotificationLevel level) {
       this.level = level;
       return this;
     }
@@ -261,7 +261,7 @@ public final class Elastic {
      * @param title the title to set the notification to
      * @return the current notification
      */
-    public ElasticNotification withTitle(String title) {
+    public Notification withTitle(String title) {
       setTitle(title);
       return this;
     }
@@ -272,7 +272,7 @@ public final class Elastic {
      * @param description the description to set the notification to
      * @return the current notification
      */
-    public ElasticNotification withDescription(String description) {
+    public Notification withDescription(String description) {
       setDescription(description);
       return this;
     }
@@ -283,7 +283,7 @@ public final class Elastic {
      * @param seconds the number of seconds to display the notification for
      * @return the current notification
      */
-    public ElasticNotification withDisplaySeconds(double seconds) {
+    public Notification withDisplaySeconds(double seconds) {
       return withDisplayMilliseconds((int) Math.round(seconds * 1000));
     }
 
@@ -293,7 +293,7 @@ public final class Elastic {
      * @param displayTimeMillis the number of milliseconds to display the notification for
      * @return the current notification
      */
-    public ElasticNotification withDisplayMilliseconds(int displayTimeMillis) {
+    public Notification withDisplayMilliseconds(int displayTimeMillis) {
       setDisplayTimeMillis(displayTimeMillis);
       return this;
     }
@@ -304,7 +304,7 @@ public final class Elastic {
      * @param width the width to set the notification to
      * @return the current notification
      */
-    public ElasticNotification withWidth(double width) {
+    public Notification withWidth(double width) {
       setWidth(width);
       return this;
     }
@@ -315,7 +315,7 @@ public final class Elastic {
      * @param height the height to set the notification to
      * @return the current notification
      */
-    public ElasticNotification withHeight(double height) {
+    public Notification withHeight(double height) {
       setHeight(height);
       return this;
     }
@@ -327,7 +327,7 @@ public final class Elastic {
      *
      * @return the current notification
      */
-    public ElasticNotification withAutomaticHeight() {
+    public Notification withAutomaticHeight() {
       setHeight(-1);
       return this;
     }
@@ -342,7 +342,7 @@ public final class Elastic {
      *
      * @return the current notification
      */
-    public ElasticNotification withNoAutoDismiss() {
+    public Notification withNoAutoDismiss() {
       setDisplayTimeMillis(0);
       return this;
     }
