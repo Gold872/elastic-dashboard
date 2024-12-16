@@ -453,7 +453,7 @@ packages:
     description:
       path: "."
       ref: elastic-version
-      resolved-ref: f03016e68144420d5388e673d19861b95550ed5b
+      resolved-ref: "141b95f6dd606204d47134107c1ddc2bbe4879cb"
       url: "https://github.com/Gold872/GaugesFlutter.git"
     source: git
     version: "1.0.4"
