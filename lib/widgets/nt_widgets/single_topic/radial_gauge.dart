@@ -358,7 +358,7 @@ class RadialGaugeWidget extends NTWidget {
                         needleEndWidth: squareSide * 0.004,
                         needleHeight: squareSide * 0.25,
                         tailColor: Colors.grey,
-                        tailRadius: squareSide * 0.055,
+                        tailRadius: squareSide * 0.075,
                         value: value,
                       ),
                   ],
@@ -370,6 +370,15 @@ class RadialGaugeWidget extends NTWidget {
                     ),
                   ],
                 ),
+                if (model.showPointer)
+                  Container(
+                    width: squareSide * 0.05,
+                    height: squareSide * 0.05,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[300]!,
+                    ),
+                  ),
                 Positioned(
                   bottom: squareSide * 0.3,
                   child: Text(
