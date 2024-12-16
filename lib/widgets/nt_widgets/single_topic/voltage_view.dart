@@ -206,6 +206,9 @@ class VoltageView extends NTWidget {
   Widget build(BuildContext context) {
     VoltageViewModel model = cast(context.watch<NTWidgetModel>());
 
+    String formatLabel(num input) =>
+        input.toStringAsFixed(input.truncateToDouble() == input ? 0 : 2);
+
     return ValueListenableBuilder(
       valueListenable: model.subscription!,
       builder: (context, data, child) {
@@ -263,7 +266,7 @@ class VoltageView extends NTWidget {
                 for (int i = 0; i < model.divisions!; i++)
                   CustomRulerLabel(
                     text:
-                        '${(model.minValue + divisionInterval! * i).toStringAsFixed(2)} V',
+                        '${formatLabel(model.minValue + divisionInterval! * i)} V',
                     value: model.minValue + divisionInterval * i,
                   ),
             ],

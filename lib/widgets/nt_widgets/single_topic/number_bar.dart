@@ -206,6 +206,9 @@ class NumberBar extends NTWidget {
   Widget build(BuildContext context) {
     NumberBarModel model = cast(context.watch<NTWidgetModel>());
 
+    String formatLabel(num input) =>
+        input.toStringAsFixed(input.truncateToDouble() == input ? 0 : 2);
+
     return ValueListenableBuilder(
       valueListenable: model.subscription!,
       builder: (context, data, child) {
@@ -262,8 +265,7 @@ class NumberBar extends NTWidget {
               if (model.divisions != null)
                 for (int i = 0; i < model.divisions!; i++)
                   CustomRulerLabel(
-                    text: (model.minValue + divisionInterval! * i)
-                        .toStringAsFixed(2),
+                    text: formatLabel(model.minValue + divisionInterval! * i),
                     value: model.minValue + divisionInterval * i,
                   ),
             ],
