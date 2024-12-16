@@ -355,6 +355,7 @@ class RadialGaugeWidget extends NTWidget {
                     if (model.showPointer)
                       NeedlePointer(
                         needleWidth: squareSide * 0.02,
+                        needleEndWidth: squareSide * 0.004,
                         needleHeight: squareSide * 0.25,
                         tailColor: Colors.grey,
                         tailRadius: squareSide * 0.055,

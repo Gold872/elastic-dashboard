@@ -146,6 +146,7 @@ class Gyro extends NTWidget {
                       needlePointer: [
                         NeedlePointer(
                           needleWidth: squareSide * 0.03,
+                          needleEndWidth: squareSide * 0.005,
                           needleHeight: maxNeedleHeight * 0.52 -
                               (squareSide - 175.875) * 0.075,
                           tailColor: Colors.grey,
