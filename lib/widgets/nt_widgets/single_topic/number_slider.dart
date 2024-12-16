@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
@@ -227,27 +227,28 @@ class NumberSlider extends NTWidget {
               overflow: TextOverflow.ellipsis,
             ),
             Expanded(
-              child: SfLinearGauge(
-                key: UniqueKey(),
-                minimum: model.minValue,
-                maximum: model.maxValue,
-                labelPosition: LinearLabelPosition.inside,
-                tickPosition: LinearElementPosition.cross,
-                interval: divisionSeparation,
-                axisTrackStyle: const LinearAxisTrackStyle(
-                  edgeStyle: LinearEdgeStyle.bothCurve,
+              child: LinearGauge(
+                rulers: RulerStyle(
+                  rulerPosition: RulerPosition.bottom,
+                  showLabel: true,
+                  textStyle: Theme.of(context).textTheme.bodyMedium,
+                  primaryRulerColor: Colors.grey,
+                  secondaryRulerColor: Colors.grey,
                 ),
-                markerPointers: [
-                  LinearShapePointer(
-                    value: model.displayValue.value,
+                extendLinearGauge: 1,
+                linearGaugeBoxDecoration: const LinearGaugeBoxDecoration(
+                  backgroundColor: Color.fromRGBO(87, 87, 87, 1),
+                  thickness: 5,
+                ),
+                pointers: [
+                  Pointer(
                     color: Theme.of(context).colorScheme.primary,
-                    height: 15.0,
-                    width: 15.0,
-                    animationDuration: 0,
-                    shapeType: LinearShapePointerType.circle,
-                    position: LinearElementPosition.cross,
-                    dragBehavior: LinearMarkerDragBehavior.free,
-                    onChangeStart: (_) {
+                    value: model.displayValue.value,
+                    shape: PointerShape.circle,
+                    enableAnimation: false,
+                    height: 15,
+                    isInteractive: true,
+                    onChangeStart: () {
                       model.dragging.value = true;
                     },
                     onChanged: (value) {
@@ -261,13 +262,24 @@ class NumberSlider extends NTWidget {
                         model.publishValue(model.displayValue.value);
                       }
                     },
-                    onChangeEnd: (value) {
+                    onChangeEnd: () {
                       model.publishValue(model.displayValue.value);
-
                       model.dragging.value = false;
                     },
                   ),
                 ],
+                customLabels: [
+                  for (int i = 0; i < model.divisions; i++)
+                    CustomRulerLabel(
+                      text: (model.minValue + divisionSeparation * i)
+                          .toStringAsFixed(2),
+                      value: model.minValue + divisionSeparation * i,
+                    ),
+                ],
+                enableGaugeAnimation: false,
+                start: model.minValue,
+                end: model.maxValue,
+                steps: divisionSeparation,
               ),
             ),
           ],

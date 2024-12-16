@@ -448,6 +448,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  geekyants_flutter_gauges:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: elastic-version
+      resolved-ref: "141b95f6dd606204d47134107c1ddc2bbe4879cb"
+      url: "https://github.com/Gold872/GaugesFlutter.git"
+    source: git
+    version: "1.0.4"
   github:
     dependency: "direct main"
     description:
@@ -1002,14 +1011,6 @@ packages:
     description:
       name: syncfusion_flutter_core
       sha256: a2427697bfad5b611db78ea4c4daef82d3350b83c729a8dc37959662a31547f9
-      url: "https://pub.dev"
-    source: hosted
-    version: "23.2.7"
-  syncfusion_flutter_gauges:
-    dependency: "direct main"
-    description:
-      name: syncfusion_flutter_gauges
-      sha256: a559712b476b05ad2506925b5031dbba3c9e7ce83f482191a8185a3de054e7e6
       url: "https://pub.dev"
     source: hosted
     version: "23.2.7"
