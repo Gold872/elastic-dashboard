@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -126,12 +126,12 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('12.00 V'), findsOneWidget);
-    expect(find.byType(SfLinearGauge), findsOneWidget);
+    expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(SfLinearGauge).evaluate().first.widget as SfLinearGauge)
-            .orientation,
-        LinearGaugeOrientation.horizontal);
+        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+            .gaugeOrientation,
+        GaugeOrientation.horizontal);
   });
 
   testWidgets('Voltage view widget test vertical', (widgetTester) async {
@@ -164,12 +164,12 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('12.00 V'), findsOneWidget);
-    expect(find.byType(SfLinearGauge), findsOneWidget);
+    expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(SfLinearGauge).evaluate().first.widget as SfLinearGauge)
-            .orientation,
-        LinearGaugeOrientation.vertical);
+        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+            .gaugeOrientation,
+        GaugeOrientation.vertical);
   });
 
   testWidgets('Voltage view widget test with divisions', (widgetTester) async {
@@ -202,11 +202,10 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('12.00 V'), findsOneWidget);
-    expect(find.byType(SfLinearGauge), findsOneWidget);
+    expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(SfLinearGauge).evaluate().first.widget as SfLinearGauge)
-            .interval,
+        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
         0.9);
   });
 }

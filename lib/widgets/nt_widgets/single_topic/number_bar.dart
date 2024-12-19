@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
@@ -206,6 +206,9 @@ class NumberBar extends NTWidget {
   Widget build(BuildContext context) {
     NumberBarModel model = cast(context.watch<NTWidgetModel>());
 
+    String formatLabel(num input) =>
+        input.toStringAsFixed(input.truncateToDouble() == input ? 0 : 2);
+
     return ValueListenableBuilder(
       valueListenable: model.subscription!,
       builder: (context, data, child) {
@@ -219,10 +222,14 @@ class NumberBar extends NTWidget {
 
         int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
-        LinearGaugeOrientation gaugeOrientation =
-            (model.orientation == 'vertical')
-                ? LinearGaugeOrientation.vertical
-                : LinearGaugeOrientation.horizontal;
+        GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
+            ? GaugeOrientation.vertical
+            : GaugeOrientation.horizontal;
+
+        RulerPosition rulerPosition =
+            (gaugeOrientation == GaugeOrientation.vertical)
+                ? RulerPosition.right
+                : RulerPosition.bottom;
 
         List<Widget> children = [
           Text(
@@ -233,29 +240,43 @@ class NumberBar extends NTWidget {
           const Flexible(
             child: SizedBox(width: 5.0, height: 5.0),
           ),
-          SfLinearGauge(
+          LinearGauge(
             key: UniqueKey(),
-            maximum: model.maxValue,
-            minimum: model.minValue,
-            barPointers: [
-              LinearBarPointer(
+            rulers: RulerStyle(
+              rulerPosition: rulerPosition,
+              inverseRulers: model.inverted,
+              showLabel: true,
+              textStyle: Theme.of(context).textTheme.bodyMedium,
+              primaryRulerColor: Colors.grey,
+              secondaryRulerColor: Colors.grey,
+            ),
+            gaugeOrientation: gaugeOrientation,
+            valueBar: [
+              ValueBar(
+                color: Theme.of(context).colorScheme.primary,
                 value: clampedValue,
+                borderRadius: 5,
+                valueBarThickness: 7.5,
+                enableAnimation: false,
                 animationDuration: 0,
-                thickness: 7.5,
-                edgeStyle: LinearEdgeStyle.bothCurve,
               ),
             ],
-            axisTrackStyle: const LinearAxisTrackStyle(
-              thickness: 7.5,
-              edgeStyle: LinearEdgeStyle.bothCurve,
-            ),
-            orientation: gaugeOrientation,
-            isAxisInversed: model.inverted,
-            interval: divisionInterval,
+            customLabels: [
+              if (model.divisions != null)
+                for (int i = 0; i < model.divisions!; i++)
+                  CustomRulerLabel(
+                    text: formatLabel(model.minValue + divisionInterval! * i),
+                    value: model.minValue + divisionInterval * i,
+                  ),
+            ],
+            enableGaugeAnimation: false,
+            start: model.minValue,
+            end: model.maxValue,
+            steps: divisionInterval,
           ),
         ];
 
-        if (gaugeOrientation == LinearGaugeOrientation.vertical) {
+        if (gaugeOrientation == GaugeOrientation.vertical) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: children,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -166,7 +166,7 @@ void main() {
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
             value: radialGaugeModel,
-            child: const RadialGauge(),
+            child: const RadialGaugeWidget(),
           ),
         ),
       ),
@@ -174,7 +174,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(SfRadialGauge), findsOneWidget);
+    expect(find.byType(RadialGauge), findsOneWidget);
     expect(find.text('-0.50'), findsOneWidget);
     expect(find.byType(NeedlePointer), findsOneWidget);
   });
@@ -216,7 +216,7 @@ void main() {
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
             value: radialGaugeModel,
-            child: const RadialGauge(),
+            child: const RadialGaugeWidget(),
           ),
         ),
       ),
@@ -224,7 +224,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(SfRadialGauge), findsOneWidget);
+    expect(find.byType(RadialGauge), findsOneWidget);
     expect(find.text('-1.00'), findsNothing);
     expect(find.text('-1'), findsOneWidget);
     expect(find.byType(NeedlePointer), findsOneWidget);
@@ -254,7 +254,7 @@ void main() {
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
             value: radialGaugeModel,
-            child: const RadialGauge(),
+            child: const RadialGaugeWidget(),
           ),
         ),
       ),
@@ -262,7 +262,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.byType(SfRadialGauge), findsOneWidget);
+    expect(find.byType(RadialGauge), findsOneWidget);
     expect(find.text('-0.50'), findsOneWidget);
     expect(find.byType(NeedlePointer), findsNothing);
   });
