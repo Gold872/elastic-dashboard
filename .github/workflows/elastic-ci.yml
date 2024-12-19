@@ -63,16 +63,30 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Install junit reporter
+        run: dart pub global activate junitreport
+
       - name: Generate mocks
         run: dart run build_runner build
 
       - name: Run tests
-        run: flutter test --coverage
+        run: flutter test --coverage --file-reporter json:reports/test-report.json
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate junit report xml
+        run: dart pub global run junitreport:tojunit --input reports/test-report.json --output reports/junit-report.xml
+
+      - name: Upload test reports to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: reports/junit-report.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
   build:
     strategy:
       fail-fast: false

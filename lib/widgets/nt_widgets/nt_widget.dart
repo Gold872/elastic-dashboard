@@ -305,6 +305,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     }
 
     initializeSubscriptions();
+    refresh();
   }
 
   @override
