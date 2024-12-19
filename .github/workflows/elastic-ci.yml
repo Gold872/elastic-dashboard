@@ -82,6 +82,7 @@ jobs:
         run: dart pub global run junitreport:tojunit --input reports/test-report.json --output reports/junit-report.xml
 
       - name: Upload test reports to Codecov
+        if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
         with:
           files: reports/junit-report.xml
