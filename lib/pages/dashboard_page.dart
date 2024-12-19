@@ -340,21 +340,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await _saveWindowPosition();
 
     if (successful) {
-      logger.info('Layout saved successfully!');
-      _showNotification(
+      logger.info('Layout saved successfully');
+      _showInfoNotification(
         title: 'Saved',
-        message: 'Layout saved successfully!',
-        color: const Color(0xff01CB67),
-        icon: const Icon(Icons.error, color: Color(0xff01CB67)),
+        message: 'Layout saved successfully',
         width: 300,
       );
     } else {
       logger.error('Could not save layout');
-      _showNotification(
+      _showInfoNotification(
         title: 'Error While Saving Layout',
-        message: 'Failed to save layout, please try again!',
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        message: 'Failed to save layout, please try again',
         width: 300,
       );
     }
@@ -375,8 +371,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await preferences.setString(PrefKeys.windowPosition, positionString);
   }
 
-  void _checkForUpdates(
-      {bool notifyIfLatest = true, bool notifyIfError = true}) async {
+  void _checkForUpdates({
+    bool notifyIfLatest = true,
+    bool notifyIfError = true,
+  }) async {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     TextTheme textTheme = Theme.of(context).textTheme;
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
@@ -451,11 +449,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         notification.show(context);
       }
     } else if (updateResponse.onLatestVersion && notifyIfLatest) {
-      _showNotification(
+      _showInfoNotification(
         title: 'No Updates Available',
         message: 'You are running on the latest version of Elastic',
-        color: const Color(0xff01CB67),
-        icon: const Icon(Icons.check_circle, color: Color(0xff01CB67)),
         width: 350,
       );
     }
@@ -497,6 +493,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     logger.info('Saving layout data to ${saveLocation.path}');
     await jsonFile.saveTo(saveLocation.path);
+    _showInfoNotification(
+      title: 'Exported Layout',
+      message: 'Successfully exported layout to\n${saveLocation.path}',
+      width: 500,
+    );
   }
 
   void _importLayout() async {
@@ -661,11 +662,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       }
     }
 
-    _showNotification(
+    _showInfoNotification(
       title: 'Successfully Downloaded Layout',
       message: 'Remote layout has been successfully downloaded and merged!',
-      color: const Color(0xff01CB67),
-      icon: const Icon(Icons.error, color: Color(0xff01CB67)),
       width: 350,
     );
 
@@ -728,24 +727,20 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
 
     if (!layoutsResponse.successful) {
-      _showNotification(
+      _showErrorNotification(
         title: 'Failed to Retrieve Layout List',
         message: layoutsResponse.data.firstOrNull ??
             'Unable to retrieve list of available layouts',
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         width: 400,
       );
       return;
     }
 
     if (layoutsResponse.data.isEmpty) {
-      _showNotification(
+      _showErrorNotification(
         title: 'Failed to Retrieve Layout List',
         message:
             'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         width: 400,
       );
       return;
@@ -766,11 +761,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
 
     if (!response.successful) {
-      _showNotification(
+      _showErrorNotification(
         title: 'Failed to Download Layout',
         message: response.data,
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         width: 400,
       );
       return;
@@ -862,11 +855,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Future(() {
       int lines = '\n'.allMatches(errorMessage).length + 1;
 
-      _showNotification(
+      _showErrorNotification(
         title: 'Error while loading JSON data',
         message: errorMessage,
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
         width: 350,
         height: 100 + (lines - 1) * 10,
       );
@@ -878,16 +869,65 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       int lines = '\n'.allMatches(warningMessage).length + 1;
 
-      _showNotification(
+      _showWarningNotification(
         title: 'Warning while loading JSON data',
         message: warningMessage,
-        color: Colors.yellow,
-        icon: const Icon(Icons.warning, color: Colors.yellow),
         width: 350,
         height: 100 + (lines - 1) * 10,
       );
     });
   }
+
+  void _showInfoNotification({
+    required String title,
+    required String message,
+    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
+    double? width,
+    double? height,
+  }) =>
+      _showNotification(
+        title: title,
+        message: message,
+        color: const Color(0xff01CB67),
+        icon: const Icon(Icons.error, color: Color(0xff01CB67)),
+        toastDuration: toastDuration,
+        width: width,
+        height: height,
+      );
+
+  void _showWarningNotification({
+    required String title,
+    required String message,
+    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
+    double? width,
+    double? height,
+  }) =>
+      _showNotification(
+        title: title,
+        message: message,
+        color: Colors.yellow,
+        icon: const Icon(Icons.warning, color: Colors.yellow),
+        toastDuration: toastDuration,
+        width: width,
+        height: height,
+      );
+
+  void _showErrorNotification({
+    required String title,
+    required String message,
+    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
+    double? width,
+    double? height,
+  }) =>
+      _showNotification(
+        title: title,
+        message: message,
+        color: const Color(0xffFE355C),
+        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+        toastDuration: toastDuration,
+        width: width,
+        height: height,
+      );
 
   void _showNotification({
     required String title,

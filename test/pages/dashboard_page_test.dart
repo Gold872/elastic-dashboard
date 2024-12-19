@@ -68,7 +68,7 @@ void main() {
     hotKeyManager.tearDown();
   });
 
-  group('[Loading and Saving]:', skip: true, () {
+  group('[Loading and Saving]:', () {
     testWidgets('offline loading', (widgetTester) async {
       FlutterError.onError = ignoreOverflowErrors;
 
