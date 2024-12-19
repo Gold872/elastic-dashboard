@@ -70,7 +70,6 @@ class ElasticLayoutDownloader {
     try {
       response = await client.get(robotUri);
     } on ClientException catch (e) {
-      print('Houston we have a problem\n\n ${e.message}');
       return (successful: false, data: [e.message]);
     }
     Map<String, dynamic>? responseJson = tryCast(jsonDecode(response.body));
