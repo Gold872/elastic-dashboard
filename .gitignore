@@ -11,6 +11,7 @@
 migrate_working_dir/
 coverage/
 *.mocks.dart
+reports/
 
 # IntelliJ related
 *.iml
