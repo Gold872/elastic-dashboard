@@ -74,6 +74,7 @@ jobs:
         with:
           files: coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
   build:
     strategy:
       fail-fast: false
