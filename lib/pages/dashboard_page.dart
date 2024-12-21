@@ -22,11 +22,11 @@ import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/elastic_layout_downloader.dart';
+import 'package:elastic_dashboard/services/elasticlib_listener.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/robot_notifications_listener.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
@@ -70,7 +70,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   SharedPreferences get preferences => widget.preferences;
-  late final RobotNotificationsListener _robotNotificationListener;
+  late final ElasticLibListener _robotNotificationListener;
   late final ElasticLayoutDownloader _layoutDownloader;
 
   bool _seenShuffleboardWarning = false;
@@ -249,8 +249,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
     }
 
-    _robotNotificationListener = RobotNotificationsListener(
+    _robotNotificationListener = ElasticLibListener(
         ntConnection: widget.ntConnection,
+        onTabSelected: (tabIdentifier) {
+          if (tabIdentifier is int) {
+            if (tabIdentifier >= _tabData.length) {
+              return;
+            }
+            setState(() => _currentTabIndex = tabIdentifier);
+          } else if (tabIdentifier is String) {
+            int tabIndex =
+                _tabData.indexWhere((tab) => tab.name == tabIdentifier);
+            if (tabIndex == -1) {
+              return;
+            }
+            setState(() => _currentTabIndex = tabIndex);
+          }
+        },
         onNotification: (title, description, icon, time, width, height) {
           setState(() {
             ColorScheme colorScheme = Theme.of(context).colorScheme;
