@@ -148,6 +148,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ntConnection: widget.ntConnection,
       preferences: widget.preferences,
       onTabChanged: (tab) {
+        _showShuffleboardWarningMessage();
         int? parsedTabIndex = int.tryParse(tab);
 
         bool isIndex = parsedTabIndex != null;
