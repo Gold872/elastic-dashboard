@@ -112,7 +112,7 @@ def select_tab(tab_name: str):
     __selected_tab_publisher.set(tab_name)
 
 
-def select_tab(tab_index: int):
+def select_tab_index(tab_index: int):
     """
     Selects the tab of the dashboard at the given index.
     If this index is greater than or equal to the number of tabs, this will have no effect.
