@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -100,7 +100,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('-0.50'), findsOneWidget);
-    expect(find.byType(SfLinearGauge), findsOneWidget);
-    expect(find.byType(LinearShapePointer), findsOneWidget);
+    expect(find.byType(LinearGauge), findsOneWidget);
+    expect(find.byType(Pointer), findsOneWidget);
   });
 }
