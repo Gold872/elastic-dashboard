@@ -1,9 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
@@ -13,7 +15,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class RadialGaugeModel extends SingleTopicNTWidgetModel {
   @override
-  String type = RadialGauge.widgetType;
+  String type = RadialGaugeWidget.widgetType;
 
   double _startAngle = -140.0;
   double _endAngle = 140.0;
@@ -275,10 +277,10 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
   }
 }
 
-class RadialGauge extends NTWidget {
+class RadialGaugeWidget extends NTWidget {
   static const String widgetType = 'Radial Gauge';
 
-  const RadialGauge({super.key});
+  const RadialGaugeWidget({super.key});
 
   static double _getWrappedValue(double value, double min, double max) {
     if (value >= min && value <= max) {
@@ -310,64 +312,83 @@ class RadialGauge extends NTWidget {
           value = _getWrappedValue(value, model.minValue, model.maxValue);
         }
 
+        value = value.clamp(model.minValue, model.maxValue);
+
         int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
-        return SfRadialGauge(
-          axes: [
-            RadialAxis(
-              startAngle: model.startAngle - 90.0,
-              endAngle: model.endAngle - 90.0,
-              minimum: model.minValue,
-              maximum: model.maxValue,
-              showTicks: model.showTicks,
-              showLabels: model.numberOfLabels != 0,
-              interval: (model.numberOfLabels != 0)
-                  ? (model.maxValue - model.minValue) / model.numberOfLabels
-                  : null,
-              showLastLabel: _getWrappedValue(
-                      model.endAngle - model.startAngle, -180.0, 180.0) !=
-                  0.0,
-              canScaleToFit: true,
-              annotations: [
-                GaugeAnnotation(
-                  horizontalAlignment: GaugeAlignment.center,
-                  verticalAlignment: GaugeAlignment.center,
-                  angle: 90.0,
-                  positionFactor: (model.showPointer) ? 0.35 : 0.05,
-                  widget: Text(
-                    value.toStringAsFixed(fractionDigits),
-                    style: TextStyle(
-                      fontSize: (model.showPointer) ? 18.0 : 28.0,
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            double squareSide =
+                min(constraints.maxWidth, constraints.maxHeight);
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                RadialGauge(
+                  track: RadialTrack(
+                    start: model.minValue,
+                    end: model.maxValue,
+                    startAngle: model.startAngle + 90,
+                    endAngle: model.endAngle + 90,
+                    steps: model.numberOfLabels,
+                    color: const Color.fromRGBO(97, 97, 97, 1),
+                    trackStyle: TrackStyle(
+                      primaryRulerColor: Colors.grey,
+                      secondaryRulerColor: Colors.grey,
+                      showPrimaryRulers: model.showTicks,
+                      showSecondaryRulers: model.showTicks,
+                      labelStyle: Theme.of(context).textTheme.bodySmall,
+                      primaryRulersHeight: model.showTicks ? 10 : 0,
+                      secondaryRulersHeight: model.showTicks ? 8 : 0,
+                      rulersOffset: -5,
+                      labelOffset: -10,
+                      showLastLabel: _getWrappedValue(
+                              model.endAngle - model.startAngle,
+                              -180.0,
+                              180.0) !=
+                          0.0,
                     ),
-                    textAlign: TextAlign.center,
+                    trackLabelFormater: (value) =>
+                        num.parse(value.toStringAsFixed(2)).toString(),
                   ),
-                ),
-              ],
-              pointers: [
-                RangePointer(
-                  enableAnimation: false,
-                  enableDragging: false,
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  value: value,
+                  needlePointer: [
+                    if (model.showPointer)
+                      NeedlePointer(
+                        needleWidth: squareSide * 0.02,
+                        needleEndWidth: squareSide * 0.004,
+                        needleHeight: squareSide * 0.25,
+                        tailColor: Colors.grey,
+                        tailRadius: squareSide * 0.075,
+                        value: value,
+                      ),
+                  ],
+                  valueBar: [
+                    RadialValueBar(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      value: value,
+                      startPosition: (model.minValue < 0.0) ? 0.0 : null,
+                    ),
+                  ],
                 ),
                 if (model.showPointer)
-                  NeedlePointer(
-                    enableAnimation: false,
-                    enableDragging: false,
-                    needleColor: Colors.red,
-                    needleEndWidth: 3.5,
-                    needleStartWidth: 0.5,
-                    needleLength: 0.5,
-                    knobStyle: const KnobStyle(
-                      borderColor: Colors.grey,
-                      borderWidth: 0.025,
-                      knobRadius: 0.05,
+                  Container(
+                    width: squareSide * 0.05,
+                    height: squareSide * 0.05,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[300]!,
                     ),
-                    value: value,
                   ),
+                Positioned(
+                  bottom: squareSide * 0.3,
+                  child: Text(
+                    value.toStringAsFixed(fractionDigits),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
               ],
-            ),
-          ],
+            );
+          },
         );
       },
     );

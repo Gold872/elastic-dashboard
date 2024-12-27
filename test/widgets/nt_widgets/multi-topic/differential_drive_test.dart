@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -94,11 +94,11 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(CustomPaint), findsWidgets);
-    expect(find.byType(SfLinearGauge), findsNWidgets(2));
-    expect(find.byType(LinearShapePointer), findsNWidgets(2));
+    expect(find.byType(LinearGauge), findsNWidgets(2));
+    expect(find.byType(Pointer), findsNWidgets(2));
 
     await widgetTester.drag(
-        find.byType(LinearShapePointer).first, const Offset(0.0, 200.0));
+        find.byType(Pointer).first, const Offset(0.0, 200.0));
     await widgetTester.pumpAndSettle();
 
     expect(
@@ -111,7 +111,7 @@ void main() {
         0.50);
 
     await widgetTester.drag(
-        find.byType(LinearShapePointer).last, const Offset(0.0, 300.0));
+        find.byType(Pointer).last, const Offset(0.0, 300.0));
     await widgetTester.pumpAndSettle();
 
     expect(
