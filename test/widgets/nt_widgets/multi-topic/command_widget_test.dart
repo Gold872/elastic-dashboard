@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -120,5 +123,68 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Type: Test Command'), findsNothing);
+  });
+
+  testWidgets('Command widget edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    CommandModel commandModel = CommandModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Command',
+      period: 0.100,
+      showType: true,
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Command',
+      childModel: commandModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final showType =
+        find.widgetWithText(DialogToggleSwitch, 'Show Command Type');
+
+    expect(showType, findsOneWidget);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showType,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(commandModel.showType, false);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showType,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(commandModel.showType, true);
   });
 }

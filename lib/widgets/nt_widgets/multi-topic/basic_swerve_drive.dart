@@ -150,7 +150,7 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
             ListTile(
               title: const Text('Radians'),
               dense: true,
-              leading: Radio(
+              leading: Radio<String>(
                 value: 'Radians',
                 groupValue: _rotationUnit,
                 onChanged: (value) {
@@ -163,7 +163,7 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
             ListTile(
               title: const Text('Degrees'),
               dense: true,
-              leading: Radio(
+              leading: Radio<String>(
                 value: 'Degrees',
                 groupValue: _rotationUnit,
                 onChanged: (value) {
@@ -176,7 +176,7 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
             ListTile(
               title: const Text('Rotations'),
               dense: true,
-              leading: Radio(
+              leading: Radio<String>(
                 value: 'Rotations',
                 groupValue: _rotationUnit,
                 onChanged: (value) {
@@ -192,16 +192,16 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     ];
   }
 
-  get showRobotRotation => _showRobotRotation;
+  bool get showRobotRotation => _showRobotRotation;
 
-  set showRobotRotation(value) {
+  set showRobotRotation(bool value) {
     _showRobotRotation = value;
     refresh();
   }
 
-  get rotationUnit => _rotationUnit;
+  String get rotationUnit => _rotationUnit;
 
-  set rotationUnit(value) {
+  set rotationUnit(String value) {
     _rotationUnit = value;
     refresh();
   }

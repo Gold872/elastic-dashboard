@@ -8,6 +8,10 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
 import '../../../test_util.dart';
@@ -117,5 +121,85 @@ void main() {
     );
 
     expect(find.byType(SfCartesianChart), findsOneWidget);
+  });
+
+  testWidgets('Graph edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Graph',
+      graphJson,
+    ) as GraphModel;
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Graph',
+      childModel: graphModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final colorPicker = find.widgetWithText(DialogColorPicker, 'Graph Color');
+    final timeDisplayed =
+        find.widgetWithText(DialogTextInput, 'Time Displayed (Seconds)');
+    final minimum = find.widgetWithText(DialogTextInput, 'Minimum');
+    final maximum = find.widgetWithText(DialogTextInput, 'Maximum');
+    final lineWidth = find.widgetWithText(DialogTextInput, 'Line Width');
+
+    expect(colorPicker, findsOneWidget);
+    expect(timeDisplayed, findsOneWidget);
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(lineWidth, findsOneWidget);
+
+    await widgetTester.enterText(timeDisplayed, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.timeDisplayed, 10.0);
+
+    await widgetTester.enterText(minimum, '0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.minValue, 0);
+
+    await widgetTester.enterText(maximum, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.maxValue, isNull);
+
+    await widgetTester.enterText(lineWidth, '2.5');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.lineWidth, 2.5);
   });
 }

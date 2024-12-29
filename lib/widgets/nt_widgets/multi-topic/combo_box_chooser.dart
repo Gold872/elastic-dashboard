@@ -49,9 +49,9 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   bool _sortOptions = false;
 
-  get sortOptions => _sortOptions;
+  bool get sortOptions => _sortOptions;
 
-  set sortOptions(value) {
+  set sortOptions(bool value) {
     _sortOptions = value;
     refresh();
   }

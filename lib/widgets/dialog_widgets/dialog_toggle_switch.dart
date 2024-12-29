@@ -17,14 +17,7 @@ class DialogToggleSwitch extends StatefulWidget {
 }
 
 class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
-  late bool value;
-
-  @override
-  void initState() {
-    super.initState();
-
-    value = widget.initialValue;
-  }
+  late bool value = widget.initialValue;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +39,7 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
             const SizedBox(width: 3),
             Switch(
               onChanged: (value) {
-                widget.onToggle.call(value);
+                widget.onToggle(value);
 
                 setState(() => this.value = value);
               },

@@ -8,6 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
 import '../../../test_util.dart';
@@ -21,6 +26,7 @@ void main() {
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
+    'divisions': 5,
     'inverted': false,
     'orientation': 'horizontal',
   };
@@ -74,7 +80,7 @@ void main() {
 
     expect(numberBarModel.minValue, -5.0);
     expect(numberBarModel.maxValue, 5.0);
-    expect(numberBarModel.divisions, isNull);
+    expect(numberBarModel.divisions, 5);
     expect(numberBarModel.inverted, isFalse);
     expect(numberBarModel.orientation, 'horizontal');
   });
@@ -88,7 +94,7 @@ void main() {
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'horizontal',
     );
@@ -107,7 +113,7 @@ void main() {
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'horizontal',
     );
@@ -145,7 +151,7 @@ void main() {
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'vertical',
     );
@@ -196,7 +202,7 @@ void main() {
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'horizontal',
     );
@@ -254,5 +260,116 @@ void main() {
     expect(
         (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
         1.0);
+  });
+
+  testWidgets('Number bar edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NumberBarModel numberBarModel = NumberBarModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Double Value',
+      dataType: 'double',
+      period: 0.100,
+      minValue: -5.0,
+      maxValue: 5.0,
+      divisions: 11,
+      inverted: false,
+      orientation: 'horizontal',
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Number Bar',
+      childModel: numberBarModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final orientation = find.text('Orientation');
+    final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
+    final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
+    final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
+    final inverted = find.widgetWithText(DialogToggleSwitch, 'Inverted');
+
+    expect(orientation, findsOneWidget);
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(divisions, findsOneWidget);
+    expect(inverted, findsOneWidget);
+
+    expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
+    await widgetTester.tap(
+      find.byWidget(find
+          .byType(DialogDropdownChooser<String>)
+          .evaluate()
+          .elementAt(1)
+          .widget),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Vertical'), findsOneWidget);
+    await widgetTester.tap(find.text('Vertical'));
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.orientation, 'vertical');
+
+    await widgetTester.enterText(minimum, '-1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.minValue, -1);
+
+    await widgetTester.enterText(maximum, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.maxValue, 1);
+
+    await widgetTester.enterText(divisions, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.divisions, 10);
+
+    await widgetTester.enterText(divisions, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.divisions, 10);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: inverted,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(numberBarModel.inverted, true);
   });
 }
