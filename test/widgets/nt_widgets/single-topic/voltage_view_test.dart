@@ -244,8 +244,8 @@ void main() {
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          key: key,
           body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
             value: ntContainerModel,
             child: const DraggableNTWidgetContainer(),
           ),
