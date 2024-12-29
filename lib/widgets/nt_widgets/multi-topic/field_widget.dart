@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +16,10 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+
+extension _SizeToOffset on Size {
+  Offset get toOffset => Offset(width, height);
+}
 
 class FieldWidgetModel extends MultiTopicNTWidgetModel {
   @override
@@ -407,17 +410,6 @@ class FieldWidget extends NTWidget {
 
   const FieldWidget({super.key});
 
-  double _getBackgroundFitWidth(FieldWidgetModel model, Size size) {
-    double fitWidth = size.width;
-    double fitHeight = size.height;
-
-    return min(
-        fitWidth,
-        fitHeight /
-            ((model._field.fieldImageHeight ?? 0) /
-                (model._field.fieldImageWidth ?? 1)));
-  }
-
   Widget _getTransformedFieldObject(
       FieldWidgetModel model,
       List<double> objectPosition,
@@ -432,16 +424,18 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * model.field.pixelsPerMeterHorizontal -
-            fieldCenter.dx;
-
-    double yFromCenter = fieldCenter.dy -
-        (objectPosition[1]) * model.field.pixelsPerMeterVertical;
-
-    Offset positionOffset = center +
-        (Offset(xFromCenter + model.field.topLeftCorner.dx,
-                yFromCenter - model.field.topLeftCorner.dy)) *
+        (objectPosition[0] * model.field.pixelsPerMeterHorizontal -
+                fieldCenter.dx) *
             scaleReduction;
+
+    double yFromCenter = (fieldCenter.dy -
+            (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
+        scaleReduction;
+
+    // Offset positionOffset = center +
+    //     (Offset(xFromCenter + model.field.topLeftCorner.dx,
+    //             yFromCenter - model.field.topLeftCorner.dy)) *
+    //         scaleReduction;
 
     double width = (objectSize?.width ?? model.otherObjectSize) *
         model.field.pixelsPerMeterHorizontal *
@@ -451,8 +445,7 @@ class FieldWidget extends NTWidget {
         model.field.pixelsPerMeterVertical *
         scaleReduction;
 
-    Matrix4 transform = Matrix4.translationValues(
-        positionOffset.dx - length / 2, positionOffset.dy - width / 2, 0.0)
+    Matrix4 transform = Matrix4.translationValues(xFromCenter, yFromCenter, 0.0)
       ..rotateZ(-radians(objectPosition[2]));
 
     Widget otherObject = Container(
@@ -484,7 +477,7 @@ class FieldWidget extends NTWidget {
     );
   }
 
-  Offset _getTransformedTrajectoryPoint(
+  Offset _getTrajectoryPointOffset(
       FieldWidgetModel model,
       List<double> objectPosition,
       Offset center,
@@ -497,18 +490,20 @@ class FieldWidget extends NTWidget {
     }
 
     double xFromCenter =
-        (objectPosition[0]) * model.field.pixelsPerMeterHorizontal -
-            fieldCenter.dx;
-
-    double yFromCenter = fieldCenter.dy -
-        (objectPosition[1]) * model.field.pixelsPerMeterVertical;
-
-    Offset positionOffset = center +
-        (Offset(xFromCenter + model.field.topLeftCorner.dx,
-                yFromCenter - model.field.topLeftCorner.dy)) *
+        (objectPosition[0] * model.field.pixelsPerMeterHorizontal -
+                fieldCenter.dx) *
             scaleReduction;
 
-    return positionOffset;
+    double yFromCenter = (fieldCenter.dy -
+            (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
+        scaleReduction;
+
+    // Offset positionOffset = center +
+    //     (Offset(xFromCenter + model.field.topLeftCorner.dx,
+    //             yFromCenter - model.field.topLeftCorner.dy)) *
+    //         scaleReduction;
+
+    return Offset(xFromCenter, yFromCenter);
   }
 
   @override
@@ -521,136 +516,158 @@ class FieldWidget extends NTWidget {
       listeners.addAll(model._otherObjectSubscriptions);
     }
 
-    return ListenableBuilder(
-      listenable: Listenable.merge(listeners),
-      child: model.field.fieldImage,
-      builder: (context, child) {
-        List<Object?> robotPositionRaw =
-            model.robotSubscription.value?.tryCast<List<Object?>>() ?? [];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListenableBuilder(
+          listenable: Listenable.merge(listeners),
+          child: model.field.fieldImage,
+          builder: (context, child) {
+            List<Object?> robotPositionRaw =
+                model.robotSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-        List<double>? robotPosition = [];
-        if (robotPositionRaw.isEmpty) {
-          robotPosition = null;
-        } else {
-          robotPosition = robotPositionRaw.whereType<double>().toList();
-        }
-
-        RenderBox? renderBox =
-            context.findAncestorRenderObjectOfType<RenderBox>();
-
-        Size size = (renderBox == null || !renderBox.hasSize)
-            ? model.widgetSize ?? const Size(0, 0)
-            : renderBox.size;
-
-        if (size != const Size(0, 0)) {
-          model.widgetSize = size;
-        }
-
-        Offset center = Offset(size.width / 2, size.height / 2);
-        Offset fieldCenter = Offset(
-                (model.field.fieldImageWidth?.toDouble() ?? 0.0),
-                (model.field.fieldImageHeight?.toDouble() ?? 0.0)) /
-            2;
-
-        double scaleReduction = (_getBackgroundFitWidth(model, size)) /
-            (model.field.fieldImageWidth ?? 1);
-
-        if (!model.rendered &&
-            renderBox != null &&
-            model.widgetSize != null &&
-            size != const Size(0, 0) &&
-            size.width > 100.0 &&
-            scaleReduction != 0.0 &&
-            fieldCenter != const Offset(0.0, 0.0) &&
-            model.field.fieldImageLoaded) {
-          model.rendered = true;
-        }
-
-        // Try rebuilding again if the image isn't fully rendered
-        // Can't do it if it's in a unit test cause it causes issues with timers running
-        if (!model.rendered &&
-            !Platform.environment.containsKey('FLUTTER_TEST')) {
-          Future.delayed(const Duration(milliseconds: 100), model.refresh);
-        }
-
-        Widget robot = _getTransformedFieldObject(
-            model,
-            robotPosition ?? [0.0, 0.0, 0.0],
-            center,
-            fieldCenter,
-            scaleReduction,
-            objectSize: Size(model.robotWidthMeters, model.robotLengthMeters));
-
-        List<Widget> otherObjects = [];
-        List<List<Offset>> trajectoryPoints = [];
-
-        if (model.showOtherObjects || model.showTrajectories) {
-          for (NT4Subscription objectSubscription
-              in model._otherObjectSubscriptions) {
-            List<Object?>? objectPositionRaw =
-                objectSubscription.value?.tryCast<List<Object?>>();
-
-            if (objectPositionRaw == null) {
-              continue;
+            List<double>? robotPosition = [];
+            if (robotPositionRaw.isEmpty) {
+              robotPosition = null;
+            } else {
+              robotPosition = robotPositionRaw.whereType<double>().toList();
             }
 
-            bool isTrajectory = objectPositionRaw.length > 24;
+            // RenderBox? renderBox =
+            //     context.findAncestorRenderObjectOfType<RenderBox>();
 
-            if (isTrajectory && !model.showTrajectories) {
-              continue;
-            } else if (!model.showOtherObjects && !isTrajectory) {
-              continue;
+            // Size oldSize = (renderBox == null || !renderBox.hasSize)
+            //     ? model.widgetSize ?? const Size(0, 0)
+            //     : renderBox.size;
+
+            Size size = Size(constraints.maxWidth, constraints.maxHeight);
+
+            // if (size != const Size(0, 0)) {
+            //   model.widgetSize = size;
+            // }
+            model.widgetSize = size;
+
+            FittedSizes fittedSizes = applyBoxFit(
+              BoxFit.contain,
+              model.field.fieldImageSize ?? const Size(0, 0),
+              size,
+            );
+
+            Offset center = size.toOffset / 2;
+            Offset fittedCenter = fittedSizes.destination.toOffset / 2;
+            // Offset fieldCenter = Offset(
+            //         (model.field.fieldImageWidth?.toDouble() ?? 0.0),
+            //         (model.field.fieldImageHeight?.toDouble() ?? 0.0)) /
+            //     2;
+            Offset fieldCenter = model.field.center;
+
+            double scaleReduction =
+                (fittedSizes.destination.width / fittedSizes.source.width);
+
+            if (!model.rendered &&
+                model.widgetSize != null &&
+                size != const Size(0, 0) &&
+                size.width > 100.0 &&
+                scaleReduction != 0.0 &&
+                fieldCenter != const Offset(0.0, 0.0) &&
+                model.field.fieldImageLoaded) {
+              model.rendered = true;
             }
 
-            List<double> objectPosition =
-                objectPositionRaw.whereType<double>().toList();
-
-            if (isTrajectory) {
-              trajectoryPoints.add([]);
+            // Try rebuilding again if the image isn't fully rendered
+            // Can't do it if it's in a unit test cause it causes issues with timers running
+            if (!model.rendered &&
+                !Platform.environment.containsKey('FLUTTER_TEST')) {
+              Future.delayed(const Duration(milliseconds: 100), model.refresh);
             }
 
-            for (int i = 0; i < objectPosition.length - 2; i += 3) {
-              if (isTrajectory) {
-                trajectoryPoints.last.add(
-                  _getTransformedTrajectoryPoint(
-                    model,
-                    objectPosition.sublist(i, i + 2),
-                    center,
-                    fieldCenter,
-                    scaleReduction,
-                  ),
-                );
-              } else {
-                otherObjects.add(
-                  _getTransformedFieldObject(
-                    model,
-                    objectPosition.sublist(i, i + 3),
-                    center,
-                    fieldCenter,
-                    scaleReduction,
-                  ),
-                );
+            Widget robot = _getTransformedFieldObject(
+                model,
+                robotPosition ?? [0.0, 0.0, 0.0],
+                center,
+                fieldCenter,
+                scaleReduction,
+                objectSize:
+                    Size(model.robotWidthMeters, model.robotLengthMeters));
+
+            List<Widget> otherObjects = [];
+            List<List<Offset>> trajectoryPoints = [];
+
+            if (model.showOtherObjects || model.showTrajectories) {
+              for (NT4Subscription objectSubscription
+                  in model._otherObjectSubscriptions) {
+                List<Object?>? objectPositionRaw =
+                    objectSubscription.value?.tryCast<List<Object?>>();
+
+                if (objectPositionRaw == null) {
+                  continue;
+                }
+
+                bool isTrajectory = objectPositionRaw.length > 24;
+
+                if (isTrajectory && !model.showTrajectories) {
+                  continue;
+                } else if (!model.showOtherObjects && !isTrajectory) {
+                  continue;
+                }
+
+                List<double> objectPosition =
+                    objectPositionRaw.whereType<double>().toList();
+
+                if (isTrajectory) {
+                  trajectoryPoints.add([]);
+                }
+
+                for (int i = 0; i < objectPosition.length - 2; i += 3) {
+                  if (isTrajectory) {
+                    trajectoryPoints.last.add(
+                      _getTrajectoryPointOffset(
+                        model,
+                        objectPosition.sublist(i, i + 2),
+                        center,
+                        fieldCenter,
+                        scaleReduction,
+                      ),
+                    );
+                  } else {
+                    otherObjects.add(
+                      _getTransformedFieldObject(
+                        model,
+                        objectPosition.sublist(i, i + 3),
+                        center,
+                        fieldCenter,
+                        scaleReduction,
+                      ),
+                    );
+                  }
+                }
               }
             }
-          }
-        }
 
-        return Stack(
-          children: [
-            child!,
-            for (List<Offset> points in trajectoryPoints)
-              CustomPaint(
-                painter: TrajectoryPainter(
-                  color: model.trajectoryColor,
-                  points: points,
-                  strokeWidth: model.trajectoryPointSize *
-                      model.field.pixelsPerMeterHorizontal *
-                      scaleReduction,
-                ),
+            return SizedBox(
+              width: fittedSizes.destination.width,
+              height: fittedSizes.destination.height,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  child!,
+                  for (List<Offset> points in trajectoryPoints)
+                    CustomPaint(
+                      size: fittedSizes.destination,
+                      painter: TrajectoryPainter(
+                        center: fittedCenter,
+                        color: model.trajectoryColor,
+                        points: points,
+                        strokeWidth: model.trajectoryPointSize *
+                            model.field.pixelsPerMeterHorizontal *
+                            scaleReduction,
+                      ),
+                    ),
+                  robot,
+                  ...otherObjects,
+                ],
               ),
-            robot,
-            ...otherObjects,
-          ],
+            );
+          },
         );
       },
     );
@@ -695,11 +712,13 @@ class TrianglePainter extends CustomPainter {
 }
 
 class TrajectoryPainter extends CustomPainter {
+  final Offset center;
   final List<Offset> points;
   final double strokeWidth;
   final Color color;
 
   TrajectoryPainter({
+    required this.center,
     required this.points,
     required this.strokeWidth,
     this.color = Colors.white,
@@ -717,10 +736,10 @@ class TrajectoryPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     Path trajectoryPath = Path();
 
-    trajectoryPath.moveTo(points[0].dx, points[0].dy);
+    trajectoryPath.moveTo(points[0].dx + center.dx, points[0].dy + center.dy);
 
     for (Offset point in points) {
-      trajectoryPath.lineTo(point.dx, point.dy);
+      trajectoryPath.lineTo(point.dx + center.dx, point.dy + center.dy);
     }
     canvas.drawPath(trajectoryPath, trajectoryPaint);
   }

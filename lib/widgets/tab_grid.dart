@@ -330,6 +330,8 @@ class TabGridModel extends ChangeNotifier {
 
     if (model is NTWidgetContainerModel &&
         model.childModel is FieldWidgetModel) {
+      (model.childModel as FieldWidgetModel).rendered = false;
+      (model.childModel as FieldWidgetModel).widgetSize = null;
       model.childModel.refresh();
     }
 
