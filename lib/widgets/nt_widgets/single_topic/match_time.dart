@@ -29,16 +29,16 @@ class MatchTimeModel extends SingleTopicNTWidgetModel {
   int _redStartTime = 15;
   int _yellowStartTime = 30;
 
-  get redStartTime => _redStartTime;
+  int get redStartTime => _redStartTime;
 
-  set redStartTime(value) {
+  set redStartTime(int value) {
     _redStartTime = value;
     refresh();
   }
 
-  get yellowStartTime => _yellowStartTime;
+  int get yellowStartTime => _yellowStartTime;
 
-  set yellowStartTime(value) {
+  set yellowStartTime(int value) {
     _yellowStartTime = value;
     refresh();
   }

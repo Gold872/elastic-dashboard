@@ -8,6 +8,7 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -151,7 +152,7 @@ void main() {
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
   });
 
-  testWidgets('Boolean box edit properties test', (widgetTester) async {
+  testWidgets('Boolean box edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
@@ -197,11 +198,15 @@ void main() {
     final trueIcon = find.text('True Icon');
     final falseIcon = find.text('False Icon');
 
+    final iconDropdown = find.byType(DialogDropdownChooser<String>);
+
     expect(trueColorPicker, findsOneWidget);
     expect(falseColorPicker, findsOneWidget);
 
     expect(trueIcon, findsOneWidget);
     expect(falseIcon, findsOneWidget);
+
+    expect(iconDropdown, findsNWidgets(3));
 
     final trueColorButton = find.descendant(
         of: trueColorPicker, matching: find.byType(ElevatedButton));
@@ -227,5 +232,31 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(booleanBoxModel.trueColor.value, Colors.black.value);
+
+    await widgetTester
+        .tap(find.byWidget(iconDropdown.evaluate().elementAt(1).widget));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('None'), findsNWidgets(3));
+    expect(find.text('Checkmark'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Checkmark'));
+    await widgetTester.pumpAndSettle();
+
+    expect(booleanBoxModel.trueIcon, 'Checkmark');
+
+    await widgetTester
+        .tap(find.byWidget(iconDropdown.evaluate().elementAt(2).widget));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('None'), findsNWidgets(2));
+    expect(find.text('Exclamation Point'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Exclamation Point'));
+    await widgetTester.pumpAndSettle();
+
+    expect(booleanBoxModel.falseIcon, 'Exclamation Point');
   });
 }

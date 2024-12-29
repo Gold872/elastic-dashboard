@@ -323,8 +323,8 @@ void main() {
     final endAngle = find.widgetWithText(DialogTextInput, 'End Angle (CW+)');
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
-    final numOfLabels =
-        find.widgetWithText(DialogTextInput, 'Number of Labels');
+    final wrapValue = find.widgetWithText(DialogToggleSwitch, 'Wrap Value');
+    final labels = find.widgetWithText(DialogTextInput, 'Number of Labels');
     final showPointer = find.widgetWithText(DialogToggleSwitch, 'Show Pointer');
     final showTicks = find.widgetWithText(DialogToggleSwitch, 'Show Ticks');
 
@@ -332,8 +332,75 @@ void main() {
     expect(endAngle, findsOneWidget);
     expect(minimum, findsOneWidget);
     expect(maximum, findsOneWidget);
-    expect(numOfLabels, findsOneWidget);
+    expect(wrapValue, findsOneWidget);
+    expect(labels, findsOneWidget);
     expect(showPointer, findsOneWidget);
     expect(showTicks, findsOneWidget);
+
+    await widgetTester.enterText(startAngle, '-90');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.startAngle, -90);
+
+    await widgetTester.enterText(endAngle, '90');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.endAngle, 90);
+
+    await widgetTester.enterText(minimum, '-1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.minValue, -1);
+
+    await widgetTester.enterText(maximum, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.maxValue, 1);
+
+    await widgetTester.ensureVisible(wrapValue);
+    await widgetTester.tap(
+      find.descendant(
+        of: wrapValue,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.wrapValue, true);
+
+    await widgetTester.enterText(labels, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.numberOfLabels, 10);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showPointer,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.showPointer, false);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showTicks,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(radialGaugeModel.showTicks, false);
   });
 }

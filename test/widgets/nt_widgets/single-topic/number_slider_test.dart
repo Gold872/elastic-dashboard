@@ -332,12 +332,50 @@ void main() {
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
     final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
-    final inverted =
+    final updateWhileDragging =
         find.widgetWithText(DialogToggleSwitch, 'Update While Dragging');
 
     expect(minimum, findsOneWidget);
     expect(maximum, findsOneWidget);
     expect(divisions, findsOneWidget);
-    expect(inverted, findsOneWidget);
+    expect(updateWhileDragging, findsOneWidget);
+
+    await widgetTester.enterText(minimum, '-1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.minValue, -1);
+
+    await widgetTester.enterText(maximum, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.maxValue, 1);
+
+    await widgetTester.enterText(divisions, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.divisions, 10);
+
+    await widgetTester.enterText(divisions, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.divisions, 10);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: updateWhileDragging,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.updateContinuously, true);
   });
 }

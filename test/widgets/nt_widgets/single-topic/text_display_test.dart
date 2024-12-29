@@ -609,5 +609,15 @@ void main() {
         find.widgetWithText(DialogToggleSwitch, 'Show Submit Button');
 
     expect(showSubmit, findsOneWidget);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showSubmit,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(textDisplayModel.showSubmitButton, false);
   });
 }

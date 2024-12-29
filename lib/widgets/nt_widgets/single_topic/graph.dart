@@ -22,37 +22,37 @@ class GraphModel extends SingleTopicNTWidgetModel {
   late Color _mainColor;
   late double _lineWidth;
 
-  get timeDisplayed => _timeDisplayed;
+  double get timeDisplayed => _timeDisplayed;
 
-  set timeDisplayed(value) {
+  set timeDisplayed(double value) {
     _timeDisplayed = value;
     refresh();
   }
 
-  get minValue => _minValue;
+  double? get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double? value) {
     _minValue = value;
     refresh();
   }
 
-  get maxValue => _maxValue;
+  double? get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double? value) {
     _maxValue = value;
     refresh();
   }
 
-  get mainColor => _mainColor;
+  Color get mainColor => _mainColor;
 
-  set mainColor(value) {
+  set mainColor(Color value) {
     _mainColor = value;
     refresh();
   }
 
-  get lineWidth => _lineWidth;
+  double get lineWidth => _lineWidth;
 
-  set lineWidth(value) {
+  set lineWidth(double value) {
     _lineWidth = value;
     refresh();
   }

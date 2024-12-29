@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -269,5 +270,65 @@ void main() {
     expect(maximum, findsOneWidget);
     expect(divisions, findsOneWidget);
     expect(inverted, findsOneWidget);
+
+    expect(orientation, findsOneWidget);
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(divisions, findsOneWidget);
+    expect(inverted, findsOneWidget);
+
+    expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
+    await widgetTester.tap(
+      find.byWidget(find
+          .byType(DialogDropdownChooser<String>)
+          .evaluate()
+          .elementAt(1)
+          .widget),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Vertical'), findsOneWidget);
+    await widgetTester.tap(find.text('Vertical'));
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.orientation, 'vertical');
+
+    await widgetTester.enterText(minimum, '-1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.minValue, -1);
+
+    await widgetTester.enterText(maximum, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.maxValue, 1);
+
+    await widgetTester.enterText(divisions, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.divisions, 10);
+
+    await widgetTester.enterText(divisions, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.divisions, 10);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: inverted,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(voltageViewModel.inverted, true);
   });
 }

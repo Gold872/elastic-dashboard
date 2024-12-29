@@ -123,7 +123,7 @@ void main() {
     expect(find.byType(SfCartesianChart), findsOneWidget);
   });
 
-  testWidgets('Graph edit properties test', (widgetTester) async {
+  testWidgets('Graph edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
@@ -173,5 +173,33 @@ void main() {
     expect(minimum, findsOneWidget);
     expect(maximum, findsOneWidget);
     expect(lineWidth, findsOneWidget);
+
+    await widgetTester.enterText(timeDisplayed, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.timeDisplayed, 10.0);
+
+    await widgetTester.enterText(minimum, '0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.minValue, 0);
+
+    await widgetTester.enterText(maximum, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.maxValue, isNull);
+
+    await widgetTester.enterText(lineWidth, '2.5');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(graphModel.lineWidth, 2.5);
   });
 }
