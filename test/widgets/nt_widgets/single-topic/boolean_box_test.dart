@@ -1,3 +1,6 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -146,5 +149,83 @@ void main() {
     booleanBoxModel.falseIcon = 'Exclamation Point';
     await widgetTester.pumpAndSettle();
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
+  });
+
+  testWidgets('Boolean box edit properties test', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Boolean Box',
+      booleanBoxJson,
+    ) as BooleanBoxModel;
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Boolean Box',
+      childModel: booleanBoxModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final trueColorPicker =
+        find.widgetWithText(DialogColorPicker, 'True Color');
+    final falseColorPicker =
+        find.widgetWithText(DialogColorPicker, 'False Color');
+
+    final trueIcon = find.text('True Icon');
+    final falseIcon = find.text('False Icon');
+
+    expect(trueColorPicker, findsOneWidget);
+    expect(falseColorPicker, findsOneWidget);
+
+    expect(trueIcon, findsOneWidget);
+    expect(falseIcon, findsOneWidget);
+
+    final trueColorButton = find.descendant(
+        of: trueColorPicker, matching: find.byType(ElevatedButton));
+    final falseColorButton = find.descendant(
+        of: falseColorPicker, matching: find.byType(ElevatedButton));
+
+    expect(trueColorButton, findsOneWidget);
+    expect(falseColorButton, findsOneWidget);
+
+    await widgetTester.tap(trueColorButton);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextField, 'Hex Code'), findsOneWidget);
+    await widgetTester.enterText(
+        find.widgetWithText(TextField, 'Hex Code'), '000000');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pump();
+
+    expect(find.widgetWithText(TextButton, 'Save'), findsOneWidget);
+    await widgetTester.tap(find.widgetWithText(TextButton, 'Save'));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(booleanBoxModel.trueColor.value, Colors.black.value);
   });
 }

@@ -1,3 +1,7 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -117,5 +121,57 @@ void main() {
     );
 
     expect(find.byType(SfCartesianChart), findsOneWidget);
+  });
+
+  testWidgets('Graph edit properties test', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Graph',
+      graphJson,
+    ) as GraphModel;
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Graph',
+      childModel: graphModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final colorPicker = find.widgetWithText(DialogColorPicker, 'Graph Color');
+    final timeDisplayed =
+        find.widgetWithText(DialogTextInput, 'Time Displayed (Seconds)');
+    final minimum = find.widgetWithText(DialogTextInput, 'Minimum');
+    final maximum = find.widgetWithText(DialogTextInput, 'Maximum');
+    final lineWidth = find.widgetWithText(DialogTextInput, 'Line Width');
+
+    expect(colorPicker, findsOneWidget);
+    expect(timeDisplayed, findsOneWidget);
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(lineWidth, findsOneWidget);
   });
 }

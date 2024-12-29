@@ -1,3 +1,7 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +25,7 @@ void main() {
     'period': 0.100,
     'min_value': 4.0,
     'max_value': 13.0,
+    'divisions': 5,
     'inverted': false,
     'orientation': 'horizontal',
   };
@@ -74,7 +79,7 @@ void main() {
 
     expect(voltageViewModel.minValue, 4.0);
     expect(voltageViewModel.maxValue, 13.0);
-    expect(voltageViewModel.divisions, isNull);
+    expect(voltageViewModel.divisions, 5);
     expect(voltageViewModel.inverted, isFalse);
     expect(voltageViewModel.orientation, 'horizontal');
   });
@@ -88,7 +93,7 @@ void main() {
       period: 0.100,
       minValue: 4.0,
       maxValue: 13.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'horizontal',
     );
@@ -107,7 +112,7 @@ void main() {
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'horizontal',
     );
@@ -145,7 +150,7 @@ void main() {
       period: 0.100,
       minValue: 4.0,
       maxValue: 13.0,
-      divisions: null,
+      divisions: 5,
       inverted: false,
       orientation: 'vertical',
     );
@@ -207,5 +212,62 @@ void main() {
     expect(
         (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
         0.9);
+  });
+
+  testWidgets('Voltage view edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    VoltageViewModel voltageViewModel = VoltageViewModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Double Value',
+      dataType: 'double',
+      period: 0.100,
+      minValue: 4.0,
+      maxValue: 13.0,
+      divisions: 11,
+      inverted: false,
+      orientation: 'horizontal',
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Voltage View',
+      childModel: voltageViewModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final orientation = find.text('Orientation');
+    final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
+    final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
+    final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
+    final inverted = find.widgetWithText(DialogToggleSwitch, 'Inverted');
+
+    expect(orientation, findsOneWidget);
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(divisions, findsOneWidget);
+    expect(inverted, findsOneWidget);
   });
 }

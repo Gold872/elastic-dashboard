@@ -1,3 +1,6 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -560,5 +563,51 @@ void main() {
 
     expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
         'I\'m submitting this without a button!');
+  });
+
+  testWidgets('Text display edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    TextDisplayModel textDisplayModel = TextDisplayModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Display Value',
+      dataType: 'string',
+      period: 0.100,
+      showSubmitButton: true,
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Text Display',
+      childModel: textDisplayModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final showSubmit =
+        find.widgetWithText(DialogToggleSwitch, 'Show Submit Button');
+
+    expect(showSubmit, findsOneWidget);
   });
 }

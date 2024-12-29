@@ -1,3 +1,7 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -275,5 +279,65 @@ void main() {
 
     expect(
         ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType, int);
+  });
+
+  testWidgets('Number slider edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NumberSliderModel numberSliderModel = NumberSliderModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Double Value',
+      dataType: 'double',
+      period: 0.100,
+      minValue: -5.0,
+      maxValue: 5.0,
+      divisions: 5,
+      updateContinuously: false,
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.fromLTWH(
+        0,
+        0,
+        3 * NTWidgetBuilder.getNormalSize(),
+        NTWidgetBuilder.getNormalSize(),
+      ),
+      title: 'Number Slider',
+      childModel: numberSliderModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
+    final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
+    final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
+    final inverted =
+        find.widgetWithText(DialogToggleSwitch, 'Update While Dragging');
+
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(divisions, findsOneWidget);
+    expect(inverted, findsOneWidget);
   });
 }

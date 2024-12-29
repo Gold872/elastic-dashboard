@@ -1,3 +1,6 @@
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -152,5 +155,53 @@ void main() {
 
     expect(find.text('96'), findsOneWidget);
     expect(coloredText('96', Colors.blue), findsOneWidget);
+  });
+
+  testWidgets('Match time edit properties test', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    MatchTimeModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
+      ntConnection,
+      preferences,
+      'Match Time',
+      matchTimeJson,
+    ) as MatchTimeModel;
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Match Time',
+      childModel: matchTimeModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final timeDisplayMode = find.text('Time Display Mode');
+    final redStartTime = find.widgetWithText(DialogTextInput, 'Red Start Time');
+    final yellowStartTime =
+        find.widgetWithText(DialogTextInput, 'Yellow Start Time');
+
+    expect(timeDisplayMode, findsOneWidget);
+    expect(redStartTime, findsOneWidget);
+    expect(yellowStartTime, findsOneWidget);
   });
 }

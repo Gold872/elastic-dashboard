@@ -27,14 +27,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   String _trueIcon = 'None';
   String _falseIcon = 'None';
 
-  get trueColor => _trueColor;
+  Color get trueColor => _trueColor;
 
   set trueColor(value) {
     _trueColor = value;
     refresh();
   }
 
-  get falseColor => _falseColor;
+  Color get falseColor => _falseColor;
 
   set falseColor(value) {
     _falseColor = value;
