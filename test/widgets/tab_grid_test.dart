@@ -195,10 +195,10 @@ void main() async {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Test Number'), findsAtLeastNWidgets(2));
+    expect(find.byType(TextDisplay), findsOneWidget);
     expect(find.text('Edit Properties'), findsOneWidget);
 
     await widgetTester.tap(find.text('Edit Properties'));
-
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Container Settings'), findsOneWidget);
@@ -214,22 +214,20 @@ void main() async {
 
     expect(find.text('Editing Title Test'), findsAtLeastNWidgets(2));
 
-    final widgetTypeSelection =
-        find.widgetWithText(DropdownMenuItem<String>, 'Text Display');
+    final widgetTypeSelection = find.text('Text Display');
 
     expect(widgetTypeSelection, findsOneWidget);
 
     await widgetTester.tap(widgetTypeSelection);
     await widgetTester.pumpAndSettle();
 
-    expect(find.widgetWithText(DropdownMenuItem<String>, 'Text Display'),
-        findsAtLeastNWidgets(2));
-    expect(
-        find.widgetWithText(DropdownMenuItem<String>, 'Graph'), findsNothing);
+    expect(find.text('Text Display'), findsNWidgets(2));
+    expect(find.text('Graph'), findsNothing);
 
-    await widgetTester.tap(
-        find.widgetWithText(DropdownMenuItem<String>, 'Text Display').last);
+    await widgetTester.tap(find.text('Text Display').last);
     await widgetTester.pumpAndSettle();
+
+    expect(find.byType(TextDisplay), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
 
