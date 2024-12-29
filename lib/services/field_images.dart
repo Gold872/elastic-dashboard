@@ -75,17 +75,6 @@ class Field {
           2
       : const Offset(0, 0);
 
-  // Offset get center => (fieldImageLoaded && fieldImageSize != null)
-  //   ? Offset(
-  //           fieldImageWidth! +
-  //               (fieldImageWidth! - bottomRightCorner.dx) -
-  //               topLeftCorner.dx,
-  //           fieldImageHeight! +
-  //               (fieldImageHeight! - bottomRightCorner.dy) -
-  //               topLeftCorner.dy) /
-  //       2
-  //   : const Offset(0, 0);
-
   late Image fieldImage;
 
   int instanceCounter = 0;

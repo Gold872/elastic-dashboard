@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +18,13 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart'
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
-extension _SizeToOffset on Size {
+extension _SizeUtils on Size {
   Offset get toOffset => Offset(width, height);
+
+  Size rotateBy(double angle) => Size(
+        (width * cos(angle) - height * sin(angle)).abs(),
+        (height * cos(angle) + width * sin(angle)).abs(),
+      );
 }
 
 class FieldWidgetModel extends MultiTopicNTWidgetModel {
@@ -50,6 +56,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   bool _showOtherObjects = true;
   bool _showTrajectories = true;
+
+  double _fieldRotation = 0.0;
 
   Color _robotColor = Colors.red;
   Color _trajectoryColor = Colors.white;
@@ -84,6 +92,13 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   set showTrajectories(bool value) {
     _showTrajectories = value;
+    refresh();
+  }
+
+  double get fieldRotation => _fieldRotation;
+
+  set fieldRotation(double value) {
+    _fieldRotation = value;
     refresh();
   }
 
@@ -122,6 +137,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     bool showTrajectories = true,
     double robotWidthMeters = 0.85,
     double robotLengthMeters = 0.85,
+    double fieldRotation = 0.0,
     Color robotColor = Colors.red,
     Color trajectoryColor = Colors.white,
     super.dataType,
@@ -130,6 +146,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         _showOtherObjects = showOtherObjects,
         _robotWidthMeters = robotWidthMeters,
         _robotLengthMeters = robotLengthMeters,
+        _fieldRotation = fieldRotation,
         _robotColor = robotColor,
         _trajectoryColor = trajectoryColor,
         super() {
@@ -157,15 +174,17 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     _showOtherObjects = tryCast(jsonData['show_other_objects']) ?? true;
     _showTrajectories = tryCast(jsonData['show_trajectories']) ?? true;
 
+    _fieldRotation = tryCast(jsonData['field_rotation']) ?? 0.0;
+
+    _robotColor = Color(tryCast(jsonData['robot_color']) ?? Colors.red.value);
+    _trajectoryColor =
+        Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.value);
+
     if (!FieldImages.hasField(_fieldGame)) {
       _fieldGame = _defaultGame;
     }
 
     _field = FieldImages.getFieldFromGame(_fieldGame)!;
-
-    _robotColor = Color(tryCast(jsonData['robot_color']) ?? Colors.red.value);
-    _trajectoryColor =
-        Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.value);
   }
 
   @override
@@ -226,6 +245,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
       'robot_length': _robotLengthMeters,
       'show_other_objects': _showOtherObjects,
       'show_trajectories': _showTrajectories,
+      'field_rotation': _fieldRotation,
       'robot_color': robotColor.value,
       'trajectory_color': trajectoryColor.value,
     };
@@ -368,6 +388,54 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
           ),
         ],
       ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                label: const Text('Rotate Left'),
+                icon: const Icon(Icons.rotate_90_degrees_ccw),
+                onPressed: () {
+                  double newRotation = fieldRotation - 90;
+                  if (newRotation < -180) {
+                    newRotation += 360;
+                  }
+                  fieldRotation = newRotation;
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                label: const Text('Rotate Right'),
+                icon: const Icon(Icons.rotate_90_degrees_cw),
+                onPressed: () {
+                  double newRotation = fieldRotation + 90;
+                  if (newRotation > 180) {
+                    newRotation -= 360;
+                  }
+                  fieldRotation = newRotation;
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
       const SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -498,11 +566,6 @@ class FieldWidget extends NTWidget {
             (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
         scaleReduction;
 
-    // Offset positionOffset = center +
-    //     (Offset(xFromCenter + model.field.topLeftCorner.dx,
-    //             yFromCenter - model.field.topLeftCorner.dy)) *
-    //         scaleReduction;
-
     return Offset(xFromCenter, yFromCenter);
   }
 
@@ -532,18 +595,8 @@ class FieldWidget extends NTWidget {
               robotPosition = robotPositionRaw.whereType<double>().toList();
             }
 
-            // RenderBox? renderBox =
-            //     context.findAncestorRenderObjectOfType<RenderBox>();
-
-            // Size oldSize = (renderBox == null || !renderBox.hasSize)
-            //     ? model.widgetSize ?? const Size(0, 0)
-            //     : renderBox.size;
-
             Size size = Size(constraints.maxWidth, constraints.maxHeight);
 
-            // if (size != const Size(0, 0)) {
-            //   model.widgetSize = size;
-            // }
             model.widgetSize = size;
 
             FittedSizes fittedSizes = applyBoxFit(
@@ -552,16 +605,23 @@ class FieldWidget extends NTWidget {
               size,
             );
 
+            FittedSizes rotatedFittedSizes = applyBoxFit(
+              BoxFit.contain,
+              model.field.fieldImageSize
+                      ?.rotateBy(-radians(model.fieldRotation)) ??
+                  const Size(0, 0),
+              size,
+            );
+
             Offset center = size.toOffset / 2;
             Offset fittedCenter = fittedSizes.destination.toOffset / 2;
-            // Offset fieldCenter = Offset(
-            //         (model.field.fieldImageWidth?.toDouble() ?? 0.0),
-            //         (model.field.fieldImageHeight?.toDouble() ?? 0.0)) /
-            //     2;
             Offset fieldCenter = model.field.center;
 
             double scaleReduction =
                 (fittedSizes.destination.width / fittedSizes.source.width);
+            double rotatedScaleReduction =
+                (rotatedFittedSizes.destination.width /
+                    rotatedFittedSizes.source.width);
 
             if (!model.rendered &&
                 model.widgetSize != null &&
@@ -643,28 +703,30 @@ class FieldWidget extends NTWidget {
               }
             }
 
-            return SizedBox(
-              width: fittedSizes.destination.width,
-              height: fittedSizes.destination.height,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  child!,
-                  for (List<Offset> points in trajectoryPoints)
-                    CustomPaint(
-                      size: fittedSizes.destination,
-                      painter: TrajectoryPainter(
-                        center: fittedCenter,
-                        color: model.trajectoryColor,
-                        points: points,
-                        strokeWidth: model.trajectoryPointSize *
-                            model.field.pixelsPerMeterHorizontal *
-                            scaleReduction,
+            return Transform.scale(
+              scale: rotatedScaleReduction / scaleReduction,
+              child: Transform.rotate(
+                angle: radians(model.fieldRotation),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    child!,
+                    for (List<Offset> points in trajectoryPoints)
+                      CustomPaint(
+                        size: fittedSizes.destination,
+                        painter: TrajectoryPainter(
+                          center: fittedCenter,
+                          color: model.trajectoryColor,
+                          points: points,
+                          strokeWidth: model.trajectoryPointSize *
+                              model.field.pixelsPerMeterHorizontal *
+                              scaleReduction,
+                        ),
                       ),
-                    ),
-                  robot,
-                  ...otherObjects,
-                ],
+                    robot,
+                    ...otherObjects,
+                  ],
+                ),
               ),
             );
           },
