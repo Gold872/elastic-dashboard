@@ -199,6 +199,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         _otherObjectTopics.add(nt4Topic.name);
         _otherObjectSubscriptions
             .add(ntConnection.subscribe(nt4Topic.name, super.period));
+        refresh();
       }
     };
 
