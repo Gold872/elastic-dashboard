@@ -151,7 +151,7 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
           Flexible(
             child: DialogTextInput(
               initialText: angleOffset.toString(),
-              label: 'Angle Offset (degrees)',
+              label: 'Angle Offset (Degrees)',
               onSubmit: (String value) {
                 double? doubleValue = double.tryParse(value);
 

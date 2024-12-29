@@ -56,59 +56,59 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   Size? _widgetSize;
 
-  get robotWidthMeters => _robotWidthMeters;
+  double get robotWidthMeters => _robotWidthMeters;
 
-  set robotWidthMeters(value) {
+  set robotWidthMeters(double value) {
     _robotWidthMeters = value;
     refresh();
   }
 
-  get robotLengthMeters => _robotLengthMeters;
+  double get robotLengthMeters => _robotLengthMeters;
 
-  set robotLengthMeters(value) {
+  set robotLengthMeters(double value) {
     _robotLengthMeters = value;
     refresh();
   }
 
-  get showOtherObjects => _showOtherObjects;
+  bool get showOtherObjects => _showOtherObjects;
 
-  set showOtherObjects(value) {
+  set showOtherObjects(bool value) {
     _showOtherObjects = value;
     refresh();
   }
 
-  get showTrajectories => _showTrajectories;
+  bool get showTrajectories => _showTrajectories;
 
-  set showTrajectories(value) {
+  set showTrajectories(bool value) {
     _showTrajectories = value;
     refresh();
   }
 
-  get robotColor => _robotColor;
+  Color get robotColor => _robotColor;
 
-  set robotColor(value) {
+  set robotColor(Color value) {
     _robotColor = value;
     refresh();
   }
 
-  get trajectoryColor => _trajectoryColor;
+  Color get trajectoryColor => _trajectoryColor;
 
-  set trajectoryColor(value) {
+  set trajectoryColor(Color value) {
     _trajectoryColor = value;
     refresh();
   }
 
-  get otherObjectSize => _otherObjectSize;
+  double get otherObjectSize => _otherObjectSize;
 
-  get trajectoryPointSize => _trajectoryPointSize;
+  double get trajectoryPointSize => _trajectoryPointSize;
 
-  get widgetSize => _widgetSize;
+  Size? get widgetSize => _widgetSize;
 
   set widgetSize(value) {
     _widgetSize = value;
   }
 
-  get field => _field;
+  Field get field => _field;
 
   FieldWidgetModel({
     required super.ntConnection,
@@ -279,7 +279,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
           ),
         ),
       ),
-      DialogDropdownChooser(
+      DialogDropdownChooser<String?>(
         onSelectionChanged: (value) {
           if (value == null) {
             return;
