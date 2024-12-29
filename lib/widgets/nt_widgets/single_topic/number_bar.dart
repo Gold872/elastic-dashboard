@@ -176,7 +176,6 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
               initialText: _divisions.toString(),
-              allowEmptySubmission: true,
             ),
           ),
           const SizedBox(width: 5),
