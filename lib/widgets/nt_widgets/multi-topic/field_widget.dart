@@ -132,7 +132,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    String? fieldName,
+    String? fieldGame,
     bool showOtherObjects = true,
     bool showTrajectories = true,
     double robotWidthMeters = 0.85,
@@ -150,7 +150,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         _robotColor = robotColor,
         _trajectoryColor = trajectoryColor,
         super() {
-    _fieldGame = fieldName ?? _fieldGame;
+    _fieldGame = fieldGame ?? _fieldGame;
 
     if (!FieldImages.hasField(_fieldGame)) {
       _fieldGame = _defaultGame;
