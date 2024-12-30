@@ -691,7 +691,7 @@ class NT4Client {
     lastAnnouncedTimestamps.clear();
 
     for (NT4Subscription sub in _subscriptions.values) {
-      sub.currentValue = null;
+      sub.updateValue(null, _getClientTimeUS());
     }
 
     _serverConnectionActive = true;
