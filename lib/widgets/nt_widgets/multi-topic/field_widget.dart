@@ -803,6 +803,7 @@ class TrajectoryPainter extends CustomPainter {
   @override
   bool shouldRepaint(TrajectoryPainter oldDelegate) {
     return oldDelegate.points != points ||
-        oldDelegate.strokeWidth != strokeWidth;
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.color != color;
   }
 }
