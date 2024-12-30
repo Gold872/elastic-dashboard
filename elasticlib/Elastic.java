@@ -14,10 +14,14 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StringTopic;
 
 public final class Elastic {
-  private static final StringTopic topic =
+  private static final StringTopic notificationTopic =
       NetworkTableInstance.getDefault().getStringTopic("/Elastic/RobotNotifications");
-  private static final StringPublisher publisher =
-      topic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
+  private static final StringPublisher notificationPublisher =
+      notificationTopic.publish(PubSubOption.sendAll(true), PubSubOption.keepDuplicates(true));
+  private static final StringTopic selectedTabTopic =
+      NetworkTableInstance.getDefault().getStringTopic("/Elastic/SelectedTab");
+  private static final StringPublisher selectedTabPublisher =
+      selectedTabTopic.publish(PubSubOption.keepDuplicates(true));
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
@@ -28,10 +32,33 @@ public final class Elastic {
    */
   public static void sendNotification(Notification notification) {
     try {
-      publisher.set(objectMapper.writeValueAsString(notification));
+      notificationPublisher.set(objectMapper.writeValueAsString(notification));
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
+  }
+
+  /**
+   * Selects the tab of the dashboard with the given name. If no tab matches the name, this will
+   * have no effect on the widgets or tabs in view.
+   *
+   * <p>If the given name is a number, Elastic will select the tab whose index equals the number
+   * provided.
+   *
+   * @param tabName the name of the tab to select
+   */
+  public static void selectTab(String tabName) {
+    selectedTabPublisher.set(tabName);
+  }
+
+  /**
+   * Selects the tab of the dashboard at the given index. If this index is greater than or equal to
+   * the number of tabs, this will have no effect.
+   *
+   * @param tabIndex the index of the tab to select.
+   */
+  public static void selectTab(int tabIndex) {
+    selectTab(Integer.toString(tabIndex));
   }
 
   /**
@@ -59,8 +86,8 @@ public final class Elastic {
     private double height;
 
     /**
-     * Creates a new Notification with all default parameters. This constructor is intended
-     * to be used with the chainable decorator methods
+     * Creates a new Notification with all default parameters. This constructor is intended to be
+     * used with the chainable decorator methods
      *
      * <p>Title and description fields are empty.
      */
