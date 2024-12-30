@@ -522,16 +522,15 @@ class FieldWidget extends NTWidget {
         color: Colors.black.withOpacity(0.35),
         border: Border.all(
           color: model.robotColor,
-          width: 0.15 * min(width, length),
+          width: 0.125 * min(width, length),
         ),
       ),
       width: length,
       height: width,
       child: CustomPaint(
-        size: Size(length * 0.25, width * 0.25),
+        size: Size(length * 0.275, width * 0.275),
         painter: TrianglePainter(
-          strokeWidth: 0.15 * min(width, length),
-          strokeColor: const Color.fromARGB(255, 0, 255, 0),
+          strokeWidth: 0.08 * min(width, length),
         ),
       ),
     );
