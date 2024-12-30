@@ -45,7 +45,17 @@ class TabGridModel extends ChangeNotifier {
     required this.preferences,
     required Map<String, dynamic> jsonData,
     required this.onAddWidgetPressed,
-    Function(String message)? onJsonLoadingWarning,
+    void Function(String message)? onJsonLoadingWarning,
+  }) {
+    loadFromJson(
+      jsonData: jsonData,
+      onJsonLoadingWarning: onJsonLoadingWarning,
+    );
+  }
+
+  void loadFromJson({
+    required Map<String, dynamic> jsonData,
+    void Function(String message)? onJsonLoadingWarning,
   }) {
     if (jsonData['containers'] != null) {
       loadContainersFromJson(
@@ -57,15 +67,11 @@ class TabGridModel extends ChangeNotifier {
     if (jsonData['layouts'] != null) {
       loadLayoutsFromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
     }
-
-    for (WidgetContainerModel model in _widgetModels) {
-      model.addListener(notifyListeners);
-    }
   }
 
   void mergeFromJson({
     required Map<String, dynamic> jsonData,
-    Function(String message)? onJsonLoadingWarning,
+    void Function(String message)? onJsonLoadingWarning,
   }) {
     if (jsonData['containers'] != null) {
       for (Map<String, dynamic> widgetData in jsonData['containers']) {
@@ -172,7 +178,7 @@ class TabGridModel extends ChangeNotifier {
   void loadContainersFromJson(Map<String, dynamic> jsonData,
       {Function(String message)? onJsonLoadingWarning}) {
     for (Map<String, dynamic> containerData in jsonData['containers']) {
-      _widgetModels.add(
+      addWidget(
         NTWidgetContainerModel.fromJson(
           ntConnection: ntConnection,
           preferences: preferences,
@@ -222,7 +228,7 @@ class TabGridModel extends ChangeNotifier {
           continue;
       }
 
-      _widgetModels.add(widget);
+      addWidget(widget);
     }
   }
 
