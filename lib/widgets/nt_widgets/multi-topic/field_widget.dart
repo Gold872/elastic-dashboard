@@ -501,11 +501,6 @@ class FieldWidget extends NTWidget {
             (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
         scaleReduction;
 
-    // Offset positionOffset = center +
-    //     (Offset(xFromCenter + model.field.topLeftCorner.dx,
-    //             yFromCenter - model.field.topLeftCorner.dy)) *
-    //         scaleReduction;
-
     double width = (objectSize?.width ?? model.otherObjectSize) *
         model.field.pixelsPerMeterHorizontal *
         scaleReduction;
@@ -527,15 +522,17 @@ class FieldWidget extends NTWidget {
         color: Colors.black.withOpacity(0.35),
         border: Border.all(
           color: model.robotColor,
-          width: 4.0,
+          width: 0.15 * min(width, length),
         ),
       ),
       width: length,
       height: width,
       child: CustomPaint(
-        size: Size(width * 0.25, width * 0.25),
-        painter:
-            TrianglePainter(strokeColor: const Color.fromARGB(255, 0, 255, 0)),
+        size: Size(length * 0.25, width * 0.25),
+        painter: TrianglePainter(
+          strokeWidth: 0.15 * min(width, length),
+          strokeColor: const Color.fromARGB(255, 0, 255, 0),
+        ),
       ),
     );
 
@@ -742,10 +739,11 @@ class TrianglePainter extends CustomPainter {
   final PaintingStyle paintingStyle;
   final double strokeWidth;
 
-  TrianglePainter(
-      {this.strokeColor = Colors.white,
-      this.strokeWidth = 3,
-      this.paintingStyle = PaintingStyle.stroke});
+  TrianglePainter({
+    this.strokeColor = Colors.white,
+    this.strokeWidth = 3,
+    this.paintingStyle = PaintingStyle.stroke,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
