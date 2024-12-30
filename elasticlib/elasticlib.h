@@ -53,4 +53,23 @@ struct Notification {
  */
 void SendNotification(const Notification& notification);
 
+/**
+ * Selects the tab of the dashboard with the given name. If no tab matches the
+ * name, this will have no effect on the widgets or tabs in view.
+ *
+ * If the given name is a number, Elastic will select the tab whose index
+ * equals the number provided.
+ *
+ * @param tabName the name of the tab to select
+ */
+void SelectTab(std::string_view tabName);
+
+/**
+ * Selects the tab of the dashboard at the given index. If this index is greater
+ * than or equal to the number of tabs, this will have no effect.
+ *
+ * @param tabIndex the index of the tab to select.
+ */
+void SelectTab(int tabIndex);
+
 }  // namespace elastic

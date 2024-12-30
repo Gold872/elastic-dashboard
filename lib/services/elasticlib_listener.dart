@@ -6,15 +6,17 @@ import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
 
-class RobotNotificationsListener {
+class ElasticLibListener {
   bool _alertFirstRun = true;
   final NTConnection ntConnection;
   final Function(String title, String description, Icon icon,
       Duration displayTime, double width, double? height) onNotification;
+  final Function(Object tabIdentifier) onTabSelected;
 
-  RobotNotificationsListener({
+  ElasticLibListener({
     required this.ntConnection,
     required this.onNotification,
+    required this.onTabSelected,
   });
 
   void listen() {
@@ -25,6 +27,14 @@ class RobotNotificationsListener {
         return;
       }
       _onAlert(alertData, alertTimestamp);
+    });
+
+    var tabSelection = ntConnection.subscribe('/Elastic/SelectedTab', 0.2);
+    tabSelection.listen((tabData, _) {
+      if (tabData == null || tabData is! String) {
+        return;
+      }
+      onTabSelected(int.tryParse(tabData) ?? tabData);
     });
 
     ntConnection.addDisconnectedListener(() => _alertFirstRun = true);

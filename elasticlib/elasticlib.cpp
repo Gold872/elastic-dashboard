@@ -6,6 +6,7 @@
 #include "elasticlib.h"
 
 #include <exception>
+#include <string>
 
 #include <fmt/core.h>
 #include <networktables/NetworkTableInstance.h>
@@ -48,6 +49,20 @@ void SendNotification(const Notification& notification) {
   } catch (...) {
     fmt::println(stderr, "Unknown error occurred while processing JSON.");
   }
+}
+
+void SelectTab(std::string_view tabName) {
+  static nt::StringTopic topic =
+      nt::NetworkTableInstance::GetDefault().GetStringTopic(
+          "/Elastic/SelectedTab");
+  static nt::StringPublisher publisher =
+      topic.Publish({.keepDuplicates = true});
+
+  publisher.Set(tabName);
+}
+
+void SelectTab(int tabIndex) {
+  SelectTab(std::to_string(tabIndex));
 }
 
 }  // namespace elastic
