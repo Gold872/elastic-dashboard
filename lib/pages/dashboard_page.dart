@@ -133,6 +133,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
           grid.onNTConnect();
         }
+        _showShuffleboardWarningMessage();
       });
     });
 
@@ -811,7 +812,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       background: colorScheme.surface,
       showProgressIndicator: false,
       width: 450,
-      height: 160,
+      height: 250,
       position: Alignment.bottomRight,
       icon: const Icon(Icons.warning, color: Colors.yellow),
       action: TextButton(
@@ -838,9 +839,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
       ),
       description: const Text(
-        'Support for the Shuffleboard API is deprecated in favor of remote layout downloading and will be removed after the 2025 season. See the documentation for more details about migration.',
+        'Support for the Shuffleboard API is deprecated in favor of remote layout downloading and will be removed after the 2025 season.\n\nAn alternative layout system is provided in the form of remote layout downloading. See the documentation for more details about migration.',
         overflow: TextOverflow.ellipsis,
-        maxLines: 4,
+        maxLines: 7,
       ),
     );
 
@@ -1217,25 +1218,25 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was created by Team 353, the POBots in the summer of 2023. The motivation was to provide teams an alternative to WPILib\'s Shuffleboard dashboard.\n',
+            'Elastic was created by Nadav from FRC Team 353, the POBots, in the Summer of 2023.\n',
           ),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'The goal of Elastic is to have the essential features of Shuffleboard, but with a more elegant and modern display, and offer more customizability and performance.\n',
+            'The goal of Elastic is to have the essential features needed for a driver dashboard, but with an elegant and modern display and a focus on customizability and performance.\n',
           ),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic is an ongoing project, if you have any ideas, feedback, or found any bugs, feel free to share them on the Github page!\n',
+            'Elastic is an ongoing project; if you have any ideas, feedback, or bug reports, feel free to share them on the Github page!\n',
           ),
         ),
         Container(
           constraints: const BoxConstraints(maxWidth: 353),
           child: const Text(
-            'Elastic was built with some inspiration from Michael Jansen\'s projects and his Dart NT4 library, along with significant help from Jason and Peter from WPILib.\n',
+            'Elastic was built with inspiration from Shuffleboard and AdvantageScope, along with significant help from FRC and WPILib developers.\n',
           ),
         ),
         Row(

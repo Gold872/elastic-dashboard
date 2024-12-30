@@ -12,13 +12,11 @@ _Important Notes/Warnings:_
 
 ## About
 
-Elastic is a simple and modern Shuffleboard alternative made by Team 353. It is meant to serve as a dashboard for competition but can also be used for testing. Some features include
-
-- Viewing data from different NT4 topics and widgets
-- Draggable and resizable card widgets
-- Customizable color scheme
-- Automatic IP retrieval from the FRC Driver Station
-- Compatibility with the WPILib Shuffleboard API
+Elastic is a simple and modern FRC dashboard made by Nadav from FRC Team 353. It is meant to be used behind the glass as a competition driver dashboard, but it can also be used for testing. Some unique features include:
+* Customizable color scheme with over 20 variants
+* Subscription sharing to reduce bandwidth consumption
+* Optimized camera streams which automatically deactivate when not in use
+* Automatic height resizing to the FRC Driver Station
 
 ![Example Layout](/screenshots/example_layout.png)
 
@@ -33,12 +31,4 @@ This dashboard wouldn't have been made without the help and inspiration from the
 * [Jonah](https://github.com/jwbonner) from Team 6328
 * [Oh yes 10 FPS](https://github.com/oh-yes-0-fps) from Team 3173
 * [Jason](https://github.com/jasondaming) and [Peter](https://github.com/PeterJohnson) from WPILib
-* [MikLast](https://www.chiefdelphi.com/u/MikLast), FRC Alum, Mentor, & Volunteer
-    * Created all of the field images that were used in this program:
-        * [Power Up](https://www.chiefdelphi.com/t/pic-top-down-orthographic-view-of-the-field/161896)
-        * [Destination: Deep Space](https://www.chiefdelphi.com/t/8k-2019-top-down-orthographic-field-views/337019)
-        * [Infinite Recharge](https://www.chiefdelphi.com/t/2020-top-down-orthographic-field-views/369892)
-        * [Rapid React](https://www.chiefdelphi.com/t/2022-top-down-field-renders/399031)
-        * [Charged Up](https://www.chiefdelphi.com/t/2023-top-down-field-renders/421365)
-        * [Crescendo](https://www.chiefdelphi.com/t/2024-crescendo-top-down-field-renders/447764)
 * All mentors and advisors of Team 353, the POBots
