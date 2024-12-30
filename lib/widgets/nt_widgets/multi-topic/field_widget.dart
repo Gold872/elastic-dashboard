@@ -480,12 +480,12 @@ class FieldWidget extends NTWidget {
   const FieldWidget({super.key});
 
   Widget _getTransformedFieldObject(
-      FieldWidgetModel model,
-      List<double> objectPosition,
-      Offset center,
-      Offset fieldCenter,
-      double scaleReduction,
-      {Size? objectSize}) {
+    FieldWidgetModel model, {
+    required List<double> objectPosition,
+    required Offset fieldCenter,
+    required double scaleReduction,
+    Size? objectSize,
+  }) {
     for (int i = 0; i < objectPosition.length; i++) {
       if (!objectPosition[i].isFinite) {
         objectPosition[i] = 0.0;
@@ -543,11 +543,11 @@ class FieldWidget extends NTWidget {
   }
 
   Offset _getTrajectoryPointOffset(
-      FieldWidgetModel model,
-      List<double> objectPosition,
-      Offset center,
-      Offset fieldCenter,
-      double scaleReduction) {
+    FieldWidgetModel model, {
+    required List<double> objectPosition,
+    required Offset fieldCenter,
+    required double scaleReduction,
+  }) {
     for (int i = 0; i < objectPosition.length; i++) {
       if (!objectPosition[i].isFinite) {
         objectPosition[i] = 0.0;
@@ -610,7 +610,6 @@ class FieldWidget extends NTWidget {
               size,
             );
 
-            Offset center = size.toOffset / 2;
             Offset fittedCenter = fittedSizes.destination.toOffset / 2;
             Offset fieldCenter = model.field.center;
 
@@ -638,13 +637,12 @@ class FieldWidget extends NTWidget {
             }
 
             Widget robot = _getTransformedFieldObject(
-                model,
-                robotPosition ?? [0.0, 0.0, 0.0],
-                center,
-                fieldCenter,
-                scaleReduction,
-                objectSize:
-                    Size(model.robotWidthMeters, model.robotLengthMeters));
+              model,
+              objectPosition: robotPosition ?? [0.0, 0.0, 0.0],
+              fieldCenter: fieldCenter,
+              scaleReduction: scaleReduction,
+              objectSize: Size(model.robotWidthMeters, model.robotLengthMeters),
+            );
 
             List<Widget> otherObjects = [];
             List<List<Offset>> trajectoryPoints = [];
@@ -679,20 +677,18 @@ class FieldWidget extends NTWidget {
                     trajectoryPoints.last.add(
                       _getTrajectoryPointOffset(
                         model,
-                        objectPosition.sublist(i, i + 2),
-                        center,
-                        fieldCenter,
-                        scaleReduction,
+                        objectPosition: objectPosition.sublist(i, i + 2),
+                        fieldCenter: fieldCenter,
+                        scaleReduction: scaleReduction,
                       ),
                     );
                   } else {
                     otherObjects.add(
                       _getTransformedFieldObject(
                         model,
-                        objectPosition.sublist(i, i + 3),
-                        center,
-                        fieldCenter,
-                        scaleReduction,
+                        objectPosition: objectPosition.sublist(i, i + 3),
+                        fieldCenter: fieldCenter,
+                        scaleReduction: scaleReduction,
                       ),
                     );
                   }
