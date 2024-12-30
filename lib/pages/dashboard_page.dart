@@ -83,7 +83,7 @@ class DashboardPage extends StatefulWidget {
   final String version;
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final UpdateChecker updateChecker;
+  final UpdateChecker? updateChecker;
   final ElasticLayoutDownloader? layoutDownloader;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
@@ -93,7 +93,7 @@ class DashboardPage extends StatefulWidget {
     required this.ntConnection,
     required this.preferences,
     required this.version,
-    required this.updateChecker,
+    this.updateChecker,
     this.layoutDownloader,
     this.onColorChanged,
     this.onThemeVariantChanged,
@@ -106,6 +106,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   SharedPreferences get preferences => widget.preferences;
   late final RobotNotificationsListener _robotNotificationListener;
+  late final UpdateChecker _updateChecker;
   late final ElasticLayoutDownloader _layoutDownloader;
 
   bool _seenShuffleboardWarning = false;
@@ -279,11 +280,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       apiListener.initializeListeners();
     });
 
-    if (!isWPILib) {
-      Future(
-          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
-    }
-
     _robotNotificationListener = RobotNotificationsListener(
         ntConnection: widget.ntConnection,
         onNotification: (title, description, icon, time, width, height) {
@@ -319,6 +315,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _layoutDownloader =
         widget.layoutDownloader ?? ElasticLayoutDownloader(Client());
+
+    _updateChecker =
+        widget.updateChecker ?? UpdateChecker(currentVersion: widget.version);
+
+    if (!isWPILib) {
+      Future(
+          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    }
   }
 
   @override
@@ -415,7 +419,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
     UpdateCheckerResponse updateResponse =
-        await widget.updateChecker.isUpdateAvailable();
+        await _updateChecker.isUpdateAvailable();
 
     if (mounted) {
       setState(() => lastUpdateResponse = updateResponse);

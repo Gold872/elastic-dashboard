@@ -20,7 +20,6 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/services/update_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -217,7 +216,6 @@ class _ElasticState extends State<Elastic> {
         ntConnection: widget.ntConnection,
         preferences: widget.preferences,
         version: widget.version,
-        updateChecker: UpdateChecker(currentVersion: widget.version),
         onColorChanged: (color) => setState(() {
           teamColor = color;
           widget.preferences.setInt(PrefKeys.teamColor, color.value);
