@@ -18,7 +18,6 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -782,7 +781,7 @@ void main() {
     testWidgets('switching tabs', (widgetTester) async {
       FlutterError.onError = ignoreOverflowErrors;
 
-      NTConnection ntConnection = createMockOnlineNT4(
+      MockNTConnection ntConnection = createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
             name: '/Shuffleboard/.metadata/Selected',
@@ -837,174 +836,29 @@ void main() {
     });
   });
 
-  group('[Remote Layouts]:', () {
-    setUp(() async {
-      SharedPreferences.setMockInitialValues({
-        PrefKeys.ipAddress: '127.0.0.1',
-        PrefKeys.layoutLocked: false,
-      });
-
-      preferences = await SharedPreferences.getInstance();
-    });
-
-    testWidgets('Shows list of layouts', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      Client mockClient = createHttpClient(
-        mockGetResponses: {
-          'http://127.0.0.1:5800/?format=json':
-              Response(jsonEncode(layoutFiles), 200)
-        },
-      );
-
-      ElasticLayoutDownloader layoutDownloader =
-          ElasticLayoutDownloader(mockClient);
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-            layoutDownloader: layoutDownloader,
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
-
-      expect(find.text('File'), findsOneWidget);
-      await widgetTester.tap(find.text('File'));
-      await widgetTester.pumpAndSettle();
-
-      expect(find.text('Download From Robot'), findsOneWidget);
-      await widgetTester.tap(find.text('Download From Robot'));
-      await widgetTester.pumpAndSettle();
-
-      expect(find.text('Select Layout'), findsOneWidget);
-      expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
-
-      await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
-      await widgetTester.pumpAndSettle();
-
-      expect(find.text('elastic-layout 1'), findsOneWidget);
-      expect(find.text('elastic-layout 2'), findsOneWidget);
-    });
-
-    group('Download layout', () {
-      testWidgets('without merges', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode(layoutFiles), 200),
-            'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-                Response(jsonEncode(layoutOne), 200),
-          },
-        );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
-
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
-            ),
-          ),
-        );
-
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Select Layout'), findsOneWidget);
-        expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
-
-        await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('elastic-layout 1'), findsOneWidget);
-
-        await widgetTester.tap(find.text('elastic-layout 1'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Download'), findsOneWidget);
-        await widgetTester.tap(find.text('Download'));
-        await widgetTester.pump(Duration.zero);
-
-        expect(
-            find.widgetWithText(
-                ElegantNotification, 'Successfully Downloaded Layout'),
-            findsOneWidget);
-
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Test Tab'), findsOneWidget);
-        await widgetTester.tap(find.text('Test Tab'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.byType(Gyro), findsNWidgets(2));
-      });
-
-      testWidgets('with merges', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode(layoutFiles), 200),
-            'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-                Response(jsonEncode(layoutOne), 200),
-          },
-        );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
-
+  group('[ElasticLib]', () {
+    group('[Remote Layouts]:', () {
+      setUp(() async {
         SharedPreferences.setMockInitialValues({
-          PrefKeys.layout: jsonEncode({
-            'version': 1.0,
-            'grid_size': 128.0,
-            'tabs': [
-              {
-                'name': 'Test Tab',
-                'grid_layout': {
-                  'layouts': [],
-                  'containers': [
-                    {
-                      'title': 'Blocking Widget',
-                      'x': 384.0,
-                      'y': 128.0,
-                      'width': 256.0,
-                      'height': 256.0,
-                      'type': 'Text Display',
-                      'properties': {
-                        'topic': '/Test Tab/Blocking Widget',
-                        'period': 0.06,
-                      },
-                    }
-                  ],
-                },
-              },
-            ],
-          }),
           PrefKeys.ipAddress: '127.0.0.1',
+          PrefKeys.layoutLocked: false,
         });
 
-        SharedPreferences preferences = await SharedPreferences.getInstance();
+        preferences = await SharedPreferences.getInstance();
+      });
+
+      testWidgets('Shows list of layouts', (widgetTester) async {
+        FlutterError.onError = ignoreOverflowErrors;
+
+        Client mockClient = createHttpClient(
+          mockGetResponses: {
+            'http://127.0.0.1:5800/?format=json':
+                Response(jsonEncode(layoutFiles), 200)
+          },
+        );
+
+        ElasticLayoutDownloader layoutDownloader =
+            ElasticLayoutDownloader(mockClient);
 
         await widgetTester.pumpWidget(
           MaterialApp(
@@ -1035,259 +889,505 @@ void main() {
         await widgetTester.pumpAndSettle();
 
         expect(find.text('elastic-layout 1'), findsOneWidget);
+        expect(find.text('elastic-layout 2'), findsOneWidget);
+      });
 
-        await widgetTester.tap(find.text('elastic-layout 1'));
-        await widgetTester.pumpAndSettle();
+      group('Download layout', () {
+        testWidgets('without merges', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
 
-        expect(find.text('Download'), findsOneWidget);
-        await widgetTester.tap(find.text('Download'));
-        await widgetTester.pump(Duration.zero);
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json':
+                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                  Response(jsonEncode(layoutOne), 200),
+            },
+          );
 
-        expect(
-            find.widgetWithText(
-                ElegantNotification, 'Successfully Downloaded Layout'),
-            findsOneWidget);
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
 
-        await widgetTester.pumpAndSettle();
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
 
-        expect(find.text('Test Tab'), findsOneWidget);
-        await widgetTester.tap(find.text('Test Tab'));
-        await widgetTester.pumpAndSettle();
+          await widgetTester.pumpAndSettle();
 
-        expect(find.text('Blocking Widget'), findsOneWidget);
-        expect(find.byType(Gyro), findsOneWidget);
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Select Layout'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('elastic-layout 1'), findsOneWidget);
+
+          await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download'), findsOneWidget);
+          await widgetTester.tap(find.text('Download'));
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                  ElegantNotification, 'Successfully Downloaded Layout'),
+              findsOneWidget);
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Test Tab'), findsOneWidget);
+          await widgetTester.tap(find.text('Test Tab'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.byType(Gyro), findsNWidgets(2));
+        });
+
+        testWidgets('with merges', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json':
+                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                  Response(jsonEncode(layoutOne), 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          SharedPreferences.setMockInitialValues({
+            PrefKeys.layout: jsonEncode({
+              'version': 1.0,
+              'grid_size': 128.0,
+              'tabs': [
+                {
+                  'name': 'Test Tab',
+                  'grid_layout': {
+                    'layouts': [],
+                    'containers': [
+                      {
+                        'title': 'Blocking Widget',
+                        'x': 384.0,
+                        'y': 128.0,
+                        'width': 256.0,
+                        'height': 256.0,
+                        'type': 'Text Display',
+                        'properties': {
+                          'topic': '/Test Tab/Blocking Widget',
+                          'period': 0.06,
+                        },
+                      }
+                    ],
+                  },
+                },
+              ],
+            }),
+            PrefKeys.ipAddress: '127.0.0.1',
+          });
+
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Select Layout'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('elastic-layout 1'), findsOneWidget);
+
+          await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download'), findsOneWidget);
+          await widgetTester.tap(find.text('Download'));
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                  ElegantNotification, 'Successfully Downloaded Layout'),
+              findsOneWidget);
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Test Tab'), findsOneWidget);
+          await widgetTester.tap(find.text('Test Tab'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Blocking Widget'), findsOneWidget);
+          expect(find.byType(Gyro), findsOneWidget);
+        });
+      });
+
+      group('Shows error when', () {
+        testWidgets('network tables is disconnected', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient();
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOfflineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pump(Duration.zero);
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                ElegantNotification,
+                'Cannot fetch remote layouts while disconnected from the robot',
+              ),
+              findsOneWidget);
+        });
+
+        testWidgets('layout fetching is not a json', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json': Response('[1, 2, 3]', 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pump(Duration.zero);
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                ElegantNotification,
+                'Response was not a json object',
+              ),
+              findsOneWidget);
+        });
+
+        testWidgets('layout json does not list files', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json': Response('{}', 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pump(Duration.zero);
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                ElegantNotification,
+                'Response json does not contain files list',
+              ),
+              findsOneWidget);
+        });
+
+        testWidgets('layout json has empty files list', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json':
+                  Response(jsonEncode({'files': []}), 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pump(Duration.zero);
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                ElegantNotification,
+                'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
+              ),
+              findsOneWidget);
+        });
+
+        testWidgets('selected file was not found', (widgetTester) async {
+          FlutterError.onError = ignoreOverflowErrors;
+
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json':
+                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                  Response('', 404),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          await widgetTester.pumpWidget(
+            MaterialApp(
+              home: DashboardPage(
+                ntConnection: createMockOnlineNT4(),
+                preferences: preferences,
+                version: '0.0.0.0',
+                updateChecker: createMockUpdateChecker(),
+                layoutDownloader: layoutDownloader,
+              ),
+            ),
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Select Layout'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('elastic-layout 1'), findsOneWidget);
+
+          await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download'), findsOneWidget);
+          await widgetTester.tap(find.text('Download'));
+          await widgetTester.pump(Duration.zero);
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                ElegantNotification,
+                'File "elastic-layout 1.json" was not found',
+              ),
+              findsOneWidget);
+        });
       });
     });
-
-    group('Shows error when', () {
-      testWidgets('network tables is disconnected', (widgetTester) async {
+    group('[Tab Selection]:', () {
+      testWidgets('Passing in tab indexes', (widgetTester) async {
         FlutterError.onError = ignoreOverflowErrors;
 
-        Client mockClient = createHttpClient();
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
+        MockNTConnection ntConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: '/Elastic/SelectedTab',
+              type: NT4TypeStr.kString,
+              properties: {},
+            ),
+          ],
+        );
 
         await widgetTester.pumpWidget(
           MaterialApp(
             home: DashboardPage(
-              ntConnection: createMockOfflineNT4(),
+              ntConnection: ntConnection,
               preferences: preferences,
               version: '0.0.0.0',
               updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
             ),
           ),
         );
 
         await widgetTester.pumpAndSettle();
 
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
+        final editableTabBar = find.byType(EditableTabBar);
+
+        expect(editableTabBar, findsOneWidget);
+
+        editableTabBarWidget() =>
+            (editableTabBar.evaluate().first.widget as EditableTabBar);
+
+        ntConnection.updateDataFromTopicName('/Elastic/SelectedTab', '1');
+
         await widgetTester.pumpAndSettle();
 
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pump(Duration.zero);
-        await widgetTester.pump(Duration.zero);
+        expect(editableTabBarWidget().currentIndex, 1);
 
-        expect(
-            find.widgetWithText(
-              ElegantNotification,
-              'Cannot fetch remote layouts while disconnected from the robot',
-            ),
-            findsOneWidget);
+        ntConnection.updateDataFromTopicName('/Elastic/SelectedTab', '10');
+
+        await widgetTester.pumpAndSettle();
+
+        expect(editableTabBarWidget().currentIndex, 1,
+            reason:
+                'Selected tab should not change since tab index is out of range');
       });
 
-      testWidgets('layout fetching is not a json', (widgetTester) async {
+      testWidgets('Passing in tab names', (widgetTester) async {
         FlutterError.onError = ignoreOverflowErrors;
 
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json': Response('[1, 2, 3]', 200),
-          },
+        MockNTConnection ntConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: '/Elastic/SelectedTab',
+              type: NT4TypeStr.kString,
+              properties: {},
+            ),
+          ],
         );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
 
         await widgetTester.pumpWidget(
           MaterialApp(
             home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
+              ntConnection: ntConnection,
               preferences: preferences,
               version: '0.0.0.0',
               updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
             ),
           ),
         );
 
         await widgetTester.pumpAndSettle();
 
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
-        await widgetTester.pumpAndSettle();
+        final editableTabBar = find.byType(EditableTabBar);
 
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pump(Duration.zero);
-        await widgetTester.pump(Duration.zero);
+        expect(editableTabBar, findsOneWidget);
 
-        expect(
-            find.widgetWithText(
-              ElegantNotification,
-              'Response was not a json object',
-            ),
-            findsOneWidget);
-      });
+        editableTabBarWidget() =>
+            (editableTabBar.evaluate().first.widget as EditableTabBar);
 
-      testWidgets('layout json does not list files', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json': Response('{}', 200),
-          },
-        );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
-
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
-            ),
-          ),
-        );
+        ntConnection.updateDataFromTopicName(
+            '/Elastic/SelectedTab', 'Autonomous');
 
         await widgetTester.pumpAndSettle();
 
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
-        await widgetTester.pumpAndSettle();
+        expect(editableTabBarWidget().currentIndex, 1);
 
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pump(Duration.zero);
-        await widgetTester.pump(Duration.zero);
-
-        expect(
-            find.widgetWithText(
-              ElegantNotification,
-              'Response json does not contain files list',
-            ),
-            findsOneWidget);
-      });
-
-      testWidgets('layout json has empty files list', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode({'files': []}), 200),
-          },
-        );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
-
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
-            ),
-          ),
-        );
+        ntConnection.updateDataFromTopicName(
+            '/Elastic/SelectedTab', 'Random Tab');
 
         await widgetTester.pumpAndSettle();
 
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pump(Duration.zero);
-        await widgetTester.pump(Duration.zero);
-
-        expect(
-            find.widgetWithText(
-              ElegantNotification,
-              'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
-            ),
-            findsOneWidget);
-      });
-
-      testWidgets('selected file was not found', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
-        Client mockClient = createHttpClient(
-          mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode(layoutFiles), 200),
-            'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-                Response('', 404),
-          },
-        );
-
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
-
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
-            ),
-          ),
-        );
-
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('File'), findsOneWidget);
-        await widgetTester.tap(find.text('File'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Download From Robot'), findsOneWidget);
-        await widgetTester.tap(find.text('Download From Robot'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Select Layout'), findsOneWidget);
-        expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
-
-        await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('elastic-layout 1'), findsOneWidget);
-
-        await widgetTester.tap(find.text('elastic-layout 1'));
-        await widgetTester.pumpAndSettle();
-
-        expect(find.text('Download'), findsOneWidget);
-        await widgetTester.tap(find.text('Download'));
-        await widgetTester.pump(Duration.zero);
-        await widgetTester.pump(Duration.zero);
-
-        expect(
-            find.widgetWithText(
-              ElegantNotification,
-              'File "elastic-layout 1.json" was not found',
-            ),
-            findsOneWidget);
+        expect(editableTabBarWidget().currentIndex, 1,
+            reason:
+                'Selected tab should not change since tab name doesnt exist');
       });
     });
   });

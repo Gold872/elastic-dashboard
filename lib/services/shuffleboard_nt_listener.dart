@@ -22,8 +22,6 @@ class ShuffleboardNTListener {
 
   late NT4Subscription selectedSubscription;
 
-  String? previousSelection;
-
   Map<String, Map<String, dynamic>> currentJsonData = {};
 
   late final NetworkTableTreeRow shuffleboardTreeRoot = NetworkTableTreeRow(
@@ -46,15 +44,12 @@ class ShuffleboardNTListener {
 
   void initializeListeners() {
     selectedSubscription.addListener(() {
-      if (selectedSubscription.value is! String?) {
+      if (selectedSubscription.value == null ||
+          selectedSubscription.value is! String) {
         return;
       }
 
-      if (selectedSubscription.value != null) {
-        _handleTabChange(selectedSubscription.value! as String);
-      }
-
-      previousSelection = selectedSubscription.value! as String;
+      _handleTabChange(selectedSubscription.value! as String);
     });
 
     // Also clear data when connected in case if threads auto populate json after disconnection
@@ -62,13 +57,11 @@ class ShuffleboardNTListener {
     ntConnection.addConnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
-      previousSelection = null;
     });
 
     ntConnection.addDisconnectedListener(() {
       currentJsonData.clear();
       shuffleboardTreeRoot.clearRows();
-      previousSelection = null;
     });
 
     ntConnection.addTopicAnnounceListener((topic) async {
