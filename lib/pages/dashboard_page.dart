@@ -632,13 +632,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     _tabData.clear();
   }
 
-  void _loadLayoutFromJsonData(String jsonString) {
+  bool _loadLayoutFromJsonData(String jsonString) {
     logger.info('Loading layout from json');
     Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
 
     if (!_validateJsonData(jsonData)) {
       _createDefaultTabs();
-      return;
+      return false;
     }
 
     if (jsonData!.containsKey('grid_size')) {
@@ -668,6 +668,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     if (_currentTabIndex >= _tabData.length) {
       _currentTabIndex = _tabData.length - 1;
     }
+
+    return true;
   }
 
   bool _mergeLayoutFromJsonData(String jsonString) {
@@ -724,6 +726,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
+    int overwritten = 0;
     for (Map<String, dynamic> tabJson in jsonData!['tabs']) {
       String tabName = tabJson['name'];
       if (!_tabData.any((tab) => tab.name == tabName)) {
@@ -740,6 +743,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           ),
         );
       } else {
+        overwritten++;
         TabGridModel existingTab =
             _tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
         existingTab.onDestroy();
@@ -752,7 +756,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _showInfoNotification(
       title: 'Successfully Downloaded Layout',
-      message: 'Remote layout has been successfully downloaded!',
+      message:
+          'Remote layout has been successfully downloaded, $overwritten tabs were overwritten.',
       width: 350,
     );
   }
@@ -907,7 +912,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       case LayoutDownloadMode.overwrite:
         setState(() => _overwriteLayoutFromJsonData(response.data));
       case LayoutDownloadMode.reload:
-        setState(() => _loadLayoutFromJsonData(response.data));
+        setState(() {
+          bool success = _loadLayoutFromJsonData(response.data);
+          if (success) {
+            _showInfoNotification(
+              title: 'Successfully Downloaded Layout',
+              message: 'Remote layout has been successfully downloaded!',
+              width: 350,
+            );
+          }
+        });
     }
   }
 

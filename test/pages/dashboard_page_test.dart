@@ -1039,6 +1039,7 @@ void main() {
             find.widgetWithText(
                 ElegantNotification, 'Successfully Downloaded Layout'),
             findsOneWidget);
+        expect(find.textContaining('1 tabs were overwritten'), findsOneWidget);
 
         await widgetTester.pumpAndSettle();
 
@@ -1288,6 +1289,11 @@ void main() {
         expect(find.text('Download'), findsOneWidget);
         await widgetTester.tap(find.text('Download'));
         await widgetTester.pump(Duration.zero);
+
+        expect(
+            find.widgetWithText(
+                ElegantNotification, 'Successfully Downloaded Layout'),
+            findsOneWidget);
 
         await widgetTester.pumpAndSettle();
 
