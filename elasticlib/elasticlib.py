@@ -41,8 +41,11 @@ class Notification:
         self.height = height
 
 
-__topic = None
-__publisher = None
+__selected_tab_topic = None
+__selected_tab_publisher = None
+
+__notification_topic = None
+__notification_publisher = None
 
 
 def send_notification(notification: Notification):
@@ -56,18 +59,20 @@ def send_notification(notification: Notification):
     Raises:
         Exception: If there is an error during serialization or publishing the notification.
     """
-    global __topic
-    global __publisher
+    global __notification_topic
+    global __notification_publisher
 
-    if not __topic:
-        __topic = NetworkTableInstance.getDefault().getStringTopic(
+    if not __notification_topic:
+        __notification_topic = NetworkTableInstance.getDefault().getStringTopic(
             "/Elastic/RobotNotifications"
         )
-    if not __publisher:
-        __publisher = __topic.publish(PubSubOptions(sendAll=True, keepDuplicates=True))
+    if not __notification_publisher:
+        __notification_publisher = __notification_topic.publish(
+            PubSubOptions(sendAll=True, keepDuplicates=True)
+        )
 
     try:
-        __publisher.set(
+        __notification_publisher.set(
             json.dumps(
                 {
                     "level": notification.level,
@@ -81,3 +86,38 @@ def send_notification(notification: Notification):
         )
     except Exception as e:
         print(f"Error serializing notification: {e}")
+
+
+def select_tab(tab_name: str):
+    """
+    Selects the tab of the dashboard with the given name.
+    If no tab matches the name, this will have no effect on the widgets or tabs in view.
+    If the given name is a number, Elastic will select the tab whose index equals the number provided.
+
+    Args:
+        tab_name (str) the name of the tab to select
+    """
+    global __selected_tab_topic
+    global __selected_tab_publisher
+
+    if not __selected_tab_topic:
+        __selected_tab_topic = NetworkTableInstance.getDefault().getStringTopic(
+            "/Elastic/SelectedTab"
+        )
+    if not __selected_tab_publisher:
+        __selected_tab_publisher = __selected_tab_topic.publish(
+            PubSubOptions(keepDuplicates=True)
+        )
+
+    __selected_tab_publisher.set(tab_name)
+
+
+def select_tab_index(tab_index: int):
+    """
+    Selects the tab of the dashboard at the given index.
+    If this index is greater than or equal to the number of tabs, this will have no effect.
+
+    Args:
+        tab_index (int) the index of the tab to select
+    """
+    select_tab(str(tab_index))
