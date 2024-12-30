@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -178,5 +181,90 @@ void main() {
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
         find.text('Waiting for Network Tables connection...'), findsOneWidget);
+  });
+
+  testWidgets('Camera stream edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    CameraStreamModel cameraStreamModel = CameraStreamModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Camera Stream',
+      period: 0.100,
+      compression: 50,
+      fps: 60,
+      resolution: const Size(100.0, 100.0),
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'Camera Stream',
+      childModel: cameraStreamModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final fps = find.widgetWithText(DialogTextInput, 'FPS');
+    final width = find.widgetWithText(DialogTextInput, 'Width');
+    final height = find.widgetWithText(DialogTextInput, 'Height');
+    final quality = find.byType(Slider);
+
+    expect(fps, findsOneWidget);
+    expect(width, findsOneWidget);
+    expect(height, findsOneWidget);
+    expect(quality, findsOneWidget);
+
+    await widgetTester.enterText(fps, '25');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.fps, 25);
+
+    await widgetTester.enterText(fps, '0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.fps, isNull);
+
+    await widgetTester.enterText(width, '640');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.resolution?.width, 640);
+
+    await widgetTester.enterText(height, '480');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.resolution?.height, 480);
+
+    await widgetTester.enterText(width, '0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.resolution, isNull);
+
+    await widgetTester.drag(quality, const Offset(100, 0));
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.quality, isNotNull);
+
+    await widgetTester.drag(quality, const Offset(-100, 0));
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.quality, isNull);
   });
 }

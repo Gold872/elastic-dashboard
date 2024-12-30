@@ -27,14 +27,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   String _trueIcon = 'None';
   String _falseIcon = 'None';
 
-  get trueColor => _trueColor;
+  Color get trueColor => _trueColor;
 
   set trueColor(value) {
     _trueColor = value;
     refresh();
   }
 
-  get falseColor => _falseColor;
+  Color get falseColor => _falseColor;
 
   set falseColor(value) {
     _falseColor = value;
@@ -43,14 +43,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
 
   String get trueIcon => _trueIcon;
 
-  set trueIcon(value) {
+  set trueIcon(String value) {
     _trueIcon = value;
     refresh();
   }
 
   String get falseIcon => _falseIcon;
 
-  set falseIcon(value) {
+  set falseIcon(String value) {
     _falseIcon = value;
     refresh();
   }
@@ -162,8 +162,11 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
             child: Column(
               children: [
                 const Text('True Icon'),
-                DialogDropdownChooser(
+                DialogDropdownChooser<String>(
                   onSelectionChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
                     trueIcon = value;
                   },
                   choices: _trueIconOptions,
@@ -177,8 +180,11 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
             child: Column(
               children: [
                 const Text('False Icon'),
-                DialogDropdownChooser(
+                DialogDropdownChooser<String>(
                   onSelectionChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
                     falseIcon = value;
                   },
                   choices: _falseIconOptions,

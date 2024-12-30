@@ -6,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/yagsl_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -89,5 +93,81 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(CustomPaint), findsWidgets);
+  });
+
+  testWidgets('YAGSL swerve drive edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    YAGSLSwerveDriveModel yagslSwerveModel = YAGSLSwerveDriveModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/YAGSL Swerve Drive',
+      period: 0.100,
+      showRobotRotation: true,
+      showDesiredStates: true,
+      angleOffset: 90.0,
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.zero,
+      title: 'YAGSL Swerve Drive',
+      childModel: yagslSwerveModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final showRobotRotation =
+        find.widgetWithText(DialogToggleSwitch, 'Show Robot Rotation');
+    final showDesiredStates =
+        find.widgetWithText(DialogToggleSwitch, 'Show Desired States');
+    final angleOffset =
+        find.widgetWithText(DialogTextInput, 'Angle Offset (Degrees)');
+
+    expect(showRobotRotation, findsOneWidget);
+    expect(showDesiredStates, findsOneWidget);
+    expect(angleOffset, findsOneWidget);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showRobotRotation,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(yagslSwerveModel.showRobotRotation, false);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: showDesiredStates,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(yagslSwerveModel.showDesiredStates, false);
+
+    await widgetTester.enterText(angleOffset, '45.0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(yagslSwerveModel.angleOffset, 45.0);
   });
 }

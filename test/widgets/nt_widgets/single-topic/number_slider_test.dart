@@ -8,6 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
+import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_slider.dart';
 import '../../../test_util.dart';
@@ -275,5 +279,103 @@ void main() {
 
     expect(
         ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType, int);
+  });
+
+  testWidgets('Number slider edit properties', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    NumberSliderModel numberSliderModel = NumberSliderModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Double Value',
+      dataType: 'double',
+      period: 0.100,
+      minValue: -5.0,
+      maxValue: 5.0,
+      divisions: 5,
+      updateContinuously: false,
+    );
+
+    NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
+      ntConnection: ntConnection,
+      preferences: preferences,
+      initialPosition: Rect.fromLTWH(
+        0,
+        0,
+        3 * NTWidgetBuilder.getNormalSize(),
+        NTWidgetBuilder.getNormalSize(),
+      ),
+      title: 'Number Slider',
+      childModel: numberSliderModel,
+    );
+
+    final key = GlobalKey();
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChangeNotifierProvider<NTWidgetContainerModel>.value(
+            key: key,
+            value: ntContainerModel,
+            child: const DraggableNTWidgetContainer(),
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    ntContainerModel.showEditProperties(key.currentContext!);
+
+    await widgetTester.pumpAndSettle();
+
+    final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
+    final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
+    final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
+    final updateWhileDragging =
+        find.widgetWithText(DialogToggleSwitch, 'Update While Dragging');
+
+    expect(minimum, findsOneWidget);
+    expect(maximum, findsOneWidget);
+    expect(divisions, findsOneWidget);
+    expect(updateWhileDragging, findsOneWidget);
+
+    await widgetTester.enterText(minimum, '-1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.minValue, -1);
+
+    await widgetTester.enterText(maximum, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.maxValue, 1);
+
+    await widgetTester.enterText(divisions, '10');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.divisions, 10);
+
+    await widgetTester.enterText(divisions, '1');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.divisions, 10);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: updateWhileDragging,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+
+    expect(numberSliderModel.updateContinuously, true);
   });
 }

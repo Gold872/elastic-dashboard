@@ -18,7 +18,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
 
   double _minValue = 4.0;
   double _maxValue = 13.0;
-  int? _divisions = 5;
+  int _divisions = 5;
   bool _inverted = false;
   String _orientation = 'horizontal';
 
@@ -36,7 +36,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
     refresh();
   }
 
-  int? get divisions => _divisions;
+  int get divisions => _divisions;
 
   set divisions(value) {
     _divisions = value;
@@ -63,7 +63,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
     required super.topic,
     double minValue = 4.0,
     double maxValue = 13.0,
-    int? divisions = 5,
+    int divisions = 5,
     bool inverted = false,
     String orientation = 'horizontal',
     super.dataType,
@@ -82,7 +82,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? 4.0;
     _maxValue = tryCast(jsonData['max_value']) ?? 13.0;
-    _divisions = tryCast(jsonData['divisions']);
+    _divisions = tryCast(jsonData['divisions']) ?? 5;
     _inverted = tryCast(jsonData['inverted']) ?? false;
     _orientation = tryCast(jsonData['orientation']) ?? 'horizontal';
   }
@@ -93,7 +93,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
       ...super.toJson(),
       'min_value': minValue,
       'max_value': maxValue,
-      if (divisions != null) 'divisions': divisions,
+      'divisions': divisions,
       'inverted': inverted,
       'orientation': orientation,
     };
@@ -175,8 +175,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
               },
               formatter: FilteringTextInputFormatter.digitsOnly,
               label: 'Divisions',
-              initialText: (_divisions != null) ? _divisions.toString() : '',
-              allowEmptySubmission: true,
+              initialText: _divisions.toString(),
             ),
           ),
           const SizedBox(width: 5),
@@ -216,9 +215,8 @@ class VoltageView extends NTWidget {
 
         double clampedVoltage = voltage.clamp(model.minValue, model.maxValue);
 
-        double? divisionInterval = (model.divisions != null)
-            ? (model.maxValue - model.minValue) / (model.divisions! - 1)
-            : null;
+        double? divisionInterval =
+            (model.maxValue - model.minValue) / (model.divisions - 1);
 
         int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
@@ -262,13 +260,12 @@ class VoltageView extends NTWidget {
               ),
             ],
             customLabels: [
-              if (model.divisions != null)
-                for (int i = 0; i < model.divisions!; i++)
-                  CustomRulerLabel(
-                    text:
-                        '${formatLabel(model.minValue + divisionInterval! * i)} V',
-                    value: model.minValue + divisionInterval * i,
-                  ),
+              for (int i = 0; i < model.divisions; i++)
+                CustomRulerLabel(
+                  text:
+                      '${formatLabel(model.minValue + divisionInterval * i)} V',
+                  value: model.minValue + divisionInterval * i,
+                ),
             ],
             enableGaugeAnimation: false,
             start: model.minValue,
