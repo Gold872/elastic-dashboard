@@ -15,7 +15,7 @@ WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
 {% tab title="C++" %}
 ```cpp
-WebServer::GetInstance().Start(5800, frc::Filesystem::GetDeployDirectory());
+frc::WebServer::GetInstance().Start(5800, frc::Filesystem::GetDeployDirectory());
 ```
 {% endtab %}
 {% endtabs %}
@@ -27,7 +27,7 @@ Next, you will have to deploy the Elastic configuration file to your robot:
 3. Deploy your robot code
 
 {% hint style="info" %}
-The name of the exported json file MUST be "elastic-layout.json", and should be placed at the root directory of your deploy folder, the folder structure should look like this:
+The exported file must end in ".json" and should be placed in the root directory of your deploy folder, the deploy folder structure should look like this:
 
 /deploy\
 &#x20;   elastic-layout.json\
