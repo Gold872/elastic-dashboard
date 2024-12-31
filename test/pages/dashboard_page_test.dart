@@ -18,7 +18,9 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -36,6 +38,30 @@ import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../services/elastic_layout_downloader_test.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
+
+Future<void> pumpDashboardPage(
+  WidgetTester widgetTester,
+  SharedPreferences preferences, {
+  NTConnection? ntConnection,
+  ElasticLayoutDownloader? layoutDownloader,
+  UpdateChecker? updateChecker,
+}) async {
+  FlutterError.onError = ignoreOverflowErrors;
+
+  await widgetTester.pumpWidget(
+    MaterialApp(
+      home: DashboardPage(
+        ntConnection: ntConnection ?? createMockOfflineNT4(),
+        preferences: preferences,
+        version: '0.0.0.0',
+        updateChecker: updateChecker ?? createMockUpdateChecker(),
+        layoutDownloader: layoutDownloader,
+      ),
+    ),
+  );
+
+  await widgetTester.pumpAndSettle();
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -69,20 +95,7 @@ void main() {
 
   group('[Loading and Saving]:', () {
     testWidgets('offline loading', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(
           find.textContaining('Network Tables: Disconnected'), findsOneWidget);
@@ -95,20 +108,11 @@ void main() {
     });
 
     testWidgets('online loading', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(),
       );
-
-      await widgetTester.pumpAndSettle();
 
       expect(find.textContaining('Network Tables: Disconnected'), findsNothing);
       expect(find.textContaining('Network Tables: Connected'), findsWidgets);
@@ -120,20 +124,7 @@ void main() {
     });
 
     testWidgets('Save layout (button)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final fileButton = find.widgetWithText(SubmenuButton, 'File');
 
@@ -153,20 +144,7 @@ void main() {
     });
 
     testWidgets('Save layout (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
 
@@ -180,20 +158,11 @@ void main() {
 
   group('[Adding Widgets]:', () {
     testWidgets('Add widget dialog search', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -279,20 +248,11 @@ void main() {
     });
 
     testWidgets('Add widget dialog (widgets)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -345,20 +305,11 @@ void main() {
     });
 
     testWidgets('Add widget dialog (layouts)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -403,38 +354,29 @@ void main() {
 
     testWidgets('Add widget dialog (list layout sub-table)',
         (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: '/Non-Typed/Value 1',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-                NT4Topic(
-                  name: '/Non-Typed/Value 2',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-                NT4Topic(
-                  name: '/Non-Typed/Value 3',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-              ],
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: '/Non-Typed/Value 1',
+              type: NT4TypeStr.kInt,
+              properties: {},
             ),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
+            NT4Topic(
+              name: '/Non-Typed/Value 2',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+            NT4Topic(
+              name: '/Non-Typed/Value 3',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+          ],
         ),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -471,46 +413,37 @@ void main() {
 
     testWidgets('Add widget dialog (unregistered sendable)',
         (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: '/Non-Registered/.type',
-                  type: NT4TypeStr.kString,
-                  properties: {},
-                ),
-                NT4Topic(
-                  name: '/Non-Registered/Value 1',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-                NT4Topic(
-                  name: '/Non-Registered/Value 2',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-                NT4Topic(
-                  name: '/Non-Registered/Value 3',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                '/Non-Registered/.type': 'Non Registered Type',
-              },
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: '/Non-Registered/.type',
+              type: NT4TypeStr.kString,
+              properties: {},
             ),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
+            NT4Topic(
+              name: '/Non-Registered/Value 1',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+            NT4Topic(
+              name: '/Non-Registered/Value 2',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+            NT4Topic(
+              name: '/Non-Registered/Value 3',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            '/Non-Registered/.type': 'Non Registered Type',
+          },
         ),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -546,20 +479,11 @@ void main() {
     });
 
     testWidgets('List Layouts', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOnlineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: createMockOnlineNT4(),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');
 
@@ -640,8 +564,6 @@ void main() {
 
   group('Shuffleboard API', () {
     testWidgets('adding widgets', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
       List<Function(NT4Topic topic)> fakeAnnounceCallbacks = [];
 
       // A custom mock is set up to reproduce behavior when actually running
@@ -700,17 +622,11 @@ void main() {
               '/Shuffleboard/Test-Tab/Shuffleboard Test Layout/.type'))
           .thenAnswer((realInvocation) => Future.value('ShuffleboardLayout'));
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: mockNT4Connection,
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: mockNT4Connection,
       );
-      await widgetTester.pumpAndSettle();
 
       await widgetTester.runAsync(() async {
         for (final callback in fakeAnnounceCallbacks) {
@@ -779,9 +695,7 @@ void main() {
     });
 
     testWidgets('switching tabs', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      MockNTConnection ntConnection = createMockOnlineNT4(
+      NTConnection ntConnection = createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
             name: '/Shuffleboard/.metadata/Selected',
@@ -791,18 +705,11 @@ void main() {
         ],
       );
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: ntConnection,
       );
-
-      await widgetTester.pumpAndSettle();
 
       final editableTabBar = find.byType(EditableTabBar);
 
@@ -848,8 +755,6 @@ void main() {
       });
 
       testWidgets('Shows list of layouts', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
         Client mockClient = createHttpClient(
           mockGetResponses: {
             'http://127.0.0.1:5800/?format=json':
@@ -860,19 +765,12 @@ void main() {
         ElasticLayoutDownloader layoutDownloader =
             ElasticLayoutDownloader(mockClient);
 
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: createMockOnlineNT4(),
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-              layoutDownloader: layoutDownloader,
-            ),
-          ),
+        await pumpDashboardPage(
+          widgetTester,
+          preferences,
+          ntConnection: createMockOnlineNT4(),
+          layoutDownloader: layoutDownloader,
         );
-
-        await widgetTester.pumpAndSettle();
 
         expect(find.text('File'), findsOneWidget);
         await widgetTester.tap(find.text('File'));
@@ -893,34 +791,23 @@ void main() {
       });
 
       group('Download layout', () {
-        testWidgets('without merges', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
+        testWidgets('shows help text', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json':
                   Response(jsonEncode(layoutFiles), 200),
-              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
-                  Response(jsonEncode(layoutOne), 200),
             },
           );
 
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -930,38 +817,19 @@ void main() {
           await widgetTester.tap(find.text('Download From Robot'));
           await widgetTester.pumpAndSettle();
 
-          expect(find.text('Select Layout'), findsOneWidget);
-          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+          expect(find.textContaining('Keeps existing tabs'), findsNothing);
 
-          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          final helpButton = find.byIcon(Icons.help_outline);
+
+          expect(helpButton, findsOneWidget);
+          await widgetTester.ensureVisible(helpButton);
+          await widgetTester.tap(helpButton);
           await widgetTester.pumpAndSettle();
 
-          expect(find.text('elastic-layout 1'), findsOneWidget);
-
-          await widgetTester.tap(find.text('elastic-layout 1'));
-          await widgetTester.pumpAndSettle();
-
-          expect(find.text('Download'), findsOneWidget);
-          await widgetTester.tap(find.text('Download'));
-          await widgetTester.pump(Duration.zero);
-
-          expect(
-              find.widgetWithText(
-                  ElegantNotification, 'Successfully Downloaded Layout'),
-              findsOneWidget);
-
-          await widgetTester.pumpAndSettle();
-
-          expect(find.text('Test Tab'), findsOneWidget);
-          await widgetTester.tap(find.text('Test Tab'));
-          await widgetTester.pumpAndSettle();
-
-          expect(find.byType(Gyro), findsNWidgets(2));
+          expect(find.textContaining('Keeps existing tabs'), findsOneWidget);
         });
 
-        testWidgets('with merges', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
+        testWidgets('overwrite mode', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json':
@@ -1006,19 +874,12 @@ void main() {
 
           SharedPreferences preferences = await SharedPreferences.getInstance();
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1037,6 +898,178 @@ void main() {
           expect(find.text('elastic-layout 1'), findsOneWidget);
 
           await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download Mode'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+              findsOneWidget);
+          await widgetTester
+              .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Overwrite'), findsNWidgets(2));
+          await widgetTester.tap(find.text('Overwrite').last);
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download'), findsOneWidget);
+          await widgetTester.tap(find.text('Download'));
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+              find.widgetWithText(
+                  ElegantNotification, 'Successfully Downloaded Layout'),
+              findsOneWidget);
+          expect(
+              find.textContaining('1 tabs were overwritten'), findsOneWidget);
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Test Tab'), findsOneWidget);
+          await widgetTester.tap(find.text('Test Tab'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Blocking Widget'), findsNothing);
+          expect(find.byType(Gyro), findsNWidgets(2));
+        });
+        group('merge mode', () {
+          testWidgets('without merges', (widgetTester) async {
+            Client mockClient = createHttpClient(
+              mockGetResponses: {
+                'http://127.0.0.1:5800/?format=json':
+                    Response(jsonEncode(layoutFiles), 200),
+                'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                    Response(jsonEncode(layoutOne), 200),
+              },
+            );
+
+            ElasticLayoutDownloader layoutDownloader =
+                ElasticLayoutDownloader(mockClient);
+
+            await pumpDashboardPage(
+              widgetTester,
+              preferences,
+              ntConnection: createMockOnlineNT4(),
+              layoutDownloader: layoutDownloader,
+            );
+
+            expect(find.text('File'), findsOneWidget);
+            await widgetTester.tap(find.text('File'));
+            await widgetTester.pumpAndSettle();
+
+            expect(find.text('Download From Robot'), findsOneWidget);
+            await widgetTester.tap(find.text('Download From Robot'));
+            await widgetTester.pumpAndSettle();
+
+            expect(find.text('Select Layout'), findsOneWidget);
+            expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+            await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+            await widgetTester.pumpAndSettle();
+
+            expect(find.text('elastic-layout 1'), findsOneWidget);
+
+            await widgetTester.tap(find.text('elastic-layout 1'));
+            await widgetTester.pumpAndSettle();
+
+            expect(find.text('Download'), findsOneWidget);
+            await widgetTester.tap(find.text('Download'));
+            await widgetTester.pump(Duration.zero);
+
+            expect(
+                find.widgetWithText(
+                    ElegantNotification, 'Successfully Downloaded Layout'),
+                findsOneWidget);
+
+            await widgetTester.pumpAndSettle();
+
+            expect(find.text('Test Tab'), findsOneWidget);
+            await widgetTester.tap(find.text('Test Tab'));
+            await widgetTester.pumpAndSettle();
+
+            expect(find.byType(Gyro), findsNWidgets(2));
+          });
+        });
+
+        testWidgets('with merges', (widgetTester) async {
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json':
+                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                  Response(jsonEncode(layoutOne), 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader =
+              ElasticLayoutDownloader(mockClient);
+
+          SharedPreferences.setMockInitialValues({
+            PrefKeys.layout: jsonEncode({
+              'version': 1.0,
+              'grid_size': 128.0,
+              'tabs': [
+                {
+                  'name': 'Test Tab',
+                  'grid_layout': {
+                    'layouts': [],
+                    'containers': [
+                      {
+                        'title': 'Blocking Widget',
+                        'x': 384.0,
+                        'y': 128.0,
+                        'width': 256.0,
+                        'height': 256.0,
+                        'type': 'Text Display',
+                        'properties': {
+                          'topic': '/Test Tab/Blocking Widget',
+                          'period': 0.06,
+                        },
+                      }
+                    ],
+                  },
+                },
+              ],
+            }),
+            PrefKeys.ipAddress: '127.0.0.1',
+          });
+
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
+          );
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Select Layout'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('elastic-layout 1'), findsOneWidget);
+
+          await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download Mode'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+              findsOneWidget);
+          await widgetTester
+              .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Merge'), findsOneWidget);
+          await widgetTester.tap(find.text('Merge'));
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Download'), findsOneWidget);
@@ -1058,29 +1091,84 @@ void main() {
           expect(find.byType(Gyro), findsOneWidget);
         });
       });
+      testWidgets('reload mode', (widgetTester) async {
+        Client mockClient = createHttpClient(
+          mockGetResponses: {
+            'http://127.0.0.1:5800/?format=json':
+                Response(jsonEncode(layoutFiles), 200),
+            'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                Response(jsonEncode(layoutOne), 200),
+          },
+        );
+
+        ElasticLayoutDownloader layoutDownloader =
+            ElasticLayoutDownloader(mockClient);
+
+        await pumpDashboardPage(
+          widgetTester,
+          preferences,
+          ntConnection: createMockOnlineNT4(),
+          layoutDownloader: layoutDownloader,
+        );
+
+        expect(find.text('File'), findsOneWidget);
+        await widgetTester.tap(find.text('File'));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Download From Robot'), findsOneWidget);
+        await widgetTester.tap(find.text('Download From Robot'));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Select Layout'), findsOneWidget);
+        expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+        await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('elastic-layout 1'), findsOneWidget);
+
+        await widgetTester.tap(find.text('elastic-layout 1'));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Download Mode'), findsOneWidget);
+        expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+            findsOneWidget);
+        await widgetTester
+            .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Full Reload'), findsOneWidget);
+        await widgetTester.tap(find.text('Full Reload'));
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Download'), findsOneWidget);
+        await widgetTester.tap(find.text('Download'));
+        await widgetTester.pump(Duration.zero);
+
+        expect(
+            find.widgetWithText(
+                ElegantNotification, 'Successfully Downloaded Layout'),
+            findsOneWidget);
+
+        await widgetTester.pumpAndSettle();
+
+        expect(find.text('Teleoperated'), findsNothing);
+        expect(find.text('Autonomous'), findsNothing);
+        expect(find.text('Test Tab'), findsOneWidget);
+      });
 
       group('Shows error when', () {
         testWidgets('network tables is disconnected', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
           Client mockClient = createHttpClient();
 
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOfflineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1100,8 +1188,6 @@ void main() {
         });
 
         testWidgets('layout fetching is not a json', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json': Response('[1, 2, 3]', 200),
@@ -1111,19 +1197,12 @@ void main() {
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1143,8 +1222,6 @@ void main() {
         });
 
         testWidgets('layout json does not list files', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json': Response('{}', 200),
@@ -1154,19 +1231,12 @@ void main() {
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1186,8 +1256,6 @@ void main() {
         });
 
         testWidgets('layout json has empty files list', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json':
@@ -1198,19 +1266,12 @@ void main() {
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1230,8 +1291,6 @@ void main() {
         });
 
         testWidgets('selected file was not found', (widgetTester) async {
-          FlutterError.onError = ignoreOverflowErrors;
-
           Client mockClient = createHttpClient(
             mockGetResponses: {
               'http://127.0.0.1:5800/?format=json':
@@ -1244,19 +1303,12 @@ void main() {
           ElasticLayoutDownloader layoutDownloader =
               ElasticLayoutDownloader(mockClient);
 
-          await widgetTester.pumpWidget(
-            MaterialApp(
-              home: DashboardPage(
-                ntConnection: createMockOnlineNT4(),
-                preferences: preferences,
-                version: '0.0.0.0',
-                updateChecker: createMockUpdateChecker(),
-                layoutDownloader: layoutDownloader,
-              ),
-            ),
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
           );
-
-          await widgetTester.pumpAndSettle();
 
           expect(find.text('File'), findsOneWidget);
           await widgetTester.tap(find.text('File'));
@@ -1293,8 +1345,6 @@ void main() {
     });
     group('[Tab Selection]:', () {
       testWidgets('Passing in tab indexes', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
         MockNTConnection ntConnection = createMockOnlineNT4(
           virtualTopics: [
             NT4Topic(
@@ -1305,18 +1355,11 @@ void main() {
           ],
         );
 
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: ntConnection,
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-            ),
-          ),
+        await pumpDashboardPage(
+          widgetTester,
+          preferences,
+          ntConnection: ntConnection,
         );
-
-        await widgetTester.pumpAndSettle();
 
         final editableTabBar = find.byType(EditableTabBar);
 
@@ -1341,8 +1384,6 @@ void main() {
       });
 
       testWidgets('Passing in tab names', (widgetTester) async {
-        FlutterError.onError = ignoreOverflowErrors;
-
         MockNTConnection ntConnection = createMockOnlineNT4(
           virtualTopics: [
             NT4Topic(
@@ -1353,18 +1394,11 @@ void main() {
           ],
         );
 
-        await widgetTester.pumpWidget(
-          MaterialApp(
-            home: DashboardPage(
-              ntConnection: ntConnection,
-              preferences: preferences,
-              version: '0.0.0.0',
-              updateChecker: createMockUpdateChecker(),
-            ),
-          ),
+        await pumpDashboardPage(
+          widgetTester,
+          preferences,
+          ntConnection: ntConnection,
         );
-
-        await widgetTester.pumpAndSettle();
 
         final editableTabBar = find.byType(EditableTabBar);
 
@@ -1393,20 +1427,7 @@ void main() {
   });
 
   testWidgets('About dialog', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
-
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: DashboardPage(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          version: '0.0.0.0',
-          updateChecker: createMockUpdateChecker(),
-        ),
-      ),
-    );
-
-    await widgetTester.pumpAndSettle();
+    await pumpDashboardPage(widgetTester, preferences);
 
     final helpButton = find.widgetWithText(SubmenuButton, 'Help');
 
@@ -1427,20 +1448,7 @@ void main() {
 
   group('[Tab Manipulation]:', () {
     testWidgets('Changing tabs', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(ComboBoxChooser), findsNothing);
 
@@ -1458,20 +1466,7 @@ void main() {
     });
 
     testWidgets('Creating new tab', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1489,20 +1484,7 @@ void main() {
     });
 
     testWidgets('Creating new tab (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1516,20 +1498,7 @@ void main() {
     });
 
     testWidgets('Closing tab', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1561,20 +1530,7 @@ void main() {
     });
 
     testWidgets('Closing tab (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1599,20 +1555,7 @@ void main() {
     });
 
     testWidgets('Reordering tabs', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1658,20 +1601,7 @@ void main() {
     });
 
     testWidgets('Reordering tabs (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1715,20 +1645,7 @@ void main() {
     });
 
     testWidgets('Navigate tabs left right (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1776,20 +1693,7 @@ void main() {
     });
 
     testWidgets('Navigate to specific tabs', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       expect(find.byType(TabGrid, skipOffstage: false), findsNWidgets(2));
 
@@ -1827,20 +1731,7 @@ void main() {
     });
 
     testWidgets('Renaming tab', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final teleopTab = find.widgetWithText(AnimatedContainer, 'Teleoperated');
 
@@ -1880,20 +1771,7 @@ void main() {
     });
 
     testWidgets('Duplicating tab', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final teleopTab = find.widgetWithText(AnimatedContainer, 'Teleoperated');
 
@@ -1915,20 +1793,7 @@ void main() {
 
   group('[Window Manipulation]:', () {
     testWidgets('Minimizing window', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final minimizeButton = find.ancestor(
           of: find.byType(DecoratedMinimizeButton),
@@ -1940,20 +1805,7 @@ void main() {
     });
 
     testWidgets('Maximizing/unmaximizing window', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final appBar = find.byType(CustomAppBar);
 
@@ -1973,20 +1825,7 @@ void main() {
     });
 
     testWidgets('Closing window (All changes saved)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
 
@@ -2011,20 +1850,7 @@ void main() {
     });
 
     testWidgets('Closing window (Unsaved changes)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final gyroWidget = find.widgetWithText(WidgetContainer, 'Test Gyro');
 
@@ -2058,20 +1884,7 @@ void main() {
 
   group('[Misc Shortcuts]:', () {
     testWidgets('Opening settings', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       final settingsButton =
           find.widgetWithIcon(MenuItemButton, Icons.settings);
@@ -2089,20 +1902,7 @@ void main() {
     });
 
     testWidgets('Opening settings (shortcut)', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
-      );
-
-      await widgetTester.pumpAndSettle();
+      await pumpDashboardPage(widgetTester, preferences);
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
 
@@ -2117,8 +1917,6 @@ void main() {
     });
 
     testWidgets('IP Address shortcuts', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
       SharedPreferences.setMockInitialValues({
         PrefKeys.ipAddressMode: IPAddressMode.custom.index,
         PrefKeys.ipAddress: '127.0.0.1',
@@ -2130,18 +1928,11 @@ void main() {
       when(dsClient.lastAnnouncedIP).thenReturn(null);
       when(ntConnection.dsClient).thenReturn(dsClient);
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: ntConnection,
       );
-
-      await widgetTester.pumpAndSettle();
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
 
@@ -2209,7 +2000,6 @@ void main() {
 
   group('[Notifications]:', () {
     testWidgets('Robot Notifications', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
       final Map<String, dynamic> data = {
         'title': 'Robot Notification Title',
         'description': 'Robot Notification Description',
@@ -2258,19 +2048,14 @@ void main() {
       final notificationWidget =
           find.widgetWithText(ElegantNotification, data['title']);
 
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: connection,
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(),
-          ),
-        ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        ntConnection: connection,
       );
+
       expect(notificationWidget, findsNothing);
 
-      await widgetTester.pumpAndSettle();
       connection
           .subscribeAll('/Elastic/RobotNotifications', 0.2)
           .updateValue(jsonEncode(data), 1);
@@ -2289,21 +2074,14 @@ void main() {
     });
 
     testWidgets('Update Notification', (widgetTester) async {
-      FlutterError.onError = ignoreOverflowErrors;
-
-      await widgetTester.pumpWidget(
-        MaterialApp(
-          home: DashboardPage(
-            ntConnection: createMockOfflineNT4(),
-            preferences: preferences,
-            version: '0.0.0.0',
-            updateChecker: createMockUpdateChecker(
-                updateAvailable: true, latestVersion: '2025.0.1'),
-          ),
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        updateChecker: createMockUpdateChecker(
+          updateAvailable: true,
+          latestVersion: '2025.0.1',
         ),
       );
-
-      await widgetTester.pumpAndSettle();
 
       final notificationWidget = find.widgetWithText(
           ElegantNotification, 'Version 2025.0.1 Available');
