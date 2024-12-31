@@ -532,17 +532,8 @@ class TabGridModel extends ChangeNotifier {
     return false;
   }
 
-  void layoutDragOutUpdate(WidgetContainerModel model, Offset globalPosition) {
-    Offset localPosition = getLocalPosition(globalPosition);
-    model.draggingRect = Rect.fromLTWH(
-      localPosition.dx,
-      localPosition.dy,
-      model.draggingRect.width,
-      model.draggingRect.height,
-    );
-    _containerDraggingIn = MapEntry(model, globalPosition);
-    notifyListeners();
-  }
+  void layoutDragOutUpdate(WidgetContainerModel model, Offset globalPosition) =>
+      addDragInWidget(model, globalPosition);
 
   void onNTConnect() {
     for (WidgetContainerModel model in _widgetModels) {
@@ -559,8 +550,8 @@ class TabGridModel extends ChangeNotifier {
   void addDragInWidget(WidgetContainerModel widget, Offset globalPosition) {
     Offset localPosition = getLocalPosition(globalPosition);
     widget.draggingRect = Rect.fromLTWH(
-      localPosition.dx,
-      localPosition.dy,
+      localPosition.dx - widget.displayRect.width / 2,
+      localPosition.dy - widget.displayRect.height / 2,
       widget.draggingRect.width,
       widget.draggingRect.height,
     );

@@ -39,26 +39,29 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultPeriodChanged;
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final Function(String? value)? onGridDPIChanged;
   final Function()? onOpenAssetsFolderPressed;
 
-  const SettingsDialog(
-      {super.key,
-      required this.ntConnection,
-      required this.preferences,
-      this.onTeamNumberChanged,
-      this.onIPAddressModeChanged,
-      this.onIPAddressChanged,
-      this.onColorChanged,
-      this.onGridToggle,
-      this.onGridSizeChanged,
-      this.onCornerRadiusChanged,
-      this.onResizeToDSChanged,
-      this.onRememberWindowPositionChanged,
-      this.onLayoutLock,
-      this.onDefaultPeriodChanged,
-      this.onDefaultGraphPeriodChanged,
-      this.onThemeVariantChanged,
-      this.onOpenAssetsFolderPressed});
+  const SettingsDialog({
+    super.key,
+    required this.ntConnection,
+    required this.preferences,
+    this.onTeamNumberChanged,
+    this.onIPAddressModeChanged,
+    this.onIPAddressChanged,
+    this.onColorChanged,
+    this.onGridToggle,
+    this.onGridSizeChanged,
+    this.onCornerRadiusChanged,
+    this.onResizeToDSChanged,
+    this.onRememberWindowPositionChanged,
+    this.onLayoutLock,
+    this.onDefaultPeriodChanged,
+    this.onDefaultGraphPeriodChanged,
+    this.onThemeVariantChanged,
+    this.onGridDPIChanged,
+    this.onOpenAssetsFolderPressed,
+  });
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -183,6 +186,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
       const Divider(),
       Row(
         children: [
+          Flexible(
+            child: DialogTextInput(
+              initialText: widget.preferences
+                      .getDouble(PrefKeys.gridDpiOverride)
+                      ?.toString() ??
+                  '',
+              label: 'Grid DPI (Experimental)',
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
+              allowEmptySubmission: true,
+              onSubmit: (value) {
+                widget.onGridDPIChanged?.call(value);
+              },
+            ),
+          ),
           TextButton.icon(
             onPressed: () {
               widget.onOpenAssetsFolderPressed?.call();
@@ -190,7 +207,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
             icon: const Icon(Icons.folder_outlined),
             label: const Text('Open Assets Folder'),
           ),
-          const Spacer(),
         ],
       ),
     ];

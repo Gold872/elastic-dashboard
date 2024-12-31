@@ -288,14 +288,10 @@ class _TreeTileState extends State<TreeTile> {
 
                 draggingWidget!.cursorGlobalLocation = details.globalPosition;
 
-                Offset position = details.globalPosition -
-                    Offset(
-                          draggingWidget!.displayRect.width,
-                          draggingWidget!.displayRect.height,
-                        ) /
-                        2;
-
-                widget.onDragUpdate?.call(position, draggingWidget!);
+                widget.onDragUpdate?.call(
+                  details.globalPosition,
+                  draggingWidget!,
+                );
               },
               onPanEnd: (details) {
                 if (draggingWidget == null) {

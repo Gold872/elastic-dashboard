@@ -1624,6 +1624,22 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onGridDPIChanged: (value) async {
+          if (value == null) {
+            return;
+          }
+          num? dpiOverride = double.tryParse(value) ?? int.tryParse(value);
+          if (dpiOverride != null && dpiOverride <= 0) {
+            return;
+          }
+          if (dpiOverride != null) {
+            await preferences.setDouble(
+                PrefKeys.gridDpiOverride, dpiOverride.toDouble());
+          } else {
+            await preferences.remove(PrefKeys.gridDpiOverride);
+          }
+          setState(() {});
+        },
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
               '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
@@ -2123,6 +2139,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 children: [
                   EditableTabBar(
                     preferences: preferences,
+                    gridDpiOverride:
+                        preferences.getDouble(PrefKeys.gridDpiOverride),
                     currentIndex: _currentTabIndex,
                     onTabMoveLeft: () {
                       _moveTabLeft();
