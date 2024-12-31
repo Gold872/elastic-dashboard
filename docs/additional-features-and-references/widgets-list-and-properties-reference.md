@@ -378,7 +378,7 @@ Displays anything under the `/Preferences` table when using the Preferences API.
 
 Built from the WPILib PIDController ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2_1_1_p_i_d_controller.html)), allows editing of the gains and setpoint of a PID controller.
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/pid_controller.png" alt=""><figcaption></figcaption></figure>
 
 ### PowerDistribution
 

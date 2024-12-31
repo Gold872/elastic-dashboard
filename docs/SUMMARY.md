@@ -16,10 +16,10 @@
 ## Additional Features and References
 
 * [Widgets List & Properties Reference](additional-features-and-references/widgets-list-and-properties-reference.md)
-* [Robot Notifications with ElasticLib](additional-features-and-references/robot-notifications-with-elasticlib.md)
+* [ElasticLib](additional-features-and-references/robot-notifications-with-elasticlib.md)
 * [Remote Layout Downloading](additional-features-and-references/remote-layout-downloading.md)
-* [Shuffleboard API](additional-features-and-references/shuffleboard-api-integration.md)
 * [Custom Widget Examples](additional-features-and-references/custom-widget-examples.md)
+* [Shuffleboard API](additional-features-and-references/shuffleboard-api-integration.md)
 
 ## Legal
 
