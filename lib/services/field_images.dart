@@ -58,13 +58,22 @@ class Field {
   int? fieldImageWidth;
   int? fieldImageHeight;
 
+  Size? get fieldImageSize =>
+      (fieldImageWidth != null && fieldImageHeight != null)
+          ? Size(fieldImageWidth!.toDouble(), fieldImageHeight!.toDouble())
+          : null;
+
   late double fieldWidthMeters;
   late double fieldHeightMeters;
 
   late Offset topLeftCorner;
   late Offset bottomRightCorner;
 
-  late Offset fieldCenter;
+  Offset get center => (fieldImageLoaded)
+      ? Offset(bottomRightCorner.dx - topLeftCorner.dx,
+              bottomRightCorner.dy - topLeftCorner.dy) /
+          2
+      : const Offset(0, 0);
 
   late Image fieldImage;
 

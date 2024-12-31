@@ -216,9 +216,9 @@ class NTWidgetBuilder {
         model: FieldWidgetModel.new,
         widget: FieldWidget.new,
         fromJson: FieldWidgetModel.fromJson,
-        minWidth: _normalSize * 3,
+        minWidth: _normalSize * 2,
         minHeight: _normalSize * 2,
-        defaultWidth: 3,
+        defaultWidth: 2,
         defaultHeight: 2);
 
     register(
