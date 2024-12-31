@@ -258,14 +258,20 @@ class TabGridModel extends ChangeNotifier {
 
     Offset localPosition = ancestor!.globalToLocal(globalPosition);
 
-    if (localPosition.dy < 0) {
-      localPosition = Offset(localPosition.dx, 0);
-    }
+    return localPosition;
+  }
 
-    if (localPosition.dx < 0) {
-      localPosition = Offset(0, localPosition.dy);
-    }
+  Offset getDragInWidgetCenter(
+      WidgetContainerModel widget, Offset globalPosition) {
+    Offset localPosition = getLocalPosition(globalPosition) -
+        Offset(widget.displayRect.width, widget.displayRect.height) / 2;
 
+    if (localPosition.dy < 0 || localPosition.dx < 0) {
+      localPosition = Offset(
+        localPosition.dx.clamp(0, double.infinity),
+        localPosition.dy.clamp(0, double.infinity),
+      );
+    }
     return localPosition;
   }
 
@@ -548,10 +554,10 @@ class TabGridModel extends ChangeNotifier {
   }
 
   void addDragInWidget(WidgetContainerModel widget, Offset globalPosition) {
-    Offset localPosition = getLocalPosition(globalPosition);
+    Offset center = getDragInWidgetCenter(widget, globalPosition);
     widget.draggingRect = Rect.fromLTWH(
-      localPosition.dx - widget.displayRect.width / 2,
-      localPosition.dy - widget.displayRect.height / 2,
+      center.dx,
+      center.dy,
       widget.draggingRect.width,
       widget.draggingRect.height,
     );
@@ -568,15 +574,12 @@ class TabGridModel extends ChangeNotifier {
 
     Offset globalPosition = _containerDraggingIn!.value;
 
-    Offset localPosition = getLocalPosition(globalPosition) -
-        Offset(widget.displayRect.width, widget.displayRect.height) / 2;
+    Offset center = getDragInWidgetCenter(widget, globalPosition);
 
     int? gridSize = preferences.getInt(PrefKeys.gridSize);
 
-    double previewX =
-        DraggableWidgetContainer.snapToGrid(localPosition.dx, gridSize);
-    double previewY =
-        DraggableWidgetContainer.snapToGrid(localPosition.dy, gridSize);
+    double previewX = DraggableWidgetContainer.snapToGrid(center.dx, gridSize);
+    double previewY = DraggableWidgetContainer.snapToGrid(center.dy, gridSize);
 
     double width = widget.displayRect.width;
     double height = widget.displayRect.height;
