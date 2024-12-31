@@ -203,7 +203,7 @@ This displays any color in a box. This can be very useful for seeing what a colo
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/6937fa87-c75a-46b4-b9cb-250460e8a6a3)
 
-This widget will show as an option on any widget displaying data that is a String. In order for this to display a color, the string must be formatted as "#RRGGBB". It is recommended to use the `toHexString()` method in WPILib's Color class ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color.html#toHexString\(\)), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_color.html#a37cd7691c1112518974d178f211f7397)) in order to obtain this hex code.
+This widget will show as an option on any widget displaying data that is a String. In order for this to display a color, the string must be formatted as "#RRGGBB". It is recommended to use the `toHexString()` method in WPILib's Color class ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color.html#toHexString\(\)), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_color.html#a37cd7691c1112518974d178f211f7397)) in order to obtain this hex code.
 
 ### Multi Color View
 
@@ -211,7 +211,7 @@ Displays a gradient of multiple colors. Will display on a topic with the `string
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/0cf9ca38-43ac-4a2b-a30a-41ee5e4eb644)
 
-This widget will show as an option on any widget displaying data that is a String array. In order for this to display a color, the elements in the array must be formatted as "#RRGGBB". It is recommended to use the `toHexString()` method in WPILib's Color class ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color.html#toHexString\(\)), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_color.html#a37cd7691c1112518974d178f211f7397)) in order to obtain these hex codes.
+This widget will show as an option on any widget displaying data that is a String array. In order for this to display a color, the elements in the array must be formatted as "#RRGGBB". It is recommended to use the `toHexString()` method in WPILib's Color class ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/util/Color.html#toHexString\(\)), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_color.html#a37cd7691c1112518974d178f211f7397)) in order to obtain these hex codes.
 
 ## Multi-Topic Widgets
 
@@ -219,7 +219,7 @@ These widgets display data from multiple topics. Most of these are built from Se
 
 ### 3-Axis Accelerometer
 
-Built from the WPILib BuiltInAccelerometer ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/BuiltInAccelerometer.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_built\_in\_accelerometer.html)), displays the X, Y, and Z acceleration of an accelerometer.
+Built from the WPILib BuiltInAccelerometer ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/BuiltInAccelerometer.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_built_in_accelerometer.html)), displays the X, Y, and Z acceleration of an accelerometer.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/d9fceaa2-3034-4b95-b49b-4dcc73c9cbae)
 
@@ -235,21 +235,35 @@ Shows a live camera view from Camera Server. It is recommended to use a very low
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/1694b27c-8e30-467c-8b67-6b3c80d1d18c)
 
+#### Properties
+
+* `compression` - The quality of the image between 0 and 100, with 0 being lowest quality, and 100 being the highest quality, defaults to null
+  * Whole number
+* `fps` - How many frames per second should be sent from the server, defaults to null
+  * Whole number
+* `resolution` - The resolution to apply to the stream, defaults to null
+  * Integer array, in the format `[width, height]`
+
 ### ComboBox Chooser
 
-Built from WPILib's Sendable Chooser ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SendableChooser.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_sendable\_chooser.html)), provides a dropdown list of all of the options, and the ability to search for an option. If the name of it is too long, hovering over the widget will reveal a tooltip showing the full name of the selected option.
+Built from WPILib's Sendable Chooser ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SendableChooser.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_sendable_chooser.html)), provides a dropdown list of all of the options, and the ability to search for an option. If the name of it is too long, hovering over the widget will reveal a tooltip showing the full name of the selected option.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/c16ce37c-80aa-41d7-b7ea-36be0892d144)
 
+#### Properties
+
+* `sort_options` - Whether or not to sort the options alphabetically, defaults to false
+  * `true`or `false`
+
 ### Split Button Chooser
 
-Also built from WPILib's Sendable Chooser ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SendableChooser.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_sendable\_chooser.html)), provides a list of all of the options as a row of buttons which can be scrolled left and right.
+Also built from WPILib's Sendable Chooser ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/SendableChooser.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_sendable_chooser.html)), provides a list of all of the options as a row of buttons which can be scrolled left and right.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/e2dcc874-b873-4d1a-9252-d53f8144cabf)
 
 ### Command Scheduler
 
-Displays a list of all of the commands scheduled, along with their IDs and a button to unschedule them. This is created using WPILib's CommandScheduler ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/CommandScheduler.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2\_1\_1\_command\_scheduler.html))
+Displays a list of all of the commands scheduled, along with their IDs and a button to unschedule them. This is created using WPILib's CommandScheduler ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/CommandScheduler.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2_1_1_command_scheduler.html))
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/dfe1cf76-2c28-47b4-9194-3816e1e52a79)
 
@@ -272,7 +286,7 @@ Displays information about a robot subsystem.
 
 ## DifferentialDrive
 
-Built from the WPILib DifferentialDrive ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_differential\_drive.html)), it displays the wheel speeds of a differential drivetrain along with a curved arrow showing its direction. The sliders on the left and right can be dragged to set the speeds of each wheel (only works when Live Window is enabled).
+Built from the WPILib DifferentialDrive ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_differential_drive.html)), it displays the wheel speeds of a differential drivetrain along with a curved arrow showing its direction. The sliders on the left and right can be dragged to set the speeds of each wheel (only works when Live Window is enabled).
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/0ddcb95a-8756-4cba-a4cb-3781e8d76233)
 
@@ -297,13 +311,13 @@ Displays the wheel rotation and velocity of a swerve drivetrain, along with the 
 
 ### Encoder
 
-Built from the WPILib Encoder ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Encoder.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_encoder.html)), displays the position and speed of an encoder.
+Built from the WPILib Encoder ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Encoder.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_encoder.html)), displays the position and speed of an encoder.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/25b874d5-04cc-4383-83e6-681081fc0992)
 
 ### Field
 
-Built from the WPILib Field2d ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_field2d.html)), displays a field with the robot's position and any other objects to scale. If a field object contains more than 8 elements, it will be displayed as a trajectory, which draws a line representing a path.
+Built from the WPILib Field2d ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_field2d.html)), displays a field with the robot's position and any other objects to scale. If a field object contains more than 8 elements, it will be displayed as a trajectory, which draws a line representing a path.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/06c7175f-3753-4706-a00e-129bd9024141)
 
@@ -325,6 +339,17 @@ Built from the WPILib Field2d ([Java](https://github.wpilib.org/allwpilib/docs/r
   * `true` or `false`
 * `show_trajectories` - Whether or not to show trajectories (defaults to true)
   * `true` or `false`
+* `field_rotation`- How many degrees to rotate the field, clockwise positive (defaults to 0.0)
+  * Decimal number
+* `robot_color`- The color of the robot bumpers (defaults to red)
+  * 32 bit int (format: 0xAARRGGBB)
+* trajectory\_color - The color of the trajectory (defaults to white)
+  * 32 bit int (format: 0xAARRGGBB)
+
+**32 Bit int Information**
+
+* The value starts with 0x, and then the ARGB code
+* To obtain the ARGB code, use this [Color Converter](https://www.myfixguide.com/color-converter/)
 
 ### FMSInfo
 
@@ -351,25 +376,25 @@ Displays anything under the `/Preferences` table when using the Preferences API.
 
 ### PIDController
 
-Built from the WPILib PIDController ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2\_1\_1\_p\_i\_d\_controller.html)), allows editing of the gains and setpoint of a PID controller.
+Built from the WPILib PIDController ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/controller/PIDController.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2_1_1_p_i_d_controller.html)), allows editing of the gains and setpoint of a PID controller.
 
-![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/ee39fb17-8114-41c8-a09e-3b9fc00e5b67)
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ### PowerDistribution
 
-Built from the WPILib PowerDistribution ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/PowerDistribution.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_power\_distribution.html)), displays the voltage, total current, and current drawn by all channels in a Power Distribution Panel/Hub.
+Built from the WPILib PowerDistribution ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/PowerDistribution.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_power_distribution.html)), displays the voltage, total current, and current drawn by all channels in a Power Distribution Panel/Hub.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/cb6760c3-ae4f-4851-b1ee-ff6f19b6111a)
 
 ### Relay
 
-Built from the WPILib Relay ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Relay.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_relay.html)), displays the current state of the relay, and allows it to be changed by selecting the different options from the list.
+Built from the WPILib Relay ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Relay.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_relay.html)), displays the current state of the relay, and allows it to be changed by selecting the different options from the list.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/53f6440a-875f-462d-94e2-16f7d92d6040)
 
 ### Ultrasonic
 
-Built from the WPILib Ultrasonic ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Ultrasonic.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc\_1\_1\_ultrasonic.html)), displays the distance reading from an Ultrasonic widget in inches.
+Built from the WPILib Ultrasonic ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/Ultrasonic.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_ultrasonic.html)), displays the distance reading from an Ultrasonic widget in inches.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/b87a84d3-cc90-4579-adb6-21ce0dd7ba4b)
 
