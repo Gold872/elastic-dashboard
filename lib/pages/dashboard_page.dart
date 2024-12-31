@@ -169,7 +169,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
           grid.onNTConnect();
         }
-        _showShuffleboardWarningMessage();
       });
     });
 
