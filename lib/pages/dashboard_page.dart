@@ -44,11 +44,46 @@ import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
 
+enum LayoutDownloadMode {
+  overwrite(
+    name: 'Overwrite',
+    description:
+        'Keeps existing tabs that are not defined in the remote layout. Any tabs that are defined in the remote layout will be overwritten locally.',
+  ),
+  merge(
+    name: 'Merge',
+    description:
+        'Merge the downloaded layout with the existing one. If a new widget cannot be properly placed, it will not be added.',
+  ),
+  reload(
+    name: 'Full Reload',
+    description: 'Deletes the existing layout and loads the new one.',
+  );
+
+  final String name;
+  final String description;
+
+  const LayoutDownloadMode({required this.name, required this.description});
+
+  static String get descriptions {
+    String result = '';
+    for (final value in values) {
+      result += '${value.name}: ';
+      result += value.description;
+
+      if (value != values.last) {
+        result += '\n\n';
+      }
+    }
+    return result;
+  }
+}
+
 class DashboardPage extends StatefulWidget {
   final String version;
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final UpdateChecker updateChecker;
+  final UpdateChecker? updateChecker;
   final ElasticLayoutDownloader? layoutDownloader;
   final Function(Color color)? onColorChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
@@ -58,7 +93,7 @@ class DashboardPage extends StatefulWidget {
     required this.ntConnection,
     required this.preferences,
     required this.version,
-    required this.updateChecker,
+    this.updateChecker,
     this.layoutDownloader,
     this.onColorChanged,
     this.onThemeVariantChanged,
@@ -71,6 +106,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> with WindowListener {
   SharedPreferences get preferences => widget.preferences;
   late final ElasticLibListener _robotNotificationListener;
+  late final UpdateChecker _updateChecker;
   late final ElasticLayoutDownloader _layoutDownloader;
 
   bool _seenShuffleboardWarning = false;
@@ -245,11 +281,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       apiListener.initializeListeners();
     });
 
-    if (!isWPILib) {
-      Future(
-          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
-    }
-
     _robotNotificationListener = ElasticLibListener(
         ntConnection: widget.ntConnection,
         onTabSelected: (tabIdentifier) {
@@ -300,6 +331,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     _layoutDownloader =
         widget.layoutDownloader ?? ElasticLayoutDownloader(Client());
+
+    _updateChecker =
+        widget.updateChecker ?? UpdateChecker(currentVersion: widget.version);
+
+    if (!isWPILib) {
+      Future(
+          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+    }
   }
 
   @override
@@ -396,7 +435,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonThemeData buttonTheme = ButtonTheme.of(context);
 
     UpdateCheckerResponse updateResponse =
-        await widget.updateChecker.isUpdateAvailable();
+        await _updateChecker.isUpdateAvailable();
 
     if (mounted) {
       setState(() => lastUpdateResponse = updateResponse);
@@ -606,13 +645,20 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     return true;
   }
 
-  void _loadLayoutFromJsonData(String jsonString) {
+  void _clearLayout() {
+    for (TabData tab in _tabData) {
+      tab.tabGrid.onDestroy();
+    }
+    _tabData.clear();
+  }
+
+  bool _loadLayoutFromJsonData(String jsonString) {
     logger.info('Loading layout from json');
     Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
 
     if (!_validateJsonData(jsonData)) {
       _createDefaultTabs();
-      return;
+      return false;
     }
 
     if (jsonData!.containsKey('grid_size')) {
@@ -620,7 +666,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       preferences.setInt(PrefKeys.gridSize, _gridSize);
     }
 
-    _tabData.clear();
+    _clearLayout();
 
     for (Map<String, dynamic> data in jsonData['tabs']) {
       _tabData.add(
@@ -642,6 +688,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     if (_currentTabIndex >= _tabData.length) {
       _currentTabIndex = _tabData.length - 1;
     }
+
+    return true;
   }
 
   bool _mergeLayoutFromJsonData(String jsonString) {
@@ -689,28 +737,120 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     return true;
   }
 
-  Future<String?> _showRemoteLayoutSelection(List<String> fileNames) async {
+  void _overwriteLayoutFromJsonData(String jsonString) {
+    logger.info('Overwriting layout from json');
+
+    Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
+
+    if (!_validateJsonData(jsonData)) {
+      return;
+    }
+
+    int overwritten = 0;
+    for (Map<String, dynamic> tabJson in jsonData!['tabs']) {
+      String tabName = tabJson['name'];
+      if (!_tabData.any((tab) => tab.name == tabName)) {
+        _tabData.add(
+          TabData(
+            name: tabName,
+            tabGrid: TabGridModel.fromJson(
+              ntConnection: widget.ntConnection,
+              preferences: widget.preferences,
+              jsonData: tabJson['grid_layout'],
+              onAddWidgetPressed: _displayAddWidgetDialog,
+              onJsonLoadingWarning: _showJsonLoadingWarning,
+            ),
+          ),
+        );
+      } else {
+        overwritten++;
+        TabGridModel existingTab =
+            _tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        existingTab.onDestroy();
+        existingTab.loadFromJson(
+          jsonData: tabJson['grid_layout'],
+          onJsonLoadingWarning: _showJsonLoadingWarning,
+        );
+      }
+    }
+
+    _showInfoNotification(
+      title: 'Successfully Downloaded Layout',
+      message:
+          'Remote layout has been successfully downloaded, $overwritten tabs were overwritten.',
+      width: 350,
+    );
+  }
+
+  Future<({String layout, LayoutDownloadMode mode})?>
+      _showRemoteLayoutSelection(List<String> fileNames) async {
     if (!mounted) {
       return null;
     }
-    ValueNotifier<String?> currentSelection = ValueNotifier(null);
-    return await showDialog<String>(
+    ValueNotifier<String?> layoutSelection = ValueNotifier(null);
+    ValueNotifier<LayoutDownloadMode> modeSelection =
+        ValueNotifier(LayoutDownloadMode.overwrite);
+
+    bool showModes = false;
+    return await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Select Layout'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ValueListenableBuilder(
-              valueListenable: currentSelection,
-              builder: (_, value, child) => DialogDropdownChooser<String>(
-                choices: fileNames,
-                initialValue: value,
-                onSelectionChanged: (selection) =>
-                    currentSelection.value = selection,
-              ),
-            )
-          ],
+        content: SizedBox(
+          width: 350,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Layout File'),
+                  ValueListenableBuilder(
+                    valueListenable: layoutSelection,
+                    builder: (_, value, child) => DialogDropdownChooser<String>(
+                      choices: fileNames,
+                      initialValue: value,
+                      onSelectionChanged: (selection) =>
+                          layoutSelection.value = selection,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Download Mode'),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: ValueListenableBuilder(
+                          valueListenable: modeSelection,
+                          builder: (_, value, child) =>
+                              DialogDropdownChooser<LayoutDownloadMode>(
+                            choices: LayoutDownloadMode.values,
+                            initialValue: value,
+                            nameMap: (value) => value.name,
+                            onSelectionChanged: (selection) {
+                              if (selection != null) {
+                                modeSelection.value = selection;
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      TextButton.icon(
+                        label: const Text('Help'),
+                        icon: const Icon(Icons.help_outline),
+                        onPressed: () {
+                          setState(() => showModes = !showModes);
+                        },
+                      ),
+                    ],
+                  ),
+                  if (showModes) ...[
+                    const SizedBox(height: 5),
+                    Text(LayoutDownloadMode.descriptions),
+                  ],
+                ],
+              );
+            },
+          ),
         ),
         actions: [
           TextButton(
@@ -718,10 +858,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             child: const Text('Cancel'),
           ),
           ValueListenableBuilder(
-            valueListenable: currentSelection,
+            valueListenable: layoutSelection,
             builder: (_, value, child) => TextButton(
               onPressed: (value != null)
-                  ? () => Navigator.of(context).pop(value)
+                  ? () => Navigator.of(context)
+                      .pop((layout: value, mode: modeSelection.value))
                   : null,
               child: const Text('Download'),
             ),
@@ -762,7 +903,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
-    String? selectedLayout = await _showRemoteLayoutSelection(
+    final selectedLayout = await _showRemoteLayoutSelection(
       layoutsResponse.data.sorted((a, b) => a.compareTo(b)),
     );
 
@@ -773,7 +914,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     LayoutDownloadResponse response = await _layoutDownloader.downloadLayout(
       ntConnection: widget.ntConnection,
       preferences: preferences,
-      layoutName: selectedLayout,
+      layoutName: selectedLayout.layout,
     );
 
     if (!response.successful) {
@@ -785,7 +926,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
-    _mergeLayoutFromJsonData(response.data);
+    switch (selectedLayout.mode) {
+      case LayoutDownloadMode.merge:
+        _mergeLayoutFromJsonData(response.data);
+      case LayoutDownloadMode.overwrite:
+        setState(() => _overwriteLayoutFromJsonData(response.data));
+      case LayoutDownloadMode.reload:
+        setState(() {
+          bool success = _loadLayoutFromJsonData(response.data);
+          if (success) {
+            _showInfoNotification(
+              title: 'Successfully Downloaded Layout',
+              message: 'Remote layout has been successfully downloaded!',
+              width: 350,
+            );
+          }
+        });
+    }
   }
 
   void _createDefaultTabs() {
