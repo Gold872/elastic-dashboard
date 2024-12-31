@@ -568,7 +568,8 @@ class TabGridModel extends ChangeNotifier {
 
     Offset globalPosition = _containerDraggingIn!.value;
 
-    Offset localPosition = getLocalPosition(globalPosition);
+    Offset localPosition = getLocalPosition(globalPosition) -
+        Offset(widget.displayRect.width, widget.displayRect.height) / 2;
 
     int? gridSize = preferences.getInt(PrefKeys.gridSize);
 
