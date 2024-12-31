@@ -14,7 +14,6 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
 import 'draggable_containers/models/layout_container_model.dart';
 import 'draggable_containers/models/list_layout_model.dart';
 import 'draggable_containers/models/nt_widget_container_model.dart';
@@ -327,11 +326,6 @@ class TabGridModel extends ChangeNotifier {
     model.previewRect = model.draggingRect;
     model.previewVisible = false;
     model.validLocation = true;
-
-    if (model is NTWidgetContainerModel &&
-        model.childModel is FieldWidgetModel) {
-      model.childModel.refresh();
-    }
 
     model.disposeModel();
   }
