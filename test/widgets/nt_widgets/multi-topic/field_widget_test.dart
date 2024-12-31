@@ -29,6 +29,7 @@ void main() {
     'robot_length': 1.0,
     'show_other_objects': true,
     'show_trajectories': true,
+    'field_rotation': 90.0,
     'robot_color': Colors.red.value,
     'trajectory_color': Colors.white.value,
   };
@@ -83,6 +84,7 @@ void main() {
     expect(fieldWidgetModel.robotLengthMeters, 1.0);
     expect(fieldWidgetModel.showOtherObjects, isTrue);
     expect(fieldWidgetModel.showTrajectories, isTrue);
+    expect(fieldWidgetModel.fieldRotation, 90.0);
     expect(fieldWidgetModel.robotColor.value, Colors.red.value);
     expect(fieldWidgetModel.trajectoryColor.value, Colors.white.value);
   });
@@ -106,6 +108,7 @@ void main() {
     expect(fieldWidgetModel.robotLengthMeters, 1.0);
     expect(fieldWidgetModel.showOtherObjects, isTrue);
     expect(fieldWidgetModel.showTrajectories, isTrue);
+    expect(fieldWidgetModel.fieldRotation, 90.0);
     expect(fieldWidgetModel.robotColor.value, Colors.red.value);
     expect(fieldWidgetModel.trajectoryColor.value, Colors.white.value);
   });
@@ -116,11 +119,12 @@ void main() {
       preferences: preferences,
       period: 0.100,
       topic: 'Test/Field',
-      fieldName: 'Crescendo',
+      fieldGame: 'Crescendo',
       showOtherObjects: true,
       showTrajectories: true,
       robotWidthMeters: 1.0,
       robotLengthMeters: 1.0,
+      fieldRotation: 90.0,
       robotColor: Colors.red,
       trajectoryColor: Colors.white,
     );
@@ -227,11 +231,12 @@ void main() {
       preferences: preferences,
       period: 0.100,
       topic: 'Test/Field',
-      fieldName: 'Crescendo',
+      fieldGame: 'Crescendo',
       showOtherObjects: true,
       showTrajectories: true,
       robotWidthMeters: 1.0,
       robotLengthMeters: 1.0,
+      fieldRotation: 90.0,
       robotColor: Colors.red,
       trajectoryColor: Colors.white,
     );
@@ -272,6 +277,14 @@ void main() {
         find.widgetWithText(DialogToggleSwitch, 'Show Non-Robot Objects');
     final showTrajectories =
         find.widgetWithText(DialogToggleSwitch, 'Show Trajectories');
+    final rotateLeft = find.ancestor(
+      of: find.text('Rotate Left'),
+      matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+    );
+    final rotateRight = find.ancestor(
+      of: find.text('Rotate Right'),
+      matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+    );
     final robotColor = find.widgetWithText(DialogColorPicker, 'Robot Color');
     final trajectoryColor =
         find.widgetWithText(DialogColorPicker, 'Trajectory Color');
@@ -281,21 +294,21 @@ void main() {
     expect(length, findsOneWidget);
     expect(showNonRobot, findsOneWidget);
     expect(showTrajectories, findsOneWidget);
+    expect(rotateLeft, findsOneWidget);
+    expect(rotateRight, findsOneWidget);
     expect(robotColor, findsOneWidget);
     expect(trajectoryColor, findsOneWidget);
 
+    await widgetTester.ensureVisible(game);
     await widgetTester.tap(game);
     await widgetTester.pumpAndSettle();
 
-    final chargedUpButton = find.widgetWithText(
-      DropdownMenuItem<String?>,
-      'Charged Up',
-    );
+    final chargedUpButton = find.text('Charged Up');
     expect(chargedUpButton, findsOneWidget);
 
-    await widgetTester.ensureVisible(chargedUpButton);
     await widgetTester.tap(chargedUpButton);
     await widgetTester.pumpAndSettle();
+
     expect(fieldWidgetModel.field.game, 'Charged Up');
 
     await widgetTester.enterText(width, '0.50');
@@ -327,5 +340,21 @@ void main() {
     );
     await widgetTester.pumpAndSettle();
     expect(fieldWidgetModel.showTrajectories, false);
+
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(fieldWidgetModel.fieldRotation, 180.0);
+
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(fieldWidgetModel.fieldRotation, -90.0);
+
+    await widgetTester.tap(rotateLeft);
+    await widgetTester.pumpAndSettle();
+    expect(fieldWidgetModel.fieldRotation, -180.0);
+
+    await widgetTester.tap(rotateLeft);
+    await widgetTester.pumpAndSettle();
+    expect(fieldWidgetModel.fieldRotation, 90.0);
   });
 }
