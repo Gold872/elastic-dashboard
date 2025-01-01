@@ -81,6 +81,46 @@ void main() {
     expect(textDisplayModel.showSubmitButton, isTrue);
   });
 
+  group('Show submit button defaults to', () {
+    test('true if topic is persistent', () {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Display Value',
+            type: NT4TypeStr.kFloat64,
+            properties: {
+              'persistent': true,
+            },
+          ),
+        ],
+        virtualValues: {
+          'Test/Display Value': 0.000001,
+        },
+      );
+
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isTrue);
+    });
+    test('false if topic is not persistent', () {
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isFalse);
+    });
+  });
+
   test('Text display to json', () {
     TextDisplayModel textDisplayModel = TextDisplayModel(
       ntConnection: ntConnection,

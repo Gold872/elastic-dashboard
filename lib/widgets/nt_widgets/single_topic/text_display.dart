@@ -31,11 +31,14 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    bool showSubmitButton = false,
+    bool? showSubmitButton,
     super.dataType,
     super.period,
-  })  : _showSubmitButton = showSubmitButton,
-        super();
+  }) : super() {
+    showSubmitButton ??= ntConnection.getTopicFromName(topic)?.isPersistent;
+    showSubmitButton ??= false;
+    _showSubmitButton = showSubmitButton;
+  }
 
   TextDisplayModel.fromJson({
     required super.ntConnection,
