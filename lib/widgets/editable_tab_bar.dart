@@ -9,6 +9,7 @@ import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/pixel_ratio_override.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
 class EditableTabBar extends StatelessWidget {
@@ -26,6 +27,8 @@ class EditableTabBar extends StatelessWidget {
 
   final int currentIndex;
 
+  final double? gridDpiOverride;
+
   const EditableTabBar({
     super.key,
     required this.preferences,
@@ -38,6 +41,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabRename,
     required this.onTabChanged,
     required this.onTabDuplicate,
+    this.gridDpiOverride,
   });
 
   void renameTab(BuildContext context, int index) {
@@ -277,33 +281,36 @@ class EditableTabBar extends StatelessWidget {
         ),
         // Tab grid area
         Flexible(
-          child: Stack(
-            children: [
-              Visibility(
-                visible:
-                    preferences.getBool(PrefKeys.showGrid) ?? Defaults.showGrid,
-                child: GridPaper(
-                  color: const Color.fromARGB(50, 195, 232, 243),
-                  interval: (preferences.getInt(PrefKeys.gridSize) ??
-                          Defaults.gridSize)
-                      .toDouble(),
-                  divisions: 1,
-                  subdivisions: 1,
-                  child: Container(),
+          child: PixelRatioOverride(
+            dpiOverride: gridDpiOverride,
+            child: Stack(
+              children: [
+                Visibility(
+                  visible: preferences.getBool(PrefKeys.showGrid) ??
+                      Defaults.showGrid,
+                  child: GridPaper(
+                    color: const Color.fromARGB(50, 195, 232, 243),
+                    interval: (preferences.getInt(PrefKeys.gridSize) ??
+                            Defaults.gridSize)
+                        .toDouble(),
+                    divisions: 1,
+                    subdivisions: 1,
+                    child: Container(),
+                  ),
                 ),
-              ),
-              FadeIndexedStack(
-                curve: Curves.decelerate,
-                index: currentIndex,
-                children: [
-                  for (TabGridModel grid in tabData.map((e) => e.tabGrid))
-                    ChangeNotifierProvider<TabGridModel>.value(
-                      value: grid,
-                      child: const TabGrid(),
-                    ),
-                ],
-              ),
-            ],
+                FadeIndexedStack(
+                  curve: Curves.decelerate,
+                  index: currentIndex,
+                  children: [
+                    for (TabGridModel grid in tabData.map((e) => e.tabGrid))
+                      ChangeNotifierProvider<TabGridModel>.value(
+                        value: grid,
+                        child: const TabGrid(),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         )
       ],

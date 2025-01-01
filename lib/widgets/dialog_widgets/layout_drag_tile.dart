@@ -53,12 +53,7 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
             return;
           }
 
-          widget.onDragUpdate.call(
-              details.globalPosition -
-                  Offset(draggingWidget!.displayRect.width,
-                          draggingWidget!.displayRect.height) /
-                      2,
-              draggingWidget!);
+          widget.onDragUpdate.call(details.globalPosition, draggingWidget!);
         },
         onPanEnd: (details) {
           if (draggingWidget == null) {

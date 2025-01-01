@@ -42,6 +42,8 @@ class FakeSettingsMethods extends Mock {
 
   void changeThemeVariant();
 
+  void changeGridDPIOverride();
+
   void openAssetsFolder();
 }
 
@@ -140,6 +142,8 @@ void main() {
     await widgetTester.tap(devSettings);
     await widgetTester.pumpAndSettle();
 
+    expect(find.widgetWithText(DialogTextInput, 'Grid DPI (Experimental)'),
+        findsOneWidget);
     expect(find.text('Open Assets Folder'), findsOneWidget);
 
     final closeButton = find.widgetWithText(TextButton, 'Close');
@@ -701,6 +705,58 @@ void main() {
 
     expect(preferences.getBool(PrefKeys.layoutLocked), false);
     verify(fakeSettings.changeLockLayout()).called(2);
+  });
+
+  testWidgets('Change Grid DPI Override', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SettingsDialog(
+          preferences: preferences,
+          ntConnection: createMockOfflineNT4(),
+          onGridDPIChanged: (value) async {
+            fakeSettings.changeGridDPIOverride();
+
+            if (value == null) {
+              return;
+            }
+
+            double? newOverride = double.tryParse(value);
+
+            if (newOverride != null) {
+              await preferences.setDouble(
+                  PrefKeys.gridDpiOverride, newOverride);
+            } else {
+              await preferences.remove(PrefKeys.gridDpiOverride);
+            }
+          },
+        ),
+      ),
+    ));
+
+    await widgetTester.pumpAndSettle();
+
+    expect(devSettings, findsOneWidget);
+    await widgetTester.tap(devSettings);
+    await widgetTester.pumpAndSettle();
+
+    final dpiOverride =
+        find.widgetWithText(DialogTextInput, 'Grid DPI (Experimental)');
+
+    expect(dpiOverride, findsOneWidget);
+
+    await widgetTester.enterText(dpiOverride, '1.0');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(preferences.getDouble(PrefKeys.gridDpiOverride), 1.0);
+
+    await widgetTester.enterText(dpiOverride, '');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(preferences.getDouble(PrefKeys.gridDpiOverride), isNull);
+
+    verify(fakeSettings.changeGridDPIOverride()).called(2);
   });
 
   testWidgets('Open assets', (widgetTester) async {
