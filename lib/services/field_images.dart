@@ -113,7 +113,10 @@ class Field {
   }
 
   void loadFieldImage() {
-    fieldImage = Image.asset(jsonData['field-image']);
+    fieldImage = Image.asset(
+      jsonData['field-image'],
+      fit: BoxFit.contain,
+    );
     fieldImage.image
         .resolve(ImageConfiguration.empty)
         .addListener(ImageStreamListener((image, synchronousCall) {

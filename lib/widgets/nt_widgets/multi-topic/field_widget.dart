@@ -703,7 +703,11 @@ class FieldWidget extends NTWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    child!,
+                    SizedBox(
+                      width: fittedSizes.destination.width,
+                      height: fittedSizes.destination.height,
+                      child: child!,
+                    ),
                     for (List<Offset> points in trajectoryPoints)
                       CustomPaint(
                         size: fittedSizes.destination,
