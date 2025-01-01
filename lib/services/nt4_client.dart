@@ -231,6 +231,9 @@ class NT4Topic {
   int getTypeId() {
     return NT4TypeStr.typeMap[type]!;
   }
+
+  bool get isPersistent =>
+      properties.containsKey('persistent') && properties['persistent'];
 }
 
 class NT4Client {

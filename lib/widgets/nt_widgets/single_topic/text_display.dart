@@ -31,11 +31,14 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    bool showSubmitButton = false,
+    bool? showSubmitButton,
     super.dataType,
     super.period,
-  })  : _showSubmitButton = showSubmitButton,
-        super();
+  }) : super() {
+    showSubmitButton ??= ntConnection.getTopicFromName(topic)?.isPersistent;
+    showSubmitButton ??= false;
+    _showSubmitButton = showSubmitButton;
+  }
 
   TextDisplayModel.fromJson({
     required super.ntConnection,
@@ -140,6 +143,8 @@ class TextDisplay extends NTWidget {
   Widget build(BuildContext context) {
     TextDisplayModel model = cast(context.watch<NTWidgetModel>());
 
+    ThemeData themeData = Theme.of(context);
+
     return ListenableBuilder(
       listenable: Listenable.merge([
         model.subscription!,
@@ -166,21 +171,35 @@ class TextDisplay extends NTWidget {
           });
         }
 
+        bool showWarning = model.controller.text != (data?.toString() ?? '');
+
         return Row(
           children: [
             Flexible(
-              child: TextField(
-                controller: model.controller,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.bottom,
-                decoration: const InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 0.0, vertical: 10.0),
-                  isDense: true,
+              child: Theme(
+                // Idk why, but this is the only way to properly change the error
+                // color without affecting the input border behavior
+                data: themeData.copyWith(
+                  colorScheme: themeData.colorScheme.copyWith(
+                    error: Colors.red[400],
+                  ),
                 ),
-                onSubmitted: (value) {
-                  model.publishData(value);
-                },
+                child: TextField(
+                  controller: model.controller,
+                  textAlign: TextAlign.left,
+                  textAlignVertical: TextAlignVertical.bottom,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0.0,
+                      vertical: 10.0,
+                    ),
+                    isDense: true,
+                    error: (showWarning) ? const SizedBox() : null,
+                  ),
+                  onSubmitted: (value) {
+                    model.publishData(value);
+                  },
+                ),
               ),
             ),
             if (model.showSubmitButton) ...[
