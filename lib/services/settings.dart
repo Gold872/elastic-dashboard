@@ -49,6 +49,7 @@ class PrefKeys {
   static String rememberWindowPosition = 'remember_window_position';
   static String defaultPeriod = 'default_period';
   static String defaultGraphPeriod = 'default_graph_period';
+  static String gridDpiOverride = 'grid_dpi_override';
   static String showOpenAssetsFolderWarning = "show_assets_folder_warning";
   static String windowPosition = 'window_position';
 }

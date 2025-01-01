@@ -497,10 +497,7 @@ class ListLayoutModel extends LayoutContainerModel {
             }
             widget.cursorGlobalLocation = details.globalPosition;
 
-            Offset location = details.globalPosition -
-                Offset(widget.displayRect.width, widget.displayRect.height) / 2;
-
-            dragOutFunctions?.dragOutUpdate(widget, location);
+            dragOutFunctions?.dragOutUpdate(widget, details.globalPosition);
           },
           onPanEnd: (details) {
             if (preferences.getBool(PrefKeys.layoutLocked) ??
