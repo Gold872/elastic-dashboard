@@ -136,7 +136,7 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
       
-      - name: Copy vc runtime
+      - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
         run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
@@ -240,7 +240,7 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }} --dart-define=ELASTIC_WPILIB=true
 
-      - name: Copy vc runtime
+      - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
         run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
