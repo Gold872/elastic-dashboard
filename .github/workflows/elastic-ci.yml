@@ -134,6 +134,13 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
+      
+      - name: Copy redist
+        if: ${{ matrix.build-option == 'windows' }}
+        run: |
+          cp windows/redist/msvcp140.dll build/windows/x64/runner/Release
+          cp windows/redist/vcruntime140.dll build/windows/x64/runner/Release
+          cp windows/redist/vcruntime140_1.dll build/windows/x64/runner/Release
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
@@ -161,7 +168,7 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         uses: L-Super/create-dmg-actions@v1.0.3
         with:
-          dmg_name: build/macos/Build/Products/Release/elastic-setup
+          dmg_name: build/macos/Build/Products/Release/elastic-setup-macos
           src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
 
       - name: Upload macOS installer
@@ -169,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: build/macos/Build/Products/Release/elastic-setup.dmg
+          path: build/macos/Build/Products/Release/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Create windows installer
