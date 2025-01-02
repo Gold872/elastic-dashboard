@@ -170,6 +170,8 @@ MockNTConnection createMockOnlineNT4({
 
     MockNT4Subscription topicSubscription = MockNT4Subscription();
 
+    when(topicSubscription.topic).thenReturn(topic.name);
+
     when(topicSubscription.value).thenAnswer((_) {
       return virtualValues![topic.name];
     });

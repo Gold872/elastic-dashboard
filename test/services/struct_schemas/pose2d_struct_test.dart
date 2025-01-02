@@ -5,35 +5,36 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elastic_dashboard/services/struct_schemas/pose2d_struct.dart';
 
+List<int> testPose2dStruct = [
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x14,
+  0x40,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x14,
+  0x40,
+  0x18,
+  0x2d,
+  0x44,
+  0x54,
+  0xfb,
+  0x21,
+  0x09,
+  0x40
+];
+
 void main() {
   test('Pose2D struct with valid data', () {
-    List<int> rawBytes = [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x18,
-      0x2d,
-      0x44,
-      0x54,
-      0xfb,
-      0x21,
-      0x09,
-      0x40
-    ];
-    Uint8List data = Uint8List.fromList(rawBytes);
+    Uint8List data = Uint8List.fromList(testPose2dStruct);
 
     Pose2dStruct pose2dStruct = Pose2dStruct.valueFromBytes(data);
 
@@ -86,34 +87,11 @@ void main() {
   });
 
   test('Pose2D array with valid data', () {
-    List<int> rawBytes = [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x18,
-      0x2d,
-      0x44,
-      0x54,
-      0xfb,
-      0x21,
-      0x09,
-      0x40
-    ];
-    Uint8List data =
-        Uint8List.fromList([...rawBytes, ...rawBytes, ...rawBytes]);
+    Uint8List data = Uint8List.fromList([
+      ...testPose2dStruct,
+      ...testPose2dStruct,
+      ...testPose2dStruct,
+    ]);
 
     List<Pose2dStruct> poseList = Pose2dStruct.listFromBytes(data);
     expect(poseList.length, 3);
@@ -125,37 +103,11 @@ void main() {
     }
   });
 
-  test('Pose2D array with missing data', () {
-    List<int> rawBytes = [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x14,
-      0x40,
-      0x18,
-      0x2d,
-      0x44,
-      0x54,
-      0xfb,
-      0x21,
-      0x09,
-      0x40
-    ];
+  test('Pose2D array with extra (missing) data', () {
     Uint8List data = Uint8List.fromList([
-      ...rawBytes,
-      ...rawBytes,
-      ...rawBytes,
+      ...testPose2dStruct,
+      ...testPose2dStruct,
+      ...testPose2dStruct,
       0x00,
       0x00,
       0x00,
