@@ -79,6 +79,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Generate junit report xml
+        if: ${{ !cancelled() }}
         run: dart pub global run junitreport:tojunit --input reports/test-report.json --output reports/junit-report.xml
 
       - name: Upload test reports to Codecov
@@ -137,7 +138,7 @@ jobs:
       
       - name: Copy vc runtime
         if: ${{ matrix.build-option == 'windows' }}
-        run: ./.github/CopyRuntime.ps1 -OutputPath build/windows/x64/runner/Release
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
@@ -241,7 +242,7 @@ jobs:
 
       - name: Copy vc runtime
         if: ${{ matrix.build-option == 'windows' }}
-        run: ./.github/CopyRuntime.ps1 -OutputPath build/windows/x64/runner/Release
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
