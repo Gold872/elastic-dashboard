@@ -612,12 +612,10 @@ class FieldWidget extends NTWidget {
               robotY = poseStruct.y;
               robotTheta = poseStruct.angle;
             } else {
-              List<double>? robotPosition = [];
-              if (robotPositionRaw.isEmpty) {
-                robotPosition = null;
-              } else if (robotPosition.length >= 3) {
-                robotPosition = robotPositionRaw.whereType<double>().toList();
+              List<double> robotPosition =
+                  robotPositionRaw.whereType<double>().toList();
 
+              if (robotPosition.length >= 3) {
                 robotX = robotPosition[0];
                 robotY = robotPosition[1];
                 robotTheta = -radians(robotPosition[2]);
