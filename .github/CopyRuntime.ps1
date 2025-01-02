@@ -19,5 +19,5 @@ $RuntimeLocation = Join-Path $VsDirectory "VC" "Redist" "MSVC" $ExpectedVersion 
 
 $CrtLocation = Join-Path $RuntimeLocation "*.CRT" -Resolve
 
-Copy-Item -Path "$CrtLocation\*" -Destination $OutputPath
+Copy-Item -Path "$CrtLocation\*.dll" -Destination $OutputPath
 
