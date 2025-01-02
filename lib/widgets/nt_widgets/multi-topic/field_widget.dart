@@ -615,7 +615,7 @@ class FieldWidget extends NTWidget {
               List<double>? robotPosition = [];
               if (robotPositionRaw.isEmpty) {
                 robotPosition = null;
-              } else {
+              } else if (robotPosition.length >= 3) {
                 robotPosition = robotPositionRaw.whereType<double>().toList();
 
                 robotX = robotPosition[0];

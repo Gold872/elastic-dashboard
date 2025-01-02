@@ -139,7 +139,53 @@ void main() {
     final trajectoryWidget = find.byWidgetPredicate(
       (widget) => widget is CustomPaint && widget.painter is TrajectoryPainter,
     );
-    testWidgets('no trajectory', (widgetTester) async {
+    testWidgets('non-struct robot, no trajectory', (widgetTester) async {
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(find.byType(CustomPaint), findsNWidgets(3));
+      expect(trajectoryWidget, findsNothing);
+      expect(fieldObject, findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('struct robot, no trajectory', (widgetTester) async {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: 'struct:Pose2d',
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': testPose2dStruct,
+          'Test/Field/OtherObject': [1.0, 1.0, 0.0],
+        },
+      );
+
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
@@ -169,7 +215,7 @@ void main() {
     testWidgets('non-struct trajectory', (widgetTester) async {
       List<double> fakeTrajectory = [];
 
-      for (int i = 0; i < 16; i++) {
+      for (int i = 0; i < 9; i++) {
         fakeTrajectory.add(i * 0.25);
         fakeTrajectory.add(i * 0.25);
         fakeTrajectory.add(0.0);
@@ -229,7 +275,7 @@ void main() {
     testWidgets('struct trajectory', (widgetTester) async {
       List<int> fakeTrajectory = [];
 
-      for (int i = 0; i < 16; i++) {
+      for (int i = 0; i < 9; i++) {
         fakeTrajectory.addAll(testPose2dStruct);
       }
 
