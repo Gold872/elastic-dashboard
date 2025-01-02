@@ -202,8 +202,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     super.init();
 
     topicAnnounceListener = (nt4Topic) {
-      if (nt4Topic.name.contains(topic) &&
-          !nt4Topic.name.contains('Robot') &&
+      if (nt4Topic.name.startsWith(topic) &&
+          !nt4Topic.name.endsWith('Robot') &&
           !nt4Topic.name.contains('.') &&
           !_otherObjectTopics.contains(nt4Topic.name)) {
         _otherObjectTopics.add(nt4Topic.name);
@@ -651,6 +651,13 @@ class FieldWidget extends NTWidget {
                 (rotatedFittedSizes.destination.width /
                     rotatedFittedSizes.source.width);
 
+            if (scaleReduction.isNaN) {
+              scaleReduction = 0;
+            }
+            if (rotatedScaleReduction.isNaN) {
+              rotatedScaleReduction = 0;
+            }
+
             if (!model.rendered &&
                 model.widgetSize != null &&
                 size != const Size(0, 0) &&
@@ -695,16 +702,17 @@ class FieldWidget extends NTWidget {
                     .toLowerCase()
                     .endsWith('trajectory');
 
-                bool isStructObject =
-                    model.isPoseStruct(objectSubscription.topic) ||
-                        model.isPoseArrayStruct(objectSubscription.topic);
                 bool isStructArray =
                     model.isPoseArrayStruct(objectSubscription.topic);
 
+                bool isStructObject =
+                    model.isPoseStruct(objectSubscription.topic) ||
+                        isStructArray;
+
                 if (isStructObject) {
                   isTrajectory = isTrajectory ||
-                      model.isPoseArrayStruct(objectSubscription.topic) &&
-                          (objectPositionRaw.length ~/ Pose2dStruct.length > 8);
+                      (isStructArray &&
+                          objectPositionRaw.length ~/ Pose2dStruct.length > 8);
                 } else {
                   isTrajectory = isTrajectory || objectPositionRaw.length > 24;
                 }
