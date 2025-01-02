@@ -135,12 +135,9 @@ jobs:
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
       
-      - name: Copy redist
+      - name: Copy vc runtime
         if: ${{ matrix.build-option == 'windows' }}
-        run: |
-          cp windows/redist/msvcp140.dll build/windows/x64/runner/Release
-          cp windows/redist/vcruntime140.dll build/windows/x64/runner/Release
-          cp windows/redist/vcruntime140_1.dll build/windows/x64/runner/Release
+        run: ./.github/CopyRuntime.ps1 -OutputPath build/windows/x64/runner/Release
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
