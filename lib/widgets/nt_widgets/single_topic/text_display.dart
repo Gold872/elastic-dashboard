@@ -22,10 +22,12 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
 
   bool get showSubmitButton => _showSubmitButton;
 
-  set showSubmitButton(value) {
+  set showSubmitButton(bool value) {
     _showSubmitButton = value;
     refresh();
   }
+
+  bool typing = false;
 
   TextDisplayModel({
     required super.ntConnection,
@@ -166,12 +168,14 @@ class TextDisplay extends NTWidget {
               }
             }
             model.controller.text = displayString;
+            model.typing = false;
 
             model.previousValue = data;
           });
         }
 
-        bool showWarning = model.controller.text != (data?.toString() ?? '');
+        bool showWarning =
+            model.controller.text != (data?.toString() ?? '') && model.typing;
 
         return Row(
           children: [
@@ -196,8 +200,13 @@ class TextDisplay extends NTWidget {
                     isDense: true,
                     error: (showWarning) ? const SizedBox() : null,
                   ),
+                  onChanged: (value) {
+                    model.typing = true;
+                    model.controller.text = value;
+                  },
                   onSubmitted: (value) {
                     model.publishData(value);
+                    model.typing = false;
                   },
                 ),
               ),
@@ -215,6 +224,7 @@ class TextDisplay extends NTWidget {
                     iconSize: 18.0,
                     onPressed: () {
                       model.publishData(model.controller.text);
+                      model.typing = false;
                     },
                     icon: const Icon(Icons.exit_to_app),
                   ),
