@@ -286,6 +286,7 @@ void main() {
       expect(boolNTConnection.getLastAnnouncedValue('Test/Display Value'),
           isFalse);
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -293,6 +294,7 @@ void main() {
       expect(
           boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isTrue);
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('string', (widgetTester) async {
@@ -344,6 +346,7 @@ void main() {
       expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
           'Hello');
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -351,6 +354,7 @@ void main() {
       expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
           'I Edited This Text');
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('int array', (widgetTester) async {
@@ -401,6 +405,7 @@ void main() {
       expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [0, 0]);
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -408,6 +413,7 @@ void main() {
       expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [1, 2, 3]);
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('boolean[]', (widgetTester) async {
@@ -459,6 +465,7 @@ void main() {
       expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [false, true]);
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -466,6 +473,7 @@ void main() {
       expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [true, false, true]);
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('double array', (widgetTester) async {
@@ -516,6 +524,7 @@ void main() {
       expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [0.0, 0.0]);
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -523,6 +532,7 @@ void main() {
       expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           [1.0, 2.0, 3.0]);
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('string array', (widgetTester) async {
@@ -574,6 +584,7 @@ void main() {
       expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           ['Hello', 'There']);
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
@@ -581,6 +592,7 @@ void main() {
       expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
           ['I', 'am', 'very', 'tired']);
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
 
     testWidgets('no submit button', (widgetTester) async {
@@ -632,6 +644,7 @@ void main() {
       expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
           'There isn\'t a submit button');
       expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
       await widgetTester.testTextInput.receiveAction(TextInputAction.done);
       await widgetTester.pumpAndSettle();
@@ -639,6 +652,7 @@ void main() {
       expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
           'I\'m submitting this without a button!');
       expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
     });
   });
 
