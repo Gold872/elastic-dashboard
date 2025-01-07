@@ -143,9 +143,9 @@ class StructSwerve extends NTWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // The side length for a 2x2 grid size
-        const double normalSideLength = 180;
+        const double normalSideLength = 170;
         double maxSideLength =
-            min(constraints.maxWidth, constraints.maxHeight) * 0.9;
+            min(constraints.maxWidth, constraints.maxHeight) * 0.85;
         return ListenableBuilder(
           listenable: Listenable.merge(model.subscriptions),
           builder: (context, child) {
@@ -362,7 +362,7 @@ class SwerveDrivePainter extends CustomPainter {
     final double circleRadius = min(size.width, size.height) / 8;
     const double arrowAngle = 40 * pi / 180;
 
-    final double pixelsPerMPS = (7.0 / 1.0) * (4.5 / maxSpeed);
+    final double pixelsPerMPS = (9.0 / 1.0) * (4.5 / maxSpeed);
 
     const double minArrowBase = 6.5;
     const double maxArrowBase = 16.0;
