@@ -221,9 +221,9 @@ class SwerveDriveWidget extends NTWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // The side length for a 2x2 grid size
-        const double normalSideLength = 180;
+        const double normalSideLength = 170;
         double sideLength =
-            min(constraints.maxWidth, constraints.maxHeight) * 0.9;
+            min(constraints.maxWidth, constraints.maxHeight) * 0.85;
         return ListenableBuilder(
           listenable: Listenable.merge(model.subscriptions),
           builder: (context, child) {
