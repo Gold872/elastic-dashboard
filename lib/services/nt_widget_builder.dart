@@ -9,6 +9,7 @@ import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/struct_swerve.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/basic_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/camera_stream.dart';
@@ -368,6 +369,18 @@ class NTWidgetBuilder {
       fromJson: SubsystemModel.fromJson,
       minWidth: _normalSize * 2,
       defaultWidth: 2,
+    );
+
+    registerMultiTopic(
+      name: StructSwerve.widgetType,
+      aliases: {'Swerve'},
+      model: StructSwerveModel.new,
+      widget: StructSwerve.new,
+      fromJson: StructSwerveModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
     );
 
     registerMultiTopic(
