@@ -134,7 +134,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   void createRows(NT4Topic nt4Topic) {
     String topic = nt4Topic.name;
-    if (!topic.startsWith('/')) {
+    bool hasLeading = topic.startsWith('/');
+    if (!hasLeading) {
       topic = '/$topic';
     }
 
@@ -145,6 +146,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     for (String row in rows) {
       currentTopic += '/$row';
 
+      String effectiveTopic =
+          hasLeading ? currentTopic : currentTopic.substring(1);
+
       bool lastElement = currentTopic == topic;
 
       if (current != null) {
@@ -152,7 +156,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = current.getRow(row);
         } else {
           current = current.createNewRow(
-              topic: currentTopic,
+              topic: effectiveTopic,
               name: row,
               ntTopic: (lastElement) ? nt4Topic : null);
         }
@@ -161,7 +165,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = root.getRow(row);
         } else {
           current = root.createNewRow(
-              topic: currentTopic,
+              topic: effectiveTopic,
               name: row,
               ntTopic: (lastElement) ? nt4Topic : null);
         }

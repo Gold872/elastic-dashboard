@@ -618,7 +618,7 @@ class FieldWidget extends NTWidget {
               if (robotPosition.length >= 3) {
                 robotX = robotPosition[0];
                 robotY = robotPosition[1];
-                robotTheta = -radians(robotPosition[2]);
+                robotTheta = radians(robotPosition[2]);
               }
             }
 
