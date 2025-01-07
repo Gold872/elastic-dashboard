@@ -8,8 +8,11 @@ class SwerveModuleStateStruct {
 
   const SwerveModuleStateStruct({required this.speed, required this.angle});
 
-  factory SwerveModuleStateStruct.valueFromBytes(Uint8List value) {
-    ByteData view = ByteData.view(value.buffer);
+  factory SwerveModuleStateStruct.valueFromBytes(
+    Uint8List value, [
+    int start = 0,
+  ]) {
+    ByteData view = ByteData.view(value.buffer, start);
 
     int length = view.lengthInBytes;
 
@@ -40,10 +43,7 @@ class SwerveModuleStateStruct {
         break;
       }
 
-      Uint8List elementBytes =
-          Uint8List.sublistView(view, i * length, i * length + length);
-
-      poseList.add(SwerveModuleStateStruct.valueFromBytes(elementBytes));
+      poseList.add(SwerveModuleStateStruct.valueFromBytes(value, i * length));
     }
 
     return poseList;
