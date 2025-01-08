@@ -750,8 +750,8 @@ class FieldWidget extends NTWidget {
                       objectTrajectory.add(
                         _getTrajectoryPointOffset(
                           model,
-                          x: objectPosition[0],
-                          y: objectPosition[1],
+                          x: objectPosition[i],
+                          y: objectPosition[i + 1],
                           fieldCenter: fieldCenter,
                           scaleReduction: scaleReduction,
                         ),
