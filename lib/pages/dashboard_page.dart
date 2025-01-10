@@ -2265,7 +2265,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                             bool connected = snapshot.data ?? false;
 
                             String connectedText = (connected)
-                                ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress)})'
+                                ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
                                 : 'Network Tables: Disconnected';
 
                             return Text(
