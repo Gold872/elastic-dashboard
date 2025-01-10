@@ -284,13 +284,13 @@ Displays information about a robot subsystem.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/0919a1f8-5a3c-4874-88c8-af4b86483837)
 
-## DifferentialDrive
+### DifferentialDrive
 
 Built from the WPILib DifferentialDrive ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/drive/DifferentialDrive.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_differential_drive.html)), it displays the wheel speeds of a differential drivetrain along with a curved arrow showing its direction. The sliders on the left and right can be dragged to set the speeds of each wheel (only works when Live Window is enabled).
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/0ddcb95a-8756-4cba-a4cb-3781e8d76233)
 
-## SwerveDrive
+### SwerveDrive
 
 _This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](https://github.com/Gold872/elastic-dashboard/wiki/Custom-Widget-Examples)
 
@@ -319,12 +319,13 @@ Built from the WPILib Encoder ([Java](https://github.wpilib.org/allwpilib/docs/r
 
 Built from the WPILib Field2d ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/smartdashboard/Field2d.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc_1_1_field2d.html)), displays a field with the robot's position and any other objects to scale. If a field object contains more than 8 elements, it will be displayed as a trajectory, which draws a line representing a path.
 
-![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/06c7175f-3753-4706-a00e-129bd9024141)
+![image](../.gitbook/assets/field2d_widget.png)
 
 #### Properties
 
-* `field_game` - The game's field to show (defaults to "Crescendo")
+* `field_game` - The game's field to show (defaults to "Reefscape")
   * Must be one of the following (case sensitive)
+    * Reefscape
     * Crescendo
     * Charged Up
     * Rapid React
@@ -343,7 +344,7 @@ Built from the WPILib Field2d ([Java](https://github.wpilib.org/allwpilib/docs/r
   * Decimal number
 * `robot_color`- The color of the robot bumpers (defaults to red)
   * 32 bit int (format: 0xAARRGGBB)
-* trajectory\_color - The color of the trajectory (defaults to white)
+* `trajectory_color` - The color of the trajectory (defaults to white)
   * 32 bit int (format: 0xAARRGGBB)
 
 **32 Bit int Information**
