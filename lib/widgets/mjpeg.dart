@@ -229,7 +229,7 @@ class MjpegController extends ChangeNotifier {
     if (isStreaming) {
       return;
     }
-    logger.debug('Starting camera stream on URL $stream');
+    logger.info('Starting camera stream on URL $stream');
     ByteStream? byteStream;
     try {
       final request = Request('GET', Uri.parse(stream));
@@ -289,7 +289,7 @@ class MjpegController extends ChangeNotifier {
   }
 
   void stopStream() async {
-    logger.debug('Stopping camera stream on URL $stream');
+    logger.info('Stopping camera stream on URL $stream');
     await _rawSubscription?.cancel();
     _buffer.clear();
     _metricsTimer?.cancel();
