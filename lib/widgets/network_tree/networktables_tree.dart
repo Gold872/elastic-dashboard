@@ -23,9 +23,10 @@ class NetworkTableTree extends StatefulWidget {
   final SharedPreferences preferences;
   final ListLayoutBuilder? listLayoutBuilder;
 
-  final Function(Offset globalPosition, WidgetContainerModel widget)?
+  final void Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
-  final Function(WidgetContainerModel widget)? onDragEnd;
+  final void Function(WidgetContainerModel widget)? onDragEnd;
+  final void Function()? onRemoveWidget;
   final String searchQuery;
   final bool hideMetadata;
 
@@ -37,6 +38,7 @@ class NetworkTableTree extends StatefulWidget {
     required this.hideMetadata,
     this.onDragUpdate,
     this.onDragEnd,
+    this.onRemoveWidget,
     this.searchQuery = '',
   });
 
@@ -46,18 +48,24 @@ class NetworkTableTree extends StatefulWidget {
 
 class _NetworkTableTreeState extends State<NetworkTableTree> {
   late final NetworkTableTreeRow root = NetworkTableTreeRow(
-      ntConnection: widget.ntConnection,
-      preferences: widget.preferences,
-      topic: '/',
-      rowName: '');
+    ntConnection: widget.ntConnection,
+    preferences: widget.preferences,
+    topic: '/',
+    rowName: '',
+  );
   late final TreeController<NetworkTableTreeRow> treeController;
 
-  late final Function(Offset globalPosition, WidgetContainerModel widget)?
-      onDragUpdate = widget.onDragUpdate;
-  late final Function(WidgetContainerModel widget)? onDragEnd =
-      widget.onDragEnd;
+  void onTopicAnnounced(NT4Topic topic) {
+    setState(() => treeController.roots = _filterChildren(root.children));
+  }
 
-  late final Function(NT4Topic topic) onNewTopicAnnounced;
+  void onTopicUnannounced(NT4Topic topic) {
+    setState(() => root.clearRows());
+  }
+
+  void onConnected() {
+    setState(() => root.clearRows());
+  }
 
   @override
   void initState() {
@@ -86,12 +94,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       },
     );
 
-    widget.ntConnection.addTopicAnnounceListener(onNewTopicAnnounced = (topic) {
-      setState(() {
-        treeController.roots = _filterChildren(root.children);
-        treeController.rebuild();
-      });
-    });
+    widget.ntConnection.addTopicAnnounceListener(onTopicAnnounced);
+    widget.ntConnection.addTopicUnannounceListener(onTopicUnannounced);
+    widget.ntConnection.addConnectedListener(onConnected);
   }
 
   List<NetworkTableTreeRow> _filterChildren(
@@ -117,7 +122,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   @override
   void dispose() {
-    widget.ntConnection.removeTopicAnnounceListener(onNewTopicAnnounced);
+    widget.ntConnection.removeTopicAnnounceListener(onTopicAnnounced);
+    widget.ntConnection.removeTopicUnannounceListener(onTopicUnannounced);
+    widget.ntConnection.removeConnectedListener(onConnected);
 
     super.dispose();
   }
@@ -198,12 +205,12 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       nodeBuilder:
           (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
         return TreeTile(
-          key: UniqueKey(),
           preferences: widget.preferences,
           entry: entry,
           listLayoutBuilder: widget.listLayoutBuilder,
-          onDragUpdate: onDragUpdate,
-          onDragEnd: onDragEnd,
+          onDragUpdate: widget.onDragUpdate,
+          onDragEnd: widget.onDragEnd,
+          onRemoveWidget: widget.onRemoveWidget,
           onTap: () {
             if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
               return;
@@ -223,9 +230,10 @@ class TreeTile extends StatefulWidget {
 
   final ListLayoutBuilder? listLayoutBuilder;
 
-  final Function(Offset globalPosition, WidgetContainerModel widget)?
+  final void Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
-  final Function(WidgetContainerModel widget)? onDragEnd;
+  final void Function(WidgetContainerModel widget)? onDragEnd;
+  final void Function()? onRemoveWidget;
 
   const TreeTile({
     super.key,
@@ -235,6 +243,7 @@ class TreeTile extends StatefulWidget {
     this.listLayoutBuilder,
     this.onDragUpdate,
     this.onDragEnd,
+    this.onRemoveWidget,
   });
 
   @override
@@ -247,9 +256,13 @@ class _TreeTileState extends State<TreeTile> {
 
   @override
   void dispose() {
-    draggingWidget?.unSubscribe();
-    draggingWidget?.disposeModel(deleting: true);
-    draggingWidget?.forceDispose();
+    if (draggingWidget != null) {
+      draggingWidget!.unSubscribe();
+      draggingWidget!.disposeModel(deleting: true);
+      draggingWidget!.forceDispose();
+
+      widget.onRemoveWidget?.call();
+    }
 
     super.dispose();
   }

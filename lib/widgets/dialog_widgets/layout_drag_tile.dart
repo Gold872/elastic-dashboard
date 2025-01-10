@@ -9,9 +9,10 @@ class LayoutDragTile extends StatefulWidget {
 
   final LayoutContainerModel Function() layoutBuilder;
 
-  final Function(Offset globalPosition, LayoutContainerModel widget)
+  final void Function(Offset globalPosition, LayoutContainerModel widget)
       onDragUpdate;
-  final Function(LayoutContainerModel widget) onDragEnd;
+  final void Function(LayoutContainerModel widget) onDragEnd;
+  final void Function() onRemoveWidget;
 
   const LayoutDragTile({
     super.key,
@@ -20,6 +21,7 @@ class LayoutDragTile extends StatefulWidget {
     required this.layoutBuilder,
     required this.onDragUpdate,
     required this.onDragEnd,
+    required this.onRemoveWidget,
   });
 
   @override
@@ -28,6 +30,19 @@ class LayoutDragTile extends StatefulWidget {
 
 class _LayoutDragTileState extends State<LayoutDragTile> {
   LayoutContainerModel? draggingWidget;
+
+  @override
+  void dispose() {
+    if (draggingWidget != null) {
+      draggingWidget?.unSubscribe();
+      draggingWidget?.disposeModel(deleting: true);
+      draggingWidget?.forceDispose();
+
+      widget.onRemoveWidget();
+    }
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
