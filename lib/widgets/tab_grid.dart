@@ -639,6 +639,13 @@ class TabGridModel extends ChangeNotifier {
     return true;
   }
 
+  void removeDragInWidget() {
+    if (_containerDraggingIn != null) {
+      _containerDraggingIn = null;
+      notifyListeners();
+    }
+  }
+
   ListLayoutModel createListLayout(
       {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
     return ListLayoutModel(

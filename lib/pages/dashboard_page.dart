@@ -2234,6 +2234,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           .tabGrid
                           .placeDragInWidget(widget);
                     },
+                    onRemoveWidget: () =>
+                        _tabData[_currentTabIndex].tabGrid.removeDragInWidget(),
                     onClose: () {
                       setState(() => _addWidgetDialogVisible = false);
                     },
@@ -2303,31 +2305,35 @@ class _AddWidgetDialog extends StatefulWidget {
   final TabGridModel Function() _grid;
   final bool _visible;
 
-  final Function(Offset globalPosition, WidgetContainerModel widget)
+  final void Function(Offset globalPosition, WidgetContainerModel widget)
       _onNTDragUpdate;
-  final Function(WidgetContainerModel widget) _onNTDragEnd;
+  final void Function(WidgetContainerModel widget) _onNTDragEnd;
 
-  final Function(Offset globalPosition, LayoutContainerModel widget)
+  final void Function(Offset globalPosition, LayoutContainerModel widget)
       _onLayoutDragUpdate;
-  final Function(LayoutContainerModel widget) _onLayoutDragEnd;
+  final void Function(LayoutContainerModel widget) _onLayoutDragEnd;
 
-  final Function()? _onClose;
+  final void Function() _onRemoveWidget;
+
+  final void Function()? _onClose;
 
   const _AddWidgetDialog({
     required this.ntConnection,
     required this.preferences,
     required TabGridModel Function() grid,
     required bool visible,
-    required dynamic Function(Offset, WidgetContainerModel) onNTDragUpdate,
-    required dynamic Function(WidgetContainerModel) onNTDragEnd,
-    required dynamic Function(Offset, LayoutContainerModel) onLayoutDragUpdate,
-    required dynamic Function(LayoutContainerModel) onLayoutDragEnd,
-    dynamic Function()? onClose,
+    required void Function(Offset, WidgetContainerModel) onNTDragUpdate,
+    required void Function(WidgetContainerModel) onNTDragEnd,
+    required void Function(Offset, LayoutContainerModel) onLayoutDragUpdate,
+    required void Function(LayoutContainerModel) onLayoutDragEnd,
+    required void Function() onRemoveWidget,
+    void Function()? onClose,
   })  : _onClose = onClose,
         _onLayoutDragEnd = onLayoutDragEnd,
         _onNTDragEnd = onNTDragEnd,
         _onNTDragUpdate = onNTDragUpdate,
         _onLayoutDragUpdate = onLayoutDragUpdate,
+        _onRemoveWidget = onRemoveWidget,
         _visible = visible,
         _grid = grid;
 
@@ -2387,6 +2393,7 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                           hideMetadata: _hideMetadata,
                           onDragUpdate: widget._onNTDragUpdate,
                           onDragEnd: widget._onNTDragEnd,
+                          onRemoveWidget: widget._onRemoveWidget,
                         ),
                         ListView(
                           children: [
@@ -2397,6 +2404,7 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                                   widget._grid().createListLayout(),
                               onDragUpdate: widget._onLayoutDragUpdate,
                               onDragEnd: widget._onLayoutDragEnd,
+                              onRemoveWidget: widget._onRemoveWidget,
                             ),
                           ],
                         ),
