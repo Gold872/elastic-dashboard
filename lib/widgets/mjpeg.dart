@@ -265,10 +265,16 @@ class MjpegController extends ChangeNotifier {
       return;
     }
 
-    _rawSubscription = byteStream.listen((data) {
-      _bitCount += data.length * Uint8List.bytesPerElement * 8;
-      _handleData(data);
-    });
+    _rawSubscription = byteStream.listen(
+      (data) {
+        _bitCount += data.length * Uint8List.bytesPerElement * 8;
+        _handleData(data);
+      },
+      onDone: () {
+        stopStream();
+        notifyListeners();
+      },
+    );
 
     _metricsTimer ??=
         Timer.periodic(const Duration(seconds: 1), _updateMetrics);
