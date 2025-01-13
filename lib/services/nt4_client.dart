@@ -128,7 +128,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
   void updateValue(Object? value, int timestamp) {
     logger.trace(
-        'Updating value for subscription with uid "$uid" to the topic "$topic" and with options "$options"; Value: $value, Time: $timestamp');
+        'Updating value for subscription: $this - Value: $value, Time: $timestamp');
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
