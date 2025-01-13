@@ -38,6 +38,9 @@ class Log {
   }
 
   void log(Level level, dynamic message, [dynamic error, StackTrace? trace]) {
+    if (Logger.level.value > level.value) {
+      return;
+    }
     _logger?.log(
       level,
       '[${_dateFormat.format(DateTime.now())}]:  $message',
