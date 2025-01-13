@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -53,6 +54,11 @@ void main() async {
     await _restorePreferencesFromBackup(appFolderPath);
     preferences = await SharedPreferences.getInstance();
   }
+
+  Level logLevel = Settings.logLevels.firstWhereOrNull((level) =>
+          level.levelName == preferences.getString(PrefKeys.logLevel)) ??
+      Defaults.logLevel;
+  Logger.level = logLevel;
 
   await windowManager.ensureInitialized();
 
@@ -145,7 +151,7 @@ Future<void> _backupPreferences(String appFolderPath) async {
     if (await File(backup).exists()) await File(backup).delete(recursive: true);
     await File(original).copy(backup);
 
-    logger.info('Backup up shared_preferences.json to $backup');
+    logger.info('Backed up shared_preferences.json to $backup');
   } catch (_) {
     /* Do nothing */
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logger/logger.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +43,8 @@ class FakeSettingsMethods extends Mock {
 
   void changeThemeVariant();
 
+  void changeLogLevel();
+
   void changeGridDPIOverride();
 
   void openAssetsFolder();
@@ -55,7 +58,7 @@ void main() {
 
   final networkSettings = find.widgetWithText(Tab, 'Network');
   final appearanceSettings = find.widgetWithText(Tab, 'Appearance');
-  final devSettings = find.widgetWithText(Tab, 'Developer');
+  final devSettings = find.widgetWithText(Tab, 'Developer (Advanced)');
 
   setUpAll(() {
     fakeSettings = FakeSettingsMethods();
@@ -76,6 +79,7 @@ void main() {
       PrefKeys.defaultPeriod: 0.10,
       PrefKeys.defaultGraphPeriod: 0.033,
       PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
+      PrefKeys.logLevel: Level.trace.levelName,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -86,14 +90,16 @@ void main() {
   testWidgets('Settings Dialog', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -142,6 +148,7 @@ void main() {
     await widgetTester.tap(devSettings);
     await widgetTester.pumpAndSettle();
 
+    expect(find.text('Log Level'), findsOneWidget);
     expect(find.widgetWithText(DialogTextInput, 'Grid DPI (Experimental)'),
         findsOneWidget);
     expect(find.text('Open Assets Folder'), findsOneWidget);
@@ -157,19 +164,21 @@ void main() {
   testWidgets('Change team number', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onTeamNumberChanged: (data) async {
-            fakeSettings.changeTeamNumber();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onTeamNumberChanged: (data) async {
+              fakeSettings.changeTeamNumber();
 
-            await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
-          },
+              await preferences.setInt(PrefKeys.teamNumber, int.parse(data!));
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -191,17 +200,19 @@ void main() {
   testWidgets('Change IP address mode', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onIPAddressModeChanged: (mode) {
-            fakeSettings.changeIPAddressMode();
-          },
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onIPAddressModeChanged: (mode) {
+              fakeSettings.changeIPAddressMode();
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -236,19 +247,21 @@ void main() {
   testWidgets('Change IP address', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onIPAddressChanged: (data) async {
-            fakeSettings.changeIPAddress();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onIPAddressChanged: (data) async {
+              fakeSettings.changeIPAddress();
 
-            await preferences.setString(PrefKeys.ipAddress, data!);
-          },
+              await preferences.setString(PrefKeys.ipAddress, data!);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -267,20 +280,22 @@ void main() {
   testWidgets('Change default period', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onDefaultPeriodChanged: (period) async {
-            fakeSettings.changeDefaultPeriod();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onDefaultPeriodChanged: (period) async {
+              fakeSettings.changeDefaultPeriod();
 
-            await preferences.setDouble(
-                PrefKeys.defaultPeriod, double.parse(period!));
-          },
+              await preferences.setDouble(
+                  PrefKeys.defaultPeriod, double.parse(period!));
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -299,20 +314,22 @@ void main() {
   testWidgets('Change default graph period', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onDefaultGraphPeriodChanged: (period) async {
-            fakeSettings.changeDefaultGraphPeriod();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onDefaultGraphPeriodChanged: (period) async {
+              fakeSettings.changeDefaultGraphPeriod();
 
-            await preferences.setDouble(
-                PrefKeys.defaultGraphPeriod, double.parse(period!));
-          },
+              await preferences.setDouble(
+                  PrefKeys.defaultGraphPeriod, double.parse(period!));
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -333,19 +350,21 @@ void main() {
   testWidgets('Change team color', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOnlineNT4(),
-          preferences: preferences,
-          onColorChanged: (color) async {
-            fakeSettings.changeColor();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOnlineNT4(),
+            preferences: preferences,
+            onColorChanged: (color) async {
+              fakeSettings.changeColor();
 
-            await preferences.setInt(PrefKeys.teamColor, color.value);
-          },
+              await preferences.setInt(PrefKeys.teamColor, color.value);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -393,20 +412,22 @@ void main() {
   testWidgets('Change theme variant', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          onThemeVariantChanged: (variant) async {
-            fakeSettings.changeThemeVariant();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            onThemeVariantChanged: (variant) async {
+              fakeSettings.changeThemeVariant();
 
-            await preferences.setString(
-                PrefKeys.themeVariant, variant.variantName);
-          },
-          preferences: preferences,
+              await preferences.setString(
+                  PrefKeys.themeVariant, variant.variantName);
+            },
+            preferences: preferences,
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -450,19 +471,21 @@ void main() {
   testWidgets('Toggle grid', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onGridToggle: (value) async {
-            fakeSettings.changeShowGrid();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onGridToggle: (value) async {
+              fakeSettings.changeShowGrid();
 
-            await preferences.setBool(PrefKeys.showGrid, value);
-          },
+              await preferences.setBool(PrefKeys.showGrid, value);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -496,19 +519,21 @@ void main() {
   testWidgets('Change grid size', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onGridSizeChanged: (gridSize) async {
-            fakeSettings.changeGridSize();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onGridSizeChanged: (gridSize) async {
+              fakeSettings.changeGridSize();
 
-            await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
-          },
+              await preferences.setInt(PrefKeys.gridSize, int.parse(gridSize!));
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -532,20 +557,22 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
     createMockOfflineNT4();
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onCornerRadiusChanged: (radius) async {
-            fakeSettings.changeCornerRadius();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onCornerRadiusChanged: (radius) async {
+              fakeSettings.changeCornerRadius();
 
-            await preferences.setDouble(
-                PrefKeys.cornerRadius, double.parse(radius!));
-          },
+              await preferences.setDouble(
+                  PrefKeys.cornerRadius, double.parse(radius!));
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -569,19 +596,21 @@ void main() {
   testWidgets('Toggle driver station auto resize', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onResizeToDSChanged: (value) async {
-            fakeSettings.changeDSAutoResize();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onResizeToDSChanged: (value) async {
+              fakeSettings.changeDSAutoResize();
 
-            await preferences.setBool(PrefKeys.autoResizeToDS, value);
-          },
+              await preferences.setBool(PrefKeys.autoResizeToDS, value);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -616,19 +645,21 @@ void main() {
   testWidgets('Toggle remember window position', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          ntConnection: createMockOfflineNT4(),
-          preferences: preferences,
-          onRememberWindowPositionChanged: (value) async {
-            fakeSettings.changeRememberWindow();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            preferences: preferences,
+            onRememberWindowPositionChanged: (value) async {
+              fakeSettings.changeRememberWindow();
 
-            await preferences.setBool(PrefKeys.rememberWindowPosition, value);
-          },
+              await preferences.setBool(PrefKeys.rememberWindowPosition, value);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -663,19 +694,21 @@ void main() {
   testWidgets('Toggle lock layout', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          preferences: preferences,
-          ntConnection: createMockOfflineNT4(),
-          onLayoutLock: (value) async {
-            fakeSettings.changeLockLayout();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            preferences: preferences,
+            ntConnection: createMockOfflineNT4(),
+            onLayoutLock: (value) async {
+              fakeSettings.changeLockLayout();
 
-            await preferences.setBool(PrefKeys.layoutLocked, value);
-          },
+              await preferences.setBool(PrefKeys.layoutLocked, value);
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -707,33 +740,93 @@ void main() {
     verify(fakeSettings.changeLockLayout()).called(2);
   });
 
+  testWidgets('Change log level', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            ntConnection: createMockOfflineNT4(),
+            onLogLevelChanged: (level) async {
+              fakeSettings.changeLogLevel();
+
+              if (level == null) {
+                await preferences.remove(PrefKeys.logLevel);
+              } else {
+                await preferences.setString(PrefKeys.logLevel, level.levelName);
+              }
+            },
+            preferences: preferences,
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(devSettings, findsOneWidget);
+    await widgetTester.tap(devSettings);
+    await widgetTester.pumpAndSettle();
+
+    final logLevelDropdown =
+        find.widgetWithText(DialogDropdownChooser<String>, 'Trace');
+
+    expect(logLevelDropdown, findsOneWidget);
+
+    await widgetTester.tap(logLevelDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Trace'), findsNWidgets(2));
+    expect(find.text('Automatic'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Automatic'));
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getString(PrefKeys.logLevel), isNull);
+
+    verify(fakeSettings.changeLogLevel()).called(1);
+
+    final newLogLevelDropdown =
+        find.widgetWithText(DialogDropdownChooser<String>, 'Automatic');
+
+    expect(newLogLevelDropdown, findsOneWidget);
+
+    await widgetTester.tap(newLogLevelDropdown);
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Automatic'), findsNWidgets(2));
+  });
+
   testWidgets('Change Grid DPI Override', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          preferences: preferences,
-          ntConnection: createMockOfflineNT4(),
-          onGridDPIChanged: (value) async {
-            fakeSettings.changeGridDPIOverride();
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            preferences: preferences,
+            ntConnection: createMockOfflineNT4(),
+            onGridDPIChanged: (value) async {
+              fakeSettings.changeGridDPIOverride();
 
-            if (value == null) {
-              return;
-            }
+              if (value == null) {
+                return;
+              }
 
-            double? newOverride = double.tryParse(value);
+              double? newOverride = double.tryParse(value);
 
-            if (newOverride != null) {
-              await preferences.setDouble(
-                  PrefKeys.gridDpiOverride, newOverride);
-            } else {
-              await preferences.remove(PrefKeys.gridDpiOverride);
-            }
-          },
+              if (newOverride != null) {
+                await preferences.setDouble(
+                    PrefKeys.gridDpiOverride, newOverride);
+              } else {
+                await preferences.remove(PrefKeys.gridDpiOverride);
+              }
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -762,17 +855,19 @@ void main() {
   testWidgets('Open assets', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    await widgetTester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SettingsDialog(
-          preferences: preferences,
-          ntConnection: createMockOfflineNT4(),
-          onOpenAssetsFolderPressed: () {
-            fakeSettings.openAssetsFolder();
-          },
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            preferences: preferences,
+            ntConnection: createMockOfflineNT4(),
+            onOpenAssetsFolderPressed: () {
+              fakeSettings.openAssetsFolder();
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     await widgetTester.pumpAndSettle();
 

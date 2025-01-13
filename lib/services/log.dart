@@ -33,7 +33,6 @@ class Log {
         ConsoleOutput(),
         if (kReleaseMode) FileOutput(file: logFile),
       ]),
-      level: kDebugMode ? Level.debug : Level.info,
       filter: ProductionFilter(),
     );
   }
