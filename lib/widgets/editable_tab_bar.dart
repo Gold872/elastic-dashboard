@@ -312,7 +312,7 @@ class EditableTabBar extends StatelessWidget {
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }
