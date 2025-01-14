@@ -447,6 +447,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
         width: 350,
+        height: 100,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
@@ -473,6 +474,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         showProgressIndicator: false,
         background: colorScheme.surface,
         width: 350,
+        height: 100,
         position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
@@ -508,6 +510,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         title: 'No Updates Available',
         message: 'You are running on the latest version of Elastic',
         width: 350,
+        height: 75,
       );
     }
   }
@@ -2093,38 +2096,37 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ],
     );
 
-    final List<Widget> trailing = [
-      if (lastUpdateResponse.updateAvailable) ...[
-        const VerticalDivider(),
-        Tooltip(
-          message: 'Download version ${lastUpdateResponse.latestVersion}',
-          child: MenuItemButton(
-            style: menuButtonStyle.copyWith(
-              minimumSize:
-                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-              maximumSize:
-                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-            ),
-            onPressed: () async {
-              Uri url = Uri.parse(Settings.releasesLink);
-
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url);
-              }
-            },
-            child: const Icon(Icons.update, color: Colors.orange),
-          ),
+    Widget? updateButton;
+    if (lastUpdateResponse.updateAvailable) {
+      updateButton = IconButton(
+        style: const ButtonStyle(
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+          maximumSize: WidgetStatePropertyAll(Size.square(34.0)),
+          minimumSize: WidgetStatePropertyAll(Size.zero),
+          padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+          iconSize: WidgetStatePropertyAll(24.0),
         ),
-        const VerticalDivider(),
-      ],
-    ];
+        tooltip: 'Download version ${lastUpdateResponse.latestVersion}',
+        onPressed: () async {
+          Uri url = Uri.parse(Settings.releasesLink);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+        icon: const Icon(Icons.update, color: Colors.orange),
+      );
+    }
 
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        trailing: trailing,
+        leadingWidth: (preferences.getBool(PrefKeys.layoutLocked) ??
+                Defaults.layoutLocked)
+            ? 500
+            : 445,
       ),
       body: Focus(
         autofocus: true,
@@ -2141,6 +2143,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     preferences: preferences,
                     gridDpiOverride:
                         preferences.getDouble(PrefKeys.gridDpiOverride),
+                    updateButton: updateButton,
                     currentIndex: _currentTabIndex,
                     onTabMoveLeft: () {
                       _moveTabLeft();
@@ -2259,6 +2262,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                 child: Row(
                   children: [
                     Expanded(
+                      flex: 3,
                       child: StreamBuilder(
                           stream: widget.ntConnection.connectionStatus(),
                           builder: (context, snapshot) {
@@ -2284,6 +2288,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       ),
                     ),
                     Expanded(
+                      flex: 3,
                       child: StreamBuilder(
                           stream: widget.ntConnection.latencyStream(),
                           builder: (context, snapshot) {

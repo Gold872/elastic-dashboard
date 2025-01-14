@@ -253,10 +253,10 @@ packages:
     dependency: "direct main"
     description:
       name: elegant_notification
-      sha256: f6ad40163a06ac5c41fe698d39c4e45b5d6c1617d6cd17062e11e1ecd39b3a97
+      sha256: "4439f045ba21c931316bc1dce731f59d59e0ec4167971639e040ad7e5d96ba9f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.4.1"
   equatable:
     dependency: transitive
     description:

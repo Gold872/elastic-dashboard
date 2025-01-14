@@ -67,17 +67,24 @@ void main() async {
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
   double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
-  Size screenSize =
-      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
+  Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
+  logger.debug(
+      'Display Information: - Screen Size: $screenSize, Scale Factor: $scaleFactor');
 
-  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
+  double minimumWidth =
+      min(scaleFactor * screenSize.width * 0.475 / 1.5, 1280.0);
+  double minimumHeight =
+      min(scaleFactor * screenSize.height * 0.475 / 1.5, 720.0);
 
   Size minimumSize = Size(minimumWidth, minimumHeight);
 
+  logger.debug('Minimum Size: $minimumSize');
+
   await windowManager.setMinimumSize(minimumSize);
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-      windowButtonVisibility: false);
+  await windowManager.setTitleBarStyle(
+    TitleBarStyle.hidden,
+    windowButtonVisibility: false,
+  );
 
   if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
     await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
@@ -90,7 +97,7 @@ void main() async {
     Elastic(
       ntConnection: ntConnection,
       preferences: preferences,
-      version: packageInfo.version,
+      version: '2025.0.1',
     ),
   );
 }
