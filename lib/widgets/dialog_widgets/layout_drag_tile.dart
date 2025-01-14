@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/layout_container_model.dart';
 
 class LayoutDragTile extends StatefulWidget {
+  final int gridIndex;
   final String title;
   final IconData icon;
 
@@ -16,6 +17,7 @@ class LayoutDragTile extends StatefulWidget {
 
   const LayoutDragTile({
     super.key,
+    required this.gridIndex,
     required this.title,
     required this.icon,
     required this.layoutBuilder,
@@ -31,8 +33,7 @@ class LayoutDragTile extends StatefulWidget {
 class _LayoutDragTileState extends State<LayoutDragTile> {
   LayoutContainerModel? draggingWidget;
 
-  @override
-  void dispose() {
+  void cancelDrag() {
     if (draggingWidget != null) {
       draggingWidget?.unSubscribe();
       draggingWidget?.disposeModel(deleting: true);
@@ -40,6 +41,19 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
 
       widget.onRemoveWidget();
     }
+  }
+
+  @override
+  void didUpdateWidget(LayoutDragTile oldWidget) {
+    if (widget.gridIndex != oldWidget.gridIndex) {
+      cancelDrag();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    cancelDrag();
 
     super.dispose();
   }

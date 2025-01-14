@@ -23,6 +23,8 @@ class NetworkTableTree extends StatefulWidget {
   final SharedPreferences preferences;
   final ListLayoutBuilder? listLayoutBuilder;
 
+  final int gridIndex;
+
   final void Function(Offset globalPosition, WidgetContainerModel widget)?
       onDragUpdate;
   final void Function(WidgetContainerModel widget)? onDragEnd;
@@ -36,6 +38,7 @@ class NetworkTableTree extends StatefulWidget {
     required this.preferences,
     this.listLayoutBuilder,
     required this.hideMetadata,
+    this.gridIndex = 0,
     this.onDragUpdate,
     this.onDragEnd,
     this.onRemoveWidget,
@@ -205,6 +208,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       nodeBuilder:
           (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
         return TreeTile(
+          gridIndex: widget.gridIndex,
           preferences: widget.preferences,
           entry: entry,
           listLayoutBuilder: widget.listLayoutBuilder,
@@ -224,6 +228,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 }
 
 class TreeTile extends StatefulWidget {
+  final int gridIndex;
+
   final SharedPreferences preferences;
   final TreeEntry<NetworkTableTreeRow> entry;
   final VoidCallback onTap;
@@ -237,6 +243,7 @@ class TreeTile extends StatefulWidget {
 
   const TreeTile({
     super.key,
+    required this.gridIndex,
     required this.preferences,
     required this.entry,
     required this.onTap,
@@ -254,15 +261,30 @@ class _TreeTileState extends State<TreeTile> {
   WidgetContainerModel? draggingWidget;
   bool dragging = false;
 
-  @override
-  void dispose() {
+  void cancelDrag() {
     if (draggingWidget != null) {
       draggingWidget!.unSubscribe();
       draggingWidget!.disposeModel(deleting: true);
       draggingWidget!.forceDispose();
 
       widget.onRemoveWidget?.call();
+
+      draggingWidget = null;
     }
+    dragging = false;
+  }
+
+  @override
+  void didUpdateWidget(TreeTile oldWidget) {
+    if (widget.gridIndex != oldWidget.gridIndex) {
+      cancelDrag();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    cancelDrag();
 
     super.dispose();
   }
