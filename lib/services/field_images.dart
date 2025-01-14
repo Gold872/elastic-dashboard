@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
+
 import 'package:elastic_dashboard/services/log.dart';
 
 class FieldImages {
@@ -13,12 +15,16 @@ class FieldImages {
       return null;
     }
 
-    Field field = fields.firstWhere((element) => element.game == game);
+    Field? field = fields.firstWhereOrNull((element) => element.game == game);
+    if (field == null) {
+      return null;
+    }
 
-    field.instanceCounter++;
-    if (!field.fieldImageLoaded) {
+    if (field.instanceCount == 0) {
       field.loadFieldImage();
     }
+    field.instanceCount++;
+
     return field;
   }
 
@@ -81,7 +87,7 @@ class Field {
 
   late Image fieldImage;
 
-  int instanceCounter = 0;
+  int instanceCount = 0;
   bool fieldImageLoaded = false;
 
   late int pixelsPerMeterHorizontal;
@@ -135,9 +141,9 @@ class Field {
 
   void dispose() async {
     logger.debug('Soft disposing field: $game');
-    instanceCounter--;
-    logger.trace('New instance count for $game: $instanceCounter');
-    if (instanceCounter <= 0) {
+    instanceCount--;
+    logger.trace('New instance count for $game: $instanceCount');
+    if (instanceCount <= 0) {
       logger.debug('Instance count for $game is 0, deleting field from memory');
       await fieldImage.image.evict();
       imageCache.clear();
