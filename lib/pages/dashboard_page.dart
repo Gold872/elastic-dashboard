@@ -1862,6 +1862,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    final double windowWidth = MediaQuery.of(context).size.width;
+
     TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
@@ -1873,6 +1875,170 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       iconSize: const WidgetStatePropertyAll(20.0),
     );
 
+    final bool layoutLocked =
+        preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
+
+    final double minWindowWidth = layoutLocked ? 500 : 460;
+    final bool consolidateMenu = windowWidth < minWindowWidth;
+
+    List<Widget> menuChildren = [
+      // File
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // Open Layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked ? _importLayout : null,
+            shortcut:
+                const SingleActivator(LogicalKeyboardKey.keyO, control: true),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.folder_open_outlined),
+                SizedBox(width: 8),
+                Text('Open Layout'),
+              ],
+            ),
+          ),
+          // Save
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: _saveLayout,
+            shortcut:
+                const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save_outlined),
+                SizedBox(width: 8),
+                Text('Save'),
+              ],
+            ),
+          ),
+          // Export layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: _exportLayout,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyS,
+              shift: true,
+              control: true,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save_as_outlined),
+                SizedBox(width: 8),
+                Text('Save As'),
+              ],
+            ),
+          ),
+          // Download layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked ? _loadLayoutFromRobot : null,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyD,
+              control: true,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.download),
+                SizedBox(width: 8),
+                Text('Download From Robot'),
+              ],
+            ),
+          ),
+        ],
+        child: const Text(
+          'File',
+        ),
+      ),
+      // Edit
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // Clear layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked
+                ? () {
+                    setState(() {
+                      _tabData[_currentTabIndex]
+                          .tabGrid
+                          .confirmClearWidgets(context);
+                    });
+                  }
+                : null,
+            leadingIcon: const Icon(Icons.clear),
+            child: const Text('Clear Layout'),
+          ),
+          // Lock/Unlock Layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: () {
+              if (layoutLocked) {
+                _unlockLayout();
+              } else {
+                _lockLayout();
+              }
+
+              setState(() {});
+            },
+            leadingIcon: layoutLocked
+                ? const Icon(Icons.lock_open)
+                : const Icon(Icons.lock_outline),
+            child: Text('${layoutLocked ? 'Unlock' : 'Lock'} Layout'),
+          )
+        ],
+        child: const Text(
+          'Edit',
+        ),
+      ),
+      // Help
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // About
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: () {
+              _displayAboutDialog(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline),
+                SizedBox(width: 8),
+                Text('About'),
+              ],
+            ),
+          ),
+          // Check for Updates (not for WPILib distribution)
+          if (!isWPILib)
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: () {
+                _checkForUpdates();
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.update_outlined),
+                  SizedBox(width: 8),
+                  Text('Check for Updates'),
+                ],
+              ),
+            ),
+        ],
+        child: const Text(
+          'Help',
+        ),
+      ),
+    ];
+
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
         backgroundColor:
@@ -1883,176 +2049,21 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         Center(
           child: Image.asset(
             logoPath,
-            width: 24.0,
-            height: 24.0,
+            width: 24,
+            height: 24,
           ),
         ),
         const SizedBox(width: 5),
-        // File
-        SubmenuButton(
-          style: menuButtonStyle,
-          menuChildren: [
-            // Open Layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? _importLayout
-                  : null,
-              shortcut:
-                  const SingleActivator(LogicalKeyboardKey.keyO, control: true),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.folder_open_outlined),
-                  SizedBox(width: 8),
-                  Text('Open Layout'),
-                ],
-              ),
+        if (!consolidateMenu)
+          ...menuChildren
+        else
+          SubmenuButton(
+            style: menuButtonStyle.copyWith(
+              iconSize: const WidgetStatePropertyAll(24),
             ),
-            // Save
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: _saveLayout,
-              shortcut:
-                  const SingleActivator(LogicalKeyboardKey.keyS, control: true),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.save_outlined),
-                  SizedBox(width: 8),
-                  Text('Save'),
-                ],
-              ),
-            ),
-            // Export layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: _exportLayout,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyS,
-                shift: true,
-                control: true,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.save_as_outlined),
-                  SizedBox(width: 8),
-                  Text('Save As'),
-                ],
-              ),
-            ),
-            // Download layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? _loadLayoutFromRobot
-                  : null,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyD,
-                control: true,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.download),
-                  SizedBox(width: 8),
-                  Text('Download From Robot'),
-                ],
-              ),
-            ),
-          ],
-          child: const Text(
-            'File',
+            menuChildren: menuChildren,
+            child: const Icon(Icons.menu),
           ),
-        ),
-        // Edit
-        SubmenuButton(
-          style: menuButtonStyle,
-          menuChildren: [
-            // Clear layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? () {
-                      setState(() {
-                        _tabData[_currentTabIndex]
-                            .tabGrid
-                            .confirmClearWidgets(context);
-                      });
-                    }
-                  : null,
-              leadingIcon: const Icon(Icons.clear),
-              child: const Text('Clear Layout'),
-            ),
-            // Lock/Unlock Layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                if (preferences.getBool(PrefKeys.layoutLocked) ??
-                    Defaults.layoutLocked) {
-                  _unlockLayout();
-                } else {
-                  _lockLayout();
-                }
-
-                setState(() {});
-              },
-              leadingIcon: (preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? const Icon(Icons.lock_open)
-                  : const Icon(Icons.lock_outline),
-              child: Text(
-                  '${(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
-            )
-          ],
-          child: const Text(
-            'Edit',
-          ),
-        ),
-        // Help
-        SubmenuButton(
-          style: menuButtonStyle,
-          menuChildren: [
-            // About
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _displayAboutDialog(context);
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.info_outline),
-                  SizedBox(width: 8),
-                  Text('About'),
-                ],
-              ),
-            ),
-            // Check for Updates (not for WPILib distribution)
-            if (!isWPILib)
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: () {
-                  _checkForUpdates();
-                },
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.update_outlined),
-                    SizedBox(width: 8),
-                    Text('Check for Updates'),
-                  ],
-                ),
-              ),
-          ],
-          child: const Text(
-            'Help',
-          ),
-        ),
         const VerticalDivider(width: 4),
         // Settings
         MenuItemButton(
@@ -2068,14 +2079,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                  Defaults.layoutLocked)
-              ? () => _displayAddWidgetDialog()
-              : null,
+          onPressed: !layoutLocked ? () => _displayAddWidgetDialog() : null,
           child: const Text('Add Widget'),
         ),
-        if ((preferences.getBool(PrefKeys.layoutLocked) ??
-            Defaults.layoutLocked)) ...[
+        if (layoutLocked) ...[
           const VerticalDivider(width: 4),
           // Unlock Layout
           Tooltip(
@@ -2120,15 +2127,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       );
     }
 
+    final double nonConolidatedLeadingWidth = (layoutLocked) ? 409 : 369;
+    final double consolidatedLeadingWidth = (layoutLocked) ? 330 : 290;
+
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        leadingWidth: (preferences.getBool(PrefKeys.layoutLocked) ??
-                Defaults.layoutLocked)
-            ? 409
-            : 369,
+        leadingWidth: consolidateMenu
+            ? consolidatedLeadingWidth
+            : nonConolidatedLeadingWidth,
       ),
       body: Focus(
         autofocus: true,
@@ -2261,49 +2270,62 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               height: 32,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: StreamBuilder(
-                          stream: widget.ntConnection.connectionStatus(),
-                          builder: (context, snapshot) {
-                            bool connected = snapshot.data ?? false;
+                child: ValueListenableBuilder(
+                    valueListenable: widget.ntConnection.ntConnected,
+                    builder: (context, connected, child) {
+                      String connectedText = (connected)
+                          ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
+                          : 'Network Tables: Disconnected';
 
-                            String connectedText = (connected)
-                                ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
-                                : 'Network Tables: Disconnected';
+                      double connectedWidth = (TextPainter(
+                              text: TextSpan(
+                                text: connectedText,
+                                style: footerStyle,
+                              ),
+                              maxLines: 1,
+                              textDirection: TextDirection.ltr)
+                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                          .size
+                          .width;
 
-                            return Text(
+                      double availableSpace = windowWidth - 20 - connectedWidth;
+
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (availableSpace >= windowWidth / 2 + 30)
+                            Text(
+                              'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                              textAlign: TextAlign.center,
+                            ),
+                          if (availableSpace >= 115)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: StreamBuilder(
+                                stream: widget.ntConnection.latencyStream(),
+                                builder: (context, snapshot) {
+                                  double latency = snapshot.data ?? 0.0;
+
+                                  return Text(
+                                    'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
+                                    textAlign: TextAlign.right,
+                                  );
+                                },
+                              ),
+                            ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
                               connectedText,
                               style: footerStyle?.copyWith(
                                 color: (connected) ? Colors.green : Colors.red,
                               ),
                               textAlign: TextAlign.left,
-                            );
-                          }),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: StreamBuilder(
-                          stream: widget.ntConnection.latencyStream(),
-                          builder: (context, snapshot) {
-                            double latency = snapshot.data ?? 0.0;
-
-                            return Text(
-                              'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
-                              textAlign: TextAlign.right,
-                            );
-                          }),
-                    ),
-                  ],
-                ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
               ),
             ),
           ],

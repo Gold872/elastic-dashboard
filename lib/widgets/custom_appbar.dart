@@ -13,6 +13,8 @@ class CustomAppBar extends AppBar {
 
   static const ThemeType buttonType = ThemeType.materia;
 
+  static const double windowButtonSize = 24;
+
   static const double titleSize = !isWPILib ? 60.0 : 140.0;
 
   CustomAppBar({
@@ -36,6 +38,8 @@ class CustomAppBar extends AppBar {
               onTap: () async => await windowManager.minimize(),
               child: const AbsorbPointer(
                 child: DecoratedMinimizeButton(
+                  width: windowButtonSize,
+                  height: windowButtonSize,
                   type: buttonType,
                   onPressed: null,
                 ),
@@ -56,6 +60,8 @@ class CustomAppBar extends AppBar {
               },
               child: const AbsorbPointer(
                 child: DecoratedMaximizeButton(
+                  width: windowButtonSize,
+                  height: windowButtonSize,
                   type: buttonType,
                   onPressed: null,
                 ),
@@ -73,6 +79,8 @@ class CustomAppBar extends AppBar {
               },
               child: const AbsorbPointer(
                 child: DecoratedCloseButton(
+                  width: windowButtonSize,
+                  height: windowButtonSize,
                   type: buttonType,
                   onPressed: null,
                 ),
