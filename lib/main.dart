@@ -71,9 +71,9 @@ void main() async {
   logger.debug(
       'Display Information: - Screen Size: $screenSize, Scale Factor: $scaleFactor');
 
-  double minimumWidth = min(scaleFactor * screenSize.width * 0.412 / 1.5, 1280);
+  double minimumWidth = min(scaleFactor * screenSize.width * 0.405 / 1.5, 1280);
   double minimumHeight =
-      min(scaleFactor * screenSize.height * 0.412 / 1.5, 720);
+      min(scaleFactor * screenSize.height * 0.405 / 1.5, 720);
 
   Size minimumSize = Size(minimumWidth, minimumHeight);
 
