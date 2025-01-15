@@ -2053,7 +2053,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             'Help',
           ),
         ),
-        const VerticalDivider(),
+        const VerticalDivider(
+          width: 8,
+        ),
         // Settings
         MenuItemButton(
           style: menuButtonStyle,
@@ -2063,7 +2065,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           },
           child: const Text('Settings'),
         ),
-        const VerticalDivider(),
+        const VerticalDivider(
+          width: 8,
+        ),
         // Add Widget
         MenuItemButton(
           style: menuButtonStyle,
@@ -2076,7 +2080,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
         if ((preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked)) ...[
-          const VerticalDivider(),
+          const VerticalDivider(
+            width: 8,
+          ),
           // Unlock Layout
           Tooltip(
             message: 'Unlock Layout',
@@ -2127,8 +2133,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         leading: menuBar,
         leadingWidth: (preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked)
-            ? 445
-            : 395,
+            ? 421
+            : 380,
       ),
       body: Focus(
         autofocus: true,
