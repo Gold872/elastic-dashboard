@@ -97,7 +97,7 @@ void main() async {
     Elastic(
       ntConnection: ntConnection,
       preferences: preferences,
-      version: '2025.0.1',
+      version: packageInfo.version,
     ),
   );
 }
