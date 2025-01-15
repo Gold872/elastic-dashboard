@@ -2127,7 +2127,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         leading: menuBar,
         leadingWidth: (preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked)
-            ? 450
+            ? 445
             : 395,
       ),
       body: Focus(
