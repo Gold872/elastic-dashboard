@@ -1866,9 +1866,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
-      textStyle: WidgetStateProperty.all(menuTextStyle),
+      textStyle: WidgetStatePropertyAll(menuTextStyle),
       backgroundColor:
           const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
 
@@ -1886,7 +1887,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             height: 24.0,
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
         // File
         SubmenuButton(
           style: menuButtonStyle,
@@ -1969,48 +1970,49 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ),
         // Edit
         SubmenuButton(
-            style: menuButtonStyle,
-            menuChildren: [
-              // Clear layout
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                        Defaults.layoutLocked)
-                    ? () {
-                        setState(() {
-                          _tabData[_currentTabIndex]
-                              .tabGrid
-                              .confirmClearWidgets(context);
-                        });
-                      }
-                    : null,
-                leadingIcon: const Icon(Icons.clear),
-                child: const Text('Clear Layout'),
-              ),
-              // Lock/Unlock Layout
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: () {
-                  if (preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked) {
-                    _unlockLayout();
-                  } else {
-                    _lockLayout();
-                  }
+          style: menuButtonStyle,
+          menuChildren: [
+            // Clear layout
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked)
+                  ? () {
+                      setState(() {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .confirmClearWidgets(context);
+                      });
+                    }
+                  : null,
+              leadingIcon: const Icon(Icons.clear),
+              child: const Text('Clear Layout'),
+            ),
+            // Lock/Unlock Layout
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: () {
+                if (preferences.getBool(PrefKeys.layoutLocked) ??
+                    Defaults.layoutLocked) {
+                  _unlockLayout();
+                } else {
+                  _lockLayout();
+                }
 
-                  setState(() {});
-                },
-                leadingIcon: (preferences.getBool(PrefKeys.layoutLocked) ??
-                        Defaults.layoutLocked)
-                    ? const Icon(Icons.lock_open)
-                    : const Icon(Icons.lock_outline),
-                child: Text(
-                    '${(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
-              )
-            ],
-            child: const Text(
-              'Edit',
-            )),
+                setState(() {});
+              },
+              leadingIcon: (preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked)
+                  ? const Icon(Icons.lock_open)
+                  : const Icon(Icons.lock_outline),
+              child: Text(
+                  '${(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
+            )
+          ],
+          child: const Text(
+            'Edit',
+          ),
+        ),
         // Help
         SubmenuButton(
           style: menuButtonStyle,
@@ -2125,8 +2127,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         leading: menuBar,
         leadingWidth: (preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked)
-            ? 500
-            : 445,
+            ? 450
+            : 395,
       ),
       body: Focus(
         autofocus: true,
