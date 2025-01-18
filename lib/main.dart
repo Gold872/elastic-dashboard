@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -66,7 +67,8 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
+  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ??
+      PlatformDispatcher.instance.views.first.devicePixelRatio);
   Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
   logger.debug(
       'Display Information: - Screen Size: $screenSize, Scale Factor: $scaleFactor');
