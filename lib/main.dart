@@ -70,7 +70,7 @@ void main() async {
   double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ??
       PlatformDispatcher.instance.views.first.devicePixelRatio);
   Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
-  logger.debug(
+  logger.info(
       'Display Information: - Screen Size: $screenSize, Scale Factor: $scaleFactor');
 
   double minimumWidth = min(scaleFactor * screenSize.width * 0.341 / 1.5, 1280);
@@ -78,7 +78,7 @@ void main() async {
 
   Size minimumSize = Size(minimumWidth, minimumHeight);
 
-  logger.debug('Minimum Size: $minimumSize');
+  logger.info('Minimum Size: $minimumSize');
 
   await windowManager.setMinimumSize(minimumSize);
   await windowManager.setTitleBarStyle(
