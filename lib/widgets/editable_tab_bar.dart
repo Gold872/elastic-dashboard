@@ -27,6 +27,8 @@ class EditableTabBar extends StatelessWidget {
 
   final int currentIndex;
 
+  final Widget? updateButton;
+
   final double? gridDpiOverride;
 
   const EditableTabBar({
@@ -41,6 +43,7 @@ class EditableTabBar extends StatelessWidget {
     required this.onTabRename,
     required this.onTabChanged,
     required this.onTabDuplicate,
+    this.updateButton,
     this.gridDpiOverride,
   });
 
@@ -245,6 +248,7 @@ class EditableTabBar extends StatelessWidget {
                 // Tab movement buttons (move left, close, move right)
                 Row(
                   children: [
+                    if (updateButton != null) updateButton!,
                     IconButton(
                       style: endButtonStyle,
                       onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
