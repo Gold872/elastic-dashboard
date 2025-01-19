@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -67,18 +65,11 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ??
-      PlatformDispatcher.instance.views.first.devicePixelRatio);
   Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
-  logger.info(
-      'Display Information: - Screen Size: $screenSize, Scale Factor: $scaleFactor');
 
-  double minimumWidth = min(scaleFactor * screenSize.width * 0.341 / 1.5, 1280);
-  double minimumHeight = min(scaleFactor * screenSize.height * 0.4 / 1.5, 720);
+  logger.debug('Display Information: - Screen Size: $screenSize');
 
-  Size minimumSize = Size(minimumWidth, minimumHeight);
-
-  logger.info('Minimum Size: $minimumSize');
+  const Size minimumSize = Size(436.5, 320.0);
 
   await windowManager.setMinimumSize(minimumSize);
   await windowManager.setTitleBarStyle(
