@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -66,18 +65,17 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
-  Size screenSize =
-      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
+  Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
-  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
+  logger.debug('Display Information: - Screen Size: $screenSize');
 
-  Size minimumSize = Size(minimumWidth, minimumHeight);
+  const Size minimumSize = Size(436.5, 320.0);
 
   await windowManager.setMinimumSize(minimumSize);
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-      windowButtonVisibility: false);
+  await windowManager.setTitleBarStyle(
+    TitleBarStyle.hidden,
+    windowButtonVisibility: false,
+  );
 
   if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
     await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);

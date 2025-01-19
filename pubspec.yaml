@@ -12,7 +12,7 @@ dependencies:
   decimal: ^2.3.3
   dot_cast: ^1.2.0
   dropdown_button2: ^2.3.9
-  elegant_notification: ^2.2.0
+  elegant_notification: ^2.4.1
   file_selector: ^1.0.1
   flex_seed_scheme: ^2.0.0
   flutter:
@@ -39,7 +39,7 @@ dependencies:
   patterns_canvas: ^0.4.0
   popover: ^0.3.0
   provider: ^6.0.5
-  screen_retriever: ^0.1.9
+  screen_retriever: ^0.2.0
   searchable_listview: ^2.7.0
   shared_preferences: ^2.1.2
   syncfusion_flutter_charts: ^23.1.44
@@ -51,7 +51,7 @@ dependencies:
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
   web_socket_channel: ^2.4.3
-  window_manager: ^0.3.7
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:

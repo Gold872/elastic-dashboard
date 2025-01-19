@@ -109,13 +109,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     // Network Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ..._ipAddressSettings(),
-                          const Divider(),
-                          ..._networkTablesSettings(),
-                        ],
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 250),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ..._ipAddressSettings(),
+                              const Divider(),
+                              ..._networkTablesSettings(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     // Style Preferences Tab
@@ -123,7 +128,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 350),
+                          constraints: const BoxConstraints(maxHeight: 355),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -138,10 +143,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     // Advanced Settings Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        children: [
-                          ..._advancedSettings(),
-                        ],
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 140),
+                          child: Column(
+                            children: [
+                              ..._advancedSettings(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -237,8 +247,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Flexible(
-              flex: 2,
+            SizedBox(
+              width: 140,
               child: UnconstrainedBox(
                 constrainedAxis: Axis.horizontal,
                 child: DialogColorPicker(
@@ -252,7 +262,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
             const VerticalDivider(),
             Flexible(
-              flex: 4,
               child: Column(
                 children: [
                   const Text('Theme Variant'),
