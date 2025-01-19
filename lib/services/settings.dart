@@ -52,4 +52,5 @@ class PrefKeys {
   static String gridDpiOverride = 'grid_dpi_override';
   static String showOpenAssetsFolderWarning = "show_assets_folder_warning";
   static String windowPosition = 'window_position';
+  static String autoSubmitButton = 'auto_submit_button';
 }

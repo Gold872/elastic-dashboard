@@ -40,6 +40,7 @@ class SettingsDialog extends StatefulWidget {
   final Function(String? value)? onDefaultGraphPeriodChanged;
   final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
   final Function(String? value)? onGridDPIChanged;
+  final Function(bool value)? onAutoSubmitButtonChanged;
   final Function()? onOpenAssetsFolderPressed;
 
   const SettingsDialog({
@@ -60,6 +61,7 @@ class SettingsDialog extends StatefulWidget {
     this.onDefaultGraphPeriodChanged,
     this.onThemeVariantChanged,
     this.onGridDPIChanged,
+    this.onAutoSubmitButtonChanged,
     this.onOpenAssetsFolderPressed,
   });
 
@@ -207,6 +209,22 @@ class _SettingsDialogState extends State<SettingsDialog> {
             icon: const Icon(Icons.folder_outlined),
             label: const Text('Open Assets Folder'),
           ),
+        ],
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: false,
+              label: 'Automatically Show Submit Button',
+              onToggle: (value) {
+                setState(() {
+                  widget.onAutoSubmitButtonChanged?.call(value);
+                });
+              },
+            ),
+          )
         ],
       ),
     ];
