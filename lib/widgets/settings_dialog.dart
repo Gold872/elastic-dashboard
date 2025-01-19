@@ -159,7 +159,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 140),
+                          constraints: const BoxConstraints(maxHeight: 205),
                           child: Column(
                             children: [
                               ..._advancedSettings(),
