@@ -8,6 +8,7 @@ import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -87,7 +88,11 @@ class _MjpegState extends State<Mjpeg> {
       controller.startStream();
     }
 
-    if (controller.errorState.value != null && kDebugMode) {
+    if (controller.errorState.value != null) {
+      String errorText = controller.errorState.value!.first.toString();
+      if (kDebugMode) {
+        errorText += '\n${controller.errorState.value!.last.toString()}';
+      }
       return SizedBox(
         width: widget.width,
         height: widget.height,
@@ -96,7 +101,7 @@ class _MjpegState extends State<Mjpeg> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    '${controller.errorState.value}',
+                    errorText,
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.red),
                   ),
@@ -112,13 +117,35 @@ class _MjpegState extends State<Mjpeg> {
       child: StreamBuilder<List<int>?>(
           stream: controller.imageStream.stream,
           builder: (context, snapshot) {
-            if ((snapshot.data == null && controller.previousImage == null) ||
-                controller.errorState.value != null) {
+            if (!controller.isStreaming) {
+              // Request has been sent but no status received yet
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CustomLoadingIndicator(),
+                  const SizedBox(height: 10),
+                  const Text('Attempting to establish HTTP connection.'),
+                ],
+              );
+            }
+            if (snapshot.data == null && controller.previousImage == null) {
               return SizedBox(
                 width: widget.width,
                 height: widget.height,
                 child: widget.loading?.call(context) ??
-                    const Center(child: CircularProgressIndicator()),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CustomLoadingIndicator(),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Connection establish but no data received.\nCamera may be disconnected from device.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
               );
             }
 
@@ -214,12 +241,35 @@ class MjpegController extends ChangeNotifier {
     this.headers = const {},
     this.preprocessor,
   }) {
-    errorState.addListener(notifyListeners);
+    errorState.addListener(_onError);
+  }
+
+  @visibleForTesting
+  MjpegController.withMockClient({
+    required this.stream,
+    this.isLive = true,
+    this.timeout = const Duration(seconds: 5),
+    this.headers = const {},
+    this.preprocessor,
+    required this.httpClient,
+  }) {
+    errorState.addListener(_onError);
+  }
+
+  void _onError() {
+    if (errorState.value != null) {
+      logger.error(
+        'Error on Mjpeg stream for URL $stream',
+        errorState.value?.firstOrNull,
+        errorState.value?.lastOrNull,
+      );
+    }
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    errorState.removeListener(notifyListeners);
+    errorState.removeListener(_onError);
     stopStream();
     imageStream.close();
     super.dispose();
@@ -242,16 +292,22 @@ class MjpegController extends ChangeNotifier {
       } else {
         if (_mountedKeys.isNotEmpty) {
           errorState.value = [
-            HttpException('Stream returned ${response.statusCode} status'),
-            StackTrace.current
+            HttpException(
+                'Stream returned status code ${response.statusCode}: "${response.reasonPhrase}"'),
+            StackTrace.current,
           ];
           imageStream.add(null);
         }
         stopStream();
       }
     } catch (error, stack) {
-      // we ignore those errors in case play/pause is triggers
-      if (!error
+      // Timed out
+      if (error.toString().contains('Connection attempt cancelled')) {
+        errorState.value = [
+          HttpException('Connection timed out', uri: Uri.tryParse(stream)),
+          stack,
+        ];
+      } else if (!error // we ignore those errors in case play/pause is triggers
           .toString()
           .contains('Connection closed before full header was received')) {
         if (_mountedKeys.isNotEmpty) {
@@ -290,11 +346,11 @@ class MjpegController extends ChangeNotifier {
 
   void stopStream() async {
     logger.info('Stopping camera stream on URL $stream');
-    await _rawSubscription?.cancel();
-    _buffer.clear();
     _metricsTimer?.cancel();
     _metricsTimer = null;
+    await _rawSubscription?.cancel();
     _rawSubscription = null;
+    _buffer.clear();
     _bitCount = 0;
     _frameCount = 0;
     httpClient.close();
@@ -308,6 +364,7 @@ class MjpegController extends ChangeNotifier {
     imageStream.add(imageData);
     _frameCount++;
     _buffer.clear();
+    errorState.value = null;
   }
 
   void _handleData(List<int> data) {
