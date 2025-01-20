@@ -216,7 +216,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
         children: [
           Flexible(
             child: DialogToggleSwitch(
-              initialValue: false,
+              initialValue: widget.preferences.getBool(PrefKeys.autoSubmitButton) ?? false,
               label: 'Automatically Show Submit Button',
               onToggle: (value) {
                 setState(() {
