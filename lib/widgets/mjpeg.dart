@@ -321,6 +321,9 @@ class MjpegController extends ChangeNotifier {
       return;
     }
 
+    previousImage = null;
+    _buffer.clear();
+
     _rawSubscription = byteStream.listen(
       (data) {
         _bitCount += data.length * Uint8List.bytesPerElement * 8;
@@ -334,6 +337,8 @@ class MjpegController extends ChangeNotifier {
 
     _metricsTimer ??=
         Timer.periodic(const Duration(seconds: 1), _updateMetrics);
+
+    notifyListeners();
   }
 
   void _updateMetrics(_) {
