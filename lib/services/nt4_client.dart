@@ -567,6 +567,11 @@ class NT4Client {
       return;
     }
 
+    // while trying to establish the connection, block out any other connection attempts
+    // prevents duplicate clients from being created on networktables
+    bool wasAttempting = _attemptingConnection;
+    _attemptingConnection = false;
+
     _clientId = Random().nextInt(99999999);
 
     String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
@@ -583,7 +588,8 @@ class NT4Client {
       // Failed to connect... try again
       logger.info(
           'Failed to connect to network tables, attempting to reconnect in 500 ms');
-      if (_attemptingConnection) {
+      if (wasAttempting) {
+        _attemptingConnection = true;
         Future.delayed(const Duration(milliseconds: 500), _connect);
       }
       return;
