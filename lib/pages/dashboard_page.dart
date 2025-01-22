@@ -13,6 +13,7 @@ import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:http/http.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -1627,6 +1628,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onLogLevelChanged: (level) async {
+          if (level == null) {
+            logger.info('Removing log level preference');
+            await preferences.remove(PrefKeys.logLevel);
+            Logger.level = Defaults.logLevel;
+            return;
+          }
+          logger.info('Changing log level to ${level.levelName}');
+          Logger.level = level;
+          await preferences.setString(PrefKeys.logLevel, level.levelName);
+        },
         onGridDPIChanged: (value) async {
           if (value == null) {
             return;
@@ -1636,9 +1648,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             return;
           }
           if (dpiOverride != null) {
+            logger.info('Setting DPI override to ${dpiOverride.toDouble()}');
             await preferences.setDouble(
                 PrefKeys.gridDpiOverride, dpiOverride.toDouble());
           } else {
+            logger.info('Removing DPI override preference');
             await preferences.remove(PrefKeys.gridDpiOverride);
           }
           setState(() {});
@@ -1647,6 +1661,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           Uri uri = Uri.file(
               '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
           if (await canLaunchUrl(uri)) {
+            logger.info('Opening URL (assets folder): ${uri.toString()}');
             launchUrl(uri);
           }
         },
