@@ -32,7 +32,8 @@ class FieldImages {
     return fields.map((e) => e.game).contains(game);
   }
 
-  static Future loadFields(String directory) async {
+  static Future<void> loadFields(String directory) async {
+    logger.info('Loading fields');
     AssetManifest assetManifest =
         await AssetManifest.loadFromAssetBundle(rootBundle);
 
@@ -49,6 +50,7 @@ class FieldImages {
   }
 
   static Future loadField(String filePath) async {
+    logger.trace('Loading field at $filePath');
     String jsonString = await rootBundle.loadString(filePath);
 
     Map<String, dynamic> jsonData = jsonDecode(jsonString);
@@ -121,6 +123,7 @@ class Field {
   }
 
   void loadFieldImage() {
+    logger.debug('Loading field image for $game');
     fieldImage = Image.asset(
       jsonData['field-image'],
       fit: BoxFit.contain,
@@ -128,6 +131,7 @@ class Field {
     fieldImage.image
         .resolve(ImageConfiguration.empty)
         .addListener(ImageStreamListener((image, synchronousCall) {
+      logger.trace('Initializing image width and height for $game');
       fieldImageWidth = image.image.width;
       fieldImageHeight = image.image.height;
 

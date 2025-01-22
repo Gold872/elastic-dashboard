@@ -30,7 +30,7 @@ dependencies:
   http: ^1.2.0
   import_sorter: ^4.6.0
   intl: ^0.18.1
-  logger: ^2.0.2+1
+  logger: ^2.5.0
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
   package_info_plus: ^5.0.1
