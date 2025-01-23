@@ -69,6 +69,11 @@ class NT4Subscription extends ValueNotifier<Object?> {
     this.uid = -1,
   }) : super(null);
 
+  @override
+  String toString() {
+    return 'NT4Subscription(Topic: $topic, Options: $options, Uid: $uid)';
+  }
+
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
   }
@@ -122,6 +127,8 @@ class NT4Subscription extends ValueNotifier<Object?> {
   }
 
   void updateValue(Object? value, int timestamp) {
+    logger.trace(
+        'Updating value for subscription: $this - Value: $value, Time: $timestamp');
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
@@ -189,6 +196,11 @@ class NT4SubscriptionOptions {
   @override
   int get hashCode =>
       Object.hashAll([periodicRateSeconds, all, topicsOnly, prefix]);
+
+  @override
+  String toString() {
+    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix)';
+  }
 }
 
 class NT4Topic {
@@ -205,6 +217,11 @@ class NT4Topic {
     this.pubUID = 0,
     required this.properties,
   });
+
+  @override
+  String toString() {
+    return 'NT4Topic(Name: $name, Type: $type, ID: $id, PubUID: $pubUID, Properties: $properties)';
+  }
 
   Map<String, dynamic> toPublishJson() {
     return {
@@ -351,6 +368,8 @@ class NT4Client {
       options: options,
     );
 
+    logger.trace('Creating new subscription: $newSub');
+
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
     _wsSubscribe(newSub);
@@ -365,6 +384,7 @@ class NT4Client {
   }
 
   void unSubscribe(NT4Subscription sub) {
+    logger.trace('Unsubscribing: $sub');
     _subscriptions.remove(sub.uid);
     _subscribedTopics.remove(sub);
     _wsUnsubscribe(sub);
@@ -392,6 +412,8 @@ class NT4Client {
   }
 
   void setProperties(NT4Topic topic, bool isPersistent, bool isRetained) {
+    logger.trace(
+        'Updating properties - Topic: $topic, Persistent: $isPersistent, Retained: $isRetained');
     topic.properties['persistent'] = isPersistent;
     topic.properties['retained'] = isRetained;
     _wsSetProperties(topic);
@@ -416,6 +438,7 @@ class NT4Client {
       topic.pubUID = _clientPublishedTopics[topic.name]!.pubUID;
       return;
     }
+    logger.trace('Publishing topic: $topic');
 
     topic.pubUID = getNewPubUID();
     _clientPublishedTopics[topic.name] = topic;
@@ -423,12 +446,16 @@ class NT4Client {
   }
 
   void unpublishTopic(NT4Topic topic) {
+    logger.trace('Unpublishing topic: $topic');
     _clientPublishedTopics.remove(topic.name);
     _wsUnpublish(topic);
   }
 
   void addSample(NT4Topic topic, dynamic data, [int? timestamp]) {
     timestamp ??= getServerTimeUS();
+
+    logger.trace(
+        'Adding sample - Topic: $topic, Data: $data, Timestamp: $timestamp');
 
     _wsSendBinary(
         serialize([topic.pubUID, timestamp, topic.getTypeId(), data]));
@@ -465,8 +492,10 @@ class NT4Client {
     if (timeTopic != null) {
       int timeToSend = _getClientTimeUS();
 
-      var rawData =
-          serialize([timeTopic.pubUID, 0, timeTopic.getTypeId(), timeToSend]);
+      var rttValue = [timeTopic.pubUID, 0, timeTopic.getTypeId(), timeToSend];
+      var rawData = serialize(rttValue);
+
+      logger.trace('Sending RTT timestamp: $rttValue');
 
       if (_useRTT) {
         if (rttWebsocketActive && mainWebsocketActive) {
@@ -479,6 +508,8 @@ class NT4Client {
   }
 
   void _rttHandleRecieveTimestamp(int serverTimestamp, int clientTimestamp) {
+    logger.trace(
+        'RTT Received - Server Time: $serverTimestamp, Client Time: $clientTimestamp');
     int rxTime = _getClientTimeUS();
 
     int rtt = rxTime - clientTimestamp;
@@ -536,6 +567,11 @@ class NT4Client {
       return;
     }
 
+    // while trying to establish the connection, block out any other connection attempts
+    // prevents duplicate clients from being created on networktables
+    bool wasAttempting = _attemptingConnection;
+    _attemptingConnection = false;
+
     _clientId = Random().nextInt(99999999);
 
     String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
@@ -552,7 +588,8 @@ class NT4Client {
       // Failed to connect... try again
       logger.info(
           'Failed to connect to network tables, attempting to reconnect in 500 ms');
-      if (_attemptingConnection) {
+      if (wasAttempting) {
+        _attemptingConnection = true;
         Future.delayed(const Duration(milliseconds: 500), _connect);
       }
       return;

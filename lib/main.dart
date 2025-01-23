@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -54,6 +54,11 @@ void main() async {
     preferences = await SharedPreferences.getInstance();
   }
 
+  Level logLevel = Settings.logLevels.firstWhereOrNull((level) =>
+          level.levelName == preferences.getString(PrefKeys.logLevel)) ??
+      Defaults.logLevel;
+  Logger.level = logLevel;
+
   await windowManager.ensureInitialized();
 
   NTWidgetBuilder.ensureInitialized();
@@ -66,18 +71,17 @@ void main() async {
   await FieldImages.loadFields('assets/fields/');
 
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  double scaleFactor = (primaryDisplay.scaleFactor?.toDouble() ?? 1.0);
-  Size screenSize =
-      (primaryDisplay.visibleSize ?? primaryDisplay.size) * scaleFactor;
+  Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
-  double minimumWidth = min(screenSize.width * 0.77 / scaleFactor, 1280.0);
-  double minimumHeight = min(screenSize.height * 0.7 / scaleFactor, 720.0);
+  logger.debug('Display Information: - Screen Size: $screenSize');
 
-  Size minimumSize = Size(minimumWidth, minimumHeight);
+  const Size minimumSize = Size(436.5, 320.0);
 
   await windowManager.setMinimumSize(minimumSize);
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-      windowButtonVisibility: false);
+  await windowManager.setTitleBarStyle(
+    TitleBarStyle.hidden,
+    windowButtonVisibility: false,
+  );
 
   if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
     await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
@@ -145,7 +149,7 @@ Future<void> _backupPreferences(String appFolderPath) async {
     if (await File(backup).exists()) await File(backup).delete(recursive: true);
     await File(original).copy(backup);
 
-    logger.info('Backup up shared_preferences.json to $backup');
+    logger.info('Backed up shared_preferences.json to $backup');
   } catch (_) {
     /* Do nothing */
   }
