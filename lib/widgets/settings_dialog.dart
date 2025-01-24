@@ -72,8 +72,8 @@ class SettingsDialog extends StatefulWidget {
     this.onThemeVariantChanged,
     this.onLogLevelChanged,
     this.onGridDPIChanged,
-    this.onAutoSubmitButtonChanged,
     this.onOpenAssetsFolderPressed,
+    this.onAutoSubmitButtonChanged,
   });
 
   @override
@@ -144,13 +144,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 355),
+                          constraints: const BoxConstraints(maxHeight: 415),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ..._themeSettings(),
                               const Divider(),
                               ..._gridSettings(),
+                              const Divider(),
+                              ..._otherSettings(),
                             ],
                           ),
                         ),
@@ -431,6 +433,32 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
             ),
           ),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> _otherSettings() {
+    return [
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text('Other Settings'),
+      ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: false,
+              label: 'Automatically Show Submit Button',
+              onToggle: (value) {
+                setState(() {
+                  widget.onAutoSubmitButtonChanged?.call(value);
+                });
+              },
+            ),
+          )
         ],
       ),
     ];

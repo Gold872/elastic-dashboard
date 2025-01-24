@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +29,7 @@ void main() {
   late NTConnection ntConnection;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({ PrefKeys.autoSubmitButton: false });
     preferences = await SharedPreferences.getInstance();
 
     ntConnection = createMockOnlineNT4(
@@ -82,7 +83,10 @@ void main() {
   });
 
   group('Show submit button defaults to', () {
-    test('true if topic is persistent', () {
+    test('true if topic is persistent and auto submit button true', () {
+      preferences.setBool(PrefKeys.autoSubmitButton, true);
+      expect(preferences.getBool(PrefKeys.autoSubmitButton), isTrue);
+
       NTConnection ntConnection = createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
@@ -108,7 +112,53 @@ void main() {
 
       expect(textDisplayModel.showSubmitButton, isTrue);
     });
-    test('false if topic is not persistent', () {
+    test('true if topic is persistent and auto submit button false', () {
+      preferences.setBool(PrefKeys.autoSubmitButton, false);
+      expect(preferences.getBool(PrefKeys.autoSubmitButton), isFalse);
+
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Display Value',
+            type: NT4TypeStr.kFloat64,
+            properties: {
+              'persistent': true,
+            },
+          ),
+        ],
+        virtualValues: {
+          'Test/Display Value': 0.000001,
+        },
+      );
+
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isTrue);
+    });
+    test('true if topic is not persistent and auto submit button true', () {
+      preferences.setBool(PrefKeys.autoSubmitButton, true);
+      expect(preferences.getBool(PrefKeys.autoSubmitButton), isTrue);
+
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isTrue);
+    });
+    test('false if topic is not persistent and auto submit button false', () {
+      preferences.setBool(PrefKeys.autoSubmitButton, false);
+      expect(preferences.getBool(PrefKeys.autoSubmitButton), isFalse);
+
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,

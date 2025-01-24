@@ -48,6 +48,8 @@ class FakeSettingsMethods extends Mock {
   void changeGridDPIOverride();
 
   void openAssetsFolder();
+
+  void changeAutoSubmitButton();
 }
 
 void main() {
@@ -80,6 +82,7 @@ void main() {
       PrefKeys.defaultGraphPeriod: 0.033,
       PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
       PrefKeys.logLevel: Level.trace.levelName,
+      PrefKeys.autoSubmitButton: false,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -882,5 +885,52 @@ void main() {
     await widgetTester.tap(openAssetsButton);
 
     verify(fakeSettings.openAssetsFolder()).called(1);
+  });
+
+  testWidgets('Change auto submit button', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            preferences: preferences,
+            ntConnection: createMockOfflineNT4(),
+            onAutoSubmitButtonChanged: (value) {
+              fakeSettings.changeAutoSubmitButton();
+              preferences.setBool(PrefKeys.autoSubmitButton, value);
+            },
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final autoSubmitButtonSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Automatically Show Submit Button');
+    
+    expect(autoSubmitButtonSwitch, findsOneWidget);
+
+    final switchWidget = find
+        .descendant(of: autoSubmitButtonSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoSubmitButton), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoSubmitButton), false);
+    verify(fakeSettings.changeAutoSubmitButton()).called(2);
   });
 }
