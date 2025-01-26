@@ -1665,6 +1665,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             launchUrl(uri);
           }
         },
+        onFRCDSDefaultChanged: () {
+          return widget.ntConnection.dsClient.updateDSDefault();
+        },
       ),
     );
   }
