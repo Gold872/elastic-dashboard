@@ -141,7 +141,7 @@ class _MjpegState extends State<Mjpeg> {
                         CustomLoadingIndicator(),
                         const SizedBox(height: 10),
                         const Text(
-                          'Connection establish but no data received.\nCamera may be disconnected from device.',
+                          'Connection established but no data received.\nCamera may be disconnected from device.',
                           textAlign: TextAlign.center,
                         ),
                       ],

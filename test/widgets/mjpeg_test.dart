@@ -164,7 +164,7 @@ void main() {
 
     expect(
         find.text(
-            'Connection establish but no data received.\nCamera may be disconnected from device.'),
+            'Connection established but no data received.\nCamera may be disconnected from device.'),
         findsOneWidget);
 
     controller.dispose();
