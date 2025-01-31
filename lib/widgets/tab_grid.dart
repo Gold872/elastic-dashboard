@@ -651,8 +651,10 @@ class TabGridModel extends ChangeNotifier {
     }
   }
 
-  ListLayoutModel createListLayout(
-      {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
+  ListLayoutModel createListLayout({
+    String title = 'List Layout',
+    List<NTWidgetContainerModel>? children,
+  }) {
     return ListLayoutModel(
       preferences: preferences,
       title: title,

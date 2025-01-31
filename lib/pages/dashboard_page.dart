@@ -335,8 +335,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         widget.updateChecker ?? UpdateChecker(currentVersion: widget.version);
 
     if (!isWPILib) {
-      Future(
-          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+      Future(() => _checkForUpdates(
+            notifyIfLatest: false,
+            notifyIfError: false,
+          ));
     }
   }
 
@@ -2169,17 +2171,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         preferences.getDouble(PrefKeys.gridDpiOverride),
                     updateButton: updateButton,
                     currentIndex: _currentTabIndex,
-                    onTabMoveLeft: () {
-                      _moveTabLeft();
-                    },
-                    onTabMoveRight: () {
-                      _moveTabRight();
-                    },
-                    onTabRename: (index, newData) {
-                      setState(() {
-                        _tabData[index] = newData;
-                      });
-                    },
+                    onTabMoveLeft: _moveTabLeft,
+                    onTabMoveRight: _moveTabRight,
+                    onTabRename: (index, newData) =>
+                        setState(() => _tabData[index] = newData),
                     onTabCreate: () {
                       String tabName = 'Tab ${_tabData.length + 1}';
                       setState(() {
@@ -2199,24 +2194,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         return;
                       }
 
-                      TabData currentTab = _tabData[index];
+                      TabData tabToRemove = _tabData[index];
 
-                      _showTabCloseConfirmation(context, currentTab.name, () {
-                        if (_currentTabIndex == _tabData.length - 1) {
-                          _currentTabIndex--;
+                      _showTabCloseConfirmation(context, tabToRemove.name, () {
+                        int indexToSwitch = _currentTabIndex;
+
+                        if (indexToSwitch == _tabData.length - 1) {
+                          indexToSwitch--;
                         }
 
-                        _tabData[index].tabGrid.onDestroy();
+                        tabToRemove.tabGrid.onDestroy();
+                        tabToRemove.tabGrid.dispose();
 
-                        setState(() {
-                          _tabData[index].tabGrid.dispose();
-                          _tabData.removeAt(index);
-                        });
+                        setState(() => _tabData.remove(tabToRemove));
+                        _switchToTab(indexToSwitch);
                       });
                     },
-                    onTabChanged: (index) {
-                      _switchToTab(index);
-                    },
+                    onTabChanged: _switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
                         Map<String, dynamic> tabJson =
@@ -2263,12 +2257,8 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                             .tabGrid
                             .placeDragInWidget(widget);
                       },
-                      // onRemoveWidget: () => WidgetsBinding.instance
-                      //     .addPostFrameCallback((_) =>
-                      //         _tabData[tabIndex].tabGrid.removeDragInWidget()),
-                      onClose: () {
-                        setState(() => _addWidgetDialogVisible = false);
-                      },
+                      onClose: () =>
+                          setState(() => _addWidgetDialogVisible = false),
                     ),
                 ],
               ),
@@ -2358,8 +2348,6 @@ class _AddWidgetDialog extends StatefulWidget {
       onLayoutDragUpdate;
   final void Function(LayoutContainerModel widget) onLayoutDragEnd;
 
-  // final void Function() onRemoveWidget;
-
   final void Function() onClose;
 
   const _AddWidgetDialog({
@@ -2371,7 +2359,6 @@ class _AddWidgetDialog extends StatefulWidget {
     required this.onNTDragEnd,
     required this.onLayoutDragUpdate,
     required this.onLayoutDragEnd,
-    // required this.onRemoveWidget,
     required this.onClose,
   });
 
@@ -2434,8 +2421,10 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
                         ntConnection: widget.ntConnection,
                         preferences: widget.preferences,
                         searchQuery: _searchQuery,
-                        listLayoutBuilder: (
-                            {required title, required children}) {
+                        listLayoutBuilder: ({
+                          required title,
+                          required children,
+                        }) {
                           return widget.grid.createListLayout(
                             title: title,
                             children: children,
