@@ -60,35 +60,33 @@ jobs:
           mkdir -p out
           javac -d out -cp "libsjava/*" *.java
 
-  # build-cpp: # Unsure what the right download for units is
-  #   name: "Build C++"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-  #
-  #     - name: Install Dependencies from FRC Maven
-  #       run: |
-  #         mkdir -p elasticlib/libs-cpp
-  #         curl -L -o elasticlib/libs-cpp/ntcore-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/ntcore/ntcore-cpp/2025.2.1/ntcore-cpp-2025.2.1.so
-  #         curl -L -o elasticlib/libs-cpp/wpimath-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/wpimath/wpimath-cpp/2025.2.1/wpimath-cpp-2025.2.1.so
-  #         curl -L -o elasticlib/libs-cpp/wpiutil-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/wpiutil/wpiutil-cpp/2025.2.1/wpiutil-cpp-2025.2.1.so
-  #
-  #     - name: Download Units Header Files
-  #       run: |
-  #         mkdir -p elasticlib/units
-  #         curl -L -o elasticlib/units/units.hpp https://raw.githubusercontent.com/nholthaus/units/master/include/units.h
-  #
-  #     - name: Install g++ and make
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y g++ make
-  #
-  #     - name: Compile C++ Code
-  #       run: |
-  #         g++ -std=c++17 -Ielasticlib/units -o elasticlib/elasticlib.o -c elasticlib/elasticlib.cpp
-  #
-  #     - name: Link C++ Code
-  #       run: |
-  #         g++ -o elasticlib/elasticlib elasticlib/elasticlib.o -Lelasticlib/libs-cpp -lntcore-cpp -lwpimath-cpp -lwpiutil-cpp
-  
+  build-cpp:
+    name: "Build C++"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies from FRC Maven
+        run: |
+          mkdir -p elasticlib/libs-cpp
+          curl -L -o elasticlib/libs-cpp/ntcore-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/ntcore/ntcore-cpp/2025.2.1/ntcore-cpp-2025.2.1.so
+          curl -L -o elasticlib/libs-cpp/wpimath-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/wpimath/wpimath-cpp/2025.2.1/wpimath-cpp-2025.2.1.so
+          curl -L -o elasticlib/libs-cpp/wpiutil-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/wpiutil/wpiutil-cpp/2025.2.1/wpiutil-cpp-2025.2.1.so
+          curl -L -o elasticlib/libs-cpp/wpiunits-cpp-2025.2.1.so https://frcmaven.wpi.edu/release/edu/wpi/first/wpiunits/wpiunits-cpp/2025.2.1/wpiunits-cpp-2025.2.1.so
+
+      - name: Install g++ and make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make
+
+      - name: Compile C++ Code
+        run: |
+          g++ -std=c++17 -Ielasticlib/units -o elasticlib/elasticlib.o -c elasticlib/elasticlib.cpp
+
+      - name: Link C++ Code
+        run: |
+          g++ -o elasticlib/elasticlib elasticlib/elasticlib.o \
+          -Lelasticlib/libs-cpp -l:ntcore-cpp-2025.2.1.so \
+          -l:wpimath-cpp-2025.2.1.so -l:wpiutil-cpp-2025.2.1.so \
+          -l:wpiunits-cpp-2025.2.1.so
