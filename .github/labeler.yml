@@ -9,3 +9,7 @@ ElasticLib:
 dependencies:
 - changed-files:
   - any-glob-to-any-file: ['pubspec.yaml']
+
+workflows:
+- changed-files:
+  - any-glob-to-any-file: ['.github/workflows/**']
