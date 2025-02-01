@@ -80,8 +80,16 @@ class NTConnection {
     onConnectedListeners.add(callback);
   }
 
+  void removeConnectedListener(VoidCallback callback) {
+    onConnectedListeners.remove(callback);
+  }
+
   void addDisconnectedListener(VoidCallback callback) {
     onDisconnectedListeners.add(callback);
+  }
+
+  void removeDisconnectedListener(VoidCallback callback) {
+    onDisconnectedListeners.remove(callback);
   }
 
   void addTopicAnnounceListener(Function(NT4Topic topic) onAnnounce) {

@@ -81,6 +81,46 @@ void main() {
     expect(textDisplayModel.showSubmitButton, isTrue);
   });
 
+  group('Show submit button defaults to', () {
+    test('true if topic is persistent', () {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Display Value',
+            type: NT4TypeStr.kFloat64,
+            properties: {
+              'persistent': true,
+            },
+          ),
+        ],
+        virtualValues: {
+          'Test/Display Value': 0.000001,
+        },
+      );
+
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isTrue);
+    });
+    test('false if topic is not persistent', () {
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isFalse);
+    });
+  });
+
   test('Text display to json', () {
     TextDisplayModel textDisplayModel = TextDisplayModel(
       ntConnection: ntConnection,
@@ -94,475 +134,526 @@ void main() {
     expect(textDisplayModel.toJson(), textDisplayJson);
   });
 
-  testWidgets('Text display widget test (double)', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+  group('Text display widget test with', () {
+    bool textDisplayHasError() =>
+        (find.byType(TextField).evaluate().first.widget as TextField)
+            .decoration!
+            .error !=
+        null;
+    testWidgets('double', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'double',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('0.000001'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('0.000001'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), '3.53');
-    expect(ntConnection.getLastAnnouncedValue('Test/Display Value'), 0.000001);
+      await widgetTester.enterText(find.byType(TextField), '3.53');
+      await widgetTester.pump(Duration.zero);
+      expect(
+          ntConnection.getLastAnnouncedValue('Test/Display Value'), 0.000001);
+      expect(textDisplayHasError(), true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Display Value'), 3.53);
-  });
+      expect(ntConnection.getLastAnnouncedValue('Test/Display Value'), 3.53);
+      expect(textDisplayHasError(), false);
+    });
 
-  testWidgets('Text display widget test (int)', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('int', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection intNTConnection;
+      NTConnection intNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: intNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kInt,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': 0,
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'int',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: intNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kInt,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': 0,
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'int',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('0'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), '3000');
-    expect(intNTConnection.getLastAnnouncedValue('Test/Display Value'), 0);
+      await widgetTester.enterText(find.byType(TextField), '3000');
+      await widgetTester.pump(Duration.zero);
+      expect(intNTConnection.getLastAnnouncedValue('Test/Display Value'), 0);
+      expect(textDisplayHasError(), true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(intNTConnection.getLastAnnouncedValue('Test/Display Value'), 3000);
-  });
+      expect(intNTConnection.getLastAnnouncedValue('Test/Display Value'), 3000);
+      expect(textDisplayHasError(), false);
+    });
 
-  testWidgets('Text display widget test (boolean)', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('boolean', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection boolNTConnection;
+      NTConnection boolNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: boolNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kBool,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': false,
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'boolean',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: boolNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kBool,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': false,
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'boolean',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('false'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('false'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), 'true');
-    expect(
-        boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isFalse);
+      await widgetTester.enterText(find.byType(TextField), 'true');
+      await widgetTester.pump(Duration.zero);
+      expect(boolNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          isFalse);
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(
-        boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isTrue);
-  });
+      expect(
+          boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isTrue);
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test (string)', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('string', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection stringNTConnection;
+      NTConnection stringNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: stringNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kString,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': 'Hello',
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'string',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: stringNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kString,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': 'Hello',
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'string',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('Hello'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Hello'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), 'I Edited This Text');
-    expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        'Hello');
+      await widgetTester.enterText(
+          find.byType(TextField), 'I Edited This Text');
+      await widgetTester.pump(Duration.zero);
+      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          'Hello');
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        'I Edited This Text');
-  });
+      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          'I Edited This Text');
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test (int[])', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('int array', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection intArrNTConnection;
+      NTConnection intArrNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: intArrNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kIntArr,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': [0, 0],
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'int[]',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: intArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kIntArr,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [0, 0],
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'int[]',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('[0, 0]'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('[0, 0]'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), '[1, 2, 3]');
-    expect(
-        intArrNTConnection.getLastAnnouncedValue('Test/Display Value'), [0, 0]);
+      await widgetTester.enterText(find.byType(TextField), '[1, 2, 3]');
+      await widgetTester.pump(Duration.zero);
+      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [0, 0]);
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        [1, 2, 3]);
-  });
+      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [1, 2, 3]);
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test (boolean[])', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('boolean[]', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection boolArrNTConnection;
+      NTConnection boolArrNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: boolArrNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kBoolArr,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': [false, true],
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'boolean[]',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: boolArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kBoolArr,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [false, true],
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'boolean[]',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('[false, true]'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('[false, true]'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), '[true, false, true]');
-    expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        [false, true]);
+      await widgetTester.enterText(
+          find.byType(TextField), '[true, false, true]');
+      await widgetTester.pump(Duration.zero);
+      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [false, true]);
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        [true, false, true]);
-  });
+      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [true, false, true]);
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test (double[])', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('double array', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection doubleArrNTConnection;
+      NTConnection doubleArrNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: doubleArrNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kFloat64Arr,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': [0.0, 0.0],
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'double[]',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: doubleArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kFloat64Arr,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [0.0, 0.0],
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double[]',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('[0.0, 0.0]'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('[0.0, 0.0]'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(find.byType(TextField), '[1.0, 2.0, 3.0]');
-    expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        [0.0, 0.0]);
+      await widgetTester.enterText(find.byType(TextField), '[1.0, 2.0, 3.0]');
+      await widgetTester.pump(Duration.zero);
+      expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [0.0, 0.0]);
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        [1.0, 2.0, 3.0]);
-  });
+      expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          [1.0, 2.0, 3.0]);
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test (string[])', (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('string array', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection stringArrNTConnection;
+      NTConnection stringArrNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: stringArrNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kStringArr,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': ['Hello', 'There'],
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'string[]',
-      period: 0.100,
-      showSubmitButton: true,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: stringArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kStringArr,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': ['Hello', 'There'],
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'string[]',
+        period: 0.100,
+        showSubmitButton: true,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('[Hello, There]'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsOneWidget);
-    expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('[Hello, There]'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsOneWidget);
+      expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(
-        find.byType(TextField), '["I", "am", "very", "tired"]');
-    expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        ['Hello', 'There']);
+      await widgetTester.enterText(
+          find.byType(TextField), '["I", "am", "very", "tired"]');
+      await widgetTester.pump(Duration.zero);
+      expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          ['Hello', 'There']);
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    await widgetTester.tap(find.byIcon(Icons.exit_to_app));
-    await widgetTester.pumpAndSettle();
+      await widgetTester.tap(find.byIcon(Icons.exit_to_app));
+      await widgetTester.pumpAndSettle();
 
-    expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        ['I', 'am', 'very', 'tired']);
-  });
+      expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          ['I', 'am', 'very', 'tired']);
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
 
-  testWidgets('Text display widget test no submit button',
-      (widgetTester) async {
-    FlutterError.onError = ignoreOverflowErrors;
+    testWidgets('no submit button', (widgetTester) async {
+      FlutterError.onError = ignoreOverflowErrors;
 
-    NTConnection stringNTConnection;
+      NTConnection stringNTConnection;
 
-    TextDisplayModel textDisplayModel = TextDisplayModel(
-      ntConnection: stringNTConnection = createMockOnlineNT4(
-        virtualTopics: [
-          NT4Topic(
-            name: 'Test/Display Value',
-            type: NT4TypeStr.kString,
-            properties: {},
-          ),
-        ],
-        virtualValues: {
-          'Test/Display Value': 'There isn\'t a submit button',
-        },
-      ),
-      preferences: preferences,
-      topic: 'Test/Display Value',
-      dataType: 'string',
-      period: 0.100,
-      showSubmitButton: false,
-    );
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: stringNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kString,
+              properties: {},
+            ),
+          ],
+          virtualValues: {
+            'Test/Display Value': 'There isn\'t a submit button',
+          },
+        ),
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'string',
+        period: 0.100,
+        showSubmitButton: false,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: textDisplayModel,
-            child: const TextDisplay(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: textDisplayModel,
+              child: const TextDisplay(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.text('There isn\'t a submit button'), findsOneWidget);
-    expect(find.byTooltip('Publish Data'), findsNothing);
-    expect(find.byIcon(Icons.exit_to_app), findsNothing);
-    expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('There isn\'t a submit button'), findsOneWidget);
+      expect(find.byTooltip('Publish Data'), findsNothing);
+      expect(find.byIcon(Icons.exit_to_app), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
 
-    await widgetTester.enterText(
-        find.byType(TextField), 'I\'m submitting this without a button!');
-    expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        'There isn\'t a submit button');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-    await widgetTester.pumpAndSettle();
+      await widgetTester.enterText(
+          find.byType(TextField), 'I\'m submitting this without a button!');
+      await widgetTester.pump(Duration.zero);
+      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          'There isn\'t a submit button');
+      expect(textDisplayHasError(), true);
+      expect(textDisplayModel.typing, true);
 
-    expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-        'I\'m submitting this without a button!');
+      await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+      await widgetTester.pumpAndSettle();
+
+      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+          'I\'m submitting this without a button!');
+      expect(textDisplayHasError(), false);
+      expect(textDisplayModel.typing, false);
+    });
   });
 
   testWidgets('Text display edit properties', (widgetTester) async {

@@ -158,6 +158,8 @@ class MjpegController extends ChangeNotifier {
 
   Timer? _metricsTimer;
 
+  final List<int> _buffer = [];
+
   int _bitCount = 0;
   int _frameCount = 0;
 
@@ -227,8 +229,8 @@ class MjpegController extends ChangeNotifier {
     if (isStreaming) {
       return;
     }
-    logger.debug('Starting camera stream on URL $stream');
-    Stream<List<int>>? byteStream;
+    logger.info('Starting camera stream on URL $stream');
+    ByteStream? byteStream;
     try {
       final request = Request('GET', Uri.parse(stream));
       request.headers.addAll(headers);
@@ -263,13 +265,19 @@ class MjpegController extends ChangeNotifier {
       return;
     }
 
-    var buffer = <int>[];
-    _rawSubscription = byteStream.listen((data) {
-      _bitCount += data.length * Uint8List.bytesPerElement * 8;
-      _handleData(buffer, data);
-    });
+    _rawSubscription = byteStream.listen(
+      (data) {
+        _bitCount += data.length * Uint8List.bytesPerElement * 8;
+        _handleData(data);
+      },
+      onDone: () {
+        stopStream();
+        notifyListeners();
+      },
+    );
 
-    _metricsTimer = Timer.periodic(const Duration(seconds: 1), _updateMetrics);
+    _metricsTimer ??=
+        Timer.periodic(const Duration(seconds: 1), _updateMetrics);
   }
 
   void _updateMetrics(_) {
@@ -281,9 +289,11 @@ class MjpegController extends ChangeNotifier {
   }
 
   void stopStream() async {
-    logger.debug('Stopping camera stream on URL $stream');
+    logger.info('Stopping camera stream on URL $stream');
     await _rawSubscription?.cancel();
+    _buffer.clear();
     _metricsTimer?.cancel();
+    _metricsTimer = null;
     _rawSubscription = null;
     _bitCount = 0;
     _frameCount = 0;
@@ -291,20 +301,20 @@ class MjpegController extends ChangeNotifier {
     httpClient = Client();
   }
 
-  void _handleNewPacket(List<int> packet) {
-    logger.trace('Handling a ${packet.length} byte packet');
-    previousImage = packet;
-    List<int> imageData = preprocessor?.process(packet) ?? packet;
+  void _handleNewPacket() {
+    logger.trace('Handling a ${_buffer.length} byte packet');
+    List<int> imageData = preprocessor?.process(_buffer) ?? List.from(_buffer);
+    previousImage = imageData;
     imageStream.add(imageData);
     _frameCount++;
+    _buffer.clear();
   }
 
-  void _handleData(List<int> buffer, List<int> data) {
-    if (buffer.isNotEmpty && buffer.last == _trigger) {
+  void _handleData(List<int> data) {
+    if (_buffer.isNotEmpty && _buffer.last == _trigger) {
       if (data.first == _eoi) {
-        buffer.add(data.first);
-        _handleNewPacket(buffer);
-        buffer = [];
+        _buffer.add(data.first);
+        _handleNewPacket();
         if (!isLive) {
           dispose();
         }
@@ -315,21 +325,20 @@ class MjpegController extends ChangeNotifier {
       final d1 = data[i + 1];
 
       if (d == _trigger && d1 == _soi) {
-        buffer = [];
-        buffer.add(d);
-      } else if (d == _trigger && d1 == _eoi && buffer.isNotEmpty) {
-        buffer.add(d);
-        buffer.add(d1);
+        _buffer.clear();
+        _buffer.add(d);
+      } else if (d == _trigger && d1 == _eoi && _buffer.isNotEmpty) {
+        _buffer.add(d);
+        _buffer.add(d1);
 
-        _handleNewPacket(buffer);
-        buffer = [];
+        _handleNewPacket();
         if (!isLive) {
           dispose();
         }
-      } else if (buffer.isNotEmpty) {
-        buffer.add(d);
-        if (i == buffer.length - 2) {
-          buffer.add(d1);
+      } else if (_buffer.isNotEmpty) {
+        _buffer.add(d);
+        if (i == data.length - 2) {
+          _buffer.add(d1);
         }
       }
     }

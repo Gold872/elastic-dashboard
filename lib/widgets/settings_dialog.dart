@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
@@ -24,41 +27,52 @@ class SettingsDialog extends StatefulWidget {
     ..add(Defaults.defaultVariantName)
     ..sort();
 
+  static final List<String> logLevelNames = Level.values
+      .where((level) => level.value % 1000 == 0)
+      .map((e) => e.levelName)
+      .toList()
+    ..insert(0, Defaults.defaultLogLevelName);
+
   final SharedPreferences preferences;
 
-  final Function(String? data)? onIPAddressChanged;
-  final Function(String? data)? onTeamNumberChanged;
-  final Function(IPAddressMode mode)? onIPAddressModeChanged;
-  final Function(Color color)? onColorChanged;
-  final Function(bool value)? onGridToggle;
-  final Function(String? gridSize)? onGridSizeChanged;
-  final Function(String? radius)? onCornerRadiusChanged;
-  final Function(bool value)? onResizeToDSChanged;
-  final Function(bool value)? onRememberWindowPositionChanged;
-  final Function(bool value)? onLayoutLock;
-  final Function(String? value)? onDefaultPeriodChanged;
-  final Function(String? value)? onDefaultGraphPeriodChanged;
-  final Function(FlexSchemeVariant variant)? onThemeVariantChanged;
-  final Function()? onOpenAssetsFolderPressed;
+  final FutureOr<void> Function(String? data)? onIPAddressChanged;
+  final FutureOr<void> Function(String? data)? onTeamNumberChanged;
+  final void Function(IPAddressMode mode)? onIPAddressModeChanged;
+  final void Function(Color color)? onColorChanged;
+  final void Function(bool value)? onGridToggle;
+  final FutureOr<void> Function(String? gridSize)? onGridSizeChanged;
+  final FutureOr<void> Function(String? radius)? onCornerRadiusChanged;
+  final void Function(bool value)? onResizeToDSChanged;
+  final void Function(bool value)? onRememberWindowPositionChanged;
+  final void Function(bool value)? onLayoutLock;
+  final FutureOr<void> Function(String? value)? onDefaultPeriodChanged;
+  final FutureOr<void> Function(String? value)? onDefaultGraphPeriodChanged;
+  final void Function(FlexSchemeVariant variant)? onThemeVariantChanged;
+  final void Function(Level? level)? onLogLevelChanged;
+  final FutureOr<void> Function(String? value)? onGridDPIChanged;
+  final void Function()? onOpenAssetsFolderPressed;
 
-  const SettingsDialog(
-      {super.key,
-      required this.ntConnection,
-      required this.preferences,
-      this.onTeamNumberChanged,
-      this.onIPAddressModeChanged,
-      this.onIPAddressChanged,
-      this.onColorChanged,
-      this.onGridToggle,
-      this.onGridSizeChanged,
-      this.onCornerRadiusChanged,
-      this.onResizeToDSChanged,
-      this.onRememberWindowPositionChanged,
-      this.onLayoutLock,
-      this.onDefaultPeriodChanged,
-      this.onDefaultGraphPeriodChanged,
-      this.onThemeVariantChanged,
-      this.onOpenAssetsFolderPressed});
+  const SettingsDialog({
+    super.key,
+    required this.ntConnection,
+    required this.preferences,
+    this.onTeamNumberChanged,
+    this.onIPAddressModeChanged,
+    this.onIPAddressChanged,
+    this.onColorChanged,
+    this.onGridToggle,
+    this.onGridSizeChanged,
+    this.onCornerRadiusChanged,
+    this.onResizeToDSChanged,
+    this.onRememberWindowPositionChanged,
+    this.onLayoutLock,
+    this.onDefaultPeriodChanged,
+    this.onDefaultGraphPeriodChanged,
+    this.onThemeVariantChanged,
+    this.onLogLevelChanged,
+    this.onGridDPIChanged,
+    this.onOpenAssetsFolderPressed,
+  });
 
   @override
   State<SettingsDialog> createState() => _SettingsDialogState();
@@ -95,7 +109,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     icon: Icon(
                       Icons.code,
                     ),
-                    child: Text('Developer'),
+                    child: Text(
+                      'Developer (Advanced)',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ],
               ),
@@ -106,13 +123,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     // Network Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ..._ipAddressSettings(),
-                          const Divider(),
-                          ..._networkTablesSettings(),
-                        ],
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 250),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ..._ipAddressSettings(),
+                              const Divider(),
+                              ..._networkTablesSettings(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     // Style Preferences Tab
@@ -120,7 +142,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 350),
+                          constraints: const BoxConstraints(maxHeight: 355),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -135,10 +157,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     // Advanced Settings Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Column(
-                        children: [
-                          ..._advancedSettings(),
-                        ],
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 205),
+                          child: Column(
+                            children: [
+                              ..._advancedSettings(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -155,45 +182,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ),
       ],
     );
-  }
-
-  List<Widget> _advancedSettings() {
-    return [
-      Row(
-        children: [
-          const Icon(Icons.warning, color: Colors.yellow),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              'WARNING: These are advanced settings that could cause issues if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-              maxLines: 3,
-            ),
-          ),
-          const SizedBox(width: 5),
-          const Icon(
-            Icons.warning,
-            color: Colors.yellow,
-          ),
-        ],
-      ),
-      const Divider(),
-      Row(
-        children: [
-          TextButton.icon(
-            onPressed: () {
-              widget.onOpenAssetsFolderPressed?.call();
-            },
-            icon: const Icon(Icons.folder_outlined),
-            label: const Text('Open Assets Folder'),
-          ),
-          const Spacer(),
-        ],
-      ),
-    ];
   }
 
   List<Widget> _themeSettings() {
@@ -221,8 +209,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Flexible(
-              flex: 2,
+            SizedBox(
+              width: 140,
               child: UnconstrainedBox(
                 constrainedAxis: Axis.horizontal,
                 child: DialogColorPicker(
@@ -236,7 +224,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
             const VerticalDivider(),
             Flexible(
-              flex: 4,
               child: Column(
                 children: [
                   const Text('Theme Variant'),
@@ -388,10 +375,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                           Defaults.cornerRadius.toString())
                       .toString(),
               label: 'Corner Radius',
-              onSubmit: (value) {
-                setState(() {
-                  widget.onCornerRadiusChanged?.call(value);
-                });
+              onSubmit: (value) async {
+                await widget.onCornerRadiusChanged?.call(value);
+                setState(() {});
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(),
             ),
@@ -489,6 +475,84 @@ class _SettingsDialogState extends State<SettingsDialog> {
             ),
           ],
         ),
+      ),
+    ];
+  }
+
+  List<Widget> _advancedSettings() {
+    String initialLogLevel = widget.preferences.getString(PrefKeys.logLevel) ??
+        Defaults.defaultLogLevelName;
+    if (!SettingsDialog.logLevelNames.contains(initialLogLevel)) {
+      initialLogLevel = Defaults.defaultLogLevelName;
+    }
+
+    return [
+      Row(
+        children: [
+          const Icon(Icons.warning, color: Colors.yellow),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              'WARNING: These are advanced settings that could cause issues if changed incorrectly. It is advised to not change anything here unless if you know what you are doing.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+              maxLines: 3,
+            ),
+          ),
+          const SizedBox(width: 5),
+          const Icon(
+            Icons.warning,
+            color: Colors.yellow,
+          ),
+        ],
+      ),
+      const Divider(),
+      Row(
+        children: [
+          const Text('Log Level'),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogDropdownChooser<String>(
+              choices: SettingsDialog.logLevelNames,
+              initialValue: initialLogLevel,
+              onSelectionChanged: (value) {
+                Level? selectedLevel = Settings.logLevels
+                    .firstWhereOrNull((level) => level.levelName == value);
+                widget.onLogLevelChanged?.call(selectedLevel);
+                setState(() {});
+              },
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          Flexible(
+            child: DialogTextInput(
+              initialText: widget.preferences
+                      .getDouble(PrefKeys.gridDpiOverride)
+                      ?.toString() ??
+                  '',
+              label: 'Grid DPI (Experimental)',
+              formatter: TextFormatterBuilder.decimalTextFormatter(),
+              allowEmptySubmission: true,
+              onSubmit: (value) async {
+                await widget.onGridDPIChanged?.call(value);
+                setState(() {});
+              },
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              widget.onOpenAssetsFolderPressed?.call();
+            },
+            icon: const Icon(Icons.folder_outlined),
+            label: const Text('Open Assets Folder'),
+          ),
+        ],
       ),
     ];
   }

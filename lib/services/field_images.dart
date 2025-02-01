@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
+
 class FieldImages {
   static List<Field> fields = [];
 
@@ -11,12 +15,16 @@ class FieldImages {
       return null;
     }
 
-    Field field = fields.firstWhere((element) => element.game == game);
+    Field? field = fields.firstWhereOrNull((element) => element.game == game);
+    if (field == null) {
+      return null;
+    }
 
-    field.instanceCounter++;
-    if (!field.fieldImageLoaded) {
+    if (field.instanceCount == 0) {
       field.loadFieldImage();
     }
+    field.instanceCount++;
+
     return field;
   }
 
@@ -24,7 +32,8 @@ class FieldImages {
     return fields.map((e) => e.game).contains(game);
   }
 
-  static Future loadFields(String directory) async {
+  static Future<void> loadFields(String directory) async {
+    logger.info('Loading fields');
     AssetManifest assetManifest =
         await AssetManifest.loadFromAssetBundle(rootBundle);
 
@@ -41,6 +50,7 @@ class FieldImages {
   }
 
   static Future loadField(String filePath) async {
+    logger.trace('Loading field at $filePath');
     String jsonString = await rootBundle.loadString(filePath);
 
     Map<String, dynamic> jsonData = jsonDecode(jsonString);
@@ -77,7 +87,7 @@ class Field {
 
   late Image fieldImage;
 
-  int instanceCounter = 0;
+  int instanceCount = 0;
   bool fieldImageLoaded = false;
 
   late int pixelsPerMeterHorizontal;
@@ -113,10 +123,15 @@ class Field {
   }
 
   void loadFieldImage() {
-    fieldImage = Image.asset(jsonData['field-image']);
+    logger.debug('Loading field image for $game');
+    fieldImage = Image.asset(
+      jsonData['field-image'],
+      fit: BoxFit.contain,
+    );
     fieldImage.image
         .resolve(ImageConfiguration.empty)
         .addListener(ImageStreamListener((image, synchronousCall) {
+      logger.trace('Initializing image width and height for $game');
       fieldImageWidth = image.image.width;
       fieldImageHeight = image.image.height;
 
@@ -125,8 +140,11 @@ class Field {
   }
 
   void dispose() async {
-    instanceCounter--;
-    if (instanceCounter <= 0) {
+    logger.debug('Soft disposing field: $game');
+    instanceCount--;
+    logger.trace('New instance count for $game: $instanceCount');
+    if (instanceCount <= 0) {
+      logger.debug('Instance count for $game is 0, deleting field from memory');
       await fieldImage.image.evict();
       imageCache.clear();
       fieldImageLoaded = false;

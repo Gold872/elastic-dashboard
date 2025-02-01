@@ -79,6 +79,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Generate junit report xml
+        if: ${{ !cancelled() }}
         run: dart pub global run junitreport:tojunit --input reports/test-report.json --output reports/junit-report.xml
 
       - name: Upload test reports to Codecov
@@ -134,6 +135,10 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
+      
+      - name: Copy runtime files
+        if: ${{ matrix.build-option == 'windows' }}
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}
@@ -161,7 +166,7 @@ jobs:
         if: ${{ matrix.build-option == 'macos' }}
         uses: L-Super/create-dmg-actions@v1.0.3
         with:
-          dmg_name: build/macos/Build/Products/Release/elastic-setup
+          dmg_name: build/macos/Build/Products/Release/elastic-setup-macos
           src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
 
       - name: Upload macOS installer
@@ -169,7 +174,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: build/macos/Build/Products/Release/elastic-setup.dmg
+          path: build/macos/Build/Products/Release/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Create windows installer
@@ -234,6 +239,10 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.build-option }} --dart-define=ELASTIC_WPILIB=true
+
+      - name: Copy runtime files
+        if: ${{ matrix.build-option == 'windows' }}
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
       - name: Zip release
         if: ${{ matrix.build-option == 'macos' }}

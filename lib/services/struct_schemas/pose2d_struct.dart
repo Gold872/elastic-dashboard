@@ -13,8 +13,8 @@ class Pose2dStruct {
     required this.angle,
   });
 
-  factory Pose2dStruct.valueFromBytes(Uint8List value) {
-    ByteData view = ByteData.view(value.buffer);
+  factory Pose2dStruct.valueFromBytes(Uint8List value, [int start = 0]) {
+    ByteData view = ByteData.view(value.buffer, start);
 
     int length = view.lengthInBytes;
 
@@ -49,10 +49,7 @@ class Pose2dStruct {
         break;
       }
 
-      Uint8List elementBytes =
-          Uint8List.sublistView(view, i * length, i * length + length);
-
-      poseList.add(Pose2dStruct.valueFromBytes(elementBytes));
+      poseList.add(Pose2dStruct.valueFromBytes(value, i * length));
     }
 
     return poseList;
