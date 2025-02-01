@@ -82,7 +82,7 @@ jobs:
 
       - name: Compile C++ Code
         run: |
-          g++ -std=c++17 -Ielasticlib/libs-cpp/wpiunits-cpp -o elasticlib/elasticlib.o -c elasticlib/elasticlib.cpp
+          g++ -std=c++17 -Ielasticlib/libs-cpp -o elasticlib/elasticlib.o -c elasticlib/elasticlib.cpp
 
       - name: Link C++ Code
         run: |
