@@ -361,6 +361,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   Future<void> _closeWindow() async {
     await _saveWindowPosition();
     await windowManager.destroy();
+    exit(0);
   }
 
   @override
