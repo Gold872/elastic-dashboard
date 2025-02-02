@@ -51,7 +51,7 @@ class SettingsDialog extends StatefulWidget {
   final void Function(Level? level)? onLogLevelChanged;
   final FutureOr<void> Function(String? value)? onGridDPIChanged;
   final void Function()? onOpenAssetsFolderPressed;
-  final void Function(bool value)? onAutoSubmitButtonChanged;
+  final FutureOr<void> Function(bool value)? onAutoSubmitButtonChanged;
 
   const SettingsDialog({
     super.key,
@@ -451,11 +451,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
           Flexible(
             child: DialogToggleSwitch(
               initialValue: false,
-              label: 'Automatically Show Submit Button',
-              onToggle: (value) {
-                setState(() {
-                  widget.onAutoSubmitButtonChanged?.call(value);
-                });
+              label: 'Auto Show Text Submit Button',
+              onToggle: (value) async {
+                await widget.onAutoSubmitButtonChanged?.call(value);
+                setState(() {});
               },
             ),
           )

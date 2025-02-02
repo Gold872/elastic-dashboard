@@ -1658,7 +1658,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           setState(() {});
         },
         onAutoSubmitButtonChanged: (value) async {
-          preferences.setBool(PrefKeys.autoSubmitButton, value);
+          await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
           setState(() {});
         },
         onOpenAssetsFolderPressed: () async {

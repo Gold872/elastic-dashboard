@@ -38,11 +38,9 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     super.dataType,
     super.period,
   }) : super() {
-
-    if (preferences.getBool(PrefKeys.autoSubmitButton) ?? false) {
-      showSubmitButton = true;
-    }
-    else {
+    if (preferences.getBool(PrefKeys.autoTextSubmitButton) ?? false) {
+      showSubmitButton ??= true;
+    } else {
       showSubmitButton ??= ntConnection.getTopicFromName(topic)?.isPersistent;
       showSubmitButton ??= false;
     }

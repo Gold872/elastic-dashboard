@@ -82,7 +82,7 @@ void main() {
       PrefKeys.defaultGraphPeriod: 0.033,
       PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
       PrefKeys.logLevel: Level.trace.levelName,
-      PrefKeys.autoSubmitButton: false,
+      PrefKeys.autoTextSubmitButton: false,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -896,9 +896,10 @@ void main() {
           body: SettingsDialog(
             preferences: preferences,
             ntConnection: createMockOfflineNT4(),
-            onAutoSubmitButtonChanged: (value) {
+            onAutoSubmitButtonChanged: (value) async {
               fakeSettings.changeAutoSubmitButton();
-              preferences.setBool(PrefKeys.autoSubmitButton, value);
+
+              await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
             },
           ),
         ),
@@ -912,8 +913,8 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     final autoSubmitButtonSwitch =
-        find.widgetWithText(DialogToggleSwitch, 'Automatically Show Submit Button');
-    
+        find.widgetWithText(DialogToggleSwitch, 'Auto Show Text Submit Button');
+
     expect(autoSubmitButtonSwitch, findsOneWidget);
 
     final switchWidget = find
@@ -925,12 +926,12 @@ void main() {
     switchWidget.onChanged?.call(true);
     await widgetTester.pumpAndSettle();
 
-    expect(preferences.getBool(PrefKeys.autoSubmitButton), true);
+    expect(preferences.getBool(PrefKeys.autoTextSubmitButton), true);
 
     switchWidget.onChanged?.call(false);
     await widgetTester.pumpAndSettle();
 
-    expect(preferences.getBool(PrefKeys.autoSubmitButton), false);
+    expect(preferences.getBool(PrefKeys.autoTextSubmitButton), false);
     verify(fakeSettings.changeAutoSubmitButton()).called(2);
   });
 }
