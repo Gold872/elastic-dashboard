@@ -145,7 +145,7 @@
             "properties": {
               "topic": "/CameraPublisher/USB Camera 0",
               "period": 0.033,
-              "rotation": 0
+              "rotation_turns": 0
             }
           },
           {
