@@ -20,6 +20,7 @@ void main() {
   final Map<String, dynamic> cameraStreamJson = {
     'topic': 'Test/Camera Stream',
     'period': 0.100,
+    'rotation_turns': 0,
     'compression': 50,
     'fps': 60,
     'resolution': [100.0, 100.0],
@@ -50,6 +51,7 @@ void main() {
       return;
     }
 
+    expect(cameraStreamModel.rotationTurns, 0);
     expect(cameraStreamModel.fps, 60);
     expect(cameraStreamModel.quality, 50);
     expect(cameraStreamModel.resolution, const Size(100.0, 100.0));
@@ -118,6 +120,7 @@ void main() {
       ntConnection: ntConnection,
       preferences: preferences,
       topic: 'Test/Camera Stream',
+      rotation: 0,
       period: 0.100,
       compression: 50,
       fps: 60,
@@ -191,6 +194,7 @@ void main() {
       preferences: preferences,
       topic: 'Test/Camera Stream',
       period: 0.100,
+      rotation: 0,
       compression: 50,
       fps: 60,
       resolution: const Size(100.0, 100.0),
@@ -228,11 +232,21 @@ void main() {
     final width = find.widgetWithText(DialogTextInput, 'Width');
     final height = find.widgetWithText(DialogTextInput, 'Height');
     final quality = find.byType(Slider);
+    final rotateLeft = find.ancestor(
+      of: find.text('Rotate Left'),
+      matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+    );
+    final rotateRight = find.ancestor(
+      of: find.text('Rotate Right'),
+      matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+    );
 
     expect(fps, findsOneWidget);
     expect(width, findsOneWidget);
     expect(height, findsOneWidget);
     expect(quality, findsOneWidget);
+    expect(rotateLeft, findsOneWidget);
+    expect(rotateRight, findsOneWidget);
 
     await widgetTester.enterText(fps, '25');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
@@ -266,5 +280,31 @@ void main() {
     await widgetTester.drag(quality, const Offset(-100, 0));
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.quality, isNull);
+
+    await widgetTester.ensureVisible(rotateRight);
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 1);
+
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 2);
+
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 3);
+
+    await widgetTester.tap(rotateRight);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 0);
+
+    await widgetTester.ensureVisible(rotateLeft);
+    await widgetTester.tap(rotateLeft);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 3);
+
+    await widgetTester.tap(rotateLeft);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.rotationTurns, 2);
   });
 }

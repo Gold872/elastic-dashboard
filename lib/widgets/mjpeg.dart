@@ -20,6 +20,7 @@ class Mjpeg extends StatefulWidget {
   final MjpegController controller;
   final BoxFit? fit;
   final bool expandToFit;
+  final int quarterTurns;
   final double? width;
   final double? height;
   final WidgetBuilder? loading;
@@ -32,6 +33,7 @@ class Mjpeg extends StatefulWidget {
     this.height,
     this.fit,
     this.expandToFit = false,
+    this.quarterTurns = 0,
     this.error,
     this.loading,
     super.key,
@@ -149,13 +151,16 @@ class _MjpegState extends State<Mjpeg> {
               );
             }
 
-            return Image.memory(
-              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-              width: widget.width,
-              height: widget.height,
-              gaplessPlayback: true,
-              fit: widget.fit,
-              scale: (widget.expandToFit) ? 1e-6 : 1.0,
+            return RotatedBox(
+              quarterTurns: widget.quarterTurns,
+              child: Image.memory(
+                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+                width: widget.width,
+                height: widget.height,
+                gaplessPlayback: true,
+                fit: widget.fit,
+                scale: (widget.expandToFit) ? 1e-6 : 1.0,
+              ),
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
