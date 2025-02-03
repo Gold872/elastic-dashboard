@@ -1577,7 +1577,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onResizeToDSChanged: (value) async {
           setState(() {
-            if (value && true) {
+            if (value && widget.ntConnection.dsClient.driverStationDocked) {
               _onDriverStationDocked();
             } else {
               _onDriverStationUndocked();
