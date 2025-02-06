@@ -7,6 +7,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -37,8 +38,12 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     super.dataType,
     super.period,
   }) : super() {
-    showSubmitButton ??= ntConnection.getTopicFromName(topic)?.isPersistent;
-    showSubmitButton ??= false;
+    if (preferences.getBool(PrefKeys.autoTextSubmitButton) ?? false) {
+      showSubmitButton ??= true;
+    } else {
+      showSubmitButton ??= ntConnection.getTopicFromName(topic)?.isPersistent;
+      showSubmitButton ??= false;
+    }
     _showSubmitButton = showSubmitButton;
   }
 
