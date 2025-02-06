@@ -109,9 +109,10 @@ void main() {
 
       expect(textDisplayModel.showSubmitButton, isTrue);
     });
-    test('true if text auto submit button true', () async {
-      SharedPreferences.setMockInitialValues(
-          {PrefKeys.autoTextSubmitButton: true});
+    test('true if text auto submit button is true', () async {
+      SharedPreferences.setMockInitialValues({
+        PrefKeys.autoTextSubmitButton: true,
+      });
       preferences = await SharedPreferences.getInstance();
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
@@ -124,9 +125,10 @@ void main() {
 
       expect(textDisplayModel.showSubmitButton, isTrue);
     });
-    test('false auto submit button false', () async {
-      SharedPreferences.setMockInitialValues(
-          {PrefKeys.autoTextSubmitButton: false});
+    test('false if auto submit button is false', () async {
+      SharedPreferences.setMockInitialValues({
+        PrefKeys.autoTextSubmitButton: false,
+      });
       preferences = await SharedPreferences.getInstance();
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
