@@ -74,4 +74,5 @@ class PrefKeys {
   static String logLevel = 'log_level';
   static String gridDpiOverride = 'grid_dpi_override';
   static String windowPosition = 'window_position';
+  static String autoTextSubmitButton = 'auto_text_submit_button';
 }
