@@ -48,6 +48,8 @@ class FakeSettingsMethods extends Mock {
   void changeGridDPIOverride();
 
   void openAssetsFolder();
+
+  void changeAutoSubmitButton();
 }
 
 void main() {
@@ -80,6 +82,7 @@ void main() {
       PrefKeys.defaultGraphPeriod: 0.033,
       PrefKeys.themeVariant: FlexSchemeVariant.chroma.variantName,
       PrefKeys.logLevel: Level.trace.levelName,
+      PrefKeys.autoTextSubmitButton: false,
     });
 
     preferences = await SharedPreferences.getInstance();
@@ -738,6 +741,55 @@ void main() {
 
     expect(preferences.getBool(PrefKeys.layoutLocked), false);
     verify(fakeSettings.changeLockLayout()).called(2);
+  });
+
+  testWidgets('Change auto submit button', (widgetTester) async {
+    FlutterError.onError = ignoreOverflowErrors;
+
+    await widgetTester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SettingsDialog(
+            preferences: preferences,
+            ntConnection: createMockOfflineNT4(),
+            onAutoSubmitButtonChanged: (value) async {
+              fakeSettings.changeAutoSubmitButton();
+
+              await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
+            },
+          ),
+        ),
+      ),
+    );
+
+    await widgetTester.pumpAndSettle();
+
+    expect(appearanceSettings, findsOneWidget);
+    await widgetTester.tap(appearanceSettings);
+    await widgetTester.pumpAndSettle();
+
+    final autoSubmitButtonSwitch =
+        find.widgetWithText(DialogToggleSwitch, 'Auto Show Text Submit Button');
+
+    expect(autoSubmitButtonSwitch, findsOneWidget);
+
+    // Widget tester.tap will not work for some reason
+    final switchWidget = find
+        .descendant(of: autoSubmitButtonSwitch, matching: find.byType(Switch))
+        .evaluate()
+        .first
+        .widget as Switch;
+
+    switchWidget.onChanged?.call(true);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoTextSubmitButton), true);
+
+    switchWidget.onChanged?.call(false);
+    await widgetTester.pumpAndSettle();
+
+    expect(preferences.getBool(PrefKeys.autoTextSubmitButton), false);
+    verify(fakeSettings.changeAutoSubmitButton()).called(2);
   });
 
   testWidgets('Change log level', (widgetTester) async {

@@ -1658,6 +1658,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           setState(() {});
         },
+        onAutoSubmitButtonChanged: (value) async {
+          await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
+          setState(() {});
+        },
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
               '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
