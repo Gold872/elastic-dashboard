@@ -8,6 +8,7 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/large_text_display.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
@@ -176,6 +177,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
           ToggleSwitch.widgetType,
           ToggleButton.widgetType,
           TextDisplay.widgetType,
+          LargeTextDisplay.widgetType,
         ];
       case NT4TypeStr.kFloat32:
       case NT4TypeStr.kFloat64:
@@ -188,10 +190,12 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
           RadialGaugeWidget.widgetType,
           GraphWidget.widgetType,
           MatchTimeWidget.widgetType,
+          LargeTextDisplay.widgetType,
         ];
       case NT4TypeStr.kString:
         return [
           TextDisplay.widgetType,
+          LargeTextDisplay.widgetType,
           SingleColorView.widgetType,
         ];
       case NT4TypeStr.kStringArr:
