@@ -33,6 +33,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/yagsl_swerve_dr
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/large_text_display.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/match_time.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/number_bar.dart';
@@ -344,6 +345,7 @@ class NTWidgetBuilder {
         defaultHeight: 2);
 
     _widgetNameBuildMap.addAll({
+      LargeTextDisplay.widgetType: LargeTextDisplay.new,
       ToggleButton.widgetType: ToggleButton.new,
       ToggleSwitch.widgetType: ToggleSwitch.new,
       SingleColorView.widgetType: SingleColorView.new,

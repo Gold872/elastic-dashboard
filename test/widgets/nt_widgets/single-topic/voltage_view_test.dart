@@ -63,16 +63,18 @@ void main() {
     expect(voltageViewModel.type, 'Voltage View');
     expect(voltageViewModel.runtimeType, VoltageViewModel);
     expect(
-        voltageViewModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      voltageViewModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (voltageViewModel is! VoltageViewModel) {
       return;
