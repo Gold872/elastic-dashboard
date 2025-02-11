@@ -59,15 +59,24 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   late final TreeController<NetworkTableTreeRow> treeController;
 
   void onTopicAnnounced(NT4Topic topic) {
-    setState(() => treeController.roots = _filterChildren(root.children));
+    treeController.roots = _filterChildren(root.children);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void onTopicUnannounced(NT4Topic topic) {
-    setState(() => root.clearRows());
+    root.clearRows();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void onConnected() {
-    setState(() => root.clearRows());
+    root.clearRows();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
