@@ -63,16 +63,18 @@ void main() {
     expect(numberBarModel.type, 'Number Bar');
     expect(numberBarModel.runtimeType, NumberBarModel);
     expect(
-        numberBarModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      numberBarModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (numberBarModel is! NumberBarModel) {
       return;
