@@ -75,4 +75,8 @@ class PrefKeys {
   static String gridDpiOverride = 'grid_dpi_override';
   static String windowPosition = 'window_position';
   static String autoTextSubmitButton = 'auto_text_submit_button';
+
+  static String buttonDirectionHorizontal = 'button_direction_horizontal';
+  static String buttonFontSize = 'button_font_size';
+  static String buttonBorderSize= 'button_border_size';
 }
