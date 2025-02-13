@@ -1716,15 +1716,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _onDriverStationDocked() async {
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-    double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
-    Size screenSize =
-        (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
+    Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
     await windowManager.unmaximize();
 
-    Size newScreenSize =
-        Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
-            pixelRatio;
+    Size newScreenSize = Size(screenSize.width, screenSize.height - 200);
 
     await windowManager.setSize(newScreenSize);
 
@@ -1743,8 +1739,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await windowManager.setResizable(true);
 
     // Re-adds the window frame, window manager's API for this is weird
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-        windowButtonVisibility: false);
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden,
+      windowButtonVisibility: false,
+    );
   }
 
   void _showWindowCloseConfirmation(BuildContext context) {
