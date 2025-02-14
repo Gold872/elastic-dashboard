@@ -144,7 +144,8 @@
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/USB Camera 0",
-              "period": 0.033
+              "period": 0.033,
+              "rotation_turns": 0
             }
           },
           {

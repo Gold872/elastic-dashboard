@@ -24,6 +24,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   int? _quality;
   int? _fps;
   Size? _resolution;
+  int _rotationTurns = 0;
 
   MjpegController? controller;
 
@@ -38,6 +39,13 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   Size? get resolution => _resolution;
 
   set resolution(value) => _resolution = value;
+
+  int get rotationTurns => _rotationTurns;
+
+  set rotationTurns(int value) {
+    _rotationTurns = value;
+    notifyListeners();
+  }
 
   String getUrlWithParameters(String urlString) {
     Uri url = Uri.parse(urlString);
@@ -65,11 +73,13 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     int? compression,
     int? fps,
     Size? resolution,
+    int rotation = 0,
     super.dataType,
     super.period,
   })  : _quality = compression,
         _fps = fps,
         _resolution = resolution,
+        _rotationTurns = rotation,
         super();
 
   CameraStreamModel.fromJson({
@@ -79,6 +89,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
+    _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
         ?.whereType<num>()
@@ -110,6 +121,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
+      'rotation_turns': rotationTurns,
       if (quality != null) 'compression': quality,
       if (fps != null) 'fps': fps,
       if (resolution != null)
@@ -230,6 +242,54 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         onPressed: () => refresh(),
         child: const Text('Apply Quality Settings'),
       ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                label: const Text('Rotate Left'),
+                icon: const Icon(Icons.rotate_90_degrees_ccw),
+                onPressed: () {
+                  int newRotation = rotationTurns - 1;
+                  if (newRotation < 0) {
+                    newRotation += 4;
+                  }
+                  rotationTurns = newRotation;
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                label: const Text('Rotate Right'),
+                icon: const Icon(Icons.rotate_90_degrees_cw),
+                onPressed: () {
+                  int newRotation = rotationTurns + 1;
+                  if (newRotation >= 4) {
+                    newRotation -= 4;
+                  }
+                  rotationTurns = newRotation;
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     ];
   }
 
@@ -343,6 +403,7 @@ class CameraStreamWidget extends NTWidget {
                   controller: model.controller!,
                   fit: BoxFit.contain,
                   expandToFit: true,
+                  quarterTurns: model.rotationTurns,
                 ),
               ),
               const Text(''),
