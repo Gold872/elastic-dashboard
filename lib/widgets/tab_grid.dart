@@ -33,6 +33,8 @@ class TabGridModel extends ChangeNotifier {
 
   final VoidCallback onAddWidgetPressed;
 
+  bool _disposed = false;
+
   TabGridModel({
     required this.ntConnection,
     required this.preferences,
@@ -640,14 +642,19 @@ class TabGridModel extends ChangeNotifier {
   }
 
   void removeDragInWidget() {
+    if (_disposed) {
+      return;
+    }
     if (_containerDraggingIn != null) {
       _containerDraggingIn = null;
       notifyListeners();
     }
   }
 
-  ListLayoutModel createListLayout(
-      {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
+  ListLayoutModel createListLayout({
+    String title = 'List Layout',
+    List<NTWidgetContainerModel>? children,
+  }) {
     return ListLayoutModel(
       preferences: preferences,
       title: title,
@@ -763,6 +770,15 @@ class TabGridModel extends ChangeNotifier {
         widget.notifyListeners();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    super.dispose();
   }
 }
 
