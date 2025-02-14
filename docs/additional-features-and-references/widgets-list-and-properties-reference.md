@@ -44,6 +44,12 @@ Displays data in a text field. This text can be edited to update the data on Net
 * `show_submit_button` - Whether or not to show a button to publish the entered data to network tables (defaults to false)
   * `true` or `false`
 
+### Large Text Display
+
+Displays any String or number in large text that will fill the entire widget.
+
+<figure><img src="../.gitbook/assets/large_text_display.png" alt=""><figcaption></figcaption></figure>
+
 ### Number Slider
 
 Displays a number in the form of a slider. The slider can be dragged to edit the value on Network Tables. It can be customized with different ranges and intervals. This supports the `double` data type.
