@@ -15,7 +15,7 @@ WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
 {% tab title="C++" %}
 ```cpp
-frc::WebServer::GetInstance().Start(5800, frc::filesystem::GetDeployDirectory());
+wpi::WebServer::GetInstance().Start(5800, frc::filesystem::GetDeployDirectory());
 ```
 
 In addition, you will also need the following includes at the top of your file:
