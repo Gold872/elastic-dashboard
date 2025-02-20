@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     rowName: '',
   );
   late final TreeController<NetworkTableTreeRow> treeController;
+  late final HashMap<String, void> topics = HashMap<String, void>();
 
   void onTopicAnnounced(NT4Topic topic) {
     treeController.roots = _filterChildren(root.children);
@@ -199,6 +201,15 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
+      }
+
+      if (topic.type == 'structschema') {
+        NT4Subscription ss = widget.ntConnection.subscribe(topic.name);
+
+        ss.addListener(() {});
+        ss.listen((dynamic obj, int i) {
+          print(obj);
+        });
       }
 
       topics.add(topic);

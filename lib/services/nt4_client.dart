@@ -394,7 +394,7 @@ class NT4Client {
       options: options,
     );
 
-    logger.trace('Creating new subscription: $newSub');
+    print('Creating new subscription: $newSub');
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
