@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:logger/logger.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -36,6 +37,8 @@ class NTConnection {
 
   Map<int, NT4Subscription> subscriptionMap = {};
   Map<NT4Subscription, int> subscriptionUseCount = {};
+
+  Map<String, String> knownSchemas = {};
 
   NTConnection(String ipAddress) {
     nt4Connect(ipAddress);
