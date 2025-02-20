@@ -393,7 +393,7 @@ class NT4Client {
       options: options,
     );
 
-    print('Creating new subscription: $newSub');
+    logger.debug('Creating new subscription: $newSub');
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);

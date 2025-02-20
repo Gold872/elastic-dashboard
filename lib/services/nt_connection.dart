@@ -1,7 +1,9 @@
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:logger/logger.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -36,6 +38,8 @@ class NTConnection {
   Map<int, NT4Subscription> subscriptionMap = {};
   Map<NT4Subscription, int> subscriptionUseCount = {};
 
+  Map<String, String> knownSchemas = {};
+
   NTConnection(String ipAddress) {
     nt4Connect(ipAddress);
   }
@@ -63,6 +67,17 @@ class NTConnection {
       topic: '',
       options: const NT4SubscriptionOptions(topicsOnly: true),
     );
+
+    _ntClient.addTopicAnnounceListener((NT4Topic topic) {
+      if (topic.type == "structschema") {
+        subscribe(topic.name).listen((data, _) {
+          String schema = String.fromCharCodes(data as List<int>);
+          String key = topic.name.split("/").last;
+          logger.trace("Received schema for $key: $schema");
+          knownSchemas[key] = schema;
+        });
+      }
+    });
   }
 
   void dsClientConnect(

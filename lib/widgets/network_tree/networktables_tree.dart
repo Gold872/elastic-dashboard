@@ -204,15 +204,6 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         continue;
       }
 
-      if (topic.type == 'structschema') {
-        NT4Subscription ss = widget.ntConnection.subscribe(topic.name);
-
-        ss.addListener(() {});
-        ss.listen((dynamic obj, int i) {
-          print(obj);
-        });
-      }
-
       topics.add(topic);
     }
 
