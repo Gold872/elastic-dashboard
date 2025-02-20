@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:logger/logger.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -73,7 +72,7 @@ class NTConnection {
         subscribe(topic.name).listen((data, _) {
           String schema = String.fromCharCodes(data as List<int>);
           String key = topic.name.split("/").last;
-          logger.trace("Received schema for $key: $schema");
+          logger.debug("Received schema for $key: $schema");
           knownSchemas[key] = schema;
         });
       }
