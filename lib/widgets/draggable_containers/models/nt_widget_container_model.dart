@@ -62,6 +62,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       ...super.toJson(),
       'type': childModel.type,
       'properties': getChildJson(),
+      'ntStructMeta': childModel.ntStructMeta?.toJson(),
     };
   }
 
@@ -89,7 +90,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     }
 
     NT4StructMeta? ntStructMeta;
-    if (!jsonData.containsKey('ntStructMeta')) {
+    if (jsonData['ntStructMeta'] == null) {
       onJsonLoadingWarning?.call(
           'Network tables widget does not have a structure meta, defaulting to an empty map.');
     } else {

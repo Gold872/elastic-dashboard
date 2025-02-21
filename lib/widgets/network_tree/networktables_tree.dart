@@ -408,8 +408,6 @@ class _TreeTileState extends State<TreeTile> {
                   return;
                 }
                 dragging = true;
-
-// IMPORTANT
                 draggingWidget = await widget.entry.node.toWidgetContainerModel(
                     listLayoutBuilder: widget.listLayoutBuilder);
                 if (!dragging) {
