@@ -131,10 +131,10 @@ class NT4Subscription extends ValueNotifier<Object?> {
     logger.trace(
         'Updating value for subscription: $this - Value: $value, Time: $timestamp');
 
-    if (options.structMeta != null) {
+    if (options.structMeta != null && value is List<int>) {
       DynStructSchema schema = options.structMeta!.schema;
       List<String> path = options.structMeta!.path;
-      Uint8List data = Uint8List.fromList(value as List<int>);
+      Uint8List data = Uint8List.fromList(value);
       DynStruct struct = DynStruct(schema: schema, data: data);
       DynStructValue dynValue = struct.get(path)!;
       value = dynValue.anyValue;
@@ -191,7 +191,9 @@ class NT4StructMeta {
 
   static NT4StructMeta fromJson(Map<String, dynamic> json) {
     return NT4StructMeta(
-      path: tryCast(json['path']) ?? [],
+      path: tryCast<List<dynamic>>(json['path'])!
+          .map((el) => tryCast<String>(el)!)
+          .toList(),
       schema: DynStructSchema.fromJson(tryCast(json['schema']) ?? {}),
     );
   }
@@ -431,8 +433,7 @@ class NT4Client {
       options: options,
     );
 
-    logger.debug('Creating new subscription: $newSub');
-    logger.debug(StackTrace.current);
+    logger.trace('Creating new subscription: $newSub');
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
