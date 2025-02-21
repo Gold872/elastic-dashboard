@@ -712,8 +712,7 @@ class NT4Client {
       options: options,
     );
 
-    logger.debug('Creating new subscription: $newSub');
-    logger.debug(StackTrace.current);
+    logger.trace('Creating new subscription: $newSub');
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
