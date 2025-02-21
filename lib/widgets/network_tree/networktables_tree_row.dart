@@ -133,6 +133,7 @@ class NetworkTableTreeRow {
           preferences: preferences,
           topic: entry.topic.name,
           dataType: entry.type,
+          ntStructMeta: entry.getStructMeta(),
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
@@ -140,6 +141,7 @@ class NetworkTableTreeRow {
           preferences: preferences,
           topic: entry.topic.name,
           dataType: entry.type,
+          ntStructMeta: entry.getStructMeta(),
         );
     }
     return null;
@@ -161,7 +163,10 @@ class NetworkTableTreeRow {
 
       if (isCameraStream) {
         return CameraStreamModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+            ntStructMeta: entry?.getStructMeta());
       }
 
       if (hasRows([
@@ -174,7 +179,10 @@ class NetworkTableTreeRow {
         'sizeLeftRight',
       ])) {
         return YAGSLSwerveDriveModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+            ntStructMeta: entry?.getStructMeta());
       }
 
       return null;
@@ -198,6 +206,7 @@ class NetworkTableTreeRow {
     return NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      entry?.getStructMeta(),
       type,
       topic,
     );

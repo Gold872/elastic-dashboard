@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -49,6 +50,7 @@ typedef NTModelJsonProvider = NTWidgetModel Function({
   required Map<String, dynamic> jsonData,
   required NTConnection ntConnection,
   required SharedPreferences preferences,
+  required NT4StructMeta? ntStructMeta,
 });
 
 typedef NTModelProvider = NTWidgetModel Function({
@@ -56,6 +58,7 @@ typedef NTModelProvider = NTWidgetModel Function({
   required NTConnection ntConnection,
   double period,
   required SharedPreferences preferences,
+  required NT4StructMeta? ntStructMeta,
   required String topic,
 });
 
@@ -367,6 +370,7 @@ class NTWidgetBuilder {
   static NTWidgetModel buildNTModelFromType(
     NTConnection ntConnection,
     SharedPreferences preferences,
+    NT4StructMeta? ntStructMeta,
     String type,
     String topic, {
     String dataType = 'Unknown',
@@ -384,6 +388,7 @@ class NTWidgetBuilder {
         topic: topic,
         dataType: dataType,
         period: period,
+        ntStructMeta: ntStructMeta,
       );
     }
 
@@ -394,12 +399,14 @@ class NTWidgetBuilder {
       topic: topic,
       dataType: dataType,
       period: period,
+      ntStructMeta: ntStructMeta,
     );
   }
 
   static NTWidgetModel buildNTModelFromJson(
     NTConnection ntConnection,
     SharedPreferences preferences,
+    NT4StructMeta? ntStructMeta,
     String type,
     Map<String, dynamic> jsonData, {
     Function(String message)? onWidgetTypeNotFound,
@@ -411,6 +418,7 @@ class NTWidgetBuilder {
         ntConnection: ntConnection,
         preferences: preferences,
         jsonData: jsonData,
+        ntStructMeta: ntStructMeta,
       );
     }
 
@@ -419,6 +427,7 @@ class NTWidgetBuilder {
     return SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: ntStructMeta,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
       dataType: tryCast(jsonData['data_type']) ?? 'Unknown',

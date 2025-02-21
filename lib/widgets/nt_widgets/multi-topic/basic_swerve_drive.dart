@@ -64,6 +64,7 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
     super.period,
@@ -75,6 +76,7 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   BasicSwerveModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
