@@ -64,6 +64,7 @@ class GraphModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     double timeDisplayed = 5.0,
     double? minValue,
     double? maxValue,
@@ -81,6 +82,7 @@ class GraphModel extends SingleTopicNTWidgetModel {
   GraphModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _timeDisplayed = tryCast(jsonData['time_displayed']) ??

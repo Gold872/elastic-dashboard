@@ -73,6 +73,7 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     bool showRobotRotation = true,
     bool showDesiredStates = true,
     double angleOffset = 0.0,
@@ -87,6 +88,7 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required Map<String, dynamic> jsonData,
+    required super.ntStructMeta,
   }) : super.fromJson(jsonData: jsonData) {
     _showRobotRotation = tryCast(jsonData['show_robot_rotation']) ?? true;
     _showDesiredStates = tryCast(jsonData['show_desired_states']) ?? true;

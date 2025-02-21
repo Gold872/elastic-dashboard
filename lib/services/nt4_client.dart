@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
@@ -129,6 +130,16 @@ class NT4Subscription extends ValueNotifier<Object?> {
   void updateValue(Object? value, int timestamp) {
     logger.trace(
         'Updating value for subscription: $this - Value: $value, Time: $timestamp');
+
+    if (options.structMeta != null) {
+      DynStructSchema schema = options.structMeta!.schema;
+      List<String> path = options.structMeta!.path;
+      Uint8List data = Uint8List.fromList(value as List<int>);
+      DynStruct struct = DynStruct(schema: schema, data: data);
+      DynStructValue dynValue = struct.get(path)!;
+      value = dynValue.anyValue;
+    }
+
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
@@ -162,17 +173,29 @@ class NT4Subscription extends ValueNotifier<Object?> {
   int get hashCode => Object.hashAll([topic, options]);
 }
 
+class NT4StructMeta {
+  final List<String> path;
+  final DynStructSchema schema;
+
+  NT4StructMeta({
+    required this.path,
+    required this.schema,
+  });
+}
+
 class NT4SubscriptionOptions {
   final double periodicRateSeconds;
   final bool all;
   final bool topicsOnly;
   final bool prefix;
+  final NT4StructMeta? structMeta;
 
   const NT4SubscriptionOptions({
     this.periodicRateSeconds = 0.1,
     this.all = false,
     this.topicsOnly = false,
     this.prefix = true,
+    this.structMeta,
   });
 
   Map<String, dynamic> toJson() {
@@ -395,6 +418,7 @@ class NT4Client {
     );
 
     logger.debug('Creating new subscription: $newSub');
+    logger.debug(StackTrace.current);
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);
