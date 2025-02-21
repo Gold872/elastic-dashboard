@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
@@ -712,6 +713,7 @@ class NT4Client {
     );
 
     logger.debug('Creating new subscription: $newSub');
+    logger.debug(StackTrace.current);
 
     _subscriptions[newSub.uid] = newSub;
     _subscribedTopics.add(newSub);

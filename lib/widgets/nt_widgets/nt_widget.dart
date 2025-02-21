@@ -26,6 +26,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
 
   final NTConnection ntConnection;
   final SharedPreferences preferences;
+  final NT4StructMeta? ntStructMeta;
 
   late double _period;
 
@@ -46,6 +47,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
   NTWidgetModel({
     required this.ntConnection,
     required this.preferences,
+    required this.ntStructMeta,
     required String topic,
     double? period,
   }) : _topic = topic {
@@ -59,6 +61,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
   NTWidgetModel.fromJson({
     required this.ntConnection,
     required this.preferences,
+    required this.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) {
     _topic = tryCast(jsonData['topic']) ?? '';
@@ -297,6 +300,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
+    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override
