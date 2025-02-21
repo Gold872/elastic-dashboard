@@ -223,6 +223,11 @@ class PreferenceSearch extends StatelessWidget {
   final RobotPreferencesModel model;
   final Function(String topic, String? data) onSubmit;
 
+  List<String> filterList(String query) => model.preferenceTopicNames
+      .where((element) =>
+          element.split('/').last.toLowerCase().contains(query.toLowerCase()))
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return SearchableList<String>(
@@ -243,16 +248,8 @@ class PreferenceSearch extends StatelessWidget {
         horizontal: 2,
         vertical: 7.5,
       ),
-      filter: (query) {
-        return model.preferenceTopicNames
-            .where((element) => element
-                .split('/')
-                .last
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-      },
-      initialList: model.preferenceTopicNames,
+      filter: (query) => filterList(query),
+      initialList: filterList(model.searchTextController.text),
       itemBuilder: (item) {
         TextEditingController? textController =
             model.preferenceTextControllers[item];
