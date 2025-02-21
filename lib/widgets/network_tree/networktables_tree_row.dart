@@ -118,7 +118,7 @@ class NetworkTableTreeRow {
       NTConnection ntConnection,
       SharedPreferences preferences,
       TreeTopicEntry entry) {
-    switch (entry.topic.type) {
+    switch (entry.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
       case NT4TypeStr.kFloat32:
@@ -132,14 +132,14 @@ class NetworkTableTreeRow {
           ntConnection: ntConnection,
           preferences: preferences,
           topic: entry.topic.name,
-          dataType: entry.topic.type,
+          dataType: entry.type,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
           ntConnection: ntConnection,
           preferences: preferences,
           topic: entry.topic.name,
-          dataType: entry.topic.type,
+          dataType: entry.type,
         );
     }
     return null;
