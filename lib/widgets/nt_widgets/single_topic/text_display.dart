@@ -91,7 +91,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
 
     late Object? formattedData;
 
-    String dataType = ntTopic!.type;
+    String dataType = super.ntStructMeta?.type ?? ntTopic!.type;
     switch (dataType) {
       case NT4TypeStr.kBool:
         formattedData = bool.tryParse(value);
