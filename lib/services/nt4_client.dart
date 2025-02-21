@@ -176,16 +176,19 @@ class NT4Subscription extends ValueNotifier<Object?> {
 class NT4StructMeta {
   final List<String> path;
   final DynStructSchema schema;
+  final String type;
 
   NT4StructMeta({
     required this.path,
     required this.schema,
+    required this.type,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'path': path,
       'schema': schema.toJson(),
+      'type': type,
     };
   }
 
@@ -195,6 +198,7 @@ class NT4StructMeta {
           .map((el) => tryCast<String>(el)!)
           .toList(),
       schema: DynStructSchema.fromJson(tryCast(json['schema']) ?? {}),
+      type: tryCast<String>(json['type']) ?? '',
     );
   }
 }

@@ -149,7 +149,7 @@ class RobotPreferences extends NTWidget {
 
               Object? formattedData;
 
-              String dataType = nt4Topic.type;
+              String dataType = model.ntStructMeta?.type ?? nt4Topic.type;
               switch (dataType) {
                 case NT4TypeStr.kBool:
                   formattedData = bool.tryParse(data);
