@@ -893,10 +893,10 @@ packages:
     dependency: "direct main"
     description:
       name: searchable_listview
-      sha256: f9bc1a57dfcba49ce2d190d642567fb82309dd23849b3b0a328266e3f90054db
+      sha256: "83d0a7673938f729078b554e47ccb66927645f798f5a2a1c0b2f85d52f1823b7"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.0"
+    version: "2.16.0"
   shared_preferences:
     dependency: "direct main"
     description:
