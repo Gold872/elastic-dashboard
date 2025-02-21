@@ -1,6 +1,6 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter/foundation.dart';
 
 class DynStructField {
@@ -18,6 +18,20 @@ class DynStructField {
     this.isNullable = false,
     this.substruct,
   });
+
+  static DynStructField fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return DynStructField(
+      name: json['name'],
+      type: json['type'],
+      isArray: json['isArray'],
+      isNullable: json['isNullable'],
+      substruct: json['substruct'] != null
+          ? DynStructSchema.fromJson(tryCast(json['substruct']) ?? {})
+          : null,
+    );
+  }
 
   static DynStructField _parseField(
       String name, String type, Map<String, String> schemas) {
@@ -69,6 +83,16 @@ class DynStructField {
       isNullable: isNullable,
       substruct: substruct?.clone(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'type': type,
+      'isArray': isArray,
+      'isNullable': isNullable,
+      'substruct': substruct?.toJson(),
+    };
   }
 }
 
@@ -123,6 +147,22 @@ class DynStructSchema {
     return DynStructSchema.raw(
       type: type,
       fields: fields.map((field) => field.clone()).toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'fields': fields.map((field) => field.toJson()).toList(),
+    };
+  }
+
+  static DynStructSchema fromJson(Map<String, dynamic> json) {
+    return DynStructSchema.raw(
+      type: json['type'],
+      fields: (tryCast<List<dynamic>>(json['fields']) ?? [])
+          .map((field) => DynStructField.fromJson(tryCast(field) ?? {}))
+          .toList(),
     );
   }
 }

@@ -180,6 +180,20 @@ class NT4StructMeta {
     required this.path,
     required this.schema,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'schema': schema.toJson(),
+    };
+  }
+
+  static NT4StructMeta fromJson(Map<String, dynamic> json) {
+    return NT4StructMeta(
+      path: tryCast(json['path']) ?? [],
+      schema: DynStructSchema.fromJson(tryCast(json['schema']) ?? {}),
+    );
+  }
 }
 
 class NT4SubscriptionOptions {
