@@ -1,3 +1,5 @@
+import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -86,12 +88,22 @@ class NTWidgetContainerModel extends WidgetContainerModel {
           'Network tables widget does not have any properties, defaulting to an empty properties map.');
     }
 
+    NT4StructMeta? ntStructMeta;
+    if (!jsonData.containsKey('ntStructMeta')) {
+      onJsonLoadingWarning?.call(
+          'Network tables widget does not have a structure meta, defaulting to an empty map.');
+    } else {
+      ntStructMeta = NT4StructMeta.fromJson(
+        tryCast(jsonData['ntStructMeta']) ?? {},
+      );
+    }
+
     String type = tryCast(jsonData['type']) ?? '';
 
     childModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      childModel.ntStructMeta,
+      ntStructMeta,
       type,
       widgetProperties,
       onWidgetTypeNotFound: onJsonLoadingWarning,

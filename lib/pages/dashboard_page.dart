@@ -658,8 +658,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   }
 
   bool _loadLayoutFromJsonData(String jsonString) {
-    return false;
-
     logger.info('Loading layout from json');
     Map<String, dynamic>? jsonData = tryCast(jsonDecode(jsonString));
 
