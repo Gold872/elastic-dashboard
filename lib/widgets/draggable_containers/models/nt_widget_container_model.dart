@@ -91,6 +91,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      childModel.ntStructMeta,
       type,
       widgetProperties,
       onWidgetTypeNotFound: onJsonLoadingWarning,
@@ -317,6 +318,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      childModel.ntStructMeta,
       type,
       childModel.topic,
       dataType: (childModel is SingleTopicNTWidgetModel)

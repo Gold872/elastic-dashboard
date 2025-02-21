@@ -57,6 +57,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     bool sortOptions = false,
     super.dataType,
     super.period,
@@ -66,6 +67,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   ComboBoxChooserModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _sortOptions = tryCast(jsonData['sort_options']) ?? _sortOptions;

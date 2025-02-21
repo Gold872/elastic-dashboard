@@ -59,6 +59,7 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     Color trueColor = Colors.green,
     Color falseColor = Colors.red,
     String trueIcon = 'None',
@@ -74,6 +75,7 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   BooleanBoxModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     int? trueColorValue =

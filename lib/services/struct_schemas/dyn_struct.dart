@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -127,69 +128,73 @@ class DynStructSchema {
 }
 
 sealed class DynStructValue {
-  get boolValue => (this as DynStructBoolean).value;
-  get intValue => (this as DynStructInt).value;
-  get longValue => (this as DynStructLong).value;
-  get floatValue => (this as DynStructFloat).value;
-  get doubleValue => (this as DynStructDouble).value;
-  get stringValue => (this as DynStructString).value;
-  get nullableValue => (this as DynStructNullable).value;
-  get arrayValue => (this as DynStructArray).value;
-  get structValue => (this as DynStructStruct).value;
+  final Object? anyValue;
+
+  DynStructValue({required this.anyValue});
+
+  bool get boolValue => (this as DynStructBoolean).value;
+  int get intValue => (this as DynStructInt).value;
+  int get longValue => (this as DynStructLong).value;
+  double get floatValue => (this as DynStructFloat).value;
+  double get doubleValue => (this as DynStructDouble).value;
+  String get stringValue => (this as DynStructString).value;
+  DynStructValue? get nullableValue => (this as DynStructNullable).value;
+  List<DynStructValue> get arrayValue => (this as DynStructArray).value;
+  DynStruct get structValue => (this as DynStructStruct).value;
 }
 
 class DynStructBoolean extends DynStructValue {
   final bool value;
 
-  DynStructBoolean(this.value);
+  DynStructBoolean(this.value) : super(anyValue: value);
 }
 
 class DynStructInt extends DynStructValue {
   final int value;
 
-  DynStructInt(this.value);
+  DynStructInt(this.value) : super(anyValue: value);
 }
 
 class DynStructLong extends DynStructValue {
   final int value;
 
-  DynStructLong(this.value);
+  DynStructLong(this.value) : super(anyValue: value);
 }
 
 class DynStructFloat extends DynStructValue {
   final double value;
 
-  DynStructFloat(this.value);
+  DynStructFloat(this.value) : super(anyValue: value);
 }
 
 class DynStructDouble extends DynStructValue {
   final double value;
 
-  DynStructDouble(this.value);
+  DynStructDouble(this.value) : super(anyValue: value);
 }
 
 class DynStructString extends DynStructValue {
   final String value;
 
-  DynStructString(this.value);
+  DynStructString(this.value) : super(anyValue: value);
 }
 
 class DynStructNullable extends DynStructValue {
   final DynStructValue? value;
 
-  DynStructNullable(this.value);
+  DynStructNullable(this.value) : super(anyValue: value);
 }
 
 class DynStructArray extends DynStructValue {
   final List<DynStructValue> value;
 
-  DynStructArray(this.value);
+  DynStructArray(this.value) : super(anyValue: value);
 }
 
 class DynStructStruct extends DynStructValue {
   final DynStruct value;
 
-  DynStructStruct(this.value);
+  DynStructStruct(this.value) : super(anyValue: value);
 }
 
 class DynStruct {
@@ -210,6 +215,20 @@ class DynStruct {
     return values[key];
   }
 
+  DynStructValue? get(List<String> key) {
+    DynStructValue value = DynStructStruct(this);
+
+    for (final k in key) {
+      if (value is DynStructStruct) {
+        value = value.structValue[k]!;
+      } else {
+        return null;
+      }
+    }
+
+    return value;
+  }
+
   static (int, Map<String, DynStructValue>) _parseData(
       DynStructSchema schema, Uint8List data) {
     Map<String, DynStructValue> values = {};
@@ -227,7 +246,7 @@ class DynStruct {
   static (int, DynStructValue) _parseValue(
       DynStructField field, Uint8List data) {
     if (field.isArray) {
-      int length = data.buffer.asByteData().getInt32(0);
+      int length = data.buffer.asByteData().getInt32(0, Endian.little);
       var (consumed, value) = _parseArray(field, data.sublist(4), length);
       return (consumed + 4, value);
     } else if (field.isNullable) {
@@ -248,15 +267,27 @@ class DynStruct {
     if (field.type == "boolean") {
       return (1, DynStructBoolean(data[0] != 0));
     } else if (field.type == "int") {
-      return (4, DynStructInt(data.buffer.asByteData().getInt32(0)));
+      return (
+        4,
+        DynStructInt(data.buffer.asByteData().getInt32(0, Endian.little))
+      );
     } else if (field.type == "long") {
-      return (8, DynStructLong(data.buffer.asByteData().getInt64(0)));
+      return (
+        8,
+        DynStructLong(data.buffer.asByteData().getInt64(0, Endian.little))
+      );
     } else if (field.type == "float") {
-      return (4, DynStructFloat(data.buffer.asByteData().getFloat32(0)));
+      return (
+        4,
+        DynStructFloat(data.buffer.asByteData().getFloat32(0, Endian.little))
+      );
     } else if (field.type == "double") {
-      return (8, DynStructDouble(data.buffer.asByteData().getFloat64(0)));
+      return (
+        8,
+        DynStructDouble(data.buffer.asByteData().getFloat64(0, Endian.little))
+      );
     } else if (field.type == "string") {
-      int length = data.buffer.asByteData().getInt32(0);
+      int length = data.buffer.asByteData().getInt32(0, Endian.little);
       return (
         length + 4,
         DynStructString(String.fromCharCodes(data.sublist(4, 4 + length)))

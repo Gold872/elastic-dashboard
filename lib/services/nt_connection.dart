@@ -171,9 +171,10 @@ class NTConnection {
     _ntClient.setServerBaseAddreess(ipAddress);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
-    NT4SubscriptionOptions subscriptionOptions =
-        NT4SubscriptionOptions(periodicRateSeconds: period);
+  NT4Subscription subscribe(String topic,
+      [double period = 0.1, NT4StructMeta? ntStructMeta]) {
+    NT4SubscriptionOptions subscriptionOptions = NT4SubscriptionOptions(
+        periodicRateSeconds: period, structMeta: ntStructMeta);
 
     int hashCode = Object.hash(topic, subscriptionOptions);
 

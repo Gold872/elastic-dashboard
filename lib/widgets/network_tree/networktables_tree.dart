@@ -280,8 +280,6 @@ class TreeTopicEntry {
 
   static _getType(
       NT4Topic topic, List<String>? structPath, DynStructSchema? schema) {
-    print('$structPath, $schema');
-
     if (schema == null || structPath == null) {
       return topic.type;
     }
@@ -307,6 +305,17 @@ class TreeTopicEntry {
 
       currentSchema = field.substruct!;
     }
+  }
+
+  NT4StructMeta? getStructMeta() {
+    if (structPath == null || thisSchema == null) {
+      return null;
+    }
+
+    DynStructSchema currentSchema = thisSchema!.clone();
+    List<String> currentPath = List.of(structPath!);
+
+    return NT4StructMeta(path: currentPath, schema: currentSchema);
   }
 
   @override

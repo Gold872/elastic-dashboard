@@ -38,6 +38,7 @@ class CommandModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     bool showType = true,
     super.dataType,
     super.period,
@@ -47,6 +48,7 @@ class CommandModel extends MultiTopicNTWidgetModel {
   CommandModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showType = tryCast(jsonData['show_type']) ?? _showType;
