@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:ui';
 
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -153,14 +154,17 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void createRows(NT4Topic nt4Topic) {
-    String topic = nt4Topic.name;
+  void createRows(TreeTopicEntry entry) {
+    String topic = entry.topic.name;
     bool hasLeading = topic.startsWith('/');
     if (!hasLeading) {
       topic = '/$topic';
     }
 
-    List<String> rows = topic.substring(1).split('/');
+    List<String> rows = [
+      ...topic.substring(1).split('/'),
+      ...?entry.structPath
+    ];
     NetworkTableTreeRow? current;
     String currentTopic = '';
 
@@ -179,7 +183,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = current.createNewRow(
               topic: effectiveTopic,
               name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
+              entry: (lastElement) ? entry : null);
         }
       } else {
         if (root.hasRow(row)) {
@@ -188,25 +192,60 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           current = root.createNewRow(
               topic: effectiveTopic,
               name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
+              entry: (lastElement) ? entry : null);
         }
       }
     }
   }
 
+  List<TreeTopicEntry> parseStruct(
+    NT4Topic topic,
+    DynStructSchema schema,
+    List<String> structPath,
+  ) {
+    List<TreeTopicEntry> topics = [];
+
+    for (DynStructField field in schema.fields) {
+      topics.add(TreeTopicEntry(
+        topic: topic,
+        structPath: [...List.of(structPath), field.name],
+        thisSchema: schema,
+      ));
+
+      if (field.substruct != null) {
+        topics.addAll(parseStruct(
+          topic,
+          field.substruct!,
+          [...List.of(structPath), field.name],
+        ));
+      }
+    }
+
+    return topics;
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<NT4Topic> topics = [];
+    List<TreeTopicEntry> topics = [];
 
     for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
       }
 
-      topics.add(topic);
+      topics.add(TreeTopicEntry(topic: topic));
+
+      if (topic.type.startsWith("struct:")) {
+        DynStructSchema schema = DynStructSchema(
+          type: topic.type.split("[]")[0].split("?")[0],
+          schemas: widget.ntConnection.knownSchemas,
+        );
+
+        topics.addAll(parseStruct(topic, schema, []));
+      }
     }
 
-    for (NT4Topic topic in topics) {
+    for (TreeTopicEntry topic in topics) {
       createRows(topic);
     }
 
@@ -235,6 +274,20 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         );
       },
     );
+  }
+}
+
+class TreeTopicEntry {
+  final NT4Topic topic;
+  final List<String>? structPath;
+  final DynStructSchema? thisSchema;
+
+  TreeTopicEntry({required this.topic, this.structPath, this.thisSchema});
+
+  @override
+  String toString() {
+    String topicData = 'NT4Topic(name: ${topic.name}, type: ${topic.type})';
+    return 'TreeTopicEntry{topic: $topicData, structPath: $structPath, thisSchema: $thisSchema}';
   }
 }
 
@@ -377,8 +430,8 @@ class _TreeTileState extends State<TreeTile> {
                             )
                           : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
-                      trailing: (widget.entry.node.ntTopic != null)
-                          ? Text(widget.entry.node.ntTopic!.type,
+                      trailing: (widget.entry.node.entry != null)
+                          ? Text(widget.entry.node.entry!.topic.type,
                               style: trailingStyle)
                           : null,
                     ),
