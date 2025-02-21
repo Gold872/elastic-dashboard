@@ -235,9 +235,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
       topics.add(TreeTopicEntry(topic: topic));
 
-      if (topic.type.startsWith("struct:")) {
+      if (topic.type.startsWith("struct:") && !topic.type.endsWith("[]")) {
         DynStructSchema schema = DynStructSchema(
-          type: topic.type.split("[]")[0].split("?")[0],
+          type: topic.type.split("?")[0],
           schemas: widget.ntConnection.knownSchemas,
         );
 
