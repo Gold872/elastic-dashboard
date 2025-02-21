@@ -35,6 +35,7 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   set topic(value) => _topic = value;
 
+  // ignore: unnecessary_getters_setters
   double get period => _period;
 
   set period(double value) => _period = value;
@@ -163,7 +164,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
     return {
       ...super.toJson(),
@@ -174,7 +175,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
     switch (dataType) {
       case NT4TypeStr.kBool:
@@ -265,7 +266,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       if (ntTopic == null && ntConnection.isNT4Connected) {
         dataType = 'Unknown';
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
     }
 

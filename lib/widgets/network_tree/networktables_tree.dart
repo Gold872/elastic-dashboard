@@ -314,7 +314,7 @@ class TreeTopicEntry {
     DynStructSchema currentSchema = thisSchema!.clone();
     List<String> currentPath = List.of(structPath!);
 
-    return NT4StructMeta(path: currentPath, schema: currentSchema);
+    return NT4StructMeta(path: currentPath, schema: currentSchema, type: type);
   }
 
   @override
