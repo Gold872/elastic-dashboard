@@ -252,10 +252,11 @@ packages:
   elegant_notification:
     dependency: "direct main"
     description:
-      name: elegant_notification
-      sha256: "4439f045ba21c931316bc1dce731f59d59e0ec4167971639e040ad7e5d96ba9f"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: fix-stacked-notifications
+      resolved-ref: "07497f6ec7c38948504619a3d44e5af6ce15becb"
+      url: "https://github.com/Gold872/Elegant-Notification.git"
+    source: git
     version: "2.4.1"
   equatable:
     dependency: transitive

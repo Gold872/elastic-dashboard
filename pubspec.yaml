@@ -67,6 +67,12 @@ flutter:
     - assets/logos/
     - assets/fields/
 
+dependency_overrides:
+  elegant_notification:
+    git:
+      url: https://github.com/Gold872/Elegant-Notification.git
+      ref: fix-stacked-notifications
+
 import_sorter:
   comments: false
   ignored_files:
