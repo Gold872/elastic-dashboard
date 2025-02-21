@@ -59,6 +59,16 @@ class DynStructField {
       throw Exception("Unknown type: $type");
     }
   }
+
+  DynStructField clone() {
+    return DynStructField(
+      name: name,
+      type: type,
+      isArray: isArray,
+      isNullable: isNullable,
+      substruct: substruct?.clone(),
+    );
+  }
 }
 
 class DynStructSchema {
@@ -69,6 +79,11 @@ class DynStructSchema {
     required this.type,
     required Map<String, String> schemas,
   }) : fields = _parseSchema(type, schemas);
+
+  DynStructSchema.raw({
+    required this.type,
+    required this.fields,
+  });
 
   DynStructField? operator [](String key) {
     for (final field in fields) {
@@ -96,6 +111,18 @@ class DynStructSchema {
     }
 
     return fields;
+  }
+
+  @override
+  String toString() {
+    return fields.map((field) => "${field.name}: ${field.type}").join(", ");
+  }
+
+  DynStructSchema clone() {
+    return DynStructSchema.raw(
+      type: type,
+      fields: fields.map((field) => field.clone()).toList(),
+    );
   }
 }
 
