@@ -12,7 +12,7 @@ dependencies:
   decimal: ^2.3.3
   dot_cast: ^1.2.0
   dropdown_button2: ^2.3.9
-  elegant_notification: ^2.4.1
+  elegant_notification: ^2.4.2
   file_selector: ^1.0.1
   flex_seed_scheme: ^2.0.0
   flutter:
@@ -66,12 +66,6 @@ flutter:
   assets:
     - assets/logos/
     - assets/fields/
-
-dependency_overrides:
-  elegant_notification:
-    git:
-      url: https://github.com/Gold872/Elegant-Notification.git
-      ref: fix-stacked-notifications
 
 import_sorter:
   comments: false
