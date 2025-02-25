@@ -25,6 +25,7 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   final NTConnection ntConnection;
   final SharedPreferences preferences;
+  final NT4StructMeta? ntStructMeta;
 
   late double _period;
 
@@ -34,9 +35,10 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   set topic(value) => _topic = value;
 
-  get period => _period;
+  // ignore: unnecessary_getters_setters
+  double get period => _period;
 
-  set period(value) => _period = value;
+  set period(double value) => _period = value;
 
   bool _disposed = false;
   bool _forceDispose = false;
@@ -44,6 +46,7 @@ abstract class NTWidgetModel extends ChangeNotifier {
   NTWidgetModel({
     required this.ntConnection,
     required this.preferences,
+    required this.ntStructMeta,
     required String topic,
     double? period,
   }) : _topic = topic {
@@ -57,6 +60,7 @@ abstract class NTWidgetModel extends ChangeNotifier {
   NTWidgetModel.fromJson({
     required this.ntConnection,
     required this.preferences,
+    required this.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) {
     _topic = tryCast(jsonData['topic']) ?? '';
@@ -130,6 +134,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     this.dataType = 'Unknown',
     super.period,
   }) : super();
@@ -139,6 +144,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required String type,
     required super.topic,
+    required super.ntStructMeta,
     this.dataType = 'Unknown',
     super.period,
   })  : _typeOverride = type,
@@ -147,6 +153,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     dataType = tryCast(jsonData['data_type']) ?? dataType;
@@ -157,7 +164,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
     return {
       ...super.toJson(),
@@ -168,7 +175,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
     switch (dataType) {
       case NT4TypeStr.kBool:
@@ -218,7 +225,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(topic, period, ntStructMeta);
   }
 
   void createTopicIfNull() {
@@ -239,7 +246,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   void resetSubscription() {
     if (subscription == null) {
-      subscription = ntConnection.subscribe(topic, period);
+      subscription = ntConnection.subscribe(topic, period, ntStructMeta);
 
       ntTopic = null;
 
@@ -250,7 +257,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     bool resetDataType = subscription!.topic != topic;
 
     ntConnection.unSubscribe(subscription!);
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(topic, period, ntStructMeta);
 
     ntTopic = null;
 
@@ -259,7 +266,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       if (ntTopic == null && ntConnection.isNT4Connected) {
         dataType = 'Unknown';
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = super.ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
     }
 
@@ -277,6 +284,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     String dataType = '', // To allow for stubbing in NTWidgetBuilder
     super.period,
   }) : super();
@@ -285,6 +293,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
+    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override

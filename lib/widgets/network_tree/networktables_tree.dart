@@ -1,5 +1,7 @@
+import 'dart:collection';
 import 'dart:ui';
 
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -57,6 +59,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     rowName: '',
   );
   late final TreeController<NetworkTableTreeRow> treeController;
+  late final HashMap<String, void> topics = HashMap<String, void>();
 
   void onTopicAnnounced(NT4Topic topic) {
     treeController.roots = _filterChildren(root.children);
@@ -151,15 +154,18 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void createRows(NT4Topic nt4Topic) {
-    String topic = nt4Topic.name;
+  void createRows(TreeTopicEntry entry) {
+    String topic = entry.topic.name;
     bool hasLeading = topic.startsWith('/');
     if (!hasLeading) {
       topic = '/$topic';
     }
 
-    List<String> rows = topic.substring(1).split('/');
-    NetworkTableTreeRow? current;
+    List<String> rows = [
+      ...topic.substring(1).split('/'),
+      ...?entry.structPath
+    ];
+    NetworkTableTreeRow current = root;
     String currentTopic = '';
 
     for (String row in rows) {
@@ -168,43 +174,69 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       String effectiveTopic =
           hasLeading ? currentTopic : currentTopic.substring(1);
 
-      bool lastElement = currentTopic == topic;
+      bool lastElement = currentTopic == '/${rows.join('/')}';
 
-      if (current != null) {
-        if (current.hasRow(row)) {
-          current = current.getRow(row);
-        } else {
-          current = current.createNewRow(
-              topic: effectiveTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
-        }
+      if (current.hasRow(row)) {
+        current = current.getRow(row);
       } else {
-        if (root.hasRow(row)) {
-          current = root.getRow(row);
-        } else {
-          current = root.createNewRow(
-              topic: effectiveTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
-        }
+        current = current.createNewRow(
+            topic: effectiveTopic,
+            name: row,
+            entry: (lastElement) ? entry : null);
       }
     }
   }
 
+  List<TreeTopicEntry> parseStruct(
+    NT4Topic topic,
+    DynStructSchema schema,
+    DynStructSchema root,
+    List<String> structPath,
+  ) {
+    List<TreeTopicEntry> topics = [];
+
+    for (DynStructField field in schema.fields) {
+      topics.add(TreeTopicEntry(
+        topic: topic,
+        structPath: [...List.of(structPath), field.name],
+        thisSchema: root,
+      ));
+
+      if (field.substruct != null) {
+        topics.addAll(parseStruct(
+          topic,
+          field.substruct!,
+          root,
+          [...List.of(structPath), field.name],
+        ));
+      }
+    }
+
+    return topics;
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<NT4Topic> topics = [];
+    List<TreeTopicEntry> topics = [];
 
     for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
       }
 
-      topics.add(topic);
+      topics.add(TreeTopicEntry(topic: topic));
+
+      if (topic.type.startsWith("struct:") && !topic.type.endsWith("[]")) {
+        DynStructSchema schema = DynStructSchema(
+          type: topic.type.split("?")[0],
+          schemas: widget.ntConnection.knownSchemas,
+        );
+
+        topics.addAll(parseStruct(topic, schema, schema, []));
+      }
     }
 
-    for (NT4Topic topic in topics) {
+    for (TreeTopicEntry topic in topics) {
       createRows(topic);
     }
 
@@ -233,6 +265,62 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         );
       },
     );
+  }
+}
+
+class TreeTopicEntry {
+  final NT4Topic topic;
+  final List<String>? structPath;
+  final DynStructSchema? thisSchema;
+  final String type;
+
+  TreeTopicEntry({required this.topic, this.structPath, this.thisSchema})
+      : type = _getType(topic, structPath, thisSchema);
+
+  static _getType(
+      NT4Topic topic, List<String>? structPath, DynStructSchema? schema) {
+    if (schema == null || structPath == null) {
+      return topic.type;
+    }
+
+    DynStructSchema currentSchema = schema.clone();
+    List<String> currentPath = List.of(structPath.reversed);
+
+    while (currentPath.isNotEmpty) {
+      String currentField = currentPath.removeLast();
+      DynStructField? field = currentSchema[currentField];
+
+      if (field == null) {
+        return topic.type;
+      }
+
+      if (field.substruct == null) {
+        return field.type;
+      }
+
+      if (currentPath.isEmpty) {
+        return 'struct:${field.type}';
+      }
+
+      currentSchema = field.substruct!;
+    }
+  }
+
+  NT4StructMeta? getStructMeta() {
+    if (structPath == null || thisSchema == null) {
+      return null;
+    }
+
+    DynStructSchema currentSchema = thisSchema!.clone();
+    List<String> currentPath = List.of(structPath!);
+
+    return NT4StructMeta(path: currentPath, schema: currentSchema, type: type);
+  }
+
+  @override
+  String toString() {
+    String topicData = 'NT4Topic(name: ${topic.name}, type: ${topic.type})';
+    return 'TreeTopicEntry{topic: $topicData, structPath: $structPath, thisSchema: $thisSchema}';
   }
 }
 
@@ -318,7 +406,6 @@ class _TreeTileState extends State<TreeTile> {
                   return;
                 }
                 dragging = true;
-
                 draggingWidget = await widget.entry.node.toWidgetContainerModel(
                     listLayoutBuilder: widget.listLayoutBuilder);
                 if (!dragging) {
@@ -375,8 +462,8 @@ class _TreeTileState extends State<TreeTile> {
                             )
                           : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
-                      trailing: (widget.entry.node.ntTopic != null)
-                          ? Text(widget.entry.node.ntTopic!.type,
+                      trailing: (widget.entry.node.entry != null)
+                          ? Text(widget.entry.node.entry!.type,
                               style: trailingStyle)
                           : null,
                     ),
