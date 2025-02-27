@@ -203,7 +203,7 @@ Displays a boolean value in the form of a switch. This switch can be toggled in 
 
 ### Single Color View
 
-_This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](https://github.com/Gold872/elastic-dashboard/wiki/Custom-Widget-Examples)
+_This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](custom-widget-examples.md)
 
 This displays any color in a box. This can be very useful for seeing what a color sensor is detecting, or a color seen by a vision tracking camera.
 
@@ -298,9 +298,9 @@ Built from the WPILib DifferentialDrive ([Java](https://github.wpilib.org/allwpi
 
 ### SwerveDrive
 
-_This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](https://github.com/Gold872/elastic-dashboard/wiki/Custom-Widget-Examples)
+_This is a custom widget, for code examples on how to display this, see_ [_Custom Widget Examples_](custom-widget-examples.md)
 
-Displays the wheel rotation and velocity of a swerve drivetrain, along with the robot's rotation. There is also a similar widget that can display data from any robot program using the YAGSL library more info in the [Custom Widget Examples](https://github.com/Gold872/elastic-dashboard/wiki/Custom-Widget-Examples) page.
+Displays the wheel rotation and velocity of a swerve drivetrain, along with the robot's rotation. There is also a similar widget that can display data from any robot program using the YAGSL library more info in the [Custom Widget Examples](custom-widget-examples.md) page.
 
 ![image](https://github.com/Gold872/elastic-dashboard/assets/91761103/ccad02b1-665f-4531-aaa7-bc30d5d5a2f5)
 
