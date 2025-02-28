@@ -57,6 +57,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       '3-Axis Accelerometer',
       threeAxisAccelerometerJson,
     );
@@ -71,6 +72,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       '3AxisAccelerometer',
       threeAxisAccelerometerJson,
     );
@@ -85,6 +87,7 @@ void main() {
         ThreeAxisAccelerometerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Three Axis Accelerometer',
       period: 0.100,
     );
@@ -99,6 +102,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       '3-Axis Accelerometer',
       threeAxisAccelerometerJson,
     );

@@ -58,6 +58,7 @@ void main() {
     NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Single Color View',
       singleColorViewJson,
     );
@@ -78,6 +79,7 @@ void main() {
     NTWidgetModel singleColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Single Color View',
       topic: 'Test/String Value',
       dataType: 'string',
@@ -93,6 +95,7 @@ void main() {
     NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Single Color View',
       singleColorViewJson,
     );

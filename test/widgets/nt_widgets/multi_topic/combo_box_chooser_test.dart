@@ -69,6 +69,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ComboBox Chooser',
       comboBoxChooserJson,
     );
@@ -87,6 +88,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'String Chooser',
       comboBoxChooserJson,
     );
@@ -105,6 +107,7 @@ void main() {
     ComboBoxChooserModel comboBoxChooserModel = ComboBoxChooserModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Combo Box Chooser',
       period: 0.100,
       sortOptions: true,
@@ -119,6 +122,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ComboBox Chooser',
       comboBoxChooserJson,
     );
@@ -182,6 +186,7 @@ void main() {
     ComboBoxChooserModel comboBoxChooserModel = ComboBoxChooserModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Combo Box Chooser',
       period: 0.100,
       sortOptions: true,

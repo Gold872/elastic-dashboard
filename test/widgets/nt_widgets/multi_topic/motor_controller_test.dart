@@ -45,6 +45,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Motor Controller',
       motorControllerJson,
     );
@@ -57,6 +58,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Nidec Brushless',
       motorControllerJson,
     );
@@ -69,6 +71,7 @@ void main() {
     MotorControllerModel motorControllerModel = MotorControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Motor Controller',
       period: 0.100,
     );
@@ -82,6 +85,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Motor Controller',
       motorControllerJson,
     );

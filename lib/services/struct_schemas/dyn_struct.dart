@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter/foundation.dart';
+
+import 'package:dot_cast/dot_cast.dart';
 
 class DynStructField {
   final String name;

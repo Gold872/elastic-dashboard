@@ -1,7 +1,7 @@
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
 typedef SubscriptionIdentification = ({
