@@ -320,7 +320,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               stackedOptions: StackedOptions(
                 key: 'robot_notification',
                 type: StackedType.above,
-                itemOffset: const Offset(0, 5),
               ),
             );
             if (mounted) widget.show(context);
