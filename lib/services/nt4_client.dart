@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';

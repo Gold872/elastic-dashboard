@@ -77,6 +77,7 @@ void main() {
     BasicSwerveModel swerveModel = BasicSwerveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Basic Swerve Drive',
       period: 0.100,
       rotationUnit: 'Radians',
@@ -119,6 +120,7 @@ void main() {
     BasicSwerveModel swerveModel = BasicSwerveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Basic Swerve Drive',
       period: 0.100,
       rotationUnit: 'Radians',

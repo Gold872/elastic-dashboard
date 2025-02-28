@@ -76,6 +76,7 @@ void main() {
     RobotPreferencesModel preferencesModel = RobotPreferencesModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Preferences',
       period: 0.100,
     );

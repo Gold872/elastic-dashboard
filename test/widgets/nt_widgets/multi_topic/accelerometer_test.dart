@@ -60,6 +60,7 @@ void main() {
     AccelerometerModel accelerometerModel = AccelerometerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Test Accelerometer',
       period: 0.100,
     );

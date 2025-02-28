@@ -62,6 +62,7 @@ void main() {
     SubsystemModel subsystemModel = SubsystemModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Subsystem',
       period: 0.100,
     );

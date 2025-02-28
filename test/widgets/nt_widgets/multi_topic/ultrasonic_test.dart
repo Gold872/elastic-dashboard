@@ -57,6 +57,7 @@ void main() {
     UltrasonicModel ultrasonicModel = UltrasonicModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Ultrasonic',
       period: 0.100,
     );

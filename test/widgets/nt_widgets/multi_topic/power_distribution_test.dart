@@ -91,6 +91,7 @@ void main() {
     PowerDistributionModel powerDistributionModel = PowerDistributionModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Power Distribution',
       period: 0.100,
     );

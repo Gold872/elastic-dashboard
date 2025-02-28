@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';

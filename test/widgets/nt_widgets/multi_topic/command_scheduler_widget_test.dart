@@ -65,6 +65,7 @@ void main() {
     CommandSchedulerModel commandSchedulerModel = CommandSchedulerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Command Scheduler',
       period: 0.100,
     );

@@ -69,6 +69,7 @@ void main() {
     NetworkAlertsModel networkAlertsModel = NetworkAlertsModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Alerts',
       period: 0.100,
     );

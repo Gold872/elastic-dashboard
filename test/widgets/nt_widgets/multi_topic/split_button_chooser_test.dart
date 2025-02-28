@@ -78,6 +78,7 @@ void main() {
     SplitButtonChooserModel splitButtonChooserModel = SplitButtonChooserModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Split Button Chooser',
       period: 0.100,
     );
