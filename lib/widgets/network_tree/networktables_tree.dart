@@ -163,7 +163,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     List<String> rows = [
       ...topic.substring(1).split('/'),
-      ...?entry.structPath
+      ...?entry.meta?.path,
     ];
     NetworkTableTreeRow current = root;
     String currentTopic = '';
@@ -197,11 +197,11 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     for (DynStructField field in schema.fields) {
       topics.add(TreeTopicEntry(
-        topic: topic,
-        structPath: [...List.of(structPath), field.name],
-        thisSchema: root,
-      ));
-
+          topic: topic,
+          meta: NT4StructMeta(
+            path: [...List.of(structPath), field.name],
+            schema: root,
+          )));
       if (field.substruct != null) {
         topics.addAll(parseStruct(
           topic,
@@ -270,57 +270,18 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
 class TreeTopicEntry {
   final NT4Topic topic;
-  final List<String>? structPath;
-  final DynStructSchema? thisSchema;
-  final String type;
+  final NT4StructMeta? meta;
 
-  TreeTopicEntry({required this.topic, this.structPath, this.thisSchema})
-      : type = _getType(topic, structPath, thisSchema);
-
-  static _getType(
-      NT4Topic topic, List<String>? structPath, DynStructSchema? schema) {
-    if (schema == null || structPath == null) {
-      return topic.type;
-    }
-
-    DynStructSchema currentSchema = schema.clone();
-    List<String> currentPath = List.of(structPath.reversed);
-
-    while (currentPath.isNotEmpty) {
-      String currentField = currentPath.removeLast();
-      DynStructField? field = currentSchema[currentField];
-
-      if (field == null) {
-        return topic.type;
-      }
-
-      if (field.substruct == null) {
-        return field.type;
-      }
-
-      if (currentPath.isEmpty) {
-        return 'struct:${field.type}';
-      }
-
-      currentSchema = field.substruct!;
-    }
-  }
-
-  NT4StructMeta? getStructMeta() {
-    if (structPath == null || thisSchema == null) {
-      return null;
-    }
-
-    DynStructSchema currentSchema = thisSchema!.clone();
-    List<String> currentPath = List.of(structPath!);
-
-    return NT4StructMeta(path: currentPath, schema: currentSchema, type: type);
-  }
+  TreeTopicEntry({required this.topic, this.meta});
 
   @override
   String toString() {
     String topicData = 'NT4Topic(name: ${topic.name}, type: ${topic.type})';
-    return 'TreeTopicEntry{topic: $topicData, structPath: $structPath, thisSchema: $thisSchema}';
+    return 'TreeTopicEntry{topic: $topicData, meta: $meta}';
+  }
+
+  String type() {
+    return meta?.type ?? topic.type;
   }
 }
 
@@ -463,7 +424,7 @@ class _TreeTileState extends State<TreeTile> {
                           : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
                       trailing: (widget.entry.node.entry != null)
-                          ? Text(widget.entry.node.entry!.type,
+                          ? Text(widget.entry.node.entry!.type(),
                               style: trailingStyle)
                           : null,
                     ),

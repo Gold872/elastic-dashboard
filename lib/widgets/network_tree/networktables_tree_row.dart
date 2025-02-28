@@ -118,7 +118,7 @@ class NetworkTableTreeRow {
       NTConnection ntConnection,
       SharedPreferences preferences,
       TreeTopicEntry entry) {
-    switch (entry.type) {
+    switch (entry.type()) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
       case NT4TypeStr.kFloat32:
@@ -132,16 +132,16 @@ class NetworkTableTreeRow {
           ntConnection: ntConnection,
           preferences: preferences,
           topic: entry.topic.name,
-          dataType: entry.type,
-          ntStructMeta: entry.getStructMeta(),
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
           ntConnection: ntConnection,
           preferences: preferences,
           topic: entry.topic.name,
-          dataType: entry.type,
-          ntStructMeta: entry.getStructMeta(),
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
     }
     return null;
@@ -166,7 +166,7 @@ class NetworkTableTreeRow {
             ntConnection: ntConnection,
             preferences: preferences,
             topic: topic,
-            ntStructMeta: entry?.getStructMeta());
+            ntStructMeta: entry?.meta);
       }
 
       if (hasRows([
@@ -182,7 +182,7 @@ class NetworkTableTreeRow {
             ntConnection: ntConnection,
             preferences: preferences,
             topic: topic,
-            ntStructMeta: entry?.getStructMeta());
+            ntStructMeta: entry?.meta);
       }
 
       return null;
@@ -206,7 +206,7 @@ class NetworkTableTreeRow {
     return NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
-      entry?.getStructMeta(),
+      entry?.meta,
       type,
       topic,
     );
