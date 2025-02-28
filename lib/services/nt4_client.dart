@@ -181,8 +181,43 @@ class NT4StructMeta {
   NT4StructMeta({
     required this.path,
     required this.schema,
+  }) : type = _getType(path, schema);
+
+  NT4StructMeta.raw({
+    required this.path,
+    required this.schema,
     required this.type,
   });
+
+  static String _getType(List<String> structPath, DynStructSchema schema) {
+    if (structPath.isEmpty) {
+      return NT4TypeStr.kStructSchema;
+    }
+
+    DynStructSchema currentSchema = schema;
+    List<String> pathStack = List.from(structPath.reversed);
+
+    while (pathStack.isNotEmpty) {
+      String fieldName = pathStack.removeLast();
+      DynStructField? field = currentSchema[fieldName];
+
+      if (field == null) {
+        return NT4TypeStr.kStructSchema;
+      }
+
+      if (field.substruct == null) {
+        return field.type;
+      }
+
+      if (pathStack.isEmpty) {
+        return 'struct:${field.type}';
+      }
+
+      currentSchema = field.substruct!;
+    }
+
+    return NT4TypeStr.kStructSchema;
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -193,7 +228,7 @@ class NT4StructMeta {
   }
 
   static NT4StructMeta fromJson(Map<String, dynamic> json) {
-    return NT4StructMeta(
+    return NT4StructMeta.raw(
       path: tryCast<List<dynamic>>(json['path'])!
           .map((el) => tryCast<String>(el)!)
           .toList(),
