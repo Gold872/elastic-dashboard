@@ -45,6 +45,7 @@ void main() {
     NTWidgetModel toggleButtonModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Toggle Button',
       toggleButtonJson,
     );
@@ -67,6 +68,7 @@ void main() {
     NTWidgetModel toggleButtonModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Toggle Button',
       topic: 'Test/Boolean Value',
       dataType: 'boolean',
@@ -82,6 +84,7 @@ void main() {
     NTWidgetModel toggleButtonModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Toggle Button',
       toggleButtonJson,
     );

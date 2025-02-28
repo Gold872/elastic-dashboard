@@ -48,6 +48,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Encoder',
       encoderWidgetJson,
     );
@@ -60,6 +61,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Quadrature Encoder',
       encoderWidgetJson,
     );
@@ -72,6 +74,7 @@ void main() {
     EncoderModel encoderWidgetModel = EncoderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Encoder',
       period: 0.100,
     );
@@ -85,6 +88,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Encoder',
       encoderWidgetJson,
     );

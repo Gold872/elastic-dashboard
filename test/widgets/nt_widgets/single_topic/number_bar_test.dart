@@ -56,6 +56,7 @@ void main() {
     NTWidgetModel numberBarModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Number Bar',
       numberBarJson,
     );
@@ -91,6 +92,7 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -110,6 +112,7 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -148,6 +151,7 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -199,6 +203,7 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
       dataType: 'int',
       period: 0.100,
@@ -233,6 +238,7 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -270,6 +276,7 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,

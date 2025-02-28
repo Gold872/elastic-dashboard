@@ -49,6 +49,7 @@ void main() {
     NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Gyro',
       gyroJson,
     );
@@ -67,6 +68,7 @@ void main() {
     GyroModel gyroModel = GyroModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Gyro',
       period: 0.100,
       counterClockwisePositive: true,
@@ -81,6 +83,7 @@ void main() {
     NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Gyro',
       gyroJson,
     );
@@ -108,6 +111,7 @@ void main() {
     GyroModel gyroModel = GyroModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Gyro',
       period: 0.100,
       counterClockwisePositive: true,

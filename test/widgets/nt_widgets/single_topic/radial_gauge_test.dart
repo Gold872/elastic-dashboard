@@ -58,6 +58,7 @@ void main() {
     NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Radial Gauge',
       radialGaugeJson,
     );
@@ -96,6 +97,7 @@ void main() {
     NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Simple Dial',
       radialGaugeJson,
     );
@@ -133,6 +135,7 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -155,6 +158,7 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -205,6 +209,7 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
       dataType: 'int',
       period: 0.100,
@@ -243,6 +248,7 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -280,6 +286,7 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,

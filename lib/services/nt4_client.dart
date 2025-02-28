@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
@@ -15,6 +14,7 @@ import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 
 class NT4TypeStr {
   static final Map<String, int> typeMap = {

@@ -54,6 +54,7 @@ void main() {
     NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Graph',
       graphJson,
     );
@@ -89,6 +90,7 @@ void main() {
     GraphModel graphModel = GraphModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -107,6 +109,7 @@ void main() {
     NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Graph',
       graphJson,
     );
@@ -131,6 +134,7 @@ void main() {
     GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Graph',
       graphJson,
     ) as GraphModel;

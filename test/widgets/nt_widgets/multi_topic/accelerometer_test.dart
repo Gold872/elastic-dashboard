@@ -44,6 +44,7 @@ void main() {
     NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Accelerometer',
       accelerometerJson,
     );
@@ -59,6 +60,7 @@ void main() {
     AccelerometerModel accelerometerModel = AccelerometerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Test Accelerometer',
       period: 0.100,
     );
@@ -72,6 +74,7 @@ void main() {
     NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Accelerometer',
       accelerometerJson,
     );

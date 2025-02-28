@@ -56,6 +56,7 @@ void main() {
     NTWidgetModel networkAlertsModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Alerts',
       networkAlertsJson,
     );
@@ -68,6 +69,7 @@ void main() {
     NetworkAlertsModel networkAlertsModel = NetworkAlertsModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Alerts',
       period: 0.100,
     );
@@ -81,6 +83,7 @@ void main() {
     NTWidgetModel networkAlertsModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Alerts',
       networkAlertsJson,
     );
