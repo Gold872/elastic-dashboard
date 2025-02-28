@@ -164,7 +164,7 @@ class NetworkTableTreeRow {
             ntConnection: ntConnection,
             preferences: preferences,
             topic: topic,
-            ntStructMeta: entry?.getStructMeta());
+            ntStructMeta: entry?.meta);
       }
 
       if (hasRows([
@@ -180,7 +180,7 @@ class NetworkTableTreeRow {
             ntConnection: ntConnection,
             preferences: preferences,
             topic: topic,
-            ntStructMeta: entry?.getStructMeta());
+            ntStructMeta: entry?.meta);
       }
 
       return null;
