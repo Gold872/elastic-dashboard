@@ -64,6 +64,7 @@ void main() {
     NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Multi Color View',
       multiColorViewJson,
     );
@@ -83,6 +84,7 @@ void main() {
     NTWidgetModel multiColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Multi Color View',
       topic: 'Test/String Array',
       dataType: 'string[]',
@@ -99,6 +101,7 @@ void main() {
     NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Multi Color View',
       multiColorViewJson,
     );
@@ -147,6 +150,7 @@ void main() {
         },
       ),
       preferences,
+      null,
       'Multi Color View',
       multiColorViewJson,
     );
@@ -189,6 +193,7 @@ void main() {
         },
       ),
       preferences,
+      null,
       'Multi Color View',
       multiColorViewJson,
     );

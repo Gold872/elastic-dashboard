@@ -44,6 +44,7 @@ void main() {
     NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Ultrasonic',
       ultrasonicJson,
     );
@@ -56,6 +57,7 @@ void main() {
     UltrasonicModel ultrasonicModel = UltrasonicModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Ultrasonic',
       period: 0.100,
     );
@@ -69,6 +71,7 @@ void main() {
     NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Ultrasonic',
       ultrasonicJson,
     );
