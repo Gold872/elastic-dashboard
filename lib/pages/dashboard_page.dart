@@ -341,10 +341,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
+  Map<String, dynamic> jsonDecodePath(String? path) {
+    if (path == null) {
+      return {};
+    }
+
+    File file = File(path);
+    return jsonDecode(file.readAsStringSync());
+  }
+
   @override
   void onWindowClose() async {
     Map<String, dynamic> savedJson =
-        jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
+        jsonDecodePath(preferences.getString(PrefKeys.layoutPath));
     Map<String, dynamic> currentJson = _toJson();
 
     bool showConfirmation = !_mapEquals(savedJson, currentJson);
@@ -386,30 +395,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       'grid_size': _gridSize,
       'tabs': gridData,
     };
-  }
-
-  Future<void> _saveLayout() async {
-    Map<String, dynamic> jsonData = _toJson();
-
-    bool successful =
-        await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
-    await _saveWindowPosition();
-
-    if (successful) {
-      logger.info('Layout saved successfully');
-      _showInfoNotification(
-        title: 'Saved',
-        message: 'Layout saved successfully',
-        width: 300,
-      );
-    } else {
-      logger.error('Could not save layout');
-      _showInfoNotification(
-        title: 'Error While Saving Layout',
-        message: 'Failed to save layout, please try again',
-        width: 300,
-      );
-    }
   }
 
   Future<void> _saveWindowPosition() async {
@@ -516,9 +501,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
-  void _exportLayout({bool last = false}) async {
+  Future<void> _exportLayout({bool last = false}) async {
     FileSaveLocation? saveLocation;
-    String? prvLocation = preferences.getString("exportLocation");
+    String? prvLocation = preferences.getString(PrefKeys.layoutPath);
 
     if (last && prvLocation != null) {
       saveLocation = FileSaveLocation(prvLocation);
@@ -544,7 +529,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         return;
       }
 
-      await preferences.setString("exportLocation", saveLocation.path);
+      await preferences.setString(PrefKeys.layoutPath, saveLocation.path);
     }
 
     logger.info('Exporting layout');
@@ -566,7 +551,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       message: 'Successfully exported layout to\n${saveLocation.path}',
       width: 500,
     );
-    await _saveLayout();
   }
 
   void _importLayout() async {
@@ -606,29 +590,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
-    Map<String, dynamic> jsonData;
     try {
-      jsonData = jsonDecode(jsonString);
+      jsonDecode(jsonString); // check valid
     } catch (e) {
       _showJsonLoadingError(e.toString());
       return;
     }
 
-    await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    await preferences.setString(PrefKeys.layoutPath, file.path);
 
     setState(() => _loadLayoutFromJsonData(jsonString));
   }
 
   void _loadLayout() {
-    String? jsonString = preferences.getString(PrefKeys.layout);
+    String? path = preferences.getString(PrefKeys.layoutPath);
 
-    if (jsonString == null) {
+    if (path == null) {
       _createDefaultTabs();
       return;
     }
 
+    File file = File(path);
+
     setState(() {
-      _loadLayoutFromJsonData(jsonString);
+      _loadLayoutFromJsonData(file.readAsStringSync());
     });
   }
 
@@ -1167,7 +1152,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         LogicalKeyboardKey.keyS,
         modifiers: [KeyModifier.control],
       ),
-      callback: _saveLayout,
+      callback: () => _exportLayout(last: true),
     );
     // Export (Ctrl + Shift + S)
     hotKeyManager.register(
@@ -1766,7 +1751,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         actions: [
           TextButton(
             onPressed: () async {
-              await _saveLayout();
+              await _exportLayout();
 
               Future.delayed(
                 const Duration(milliseconds: 250),
@@ -1928,19 +1913,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               ],
             ),
           ),
-          // Save
-          MenuItemButton(
-            style: menuButtonStyle,
-            onPressed: _saveLayout,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.save_outlined),
-                SizedBox(width: 8),
-                Text('Save without Exporting'),
-              ],
-            ),
-          ),
           // Export layout
           MenuItemButton(
             style: menuButtonStyle,
@@ -1954,7 +1926,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               children: [
                 Icon(Icons.save_as_outlined),
                 SizedBox(width: 8),
-                Text('Export To Last'),
+                Text('Save'),
               ],
             ),
           ),
@@ -1972,7 +1944,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               children: [
                 Icon(Icons.save_as_outlined),
                 SizedBox(width: 8),
-                Text('Export'),
+                Text('Save As'),
               ],
             ),
           ),
