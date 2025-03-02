@@ -576,7 +576,7 @@ class ShuffleboardNTListener {
     for (String row in rows) {
       currentTopic += '/$row';
 
-      bool lastElement = currentTopic == topic;
+      // bool lastElement = currentTopic == topic;
 
       if (current != null) {
         if (current.hasRow(row)) {

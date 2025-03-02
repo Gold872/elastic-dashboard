@@ -516,30 +516,39 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
-  void _exportLayout() async {
-    const XTypeGroup jsonTypeGroup = XTypeGroup(
-      label: 'JSON (JavaScript Object Notation)',
-      extensions: ['.json'],
-      mimeTypes: ['application/json'],
-      uniformTypeIdentifiers: ['public.json'],
-    );
+  void _exportLayout({bool last = false}) async {
+    FileSaveLocation? saveLocation;
+    String? prvLocation = preferences.getString("exportLocation");
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    if (last && prvLocation != null) {
+      saveLocation = FileSaveLocation(prvLocation);
+    } else {
+      const XTypeGroup jsonTypeGroup = XTypeGroup(
+        label: 'JSON (JavaScript Object Notation)',
+        extensions: ['.json'],
+        mimeTypes: ['application/json'],
+        uniformTypeIdentifiers: ['public.json'],
+      );
+
+      const XTypeGroup anyTypeGroup = XTypeGroup(
+        label: 'All Files',
+      );
+
+      saveLocation = await getSaveLocation(
+        suggestedName: 'elastic-layout.json',
+        acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
+      );
+
+      if (saveLocation == null) {
+        logger.info('Ignoring layout export, no location was selected');
+        return;
+      }
+
+      await preferences.setString("exportLocation", saveLocation.path);
+    }
 
     logger.info('Exporting layout');
-    final FileSaveLocation? saveLocation = await getSaveLocation(
-      suggestedName: 'elastic-layout.json',
-      acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
-    );
-
     hotKeyManager.resetKeysPressed();
-
-    if (saveLocation == null) {
-      logger.info('Ignoring layout export, no location was selected');
-      return;
-    }
 
     Map<String, dynamic> jsonData = _toJson();
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
@@ -557,6 +566,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       message: 'Successfully exported layout to\n${saveLocation.path}',
       width: 500,
     );
+    await _saveLayout();
   }
 
   void _importLayout() async {
@@ -1922,14 +1932,29 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           MenuItemButton(
             style: menuButtonStyle,
             onPressed: _saveLayout,
-            shortcut:
-                const SingleActivator(LogicalKeyboardKey.keyS, control: true),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.save_outlined),
                 SizedBox(width: 8),
-                Text('Save'),
+                Text('Save without Exporting'),
+              ],
+            ),
+          ),
+          // Export layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: () => _exportLayout(last: true),
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyS,
+              control: true,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save_as_outlined),
+                SizedBox(width: 8),
+                Text('Export To Last'),
               ],
             ),
           ),
@@ -1947,7 +1972,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               children: [
                 Icon(Icons.save_as_outlined),
                 SizedBox(width: 8),
-                Text('Save As'),
+                Text('Export'),
               ],
             ),
           ),
