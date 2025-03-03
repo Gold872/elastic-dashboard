@@ -545,10 +545,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     String jsonString = encoder.convert(jsonData);
 
-    final Uint8List fileData = Uint8List.fromList(jsonString.codeUnits);
+    final Uint8List fileData = utf8.encode(jsonString);
 
-    final XFile jsonFile = XFile.fromData(fileData,
-        mimeType: 'application/json', name: 'elastic-layout.json');
+    final XFile jsonFile = XFile.fromData(
+      fileData,
+      mimeType: 'application/json',
+      name: 'elastic-layout.json',
+    );
 
     logger.info('Saving layout data to ${saveLocation.path}');
     await jsonFile.saveTo(saveLocation.path);
