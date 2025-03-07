@@ -165,6 +165,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       },
     );
 
+    if (widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
+        Defaults.autoResizeToDS) {
+      widget.ntConnection.startDBModeServer();
+    }
+
     widget.ntConnection.addConnectedListener(() {
       setState(() {
         for (TabGridModel grid in _tabData.map((e) => e.tabGrid)) {
@@ -1579,15 +1584,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           });
         },
         onResizeToDSChanged: (value) async {
+          await preferences.setBool(PrefKeys.autoResizeToDS, value);
+
           setState(() {
-            if (value && widget.ntConnection.dsClient.driverStationDocked) {
-              _onDriverStationDocked();
+            if (value) {
+              widget.ntConnection.startDBModeServer();
             } else {
+              widget.ntConnection.stopDBModeServer();
               _onDriverStationUndocked();
             }
           });
-
-          await preferences.setBool(PrefKeys.autoResizeToDS, value);
         },
         onRememberWindowPositionChanged: (value) async {
           await preferences.setBool(PrefKeys.rememberWindowPosition, value);
@@ -1726,7 +1732,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     Size newScreenSize = Size(screenSize.width, screenSize.height - 200);
 
     await windowManager.setSize(newScreenSize);
-
     await windowManager.setAlignment(Alignment.topCenter);
 
     Settings.isWindowMaximizable = false;
