@@ -31,6 +31,7 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
+import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -135,7 +136,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     super.initState();
 
     windowManager.addListener(this);
-    if (!kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
