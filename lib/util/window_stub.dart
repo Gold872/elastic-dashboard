@@ -69,7 +69,7 @@ abstract mixin class WindowListener {
 }
 
 class WindowManager {
-  WindowManager._() {}
+  WindowManager._();
 
   /// The shared instance of [WindowManager].
   static final WindowManager instance = WindowManager._();
@@ -104,9 +104,7 @@ class WindowManager {
   Future<void> close() async {}
 
   /// Check if is intercepting the native close signal.
-  Future<bool> isPreventClose() async {
-    return await true;
-  }
+  Future<bool> isPreventClose() async => true;
 
   /// Set if intercept the native close signal. May useful when combine with the onclose event listener.
   /// This will also prevent the manually triggered close event.
@@ -123,9 +121,7 @@ class WindowManager {
   /// Returns `bool` - Whether window is focused.
   ///
   /// @platforms macos,windows
-  Future<bool> isFocused() async {
-    return await true;
-  }
+  Future<bool> isFocused() async => true;
 
   /// Shows and gives focus to the window.
   Future<void> show({bool inactive = false}) async {}
@@ -134,14 +130,10 @@ class WindowManager {
   Future<void> hide() async {}
 
   /// Returns `bool` - Whether the window is visible to the user.
-  Future<bool> isVisible() async {
-    return await true;
-  }
+  Future<bool> isVisible() async => true;
 
   /// Returns `bool` - Whether the window is maximized.
-  Future<bool> isMaximized() async {
-    return await true;
-  }
+  Future<bool> isMaximized() async => true;
 
   /// Maximizes the window. `vertically` simulates aero snap, only works on Windows
   Future<void> maximize({bool vertically = false}) async {}
@@ -150,9 +142,7 @@ class WindowManager {
   Future<void> unmaximize() async {}
 
   /// Returns `bool` - Whether the window is minimized.
-  Future<bool> isMinimized() async {
-    return await true;
-  }
+  Future<bool> isMinimized() async => true;
 
   /// Minimizes the window. On some platforms the minimized window will be shown in the Dock.
   Future<void> minimize() async {}
@@ -306,9 +296,7 @@ class WindowManager {
   Future<void> setAlwaysOnBottom(bool isAlwaysOnBottom) async {}
 
   /// Returns `String` - The title of the native window.
-  Future<String> getTitle() async {
-    return await "";
-  }
+  Future<String> getTitle() async => "";
 
   /// Changes the title of native window to title.
   Future<void> setTitle(String title) async {}
