@@ -35,9 +35,6 @@ class ScreenRetriever {
   /// The shared instance of [ScreenRetriever].
   static final ScreenRetriever instance = ScreenRetriever._();
 
-  /// Handle screen events from the platform side.
-  void _handleScreenEvent(event) {}
-
   Future<Offset> getCursorScreenPoint() async {
     return const Offset(0, 0);
   }
