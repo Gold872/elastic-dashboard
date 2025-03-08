@@ -205,7 +205,9 @@ class WindowManager {
   }) async {}
 
   /// Returns `Rect` - The bounds of the window as Object.
-  // Future<Rect> getBounds() async {}
+  Future<Rect> getBounds() async {
+    return Rect.fromLTWH(0, 0, 0, 0);
+  }
 
   /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(
