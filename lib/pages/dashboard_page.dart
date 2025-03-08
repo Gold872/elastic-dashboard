@@ -135,7 +135,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     super.initState();
 
     windowManager.addListener(this);
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
