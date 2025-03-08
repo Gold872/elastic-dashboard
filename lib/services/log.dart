@@ -10,7 +10,7 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 
 import 'package:path_provider/path_provider.dart'
-    if (kIsWeb) 'package:elastic_dashboard/util/path_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/path_stub.dart';
 
 class Log {
   static final DateFormat _dateFormat = DateFormat('HH:mm:ss.S');
