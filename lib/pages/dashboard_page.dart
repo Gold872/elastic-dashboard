@@ -46,9 +46,9 @@ import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
 
 import 'package:screen_retriever/screen_retriever.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/screen_stub.dart';
+    if (kIsWeb) 'package:elastic_dashboard/util/screen_stub.dart';
 import 'package:window_manager/window_manager.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
+    if (kIsWeb) 'package:elastic_dashboard/util/window_stub.dart';
 
 enum LayoutDownloadMode {
   overwrite(
@@ -136,7 +136,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     super.initState();
 
     windowManager.addListener(this);
-    if (isUnitTest) {
+    if (!isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
