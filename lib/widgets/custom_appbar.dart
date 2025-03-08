@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:titlebar_buttons/titlebar_buttons.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+
+import 'package:window_manager/window_manager.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
 
 class CustomAppBar extends AppBar {
   final String titleText;
@@ -33,59 +36,54 @@ class CustomAppBar extends AppBar {
           flexibleSpace: const _WindowDragArea(),
           notificationPredicate: (_) => false,
           actions: [
-            InkWell(
-              canRequestFocus: false,
-              onTap: () async => await windowManager.minimize(),
-              child: const AbsorbPointer(
-                child: DecoratedMinimizeButton(
-                  width: windowButtonSize,
-                  height: windowButtonSize,
-                  type: buttonType,
-                  onPressed: null,
+            if (!kIsWeb) ...[
+              InkWell(
+                canRequestFocus: false,
+                onTap: () async => {},
+                child: const AbsorbPointer(
+                  child: DecoratedMinimizeButton(
+                    width: windowButtonSize,
+                    height: windowButtonSize,
+                    type: buttonType,
+                    onPressed: null,
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              canRequestFocus: false,
-              onTap: () async {
-                if (!Settings.isWindowMaximizable) {
-                  return;
-                }
-
-                if (await windowManager.isMaximized()) {
-                  windowManager.unmaximize();
-                } else {
-                  windowManager.maximize();
-                }
-              },
-              child: const AbsorbPointer(
-                child: DecoratedMaximizeButton(
-                  width: windowButtonSize,
-                  height: windowButtonSize,
-                  type: buttonType,
-                  onPressed: null,
+              InkWell(
+                canRequestFocus: false,
+                onTap: () async {
+                  if (!Settings.isWindowMaximizable) {
+                    return;
+                  }
+                },
+                child: const AbsorbPointer(
+                  child: DecoratedMaximizeButton(
+                    width: windowButtonSize,
+                    height: windowButtonSize,
+                    type: buttonType,
+                    onPressed: null,
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              canRequestFocus: false,
-              hoverColor: Colors.red,
-              onTap: () async {
-                if (onWindowClose == null) {
-                  await windowManager.close();
-                } else {
-                  onWindowClose.call();
-                }
-              },
-              child: const AbsorbPointer(
-                child: DecoratedCloseButton(
-                  width: windowButtonSize,
-                  height: windowButtonSize,
-                  type: buttonType,
-                  onPressed: null,
+              InkWell(
+                canRequestFocus: false,
+                hoverColor: Colors.red,
+                onTap: () async {
+                  if (onWindowClose == null) {
+                  } else {
+                    onWindowClose.call();
+                  }
+                },
+                child: const AbsorbPointer(
+                  child: DecoratedCloseButton(
+                    width: windowButtonSize,
+                    height: windowButtonSize,
+                    type: buttonType,
+                    onPressed: null,
+                  ),
                 ),
               ),
-            ),
+            ]
           ],
           title: _WindowDragArea(
             child: LayoutBuilder(

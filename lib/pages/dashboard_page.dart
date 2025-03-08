@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -16,10 +17,8 @@ import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
-import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/elastic_layout_downloader.dart';
@@ -32,6 +31,7 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
+import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -44,6 +44,11 @@ import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 import '../widgets/draggable_containers/models/layout_container_model.dart';
+
+import 'package:screen_retriever/screen_retriever.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/screen_stub.dart';
+import 'package:window_manager/window_manager.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
 
 enum LayoutDownloadMode {
   overwrite(
@@ -131,7 +136,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     super.initState();
 
     windowManager.addListener(this);
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
