@@ -31,6 +31,7 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
+import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
@@ -525,7 +526,7 @@ class _DashboardPageState extends State<DashboardPage>
     model.addListener(onModelUpdate);
 
     windowManager.addListener(this);
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
