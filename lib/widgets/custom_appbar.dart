@@ -9,7 +9,6 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:window_manager/window_manager.dart'
     if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
 
-
 class CustomAppBar extends AppBar {
   final String titleText;
   final Color? appBarColor;
