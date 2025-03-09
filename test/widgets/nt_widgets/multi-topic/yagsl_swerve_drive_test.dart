@@ -39,6 +39,7 @@ void main() {
     NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'YAGSL Swerve Drive',
       yagslSwerveJson,
     );
@@ -59,6 +60,7 @@ void main() {
     YAGSLSwerveDriveModel yagslSwerveModel = YAGSLSwerveDriveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/YAGSL Swerve Drive',
       period: 0.100,
       showRobotRotation: true,
@@ -75,6 +77,7 @@ void main() {
     NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'YAGSL Swerve Drive',
       yagslSwerveJson,
     );
@@ -101,6 +104,7 @@ void main() {
     YAGSLSwerveDriveModel yagslSwerveModel = YAGSLSwerveDriveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/YAGSL Swerve Drive',
       period: 0.100,
       showRobotRotation: true,

@@ -44,6 +44,7 @@ void main() {
     NTWidgetModel relayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Relay',
       relayJson,
     );
@@ -56,6 +57,7 @@ void main() {
     RelayModel relayModel = RelayModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Relay',
       period: 0.100,
     );
@@ -69,6 +71,7 @@ void main() {
     NTWidgetModel relayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Relay',
       relayJson,
     );

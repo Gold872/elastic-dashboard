@@ -61,6 +61,7 @@ void main() {
     NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     );
@@ -94,6 +95,7 @@ void main() {
     MatchTimeModel matchTimeModel = MatchTimeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -111,6 +113,7 @@ void main() {
     NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     );
@@ -166,6 +169,7 @@ void main() {
     MatchTimeModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     ) as MatchTimeModel;

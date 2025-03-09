@@ -576,25 +576,21 @@ class ShuffleboardNTListener {
     for (String row in rows) {
       currentTopic += '/$row';
 
-      bool lastElement = currentTopic == topic;
+      // bool lastElement = currentTopic == topic;
 
       if (current != null) {
         if (current.hasRow(row)) {
           current = current.getRow(row);
         } else {
-          current = current.createNewRow(
-              topic: currentTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
+          current =
+              current.createNewRow(topic: currentTopic, name: row, entry: null);
         }
       } else {
         if (shuffleboardTreeRoot.hasRow(row)) {
           current = shuffleboardTreeRoot.getRow(row);
         } else {
           current = shuffleboardTreeRoot.createNewRow(
-              topic: currentTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
+              topic: currentTopic, name: row, entry: null);
         }
       }
     }

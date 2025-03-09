@@ -57,6 +57,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Split Button Chooser',
       splitButtonChooserJson,
     );
@@ -69,6 +70,7 @@ void main() {
     SplitButtonChooserModel splitButtonChooserModel = SplitButtonChooserModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Split Button Chooser',
       period: 0.100,
     );
@@ -83,6 +85,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Split Button Chooser',
       splitButtonChooserJson,
     );

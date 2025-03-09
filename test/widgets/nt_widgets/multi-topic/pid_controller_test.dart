@@ -62,6 +62,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PIDController',
       pidControllerJson,
     );
@@ -74,6 +75,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PID Controller',
       pidControllerJson,
     );
@@ -86,6 +88,7 @@ void main() {
     PIDControllerModel pidControllerModel = PIDControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/PID Controller',
       period: 0.100,
     );
@@ -99,6 +102,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PIDController',
       pidControllerJson,
     );

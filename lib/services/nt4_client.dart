@@ -14,6 +14,7 @@ import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
 
 class NT4TypeStr {
   static final Map<String, int> typeMap = {
@@ -129,6 +130,16 @@ class NT4Subscription extends ValueNotifier<Object?> {
   void updateValue(Object? value, int timestamp) {
     logger.trace(
         'Updating value for subscription: $this - Value: $value, Time: $timestamp');
+
+    if (options.structMeta != null && value is List<int>) {
+      DynStructSchema schema = options.structMeta!.schema;
+      List<String> path = options.structMeta!.path;
+      Uint8List data = Uint8List.fromList(value);
+      DynStruct struct = DynStruct(schema: schema, data: data);
+      DynStructValue dynValue = struct.get(path)!;
+      value = dynValue.anyValue;
+    }
+
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
@@ -162,17 +173,84 @@ class NT4Subscription extends ValueNotifier<Object?> {
   int get hashCode => Object.hashAll([topic, options]);
 }
 
+class NT4StructMeta {
+  final List<String> path;
+  final DynStructSchema schema;
+  final String type;
+
+  NT4StructMeta({
+    required this.path,
+    required this.schema,
+  }) : type = _getType(path, schema);
+
+  NT4StructMeta.raw({
+    required this.path,
+    required this.schema,
+    required this.type,
+  });
+
+  static String _getType(List<String> structPath, DynStructSchema schema) {
+    if (structPath.isEmpty) {
+      return NT4TypeStr.kStructSchema;
+    }
+
+    DynStructSchema currentSchema = schema;
+    List<String> pathStack = List.from(structPath.reversed);
+
+    while (pathStack.isNotEmpty) {
+      String fieldName = pathStack.removeLast();
+      DynStructField? field = currentSchema[fieldName];
+
+      if (field == null) {
+        return NT4TypeStr.kStructSchema;
+      }
+
+      if (field.substruct == null) {
+        return field.type;
+      }
+
+      if (pathStack.isEmpty) {
+        return 'struct:${field.type}';
+      }
+
+      currentSchema = field.substruct!;
+    }
+
+    return NT4TypeStr.kStructSchema;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'schema': schema.toJson(),
+      'type': type,
+    };
+  }
+
+  static NT4StructMeta fromJson(Map<String, dynamic> json) {
+    return NT4StructMeta.raw(
+      path: tryCast<List<dynamic>>(json['path'])!
+          .map((el) => tryCast<String>(el)!)
+          .toList(),
+      schema: DynStructSchema.fromJson(tryCast(json['schema']) ?? {}),
+      type: tryCast<String>(json['type']) ?? '',
+    );
+  }
+}
+
 class NT4SubscriptionOptions {
   final double periodicRateSeconds;
   final bool all;
   final bool topicsOnly;
   final bool prefix;
+  final NT4StructMeta? structMeta;
 
   const NT4SubscriptionOptions({
     this.periodicRateSeconds = 0.1,
     this.all = false,
     this.topicsOnly = false,
     this.prefix = true,
+    this.structMeta,
   });
 
   Map<String, dynamic> toJson() {

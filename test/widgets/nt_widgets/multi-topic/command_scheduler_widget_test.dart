@@ -52,6 +52,7 @@ void main() {
     NTWidgetModel commandSchedulerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Scheduler',
       commandSchedulerJson,
     );
@@ -64,6 +65,7 @@ void main() {
     CommandSchedulerModel commandSchedulerModel = CommandSchedulerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Command Scheduler',
       period: 0.100,
     );
@@ -77,6 +79,7 @@ void main() {
     NTWidgetModel commandSchedulerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Scheduler',
       commandSchedulerJson,
     );
