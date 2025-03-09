@@ -70,6 +70,7 @@ class NTConnection {
     _ntClient.addTopicAnnounceListener((NT4Topic topic) {
       if (topic.type == "structschema") {
         subscribe(topic.name).listen((data, _) {
+          if (data == null) return;
           String schema = String.fromCharCodes(data as List<int>);
           String key = topic.name.split("/").last;
           logger.debug("Received schema for $key: $schema");
