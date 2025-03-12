@@ -231,6 +231,7 @@ class MjpegController extends ChangeNotifier {
       _visibleKeys.remove(key);
 
       if (_visibleKeys.isEmpty) {
+        errorState.value = null;
         stopStream();
       }
     }
@@ -300,7 +301,10 @@ class MjpegController extends ChangeNotifier {
   }
 
   void startStream() async {
-    if (isStreaming || _disposed || _attemptingConnection) {
+    if (isStreaming ||
+        _visibleKeys.isEmpty ||
+        _disposed ||
+        _attemptingConnection) {
       return;
     }
     _attemptingConnection = true;
