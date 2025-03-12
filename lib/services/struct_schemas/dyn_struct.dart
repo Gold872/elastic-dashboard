@@ -104,7 +104,7 @@ class DynStructSchema {
   DynStructSchema({
     required this.type,
     required Map<String, String> schemas,
-  }) : fields = _parseSchema(type, schemas);
+  }) : fields = _tryParseSchema(type, schemas);
 
   DynStructSchema.raw({
     required this.type,
@@ -119,6 +119,15 @@ class DynStructSchema {
     }
 
     return null;
+  }
+
+  static List<DynStructField> _tryParseSchema(
+      String name, Map<String, String> schemas) {
+    try {
+      return _parseSchema(name, schemas);
+    } catch (_e) {
+      return [];
+    }
   }
 
   static List<DynStructField> _parseSchema(
