@@ -303,7 +303,6 @@ class MjpegController extends ChangeNotifier {
     stopStream();
     imageStream.close();
     _disposed = true;
-    _mountedKeys.clear();
     super.dispose();
   }
 
