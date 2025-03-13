@@ -146,12 +146,12 @@ void main() {
 
     expect(controller.errorState.value, isNotNull);
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 100));
 
     expect(controller.currentStreamIndex, 1);
     expect(controller.currentStream, 'http://10.0.0.2:1182/?action=stream');
 
-    await Future.delayed(const Duration(milliseconds: 100 + 500));
+    await Future.delayed(const Duration(milliseconds: 100 + 100));
 
     expect(controller.errorState.value, isNotNull);
 

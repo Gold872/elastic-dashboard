@@ -231,7 +231,11 @@ class MjpegController extends ChangeNotifier {
       _visibleKeys.remove(key);
 
       if (_visibleKeys.isEmpty) {
-        errorState.value = null;
+        Future(() {
+          if (!_disposed) {
+            errorState.value = null;
+          }
+        });
         stopStream();
       }
     }
@@ -404,7 +408,7 @@ class MjpegController extends ChangeNotifier {
     httpClient = Client();
 
     if (retry && !isStreaming) {
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 100));
       _switchToNextStream();
       startStream();
     }
