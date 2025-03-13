@@ -138,9 +138,8 @@ void main() {
 
     // Trick the controller into being visible and start streaming
     final Key visibleKey = UniqueKey();
+    controller.setMounted(visibleKey, true);
     controller.setVisible(visibleKey, true);
-
-    controller.startStream();
 
     await Future.delayed(const Duration(milliseconds: 100));
 
