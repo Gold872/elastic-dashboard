@@ -527,7 +527,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
-              maxLines: 3,
             ),
           ),
           const SizedBox(width: 5),

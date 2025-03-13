@@ -2147,8 +2147,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       );
     }
 
+    final double platformWidthAdjust = Platform.isMacOS ? 15 : 0;
+
     final double nonConolidatedLeadingWidth = (layoutLocked) ? 409 : 369;
-    final double consolidatedLeadingWidth = (layoutLocked) ? 330 : 290;
+    final double consolidatedLeadingWidth =
+        platformWidthAdjust + (layoutLocked ? 330 : 290);
 
     return Scaffold(
       appBar: CustomAppBar(
