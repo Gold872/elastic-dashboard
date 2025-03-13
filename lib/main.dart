@@ -75,7 +75,7 @@ void main() async {
 
   logger.debug('Display Information: - Screen Size: $screenSize');
 
-  final Size minimumSize = Size(436.5 + (Platform.isMacOS ? 15 : 0), 320.0);
+  final Size minimumSize = Size(436.5 + (Platform.isMacOS ? 30 : 0), 320.0);
 
   await windowManager.setMinimumSize(minimumSize);
   await windowManager.setTitleBarStyle(
