@@ -33,7 +33,7 @@ dependencies:
   logger: ^2.5.0
   messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
-  package_info_plus: ^5.0.1
+  package_info_plus: ^8.3.0
   path: ^1.8.3
   path_provider: ^2.0.15
   patterns_canvas: ^0.4.0
@@ -50,7 +50,7 @@ dependencies:
   vector_math: ^2.1.4
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
-  web_socket_channel: ^2.4.3
+  web_socket_channel: ^3.0.2
   window_manager: ^0.4.3
 
 dev_dependencies:

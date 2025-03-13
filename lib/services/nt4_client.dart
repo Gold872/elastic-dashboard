@@ -283,6 +283,8 @@ class NT4Client {
   WebSocketChannel? _rttWebsocket;
   StreamSubscription? _rttWebsocketListener;
 
+  Timer? _connectionTimer;
+
   Timer? _pingTimer;
   Timer? _pongTimer;
 
@@ -298,7 +300,8 @@ class NT4Client {
       _rttWebsocket != null && _rttWebsocket!.closeCode == null;
 
   bool _useRTT = false;
-  bool _attemptingConnection = true;
+  bool _attemptConnection = true;
+  bool _attemptingConnection = false;
 
   int _lastPongTime = 0;
 
@@ -312,15 +315,24 @@ class NT4Client {
     this.onConnect,
     this.onDisconnect,
   }) {
-    Future.delayed(
-        const Duration(seconds: 1, milliseconds: 500), () => _connect());
+    Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
+      _connect();
+      _connectionTimer = Timer.periodic(
+        const Duration(milliseconds: 500),
+        _connect,
+      );
+    });
+  }
+
+  @visibleForTesting
+  void cancelConnectionTimer() {
+    _connectionTimer?.cancel();
   }
 
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
     _wsOnClose(false);
-    _attemptingConnection = true;
-    Future.delayed(const Duration(milliseconds: 100), _connect);
+    _attemptConnection = true;
   }
 
   Stream<double> latencyStream() async* {
@@ -562,15 +574,18 @@ class NT4Client {
     _mainWebsocket?.sink.add(data);
   }
 
-  void _connect() async {
-    if (_serverConnectionActive || !_attemptingConnection) {
+  void _connect([_]) async {
+    if (_serverConnectionActive ||
+        !_attemptConnection ||
+        _attemptingConnection) {
+      logger.trace(
+          'Ignoring connection attempt; Connection Active: $_serverConnectionActive, Should Attempt Connection: $_attemptConnection, Currently Attempting: $_attemptingConnection');
       return;
     }
 
-    // while trying to establish the connection, block out any other connection attempts
-    // prevents duplicate clients from being created on networktables
-    bool wasAttempting = _attemptingConnection;
-    _attemptingConnection = false;
+    logger.trace('Beginning connection attempt');
+
+    _attemptingConnection = true;
 
     _clientId = Random().nextInt(99999999);
 
@@ -588,19 +603,20 @@ class NT4Client {
       // Failed to connect... try again
       logger.info(
           'Failed to connect to network tables, attempting to reconnect in 500 ms');
-      if (wasAttempting) {
-        _attemptingConnection = true;
-        Future.delayed(const Duration(milliseconds: 500), _connect);
-      }
+
+      logger.debug('Connection failed with error', e);
+
+      _attemptingConnection = false;
       return;
     }
-    _attemptingConnection = false;
-
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
       await _mainWebsocket?.sink.close();
+      _attemptingConnection = false;
       return;
     }
+
+    _attemptingConnection = false;
 
     _pingTimer?.cancel();
     _pongTimer?.cancel();
@@ -753,7 +769,8 @@ class NT4Client {
   }
 
   void _wsOnClose([bool autoReconnect = true]) async {
-    _attemptingConnection = false;
+    logger.debug('WS Connection on Close, auto reconnect: $autoReconnect');
+    _attemptConnection = false;
 
     _pingTimer?.cancel();
     _pongTimer?.cancel();
@@ -783,9 +800,10 @@ class NT4Client {
     announcedTopics.clear();
 
     logger.debug('[NT4] Connection closed. Attempting to reconnect in 500 ms');
-    if (autoReconnect && !_attemptingConnection) {
-      _attemptingConnection = true;
-      Future.delayed(const Duration(milliseconds: 500), _connect);
+    if (autoReconnect) {
+      logger.trace(
+          'Auto reconnect set to true, setting attempt connection to true');
+      _attemptConnection = true;
     }
   }
 
