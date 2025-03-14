@@ -301,7 +301,8 @@ class NT4Client {
 
   bool _useRTT = false;
   bool _attemptConnection = true;
-  bool _attemptingConnection = false;
+  bool _attemptingNTConnection = false;
+  bool _attemptingRTTConnection = false;
 
   int _lastPongTime = 0;
 
@@ -317,9 +318,13 @@ class NT4Client {
   }) {
     Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
       _connect();
+
       _connectionTimer = Timer.periodic(
         const Duration(milliseconds: 500),
-        _connect,
+        (_) {
+          _connect();
+          _rttConnect();
+        },
       );
     });
   }
@@ -331,8 +336,10 @@ class NT4Client {
 
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
-    _wsOnClose(false);
-    _attemptConnection = true;
+    _wsOnClose();
+    // IP address is changed, so it doesn't matter
+    _attemptingNTConnection = false;
+    _attemptingRTTConnection = false;
   }
 
   Stream<double> latencyStream() async* {
@@ -389,7 +396,9 @@ class NT4Client {
     if (lastAnnouncedValues.containsKey(topic) &&
         lastAnnouncedTimestamps.containsKey(topic)) {
       newSub.updateValue(
-          lastAnnouncedValues[topic], lastAnnouncedTimestamps[topic]!);
+        lastAnnouncedValues[topic],
+        lastAnnouncedTimestamps[topic]!,
+      );
     }
 
     return newSub;
@@ -470,7 +479,13 @@ class NT4Client {
         'Adding sample - Topic: $topic, Data: $data, Timestamp: $timestamp');
 
     _wsSendBinary(
-        serialize([topic.pubUID, timestamp, topic.getTypeId(), data]));
+      serialize([
+        topic.pubUID,
+        timestamp,
+        topic.getTypeId(),
+        data,
+      ]),
+    );
 
     lastAnnouncedValues[topic.name] = data;
     lastAnnouncedTimestamps[topic.name] = timestamp;
@@ -574,31 +589,33 @@ class NT4Client {
     _mainWebsocket?.sink.add(data);
   }
 
-  void _connect([_]) async {
+  Future<void> _connect() async {
     if (_serverConnectionActive ||
         !_attemptConnection ||
-        _attemptingConnection) {
+        _attemptingNTConnection) {
       logger.trace(
-          'Ignoring connection attempt; Connection Active: $_serverConnectionActive, Should Attempt Connection: $_attemptConnection, Currently Attempting: $_attemptingConnection');
+          'Ignoring connection attempt; Connection Active: $_serverConnectionActive, Should Attempt Connection: $_attemptConnection, Currently Attempting: $_attemptingNTConnection');
       return;
     }
 
     logger.trace('Beginning connection attempt');
 
-    _attemptingConnection = true;
+    _attemptingNTConnection = true;
 
     _clientId = Random().nextInt(99999999);
 
     String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
-    _mainWebsocket =
-        WebSocketChannel.connect(Uri.parse(mainServerAddr), protocols: [
-      'networktables.first.wpi.edu',
-      'v4.1.networktables.first.wpi.edu',
-    ]);
+    WebSocketChannel attemptedWebsocket = WebSocketChannel.connect(
+      Uri.parse(mainServerAddr),
+      protocols: [
+        'networktables.first.wpi.edu',
+        'v4.1.networktables.first.wpi.edu',
+      ],
+    );
 
     try {
-      await _mainWebsocket!.ready;
+      await attemptedWebsocket.ready;
     } catch (e) {
       // Failed to connect... try again
       logger.info(
@@ -606,17 +623,23 @@ class NT4Client {
 
       logger.debug('Connection failed with error', e);
 
-      _attemptingConnection = false;
+      // If the ip address changed while connecting (but failed), don't assume we're no
+      // longer connecting, otherwise it could cause multiple clients to connect
+      if (mainServerAddr.contains(serverBaseAddress)) {
+        _attemptingNTConnection = false;
+      }
       return;
     }
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
-      await _mainWebsocket?.sink.close();
-      _attemptingConnection = false;
+      _attemptingNTConnection = false;
+
+      attemptedWebsocket.sink.close().ignore();
       return;
     }
 
-    _attemptingConnection = false;
+    _mainWebsocket = attemptedWebsocket;
+    _attemptingNTConnection = false;
 
     _pingTimer?.cancel();
     _pongTimer?.cancel();
@@ -647,10 +670,6 @@ class NT4Client {
       cancelOnError: true,
     );
 
-    if (_useRTT) {
-      await _rttConnect();
-    }
-
     NT4Topic timeTopic = NT4Topic(
         name: 'Time',
         type: NT4TypeStr.kInt,
@@ -679,35 +698,45 @@ class NT4Client {
   }
 
   Future<void> _rttConnect() async {
-    if (!_useRTT || _rttConnectionActive) {
+    if (!_useRTT || _rttConnectionActive || _attemptingRTTConnection) {
       return;
     }
+    _attemptingRTTConnection = true;
 
     String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
-    _rttWebsocket = WebSocketChannel.connect(Uri.parse(rttServerAddr),
-        protocols: ['rtt.networktables.first.wpi.edu']);
+    WebSocketChannel connectionAttempt = WebSocketChannel.connect(
+      Uri.parse(rttServerAddr),
+      protocols: ['rtt.networktables.first.wpi.edu'],
+    );
 
     try {
-      await _rttWebsocket!.ready;
+      await connectionAttempt.ready;
     } catch (e) {
       logger.info(
           'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms');
-      Future.delayed(const Duration(milliseconds: 500), _rttConnect);
+      _attemptingRTTConnection = false;
+      return;
+    }
+    if (!rttServerAddr.contains(serverBaseAddress)) {
+      _attemptingRTTConnection = false;
+
+      logger.info(
+          'IP Addressed changed while connecting to RTT, aborting connection');
+      connectionAttempt.sink.close().ignore();
       return;
     }
 
-    if (!rttServerAddr.contains(serverBaseAddress)) {
-      logger.info(
-          'IP Addressed changed while connecting to RTT, aborting connection');
-      await _rttWebsocket?.sink.close();
-      return;
-    }
+    _rttWebsocket = connectionAttempt;
+    _attemptingRTTConnection = false;
+    _rttConnectionActive = true;
+
+    bool receivedMessage = false;
 
     _rttWebsocketListener = _rttWebsocket!.stream.listen(
       (data) {
-        if (!_rttConnectionActive) {
+        if (!receivedMessage) {
           logger.info('RTT protocol connected on $serverBaseAddress');
-          _rttConnectionActive = true;
+          receivedMessage = true;
         }
 
         if (!_serverConnectionActive && mainWebsocketActive) {
@@ -755,7 +784,10 @@ class NT4Client {
     onConnect?.call();
   }
 
-  void _rttOnClose() async {
+  Future<void> _rttOnClose() async {
+    // Block out any connection attempts so we can ensure everything is closed
+    _attemptingRTTConnection = true;
+
     await _rttWebsocketListener?.cancel();
     _rttWebsocketListener = null;
     await _rttWebsocket?.sink.close();
@@ -763,13 +795,16 @@ class NT4Client {
 
     _lastPongTime = 0;
     _rttConnectionActive = false;
-    _useRTT = false;
 
     logger.info('RTT Connection closed');
+    _attemptingRTTConnection = false;
   }
 
-  void _wsOnClose([bool autoReconnect = true]) async {
-    logger.debug('WS Connection on Close, auto reconnect: $autoReconnect');
+  Future<void> _wsOnClose([bool autoReconnect = true]) async {
+    logger.debug('WS connection on close, auto reconnect: $autoReconnect');
+    // Block out any connection attempts while disposing of the sockets
+    _attemptingNTConnection = true;
+    _attemptingRTTConnection = true;
     _attemptConnection = false;
 
     _pingTimer?.cancel();
@@ -798,6 +833,9 @@ class NT4Client {
     onDisconnect?.call();
 
     announcedTopics.clear();
+
+    _attemptingNTConnection = false;
+    _attemptingRTTConnection = false;
 
     logger.debug('[NT4] Connection closed. Attempting to reconnect in 500 ms');
     if (autoReconnect) {
