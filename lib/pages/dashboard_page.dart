@@ -2061,8 +2061,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
-        backgroundColor:
-            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        backgroundColor: WidgetStatePropertyAll(Colors.white),
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
