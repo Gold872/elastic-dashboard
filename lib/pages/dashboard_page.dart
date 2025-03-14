@@ -1901,9 +1901,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     final double platformWidthAdjust = Platform.isMacOS ? 30 : 0;
 
-    final double minWindowWidth = layoutLocked ? 500 : 460;
-    final bool consolidateMenu =
-        windowWidth < (minWindowWidth + platformWidthAdjust);
+    final double minWindowWidth =
+        platformWidthAdjust + (layoutLocked ? 500 : 460);
+    final bool consolidateMenu = windowWidth < minWindowWidth;
 
     List<Widget> menuChildren = [
       // File
