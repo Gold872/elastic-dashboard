@@ -733,12 +733,13 @@ class NT4Client {
     } catch (e) {
       logger.info(
           'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms');
-      _attemptingRTTConnection = false;
+      // Only reset connection attempt if the address hasn't changed, see explanation above
+      if (rttServerAddr.contains(serverBaseAddress)) {
+        _attemptingRTTConnection = false;
+      }
       return;
     }
     if (!rttServerAddr.contains(serverBaseAddress)) {
-      _attemptingRTTConnection = false;
-
       logger.info(
           'IP Addressed changed while connecting to RTT, aborting connection');
       connectionAttempt.sink.close().ignore();
