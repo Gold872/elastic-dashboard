@@ -337,7 +337,10 @@ class NT4Client {
   void setServerBaseAddreess(String serverBaseAddress) {
     this.serverBaseAddress = serverBaseAddress;
     _wsOnClose();
-    // IP address is changed, so it doesn't matter
+    // IP address is changed, so we're "resetting" the attempt state
+    // In the connect method, we don't change the attempting state if
+    // the address changes during connection, so this will have no effect
+    // on existing connections
     _attemptingNTConnection = false;
     _attemptingRTTConnection = false;
   }
@@ -514,7 +517,7 @@ class NT4Client {
     return _getClientTimeUS() + _serverTimeOffsetUS;
   }
 
-  void _rttSendTimestamp() {
+  void _rttSendTimestamp([_]) {
     var timeTopic = announcedTopics[-1];
     if (timeTopic != null) {
       int timeToSend = _getClientTimeUS();
@@ -590,11 +593,12 @@ class NT4Client {
   }
 
   Future<void> _connect() async {
-    if (_serverConnectionActive ||
+    if (_mainWebsocket != null ||
         !_attemptConnection ||
         _attemptingNTConnection) {
       logger.trace(
-          'Ignoring connection attempt; Connection Active: $_serverConnectionActive, Should Attempt Connection: $_attemptConnection, Currently Attempting: $_attemptingNTConnection');
+        'Ignoring connection attempt; Connection Active: ${_mainWebsocket != null}, Should Attempt Connection: $_attemptConnection, Currently Attempting: $_attemptingNTConnection',
+      );
       return;
     }
 
@@ -606,7 +610,7 @@ class NT4Client {
 
     String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
-    WebSocketChannel attemptedWebsocket = WebSocketChannel.connect(
+    WebSocketChannel connectionAttempt = WebSocketChannel.connect(
       Uri.parse(mainServerAddr),
       protocols: [
         'networktables.first.wpi.edu',
@@ -615,7 +619,7 @@ class NT4Client {
     );
 
     try {
-      await attemptedWebsocket.ready;
+      await connectionAttempt.ready;
     } catch (e) {
       // Failed to connect... try again
       logger.info(
@@ -632,13 +636,16 @@ class NT4Client {
     }
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
-      _attemptingNTConnection = false;
 
-      attemptedWebsocket.sink.close().ignore();
+      // We don't set attempting connection to false here since we're assuming
+      // that when the address changes, it will "reset" the "attempt state" to
+      // only work for the new address
+
+      connectionAttempt.sink.close().ignore();
       return;
     }
 
-    _mainWebsocket = attemptedWebsocket;
+    _mainWebsocket = connectionAttempt;
     _attemptingNTConnection = false;
 
     _pingTimer?.cancel();
@@ -671,21 +678,25 @@ class NT4Client {
     );
 
     NT4Topic timeTopic = NT4Topic(
-        name: 'Time',
-        type: NT4TypeStr.kInt,
-        id: -1,
-        pubUID: -1,
-        properties: {});
+      name: 'Time',
+      type: NT4TypeStr.kInt,
+      id: -1,
+      pubUID: -1,
+      properties: {},
+    );
     announcedTopics[timeTopic.id] = timeTopic;
 
     _lastPongTime = 0;
     _rttSendTimestamp();
 
-    _pingTimer = Timer.periodic(Duration(milliseconds: _pingInterval), (timer) {
-      _rttSendTimestamp();
-    });
-    _pongTimer =
-        Timer.periodic(Duration(milliseconds: _pingInterval), _checkPingStatus);
+    _pingTimer = Timer.periodic(
+      Duration(milliseconds: _pingInterval),
+      _rttSendTimestamp,
+    );
+    _pongTimer = Timer.periodic(
+      Duration(milliseconds: _pingInterval),
+      _checkPingStatus,
+    );
 
     for (NT4Topic topic in _clientPublishedTopics.values) {
       _wsPublish(topic);
@@ -698,7 +709,10 @@ class NT4Client {
   }
 
   Future<void> _rttConnect() async {
-    if (!_useRTT || _rttConnectionActive || _attemptingRTTConnection) {
+    if (!_useRTT ||
+        _rttWebsocket != null ||
+        _rttConnectionActive ||
+        _attemptingRTTConnection) {
       return;
     }
     _attemptingRTTConnection = true;
@@ -881,11 +895,12 @@ class NT4Client {
           }
 
           NT4Topic newTopic = NT4Topic(
-              name: params['name'],
-              type: params['type'],
-              id: params['id'],
-              pubUID: params['pubid'] ?? (currentTopic?.pubUID ?? 0),
-              properties: params['properties']);
+            name: params['name'],
+            type: params['type'],
+            id: params['id'],
+            pubUID: params['pubid'] ?? (currentTopic?.pubUID ?? 0),
+            properties: params['properties'],
+          );
           announcedTopics[newTopic.id] = newTopic;
 
           for (final listener in _topicAnnounceListeners) {
