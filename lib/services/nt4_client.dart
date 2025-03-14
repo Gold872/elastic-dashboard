@@ -622,23 +622,27 @@ class NT4Client {
       await connectionAttempt.ready;
     } catch (e) {
       // Failed to connect... try again
-      logger.info(
-          'Failed to connect to network tables, attempting to reconnect in 500 ms');
 
-      logger.debug('Connection failed with error', e);
-
-      // If the ip address changed while connecting (but failed), don't assume we're no
-      // longer connecting, otherwise it could cause multiple clients to connect
+      // When changing IP addresses we ignore any current connection attempts
+      // since the handshake can take a long time, this will avoid logging information
+      // that is from an old connection attempt
       if (mainServerAddr.contains(serverBaseAddress)) {
+        logger.info(
+            'Failed to connect to network tables, attempting to reconnect in 500 ms');
+
         _attemptingNTConnection = false;
       }
+      // The attempt state does not get set to false if the ip address changed while
+      // connecting, since changing the ip address resets the connection attempt state
+
+      logger.trace('Connection failed with error', e);
       return;
     }
     if (!mainServerAddr.contains(serverBaseAddress)) {
       logger.info('IP Address changed while connecting, aborting connection');
 
       // We don't set attempting connection to false here since we're assuming
-      // that when the address changes, it will "reset" the "attempt state" to
+      // that when the address changes, it will "reset" the attempt state to
       // only work for the new address
 
       connectionAttempt.sink.close().ignore();
