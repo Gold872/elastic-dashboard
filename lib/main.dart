@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:logger/logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
@@ -33,11 +34,11 @@ void main() async {
     BrowserContextMenu.disableContextMenu();
   }
 
-  // final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
   await logger.initialize();
 
-  // logger.info('Starting application: Version ${packageInfo.version}');
+  logger.info('Starting application: Version ${packageInfo.version}');
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -109,7 +110,7 @@ void main() async {
     Elastic(
       ntConnection: ntConnection,
       preferences: preferences,
-      version: "packageInfo.version",
+      version: packageInfo.version,
     ),
   );
 }
