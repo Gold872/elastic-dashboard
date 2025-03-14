@@ -1898,8 +1898,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     final bool layoutLocked =
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
+    final double platformWidthAdjust = Platform.isMacOS ? 30 : 0;
+
     final double minWindowWidth = layoutLocked ? 500 : 460;
-    final bool consolidateMenu = windowWidth < minWindowWidth;
+    final bool consolidateMenu =
+        windowWidth < (minWindowWidth + platformWidthAdjust);
 
     List<Widget> menuChildren = [
       // File
@@ -2145,8 +2148,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         icon: const Icon(Icons.update, color: Colors.orange),
       );
     }
-
-    final double platformWidthAdjust = Platform.isMacOS ? 30 : 0;
 
     final double nonConolidatedLeadingWidth =
         platformWidthAdjust + (layoutLocked ? 409 : 369);
