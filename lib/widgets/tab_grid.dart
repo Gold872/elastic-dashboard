@@ -432,7 +432,7 @@ class TabGridModel extends ChangeNotifier {
       );
     }
 
-    int? gridSize = preferences.getInt(PrefKeys.gridSize);
+    int gridSize = preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
 
     double previewX =
         DraggableWidgetContainer.snapToGrid(constrainedRect.left, gridSize);
@@ -440,27 +440,51 @@ class TabGridModel extends ChangeNotifier {
         DraggableWidgetContainer.snapToGrid(constrainedRect.top, gridSize);
 
     double previewWidth = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.width.clamp(model.minWidth, double.infinity), gridSize);
+      max(model.minWidth, constrainedRect.width),
+      gridSize,
+    );
     double previewHeight = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.height.clamp(model.minHeight, double.infinity),
-        gridSize);
+      max(model.minHeight, constrainedRect.height),
+      gridSize,
+    );
 
     if (previewWidth < model.minWidth) {
       previewWidth = DraggableWidgetContainer.snapToGrid(
-          constrainedRect.width.clamp(model.minWidth, double.infinity) +
-              (gridSize ?? Defaults.gridSize),
-          gridSize);
+        max(model.minWidth, constrainedRect.width) + gridSize,
+        gridSize,
+      );
     }
 
     if (previewHeight < model.minHeight) {
       previewHeight = DraggableWidgetContainer.snapToGrid(
-          constrainedRect.height.clamp(model.minHeight, double.infinity) +
-              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize),
-          gridSize);
+        max(model.minHeight, constrainedRect.height) + gridSize,
+        gridSize,
+      );
     }
 
-    Rect preview =
-        Rect.fromLTWH(previewX, previewY, previewWidth, previewHeight);
+    if (model.resizing) {
+      if (result.handle.influencesLeft) {
+        double snappedRight = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.right,
+          gridSize,
+        );
+        previewX = snappedRight - previewWidth;
+      }
+      if (result.handle.influencesTop) {
+        double snappedBottom = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.bottom,
+          gridSize,
+        );
+        previewY = snappedBottom - previewHeight;
+      }
+    }
+
+    Rect preview = Rect.fromLTWH(
+      previewX,
+      previewY,
+      previewWidth,
+      previewHeight,
+    );
 
     model.draggingRect = constrainedRect;
     model.previewRect = preview;
