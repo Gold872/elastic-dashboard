@@ -334,9 +334,9 @@ class NT4Client {
     _connectionTimer?.cancel();
   }
 
-  void setServerBaseAddreess(String serverBaseAddress) {
+  Future<void> setServerBaseAddreess(String serverBaseAddress) async {
     this.serverBaseAddress = serverBaseAddress;
-    _wsOnClose();
+    await _wsOnClose();
     // IP address is changed, so we're "resetting" the attempt state
     // In the connect method, we don't change the attempting state if
     // the address changes during connection, so this will have no effect
