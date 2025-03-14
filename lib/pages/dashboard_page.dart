@@ -1889,8 +1889,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
       textStyle: WidgetStatePropertyAll(menuTextStyle),
-      backgroundColor:
-          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      backgroundColor: const WidgetStatePropertyAll(
+        Color.fromARGB(255, 25, 25, 25),
+      ),
       minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
@@ -2064,7 +2065,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(Colors.white),
+        backgroundColor: WidgetStatePropertyAll(
+          Color.fromARGB(255, 25, 25, 25),
+        ),
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
