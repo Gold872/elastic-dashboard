@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -40,6 +42,7 @@ class FMSInfoModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     super.dataType,
     super.period,
   });
@@ -48,6 +51,7 @@ class FMSInfoModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
+    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override

@@ -63,6 +63,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );
@@ -75,6 +76,7 @@ void main() {
     RobotPreferencesModel preferencesModel = RobotPreferencesModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Preferences',
       period: 0.100,
     );
@@ -88,6 +90,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );

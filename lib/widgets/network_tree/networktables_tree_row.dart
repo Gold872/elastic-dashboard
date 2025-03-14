@@ -23,7 +23,7 @@ class NetworkTableTreeRow {
   final String topic;
   final String rowName;
 
-  final NT4Topic? ntTopic;
+  final TreeTopicEntry? entry;
 
   List<NetworkTableTreeRow> children = [];
 
@@ -32,7 +32,7 @@ class NetworkTableTreeRow {
     required this.preferences,
     required this.topic,
     required this.rowName,
-    this.ntTopic,
+    this.entry,
   });
 
   bool hasRow(String name) {
@@ -81,13 +81,13 @@ class NetworkTableTreeRow {
   }
 
   NetworkTableTreeRow createNewRow(
-      {required String topic, required String name, NT4Topic? ntTopic}) {
+      {required String topic, required String name, TreeTopicEntry? entry}) {
     NetworkTableTreeRow newRow = NetworkTableTreeRow(
       ntConnection: ntConnection,
       preferences: preferences,
       topic: topic,
       rowName: name,
-      ntTopic: ntTopic,
+      entry: entry,
     );
     addRow(newRow);
 
@@ -117,8 +117,8 @@ class NetworkTableTreeRow {
   static SingleTopicNTWidgetModel? getNTWidgetFromTopic(
       NTConnection ntConnection,
       SharedPreferences preferences,
-      NT4Topic ntTopic) {
-    switch (ntTopic.type) {
+      TreeTopicEntry entry) {
+    switch (entry.type()) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
       case NT4TypeStr.kFloat32:
@@ -131,22 +131,24 @@ class NetworkTableTreeRow {
         return TextDisplayModel(
           ntConnection: ntConnection,
           preferences: preferences,
-          topic: ntTopic.name,
-          dataType: ntTopic.type,
+          topic: entry.topic.name,
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
           ntConnection: ntConnection,
           preferences: preferences,
-          topic: ntTopic.name,
-          dataType: ntTopic.type,
+          topic: entry.topic.name,
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
     }
     return null;
   }
 
   Future<NTWidgetModel?>? getPrimaryWidget() async {
-    if (ntTopic == null) {
+    if (entry == null) {
       if (hasRow('.type')) {
         return await getTypedWidget('$topic/.type');
       }
@@ -161,7 +163,10 @@ class NetworkTableTreeRow {
 
       if (isCameraStream) {
         return CameraStreamModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+            ntStructMeta: entry?.meta);
       }
 
       if (hasRows([
@@ -174,13 +179,16 @@ class NetworkTableTreeRow {
         'sizeLeftRight',
       ])) {
         return YAGSLSwerveDriveModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+            ntStructMeta: entry?.meta);
       }
 
       return null;
     }
 
-    return getNTWidgetFromTopic(ntConnection, preferences, ntTopic!);
+    return getNTWidgetFromTopic(ntConnection, preferences, entry!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
@@ -198,6 +206,7 @@ class NetworkTableTreeRow {
     return NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      entry?.meta,
       type,
       topic,
     );

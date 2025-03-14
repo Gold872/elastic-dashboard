@@ -51,6 +51,7 @@ void main() {
     NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'DifferentialDrive',
       differentialDriveJson,
     );
@@ -63,6 +64,7 @@ void main() {
     DifferentialDriveModel differentialDriveModel = DifferentialDriveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Differential Drive',
       period: 0.100,
     );
@@ -76,6 +78,7 @@ void main() {
     NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'DifferentialDrive',
       differentialDriveJson,
     );

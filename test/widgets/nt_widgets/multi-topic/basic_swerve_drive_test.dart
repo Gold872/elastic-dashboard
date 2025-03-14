@@ -37,6 +37,7 @@ void main() {
     NTWidgetModel swerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'SwerveDrive',
       swerveJson,
     );
@@ -76,6 +77,7 @@ void main() {
     BasicSwerveModel swerveModel = BasicSwerveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Basic Swerve Drive',
       period: 0.100,
       rotationUnit: 'Radians',
@@ -91,6 +93,7 @@ void main() {
     NTWidgetModel swerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'SwerveDrive',
       swerveJson,
     );
@@ -117,6 +120,7 @@ void main() {
     BasicSwerveModel swerveModel = BasicSwerveModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Basic Swerve Drive',
       period: 0.100,
       rotationUnit: 'Radians',

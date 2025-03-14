@@ -46,6 +46,7 @@ void main() {
     NTWidgetModel largeTextModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Large Text Display',
       largeTextDisplayJson,
     );
@@ -67,6 +68,7 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
       dataType: 'string',
@@ -83,6 +85,7 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
       dataType: 'string',

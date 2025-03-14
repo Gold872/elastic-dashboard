@@ -50,6 +50,7 @@ void main() {
     NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Text Display',
       textDisplayJson,
     );
@@ -68,6 +69,7 @@ void main() {
     NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Text View',
       textDisplayJson,
     );
@@ -102,6 +104,7 @@ void main() {
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'double',
         period: 0.100,
@@ -118,6 +121,7 @@ void main() {
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'double',
         period: 0.100,
@@ -134,6 +138,7 @@ void main() {
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'double',
         period: 0.100,
@@ -147,6 +152,7 @@ void main() {
     TextDisplayModel textDisplayModel = TextDisplayModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Display Value',
       dataType: 'double',
       period: 0.100,
@@ -168,6 +174,7 @@ void main() {
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'double',
         period: 0.100,
@@ -224,6 +231,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'int',
         period: 0.100,
@@ -279,6 +287,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'boolean',
         period: 0.100,
@@ -338,6 +347,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'string',
         period: 0.100,
@@ -398,6 +408,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'int[]',
         period: 0.100,
@@ -457,6 +468,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'boolean[]',
         period: 0.100,
@@ -517,6 +529,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'double[]',
         period: 0.100,
@@ -576,6 +589,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'string[]',
         period: 0.100,
@@ -636,6 +650,7 @@ void main() {
           },
         ),
         preferences: preferences,
+        ntStructMeta: null,
         topic: 'Test/Display Value',
         dataType: 'string',
         period: 0.100,
@@ -684,6 +699,7 @@ void main() {
     TextDisplayModel textDisplayModel = TextDisplayModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Display Value',
       dataType: 'string',
       period: 0.100,
