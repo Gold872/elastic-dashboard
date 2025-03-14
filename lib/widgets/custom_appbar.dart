@@ -22,7 +22,7 @@ class CustomAppBar extends AppBar {
     this.titleText = 'Elastic',
     this.appBarColor,
     this.onWindowClose,
-    required super.leadingWidth,
+    super.leadingWidth,
     required super.leading,
   }) : super(
           toolbarHeight: 36,
