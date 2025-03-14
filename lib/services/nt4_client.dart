@@ -619,6 +619,7 @@ class NT4Client {
     );
 
     try {
+      logger.trace('Awaiting connection ready');
       await connectionAttempt.ready;
     } catch (e) {
       // Failed to connect... try again
