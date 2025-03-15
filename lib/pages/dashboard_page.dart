@@ -2291,24 +2291,24 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}';
 
                       double connectedWidth = (TextPainter(
-                              text: TextSpan(
-                                text: connectedText,
-                                style: footerStyle,
-                              ),
-                              maxLines: 1,
-                              textDirection: TextDirection.ltr)
-                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                        text: TextSpan(
+                          text: connectedText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
                           .size
                           .width;
 
                       double teamNumberWidth = (TextPainter(
-                              text: TextSpan(
-                                text: teamNumberText,
-                                style: footerStyle,
-                              ),
-                              maxLines: 1,
-                              textDirection: TextDirection.ltr)
-                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                        text: TextSpan(
+                          text: teamNumberText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
                           .size
                           .width;
 

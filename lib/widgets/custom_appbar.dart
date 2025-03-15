@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 /// Essentially a copy of Flutter's [AppBar] but with a non-fixed leading
@@ -18,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   static const double windowButtonSize = 24;
 
-  static const double titleSize = !isWPILib ? 60.0 : 140.0;
+  static double? titleSize;
 
   late final Widget trailing = Row(
     mainAxisSize: MainAxisSize.min,
@@ -80,7 +79,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   );
 
   late final Widget title = LayoutBuilder(
-    builder: (context, constraints) => (constraints.maxWidth >= titleSize)
+    builder: (context, constraints) => (constraints.maxWidth >= titleSize!)
         ? Text(
             titleText,
             style: Theme.of(context).textTheme.titleLarge,
@@ -100,6 +99,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    titleSize ??= (TextPainter(
+      text: TextSpan(
+        text: titleText,
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout())
+        .size
+        .width;
+
     return Material(
       color: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
       type: MaterialType.canvas,
