@@ -2287,9 +2287,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
                           : 'Network Tables: Disconnected';
 
+                      String teamNumberText =
+                          'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}';
+
                       double connectedWidth = (TextPainter(
                               text: TextSpan(
                                 text: connectedText,
+                                style: footerStyle,
+                              ),
+                              maxLines: 1,
+                              textDirection: TextDirection.ltr)
+                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                          .size
+                          .width;
+
+                      double teamNumberWidth = (TextPainter(
+                              text: TextSpan(
+                                text: teamNumberText,
                                 style: footerStyle,
                               ),
                               maxLines: 1,
@@ -2303,9 +2317,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       return Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (availableSpace >= windowWidth / 2 + 30)
+                          if (availableSpace >=
+                              (windowWidth + teamNumberWidth) / 2)
                             Text(
-                              'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                              teamNumberText,
                               textAlign: TextAlign.center,
                             ),
                           if (availableSpace >= 115)

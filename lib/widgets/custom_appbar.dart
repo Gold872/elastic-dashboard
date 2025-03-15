@@ -85,7 +85,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             titleText,
             style: Theme.of(context).textTheme.titleLarge,
             textAlign: TextAlign.center,
-            overflow: TextOverflow.visible,
+            overflow: TextOverflow.clip,
           )
         : const SizedBox(),
   );
