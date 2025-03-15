@@ -820,7 +820,6 @@ class TabGrid extends StatelessWidget {
         return ChangeNotifierProvider<NTWidgetContainerModel>.value(
           value: widgetModel,
           child: DraggableNTWidgetContainer(
-            key: widgetModel.key,
             updateFunctions: (
               onUpdate: model._ntContainerOnUpdate,
               onDragBegin: model._ntContainerOnDragBegin,
@@ -836,7 +835,6 @@ class TabGrid extends StatelessWidget {
         return ChangeNotifierProvider<ListLayoutModel>.value(
           value: widgetModel,
           child: DraggableListLayout(
-            key: widgetModel.key,
             updateFunctions: (
               onUpdate: model._layoutContainerOnUpdate,
               onDragBegin: model._layoutContainerOnDragBegin,
@@ -908,6 +906,7 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
+          key: container.key,
           onSecondaryTapUp: (details) {
             if (model.preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked) {
