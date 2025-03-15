@@ -611,15 +611,15 @@ class NT4Client {
 
     String mainServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
 
-    WebSocketChannel connectionAttempt = WebSocketChannel.connect(
-      Uri.parse(mainServerAddr),
-      protocols: [
-        'networktables.first.wpi.edu',
-        'v4.1.networktables.first.wpi.edu',
-      ],
-    );
-
+    WebSocketChannel connectionAttempt;
     try {
+      connectionAttempt = WebSocketChannel.connect(
+        Uri.parse(mainServerAddr),
+        protocols: [
+          'networktables.first.wpi.edu',
+          'v4.1.networktables.first.wpi.edu',
+        ],
+      );
       logger.trace('Awaiting connection ready');
       await connectionAttempt.ready;
     } catch (e) {
@@ -724,12 +724,21 @@ class NT4Client {
     _attemptingRTTConnection = true;
 
     String rttServerAddr = 'ws://$serverBaseAddress:5810/nt/Elastic';
-    WebSocketChannel connectionAttempt = WebSocketChannel.connect(
-      Uri.parse(rttServerAddr),
-      protocols: ['rtt.networktables.first.wpi.edu'],
-    );
 
+    Uri? rttUri = Uri.tryParse(rttServerAddr);
+
+    if (rttUri == null) {
+      logger.info('Aborting RTT connection attempt, URI is not valid');
+      _attemptingRTTConnection = false;
+      return;
+    }
+
+    WebSocketChannel connectionAttempt;
     try {
+      connectionAttempt = WebSocketChannel.connect(
+        Uri.parse(rttServerAddr),
+        protocols: ['rtt.networktables.first.wpi.edu'],
+      );
       await connectionAttempt.ready;
     } catch (e) {
       logger.info(
