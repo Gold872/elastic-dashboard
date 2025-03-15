@@ -79,7 +79,7 @@ void main() async {
   if (Platform.isMacOS) {
     platformWidthAdjust = 30;
   } else if (Platform.isLinux) {
-    platformWidthAdjust = 15;
+    platformWidthAdjust = 10;
   } else {
     platformWidthAdjust = 0;
   }
