@@ -101,7 +101,7 @@ jobs:
             build-option: "macos"
             artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
             artifact-name: Elastic-macOS
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
