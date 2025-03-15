@@ -1899,7 +1899,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     final bool layoutLocked =
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
-    final double platformWidthAdjust = Platform.isMacOS ? 30 : 0;
+    late final double platformWidthAdjust;
+    if (Platform.isMacOS) {
+      platformWidthAdjust = 30;
+    } else if (Platform.isLinux) {
+      platformWidthAdjust = 15;
+    } else {
+      platformWidthAdjust = 0;
+    }
 
     final double minWindowWidth =
         platformWidthAdjust + (layoutLocked ? 500 : 460);
