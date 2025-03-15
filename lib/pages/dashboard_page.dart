@@ -2159,19 +2159,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       );
     }
 
-    final double nonConolidatedLeadingWidth =
-        platformWidthAdjust + (layoutLocked ? 409 : 369);
-    final double consolidatedLeadingWidth =
-        platformWidthAdjust + (layoutLocked ? 330 : 290);
-
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        leadingWidth: consolidateMenu
-            ? consolidatedLeadingWidth
-            : nonConolidatedLeadingWidth,
       ),
       body: Focus(
         autofocus: true,
