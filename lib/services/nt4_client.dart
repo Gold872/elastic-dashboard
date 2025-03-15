@@ -343,6 +343,7 @@ class NT4Client {
     // on existing connections
     _attemptingNTConnection = false;
     _attemptingRTTConnection = false;
+    Future.delayed(const Duration(milliseconds: 100), _connect);
   }
 
   Stream<double> latencyStream() async* {
@@ -741,7 +742,7 @@ class NT4Client {
     }
     if (!rttServerAddr.contains(serverBaseAddress)) {
       logger.info(
-          'IP Addressed changed while connecting to RTT, aborting connection');
+          'IP Addressed changed while connecting to RTT, aborting RTT connection');
       connectionAttempt.sink.close().ignore();
       return;
     }
@@ -822,6 +823,9 @@ class NT4Client {
 
   Future<void> _wsOnClose([bool autoReconnect = true]) async {
     logger.debug('WS connection on close, auto reconnect: $autoReconnect');
+    _serverConnectionActive = false;
+    onDisconnect?.call();
+
     // Block out any connection attempts while disposing of the sockets
     _attemptingNTConnection = true;
     _attemptingRTTConnection = true;
@@ -850,7 +854,6 @@ class NT4Client {
     _latencyMs = 0;
 
     logger.info('Network Tables disconnected');
-    onDisconnect?.call();
 
     announcedTopics.clear();
 
