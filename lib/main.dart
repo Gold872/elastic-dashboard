@@ -1,17 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:screen_retriever/screen_retriever.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/app_distributor.dart';
@@ -21,8 +20,19 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
+import 'package:path_provider/path_provider.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/path_stub.dart';
+import 'package:screen_retriever/screen_retriever.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/screen_stub.dart';
+import 'package:window_manager/window_manager.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kIsWeb) {
+    BrowserContextMenu.disableContextMenu();
+  }
 
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -35,31 +45,27 @@ void main() async {
     logger.error('Flutter Error', details.exception, details.stack);
   };
 
-  final String appFolderPath = (await getApplicationSupportDirectory()).path;
-
-  // Prevents data loss if shared_preferences.json gets corrupted
-  // More info and original implementation: https://github.com/flutter/flutter/issues/89211#issuecomment-915096452
-  SharedPreferences preferences;
-  try {
-    preferences = await SharedPreferences.getInstance();
-
-    // Store a copy of user's preferences on the disk
-    await _backupPreferences(appFolderPath);
-  } catch (error) {
-    logger.warning(
-        'Failed to get shared preferences instance, attempting to retrieve from backup',
-        error);
-    // Remove broken preferences files and restore previous settings
-    await _restorePreferencesFromBackup(appFolderPath);
-    preferences = await SharedPreferences.getInstance();
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  if (!kIsWeb) {
+    final String appFolderPath = (await getApplicationSupportDirectory()).path;
+    // Prevents data loss if shared_preferences.json gets corrupted
+    // More info and original implementation: https://github.com/flutter/flutter/issues/89211#issuecomment-915096452
+    try {
+      // Store a copy of user's preferences on the disk
+      await _backupPreferences(appFolderPath);
+    } catch (error) {
+      logger.warning(
+          'Failed to get shared preferences instance, attempting to retrieve from backup',
+          error);
+      // Remove broken preferences files and restore previous settings
+      await _restorePreferencesFromBackup(appFolderPath);
+    }
   }
 
   Level logLevel = Settings.logLevels.firstWhereOrNull((level) =>
           level.levelName == preferences.getString(PrefKeys.logLevel)) ??
       Defaults.logLevel;
   Logger.level = logLevel;
-
-  await windowManager.ensureInitialized();
 
   NTWidgetBuilder.ensureInitialized();
 
@@ -69,26 +75,27 @@ void main() async {
   NTConnection ntConnection = NTConnection(ipAddress);
 
   await FieldImages.loadFields('assets/fields/');
+  if (!kIsWeb) {
+    Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+    Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
-  Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-  Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
+    logger.debug('Display Information: - Screen Size: $screenSize');
 
-  logger.debug('Display Information: - Screen Size: $screenSize');
+    final Size minimumSize = Size(436.5 + (Platform.isMacOS ? 30 : 0), 320.0);
 
-  final Size minimumSize = Size(436.5 + (Platform.isMacOS ? 30 : 0), 320.0);
+    await windowManager.setMinimumSize(minimumSize);
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden,
+      windowButtonVisibility: false,
+    );
 
-  await windowManager.setMinimumSize(minimumSize);
-  await windowManager.setTitleBarStyle(
-    TitleBarStyle.hidden,
-    windowButtonVisibility: false,
-  );
+    if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
+      await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
+    }
 
-  if (preferences.getBool(PrefKeys.rememberWindowPosition) ?? false) {
-    await _restoreWindowPosition(preferences, primaryDisplay, minimumSize);
+    await windowManager.show();
+    await windowManager.focus();
   }
-
-  await windowManager.show();
-  await windowManager.focus();
 
   runApp(
     Elastic(
