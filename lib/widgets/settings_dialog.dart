@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,6 +52,7 @@ class SettingsDialog extends StatefulWidget {
   final void Function(Level? level)? onLogLevelChanged;
   final FutureOr<void> Function(String? value)? onGridDPIChanged;
   final void Function()? onOpenAssetsFolderPressed;
+  final FutureOr<void> Function(bool value)? onAutoSubmitButtonChanged;
 
   const SettingsDialog({
     super.key,
@@ -72,6 +74,7 @@ class SettingsDialog extends StatefulWidget {
     this.onLogLevelChanged,
     this.onGridDPIChanged,
     this.onOpenAssetsFolderPressed,
+    this.onAutoSubmitButtonChanged,
   });
 
   @override
@@ -142,13 +145,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 355),
+                          constraints: const BoxConstraints(maxHeight: 415),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ..._themeSettings(),
                               const Divider(),
                               ..._gridSettings(),
+                              const Divider(),
+                              ..._otherSettings(),
                             ],
                           ),
                         ),
@@ -434,6 +439,31 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
   }
 
+  List<Widget> _otherSettings() {
+    return [
+      const Align(
+        alignment: Alignment.topLeft,
+        child: Text('Other Settings'),
+      ),
+      const SizedBox(height: 5),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: DialogToggleSwitch(
+              initialValue: false,
+              label: 'Auto Show Text Submit Button',
+              onToggle: (value) async {
+                await widget.onAutoSubmitButtonChanged?.call(value);
+                setState(() {});
+              },
+            ),
+          )
+        ],
+      ),
+    ];
+  }
+
   List<Widget> _networkTablesSettings() {
     return [
       const Align(
@@ -498,7 +528,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
-              maxLines: 3,
+              maxLines: 4,
             ),
           ),
           const SizedBox(width: 5),
@@ -545,13 +575,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
             ),
           ),
-          TextButton.icon(
-            onPressed: () {
-              widget.onOpenAssetsFolderPressed?.call();
-            },
-            icon: const Icon(Icons.folder_outlined),
-            label: const Text('Open Assets Folder'),
-          ),
+          if (!Platform.isMacOS)
+            TextButton.icon(
+              onPressed: () {
+                widget.onOpenAssetsFolderPressed?.call();
+              },
+              icon: const Icon(Icons.folder_outlined),
+              label: const Text('Open Assets Folder'),
+            ),
         ],
       ),
     ];

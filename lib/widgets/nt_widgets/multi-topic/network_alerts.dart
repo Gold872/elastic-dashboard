@@ -55,6 +55,8 @@ class NetworkAlerts extends NTWidget {
 
   @override
   Widget build(BuildContext context) {
+    ScrollController scrollController = ScrollController();
+
     NetworkAlertsModel model = cast(context.watch<NTWidgetModel>());
 
     return ListenableBuilder(
@@ -73,66 +75,71 @@ class NetworkAlerts extends NTWidget {
         List<String> warnings = warningsRaw.whereType<String>().toList();
         List<String> infos = infosRaw.whereType<String>().toList();
 
-        return ListView.builder(
-          itemCount: errors.length + warnings.length + infos.length,
-          itemBuilder: (context, index) {
-            String alertType = 'error';
-            String alertMessage;
-            if (index >= errors.length) {
-              index -= errors.length;
-              alertType = 'warning';
-            }
-            if (index >= warnings.length && alertType == 'warning') {
-              index -= warnings.length;
-              alertType = 'info';
-            }
-            if (index >= infos.length && alertType == 'info') {
-              alertType = 'none';
-            }
+        return Scrollbar(
+          thumbVisibility: true,
+          controller: scrollController,
+          child: ListView.builder(
+            controller: scrollController,
+            itemCount: errors.length + warnings.length + infos.length,
+            itemBuilder: (context, index) {
+              String alertType = 'error';
+              String alertMessage;
+              if (index >= errors.length) {
+                index -= errors.length;
+                alertType = 'warning';
+              }
+              if (index >= warnings.length && alertType == 'warning') {
+                index -= warnings.length;
+                alertType = 'info';
+              }
+              if (index >= infos.length && alertType == 'info') {
+                alertType = 'none';
+              }
 
-            TextStyle? messageStyle = Theme.of(context).textTheme.bodyMedium;
+              TextStyle? messageStyle = Theme.of(context).textTheme.bodyMedium;
 
-            switch (alertType) {
-              case 'error':
-                alertMessage = errors[index];
-                return ListTile(
-                  dense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  leading: const Icon(
-                    Icons.cancel,
-                    size: 24,
-                    color: Colors.red,
-                  ),
-                  title: Text(alertMessage, style: messageStyle),
-                );
-              case 'warning':
-                alertMessage = warnings[index];
-                return ListTile(
-                  dense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  leading: const Icon(
-                    Icons.warning,
-                    size: 24,
-                    color: Colors.yellow,
-                  ),
-                  title: Text(alertMessage, style: messageStyle),
-                );
-              case 'info':
-                alertMessage = infos[index];
-                return ListTile(
-                  dense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  leading: const Icon(
-                    Icons.info,
-                    size: 24,
-                    color: Colors.green,
-                  ),
-                  title: Text(alertMessage, style: messageStyle),
-                );
-              default:
-                return Container();
-            }
-          },
+              switch (alertType) {
+                case 'error':
+                  alertMessage = errors[index];
+                  return ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    leading: const Icon(
+                      Icons.cancel,
+                      size: 24,
+                      color: Colors.red,
+                    ),
+                    title: Text(alertMessage, style: messageStyle),
+                  );
+                case 'warning':
+                  alertMessage = warnings[index];
+                  return ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    leading: const Icon(
+                      Icons.warning,
+                      size: 24,
+                      color: Colors.yellow,
+                    ),
+                    title: Text(alertMessage, style: messageStyle),
+                  );
+                case 'info':
+                  alertMessage = infos[index];
+                  return ListTile(
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    leading: const Icon(
+                      Icons.info,
+                      size: 24,
+                      color: Colors.green,
+                    ),
+                    title: Text(alertMessage, style: messageStyle),
+                  );
+                default:
+                  return Container();
+              }
+            },
+          ),
         );
       },
     );

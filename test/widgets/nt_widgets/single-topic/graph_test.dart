@@ -61,16 +61,18 @@ void main() {
     expect(graphModel.type, 'Graph');
     expect(graphModel.runtimeType, GraphModel);
     expect(
-        graphModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      graphModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (graphModel is! GraphModel) {
       return;

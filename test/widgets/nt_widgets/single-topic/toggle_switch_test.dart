@@ -52,13 +52,15 @@ void main() {
     expect(toggleSwitchModel.type, 'Toggle Switch');
     expect(toggleSwitchModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
-        toggleSwitchModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Boolean Box',
-          'Toggle Button',
-          'Toggle Switch',
-          'Text Display',
-        ]));
+      toggleSwitchModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Boolean Box',
+        'Toggle Button',
+        'Toggle Switch',
+        'Text Display',
+        'Large Text Display',
+      ]),
+    );
   });
 
   test('Toggle switch to json', () {

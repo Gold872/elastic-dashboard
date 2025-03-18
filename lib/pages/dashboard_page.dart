@@ -205,9 +205,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        setState(() {
-          _currentTabIndex = tabIndex;
-        });
+        _switchToTab(tabIndex);
       },
       onTabCreated: (tab) {
         _showShuffleboardWarningMessage();
@@ -289,14 +287,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             if (tabIdentifier >= _tabData.length) {
               return;
             }
-            setState(() => _currentTabIndex = tabIdentifier);
+            _switchToTab(tabIdentifier);
           } else if (tabIdentifier is String) {
             int tabIndex =
                 _tabData.indexWhere((tab) => tab.name == tabIdentifier);
             if (tabIndex == -1) {
               return;
             }
-            setState(() => _currentTabIndex = tabIndex);
+            _switchToTab(tabIndex);
           }
         },
         onNotification: (title, description, icon, time, width, height) {
@@ -322,7 +320,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               stackedOptions: StackedOptions(
                 key: 'robot_notification',
                 type: StackedType.above,
-                itemOffset: const Offset(0, 5),
               ),
             );
             if (mounted) widget.show(context);
@@ -337,8 +334,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         widget.updateChecker ?? UpdateChecker(currentVersion: widget.version);
 
     if (!isWPILib) {
-      Future(
-          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+      Future(() => _checkForUpdates(
+            notifyIfLatest: false,
+            notifyIfError: false,
+          ));
     }
   }
 
@@ -361,6 +360,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   Future<void> _closeWindow() async {
     await _saveWindowPosition();
     await windowManager.destroy();
+    exit(0);
   }
 
   @override
@@ -545,10 +545,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     String jsonString = encoder.convert(jsonData);
 
-    final Uint8List fileData = Uint8List.fromList(jsonString.codeUnits);
+    final Uint8List fileData = utf8.encode(jsonString);
 
-    final XFile jsonFile = XFile.fromData(fileData,
-        mimeType: 'application/json', name: 'elastic-layout.json');
+    final XFile jsonFile = XFile.fromData(
+      fileData,
+      mimeType: 'application/json',
+      name: 'elastic-layout.json',
+    );
 
     logger.info('Saving layout data to ${saveLocation.path}');
     await jsonFile.saveTo(saveLocation.path);
@@ -690,7 +693,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     _createDefaultTabs();
 
     if (_currentTabIndex >= _tabData.length) {
-      _currentTabIndex = _tabData.length - 1;
+      _switchToTab(_tabData.length - 1);
     }
 
     return true;
@@ -1198,7 +1201,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           if (i - 1 < _tabData.length) {
             logger
                 .info('Switching tab to index ${i - 1} via keyboard shortcut');
-            setState(() => _currentTabIndex = i - 1);
+            _switchToTab(i - 1);
           }
         },
       );
@@ -1276,7 +1279,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           ),
         );
 
-        setState(() => _currentTabIndex = newTabIndex);
+        _switchToTab(newTabIndex);
       },
     );
     // Close Tab (Ctrl + W)
@@ -1306,6 +1309,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           _tabData[oldTabIndex].tabGrid.onDestroy();
 
           setState(() {
+            _tabData[oldTabIndex].tabGrid.dispose();
             _tabData.removeAt(oldTabIndex);
           });
         });
@@ -1657,6 +1661,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           }
           setState(() {});
         },
+        onAutoSubmitButtonChanged: (value) async {
+          await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
+          setState(() {});
+        },
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
               '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
@@ -1711,15 +1719,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _onDriverStationDocked() async {
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-    double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
-    Size screenSize =
-        (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
+    Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
     await windowManager.unmaximize();
 
-    Size newScreenSize =
-        Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
-            pixelRatio;
+    Size newScreenSize = Size(screenSize.width, screenSize.height - 200);
 
     await windowManager.setSize(newScreenSize);
 
@@ -1738,8 +1742,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await windowManager.setResizable(true);
 
     // Re-adds the window frame, window manager's API for this is weird
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-        windowButtonVisibility: false);
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden,
+      windowButtonVisibility: false,
+    );
   }
 
   void _showWindowCloseConfirmation(BuildContext context) {
@@ -1807,6 +1813,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
   }
 
+  void _switchToTab(int tabIndex) =>
+      setState(() => _currentTabIndex = tabIndex);
+
   void _moveTabLeft() {
     if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
       return;
@@ -1858,9 +1867,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       moveIndex = 0;
     }
 
-    setState(() {
-      _currentTabIndex = moveIndex;
-    });
+    _switchToTab(moveIndex);
   }
 
   void _moveToPreviousTab() {
@@ -1870,9 +1877,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       moveIndex = _tabData.length - 1;
     }
 
-    setState(() {
-      _currentTabIndex = moveIndex;
-    });
+    _switchToTab(moveIndex);
   }
 
   @override
@@ -1884,8 +1889,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
       textStyle: WidgetStatePropertyAll(menuTextStyle),
-      backgroundColor:
-          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      backgroundColor: const WidgetStatePropertyAll(
+        Color.fromARGB(255, 25, 25, 25),
+      ),
       minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
@@ -1893,7 +1899,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     final bool layoutLocked =
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
-    final double minWindowWidth = layoutLocked ? 500 : 460;
+    late final double platformWidthAdjust;
+    if (Platform.isMacOS) {
+      platformWidthAdjust = 30;
+    } else if (Platform.isLinux) {
+      platformWidthAdjust = 10;
+    } else {
+      platformWidthAdjust = 0;
+    }
+
+    final double minWindowWidth =
+        platformWidthAdjust + (layoutLocked ? 500 : 460);
     final bool consolidateMenu = windowWidth < minWindowWidth;
 
     List<Widget> menuChildren = [
@@ -2056,8 +2072,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
-        backgroundColor:
-            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        backgroundColor: WidgetStatePropertyAll(
+          Color.fromARGB(255, 25, 25, 25),
+        ),
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
@@ -2142,17 +2159,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       );
     }
 
-    final double nonConolidatedLeadingWidth = (layoutLocked) ? 409 : 369;
-    final double consolidatedLeadingWidth = (layoutLocked) ? 330 : 290;
-
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        leadingWidth: consolidateMenu
-            ? consolidatedLeadingWidth
-            : nonConolidatedLeadingWidth,
       ),
       body: Focus(
         autofocus: true,
@@ -2171,17 +2182,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         preferences.getDouble(PrefKeys.gridDpiOverride),
                     updateButton: updateButton,
                     currentIndex: _currentTabIndex,
-                    onTabMoveLeft: () {
-                      _moveTabLeft();
-                    },
-                    onTabMoveRight: () {
-                      _moveTabRight();
-                    },
-                    onTabRename: (index, newData) {
-                      setState(() {
-                        _tabData[index] = newData;
-                      });
-                    },
+                    onTabMoveLeft: _moveTabLeft,
+                    onTabMoveRight: _moveTabRight,
+                    onTabRename: (index, newData) =>
+                        setState(() => _tabData[index] = newData),
                     onTabCreate: () {
                       String tabName = 'Tab ${_tabData.length + 1}';
                       setState(() {
@@ -2201,23 +2205,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         return;
                       }
 
-                      TabData currentTab = _tabData[index];
+                      TabData tabToRemove = _tabData[index];
 
-                      _showTabCloseConfirmation(context, currentTab.name, () {
-                        if (_currentTabIndex == _tabData.length - 1) {
-                          _currentTabIndex--;
+                      _showTabCloseConfirmation(context, tabToRemove.name, () {
+                        int indexToSwitch = _currentTabIndex;
+
+                        if (indexToSwitch == _tabData.length - 1) {
+                          indexToSwitch--;
                         }
 
-                        _tabData[index].tabGrid.onDestroy();
+                        tabToRemove.tabGrid.onDestroy();
+                        tabToRemove.tabGrid.dispose();
 
-                        setState(() {
-                          _tabData.removeAt(index);
-                        });
+                        setState(() => _tabData.remove(tabToRemove));
+                        _switchToTab(indexToSwitch);
                       });
                     },
-                    onTabChanged: (index) {
-                      setState(() => _currentTabIndex = index);
-                    },
+                    onTabChanged: _switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
                         Map<String, dynamic> tabJson =
@@ -2238,44 +2242,35 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     },
                     tabData: _tabData,
                   ),
-                  _AddWidgetDialog(
-                    ntConnection: widget.ntConnection,
-                    preferences: widget.preferences,
-                    grid: () => _tabData[_currentTabIndex].tabGrid,
-                    visible: _addWidgetDialogVisible,
-                    onNTDragUpdate: (globalPosition, widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .addDragInWidget(widget, globalPosition);
-                    },
-                    onNTDragEnd: (widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .placeDragInWidget(widget);
-                    },
-                    onLayoutDragUpdate: (globalPosition, widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .addDragInWidget(widget, globalPosition);
-                    },
-                    onLayoutDragEnd: (widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .placeDragInWidget(widget);
-                    },
-                    onRemoveWidget: () {
-                      // Just in case if the tab index is somehow changed between frames
-                      int indexOnRemoval = _currentTabIndex;
-
-                      WidgetsBinding.instance.addPostFrameCallback((_) =>
-                          _tabData[indexOnRemoval]
-                              .tabGrid
-                              .removeDragInWidget());
-                    },
-                    onClose: () {
-                      setState(() => _addWidgetDialogVisible = false);
-                    },
-                  ),
+                  if (_addWidgetDialogVisible)
+                    _AddWidgetDialog(
+                      ntConnection: widget.ntConnection,
+                      preferences: widget.preferences,
+                      grid: _tabData[_currentTabIndex].tabGrid,
+                      gridIndex: _currentTabIndex,
+                      onNTDragUpdate: (globalPosition, widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .addDragInWidget(widget, globalPosition);
+                      },
+                      onNTDragEnd: (widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .placeDragInWidget(widget);
+                      },
+                      onLayoutDragUpdate: (globalPosition, widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .addDragInWidget(widget, globalPosition);
+                      },
+                      onLayoutDragEnd: (widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .placeDragInWidget(widget);
+                      },
+                      onClose: () =>
+                          setState(() => _addWidgetDialogVisible = false),
+                    ),
                 ],
               ),
             ),
@@ -2292,14 +2287,28 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
                           : 'Network Tables: Disconnected';
 
+                      String teamNumberText =
+                          'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}';
+
                       double connectedWidth = (TextPainter(
-                              text: TextSpan(
-                                text: connectedText,
-                                style: footerStyle,
-                              ),
-                              maxLines: 1,
-                              textDirection: TextDirection.ltr)
-                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                        text: TextSpan(
+                          text: connectedText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
+                          .size
+                          .width;
+
+                      double teamNumberWidth = (TextPainter(
+                        text: TextSpan(
+                          text: teamNumberText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
                           .size
                           .width;
 
@@ -2308,9 +2317,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       return Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (availableSpace >= windowWidth / 2 + 30)
+                          if (availableSpace >=
+                              (windowWidth + teamNumberWidth) / 2)
                             Text(
-                              'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                              teamNumberText,
                               textAlign: TextAlign.center,
                             ),
                           if (availableSpace >= 115)
@@ -2353,40 +2363,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 class _AddWidgetDialog extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final TabGridModel Function() _grid;
-  final bool _visible;
+  final TabGridModel grid;
+  final int gridIndex;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)
-      _onNTDragUpdate;
-  final void Function(WidgetContainerModel widget) _onNTDragEnd;
+      onNTDragUpdate;
+  final void Function(WidgetContainerModel widget) onNTDragEnd;
 
   final void Function(Offset globalPosition, LayoutContainerModel widget)
-      _onLayoutDragUpdate;
-  final void Function(LayoutContainerModel widget) _onLayoutDragEnd;
+      onLayoutDragUpdate;
+  final void Function(LayoutContainerModel widget) onLayoutDragEnd;
 
-  final void Function() _onRemoveWidget;
-
-  final void Function()? _onClose;
+  final void Function() onClose;
 
   const _AddWidgetDialog({
     required this.ntConnection,
     required this.preferences,
-    required TabGridModel Function() grid,
-    required bool visible,
-    required void Function(Offset, WidgetContainerModel) onNTDragUpdate,
-    required void Function(WidgetContainerModel) onNTDragEnd,
-    required void Function(Offset, LayoutContainerModel) onLayoutDragUpdate,
-    required void Function(LayoutContainerModel) onLayoutDragEnd,
-    required void Function() onRemoveWidget,
-    void Function()? onClose,
-  })  : _onClose = onClose,
-        _onLayoutDragEnd = onLayoutDragEnd,
-        _onNTDragEnd = onNTDragEnd,
-        _onNTDragUpdate = onNTDragUpdate,
-        _onLayoutDragUpdate = onLayoutDragUpdate,
-        _onRemoveWidget = onRemoveWidget,
-        _visible = visible,
-        _grid = grid;
+    required this.grid,
+    required this.gridIndex,
+    required this.onNTDragUpdate,
+    required this.onNTDragEnd,
+    required this.onLayoutDragUpdate,
+    required this.onLayoutDragEnd,
+    required this.onClose,
+  });
 
   @override
   State<_AddWidgetDialog> createState() => _AddWidgetDialogState();
@@ -2396,126 +2396,139 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
   String _searchQuery = '';
 
+  void onRemove(TabGridModel grid) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      grid.removeDragInWidget();
+    });
+  }
+
+  @override
+  void didUpdateWidget(_AddWidgetDialog oldWidget) {
+    if (widget.gridIndex != oldWidget.gridIndex ||
+        widget.grid != oldWidget.grid) {
+      onRemove(oldWidget.grid);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: widget._visible,
-      child: DraggableDialog(
-        dialog: Container(
-          decoration: const BoxDecoration(boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              spreadRadius: -12.5,
-              offset: Offset(5.0, 5.0),
-              color: Colors.black87,
-            )
-          ]),
-          child: Card(
-            margin: const EdgeInsets.all(10.0),
-            child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  const Icon(Icons.drag_handle, color: Colors.grey),
-                  const SizedBox(height: 10),
-                  Text('Add Widget',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const TabBar(
-                    tabs: [
-                      Tab(text: 'Network Tables'),
-                      Tab(text: 'Layouts'),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        NetworkTableTree(
-                          ntConnection: widget.ntConnection,
-                          preferences: widget.preferences,
-                          searchQuery: _searchQuery,
-                          listLayoutBuilder: (
-                              {required title, required children}) {
-                            return widget._grid().createListLayout(
-                                  title: title,
-                                  children: children,
-                                );
-                          },
-                          hideMetadata: _hideMetadata,
-                          onDragUpdate: widget._onNTDragUpdate,
-                          onDragEnd: widget._onNTDragEnd,
-                          onRemoveWidget: widget._onRemoveWidget,
-                        ),
-                        ListView(
-                          children: [
-                            LayoutDragTile(
-                              title: 'List Layout',
-                              icon: Icons.table_rows,
-                              layoutBuilder: () =>
-                                  widget._grid().createListLayout(),
-                              onDragUpdate: widget._onLayoutDragUpdate,
-                              onDragEnd: widget._onLayoutDragEnd,
-                              onRemoveWidget: widget._onRemoveWidget,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
+    return DraggableDialog(
+      dialog: Container(
+        decoration: const BoxDecoration(boxShadow: [
+          BoxShadow(
+            blurRadius: 20,
+            spreadRadius: -12.5,
+            offset: Offset(5.0, 5.0),
+            color: Colors.black87,
+          )
+        ]),
+        child: Card(
+          margin: const EdgeInsets.all(10.0),
+          child: DefaultTabController(
+            length: 2,
+            child: Column(
+              children: [
+                const Icon(Icons.drag_handle, color: Colors.grey),
+                const SizedBox(height: 10),
+                Text('Add Widget',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const TabBar(
+                  tabs: [
+                    Tab(text: 'Network Tables'),
+                    Tab(text: 'Layouts'),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Expanded(
+                  child: TabBarView(
                     children: [
-                      Builder(builder: (context) {
-                        return IconButton(
-                          icon: const Icon(Icons.settings),
-                          onPressed: () {
-                            showPopover(
-                              context: context,
-                              direction: PopoverDirection.top,
-                              transitionDuration:
-                                  const Duration(milliseconds: 100),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surface,
-                              barrierColor: Colors.transparent,
-                              width: 200.0,
-                              bodyBuilder: (context) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: DialogToggleSwitch(
-                                    label: 'Hide Metadata',
-                                    initialValue: _hideMetadata,
-                                    onToggle: (value) {
-                                      setState(() => _hideMetadata = value);
-                                    },
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        );
-                      }),
-                      Expanded(
-                        child: SizedBox(
-                          height: 40.0,
-                          child: DialogTextInput(
-                            onSubmit: (value) =>
-                                setState(() => _searchQuery = value),
-                            initialText: _searchQuery,
-                            allowEmptySubmission: true,
-                            updateOnChanged: true,
-                            label: 'Search',
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          widget._onClose?.call();
+                      NetworkTableTree(
+                        ntConnection: widget.ntConnection,
+                        preferences: widget.preferences,
+                        searchQuery: _searchQuery,
+                        listLayoutBuilder: ({
+                          required title,
+                          required children,
+                        }) {
+                          return widget.grid.createListLayout(
+                            title: title,
+                            children: children,
+                          );
                         },
-                        child: const Text('Close'),
+                        hideMetadata: _hideMetadata,
+                        gridIndex: widget.gridIndex,
+                        onDragUpdate: widget.onNTDragUpdate,
+                        onDragEnd: widget.onNTDragEnd,
+                        onRemoveWidget: () => onRemove(widget.grid),
+                      ),
+                      ListView(
+                        children: [
+                          LayoutDragTile(
+                            gridIndex: widget.gridIndex,
+                            title: 'List Layout',
+                            icon: Icons.table_rows,
+                            layoutBuilder: () => widget.grid.createListLayout(),
+                            onDragUpdate: widget.onLayoutDragUpdate,
+                            onDragEnd: widget.onLayoutDragEnd,
+                            onRemoveWidget: () => onRemove(widget.grid),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Row(
+                  children: [
+                    Builder(builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: () {
+                          showPopover(
+                            context: context,
+                            direction: PopoverDirection.top,
+                            transitionDuration:
+                                const Duration(milliseconds: 100),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surface,
+                            barrierColor: Colors.transparent,
+                            width: 200.0,
+                            bodyBuilder: (context) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: DialogToggleSwitch(
+                                  label: 'Hide Metadata',
+                                  initialValue: _hideMetadata,
+                                  onToggle: (value) {
+                                    setState(() => _hideMetadata = value);
+                                  },
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }),
+                    Expanded(
+                      child: SizedBox(
+                        height: 40.0,
+                        child: DialogTextInput(
+                          onSubmit: (value) =>
+                              setState(() => _searchQuery = value),
+                          initialText: _searchQuery,
+                          allowEmptySubmission: true,
+                          updateOnChanged: true,
+                          label: 'Search',
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: widget.onClose,
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

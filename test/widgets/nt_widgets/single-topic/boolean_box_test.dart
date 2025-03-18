@@ -68,13 +68,15 @@ void main() {
     expect(booleanBoxModel.type, 'Boolean Box');
     expect(booleanBoxModel.runtimeType, BooleanBoxModel);
     expect(
-        booleanBoxModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Boolean Box',
-          'Toggle Switch',
-          'Toggle Button',
-          'Text Display',
-        ]));
+      booleanBoxModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Boolean Box',
+        'Toggle Switch',
+        'Toggle Button',
+        'Text Display',
+        'Large Text Display',
+      ]),
+    );
 
     if (booleanBoxModel is! BooleanBoxModel) {
       return;

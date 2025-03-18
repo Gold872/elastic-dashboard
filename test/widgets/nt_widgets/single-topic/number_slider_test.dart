@@ -61,16 +61,18 @@ void main() {
     expect(numberSliderModel.type, 'Number Slider');
     expect(numberSliderModel.runtimeType, NumberSliderModel);
     expect(
-        numberSliderModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      numberSliderModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (numberSliderModel is! NumberSliderModel) {
       return;

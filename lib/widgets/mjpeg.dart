@@ -8,6 +8,7 @@ import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -19,6 +20,7 @@ class Mjpeg extends StatefulWidget {
   final MjpegController controller;
   final BoxFit? fit;
   final bool expandToFit;
+  final int quarterTurns;
   final double? width;
   final double? height;
   final WidgetBuilder? loading;
@@ -31,6 +33,7 @@ class Mjpeg extends StatefulWidget {
     this.height,
     this.fit,
     this.expandToFit = false,
+    this.quarterTurns = 0,
     this.error,
     this.loading,
     super.key,
@@ -83,11 +86,9 @@ class _MjpegState extends State<Mjpeg> {
 
     controller.setMounted(streamKey, context.mounted);
 
-    if (controller.isVisible(streamKey)) {
-      controller.startStream();
-    }
-
     if (controller.errorState.value != null && kDebugMode) {
+      String errorText =
+          '${controller.errorState.value!.first}\n${controller.errorState.value!.last.toString()}';
       return SizedBox(
         width: widget.width,
         height: widget.height,
@@ -96,14 +97,17 @@ class _MjpegState extends State<Mjpeg> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    '${controller.errorState.value}',
+                    errorText,
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
               )
-            : widget.error!(context, controller.errorState.value!.first,
-                controller.errorState.value!.last),
+            : widget.error!(
+                context,
+                controller.errorState.value!.first,
+                controller.errorState.value!.last,
+              ),
       );
     }
 
@@ -112,23 +116,48 @@ class _MjpegState extends State<Mjpeg> {
       child: StreamBuilder<List<int>?>(
           stream: controller.imageStream.stream,
           builder: (context, snapshot) {
-            if ((snapshot.data == null && controller.previousImage == null) ||
-                controller.errorState.value != null) {
+            if (!controller.isStreaming) {
+              // Request has been sent but no status received yet
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CustomLoadingIndicator(),
+                  const SizedBox(height: 10),
+                  const Text('Attempting to establish HTTP connection.'),
+                ],
+              );
+            }
+            if (snapshot.data == null && controller.previousImage == null) {
               return SizedBox(
                 width: widget.width,
                 height: widget.height,
                 child: widget.loading?.call(context) ??
-                    const Center(child: CircularProgressIndicator()),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CustomLoadingIndicator(),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Connection established but no data received.\nCamera may be disconnected from device.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
               );
             }
 
-            return Image.memory(
-              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-              width: widget.width,
-              height: widget.height,
-              gaplessPlayback: true,
-              fit: widget.fit,
-              scale: (widget.expandToFit) ? 1e-6 : 1.0,
+            return RotatedBox(
+              quarterTurns: widget.quarterTurns,
+              child: Image.memory(
+                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+                width: widget.width,
+                height: widget.height,
+                gaplessPlayback: true,
+                fit: widget.fit,
+                scale: (widget.expandToFit) ? 1e-6 : 1.0,
+              ),
             );
           }),
       onVisibilityChanged: (VisibilityInfo info) {
@@ -145,10 +174,16 @@ class MjpegController extends ChangeNotifier {
   static const _soi = 0xD8;
   static const _eoi = 0xD9;
 
-  final String stream;
+  final List<String> streams;
   final bool isLive;
   final Duration timeout;
   final Map<String, String> headers;
+
+  int currentStreamIndex = 0;
+
+  String get currentStream =>
+      streams[currentStreamIndex.clamp(0, streams.length - 1)];
+
   Client httpClient = Client();
 
   StreamSubscription<List<int>>? _rawSubscription;
@@ -172,10 +207,16 @@ class MjpegController extends ChangeNotifier {
   final Set<Key> _mountedKeys = {};
   final Set<Key> _visibleKeys = {};
 
+  bool _disposed = false;
+
+  bool get _inUse => !_disposed && _mountedKeys.isNotEmpty;
+
+  bool get _shouldStream => _visibleKeys.isNotEmpty && _inUse;
+
   bool isVisible(Key key) => _visibleKeys.contains(key);
 
   void setVisible(Key key, bool value) {
-    logger.trace('Setting visibility to $value for $stream');
+    logger.trace('Setting visibility to $value for $currentStream');
     if (value) {
       bool hasChanged = !_visibleKeys.contains(key);
       _visibleKeys.add(key);
@@ -183,12 +224,20 @@ class MjpegController extends ChangeNotifier {
       if (hasChanged) {
         logger.trace(
             'Visibility changed to true, notifying listeners for mjpeg stream');
+        if (!isStreaming && errorState.value == null) {
+          startStream();
+        }
         notifyListeners();
       }
     } else {
       _visibleKeys.remove(key);
 
       if (_visibleKeys.isEmpty) {
+        Future(() {
+          if (_inUse) {
+            errorState.value = null;
+          }
+        });
         stopStream();
       }
     }
@@ -197,7 +246,7 @@ class MjpegController extends ChangeNotifier {
   bool isMounted(Key key) => _mountedKeys.contains(key);
 
   void setMounted(Key key, bool value) {
-    logger.trace('Setting mounted to $value for $stream');
+    logger.trace('Setting mounted to $value for $currentStream');
     if (value) {
       _mountedKeys.add(key);
     } else {
@@ -205,30 +254,64 @@ class MjpegController extends ChangeNotifier {
     }
   }
 
+  bool _attemptingConnection = false;
+
   bool get isStreaming => _rawSubscription != null;
 
   MjpegController({
-    required this.stream,
+    required this.streams,
     this.isLive = true,
     this.timeout = const Duration(seconds: 5),
     this.headers = const {},
     this.preprocessor,
   }) {
-    errorState.addListener(notifyListeners);
+    errorState.addListener(_onError);
+  }
+
+  @visibleForTesting
+  MjpegController.withMockClient({
+    required this.streams,
+    this.isLive = true,
+    this.timeout = const Duration(seconds: 5),
+    this.headers = const {},
+    this.preprocessor,
+    required this.httpClient,
+  }) {
+    errorState.addListener(_onError);
+  }
+
+  void _onError() {
+    if (errorState.value != null) {
+      logger.error(
+        'Error on Mjpeg stream for URL $currentStream',
+        errorState.value?.firstOrNull,
+        errorState.value?.lastOrNull,
+      );
+      if (errorState.value!.first is TimeoutException ||
+          errorState.value!.first is HttpException) {
+        stopStream(retry: _inUse);
+      } else {
+        stopStream();
+      }
+    }
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    errorState.removeListener(notifyListeners);
+    errorState.removeListener(_onError);
     stopStream();
     imageStream.close();
+    _disposed = true;
     super.dispose();
   }
 
   void startStream() async {
-    if (isStreaming) {
+    if (isStreaming || !_shouldStream || _attemptingConnection) {
       return;
     }
+    _attemptingConnection = true;
+    String stream = streams[currentStreamIndex];
     logger.info('Starting camera stream on URL $stream');
     ByteStream? byteStream;
     try {
@@ -240,30 +323,41 @@ class MjpegController extends ChangeNotifier {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         byteStream = response.stream;
       } else {
-        if (_mountedKeys.isNotEmpty) {
+        if (_inUse) {
           errorState.value = [
-            HttpException('Stream returned ${response.statusCode} status'),
-            StackTrace.current
+            HttpException(
+              'Stream returned status code ${response.statusCode}: "${response.reasonPhrase}"',
+            ),
+            StackTrace.current,
           ];
           imageStream.add(null);
         }
-        stopStream();
       }
     } catch (error, stack) {
-      // we ignore those errors in case play/pause is triggers
-      if (!error
+      // Timed out
+      if (error.toString().contains('Connection attempt cancelled')) {
+        errorState.value = [
+          HttpException('Connection timed out', uri: Uri.tryParse(stream)),
+          stack,
+        ];
+      } else if (!error // we ignore those errors in case play/pause is triggers
           .toString()
           .contains('Connection closed before full header was received')) {
-        if (_mountedKeys.isNotEmpty) {
+        if (_inUse) {
           errorState.value = [error, stack];
           imageStream.add(null);
         }
       }
     }
 
-    if (byteStream == null) {
+    _attemptingConnection = false;
+
+    if (byteStream == null || !_shouldStream) {
       return;
     }
+
+    previousImage = null;
+    _buffer.clear();
 
     _rawSubscription = byteStream.listen(
       (data) {
@@ -271,13 +365,17 @@ class MjpegController extends ChangeNotifier {
         _handleData(data);
       },
       onDone: () {
-        stopStream();
+        stopStream(retry: _inUse);
         notifyListeners();
       },
     );
 
-    _metricsTimer ??=
-        Timer.periodic(const Duration(seconds: 1), _updateMetrics);
+    _metricsTimer ??= Timer.periodic(
+      const Duration(seconds: 1),
+      _updateMetrics,
+    );
+
+    notifyListeners();
   }
 
   void _updateMetrics(_) {
@@ -288,17 +386,32 @@ class MjpegController extends ChangeNotifier {
     _frameCount = 0;
   }
 
-  void stopStream() async {
-    logger.info('Stopping camera stream on URL $stream');
-    await _rawSubscription?.cancel();
-    _buffer.clear();
+  void _switchToNextStream() {
+    currentStreamIndex++;
+    if (currentStreamIndex >= streams.length) {
+      currentStreamIndex = 0;
+    }
+    logger.info(
+        'Switching to stream at index $currentStreamIndex: $currentStream');
+  }
+
+  void stopStream({bool retry = false}) async {
+    logger.info('Stopping camera stream on URL $currentStream');
     _metricsTimer?.cancel();
     _metricsTimer = null;
+    await _rawSubscription?.cancel();
     _rawSubscription = null;
+    _buffer.clear();
     _bitCount = 0;
     _frameCount = 0;
     httpClient.close();
     httpClient = Client();
+
+    if (retry && !isStreaming) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      _switchToNextStream();
+      startStream();
+    }
   }
 
   void _handleNewPacket() {
@@ -308,6 +421,7 @@ class MjpegController extends ChangeNotifier {
     imageStream.add(imageData);
     _frameCount++;
     _buffer.clear();
+    errorState.value = null;
   }
 
   void _handleData(List<int> data) {

@@ -65,16 +65,18 @@ void main() {
     expect(radialGaugeModel.type, 'Radial Gauge');
     expect(radialGaugeModel.runtimeType, RadialGaugeModel);
     expect(
-        radialGaugeModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      radialGaugeModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (radialGaugeModel is! RadialGaugeModel) {
       return;
@@ -110,6 +112,7 @@ void main() {
           'Voltage View',
           'Radial Gauge',
           'Match Time',
+          'Large Text Display',
         ]));
 
     if (radialGaugeModel is! RadialGaugeModel) {

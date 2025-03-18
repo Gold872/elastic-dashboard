@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -82,7 +83,7 @@ void main() {
   });
 
   group('Show submit button defaults to', () {
-    test('true if topic is persistent', () {
+    test('true if topic is persistent', () async {
       NTConnection ntConnection = createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
@@ -108,7 +109,28 @@ void main() {
 
       expect(textDisplayModel.showSubmitButton, isTrue);
     });
-    test('false if topic is not persistent', () {
+    test('true if text auto submit button is true', () async {
+      SharedPreferences.setMockInitialValues({
+        PrefKeys.autoTextSubmitButton: true,
+      });
+      preferences = await SharedPreferences.getInstance();
+
+      TextDisplayModel textDisplayModel = TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: 'Test/Display Value',
+        dataType: 'double',
+        period: 0.100,
+      );
+
+      expect(textDisplayModel.showSubmitButton, isTrue);
+    });
+    test('false if auto submit button is false', () async {
+      SharedPreferences.setMockInitialValues({
+        PrefKeys.autoTextSubmitButton: false,
+      });
+      preferences = await SharedPreferences.getInstance();
+
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
