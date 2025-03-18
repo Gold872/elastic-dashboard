@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
@@ -106,6 +107,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
+  void init() {
+    ntConnection.ntConnected.addListener(onNTConnected);
+    super.init();
+  }
+
+  @override
   void initializeSubscriptions() {
     streamsSubscription = ntConnection.subscribe(streamsTopic, super.period);
   }
@@ -180,8 +187,10 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       newWidth = newWidth! + 1;
                     }
 
-                    resolution = Size(newWidth!.toDouble(),
-                        resolution?.height.toDouble() ?? 0);
+                    resolution = Size(
+                      newWidth!.toDouble(),
+                      resolution?.height.toDouble() ?? 0,
+                    );
                   });
                 },
               ),
@@ -202,8 +211,10 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       return;
                     }
 
-                    resolution = Size(resolution?.width.toDouble() ?? 0,
-                        newHeight.toDouble());
+                    resolution = Size(
+                      resolution?.width.toDouble() ?? 0,
+                      newHeight.toDouble(),
+                    );
                   });
                 },
               ),
@@ -297,9 +308,18 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   void disposeWidget({bool deleting = false}) {
     if (deleting) {
       controller?.dispose();
+      ntConnection.ntConnected.removeListener(onNTConnected);
     }
 
     super.disposeWidget(deleting: deleting);
+  }
+
+  void onNTConnected() {
+    if (ntConnection.ntConnected.value) {
+      closeClient();
+    } else {
+      controller?.stopStream();
+    }
   }
 
   void closeClient() {
@@ -369,15 +389,20 @@ class CameraStreamWidget extends NTWidget {
 
         bool createNewWidget = model.controller == null;
 
-        String stream = model.getUrlWithParameters(streams.last);
+        List<String> streamUrls = streams
+            .map((stream) => model.getUrlWithParameters(stream))
+            .toList();
 
-        createNewWidget =
-            createNewWidget || (model.controller?.stream != stream);
+        createNewWidget = createNewWidget ||
+            !(model.controller?.streams.equals(streamUrls) ?? false);
 
         if (createNewWidget) {
           model.controller?.dispose();
 
-          model.controller = MjpegController(stream: stream);
+          model.controller = MjpegController(
+            streams: streamUrls,
+            timeout: const Duration(milliseconds: 500),
+          );
         }
 
         return IntrinsicWidth(

@@ -42,7 +42,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     MjpegController controller = MjpegController.withMockClient(
-      stream: 'http://10.0.0.2:1181/?action=stream',
+      streams: ['http://10.0.0.2:1181/?action=stream'],
       httpClient: createStreamClient(),
     );
 
@@ -81,7 +81,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     MjpegController controller = MjpegController.withMockClient(
-      stream: 'http://10.0.0.2:1181/?action=stream',
+      streams: ['http://10.0.0.2:1181/?action=stream'],
       httpClient: createStreamClient({
         'http://10.0.0.2:1181/?action=stream': StreamedResponse(
           Stream.value([]),
@@ -126,11 +126,45 @@ void main() {
         .pump(VisibilityDetectorController.instance.updateInterval);
   });
 
+  test('Cycles through invalid URLs', () async {
+    MjpegController controller = MjpegController.withMockClient(
+      streams: [
+        'http://10.0.0.2:1181/?action=stream',
+        'http://10.0.0.2:1182/?action=stream',
+      ],
+      timeout: const Duration(milliseconds: 100),
+      httpClient: createStreamClient(),
+    );
+
+    // Trick the controller into being visible and start streaming
+    final Key visibleKey = UniqueKey();
+    controller.setMounted(visibleKey, true);
+    controller.setVisible(visibleKey, true);
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    expect(controller.errorState.value, isNotNull);
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    expect(controller.currentStreamIndex, 1);
+    expect(controller.currentStream, 'http://10.0.0.2:1182/?action=stream');
+
+    await Future.delayed(const Duration(milliseconds: 100 + 100));
+
+    expect(controller.errorState.value, isNotNull);
+
+    expect(controller.currentStreamIndex, 0);
+    expect(controller.currentStream, 'http://10.0.0.2:1181/?action=stream');
+
+    controller.dispose();
+  });
+
   testWidgets('Waiting for image in stream', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     MjpegController controller = MjpegController.withMockClient(
-      stream: 'http://10.0.0.2:1181/?action=stream',
+      streams: ['http://10.0.0.2:1181/?action=stream'],
       httpClient: createStreamClient({
         'http://10.0.0.2:1181/?action=stream': StreamedResponse(
           Stream.value([]),
