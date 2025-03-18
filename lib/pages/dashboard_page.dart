@@ -13,6 +13,7 @@ import 'package:elegant_notification/resources/stacked_options.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:http/http.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:popover/popover.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -209,9 +210,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           return;
         }
 
-        setState(() {
-          _currentTabIndex = tabIndex;
-        });
+        _switchToTab(tabIndex);
       },
       onTabCreated: (tab) {
         _showShuffleboardWarningMessage();
@@ -293,14 +292,14 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             if (tabIdentifier >= _tabData.length) {
               return;
             }
-            setState(() => _currentTabIndex = tabIdentifier);
+            _switchToTab(tabIdentifier);
           } else if (tabIdentifier is String) {
             int tabIndex =
                 _tabData.indexWhere((tab) => tab.name == tabIdentifier);
             if (tabIndex == -1) {
               return;
             }
-            setState(() => _currentTabIndex = tabIndex);
+            _switchToTab(tabIndex);
           }
         },
         onNotification: (title, description, icon, time, width, height) {
@@ -326,7 +325,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               stackedOptions: StackedOptions(
                 key: 'robot_notification',
                 type: StackedType.above,
-                itemOffset: const Offset(0, 5),
               ),
             );
             if (mounted) widget.show(context);
@@ -341,8 +339,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         widget.updateChecker ?? UpdateChecker(currentVersion: widget.version);
 
     if (!isWPILib) {
-      Future(
-          () => _checkForUpdates(notifyIfLatest: false, notifyIfError: false));
+      Future(() => _checkForUpdates(
+            notifyIfLatest: false,
+            notifyIfError: false,
+          ));
     }
   }
 
@@ -365,6 +365,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   Future<void> _closeWindow() async {
     await _saveWindowPosition();
     await windowManager.destroy();
+    exit(0);
   }
 
   @override
@@ -452,6 +453,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         progressIndicatorBackground: colorScheme.surface,
         progressIndicatorColor: const Color(0xffFE355C),
         width: 350,
+        height: 100,
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
@@ -478,6 +480,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         showProgressIndicator: false,
         background: colorScheme.surface,
         width: 350,
+        height: 100,
         position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
@@ -513,6 +516,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         title: 'No Updates Available',
         message: 'You are running on the latest version of Elastic',
         width: 350,
+        height: 75,
       );
     }
   }
@@ -546,10 +550,13 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     String jsonString = encoder.convert(jsonData);
 
-    final Uint8List fileData = Uint8List.fromList(jsonString.codeUnits);
+    final Uint8List fileData = utf8.encode(jsonString);
 
-    final XFile jsonFile = XFile.fromData(fileData,
-        mimeType: 'application/json', name: 'elastic-layout.json');
+    final XFile jsonFile = XFile.fromData(
+      fileData,
+      mimeType: 'application/json',
+      name: 'elastic-layout.json',
+    );
 
     logger.info('Saving layout data to ${saveLocation.path}');
     await jsonFile.saveTo(saveLocation.path);
@@ -691,7 +698,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     _createDefaultTabs();
 
     if (_currentTabIndex >= _tabData.length) {
-      _currentTabIndex = _tabData.length - 1;
+      _switchToTab(_tabData.length - 1);
     }
 
     return true;
@@ -1199,7 +1206,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           if (i - 1 < _tabData.length) {
             logger
                 .info('Switching tab to index ${i - 1} via keyboard shortcut');
-            setState(() => _currentTabIndex = i - 1);
+            _switchToTab(i - 1);
           }
         },
       );
@@ -1277,7 +1284,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           ),
         );
 
-        setState(() => _currentTabIndex = newTabIndex);
+        _switchToTab(newTabIndex);
       },
     );
     // Close Tab (Ctrl + W)
@@ -1307,6 +1314,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           _tabData[oldTabIndex].tabGrid.onDestroy();
 
           setState(() {
+            _tabData[oldTabIndex].tabGrid.dispose();
             _tabData.removeAt(oldTabIndex);
           });
         });
@@ -1630,6 +1638,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         },
         onColorChanged: widget.onColorChanged,
         onThemeVariantChanged: widget.onThemeVariantChanged,
+        onLogLevelChanged: (level) async {
+          if (level == null) {
+            logger.info('Removing log level preference');
+            await preferences.remove(PrefKeys.logLevel);
+            Logger.level = Defaults.logLevel;
+            return;
+          }
+          logger.info('Changing log level to ${level.levelName}');
+          Logger.level = level;
+          await preferences.setString(PrefKeys.logLevel, level.levelName);
+        },
         onGridDPIChanged: (value) async {
           if (value == null) {
             return;
@@ -1639,17 +1658,24 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
             return;
           }
           if (dpiOverride != null) {
+            logger.info('Setting DPI override to ${dpiOverride.toDouble()}');
             await preferences.setDouble(
                 PrefKeys.gridDpiOverride, dpiOverride.toDouble());
           } else {
+            logger.info('Removing DPI override preference');
             await preferences.remove(PrefKeys.gridDpiOverride);
           }
+          setState(() {});
+        },
+        onAutoSubmitButtonChanged: (value) async {
+          await preferences.setBool(PrefKeys.autoTextSubmitButton, value);
           setState(() {});
         },
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
               '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
           if (await canLaunchUrl(uri)) {
+            logger.info('Opening URL (assets folder): ${uri.toString()}');
             launchUrl(uri);
           }
         },
@@ -1699,15 +1725,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
   void _onDriverStationDocked() async {
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
-    double pixelRatio = primaryDisplay.scaleFactor?.toDouble() ?? 1.0;
-    Size screenSize =
-        (primaryDisplay.visibleSize ?? primaryDisplay.size) * pixelRatio;
+    Size screenSize = primaryDisplay.visibleSize ?? primaryDisplay.size;
 
     await windowManager.unmaximize();
 
-    Size newScreenSize =
-        Size(screenSize.width, (screenSize.height) - (200 * pixelRatio)) /
-            pixelRatio;
+    Size newScreenSize = Size(screenSize.width, screenSize.height - 200);
 
     await windowManager.setSize(newScreenSize);
     await windowManager.setAlignment(Alignment.topCenter);
@@ -1725,8 +1747,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     await windowManager.setResizable(true);
 
     // Re-adds the window frame, window manager's API for this is weird
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-        windowButtonVisibility: false);
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden,
+      windowButtonVisibility: false,
+    );
   }
 
   void _showWindowCloseConfirmation(BuildContext context) {
@@ -1794,6 +1818,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     );
   }
 
+  void _switchToTab(int tabIndex) =>
+      setState(() => _currentTabIndex = tabIndex);
+
   void _moveTabLeft() {
     if (preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) {
       return;
@@ -1845,9 +1872,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       moveIndex = 0;
     }
 
-    setState(() {
-      _currentTabIndex = moveIndex;
-    });
+    _switchToTab(moveIndex);
   }
 
   void _moveToPreviousTab() {
@@ -1857,203 +1882,226 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       moveIndex = _tabData.length - 1;
     }
 
-    setState(() {
-      _currentTabIndex = moveIndex;
-    });
+    _switchToTab(moveIndex);
   }
 
   @override
   Widget build(BuildContext context) {
+    final double windowWidth = MediaQuery.of(context).size.width;
+
     TextStyle? menuTextStyle = Theme.of(context).textTheme.bodySmall;
     TextStyle? footerStyle = Theme.of(context).textTheme.bodyMedium;
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
-      textStyle: WidgetStateProperty.all(menuTextStyle),
-      backgroundColor:
-          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      textStyle: WidgetStatePropertyAll(menuTextStyle),
+      backgroundColor: const WidgetStatePropertyAll(
+        Color.fromARGB(255, 25, 25, 25),
+      ),
+      minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
 
+    final bool layoutLocked =
+        preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
+
+    late final double platformWidthAdjust;
+    if (Platform.isMacOS) {
+      platformWidthAdjust = 30;
+    } else if (Platform.isLinux) {
+      platformWidthAdjust = 10;
+    } else {
+      platformWidthAdjust = 0;
+    }
+
+    final double minWindowWidth =
+        platformWidthAdjust + (layoutLocked ? 500 : 460);
+    final bool consolidateMenu = windowWidth < minWindowWidth;
+
+    List<Widget> menuChildren = [
+      // File
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // Open Layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked ? _importLayout : null,
+            shortcut:
+                const SingleActivator(LogicalKeyboardKey.keyO, control: true),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.folder_open_outlined),
+                SizedBox(width: 8),
+                Text('Open Layout'),
+              ],
+            ),
+          ),
+          // Save
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: _saveLayout,
+            shortcut:
+                const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save_outlined),
+                SizedBox(width: 8),
+                Text('Save'),
+              ],
+            ),
+          ),
+          // Export layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: _exportLayout,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyS,
+              shift: true,
+              control: true,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.save_as_outlined),
+                SizedBox(width: 8),
+                Text('Save As'),
+              ],
+            ),
+          ),
+          // Download layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked ? _loadLayoutFromRobot : null,
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyD,
+              control: true,
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.download),
+                SizedBox(width: 8),
+                Text('Download From Robot'),
+              ],
+            ),
+          ),
+        ],
+        child: const Text(
+          'File',
+        ),
+      ),
+      // Edit
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // Clear layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: !layoutLocked
+                ? () {
+                    setState(() {
+                      _tabData[_currentTabIndex]
+                          .tabGrid
+                          .confirmClearWidgets(context);
+                    });
+                  }
+                : null,
+            leadingIcon: const Icon(Icons.clear),
+            child: const Text('Clear Layout'),
+          ),
+          // Lock/Unlock Layout
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: () {
+              if (layoutLocked) {
+                _unlockLayout();
+              } else {
+                _lockLayout();
+              }
+
+              setState(() {});
+            },
+            leadingIcon: layoutLocked
+                ? const Icon(Icons.lock_open)
+                : const Icon(Icons.lock_outline),
+            child: Text('${layoutLocked ? 'Unlock' : 'Lock'} Layout'),
+          )
+        ],
+        child: const Text(
+          'Edit',
+        ),
+      ),
+      // Help
+      SubmenuButton(
+        style: menuButtonStyle,
+        menuChildren: [
+          // About
+          MenuItemButton(
+            style: menuButtonStyle,
+            onPressed: () {
+              _displayAboutDialog(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.info_outline),
+                SizedBox(width: 8),
+                Text('About'),
+              ],
+            ),
+          ),
+          // Check for Updates (not for WPILib distribution)
+          if (!isWPILib)
+            MenuItemButton(
+              style: menuButtonStyle,
+              onPressed: () {
+                _checkForUpdates();
+              },
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.update_outlined),
+                  SizedBox(width: 8),
+                  Text('Check for Updates'),
+                ],
+              ),
+            ),
+        ],
+        child: const Text(
+          'Help',
+        ),
+      ),
+    ];
+
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
-        backgroundColor:
-            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        backgroundColor: WidgetStatePropertyAll(
+          Color.fromARGB(255, 25, 25, 25),
+        ),
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
         Center(
           child: Image.asset(
             logoPath,
-            width: 24.0,
-            height: 24.0,
+            width: 24,
+            height: 24,
           ),
         ),
-        const SizedBox(width: 10),
-        // File
-        SubmenuButton(
-          style: menuButtonStyle,
-          menuChildren: [
-            // Open Layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? _importLayout
-                  : null,
-              shortcut:
-                  const SingleActivator(LogicalKeyboardKey.keyO, control: true),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.folder_open_outlined),
-                  SizedBox(width: 8),
-                  Text('Open Layout'),
-                ],
-              ),
+        const SizedBox(width: 5),
+        if (!consolidateMenu)
+          ...menuChildren
+        else
+          SubmenuButton(
+            style: menuButtonStyle.copyWith(
+              iconSize: const WidgetStatePropertyAll(24),
             ),
-            // Save
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: _saveLayout,
-              shortcut:
-                  const SingleActivator(LogicalKeyboardKey.keyS, control: true),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.save_outlined),
-                  SizedBox(width: 8),
-                  Text('Save'),
-                ],
-              ),
-            ),
-            // Export layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: _exportLayout,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyS,
-                shift: true,
-                control: true,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.save_as_outlined),
-                  SizedBox(width: 8),
-                  Text('Save As'),
-                ],
-              ),
-            ),
-            // Download layout
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked)
-                  ? _loadLayoutFromRobot
-                  : null,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyD,
-                control: true,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.download),
-                  SizedBox(width: 8),
-                  Text('Download From Robot'),
-                ],
-              ),
-            ),
-          ],
-          child: const Text(
-            'File',
+            menuChildren: menuChildren,
+            child: const Icon(Icons.menu),
           ),
-        ),
-        // Edit
-        SubmenuButton(
-            style: menuButtonStyle,
-            menuChildren: [
-              // Clear layout
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                        Defaults.layoutLocked)
-                    ? () {
-                        setState(() {
-                          _tabData[_currentTabIndex]
-                              .tabGrid
-                              .confirmClearWidgets(context);
-                        });
-                      }
-                    : null,
-                leadingIcon: const Icon(Icons.clear),
-                child: const Text('Clear Layout'),
-              ),
-              // Lock/Unlock Layout
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: () {
-                  if (preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked) {
-                    _unlockLayout();
-                  } else {
-                    _lockLayout();
-                  }
-
-                  setState(() {});
-                },
-                leadingIcon: (preferences.getBool(PrefKeys.layoutLocked) ??
-                        Defaults.layoutLocked)
-                    ? const Icon(Icons.lock_open)
-                    : const Icon(Icons.lock_outline),
-                child: Text(
-                    '${(preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked) ? 'Unlock' : 'Lock'} Layout'),
-              )
-            ],
-            child: const Text(
-              'Edit',
-            )),
-        // Help
-        SubmenuButton(
-          style: menuButtonStyle,
-          menuChildren: [
-            // About
-            MenuItemButton(
-              style: menuButtonStyle,
-              onPressed: () {
-                _displayAboutDialog(context);
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.info_outline),
-                  SizedBox(width: 8),
-                  Text('About'),
-                ],
-              ),
-            ),
-            // Check for Updates (not for WPILib distribution)
-            if (!isWPILib)
-              MenuItemButton(
-                style: menuButtonStyle,
-                onPressed: () {
-                  _checkForUpdates();
-                },
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.update_outlined),
-                    SizedBox(width: 8),
-                    Text('Check for Updates'),
-                  ],
-                ),
-              ),
-          ],
-          child: const Text(
-            'Help',
-          ),
-        ),
-        const VerticalDivider(),
+        const VerticalDivider(width: 4),
         // Settings
         MenuItemButton(
           style: menuButtonStyle,
@@ -2063,20 +2111,16 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           },
           child: const Text('Settings'),
         ),
-        const VerticalDivider(),
+        const VerticalDivider(width: 4),
         // Add Widget
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                  Defaults.layoutLocked)
-              ? () => _displayAddWidgetDialog()
-              : null,
+          onPressed: !layoutLocked ? () => _displayAddWidgetDialog() : null,
           child: const Text('Add Widget'),
         ),
-        if ((preferences.getBool(PrefKeys.layoutLocked) ??
-            Defaults.layoutLocked)) ...[
-          const VerticalDivider(),
+        if (layoutLocked) ...[
+          const VerticalDivider(width: 4),
           // Unlock Layout
           Tooltip(
             message: 'Unlock Layout',
@@ -2098,38 +2142,33 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       ],
     );
 
-    final List<Widget> trailing = [
-      if (lastUpdateResponse.updateAvailable) ...[
-        const VerticalDivider(),
-        Tooltip(
-          message: 'Download version ${lastUpdateResponse.latestVersion}',
-          child: MenuItemButton(
-            style: menuButtonStyle.copyWith(
-              minimumSize:
-                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-              maximumSize:
-                  const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-            ),
-            onPressed: () async {
-              Uri url = Uri.parse(Settings.releasesLink);
-
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url);
-              }
-            },
-            child: const Icon(Icons.update, color: Colors.orange),
-          ),
+    Widget? updateButton;
+    if (lastUpdateResponse.updateAvailable) {
+      updateButton = IconButton(
+        style: const ButtonStyle(
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
+          maximumSize: WidgetStatePropertyAll(Size.square(34.0)),
+          minimumSize: WidgetStatePropertyAll(Size.zero),
+          padding: WidgetStatePropertyAll(EdgeInsets.all(4.0)),
+          iconSize: WidgetStatePropertyAll(24.0),
         ),
-        const VerticalDivider(),
-      ],
-    ];
+        tooltip: 'Download version ${lastUpdateResponse.latestVersion}',
+        onPressed: () async {
+          Uri url = Uri.parse(Settings.releasesLink);
+
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url);
+          }
+        },
+        icon: const Icon(Icons.update, color: Colors.orange),
+      );
+    }
 
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        trailing: trailing,
       ),
       body: Focus(
         autofocus: true,
@@ -2146,18 +2185,12 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     preferences: preferences,
                     gridDpiOverride:
                         preferences.getDouble(PrefKeys.gridDpiOverride),
+                    updateButton: updateButton,
                     currentIndex: _currentTabIndex,
-                    onTabMoveLeft: () {
-                      _moveTabLeft();
-                    },
-                    onTabMoveRight: () {
-                      _moveTabRight();
-                    },
-                    onTabRename: (index, newData) {
-                      setState(() {
-                        _tabData[index] = newData;
-                      });
-                    },
+                    onTabMoveLeft: _moveTabLeft,
+                    onTabMoveRight: _moveTabRight,
+                    onTabRename: (index, newData) =>
+                        setState(() => _tabData[index] = newData),
                     onTabCreate: () {
                       String tabName = 'Tab ${_tabData.length + 1}';
                       setState(() {
@@ -2177,23 +2210,23 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                         return;
                       }
 
-                      TabData currentTab = _tabData[index];
+                      TabData tabToRemove = _tabData[index];
 
-                      _showTabCloseConfirmation(context, currentTab.name, () {
-                        if (_currentTabIndex == _tabData.length - 1) {
-                          _currentTabIndex--;
+                      _showTabCloseConfirmation(context, tabToRemove.name, () {
+                        int indexToSwitch = _currentTabIndex;
+
+                        if (indexToSwitch == _tabData.length - 1) {
+                          indexToSwitch--;
                         }
 
-                        _tabData[index].tabGrid.onDestroy();
+                        tabToRemove.tabGrid.onDestroy();
+                        tabToRemove.tabGrid.dispose();
 
-                        setState(() {
-                          _tabData.removeAt(index);
-                        });
+                        setState(() => _tabData.remove(tabToRemove));
+                        _switchToTab(indexToSwitch);
                       });
                     },
-                    onTabChanged: (index) {
-                      setState(() => _currentTabIndex = index);
-                    },
+                    onTabChanged: _switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
                         Map<String, dynamic> tabJson =
@@ -2214,35 +2247,35 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                     },
                     tabData: _tabData,
                   ),
-                  _AddWidgetDialog(
-                    ntConnection: widget.ntConnection,
-                    preferences: widget.preferences,
-                    grid: () => _tabData[_currentTabIndex].tabGrid,
-                    visible: _addWidgetDialogVisible,
-                    onNTDragUpdate: (globalPosition, widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .addDragInWidget(widget, globalPosition);
-                    },
-                    onNTDragEnd: (widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .placeDragInWidget(widget);
-                    },
-                    onLayoutDragUpdate: (globalPosition, widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .addDragInWidget(widget, globalPosition);
-                    },
-                    onLayoutDragEnd: (widget) {
-                      _tabData[_currentTabIndex]
-                          .tabGrid
-                          .placeDragInWidget(widget);
-                    },
-                    onClose: () {
-                      setState(() => _addWidgetDialogVisible = false);
-                    },
-                  ),
+                  if (_addWidgetDialogVisible)
+                    _AddWidgetDialog(
+                      ntConnection: widget.ntConnection,
+                      preferences: widget.preferences,
+                      grid: _tabData[_currentTabIndex].tabGrid,
+                      gridIndex: _currentTabIndex,
+                      onNTDragUpdate: (globalPosition, widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .addDragInWidget(widget, globalPosition);
+                      },
+                      onNTDragEnd: (widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .placeDragInWidget(widget);
+                      },
+                      onLayoutDragUpdate: (globalPosition, widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .addDragInWidget(widget, globalPosition);
+                      },
+                      onLayoutDragEnd: (widget) {
+                        _tabData[_currentTabIndex]
+                            .tabGrid
+                            .placeDragInWidget(widget);
+                      },
+                      onClose: () =>
+                          setState(() => _addWidgetDialogVisible = false),
+                    ),
                 ],
               ),
             ),
@@ -2252,47 +2285,77 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               height: 32,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: StreamBuilder(
-                          stream: widget.ntConnection.connectionStatus(),
-                          builder: (context, snapshot) {
-                            bool connected = snapshot.data ?? false;
+                child: ValueListenableBuilder(
+                    valueListenable: widget.ntConnection.ntConnected,
+                    builder: (context, connected, child) {
+                      String connectedText = (connected)
+                          ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
+                          : 'Network Tables: Disconnected';
 
-                            String connectedText = (connected)
-                                ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress)})'
-                                : 'Network Tables: Disconnected';
+                      String teamNumberText =
+                          'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}';
 
-                            return Text(
+                      double connectedWidth = (TextPainter(
+                        text: TextSpan(
+                          text: connectedText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
+                          .size
+                          .width;
+
+                      double teamNumberWidth = (TextPainter(
+                        text: TextSpan(
+                          text: teamNumberText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
+                          .size
+                          .width;
+
+                      double availableSpace = windowWidth - 20 - connectedWidth;
+
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (availableSpace >=
+                              (windowWidth + teamNumberWidth) / 2)
+                            Text(
+                              teamNumberText,
+                              textAlign: TextAlign.center,
+                            ),
+                          if (availableSpace >= 115)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: StreamBuilder(
+                                stream: widget.ntConnection.latencyStream(),
+                                builder: (context, snapshot) {
+                                  double latency = snapshot.data ?? 0.0;
+
+                                  return Text(
+                                    'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
+                                    textAlign: TextAlign.right,
+                                  );
+                                },
+                              ),
+                            ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
                               connectedText,
                               style: footerStyle?.copyWith(
                                 color: (connected) ? Colors.green : Colors.red,
                               ),
                               textAlign: TextAlign.left,
-                            );
-                          }),
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      child: StreamBuilder(
-                          stream: widget.ntConnection.latencyStream(),
-                          builder: (context, snapshot) {
-                            double latency = snapshot.data ?? 0.0;
-
-                            return Text(
-                              'Latency: ${latency.toStringAsFixed(2).padLeft(5)} ms',
-                              textAlign: TextAlign.right,
-                            );
-                          }),
-                    ),
-                  ],
-                ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
               ),
             ),
           ],
@@ -2305,36 +2368,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 class _AddWidgetDialog extends StatefulWidget {
   final NTConnection ntConnection;
   final SharedPreferences preferences;
-  final TabGridModel Function() _grid;
-  final bool _visible;
+  final TabGridModel grid;
+  final int gridIndex;
 
-  final Function(Offset globalPosition, WidgetContainerModel widget)
-      _onNTDragUpdate;
-  final Function(WidgetContainerModel widget) _onNTDragEnd;
+  final void Function(Offset globalPosition, WidgetContainerModel widget)
+      onNTDragUpdate;
+  final void Function(WidgetContainerModel widget) onNTDragEnd;
 
-  final Function(Offset globalPosition, LayoutContainerModel widget)
-      _onLayoutDragUpdate;
-  final Function(LayoutContainerModel widget) _onLayoutDragEnd;
+  final void Function(Offset globalPosition, LayoutContainerModel widget)
+      onLayoutDragUpdate;
+  final void Function(LayoutContainerModel widget) onLayoutDragEnd;
 
-  final Function()? _onClose;
+  final void Function() onClose;
 
   const _AddWidgetDialog({
     required this.ntConnection,
     required this.preferences,
-    required TabGridModel Function() grid,
-    required bool visible,
-    required dynamic Function(Offset, WidgetContainerModel) onNTDragUpdate,
-    required dynamic Function(WidgetContainerModel) onNTDragEnd,
-    required dynamic Function(Offset, LayoutContainerModel) onLayoutDragUpdate,
-    required dynamic Function(LayoutContainerModel) onLayoutDragEnd,
-    dynamic Function()? onClose,
-  })  : _onClose = onClose,
-        _onLayoutDragEnd = onLayoutDragEnd,
-        _onNTDragEnd = onNTDragEnd,
-        _onNTDragUpdate = onNTDragUpdate,
-        _onLayoutDragUpdate = onLayoutDragUpdate,
-        _visible = visible,
-        _grid = grid;
+    required this.grid,
+    required this.gridIndex,
+    required this.onNTDragUpdate,
+    required this.onNTDragEnd,
+    required this.onLayoutDragUpdate,
+    required this.onLayoutDragEnd,
+    required this.onClose,
+  });
 
   @override
   State<_AddWidgetDialog> createState() => _AddWidgetDialogState();
@@ -2344,124 +2401,139 @@ class _AddWidgetDialogState extends State<_AddWidgetDialog> {
   bool _hideMetadata = true;
   String _searchQuery = '';
 
+  void onRemove(TabGridModel grid) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      grid.removeDragInWidget();
+    });
+  }
+
+  @override
+  void didUpdateWidget(_AddWidgetDialog oldWidget) {
+    if (widget.gridIndex != oldWidget.gridIndex ||
+        widget.grid != oldWidget.grid) {
+      onRemove(oldWidget.grid);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: widget._visible,
-      child: DraggableDialog(
-        dialog: Container(
-          decoration: const BoxDecoration(boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              spreadRadius: -12.5,
-              offset: Offset(5.0, 5.0),
-              color: Colors.black87,
-            )
-          ]),
-          child: Card(
-            margin: const EdgeInsets.all(10.0),
-            child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  const Icon(Icons.drag_handle, color: Colors.grey),
-                  const SizedBox(height: 10),
-                  Text('Add Widget',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const TabBar(
-                    tabs: [
-                      Tab(text: 'Network Tables'),
-                      Tab(text: 'Layouts'),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        NetworkTableTree(
-                          ntConnection: widget.ntConnection,
-                          preferences: widget.preferences,
-                          searchQuery: _searchQuery,
-                          listLayoutBuilder: (
-                              {required title, required children}) {
-                            return widget._grid().createListLayout(
-                                  title: title,
-                                  children: children,
-                                );
-                          },
-                          hideMetadata: _hideMetadata,
-                          onDragUpdate: widget._onNTDragUpdate,
-                          onDragEnd: widget._onNTDragEnd,
-                        ),
-                        ListView(
-                          children: [
-                            LayoutDragTile(
-                              title: 'List Layout',
-                              icon: Icons.table_rows,
-                              layoutBuilder: () =>
-                                  widget._grid().createListLayout(),
-                              onDragUpdate: widget._onLayoutDragUpdate,
-                              onDragEnd: widget._onLayoutDragEnd,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
+    return DraggableDialog(
+      dialog: Container(
+        decoration: const BoxDecoration(boxShadow: [
+          BoxShadow(
+            blurRadius: 20,
+            spreadRadius: -12.5,
+            offset: Offset(5.0, 5.0),
+            color: Colors.black87,
+          )
+        ]),
+        child: Card(
+          margin: const EdgeInsets.all(10.0),
+          child: DefaultTabController(
+            length: 2,
+            child: Column(
+              children: [
+                const Icon(Icons.drag_handle, color: Colors.grey),
+                const SizedBox(height: 10),
+                Text('Add Widget',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const TabBar(
+                  tabs: [
+                    Tab(text: 'Network Tables'),
+                    Tab(text: 'Layouts'),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Expanded(
+                  child: TabBarView(
                     children: [
-                      Builder(builder: (context) {
-                        return IconButton(
-                          icon: const Icon(Icons.settings),
-                          onPressed: () {
-                            showPopover(
-                              context: context,
-                              direction: PopoverDirection.top,
-                              transitionDuration:
-                                  const Duration(milliseconds: 100),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surface,
-                              barrierColor: Colors.transparent,
-                              width: 200.0,
-                              bodyBuilder: (context) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: DialogToggleSwitch(
-                                    label: 'Hide Metadata',
-                                    initialValue: _hideMetadata,
-                                    onToggle: (value) {
-                                      setState(() => _hideMetadata = value);
-                                    },
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        );
-                      }),
-                      Expanded(
-                        child: SizedBox(
-                          height: 40.0,
-                          child: DialogTextInput(
-                            onSubmit: (value) =>
-                                setState(() => _searchQuery = value),
-                            initialText: _searchQuery,
-                            allowEmptySubmission: true,
-                            updateOnChanged: true,
-                            label: 'Search',
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          widget._onClose?.call();
+                      NetworkTableTree(
+                        ntConnection: widget.ntConnection,
+                        preferences: widget.preferences,
+                        searchQuery: _searchQuery,
+                        listLayoutBuilder: ({
+                          required title,
+                          required children,
+                        }) {
+                          return widget.grid.createListLayout(
+                            title: title,
+                            children: children,
+                          );
                         },
-                        child: const Text('Close'),
+                        hideMetadata: _hideMetadata,
+                        gridIndex: widget.gridIndex,
+                        onDragUpdate: widget.onNTDragUpdate,
+                        onDragEnd: widget.onNTDragEnd,
+                        onRemoveWidget: () => onRemove(widget.grid),
+                      ),
+                      ListView(
+                        children: [
+                          LayoutDragTile(
+                            gridIndex: widget.gridIndex,
+                            title: 'List Layout',
+                            icon: Icons.table_rows,
+                            layoutBuilder: () => widget.grid.createListLayout(),
+                            onDragUpdate: widget.onLayoutDragUpdate,
+                            onDragEnd: widget.onLayoutDragEnd,
+                            onRemoveWidget: () => onRemove(widget.grid),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Row(
+                  children: [
+                    Builder(builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: () {
+                          showPopover(
+                            context: context,
+                            direction: PopoverDirection.top,
+                            transitionDuration:
+                                const Duration(milliseconds: 100),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surface,
+                            barrierColor: Colors.transparent,
+                            width: 200.0,
+                            bodyBuilder: (context) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: DialogToggleSwitch(
+                                  label: 'Hide Metadata',
+                                  initialValue: _hideMetadata,
+                                  onToggle: (value) {
+                                    setState(() => _hideMetadata = value);
+                                  },
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }),
+                    Expanded(
+                      child: SizedBox(
+                        height: 40.0,
+                        child: DialogTextInput(
+                          onSubmit: (value) =>
+                              setState(() => _searchQuery = value),
+                          initialText: _searchQuery,
+                          allowEmptySubmission: true,
+                          updateOnChanged: true,
+                          label: 'Search',
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: widget.onClose,
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

@@ -131,6 +131,7 @@ class DSInteropClient {
   }
 
   void _tcpSocketOnMessage(String data) {
+    logger.debug('Received data from TCP 1742: "$data"');
     var jsonData = jsonDecode(data.toString());
 
     if (jsonData is! Map) {
@@ -161,6 +162,7 @@ class DSInteropClient {
   }
 
   void _dbModeServerOnMessage(Uint8List data) {
+    logger.trace('Received message from socket on TCP 1741: $data');
     _tcpBuffer.addAll(data);
     Map<int, Uint8List> mappedData = {};
 

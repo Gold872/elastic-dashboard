@@ -16,6 +16,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widg
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/field_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import '../../../services/struct_schemas/pose2d_struct_test.dart';
 import '../../../test_util.dart';
 
 void main() {
@@ -24,7 +25,7 @@ void main() {
   final Map<String, dynamic> fieldWidgetJson = {
     'topic': 'Test/Field',
     'period': 0.100,
-    'field_game': 'Crescendo',
+    'field_game': 'Reefscape',
     'robot_width': 1.0,
     'robot_length': 1.0,
     'show_other_objects': true,
@@ -119,7 +120,7 @@ void main() {
       preferences: preferences,
       period: 0.100,
       topic: 'Test/Field',
-      fieldGame: 'Crescendo',
+      fieldGame: 'Reefscape',
       showOtherObjects: true,
       showTrajectories: true,
       robotWidthMeters: 1.0,
@@ -131,96 +132,387 @@ void main() {
 
     expect(fieldWidgetModel.toJson(), fieldWidgetJson);
   });
-
-  testWidgets('Field widget test (no trajectory)', (widgetTester) async {
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Field',
-      fieldWidgetJson,
+  group('Field widget with', () {
+    final fieldObject = find.byWidgetPredicate(
+      (widget) => widget is CustomPaint && widget.painter is TrianglePainter,
     );
+    final trajectoryWidget = find.byWidgetPredicate(
+      (widget) => widget is CustomPaint && widget.painter is TrajectoryPainter,
+    );
+    testWidgets('non-struct robot, no trajectory', (widgetTester) async {
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
 
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: fieldWidgetModel,
-            child: const FieldWidget(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.byType(CustomPaint), findsNWidgets(3));
-    expect(
-        find.byWidgetPredicate((widget) =>
-            widget is CustomPaint && widget.painter is TrajectoryPainter),
-        findsNothing);
-    expect(find.byType(Image), findsOneWidget);
-  });
+      expect(find.byType(CustomPaint), findsNWidgets(3));
+      expect(trajectoryWidget, findsNothing);
+      expect(fieldObject, findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
+    });
 
-  testWidgets('Field widget test (with trajectory)', (widgetTester) async {
-    List<double> fakeTrajectory = [];
+    testWidgets('struct robot, no trajectory', (widgetTester) async {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: 'struct:Pose2d',
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': testPose2dStruct,
+          'Test/Field/OtherObject': [1.0, 1.0, 0.0],
+        },
+      );
 
-    for (int i = 0; i < 16; i++) {
-      fakeTrajectory.add(i * 0.25);
-      fakeTrajectory.add(i * 0.25);
-      fakeTrajectory.add(0.0);
-    }
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
 
-    NTConnection ntConnection = createMockOnlineNT4(
-      virtualTopics: [
-        NT4Topic(
-          name: 'Test/Field/Robot',
-          type: NT4TypeStr.kFloat64Arr,
-          properties: {},
-        ),
-        NT4Topic(
-          name: 'Test/Field/OtherObject',
-          type: NT4TypeStr.kFloat64Arr,
-          properties: {},
-        ),
-        NT4Topic(
-          name: 'Test/Field/Trajectory',
-          type: NT4TypeStr.kFloat64Arr,
-          properties: {},
-        ),
-      ],
-      virtualValues: {
-        'Test/Field/Robot': [5.0, 5.0, 270.0],
-        'Test/Field/OtherObject': [1.0, 1.0, 0.0],
-        'Test/Field/Trajectory': fakeTrajectory,
-      },
-    );
-
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Field',
-      fieldWidgetJson,
-    );
-
-    await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: fieldWidgetModel,
-            child: const FieldWidget(),
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await widgetTester.pumpAndSettle();
+      await widgetTester.pumpAndSettle();
 
-    expect(find.byType(CustomPaint), findsNWidgets(4));
-    expect(
-        find.byWidgetPredicate((widget) =>
-            widget is CustomPaint && widget.painter is TrajectoryPainter),
-        findsOneWidget);
-    expect(find.byType(Image), findsOneWidget);
+      expect(find.byType(CustomPaint), findsNWidgets(3));
+      expect(trajectoryWidget, findsNothing);
+      expect(fieldObject, findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('non-struct trajectory', (widgetTester) async {
+      List<double> fakeTrajectory = [];
+
+      for (int i = 0; i < 9; i++) {
+        fakeTrajectory.add(i * 0.25);
+        fakeTrajectory.add(i * 0.25);
+        fakeTrajectory.add(0.0);
+      }
+
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/Trajectory',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObject': [1.0, 1.0, 0.0],
+          'Test/Field/Trajectory': fakeTrajectory,
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(find.byType(CustomPaint), findsNWidgets(4));
+      expect(trajectoryWidget, findsOneWidget);
+      expect(fieldObject, findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('struct trajectory', (widgetTester) async {
+      List<int> fakeTrajectory = [];
+
+      for (int i = 0; i < 9; i++) {
+        fakeTrajectory.addAll(testPose2dStruct);
+      }
+
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/Trajectory',
+            type: 'struct:Pose2d[]',
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObject': [1.0, 1.0, 0.0],
+          'Test/Field/Trajectory': fakeTrajectory,
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(find.byType(CustomPaint), findsNWidgets(4));
+      expect(trajectoryWidget, findsOneWidget);
+      expect(fieldObject, findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
+    });
+
+    testWidgets('with one non-struct object', (widgetTester) async {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObject': [5.0, 5.0, 0.0],
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(fieldObject, findsNWidgets(2));
+      expect(trajectoryWidget, findsNothing);
+    });
+
+    testWidgets('with multiple non-struct objects', (widgetTester) async {
+      List<double> fakeObjects = [5.0, 5.0, 0.0, 5.0, 5.0, 0.0, 5.0, 5.0, 0.0];
+
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObjects',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObjects': fakeObjects,
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(fieldObject, findsNWidgets(4));
+      expect(trajectoryWidget, findsNothing);
+    });
+
+    testWidgets('with one struct object', (widgetTester) async {
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObject',
+            type: 'struct:Pose2d',
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObject': testPose2dStruct,
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(fieldObject, findsNWidgets(2));
+      expect(trajectoryWidget, findsNothing);
+    });
+
+    testWidgets('with multiple struct objects', (widgetTester) async {
+      List<int> fakeObjects = [
+        ...testPose2dStruct,
+        ...testPose2dStruct,
+        ...testPose2dStruct,
+      ];
+
+      NTConnection ntConnection = createMockOnlineNT4(
+        virtualTopics: [
+          NT4Topic(
+            name: 'Test/Field/Robot',
+            type: NT4TypeStr.kFloat64Arr,
+            properties: {},
+          ),
+          NT4Topic(
+            name: 'Test/Field/OtherObjects',
+            type: 'struct:Pose2d[]',
+            properties: {},
+          ),
+        ],
+        virtualValues: {
+          'Test/Field/Robot': [5.0, 5.0, 270.0],
+          'Test/Field/OtherObjects': fakeObjects,
+        },
+      );
+
+      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+        ntConnection,
+        preferences,
+        'Field',
+        fieldWidgetJson,
+      );
+
+      await widgetTester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ChangeNotifierProvider<NTWidgetModel>.value(
+              value: fieldWidgetModel,
+              child: const FieldWidget(),
+            ),
+          ),
+        ),
+      );
+
+      await widgetTester.pumpAndSettle();
+
+      expect(fieldObject, findsNWidgets(4));
+      expect(trajectoryWidget, findsNothing);
+    });
   });
 
   testWidgets('Field widget edit properties', (widgetTester) async {
@@ -231,7 +523,7 @@ void main() {
       preferences: preferences,
       period: 0.100,
       topic: 'Test/Field',
-      fieldGame: 'Crescendo',
+      fieldGame: 'Reefscape',
       showOtherObjects: true,
       showTrajectories: true,
       robotWidthMeters: 1.0,

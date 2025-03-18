@@ -95,81 +95,98 @@ class Gyro extends NTWidget {
   Widget build(BuildContext context) {
     GyroModel model = cast(context.watch<NTWidgetModel>());
 
-    return ValueListenableBuilder(
-      valueListenable: model.valueSubscription,
-      builder: (context, data, child) {
-        double value = tryCast(data) ?? 0.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double flexCoefficient = 20.0 / 23;
+        // measured on a 2x2 gyro widget
+        const double normalSquareSide = 199.9 * flexCoefficient;
+        double squareSide =
+            min(constraints.maxWidth, constraints.maxHeight * flexCoefficient);
+        return Transform.scale(
+          scale: squareSide / normalSquareSide,
+          child: ValueListenableBuilder(
+            valueListenable: model.valueSubscription,
+            builder: (context, data, child) {
+              double value = tryCast(data) ?? 0.0;
 
-        if (model.counterClockwisePositive) {
-          value *= -1;
-        }
+              if (model.counterClockwisePositive) {
+                value *= -1;
+              }
 
-        double angle = _wrapAngle(value);
+              double angle = _wrapAngle(value);
 
-        return Column(
-          children: [
-            Flexible(
-              child: LayoutBuilder(builder: (context, constraints) {
-                double squareSide =
-                    min(constraints.maxWidth, constraints.maxHeight);
-
-                // Formula taken from radial gauge source code
-                final maxNeedleHeight = squareSide / (2 * 0.65) - (2 * 7.5);
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    RadialGauge(
-                      radiusFactor: 0.65,
-                      track: RadialTrack(
-                        thickness: 7.5,
-                        start: 0,
-                        end: 360,
-                        startAngle: 90,
-                        endAngle: 90 + 360,
-                        steps: 360 ~/ 45,
-                        color: const Color.fromRGBO(97, 97, 97, 1),
-                        trackStyle: TrackStyle(
-                            primaryRulerColor: Colors.grey,
-                            secondaryRulerColor:
-                                const Color.fromRGBO(97, 97, 97, 1),
-                            labelStyle: Theme.of(context).textTheme.bodySmall,
-                            primaryRulersHeight: 7.5,
-                            primaryRulersWidth: 2,
-                            secondaryRulersHeight: 7.5,
-                            rulersOffset: -18,
-                            labelOffset: -57.5,
-                            showLastLabel: false,
-                            secondaryRulerPerInterval: 8,
-                            inverseRulers: true),
-                        trackLabelFormater: (value) => value.toStringAsFixed(0),
-                      ),
-                      needlePointer: [
-                        NeedlePointer(
-                          needleWidth: squareSide * 0.03,
-                          needleEndWidth: squareSide * 0.005,
-                          needleHeight: maxNeedleHeight * 0.52 -
-                              (squareSide - 175.875) * 0.075,
-                          tailColor: Colors.grey,
-                          tailRadius: squareSide * 0.1,
-                          value: value,
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    flex: 20,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: normalSquareSide,
+                          height: normalSquareSide,
+                          child: RadialGauge(
+                            radiusFactor: 0.65,
+                            track: RadialTrack(
+                              thickness: 7.5,
+                              start: 0,
+                              end: 360,
+                              startAngle: 90,
+                              endAngle: 90 + 360,
+                              steps: 360 ~/ 45,
+                              color: const Color.fromRGBO(97, 97, 97, 1),
+                              trackStyle: TrackStyle(
+                                  primaryRulerColor: Colors.grey,
+                                  secondaryRulerColor:
+                                      const Color.fromRGBO(97, 97, 97, 1),
+                                  labelStyle:
+                                      Theme.of(context).textTheme.bodySmall,
+                                  primaryRulersHeight: 7.25,
+                                  primaryRulersWidth: 2,
+                                  secondaryRulersHeight: 7.25,
+                                  rulersOffset: -18.5,
+                                  labelOffset: -58.0,
+                                  showLastLabel: false,
+                                  secondaryRulerPerInterval: 8,
+                                  inverseRulers: true),
+                              trackLabelFormater: (value) =>
+                                  value.toStringAsFixed(0),
+                            ),
+                            needlePointer: [
+                              NeedlePointer(
+                                needleWidth: 5.25,
+                                needleEndWidth: 0.87,
+                                needleHeight: 60,
+                                tailColor: Colors.grey,
+                                tailRadius: 17.5,
+                                value: value,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 12.3,
+                          height: 12.3,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[300]!,
+                          ),
                         ),
                       ],
                     ),
-                    Container(
-                      width: squareSide * 0.07,
-                      height: squareSide * 0.07,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey[300]!,
-                      ),
+                  ),
+                  Flexible(
+                    flex: 3,
+                    child: Text(
+                      angle.toStringAsFixed(2),
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                  ],
-                );
-              }),
-            ),
-            Text(angle.toStringAsFixed(2),
-                style: Theme.of(context).textTheme.bodyLarge),
-          ],
+                  ),
+                ],
+              );
+            },
+          ),
         );
       },
     );

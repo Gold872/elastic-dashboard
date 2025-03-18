@@ -14,14 +14,13 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
   final TextEditingController searchTextController = TextEditingController();
 
   final List<String> preferenceTopicNames = [];
+
   final Map<String, NT4Subscription> preferenceSubscriptions = {};
+  final Map<String, VoidCallback> subscriptionListeners = {};
+
   final Map<String, NT4Topic> preferenceTopics = {};
   final Map<String, TextEditingController> preferenceTextControllers = {};
   final Map<String, Object?> previousValues = {};
-
-  @override
-  List<NT4Subscription> get subscriptions =>
-      preferenceSubscriptions.values.toList();
 
   late Function(NT4Topic topic) topicAnnounceListener;
 
@@ -52,18 +51,9 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
         return;
       }
 
-      Object? previousValue = ntConnection.getLastAnnouncedValue(topic.name);
-
       preferenceTopicNames.add(topic.name);
       preferenceTopics.addAll({topic.name: topic});
-      preferenceSubscriptions.addAll({
-        topic.name: ntConnection.subscribe(topic.name, super.period),
-      });
-      preferenceTextControllers.addAll({
-        topic.name: TextEditingController()
-          ..text = previousValue?.toString() ?? ''
-      });
-      previousValues.addAll({topic.name: previousValue});
+      initSubscription(topic.name);
 
       notifyListeners();
     };
@@ -76,10 +66,8 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
       preferenceTopicNames.remove(topic.name);
 
       preferenceTopics.remove(topic.name);
+      destroySubscription(topic.name);
 
-      if (preferenceSubscriptions.containsKey(topic.name)) {
-        ntConnection.unSubscribe(preferenceSubscriptions[topic.name]!);
-      }
       preferenceSubscriptions.remove(topic.name);
 
       preferenceTextControllers.remove(topic.name);
@@ -98,13 +86,69 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
   @override
   void resetSubscription() {
     for (NT4Subscription subscription in preferenceSubscriptions.values) {
-      ntConnection.unSubscribe(subscription);
+      destroySubscription(subscription.topic);
     }
     preferenceSubscriptions.clear();
+
+    preferenceTopics.clear();
+    preferenceTopicNames.clear();
+    preferenceTextControllers.clear();
 
     // Trigger the topics to get recalled to the listener and added to the preferences list
     ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
     ntConnection.addTopicAnnounceListener(topicAnnounceListener);
+
+    super.resetSubscription();
+  }
+
+  void initSubscription(String topicName) {
+    Object? previousValue = ntConnection.getLastAnnouncedValue(topicName);
+
+    NT4Subscription subscription =
+        ntConnection.subscribe(topicName, super.period);
+
+    preferenceSubscriptions.addAll({
+      topicName: subscription,
+    });
+    preferenceTextControllers.addAll({
+      topicName: TextEditingController()..text = previousValue?.toString() ?? ''
+    });
+    previousValues.addAll({topicName: previousValue});
+
+    VoidCallback listener;
+
+    subscription.addListener(listener = () => onSubscriptionUpdate(topicName));
+
+    subscriptionListeners.addAll({topicName: listener});
+  }
+
+  void destroySubscription(String topicName) {
+    NT4Subscription? subscription = preferenceSubscriptions[topicName];
+    if (subscription == null) {
+      return;
+    }
+
+    ntConnection.unSubscribe(subscription);
+
+    if (subscriptionListeners.containsKey(topicName)) {
+      subscription.removeListener(subscriptionListeners[topicName]!);
+      subscriptionListeners.remove(topicName);
+    }
+  }
+
+  void onSubscriptionUpdate(String topicName) {
+    if (!preferenceTextControllers.containsKey(topicName) ||
+        !subscriptionListeners.containsKey(topicName)) {
+      return;
+    }
+
+    if (preferenceSubscriptions[topicName]?.value.toString() !=
+        previousValues[topicName].toString()) {
+      preferenceTextControllers[topicName]?.text =
+          preferenceSubscriptions[topicName]?.value?.toString() ?? '';
+
+      previousValues[topicName] = preferenceSubscriptions[topicName]?.value;
+    }
   }
 }
 
@@ -117,71 +161,55 @@ class RobotPreferences extends NTWidget {
   Widget build(BuildContext context) {
     RobotPreferencesModel model = cast(context.watch<NTWidgetModel>());
 
-    return ListenableBuilder(
-        listenable: Listenable.merge(model.subscriptions),
-        builder: (context, child) {
-          for (String topic in model.preferenceTopicNames) {
-            if (model.preferenceSubscriptions[topic]?.value.toString() !=
-                model.previousValues[topic].toString()) {
-              model.preferenceTextControllers[topic]?.text =
-                  model.preferenceSubscriptions[topic]?.value?.toString() ?? '';
+    return PreferenceSearch(
+      onSubmit: (String topic, String? data) {
+        NT4Topic? nt4Topic = model.preferenceTopics[topic];
 
-              model.previousValues[topic] =
-                  model.preferenceSubscriptions[topic]?.value;
-            }
-          }
+        if (nt4Topic == null ||
+            !model.ntConnection.isTopicPublished(nt4Topic)) {
+          return;
+        }
 
-          return PreferenceSearch(
-            onSubmit: (String topic, String? data) {
-              NT4Topic? nt4Topic = model.preferenceTopics[topic];
+        if (data == null) {
+          model.ntConnection.unpublishTopic(nt4Topic);
+          return;
+        }
 
-              if (nt4Topic == null ||
-                  !model.ntConnection.isTopicPublished(nt4Topic)) {
-                return;
-              }
+        Object? formattedData;
 
-              if (data == null) {
-                model.ntConnection.unpublishTopic(nt4Topic);
-                return;
-              }
+        String dataType = nt4Topic.type;
+        switch (dataType) {
+          case NT4TypeStr.kBool:
+            formattedData = bool.tryParse(data);
+            break;
+          case NT4TypeStr.kFloat32:
+          case NT4TypeStr.kFloat64:
+            formattedData = double.tryParse(data);
+            break;
+          case NT4TypeStr.kInt:
+            formattedData = int.tryParse(data);
+            break;
+          case NT4TypeStr.kString:
+            formattedData = data;
+            break;
+          default:
+            break;
+        }
 
-              Object? formattedData;
+        if (formattedData == null) {
+          model.preferenceTextControllers[topic]?.text =
+              model.previousValues[topic].toString();
+          model.ntConnection.unpublishTopic(nt4Topic);
+          return;
+        }
 
-              String dataType = nt4Topic.type;
-              switch (dataType) {
-                case NT4TypeStr.kBool:
-                  formattedData = bool.tryParse(data);
-                  break;
-                case NT4TypeStr.kFloat32:
-                case NT4TypeStr.kFloat64:
-                  formattedData = double.tryParse(data);
-                  break;
-                case NT4TypeStr.kInt:
-                  formattedData = int.tryParse(data);
-                  break;
-                case NT4TypeStr.kString:
-                  formattedData = data;
-                  break;
-                default:
-                  break;
-              }
+        model.ntConnection.updateDataFromTopic(nt4Topic, formattedData);
+        model.ntConnection.unpublishTopic(nt4Topic);
 
-              if (formattedData == null) {
-                model.preferenceTextControllers[topic]?.text =
-                    model.previousValues[topic].toString();
-                model.ntConnection.unpublishTopic(nt4Topic);
-                return;
-              }
-
-              model.ntConnection.updateDataFromTopic(nt4Topic, formattedData);
-              model.ntConnection.unpublishTopic(nt4Topic);
-
-              model.preferenceTextControllers[topic]?.text =
-                  formattedData.toString();
-            },
-            model: model,
-          );
-        });
+        model.preferenceTextControllers[topic]?.text = formattedData.toString();
+      },
+      model: model,
+    );
   }
 }
 
@@ -194,6 +222,11 @@ class PreferenceSearch extends StatelessWidget {
 
   final RobotPreferencesModel model;
   final Function(String topic, String? data) onSubmit;
+
+  List<String> filterList(String query) => model.preferenceTopicNames
+      .where((element) =>
+          element.split('/').last.toLowerCase().contains(query.toLowerCase()))
+      .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -211,17 +244,12 @@ class PreferenceSearch extends StatelessWidget {
       ),
       searchTextController: model.searchTextController,
       seperatorBuilder: (context, _) => const Divider(height: 4.0),
-      spaceBetweenSearchAndList: 15,
-      filter: (query) {
-        return model.preferenceTopicNames
-            .where((element) => element
-                .split('/')
-                .last
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-      },
-      initialList: model.preferenceTopicNames,
+      searchFieldPadding: const EdgeInsets.symmetric(
+        horizontal: 2,
+        vertical: 7.5,
+      ),
+      filter: (query) => filterList(query),
+      initialList: filterList(model.searchTextController.text),
       itemBuilder: (item) {
         TextEditingController? textController =
             model.preferenceTextControllers[item];

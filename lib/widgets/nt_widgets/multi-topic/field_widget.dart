@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:vector_math/vector_math_64.dart' show radians;
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/struct_schemas/pose2d_struct.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -47,7 +49,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   late Function(NT4Topic topic) topicAnnounceListener;
 
-  static const String _defaultGame = 'Crescendo';
+  static const String _defaultGame = 'Reefscape';
   String _fieldGame = _defaultGame;
   late Field _field;
 
@@ -128,6 +130,14 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   Field get field => _field;
 
+  bool isPoseStruct(String topic) {
+    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d';
+  }
+
+  bool isPoseArrayStruct(String topic) {
+    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d[]';
+  }
+
   FieldWidgetModel({
     required super.ntConnection,
     required super.preferences,
@@ -192,8 +202,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     super.init();
 
     topicAnnounceListener = (nt4Topic) {
-      if (nt4Topic.name.contains(topic) &&
-          !nt4Topic.name.contains('Robot') &&
+      if (nt4Topic.name.startsWith(topic) &&
+          !nt4Topic.name.endsWith('Robot') &&
           !nt4Topic.name.contains('.') &&
           !_otherObjectTopics.contains(nt4Topic.name)) {
         _otherObjectTopics.add(nt4Topic.name);
@@ -481,25 +491,29 @@ class FieldWidget extends NTWidget {
 
   Widget _getTransformedFieldObject(
     FieldWidgetModel model, {
-    required List<double> objectPosition,
+    required double x,
+    required double y,
+    required double angleRadians,
     required Offset fieldCenter,
     required double scaleReduction,
     Size? objectSize,
   }) {
-    for (int i = 0; i < objectPosition.length; i++) {
-      if (!objectPosition[i].isFinite) {
-        objectPosition[i] = 0.0;
-      }
+    if (!x.isFinite || x.isNaN) {
+      x = 0;
     }
-
+    if (!y.isFinite || y.isNaN) {
+      y = 0;
+    }
+    if (!angleRadians.isFinite || angleRadians.isNaN) {
+      angleRadians = 0;
+    }
     double xFromCenter =
-        (objectPosition[0] * model.field.pixelsPerMeterHorizontal -
-                fieldCenter.dx) *
+        (x * model.field.pixelsPerMeterHorizontal - fieldCenter.dx) *
             scaleReduction;
 
-    double yFromCenter = (fieldCenter.dy -
-            (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
-        scaleReduction;
+    double yFromCenter =
+        (fieldCenter.dy - (y * model.field.pixelsPerMeterVertical)) *
+            scaleReduction;
 
     double width = (objectSize?.width ?? model.otherObjectSize) *
         model.field.pixelsPerMeterHorizontal *
@@ -510,7 +524,7 @@ class FieldWidget extends NTWidget {
         scaleReduction;
 
     Matrix4 transform = Matrix4.translationValues(xFromCenter, yFromCenter, 0.0)
-      ..rotateZ(-radians(objectPosition[2]));
+      ..rotateZ(-angleRadians);
 
     Widget otherObject = Container(
       alignment: Alignment.center,
@@ -544,24 +558,24 @@ class FieldWidget extends NTWidget {
 
   Offset _getTrajectoryPointOffset(
     FieldWidgetModel model, {
-    required List<double> objectPosition,
+    required double x,
+    required double y,
     required Offset fieldCenter,
     required double scaleReduction,
   }) {
-    for (int i = 0; i < objectPosition.length; i++) {
-      if (!objectPosition[i].isFinite) {
-        objectPosition[i] = 0.0;
-      }
+    if (!x.isFinite) {
+      x = 0;
     }
-
+    if (!y.isFinite) {
+      y = 0;
+    }
     double xFromCenter =
-        (objectPosition[0] * model.field.pixelsPerMeterHorizontal -
-                fieldCenter.dx) *
+        (x * model.field.pixelsPerMeterHorizontal - fieldCenter.dx) *
             scaleReduction;
 
-    double yFromCenter = (fieldCenter.dy -
-            (objectPosition[1] * model.field.pixelsPerMeterVertical)) *
-        scaleReduction;
+    double yFromCenter =
+        (fieldCenter.dy - (y * model.field.pixelsPerMeterVertical)) *
+            scaleReduction;
 
     return Offset(xFromCenter, yFromCenter);
   }
@@ -585,11 +599,27 @@ class FieldWidget extends NTWidget {
             List<Object?> robotPositionRaw =
                 model.robotSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-            List<double>? robotPosition = [];
-            if (robotPositionRaw.isEmpty) {
-              robotPosition = null;
+            double robotX = 0;
+            double robotY = 0;
+            double robotTheta = 0;
+
+            if (model.isPoseStruct(model.robotTopicName)) {
+              List<int> poseBytes = robotPositionRaw.whereType<int>().toList();
+              Pose2dStruct poseStruct =
+                  Pose2dStruct.valueFromBytes(Uint8List.fromList(poseBytes));
+
+              robotX = poseStruct.x;
+              robotY = poseStruct.y;
+              robotTheta = poseStruct.angle;
             } else {
-              robotPosition = robotPositionRaw.whereType<double>().toList();
+              List<double> robotPosition =
+                  robotPositionRaw.whereType<double>().toList();
+
+              if (robotPosition.length >= 3) {
+                robotX = robotPosition[0];
+                robotY = robotPosition[1];
+                robotTheta = radians(robotPosition[2]);
+              }
             }
 
             Size size = Size(constraints.maxWidth, constraints.maxHeight);
@@ -619,6 +649,13 @@ class FieldWidget extends NTWidget {
                 (rotatedFittedSizes.destination.width /
                     rotatedFittedSizes.source.width);
 
+            if (scaleReduction.isNaN) {
+              scaleReduction = 0;
+            }
+            if (rotatedScaleReduction.isNaN) {
+              rotatedScaleReduction = 0;
+            }
+
             if (!model.rendered &&
                 model.widgetSize != null &&
                 size != const Size(0, 0) &&
@@ -638,7 +675,9 @@ class FieldWidget extends NTWidget {
 
             Widget robot = _getTransformedFieldObject(
               model,
-              objectPosition: robotPosition ?? [0.0, 0.0, 0.0],
+              x: robotX,
+              y: robotY,
+              angleRadians: robotTheta,
               fieldCenter: fieldCenter,
               scaleReduction: scaleReduction,
               objectSize: Size(model.robotWidthMeters, model.robotLengthMeters),
@@ -657,7 +696,24 @@ class FieldWidget extends NTWidget {
                   continue;
                 }
 
-                bool isTrajectory = objectPositionRaw.length > 24;
+                bool isTrajectory = objectSubscription.topic
+                    .toLowerCase()
+                    .endsWith('trajectory');
+
+                bool isStructArray =
+                    model.isPoseArrayStruct(objectSubscription.topic);
+
+                bool isStructObject =
+                    model.isPoseStruct(objectSubscription.topic) ||
+                        isStructArray;
+
+                if (isStructObject) {
+                  isTrajectory = isTrajectory ||
+                      (isStructArray &&
+                          objectPositionRaw.length ~/ Pose2dStruct.length > 8);
+                } else {
+                  isTrajectory = isTrajectory || objectPositionRaw.length > 24;
+                }
 
                 if (isTrajectory && !model.showTrajectories) {
                   continue;
@@ -665,32 +721,100 @@ class FieldWidget extends NTWidget {
                   continue;
                 }
 
-                List<double> objectPosition =
-                    objectPositionRaw.whereType<double>().toList();
-
                 if (isTrajectory) {
-                  trajectoryPoints.add([]);
-                }
+                  List<Offset> objectTrajectory = [];
 
-                for (int i = 0; i < objectPosition.length - 2; i += 3) {
-                  if (isTrajectory) {
-                    trajectoryPoints.last.add(
-                      _getTrajectoryPointOffset(
-                        model,
-                        objectPosition: objectPosition.sublist(i, i + 2),
-                        fieldCenter: fieldCenter,
-                        scaleReduction: scaleReduction,
-                      ),
-                    );
+                  if (isStructObject) {
+                    List<int> structArrayBytes =
+                        objectPositionRaw.whereType<int>().toList();
+
+                    List<Pose2dStruct> poseArray = Pose2dStruct.listFromBytes(
+                        Uint8List.fromList(structArrayBytes));
+
+                    for (Pose2dStruct pose in poseArray) {
+                      objectTrajectory.add(
+                        _getTrajectoryPointOffset(
+                          model,
+                          x: pose.x,
+                          y: pose.y,
+                          fieldCenter: fieldCenter,
+                          scaleReduction: scaleReduction,
+                        ),
+                      );
+                    }
                   } else {
-                    otherObjects.add(
-                      _getTransformedFieldObject(
-                        model,
-                        objectPosition: objectPosition.sublist(i, i + 3),
-                        fieldCenter: fieldCenter,
-                        scaleReduction: scaleReduction,
-                      ),
-                    );
+                    List<double> objectPosition =
+                        objectPositionRaw.whereType<double>().toList();
+
+                    for (int i = 0; i < objectPosition.length - 2; i += 3) {
+                      objectTrajectory.add(
+                        _getTrajectoryPointOffset(
+                          model,
+                          x: objectPosition[i],
+                          y: objectPosition[i + 1],
+                          fieldCenter: fieldCenter,
+                          scaleReduction: scaleReduction,
+                        ),
+                      );
+                    }
+                  }
+
+                  if (objectTrajectory.isNotEmpty) {
+                    trajectoryPoints.add(objectTrajectory);
+                  }
+                } else {
+                  if (isStructObject) {
+                    List<int> structBytes =
+                        objectPositionRaw.whereType<int>().toList();
+                    if (isStructArray) {
+                      List<Pose2dStruct> poses = Pose2dStruct.listFromBytes(
+                          Uint8List.fromList(structBytes));
+
+                      for (Pose2dStruct pose in poses) {
+                        otherObjects.add(
+                          _getTransformedFieldObject(
+                            model,
+                            x: pose.x,
+                            y: pose.y,
+                            angleRadians: pose.angle,
+                            fieldCenter: fieldCenter,
+                            scaleReduction: scaleReduction,
+                          ),
+                        );
+                      }
+                    } else {
+                      Pose2dStruct pose = Pose2dStruct.valueFromBytes(
+                          Uint8List.fromList(structBytes));
+
+                      otherObjects.add(
+                        _getTransformedFieldObject(
+                          model,
+                          x: pose.x,
+                          y: pose.y,
+                          angleRadians: pose.angle,
+                          fieldCenter: fieldCenter,
+                          scaleReduction: scaleReduction,
+                        ),
+                      );
+                    }
+                  } else {
+                    List<double> objectPosition =
+                        objectPositionRaw.whereType<double>().toList();
+
+                    for (int i = 0; i < objectPosition.length - 2; i += 3) {
+                      List<double> positionArray =
+                          objectPosition.sublist(i, i + 3);
+                      otherObjects.add(
+                        _getTransformedFieldObject(
+                          model,
+                          x: positionArray[0],
+                          y: positionArray[1],
+                          angleRadians: radians(positionArray[2]),
+                          fieldCenter: fieldCenter,
+                          scaleReduction: scaleReduction,
+                        ),
+                      );
+                    }
                   }
                 }
               }

@@ -64,11 +64,13 @@ void main() {
     expect(singleColorViewModel.type, 'Single Color View');
     expect(singleColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
-        singleColorViewModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Single Color View',
-        ]));
+      singleColorViewModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Large Text Display',
+        'Single Color View',
+      ]),
+    );
   });
 
   test('Single color view to json', () {

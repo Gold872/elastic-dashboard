@@ -68,16 +68,18 @@ void main() {
     expect(matchTimeModel.type, 'Match Time');
     expect(matchTimeModel.runtimeType, MatchTimeModel);
     expect(
-        matchTimeModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-        ]));
+      matchTimeModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (matchTimeModel is! MatchTimeModel) {
       return;

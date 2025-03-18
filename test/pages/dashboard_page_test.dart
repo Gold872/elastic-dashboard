@@ -45,8 +45,13 @@ Future<void> pumpDashboardPage(
   NTConnection? ntConnection,
   ElasticLayoutDownloader? layoutDownloader,
   UpdateChecker? updateChecker,
+  Size? size = const Size(1920, 1080),
 }) async {
   FlutterError.onError = ignoreOverflowErrors;
+  if (size != null) {
+    widgetTester.view.physicalSize = size;
+    widgetTester.view.devicePixelRatio = 1.0;
+  }
 
   await widgetTester.pumpWidget(
     MaterialApp(
@@ -91,6 +96,73 @@ void main() {
 
   tearDown(() {
     hotKeyManager.tearDown();
+  });
+
+  group('[Responsive Layout]:', () {
+    final fileButton = find.widgetWithText(SubmenuButton, 'File');
+    final collapsedMenu = find.widgetWithIcon(SubmenuButton, Icons.menu);
+    final title = find.text('Elastic');
+    final teamNumber = find.text('Team 353');
+    final latency = find.textContaining('Latency:');
+
+    testWidgets('Shows everything on normal screen', (widgetTester) async {
+      await pumpDashboardPage(widgetTester, preferences);
+
+      expect(fileButton, findsOneWidget);
+      expect(collapsedMenu, findsNothing);
+      expect(title, findsOneWidget);
+      expect(teamNumber, findsOneWidget);
+      expect(latency, findsOneWidget);
+    });
+
+    testWidgets('Hides title when width = 525', (widgetTester) async {
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        size: const Size(525, 525),
+      );
+
+      expect(title, findsNothing);
+    });
+
+    testWidgets('Hides team number when width = 500', (widgetTester) async {
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        size: const Size(500, 500),
+      );
+
+      expect(fileButton, findsOneWidget);
+      expect(collapsedMenu, findsNothing);
+
+      expect(teamNumber, findsNothing);
+    });
+
+    testWidgets('Collapses menu when width < 460', (widgetTester) async {
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        size: const Size(459.99, 459.99),
+      );
+
+      expect(fileButton, findsNothing);
+      expect(collapsedMenu, findsOneWidget);
+      expect(title, findsNothing);
+    });
+
+    testWidgets('Hides latency when width = 300', (widgetTester) async {
+      await pumpDashboardPage(
+        widgetTester,
+        preferences,
+        size: const Size(300, 300),
+      );
+
+      expect(fileButton, findsNothing);
+      expect(collapsedMenu, findsOneWidget);
+      expect(title, findsNothing);
+      expect(teamNumber, findsNothing);
+      expect(latency, findsNothing);
+    });
   });
 
   group('[Loading and Saving]:', () {
@@ -483,6 +555,7 @@ void main() {
         widgetTester,
         preferences,
         ntConnection: createMockOnlineNT4(),
+        size: null,
       );
 
       final addWidget = find.widgetWithText(MenuItemButton, 'Add Widget');

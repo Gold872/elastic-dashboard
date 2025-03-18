@@ -1,0 +1,15 @@
+GUI:
+- changed-files:
+  - any-glob-to-any-file: ['lib/**', 'test/**', 'pubspec.yaml']
+
+ElasticLib:
+- changed-files:
+  - any-glob-to-any-file: ['elasticlib/**']
+
+dependencies:
+- changed-files:
+  - any-glob-to-any-file: ['pubspec.yaml']
+
+workflows:
+- changed-files:
+  - any-glob-to-any-file: ['.github/workflows/**']

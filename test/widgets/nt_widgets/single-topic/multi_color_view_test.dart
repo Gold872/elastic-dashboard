@@ -71,11 +71,12 @@ void main() {
     expect(multiColorViewModel.type, 'Multi Color View');
     expect(multiColorViewModel.runtimeType, SingleTopicNTWidgetModel);
     expect(
-        multiColorViewModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Multi Color View',
-          'Text Display',
-        ]));
+      multiColorViewModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Multi Color View',
+        'Text Display',
+      ]),
+    );
   });
 
   test('Multi color view to json', () {

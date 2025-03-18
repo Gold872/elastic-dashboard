@@ -33,6 +33,8 @@ class TabGridModel extends ChangeNotifier {
 
   final VoidCallback onAddWidgetPressed;
 
+  bool _disposed = false;
+
   TabGridModel({
     required this.ntConnection,
     required this.preferences,
@@ -64,7 +66,10 @@ class TabGridModel extends ChangeNotifier {
     }
 
     if (jsonData['layouts'] != null) {
-      loadLayoutsFromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
+      loadLayoutsFromJson(
+        jsonData,
+        onJsonLoadingWarning: onJsonLoadingWarning,
+      );
     }
   }
 
@@ -157,6 +162,7 @@ class TabGridModel extends ChangeNotifier {
                 ntConnection: ntConnection,
                 jsonData: jsonData,
                 preferences: preferences,
+                enabled: ntConnection.isNT4Connected,
                 onJsonLoadingWarning: onJsonLoadingWarning,
               ),
               enabled: ntConnection.isNT4Connected,
@@ -211,6 +217,7 @@ class TabGridModel extends ChangeNotifier {
               ntConnection: ntConnection,
               jsonData: jsonData,
               preferences: preferences,
+              enabled: ntConnection.isNT4Connected,
               onJsonLoadingWarning: onJsonLoadingWarning,
             ),
             enabled: ntConnection.isNT4Connected,
@@ -425,7 +432,7 @@ class TabGridModel extends ChangeNotifier {
       );
     }
 
-    int? gridSize = preferences.getInt(PrefKeys.gridSize);
+    int gridSize = preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize;
 
     double previewX =
         DraggableWidgetContainer.snapToGrid(constrainedRect.left, gridSize);
@@ -433,27 +440,51 @@ class TabGridModel extends ChangeNotifier {
         DraggableWidgetContainer.snapToGrid(constrainedRect.top, gridSize);
 
     double previewWidth = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.width.clamp(model.minWidth, double.infinity), gridSize);
+      max(model.minWidth, constrainedRect.width),
+      gridSize,
+    );
     double previewHeight = DraggableWidgetContainer.snapToGrid(
-        constrainedRect.height.clamp(model.minHeight, double.infinity),
-        gridSize);
+      max(model.minHeight, constrainedRect.height),
+      gridSize,
+    );
 
     if (previewWidth < model.minWidth) {
       previewWidth = DraggableWidgetContainer.snapToGrid(
-          constrainedRect.width.clamp(model.minWidth, double.infinity) +
-              (gridSize ?? Defaults.gridSize),
-          gridSize);
+        max(model.minWidth, constrainedRect.width) + gridSize,
+        gridSize,
+      );
     }
 
     if (previewHeight < model.minHeight) {
       previewHeight = DraggableWidgetContainer.snapToGrid(
-          constrainedRect.height.clamp(model.minHeight, double.infinity) +
-              (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize),
-          gridSize);
+        max(model.minHeight, constrainedRect.height) + gridSize,
+        gridSize,
+      );
     }
 
-    Rect preview =
-        Rect.fromLTWH(previewX, previewY, previewWidth, previewHeight);
+    if (model.resizing) {
+      if (result.handle.influencesLeft) {
+        double snappedRight = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.right,
+          gridSize,
+        );
+        previewX = snappedRight - previewWidth;
+      }
+      if (result.handle.influencesTop) {
+        double snappedBottom = DraggableWidgetContainer.snapToGrid(
+          constrainedRect.bottom,
+          gridSize,
+        );
+        previewY = snappedBottom - previewHeight;
+      }
+    }
+
+    Rect preview = Rect.fromLTWH(
+      previewX,
+      previewY,
+      previewWidth,
+      previewHeight,
+    );
 
     model.draggingRect = constrainedRect;
     model.previewRect = preview;
@@ -634,8 +665,20 @@ class TabGridModel extends ChangeNotifier {
     return true;
   }
 
-  ListLayoutModel createListLayout(
-      {String title = 'List Layout', List<NTWidgetContainerModel>? children}) {
+  void removeDragInWidget() {
+    if (_disposed) {
+      return;
+    }
+    if (_containerDraggingIn != null) {
+      _containerDraggingIn = null;
+      notifyListeners();
+    }
+  }
+
+  ListLayoutModel createListLayout({
+    String title = 'List Layout',
+    List<NTWidgetContainerModel>? children,
+  }) {
     return ListLayoutModel(
       preferences: preferences,
       title: title,
@@ -752,6 +795,15 @@ class TabGridModel extends ChangeNotifier {
       }
     });
   }
+
+  @override
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    super.dispose();
+  }
 }
 
 class TabGrid extends StatelessWidget {
@@ -768,7 +820,6 @@ class TabGrid extends StatelessWidget {
         return ChangeNotifierProvider<NTWidgetContainerModel>.value(
           value: widgetModel,
           child: DraggableNTWidgetContainer(
-            key: widgetModel.key,
             updateFunctions: (
               onUpdate: model._ntContainerOnUpdate,
               onDragBegin: model._ntContainerOnDragBegin,
@@ -784,7 +835,6 @@ class TabGrid extends StatelessWidget {
         return ChangeNotifierProvider<ListLayoutModel>.value(
           value: widgetModel,
           child: DraggableListLayout(
-            key: widgetModel.key,
             updateFunctions: (
               onUpdate: model._layoutContainerOnUpdate,
               onDragBegin: model._layoutContainerOnDragBegin,
@@ -856,6 +906,7 @@ class TabGrid extends StatelessWidget {
 
       dashboardWidgets.add(
         GestureDetector(
+          key: container.key,
           onSecondaryTapUp: (details) {
             if (model.preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked) {

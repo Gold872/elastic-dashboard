@@ -75,7 +75,7 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     _selectedTopic ??=
         ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
 
-    ntConnection.updateDataFromTopic(_selectedTopic!, selected);
+    Future(() => ntConnection.updateDataFromTopic(_selectedTopic!, selected));
   }
 }
 
