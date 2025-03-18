@@ -63,6 +63,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ProfiledPIDController',
       profiledPIDControllerJson,
     );
@@ -76,6 +77,7 @@ void main() {
         ProfiledPIDControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Profiled PID Controller',
       period: 0.100,
     );
@@ -90,6 +92,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ProfiledPIDController',
       profiledPIDControllerJson,
     );

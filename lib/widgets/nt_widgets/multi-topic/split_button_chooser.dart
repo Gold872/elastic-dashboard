@@ -39,6 +39,7 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     super.dataType,
     super.period,
   }) : super();
@@ -47,6 +48,7 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
+    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override

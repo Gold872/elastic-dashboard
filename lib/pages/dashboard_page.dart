@@ -341,10 +341,19 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
+  Map<String, dynamic> jsonDecodePath(String? path) {
+    if (path == null) {
+      return {};
+    }
+
+    File file = File(path);
+    return jsonDecode(file.readAsStringSync());
+  }
+
   @override
   void onWindowClose() async {
     Map<String, dynamic> savedJson =
-        jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
+        jsonDecodePath(preferences.getString(PrefKeys.layoutPath));
     Map<String, dynamic> currentJson = _toJson();
 
     bool showConfirmation = !_mapEquals(savedJson, currentJson);
@@ -386,30 +395,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       'grid_size': _gridSize,
       'tabs': gridData,
     };
-  }
-
-  Future<void> _saveLayout() async {
-    Map<String, dynamic> jsonData = _toJson();
-
-    bool successful =
-        await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
-    await _saveWindowPosition();
-
-    if (successful) {
-      logger.info('Layout saved successfully');
-      _showInfoNotification(
-        title: 'Saved',
-        message: 'Layout saved successfully',
-        width: 300,
-      );
-    } else {
-      logger.error('Could not save layout');
-      _showInfoNotification(
-        title: 'Error While Saving Layout',
-        message: 'Failed to save layout, please try again',
-        width: 300,
-      );
-    }
   }
 
   Future<void> _saveWindowPosition() async {
@@ -516,30 +501,39 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
   }
 
-  void _exportLayout() async {
-    const XTypeGroup jsonTypeGroup = XTypeGroup(
-      label: 'JSON (JavaScript Object Notation)',
-      extensions: ['.json'],
-      mimeTypes: ['application/json'],
-      uniformTypeIdentifiers: ['public.json'],
-    );
+  Future<void> _exportLayout({bool last = false}) async {
+    FileSaveLocation? saveLocation;
+    String? prvLocation = preferences.getString(PrefKeys.layoutPath);
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    if (last && prvLocation != null) {
+      saveLocation = FileSaveLocation(prvLocation);
+    } else {
+      const XTypeGroup jsonTypeGroup = XTypeGroup(
+        label: 'JSON (JavaScript Object Notation)',
+        extensions: ['.json'],
+        mimeTypes: ['application/json'],
+        uniformTypeIdentifiers: ['public.json'],
+      );
+
+      const XTypeGroup anyTypeGroup = XTypeGroup(
+        label: 'All Files',
+      );
+
+      saveLocation = await getSaveLocation(
+        suggestedName: 'elastic-layout.json',
+        acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
+      );
+
+      if (saveLocation == null) {
+        logger.info('Ignoring layout export, no location was selected');
+        return;
+      }
+
+      await preferences.setString(PrefKeys.layoutPath, saveLocation.path);
+    }
 
     logger.info('Exporting layout');
-    final FileSaveLocation? saveLocation = await getSaveLocation(
-      suggestedName: 'elastic-layout.json',
-      acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
-    );
-
     hotKeyManager.resetKeysPressed();
-
-    if (saveLocation == null) {
-      logger.info('Ignoring layout export, no location was selected');
-      return;
-    }
 
     Map<String, dynamic> jsonData = _toJson();
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
@@ -599,29 +593,30 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       return;
     }
 
-    Map<String, dynamic> jsonData;
     try {
-      jsonData = jsonDecode(jsonString);
+      jsonDecode(jsonString); // check valid
     } catch (e) {
       _showJsonLoadingError(e.toString());
       return;
     }
 
-    await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    await preferences.setString(PrefKeys.layoutPath, file.path);
 
     setState(() => _loadLayoutFromJsonData(jsonString));
   }
 
   void _loadLayout() {
-    String? jsonString = preferences.getString(PrefKeys.layout);
+    String? path = preferences.getString(PrefKeys.layoutPath);
 
-    if (jsonString == null) {
+    if (path == null) {
       _createDefaultTabs();
       return;
     }
 
+    File file = File(path);
+
     setState(() {
-      _loadLayoutFromJsonData(jsonString);
+      _loadLayoutFromJsonData(file.readAsStringSync());
     });
   }
 
@@ -1160,7 +1155,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         LogicalKeyboardKey.keyS,
         modifiers: [KeyModifier.control],
       ),
-      callback: _saveLayout,
+      callback: () => _exportLayout(last: true),
     );
     // Export (Ctrl + Shift + S)
     hotKeyManager.register(
@@ -1759,7 +1754,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         actions: [
           TextButton(
             onPressed: () async {
-              await _saveLayout();
+              await _exportLayout();
 
               Future.delayed(
                 const Duration(milliseconds: 250),
@@ -1932,16 +1927,18 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
               ],
             ),
           ),
-          // Save
+          // Export layout
           MenuItemButton(
             style: menuButtonStyle,
-            onPressed: _saveLayout,
-            shortcut:
-                const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+            onPressed: () => _exportLayout(last: true),
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyS,
+              control: true,
+            ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.save_outlined),
+                Icon(Icons.save_as_outlined),
                 SizedBox(width: 8),
                 Text('Save'),
               ],

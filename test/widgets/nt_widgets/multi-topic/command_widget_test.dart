@@ -54,6 +54,7 @@ void main() {
     NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Command',
       commandWidgetJson,
     );
@@ -72,6 +73,7 @@ void main() {
     CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Command',
       period: 0.100,
       showType: true,
@@ -86,6 +88,7 @@ void main() {
     NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Command',
       commandWidgetJson,
     );
@@ -131,6 +134,7 @@ void main() {
     CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Command',
       period: 0.100,
       showType: true,

@@ -70,6 +70,7 @@ void main() {
     NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Field',
       fieldWidgetJson,
     );
@@ -94,6 +95,7 @@ void main() {
     NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Field2d',
       fieldWidgetJson,
     );
@@ -125,6 +127,7 @@ void main() {
       showTrajectories: true,
       robotWidthMeters: 1.0,
       robotLengthMeters: 1.0,
+      ntStructMeta: null,
       fieldRotation: 90.0,
       robotColor: Colors.red,
       trajectoryColor: Colors.white,
@@ -143,6 +146,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -189,6 +193,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -249,6 +254,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -307,6 +313,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -353,6 +360,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -399,6 +407,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -443,6 +452,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -493,6 +503,7 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
+        null,
         'Field',
         fieldWidgetJson,
       );
@@ -531,6 +542,7 @@ void main() {
       fieldRotation: 90.0,
       robotColor: Colors.red,
       trajectoryColor: Colors.white,
+      ntStructMeta: null,
     );
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(

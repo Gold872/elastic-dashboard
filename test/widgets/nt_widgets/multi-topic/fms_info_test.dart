@@ -102,7 +102,7 @@ void main() {
   Future<void> pushFMSInfoWidget(
       WidgetTester widgetTester, NTConnection ntConnection) async {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
-        ntConnection, preferences, 'FMSInfo', fmsInfoJson);
+        ntConnection, preferences, null, 'FMSInfo', fmsInfoJson);
 
     return widgetTester.pumpWidget(
       MaterialApp(
@@ -136,6 +136,7 @@ void main() {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'FMSInfo',
       fmsInfoJson,
     );
@@ -148,6 +149,7 @@ void main() {
     FMSInfoModel fmsInfoModel = FMSInfoModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/FMSInfo',
       period: 0.100,
     );

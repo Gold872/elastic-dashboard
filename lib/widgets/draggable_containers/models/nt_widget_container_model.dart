@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -60,6 +61,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       ...super.toJson(),
       'type': childModel.type,
       'properties': getChildJson(),
+      'ntStructMeta': childModel.ntStructMeta?.toJson(),
     };
   }
 
@@ -86,11 +88,22 @@ class NTWidgetContainerModel extends WidgetContainerModel {
           'Network tables widget does not have any properties, defaulting to an empty properties map.');
     }
 
+    NT4StructMeta? ntStructMeta;
+    if (jsonData['ntStructMeta'] == null) {
+      onJsonLoadingWarning?.call(
+          'Network tables widget does not have a structure meta, defaulting to an empty map.');
+    } else {
+      ntStructMeta = NT4StructMeta.fromJson(
+        tryCast(jsonData['ntStructMeta']) ?? {},
+      );
+    }
+
     String type = tryCast(jsonData['type']) ?? '';
 
     childModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      ntStructMeta,
       type,
       widgetProperties,
       onWidgetTypeNotFound: onJsonLoadingWarning,
@@ -317,6 +330,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      childModel.ntStructMeta,
       type,
       childModel.topic,
       dataType: (childModel is SingleTopicNTWidgetModel)
