@@ -818,10 +818,14 @@ class _DashboardPageState extends State<DashboardPage>
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
     late final double platformWidthAdjust;
-    if (Platform.isMacOS) {
-      platformWidthAdjust = 30;
-    } else if (Platform.isLinux) {
-      platformWidthAdjust = 10;
+    if (!kIsWeb) {
+      if (Platform.isMacOS) {
+        platformWidthAdjust = 30;
+      } else if (Platform.isLinux) {
+        platformWidthAdjust = 10;
+      } else {
+        platformWidthAdjust = 0;
+      }
     } else {
       platformWidthAdjust = 0;
     }

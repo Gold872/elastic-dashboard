@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -580,7 +581,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
             ),
           ),
-          if (!Platform.isMacOS)
+          if (!kIsWeb && !Platform.isMacOS)
             TextButton.icon(
               onPressed: () {
                 widget.onOpenAssetsFolderPressed?.call();
