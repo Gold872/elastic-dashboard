@@ -82,10 +82,14 @@ void main() async {
     logger.debug('Display Information: - Screen Size: $screenSize');
 
     late final double platformWidthAdjust;
-    if (Platform.isMacOS) {
-      platformWidthAdjust = 30;
-    } else if (Platform.isLinux) {
-      platformWidthAdjust = 10;
+    if (!kIsWeb) {
+      if (Platform.isMacOS) {
+        platformWidthAdjust = 30;
+      } else if (Platform.isLinux) {
+        platformWidthAdjust = 10;
+      } else {
+        platformWidthAdjust = 0;
+      }
     } else {
       platformWidthAdjust = 0;
     }
