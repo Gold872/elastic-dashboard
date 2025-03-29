@@ -544,7 +544,7 @@ class NT4Client {
     int rxTime = _getClientTimeUS();
 
     int rtt = rxTime - clientTimestamp;
-    int serverTimeAtRx = (serverTimestamp - rtt / 2.0).round();
+    int serverTimeAtRx = serverTimestamp + rtt ~/ 2;
     _serverTimeOffsetUS = serverTimeAtRx - rxTime;
 
     _lastPongTime = rxTime;
