@@ -4,7 +4,6 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
@@ -29,9 +28,12 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
         defaultSubscription,
       ];
 
-  String? selectedChoice;
+  late Listenable chooserStateListenable;
 
-  StringChooserData? previousData;
+  String? previousDefault;
+  String? previousSelected;
+  String? previousActive;
+  List<String>? previousOptions;
 
   NT4Topic? _selectedTopic;
 
@@ -58,13 +60,85 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
     defaultSubscription =
         ntConnection.subscribe(defaultTopicName, super.period);
+    chooserStateListenable = Listenable.merge(subscriptions);
+    chooserStateListenable.addListener(onChooserStateUpdate);
+
+    previousOptions = null;
+    previousActive = null;
+    previousDefault = null;
+    previousSelected = null;
+
+    // Initial caching of the chooser state, when switching
+    // topics the listener won't be called, so we have to call it manually
+    onChooserStateUpdate();
   }
 
   @override
   void resetSubscription() {
     _selectedTopic = null;
+    chooserStateListenable.removeListener(onChooserStateUpdate);
 
     super.resetSubscription();
+  }
+
+  void onChooserStateUpdate() {
+    List<Object?>? rawOptions =
+        optionsSubscription.value?.tryCast<List<Object?>>();
+
+    List<String>? currentOptions = rawOptions?.whereType<String>().toList();
+
+    String? currentActive = tryCast(activeSubscription.value);
+    if (currentActive != null && currentActive.isEmpty) {
+      currentActive = null;
+    }
+
+    String? currentSelected = tryCast(selectedSubscription.value);
+    if (currentSelected != null && currentSelected.isEmpty) {
+      currentSelected = null;
+    }
+
+    String? currentDefault = tryCast(defaultSubscription.value);
+    if (currentDefault != null && currentDefault.isEmpty) {
+      currentDefault = null;
+    }
+
+    bool hasValue = currentOptions != null ||
+        currentActive != null ||
+        currentDefault != null;
+
+    bool publishCurrent =
+        hasValue && previousSelected != null && currentSelected == null;
+
+    // We only want to publish the selected topic if we're getting values
+    // from the others, since it means the chooser is published on network tables
+    if (hasValue) {
+      _selectedTopic ??= ntConnection.publishNewTopic(
+        selectedTopicName,
+        NT4TypeStr.kString,
+        properties: {
+          'retained': true,
+        },
+      );
+    }
+
+    if (currentOptions != null) {
+      previousOptions = currentOptions;
+    }
+    if (currentSelected != null) {
+      previousSelected = currentSelected;
+    }
+    if (currentActive != null) {
+      previousActive = currentActive;
+    }
+    if (currentDefault != null) {
+      previousDefault = currentDefault;
+    }
+
+    if (publishCurrent) {
+      publishSelectedValue(previousSelected);
+    }
+
+    notifyListeners();
   }
 
   void publishSelectedValue(String? selected) {
@@ -72,10 +146,15 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
       return;
     }
 
-    _selectedTopic ??=
-        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    _selectedTopic ??= ntConnection.publishNewTopic(
+      selectedTopicName,
+      NT4TypeStr.kString,
+      properties: {
+        'retained': true,
+      },
+    );
 
-    Future(() => ntConnection.updateDataFromTopic(_selectedTopic!, selected));
+    ntConnection.updateDataFromTopic(_selectedTopic!, selected);
   }
 }
 
@@ -88,107 +167,45 @@ class SplitButtonChooser extends NTWidget {
   Widget build(BuildContext context) {
     SplitButtonChooserModel model = cast(context.watch<NTWidgetModel>());
 
-    return ListenableBuilder(
-      listenable: Listenable.merge(model.subscriptions),
-      builder: (context, child) {
-        List<Object?> rawOptions =
-            model.optionsSubscription.value?.tryCast<List<Object?>>() ?? [];
+    String? preview =
+        model.previousSelected ?? model.previousActive ?? model.previousDefault;
 
-        List<String> options = rawOptions.whereType<String>().toList();
+    bool showWarning = model.previousActive != preview;
 
-        String? active = tryCast(model.activeSubscription.value);
-        if (active != null && active == '') {
-          active = null;
-        }
-
-        String? selected = tryCast(model.selectedSubscription.value);
-        if (selected != null && selected == '') {
-          selected = null;
-        }
-
-        String? defaultOption = tryCast(model.defaultSubscription.value);
-        if (defaultOption != null && defaultOption == '') {
-          defaultOption = null;
-        }
-
-        if (!model.ntConnection.isNT4Connected) {
-          active = null;
-          selected = null;
-          defaultOption = null;
-        }
-
-        StringChooserData currentData = StringChooserData(
-            options: options,
-            active: active,
-            defaultOption: defaultOption,
-            selected: selected);
-
-        // If a choice has been selected previously but the topic on NT has no value, publish it
-        // This can happen if NT happens to restart
-        if (currentData.selectedChanged(model.previousData)) {
-          if (selected != null && model.selectedChoice != selected) {
-            model.selectedChoice = selected;
-          }
-        } else if (currentData.activeChanged(model.previousData) ||
-            active == null) {
-          if (selected == null && model.selectedChoice != null) {
-            if (options.contains(model.selectedChoice!)) {
-              model.publishSelectedValue(model.selectedChoice!);
-            } else if (options.isNotEmpty) {
-              model.selectedChoice = active;
-            }
-          }
-        }
-
-        // If nothing is selected but NT has an active value, set the selected to the NT value
-        // This happens on program startup
-        if (active != null && model.selectedChoice == null) {
-          model.selectedChoice = active;
-        }
-
-        model.previousData = currentData;
-
-        bool showWarning = active != model.selectedChoice;
-
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: ToggleButtons(
-                  onPressed: (index) {
-                    model.selectedChoice = options[index];
-
-                    model.publishSelectedValue(model.selectedChoice!);
-                  },
-                  isSelected: options.map((String option) {
-                    if (option == model.selectedChoice) {
-                      return true;
-                    }
-                    return false;
-                  }).toList(),
-                  children: options.map((String option) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(option),
-                    );
-                  }).toList(),
-                ),
-              ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ToggleButtons(
+              onPressed: (index) {
+                model.publishSelectedValue(model.previousOptions?[index]);
+              },
+              isSelected: model.previousOptions
+                      ?.map((String option) => option == preview)
+                      .toList() ??
+                  [],
+              children: model.previousOptions
+                      ?.map((String option) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(option),
+                          ))
+                      .toList() ??
+                  [],
             ),
-            const SizedBox(width: 5),
-            (showWarning)
-                ? const Tooltip(
-                    message:
-                        'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                    child: Icon(Icons.priority_high, color: Colors.red),
-                  )
-                : const Icon(Icons.check, color: Colors.green),
-          ],
-        );
-      },
+          ),
+        ),
+        const SizedBox(width: 5),
+        (showWarning)
+            ? const Tooltip(
+                message:
+                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                child: Icon(Icons.priority_high, color: Colors.red),
+              )
+            : const Icon(Icons.check, color: Colors.green),
+      ],
     );
   }
 }

@@ -104,21 +104,25 @@ void main() {
     expect(find.text('One'), findsOneWidget);
     expect(find.text('Two'), findsOneWidget);
     expect(find.text('Three'), findsOneWidget);
-    expect((splitButtonChooserModel as SplitButtonChooserModel).selectedChoice,
-        'Two');
+    expect(
+      (splitButtonChooserModel as SplitButtonChooserModel).previousSelected,
+      isNull,
+    );
     expect(find.byIcon(Icons.check), findsOneWidget);
 
     await widgetTester.tap(find.text('One'));
-    splitButtonChooserModel.refresh();
+    splitButtonChooserModel.onChooserStateUpdate();
     await widgetTester.pumpAndSettle();
 
-    expect(splitButtonChooserModel.selectedChoice, 'One');
+    expect(splitButtonChooserModel.previousSelected, 'One');
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
 
     ntConnection.updateDataFromTopicName(
-        splitButtonChooserModel.activeTopicName, 'One');
+      splitButtonChooserModel.activeTopicName,
+      'One',
+    );
 
-    splitButtonChooserModel.refresh();
+    splitButtonChooserModel.onChooserStateUpdate();
     await widgetTester.pumpAndSettle();
 
     expect(find.byIcon(Icons.priority_high), findsNothing);
