@@ -34,25 +34,32 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-            name: 'Test/Combo Box Chooser/options',
-            type: NT4TypeStr.kStringArr,
-            properties: {}),
+          name: 'Test/Combo Box Chooser/options',
+          type: NT4TypeStr.kStringArr,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Combo Box Chooser/active',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Combo Box Chooser/active',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Combo Box Chooser/selected',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Combo Box Chooser/selected',
+          type: NT4TypeStr.kString,
+          properties: {
+            'retained': true,
+          },
+        ),
         NT4Topic(
-            name: 'Test/Combo Box Chooser/default',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Combo Box Chooser/default',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
       ],
       virtualValues: {
         'Test/Combo Box Chooser/options': ['One', 'Two', 'Three'],
         'Test/Combo Box Chooser/active': 'Two',
+        'Test/Combo Box Chooser/default': 'Two',
         'Test/Combo Box Chooser/selected': null,
       },
     );
