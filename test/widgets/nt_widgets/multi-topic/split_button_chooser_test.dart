@@ -29,25 +29,33 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-            name: 'Test/Split Button Chooser/options',
-            type: NT4TypeStr.kStringArr,
-            properties: {}),
+          name: 'Test/Split Button Chooser/options',
+          type: NT4TypeStr.kStringArr,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Split Button Chooser/active',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Split Button Chooser/active',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Split Button Chooser/selected',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Split Button Chooser/default',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Split Button Chooser/default',
-            type: NT4TypeStr.kString,
-            properties: {}),
+          name: 'Test/Split Button Chooser/selected',
+          type: NT4TypeStr.kString,
+          properties: {
+            'retained': true,
+          },
+        ),
       ],
       virtualValues: {
         'Test/Split Button Chooser/options': ['One', 'Two', 'Three'],
         'Test/Split Button Chooser/active': 'Two',
+        'Test/Split Button Chooser/default': 'Two',
+        'Test/Split Button Chooser/selected': null,
       },
     );
   });
@@ -104,21 +112,25 @@ void main() {
     expect(find.text('One'), findsOneWidget);
     expect(find.text('Two'), findsOneWidget);
     expect(find.text('Three'), findsOneWidget);
-    expect((splitButtonChooserModel as SplitButtonChooserModel).selectedChoice,
-        'Two');
+    expect(
+      (splitButtonChooserModel as SplitButtonChooserModel).previousSelected,
+      isNull,
+    );
     expect(find.byIcon(Icons.check), findsOneWidget);
 
     await widgetTester.tap(find.text('One'));
-    splitButtonChooserModel.refresh();
+    splitButtonChooserModel.onChooserStateUpdate();
     await widgetTester.pumpAndSettle();
 
-    expect(splitButtonChooserModel.selectedChoice, 'One');
+    expect(splitButtonChooserModel.previousSelected, 'One');
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
 
     ntConnection.updateDataFromTopicName(
-        splitButtonChooserModel.activeTopicName, 'One');
+      splitButtonChooserModel.activeTopicName,
+      'One',
+    );
 
-    splitButtonChooserModel.refresh();
+    splitButtonChooserModel.onChooserStateUpdate();
     await widgetTester.pumpAndSettle();
 
     expect(find.byIcon(Icons.priority_high), findsNothing);
