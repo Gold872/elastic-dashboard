@@ -167,8 +167,7 @@ class SplitButtonChooser extends NTWidget {
   Widget build(BuildContext context) {
     SplitButtonChooserModel model = cast(context.watch<NTWidgetModel>());
 
-    String? preview =
-        model.previousSelected ?? model.previousActive ?? model.previousDefault;
+    String? preview = model.previousSelected ?? model.previousDefault;
 
     bool showWarning = model.previousActive != preview;
 
