@@ -135,7 +135,7 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
-      
+
       - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
         run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
@@ -177,7 +177,7 @@ jobs:
           path: build/macos/Build/Products/Release/elastic-setup-macos.dmg
           if-no-files-found: error
 
-      - name: Install Innosetup
+      - name: Install Inno Setup
         if: ${{ matrix.build-option == 'windows' }}
         run: choco install innosetup -y
 
@@ -191,7 +191,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: "build/windows/x64/installer"
+          path: build/windows/x64/installer
           if-no-files-found: error
 
   build-wpilib:
