@@ -237,16 +237,20 @@ class NTConnection {
     _ntClient.unpublishTopic(topic);
   }
 
-  void updateDataFromSubscription(NT4Subscription subscription, dynamic data) {
-    _ntClient.addSampleFromName(subscription.topic, data);
+  void updateDataFromSubscription(
+    NT4Subscription subscription,
+    dynamic data, [
+    int? timestamp,
+  ]) {
+    _ntClient.addSampleFromName(subscription.topic, data, timestamp);
   }
 
-  void updateDataFromTopic(NT4Topic topic, dynamic data) {
-    _ntClient.addSample(topic, data);
+  void updateDataFromTopic(NT4Topic topic, dynamic data, [int? timestamp]) {
+    _ntClient.addSample(topic, data, timestamp);
   }
 
   @visibleForTesting
-  void updateDataFromTopicName(String topic, dynamic data) {
-    _ntClient.addSampleFromName(topic, data);
+  void updateDataFromTopicName(String topic, dynamic data, [int? timestamp]) {
+    _ntClient.addSampleFromName(topic, data, timestamp);
   }
 }

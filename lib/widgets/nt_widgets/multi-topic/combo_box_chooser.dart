@@ -157,13 +157,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     // We only want to publish the selected topic if we're getting values
     // from the others, since it means the chooser is published on network tables
     if (hasValue) {
-      _selectedTopic ??= ntConnection.publishNewTopic(
-        selectedTopicName,
-        NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
-      );
+      publishSelectedTopic();
     }
 
     if (currentOptions != null) {
@@ -180,26 +174,50 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     }
 
     if (publishCurrent) {
-      publishSelectedValue(previousSelected);
+      publishSelectedValue(previousSelected, true);
     }
 
     notifyListeners();
   }
 
-  void publishSelectedValue(String? selected) {
+  void publishSelectedTopic() {
+    if (_selectedTopic != null) {
+      return;
+    }
+
+    NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
+
+    if (existing != null) {
+      existing.properties.addAll({
+        'retained': true,
+      });
+      ntConnection.publishTopic(existing);
+      _selectedTopic = existing;
+    } else {
+      _selectedTopic = ntConnection.publishNewTopic(
+        selectedTopicName,
+        NT4TypeStr.kString,
+        properties: {
+          'retained': true,
+        },
+      );
+    }
+  }
+
+  void publishSelectedValue(String? selected, [bool initial = false]) {
     if (selected == null || !ntConnection.isNT4Connected) {
       return;
     }
 
-    _selectedTopic ??= ntConnection.publishNewTopic(
-      selectedTopicName,
-      NT4TypeStr.kString,
-      properties: {
-        'retained': true,
-      },
-    );
+    if (_selectedTopic == null) {
+      publishSelectedTopic();
+    }
 
-    ntConnection.updateDataFromTopic(_selectedTopic!, selected);
+    ntConnection.updateDataFromTopic(
+      _selectedTopic!,
+      selected,
+      initial ? 0 : null,
+    );
   }
 }
 
