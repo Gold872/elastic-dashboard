@@ -475,9 +475,7 @@ class NT4Client {
       NT4Topic existing = _clientPublishedTopics[topic.name]!;
       topic.pubUID = existing.pubUID;
       existing.properties.addAll(topic.properties);
-      if (topic.properties.isNotEmpty) {
-        _wsSetProperties(topic);
-      }
+      _wsSetProperties(existing);
       return;
     }
     logger.trace('Publishing topic: $topic');
@@ -485,9 +483,7 @@ class NT4Client {
     topic.pubUID = getNewPubUID();
     _clientPublishedTopics[topic.name] = topic;
     _wsPublish(topic);
-    if (topic.properties.isNotEmpty) {
-      _wsSetProperties(topic);
-    }
+    _wsSetProperties(topic);
   }
 
   void unpublishTopic(NT4Topic topic) {

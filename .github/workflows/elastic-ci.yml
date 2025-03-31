@@ -135,7 +135,7 @@ jobs:
 
       - name: Build app
         run: flutter build ${{ matrix.build-option }}
-      
+
       - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
         run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
@@ -177,19 +177,21 @@ jobs:
           path: build/macos/Build/Products/Release/elastic-setup-macos.dmg
           if-no-files-found: error
 
+      - name: Install Inno Setup
+        if: ${{ matrix.build-option == 'windows' }}
+        run: choco install innosetup -y
+
       - name: Create windows installer
         if: ${{ matrix.build-option == 'windows' }}
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
-        with:
-          path: installer_setup_script.iss
-          options: /O+
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer_setup_script.iss
 
       - name: Upload windows installer
         if: ${{ matrix.build-option == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: "build/windows/x64/installer"
+          path: build/windows/x64/installer
           if-no-files-found: error
 
   build-wpilib:
