@@ -178,7 +178,7 @@ jobs:
           if-no-files-found: error
 
       - name: Install Innosetup
-        if ${{ matrix.build-option == 'windows' }}
+        if: ${{ matrix.build-option == 'windows' }}
         run: choco install innosetup -y
 
       - name: Create windows installer
