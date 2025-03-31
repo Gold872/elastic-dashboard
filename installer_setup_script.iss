@@ -1,10 +1,12 @@
 #define MyAppName "Elastic"
 #define MyAppFolderName "FRC Elastic"
 #define MyAppPublisher "Gold87"
-#define MyAppURL "https://github.com/gold872/elastic-dashboard/"
+#define MyAppURL "https://github.com/Gold872/elastic-dashboard/"
 #define MyAppExeName "elastic_dashboard.exe"
-#define AppVersionName GetStringFileInfo('build\windows\x64\runner\Release\elastic_dashboard.exe', 'ProductVersion')
-#define ApplicationVersion GetVersionNumbersString('build\windows\x64\runner\Release\elastic_dashboard.exe')
+#define MyAppSourceDir "build\windows\x64\runner\Release"
+#define MyAppExePath MyAppSourceDir + "\" + MyAppExeName
+#define AppVersionName GetStringFileInfo(MyAppExePath, "ProductVersion")
+#define ApplicationVersion GetVersionNumbersString(MyAppExePath)
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -19,6 +21,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppFolderName}
+UninstallDisplayIcon={app}\{#MyAppExeName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
@@ -45,9 +48,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\windows\x64\runner\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: {#MyAppExePath}; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
