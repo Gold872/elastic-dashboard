@@ -68,7 +68,6 @@ void main() {
     GyroModel gyroModel = GyroModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Gyro',
       period: 0.100,
       counterClockwisePositive: true,
@@ -111,7 +110,6 @@ void main() {
     GyroModel gyroModel = GyroModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Gyro',
       period: 0.100,
       counterClockwisePositive: true,

@@ -601,6 +601,7 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     }
 
     await preferences.setString(PrefKeys.layoutPath, file.path);
+    await preferences.setString(PrefKeys.layout, jsonString);
 
     setState(() => _loadLayoutFromJsonData(jsonString));
   }

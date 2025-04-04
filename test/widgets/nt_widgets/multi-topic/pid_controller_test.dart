@@ -88,7 +88,6 @@ void main() {
     PIDControllerModel pidControllerModel = PIDControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/PID Controller',
       period: 0.100,
     );

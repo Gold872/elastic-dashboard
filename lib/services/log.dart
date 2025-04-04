@@ -34,12 +34,15 @@ class Log {
         if (kReleaseMode) FileOutput(file: logFile),
       ]),
       filter: ProductionFilter(),
-      level: Level.debug,
+      level: Level.info,
     );
   }
 
   void log(Level level, dynamic message, [dynamic error, StackTrace? trace]) {
-    if (Logger.level.value > level.value) {}
+    if (Logger.level.value > level.value) {
+      return;
+    }
+
     _logger?.log(
       level,
       '[${_dateFormat.format(DateTime.now())}]:  $message',

@@ -74,7 +74,6 @@ void main() {
     EncoderModel encoderWidgetModel = EncoderModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Encoder',
       period: 0.100,
     );
