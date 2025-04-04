@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/power_distribution.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
@@ -65,6 +65,7 @@ void main() {
     NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PowerDistribution',
       powerDistributionJson,
     );
@@ -77,6 +78,7 @@ void main() {
     NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PDP',
       powerDistributionJson,
     );
@@ -102,6 +104,7 @@ void main() {
     NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PowerDistribution',
       powerDistributionJson,
     );

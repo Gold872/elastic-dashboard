@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/fms_info.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/fms_info.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
@@ -102,7 +102,7 @@ void main() {
   Future<void> pushFMSInfoWidget(
       WidgetTester widgetTester, NTConnection ntConnection) async {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
-        ntConnection, preferences, 'FMSInfo', fmsInfoJson);
+        ntConnection, preferences, null, 'FMSInfo', fmsInfoJson);
 
     return widgetTester.pumpWidget(
       MaterialApp(
@@ -136,6 +136,7 @@ void main() {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'FMSInfo',
       fmsInfoJson,
     );

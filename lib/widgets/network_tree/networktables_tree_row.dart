@@ -11,8 +11,8 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/yagsl_swerve_drive.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/yagsl_swerve_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/text_display.dart';
@@ -23,7 +23,7 @@ class NetworkTableTreeRow {
   final String topic;
   final String rowName;
 
-  final NT4Topic? ntTopic;
+  final TreeTopicEntry? entry;
 
   List<NetworkTableTreeRow> children = [];
 
@@ -32,7 +32,7 @@ class NetworkTableTreeRow {
     required this.preferences,
     required this.topic,
     required this.rowName,
-    this.ntTopic,
+    this.entry,
   });
 
   bool hasRow(String name) {
@@ -81,13 +81,13 @@ class NetworkTableTreeRow {
   }
 
   NetworkTableTreeRow createNewRow(
-      {required String topic, required String name, NT4Topic? ntTopic}) {
+      {required String topic, required String name, TreeTopicEntry? entry}) {
     NetworkTableTreeRow newRow = NetworkTableTreeRow(
       ntConnection: ntConnection,
       preferences: preferences,
       topic: topic,
       rowName: name,
-      ntTopic: ntTopic,
+      entry: entry,
     );
     addRow(newRow);
 
@@ -117,8 +117,8 @@ class NetworkTableTreeRow {
   static SingleTopicNTWidgetModel? getNTWidgetFromTopic(
       NTConnection ntConnection,
       SharedPreferences preferences,
-      NT4Topic ntTopic) {
-    switch (ntTopic.type) {
+      TreeTopicEntry entry) {
+    switch (entry.type()) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
       case NT4TypeStr.kFloat32:
@@ -131,22 +131,24 @@ class NetworkTableTreeRow {
         return TextDisplayModel(
           ntConnection: ntConnection,
           preferences: preferences,
-          topic: ntTopic.name,
-          dataType: ntTopic.type,
+          topic: entry.topic.name,
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
       case NT4TypeStr.kBool:
         return BooleanBoxModel(
           ntConnection: ntConnection,
           preferences: preferences,
-          topic: ntTopic.name,
-          dataType: ntTopic.type,
+          topic: entry.topic.name,
+          dataType: entry.type(),
+          ntStructMeta: entry.meta,
         );
     }
     return null;
   }
 
   Future<NTWidgetModel?>? getPrimaryWidget() async {
-    if (ntTopic == null) {
+    if (entry == null) {
       if (hasRow('.type')) {
         return await getTypedWidget('$topic/.type');
       }
@@ -180,7 +182,7 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    return getNTWidgetFromTopic(ntConnection, preferences, ntTopic!);
+    return getNTWidgetFromTopic(ntConnection, preferences, entry!);
   }
 
   Future<String?> getTypeString(String typeTopic) async {
@@ -198,6 +200,7 @@ class NetworkTableTreeRow {
     return NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      entry?.meta,
       type,
       topic,
     );

@@ -20,7 +20,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-abstract class NTWidgetModel extends ChangeNotifier {
+sealed class NTWidgetModel extends ChangeNotifier {
   String get type;
 
   final NTConnection ntConnection;
@@ -34,9 +34,10 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   set topic(value) => _topic = value;
 
-  get period => _period;
+  // ignore: unnecessary_getters_setters
+  double get period => _period;
 
-  set period(value) => _period = value;
+  set period(double value) => _period = value;
 
   bool _disposed = false;
   bool _forceDispose = false;
@@ -124,12 +125,14 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   String dataType = 'Unknown';
 
   NT4Subscription? subscription;
+  NT4StructMeta? ntStructMeta;
   NT4Topic? ntTopic;
 
   SingleTopicNTWidgetModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required ntStructMeta,
     this.dataType = 'Unknown',
     super.period,
   }) : super();
@@ -139,6 +142,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required String type,
     required super.topic,
+    required ntStructMeta,
     this.dataType = 'Unknown',
     super.period,
   })  : _typeOverride = type,
@@ -147,6 +151,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     dataType = tryCast(jsonData['data_type']) ?? dataType;
@@ -157,7 +162,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   Map<String, dynamic> toJson() {
     if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
     return {
       ...super.toJson(),
@@ -168,7 +173,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
     switch (dataType) {
       case NT4TypeStr.kBool:
@@ -218,7 +223,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(topic, period, ntStructMeta);
   }
 
   void createTopicIfNull() {
@@ -239,7 +244,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   void resetSubscription() {
     if (subscription == null) {
-      subscription = ntConnection.subscribe(topic, period);
+      subscription = ntConnection.subscribe(topic, period, ntStructMeta);
 
       ntTopic = null;
 
@@ -250,7 +255,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     bool resetDataType = subscription!.topic != topic;
 
     ntConnection.unSubscribe(subscription!);
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribe(topic, period, ntStructMeta);
 
     ntTopic = null;
 
@@ -259,7 +264,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       if (ntTopic == null && ntConnection.isNT4Connected) {
         dataType = 'Unknown';
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
     }
 

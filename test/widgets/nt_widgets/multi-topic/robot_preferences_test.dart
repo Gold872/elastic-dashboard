@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/robot_preferences.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 import '../../../test_util.mocks.dart';
@@ -63,6 +63,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );
@@ -88,6 +89,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );

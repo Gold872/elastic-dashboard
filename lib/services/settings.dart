@@ -57,7 +57,6 @@ class Defaults {
 }
 
 class PrefKeys {
-  static String layout = 'layout';
   static String ipAddress = 'ip_address';
   static String ipAddressMode = 'ip_address_mode';
   static String teamNumber = 'team_number';
@@ -75,4 +74,6 @@ class PrefKeys {
   static String gridDpiOverride = 'grid_dpi_override';
   static String windowPosition = 'window_position';
   static String autoTextSubmitButton = 'auto_text_submit_button';
+  static String layoutPath = 'exportPath';
+  static String layout = 'layout';
 }

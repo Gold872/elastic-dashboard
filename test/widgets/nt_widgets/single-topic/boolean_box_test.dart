@@ -61,6 +61,7 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -92,6 +93,7 @@ void main() {
     BooleanBoxModel booleanBoxModel = BooleanBoxModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Boolean Value',
       dataType: 'boolean',
       period: 0.100,
@@ -110,6 +112,7 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -160,6 +163,7 @@ void main() {
     BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     ) as BooleanBoxModel;

@@ -34,6 +34,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     bool? showSubmitButton,
     super.dataType,
     super.period,
@@ -50,6 +51,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
   TextDisplayModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _showSubmitButton =
@@ -89,7 +91,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
 
     late Object? formattedData;
 
-    String dataType = ntTopic!.type;
+    String dataType = super.ntStructMeta?.type ?? ntTopic!.type;
     switch (dataType) {
       case NT4TypeStr.kBool:
         formattedData = bool.tryParse(value);

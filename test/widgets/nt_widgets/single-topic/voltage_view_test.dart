@@ -56,6 +56,7 @@ void main() {
     NTWidgetModel voltageViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Voltage View',
       voltageViewJson,
     );
@@ -91,6 +92,7 @@ void main() {
     VoltageViewModel voltageViewModel = VoltageViewModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -110,6 +112,7 @@ void main() {
     NTWidgetModel voltageViewModel = VoltageViewModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -148,6 +151,7 @@ void main() {
     NTWidgetModel voltageViewModel = VoltageViewModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -186,6 +190,7 @@ void main() {
     NTWidgetModel voltageViewModel = VoltageViewModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -223,6 +228,7 @@ void main() {
     VoltageViewModel voltageViewModel = VoltageViewModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
 typedef SubscriptionIdentification = ({
@@ -36,6 +37,8 @@ class NTConnection {
   Map<int, NT4Subscription> subscriptionMap = {};
   Map<NT4Subscription, int> subscriptionUseCount = {};
 
+  Map<String, String> knownSchemas = {};
+
   NTConnection(String ipAddress) {
     nt4Connect(ipAddress);
   }
@@ -63,6 +66,18 @@ class NTConnection {
       topic: '',
       options: const NT4SubscriptionOptions(topicsOnly: true),
     );
+
+    _ntClient.addTopicAnnounceListener((NT4Topic topic) {
+      if (topic.type == "structschema") {
+        subscribe(topic.name).listen((data, _) {
+          if (data == null) return;
+          String schema = String.fromCharCodes(data as List<int>);
+          String key = topic.name.split("/").last;
+          logger.debug("Received schema for $key: $schema");
+          knownSchemas[key] = schema;
+        });
+      }
+    });
   }
 
   void dsClientConnect(
@@ -157,9 +172,10 @@ class NTConnection {
     _ntClient.setServerBaseAddreess(ipAddress);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
-    NT4SubscriptionOptions subscriptionOptions =
-        NT4SubscriptionOptions(periodicRateSeconds: period);
+  NT4Subscription subscribe(String topic,
+      [double period = 0.1, NT4StructMeta? ntStructMeta]) {
+    NT4SubscriptionOptions subscriptionOptions = NT4SubscriptionOptions(
+        periodicRateSeconds: period, structMeta: ntStructMeta);
 
     int hashCode = Object.hash(topic, subscriptionOptions);
 

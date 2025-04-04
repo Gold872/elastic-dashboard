@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/encoder_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/encoder_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
@@ -48,6 +48,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Encoder',
       encoderWidgetJson,
     );
@@ -60,6 +61,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Quadrature Encoder',
       encoderWidgetJson,
     );
@@ -85,6 +87,7 @@ void main() {
     NTWidgetModel encoderWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Encoder',
       encoderWidgetJson,
     );

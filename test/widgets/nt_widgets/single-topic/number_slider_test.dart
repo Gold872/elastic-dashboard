@@ -54,6 +54,7 @@ void main() {
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Number Slider',
       numberSliderJson,
     );
@@ -88,6 +89,7 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -107,6 +109,7 @@ void main() {
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Number Slider',
       numberSliderJson,
     );
@@ -160,6 +163,7 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
@@ -229,6 +233,7 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
       dataType: 'int',
       period: 0.100,
@@ -289,6 +294,7 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
       dataType: 'double',
       period: 0.100,
