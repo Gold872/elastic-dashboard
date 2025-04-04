@@ -22,7 +22,6 @@ class AccelerometerModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    required super.ntStructMeta,
     super.period,
     super.dataType,
   }) : super();
@@ -31,7 +30,6 @@ class AccelerometerModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
-    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override

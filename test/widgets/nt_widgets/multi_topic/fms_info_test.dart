@@ -149,7 +149,6 @@ void main() {
     FMSInfoModel fmsInfoModel = FMSInfoModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/FMSInfo',
       period: 0.100,
     );

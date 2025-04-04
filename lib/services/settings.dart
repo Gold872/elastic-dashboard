@@ -75,4 +75,5 @@ class PrefKeys {
   static String windowPosition = 'window_position';
   static String autoTextSubmitButton = 'auto_text_submit_button';
   static String layoutPath = 'exportPath';
+  static String layout = 'layout';
 }

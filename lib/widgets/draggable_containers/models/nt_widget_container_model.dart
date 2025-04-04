@@ -57,11 +57,18 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'type': childModel.type,
-      'properties': getChildJson(),
-      'ntStructMeta': childModel.ntStructMeta?.toJson(),
+    return switch (childModel) {
+      SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) => {
+          ...super.toJson(),
+          'type': childModel.type,
+          'properties': getChildJson(),
+          'ntStructMeta': ntStructMeta?.toJson(),
+        },
+      MultiTopicNTWidgetModel() => {
+          ...super.toJson(),
+          'type': childModel.type,
+          'properties': getChildJson(),
+        },
     };
   }
 
@@ -330,7 +337,11 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
-      childModel.ntStructMeta,
+      switch (childModel) {
+        SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) =>
+          ntStructMeta,
+        MultiTopicNTWidgetModel() => null,
+      },
       type,
       childModel.topic,
       dataType: (childModel is SingleTopicNTWidgetModel)
