@@ -30,8 +30,8 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'package:elastic_dashboard/widgets/draggable_dialog.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/combo_box_chooser.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/gyro.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
