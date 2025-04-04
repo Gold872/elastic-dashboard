@@ -32,18 +32,14 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
         defaultSubscription,
       ];
 
+  late Listenable chooserStateListenable;
+
   final TextEditingController _searchController = TextEditingController();
 
-  String? _selectedChoice;
-
-  String? get selectedChoice => _selectedChoice;
-
-  set selectedChoice(value) {
-    _selectedChoice = value;
-    refresh();
-  }
-
-  StringChooserData? previousData;
+  String? previousDefault;
+  String? previousSelected;
+  String? previousActive;
+  List<String>? previousOptions;
 
   NT4Topic? _selectedTopic;
 
@@ -53,6 +49,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   set sortOptions(bool value) {
     _sortOptions = value;
+    previousOptions?.sort();
     refresh();
   }
 
@@ -83,11 +80,23 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
     defaultSubscription =
         ntConnection.subscribe(defaultTopicName, super.period);
+    chooserStateListenable = Listenable.merge(subscriptions);
+    chooserStateListenable.addListener(onChooserStateUpdate);
+
+    previousOptions = null;
+    previousActive = null;
+    previousDefault = null;
+    previousSelected = null;
+
+    // Initial caching of the chooser state, when switching
+    // topics the listener won't be called, so we have to call it manually
+    onChooserStateUpdate();
   }
 
   @override
   void resetSubscription() {
     _selectedTopic = null;
+    chooserStateListenable.removeListener(onChooserStateUpdate);
 
     super.resetSubscription();
   }
@@ -113,15 +122,102 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     ];
   }
 
-  void publishSelectedValue(String? selected) {
+  void onChooserStateUpdate() {
+    List<Object?>? rawOptions =
+        optionsSubscription.value?.tryCast<List<Object?>>();
+
+    List<String>? currentOptions = rawOptions?.whereType<String>().toList();
+
+    if (sortOptions) {
+      currentOptions?.sort();
+    }
+
+    String? currentActive = tryCast(activeSubscription.value);
+    if (currentActive != null && currentActive.isEmpty) {
+      currentActive = null;
+    }
+
+    String? currentSelected = tryCast(selectedSubscription.value);
+    if (currentSelected != null && currentSelected.isEmpty) {
+      currentSelected = null;
+    }
+
+    String? currentDefault = tryCast(defaultSubscription.value);
+    if (currentDefault != null && currentDefault.isEmpty) {
+      currentDefault = null;
+    }
+
+    bool hasValue = currentOptions != null ||
+        currentActive != null ||
+        currentDefault != null;
+
+    bool publishCurrent =
+        hasValue && previousSelected != null && currentSelected == null;
+
+    // We only want to publish the selected topic if we're getting values
+    // from the others, since it means the chooser is published on network tables
+    if (hasValue) {
+      publishSelectedTopic();
+    }
+
+    if (currentOptions != null) {
+      previousOptions = currentOptions;
+    }
+    if (currentSelected != null) {
+      previousSelected = currentSelected;
+    }
+    if (currentActive != null) {
+      previousActive = currentActive;
+    }
+    if (currentDefault != null) {
+      previousDefault = currentDefault;
+    }
+
+    if (publishCurrent) {
+      publishSelectedValue(previousSelected, true);
+    }
+
+    notifyListeners();
+  }
+
+  void publishSelectedTopic() {
+    if (_selectedTopic != null) {
+      return;
+    }
+
+    NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
+
+    if (existing != null) {
+      existing.properties.addAll({
+        'retained': true,
+      });
+      ntConnection.publishTopic(existing);
+      _selectedTopic = existing;
+    } else {
+      _selectedTopic = ntConnection.publishNewTopic(
+        selectedTopicName,
+        NT4TypeStr.kString,
+        properties: {
+          'retained': true,
+        },
+      );
+    }
+  }
+
+  void publishSelectedValue(String? selected, [bool initial = false]) {
     if (selected == null || !ntConnection.isNT4Connected) {
       return;
     }
 
-    _selectedTopic ??=
-        ntConnection.publishNewTopic(selectedTopicName, NT4TypeStr.kString);
+    if (_selectedTopic == null) {
+      publishSelectedTopic();
+    }
 
-    Future(() => ntConnection.updateDataFromTopic(_selectedTopic!, selected));
+    ntConnection.updateDataFromTopic(
+      _selectedTopic!,
+      selected,
+      initial ? 0 : null,
+    );
   }
 }
 
@@ -134,133 +230,38 @@ class ComboBoxChooser extends NTWidget {
   Widget build(BuildContext context) {
     ComboBoxChooserModel model = cast(context.watch<NTWidgetModel>());
 
-    return ListenableBuilder(
-      listenable: Listenable.merge(model.subscriptions),
-      builder: (context, child) {
-        List<Object?> rawOptions =
-            model.optionsSubscription.value?.tryCast<List<Object?>>() ?? [];
+    String? preview = model.previousSelected ?? model.previousDefault;
 
-        List<String> options = rawOptions.whereType<String>().toList();
+    bool showWarning = model.previousActive != preview;
 
-        if (model.sortOptions) {
-          options.sort();
-        }
-
-        String? active = tryCast(model.activeSubscription.value);
-        if (active != null && active == '') {
-          active = null;
-        }
-
-        String? selected = tryCast(model.selectedSubscription.value);
-        if (selected != null && selected == '') {
-          selected = null;
-        }
-
-        String? defaultOption = tryCast(model.defaultSubscription.value);
-        if (defaultOption != null && defaultOption == '') {
-          defaultOption = null;
-        }
-
-        if (!model.ntConnection.isNT4Connected) {
-          active = null;
-          selected = null;
-          defaultOption = null;
-        }
-
-        StringChooserData currentData = StringChooserData(
-            options: options,
-            active: active,
-            defaultOption: defaultOption,
-            selected: selected);
-
-        // If a choice has been selected previously but the topic on NT has no value, publish it
-        // This can happen if NT happens to restart
-        if (currentData.selectedChanged(model.previousData)) {
-          if (selected != null && model.selectedChoice != selected) {
-            model.selectedChoice = selected;
-          }
-        } else if (currentData.activeChanged(model.previousData) ||
-            active == null) {
-          if (selected == null && model.selectedChoice != null) {
-            if (options.contains(model.selectedChoice!)) {
-              model.publishSelectedValue(model.selectedChoice!);
-            } else if (options.isNotEmpty) {
-              model.selectedChoice = active;
-            }
-          }
-        }
-
-        // If nothing is selected but NT has an active value, set the selected to the NT value
-        // This happens on program startup
-        if (active != null && model.selectedChoice == null) {
-          model.selectedChoice = active;
-        }
-
-        model.previousData = currentData;
-
-        bool showWarning = active != model.selectedChoice;
-
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: 36.0,
-                ),
-                child: _StringChooserDropdown(
-                  selected: model.selectedChoice,
-                  options: options,
-                  textController: model._searchController,
-                  onValueChanged: (String? value) {
-                    model.publishSelectedValue(value);
-
-                    model.selectedChoice = value;
-                  },
-                ),
-              ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: 36.0,
             ),
-            const SizedBox(width: 5),
-            (showWarning)
-                ? const Tooltip(
-                    message:
-                        'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                    child: Icon(Icons.priority_high, color: Colors.red),
-                  )
-                : const Icon(Icons.check, color: Colors.green),
-          ],
-        );
-      },
+            child: _StringChooserDropdown(
+              selected: preview,
+              options: model.previousOptions ?? [preview ?? ''],
+              textController: model._searchController,
+              onValueChanged: (String? value) {
+                model.publishSelectedValue(value);
+              },
+            ),
+          ),
+        ),
+        const SizedBox(width: 5),
+        (showWarning)
+            ? const Tooltip(
+                message:
+                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                child: Icon(Icons.priority_high, color: Colors.red),
+              )
+            : const Icon(Icons.check, color: Colors.green),
+      ],
     );
-  }
-}
-
-class StringChooserData {
-  final List<String> options;
-  final String? active;
-  final String? defaultOption;
-  final String? selected;
-
-  const StringChooserData(
-      {required this.options,
-      required this.active,
-      required this.defaultOption,
-      required this.selected});
-
-  bool optionsChanged(StringChooserData? other) {
-    return options != other?.options;
-  }
-
-  bool activeChanged(StringChooserData? other) {
-    return active != other?.active;
-  }
-
-  bool defaultOptionChanged(StringChooserData? other) {
-    return defaultOption != other?.defaultOption;
-  }
-
-  bool selectedChanged(StringChooserData? other) {
-    return selected != other?.selected;
   }
 }
 

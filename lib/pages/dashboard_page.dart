@@ -1885,8 +1885,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     ButtonStyle menuButtonStyle = ButtonStyle(
       alignment: Alignment.center,
       textStyle: WidgetStatePropertyAll(menuTextStyle),
-      backgroundColor:
-          const WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+      backgroundColor: const WidgetStatePropertyAll(
+        Color.fromARGB(255, 25, 25, 25),
+      ),
       minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
       iconSize: const WidgetStatePropertyAll(20.0),
     );
@@ -1894,7 +1895,17 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
     final bool layoutLocked =
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
-    final double minWindowWidth = layoutLocked ? 500 : 460;
+    late final double platformWidthAdjust;
+    if (Platform.isMacOS) {
+      platformWidthAdjust = 30;
+    } else if (Platform.isLinux) {
+      platformWidthAdjust = 10;
+    } else {
+      platformWidthAdjust = 0;
+    }
+
+    final double minWindowWidth =
+        platformWidthAdjust + (layoutLocked ? 500 : 460);
     final bool consolidateMenu = windowWidth < minWindowWidth;
 
     List<Widget> menuChildren = [
@@ -2059,8 +2070,9 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
 
     MenuBar menuBar = MenuBar(
       style: const MenuStyle(
-        backgroundColor:
-            WidgetStatePropertyAll(Color.fromARGB(255, 25, 25, 25)),
+        backgroundColor: WidgetStatePropertyAll(
+          Color.fromARGB(255, 25, 25, 25),
+        ),
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
@@ -2145,17 +2157,11 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
       );
     }
 
-    final double nonConolidatedLeadingWidth = (layoutLocked) ? 409 : 369;
-    final double consolidatedLeadingWidth = (layoutLocked) ? 330 : 290;
-
     return Scaffold(
       appBar: CustomAppBar(
         titleText: appTitle,
         onWindowClose: onWindowClose,
         leading: menuBar,
-        leadingWidth: consolidateMenu
-            ? consolidatedLeadingWidth
-            : nonConolidatedLeadingWidth,
       ),
       body: Focus(
         autofocus: true,
@@ -2279,14 +2285,28 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                           ? 'Network Tables: Connected (${preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress})'
                           : 'Network Tables: Disconnected';
 
+                      String teamNumberText =
+                          'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}';
+
                       double connectedWidth = (TextPainter(
-                              text: TextSpan(
-                                text: connectedText,
-                                style: footerStyle,
-                              ),
-                              maxLines: 1,
-                              textDirection: TextDirection.ltr)
-                            ..layout(minWidth: 0, maxWidth: double.infinity))
+                        text: TextSpan(
+                          text: connectedText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
+                          .size
+                          .width;
+
+                      double teamNumberWidth = (TextPainter(
+                        text: TextSpan(
+                          text: teamNumberText,
+                          style: footerStyle,
+                        ),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                      )..layout())
                           .size
                           .width;
 
@@ -2295,9 +2315,10 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
                       return Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (availableSpace >= windowWidth / 2 + 30)
+                          if (availableSpace >=
+                              (windowWidth + teamNumberWidth) / 2)
                             Text(
-                              'Team ${preferences.getInt(PrefKeys.teamNumber)?.toString() ?? 'Unknown'}',
+                              teamNumberText,
                               textAlign: TextAlign.center,
                             ),
                           if (availableSpace >= 115)
