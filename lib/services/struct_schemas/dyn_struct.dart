@@ -4,15 +4,15 @@ import 'package:flutter/foundation.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 
-class DynStructField {
+class DynamicStructField {
   final String name;
   final String type;
   final bool isArray;
   final bool isNullable;
 
-  final DynStructSchema? substruct;
+  final DynamicStructSchema? substruct;
 
-  DynStructField({
+  DynamicStructField({
     required this.name,
     required this.type,
     this.isArray = false,
@@ -20,53 +20,53 @@ class DynStructField {
     this.substruct,
   });
 
-  static DynStructField fromJson(
+  static DynamicStructField fromJson(
     Map<String, dynamic> json,
   ) {
-    return DynStructField(
+    return DynamicStructField(
       name: json['name'],
       type: json['type'],
       isArray: json['isArray'],
       isNullable: json['isNullable'],
       substruct: json['substruct'] != null
-          ? DynStructSchema.fromJson(tryCast(json['substruct']) ?? {})
+          ? DynamicStructSchema.fromJson(tryCast(json['substruct']) ?? {})
           : null,
     );
   }
 
-  static DynStructField _parseField(
+  static DynamicStructField _parseField(
       String name, String type, Map<String, String> schemas) {
     if (type == "boolean") {
-      return DynStructField(name: name, type: type);
+      return DynamicStructField(name: name, type: type);
     } else if (type == "int") {
-      return DynStructField(name: name, type: type);
+      return DynamicStructField(name: name, type: type);
     } else if (type == "long") {
-      return DynStructField(name: name, type: type);
+      return DynamicStructField(name: name, type: type);
     } else if (type == "float") {
-      return DynStructField(name: name, type: type);
+      return DynamicStructField(name: name, type: type);
     } else if (type == "double") {
-      return DynStructField(name: name, type: type);
+      return DynamicStructField(name: name, type: type);
     } else if (type.endsWith("?")) {
       String subtype = type.substring(0, type.length - 1);
-      return DynStructField(
+      return DynamicStructField(
         name: name,
         type: subtype,
         isNullable: true,
       );
     } else if (type.endsWith("[]")) {
       String subtype = type.substring(0, type.length - 2);
-      return DynStructField(
+      return DynamicStructField(
         name: name,
         type: subtype,
         isArray: true,
       );
     } else if (type == "string") {
-      return DynStructField(name: name, type: "string");
+      return DynamicStructField(name: name, type: "string");
     } else if (schemas.containsKey('struct:$type')) {
-      return DynStructField(
+      return DynamicStructField(
         name: name,
         type: type,
-        substruct: DynStructSchema(
+        substruct: DynamicStructSchema(
           type: 'struct:$type',
           schemas: schemas,
         ),
@@ -76,8 +76,8 @@ class DynStructField {
     }
   }
 
-  DynStructField clone() {
-    return DynStructField(
+  DynamicStructField clone() {
+    return DynamicStructField(
       name: name,
       type: type,
       isArray: isArray,
@@ -97,21 +97,21 @@ class DynStructField {
   }
 }
 
-class DynStructSchema {
+class DynamicStructSchema {
   final String type;
-  final List<DynStructField> fields;
+  final List<DynamicStructField> fields;
 
-  DynStructSchema({
+  DynamicStructSchema({
     required this.type,
     required Map<String, String> schemas,
   }) : fields = _tryParseSchema(type, schemas);
 
-  DynStructSchema.raw({
+  DynamicStructSchema.raw({
     required this.type,
     required this.fields,
   });
 
-  DynStructField? operator [](String key) {
+  DynamicStructField? operator [](String key) {
     for (final field in fields) {
       if (field.name == key) {
         return field;
@@ -121,7 +121,7 @@ class DynStructSchema {
     return null;
   }
 
-  static List<DynStructField> _tryParseSchema(
+  static List<DynamicStructField> _tryParseSchema(
       String name, Map<String, String> schemas) {
     try {
       return _parseSchema(name, schemas);
@@ -130,9 +130,9 @@ class DynStructSchema {
     }
   }
 
-  static List<DynStructField> _parseSchema(
+  static List<DynamicStructField> _parseSchema(
       String name, Map<String, String> schemas) {
-    List<DynStructField> fields = [];
+    List<DynamicStructField> fields = [];
     List<String>? schemaParts = schemas[name]?.split(';');
 
     if (schemaParts == null) {
@@ -141,7 +141,7 @@ class DynStructSchema {
 
     for (final String part in schemaParts) {
       var [type, name] = part.split(' ');
-      var field = DynStructField._parseField(name, type, schemas);
+      var field = DynamicStructField._parseField(name, type, schemas);
       fields.add(field);
     }
 
@@ -153,8 +153,8 @@ class DynStructSchema {
     return fields.map((field) => "${field.name}: ${field.type}").join(", ");
   }
 
-  DynStructSchema clone() {
-    return DynStructSchema.raw(
+  DynamicStructSchema clone() {
+    return DynamicStructSchema.raw(
       type: type,
       fields: fields.map((field) => field.clone()).toList(),
     );
@@ -167,20 +167,20 @@ class DynStructSchema {
     };
   }
 
-  static DynStructSchema fromJson(Map<String, dynamic> json) {
-    return DynStructSchema.raw(
+  static DynamicStructSchema fromJson(Map<String, dynamic> json) {
+    return DynamicStructSchema.raw(
       type: json['type'],
       fields: (tryCast<List<dynamic>>(json['fields']) ?? [])
-          .map((field) => DynStructField.fromJson(tryCast(field) ?? {}))
+          .map((field) => DynamicStructField.fromJson(tryCast(field) ?? {}))
           .toList(),
     );
   }
 }
 
-sealed class DynStructValue {
+sealed class DynamicStructValue {
   final Object? anyValue;
 
-  DynStructValue({required this.anyValue});
+  DynamicStructValue({required this.anyValue});
 
   bool get boolValue => (this as DynStructBoolean).value;
   int get intValue => (this as DynStructInt).value;
@@ -188,68 +188,68 @@ sealed class DynStructValue {
   double get floatValue => (this as DynStructFloat).value;
   double get doubleValue => (this as DynStructDouble).value;
   String get stringValue => (this as DynStructString).value;
-  DynStructValue? get nullableValue => (this as DynStructNullable).value;
-  List<DynStructValue> get arrayValue => (this as DynStructArray).value;
+  DynamicStructValue? get nullableValue => (this as DynStructNullable).value;
+  List<DynamicStructValue> get arrayValue => (this as DynStructArray).value;
   DynStruct get structValue => (this as DynStructStruct).value;
 }
 
-class DynStructBoolean extends DynStructValue {
+class DynStructBoolean extends DynamicStructValue {
   final bool value;
 
   DynStructBoolean(this.value) : super(anyValue: value);
 }
 
-class DynStructInt extends DynStructValue {
+class DynStructInt extends DynamicStructValue {
   final int value;
 
   DynStructInt(this.value) : super(anyValue: value);
 }
 
-class DynStructLong extends DynStructValue {
+class DynStructLong extends DynamicStructValue {
   final int value;
 
   DynStructLong(this.value) : super(anyValue: value);
 }
 
-class DynStructFloat extends DynStructValue {
+class DynStructFloat extends DynamicStructValue {
   final double value;
 
   DynStructFloat(this.value) : super(anyValue: value);
 }
 
-class DynStructDouble extends DynStructValue {
+class DynStructDouble extends DynamicStructValue {
   final double value;
 
   DynStructDouble(this.value) : super(anyValue: value);
 }
 
-class DynStructString extends DynStructValue {
+class DynStructString extends DynamicStructValue {
   final String value;
 
   DynStructString(this.value) : super(anyValue: value);
 }
 
-class DynStructNullable extends DynStructValue {
-  final DynStructValue? value;
+class DynStructNullable extends DynamicStructValue {
+  final DynamicStructValue? value;
 
   DynStructNullable(this.value) : super(anyValue: value);
 }
 
-class DynStructArray extends DynStructValue {
-  final List<DynStructValue> value;
+class DynStructArray extends DynamicStructValue {
+  final List<DynamicStructValue> value;
 
   DynStructArray(this.value) : super(anyValue: value);
 }
 
-class DynStructStruct extends DynStructValue {
+class DynStructStruct extends DynamicStructValue {
   final DynStruct value;
 
   DynStructStruct(this.value) : super(anyValue: value);
 }
 
 class DynStruct {
-  final DynStructSchema schema;
-  late final Map<String, DynStructValue> values;
+  final DynamicStructSchema schema;
+  late final Map<String, DynamicStructValue> values;
   late final int consumed;
 
   DynStruct({
@@ -261,12 +261,12 @@ class DynStruct {
     this.consumed = consumed;
   }
 
-  DynStructValue? operator [](String key) {
+  DynamicStructValue? operator [](String key) {
     return values[key];
   }
 
-  DynStructValue? get(List<String> key) {
-    DynStructValue value = DynStructStruct(this);
+  DynamicStructValue? get(List<String> key) {
+    DynamicStructValue value = DynStructStruct(this);
 
     for (final k in key) {
       if (value is DynStructStruct) {
@@ -279,9 +279,9 @@ class DynStruct {
     return value;
   }
 
-  static (int, Map<String, DynStructValue>) _parseData(
-      DynStructSchema schema, Uint8List data) {
-    Map<String, DynStructValue> values = {};
+  static (int, Map<String, DynamicStructValue>) _parseData(
+      DynamicStructSchema schema, Uint8List data) {
+    Map<String, DynamicStructValue> values = {};
     int offset = 0;
 
     for (final field in schema.fields) {
@@ -293,8 +293,8 @@ class DynStruct {
     return (offset, values);
   }
 
-  static (int, DynStructValue) _parseValue(
-      DynStructField field, Uint8List data) {
+  static (int, DynamicStructValue) _parseValue(
+      DynamicStructField field, Uint8List data) {
     if (field.isArray) {
       int length = data.buffer.asByteData().getInt32(0, Endian.little);
       var (consumed, value) = _parseArray(field, data.sublist(4), length);
@@ -312,8 +312,8 @@ class DynStruct {
     }
   }
 
-  static (int, DynStructValue) _parseValueInner(
-      DynStructField field, Uint8List data) {
+  static (int, DynamicStructValue) _parseValueInner(
+      DynamicStructField field, Uint8List data) {
     if (field.type == "boolean") {
       return (1, DynStructBoolean(data[0] != 0));
     } else if (field.type == "int") {
@@ -355,8 +355,8 @@ class DynStruct {
   }
 
   static (int, DynStructArray) _parseArray(
-      DynStructField field, Uint8List data, int length) {
-    List<DynStructValue> values = [];
+      DynamicStructField field, Uint8List data, int length) {
+    List<DynamicStructValue> values = [];
     int offset = 0;
 
     for (int i = 0; i < length; i++) {
