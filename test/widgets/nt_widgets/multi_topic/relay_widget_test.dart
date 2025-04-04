@@ -57,7 +57,6 @@ void main() {
     RelayModel relayModel = RelayModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Relay',
       period: 0.100,
     );

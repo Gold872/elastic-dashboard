@@ -161,10 +161,7 @@ class NetworkTableTreeRow {
 
       if (isCameraStream) {
         return CameraStreamModel(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            topic: topic,
-            ntStructMeta: entry?.meta);
+            ntConnection: ntConnection, preferences: preferences, topic: topic);
       }
 
       if (hasRows([
@@ -177,10 +174,7 @@ class NetworkTableTreeRow {
         'sizeLeftRight',
       ])) {
         return YAGSLSwerveDriveModel(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            topic: topic,
-            ntStructMeta: entry?.meta);
+            ntConnection: ntConnection, preferences: preferences, topic: topic);
       }
 
       return null;

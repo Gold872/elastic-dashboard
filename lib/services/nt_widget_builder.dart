@@ -59,7 +59,6 @@ typedef NTModelProvider = NTWidgetModel Function({
   NT4StructMeta? ntStructMeta,
   required NTConnection ntConnection,
   required SharedPreferences preferences,
-  required NT4StructMeta? ntStructMeta,
   required String topic,
 });
 
