@@ -132,11 +132,11 @@ class NT4Subscription extends ValueNotifier<Object?> {
         'Updating value for subscription: $this - Value: $value, Time: $timestamp');
 
     if (options.structMeta != null && value is List<int>) {
-      DynStructSchema schema = options.structMeta!.schema;
+      DynamicStructSchema schema = options.structMeta!.schema;
       List<String> path = options.structMeta!.path;
       Uint8List data = Uint8List.fromList(value);
       DynStruct struct = DynStruct(schema: schema, data: data);
-      DynStructValue dynValue = struct.get(path)!;
+      DynamicStructValue dynValue = struct.get(path)!;
       value = dynValue.anyValue;
     }
 
@@ -175,7 +175,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
 class NT4StructMeta {
   final List<String> path;
-  final DynStructSchema schema;
+  final DynamicStructSchema schema;
   final String type;
 
   NT4StructMeta({
@@ -189,17 +189,17 @@ class NT4StructMeta {
     required this.type,
   });
 
-  static String _getType(List<String> structPath, DynStructSchema schema) {
+  static String _getType(List<String> structPath, DynamicStructSchema schema) {
     if (structPath.isEmpty) {
       return NT4TypeStr.kStructSchema;
     }
 
-    DynStructSchema currentSchema = schema;
+    DynamicStructSchema currentSchema = schema;
     List<String> pathStack = List.from(structPath.reversed);
 
     while (pathStack.isNotEmpty) {
       String fieldName = pathStack.removeLast();
-      DynStructField? field = currentSchema[fieldName];
+      DynamicStructField? field = currentSchema[fieldName];
 
       if (field == null) {
         return NT4TypeStr.kStructSchema;
@@ -232,7 +232,7 @@ class NT4StructMeta {
       path: tryCast<List<dynamic>>(json['path'])!
           .map((el) => tryCast<String>(el)!)
           .toList(),
-      schema: DynStructSchema.fromJson(tryCast(json['schema']) ?? {}),
+      schema: DynamicStructSchema.fromJson(tryCast(json['schema']) ?? {}),
       type: tryCast<String>(json['type']) ?? '',
     );
   }
