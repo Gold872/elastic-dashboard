@@ -122,7 +122,6 @@ void main() {
     CameraStreamModel cameraStreamModel = CameraStreamModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Camera Stream',
       rotation: 0,
       period: 0.100,
@@ -198,7 +197,6 @@ void main() {
     CameraStreamModel cameraStreamModel = CameraStreamModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Camera Stream',
       period: 0.100,
       rotation: 0,

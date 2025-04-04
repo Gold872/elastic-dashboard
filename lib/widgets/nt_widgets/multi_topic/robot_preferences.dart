@@ -32,7 +32,6 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    required super.ntStructMeta,
     super.dataType,
     super.period,
   }) : super();
@@ -41,7 +40,6 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
-    required super.ntStructMeta,
   }) : super.fromJson();
 
   @override
@@ -179,7 +177,7 @@ class RobotPreferences extends NTWidget {
 
         Object? formattedData;
 
-        String dataType = model.ntStructMeta?.type ?? nt4Topic.type;
+        String dataType = nt4Topic.type;
         switch (dataType) {
           case NT4TypeStr.kBool:
             formattedData = bool.tryParse(data);

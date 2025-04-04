@@ -77,7 +77,6 @@ void main() {
         ProfiledPIDControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Profiled PID Controller',
       period: 0.100,
     );

@@ -87,7 +87,6 @@ void main() {
         ThreeAxisAccelerometerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Three Axis Accelerometer',
       period: 0.100,
     );

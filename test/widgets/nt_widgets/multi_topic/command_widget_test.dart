@@ -73,7 +73,6 @@ void main() {
     CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Command',
       period: 0.100,
       showType: true,
@@ -134,7 +133,6 @@ void main() {
     CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Command',
       period: 0.100,
       showType: true,

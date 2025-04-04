@@ -64,7 +64,6 @@ void main() {
     DifferentialDriveModel differentialDriveModel = DifferentialDriveModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Differential Drive',
       period: 0.100,
     );

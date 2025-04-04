@@ -71,7 +71,6 @@ void main() {
     MotorControllerModel motorControllerModel = MotorControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       topic: 'Test/Motor Controller',
       period: 0.100,
     );

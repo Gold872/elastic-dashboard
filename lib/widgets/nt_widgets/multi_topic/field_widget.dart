@@ -142,7 +142,6 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    required super.ntStructMeta,
     String? fieldGame,
     bool showOtherObjects = true,
     bool showTrajectories = true,
@@ -173,7 +172,6 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   FieldWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
-    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
