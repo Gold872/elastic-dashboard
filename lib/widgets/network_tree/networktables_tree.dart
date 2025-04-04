@@ -190,13 +190,13 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   List<TreeTopicEntry> parseStruct(
     NT4Topic topic,
-    DynStructSchema schema,
-    DynStructSchema root,
+    DynamicStructSchema schema,
+    DynamicStructSchema root,
     List<String> structPath,
   ) {
     List<TreeTopicEntry> topics = [];
 
-    for (DynStructField field in schema.fields) {
+    for (DynamicStructField field in schema.fields) {
       topics.add(TreeTopicEntry(
           topic: topic,
           meta: NT4StructMeta(
@@ -228,7 +228,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       topics.add(TreeTopicEntry(topic: topic));
 
       if (topic.type.startsWith("struct:") && !topic.type.endsWith("[]")) {
-        DynStructSchema schema = DynStructSchema(
+        DynamicStructSchema schema = DynamicStructSchema(
           type: topic.type.split("?")[0],
           schemas: widget.ntConnection.knownSchemas,
         );
