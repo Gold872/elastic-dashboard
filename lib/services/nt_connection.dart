@@ -233,8 +233,12 @@ class NTConnection {
     _ntClient.publishTopic(topic);
   }
 
-  NT4Topic publishNewTopic(String name, String type) {
-    return _ntClient.publishNewTopic(name, type);
+  NT4Topic publishNewTopic(
+    String name,
+    String type, {
+    Map<String, dynamic> properties = const {},
+  }) {
+    return _ntClient.publishNewTopic(name, type, properties);
   }
 
   bool isTopicPublished(NT4Topic? topic) {
@@ -249,16 +253,20 @@ class NTConnection {
     _ntClient.unpublishTopic(topic);
   }
 
-  void updateDataFromSubscription(NT4Subscription subscription, dynamic data) {
-    _ntClient.addSampleFromName(subscription.topic, data);
+  void updateDataFromSubscription(
+    NT4Subscription subscription,
+    dynamic data, [
+    int? timestamp,
+  ]) {
+    _ntClient.addSampleFromName(subscription.topic, data, timestamp);
   }
 
-  void updateDataFromTopic(NT4Topic topic, dynamic data) {
-    _ntClient.addSample(topic, data);
+  void updateDataFromTopic(NT4Topic topic, dynamic data, [int? timestamp]) {
+    _ntClient.addSample(topic, data, timestamp);
   }
 
   @visibleForTesting
-  void updateDataFromTopicName(String topic, dynamic data) {
-    _ntClient.addSampleFromName(topic, data);
+  void updateDataFromTopicName(String topic, dynamic data, [int? timestamp]) {
+    _ntClient.addSampleFromName(topic, data, timestamp);
   }
 }

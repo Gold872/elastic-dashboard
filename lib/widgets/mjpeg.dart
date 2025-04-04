@@ -86,15 +86,9 @@ class _MjpegState extends State<Mjpeg> {
 
     controller.setMounted(streamKey, context.mounted);
 
-    if (controller.isVisible(streamKey)) {
-      controller.startStream();
-    }
-
-    if (controller.errorState.value != null) {
-      String errorText = controller.errorState.value!.first.toString();
-      if (kDebugMode) {
-        errorText += '\n${controller.errorState.value!.last.toString()}';
-      }
+    if (controller.errorState.value != null && kDebugMode) {
+      String errorText =
+          '${controller.errorState.value!.first}\n${controller.errorState.value!.last.toString()}';
       return SizedBox(
         width: widget.width,
         height: widget.height,
@@ -109,8 +103,11 @@ class _MjpegState extends State<Mjpeg> {
                   ),
                 ),
               )
-            : widget.error!(context, controller.errorState.value!.first,
-                controller.errorState.value!.last),
+            : widget.error!(
+                context,
+                controller.errorState.value!.first,
+                controller.errorState.value!.last,
+              ),
       );
     }
 
@@ -177,10 +174,16 @@ class MjpegController extends ChangeNotifier {
   static const _soi = 0xD8;
   static const _eoi = 0xD9;
 
-  final String stream;
+  final List<String> streams;
   final bool isLive;
   final Duration timeout;
   final Map<String, String> headers;
+
+  int currentStreamIndex = 0;
+
+  String get currentStream =>
+      streams[currentStreamIndex.clamp(0, streams.length - 1)];
+
   Client httpClient = Client();
 
   StreamSubscription<List<int>>? _rawSubscription;
@@ -204,10 +207,16 @@ class MjpegController extends ChangeNotifier {
   final Set<Key> _mountedKeys = {};
   final Set<Key> _visibleKeys = {};
 
+  bool _disposed = false;
+
+  bool get _inUse => !_disposed && _mountedKeys.isNotEmpty;
+
+  bool get _shouldStream => _visibleKeys.isNotEmpty && _inUse;
+
   bool isVisible(Key key) => _visibleKeys.contains(key);
 
   void setVisible(Key key, bool value) {
-    logger.trace('Setting visibility to $value for $stream');
+    logger.trace('Setting visibility to $value for $currentStream');
     if (value) {
       bool hasChanged = !_visibleKeys.contains(key);
       _visibleKeys.add(key);
@@ -215,12 +224,20 @@ class MjpegController extends ChangeNotifier {
       if (hasChanged) {
         logger.trace(
             'Visibility changed to true, notifying listeners for mjpeg stream');
+        if (!isStreaming && errorState.value == null) {
+          startStream();
+        }
         notifyListeners();
       }
     } else {
       _visibleKeys.remove(key);
 
       if (_visibleKeys.isEmpty) {
+        Future(() {
+          if (_inUse) {
+            errorState.value = null;
+          }
+        });
         stopStream();
       }
     }
@@ -229,7 +246,7 @@ class MjpegController extends ChangeNotifier {
   bool isMounted(Key key) => _mountedKeys.contains(key);
 
   void setMounted(Key key, bool value) {
-    logger.trace('Setting mounted to $value for $stream');
+    logger.trace('Setting mounted to $value for $currentStream');
     if (value) {
       _mountedKeys.add(key);
     } else {
@@ -237,10 +254,12 @@ class MjpegController extends ChangeNotifier {
     }
   }
 
+  bool _attemptingConnection = false;
+
   bool get isStreaming => _rawSubscription != null;
 
   MjpegController({
-    required this.stream,
+    required this.streams,
     this.isLive = true,
     this.timeout = const Duration(seconds: 5),
     this.headers = const {},
@@ -251,7 +270,7 @@ class MjpegController extends ChangeNotifier {
 
   @visibleForTesting
   MjpegController.withMockClient({
-    required this.stream,
+    required this.streams,
     this.isLive = true,
     this.timeout = const Duration(seconds: 5),
     this.headers = const {},
@@ -264,10 +283,16 @@ class MjpegController extends ChangeNotifier {
   void _onError() {
     if (errorState.value != null) {
       logger.error(
-        'Error on Mjpeg stream for URL $stream',
+        'Error on Mjpeg stream for URL $currentStream',
         errorState.value?.firstOrNull,
         errorState.value?.lastOrNull,
       );
+      if (errorState.value!.first is TimeoutException ||
+          errorState.value!.first is HttpException) {
+        stopStream(retry: _inUse);
+      } else {
+        stopStream();
+      }
     }
     notifyListeners();
   }
@@ -277,13 +302,16 @@ class MjpegController extends ChangeNotifier {
     errorState.removeListener(_onError);
     stopStream();
     imageStream.close();
+    _disposed = true;
     super.dispose();
   }
 
   void startStream() async {
-    if (isStreaming) {
+    if (isStreaming || !_shouldStream || _attemptingConnection) {
       return;
     }
+    _attemptingConnection = true;
+    String stream = streams[currentStreamIndex];
     logger.info('Starting camera stream on URL $stream');
     ByteStream? byteStream;
     try {
@@ -295,15 +323,15 @@ class MjpegController extends ChangeNotifier {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         byteStream = response.stream;
       } else {
-        if (_mountedKeys.isNotEmpty) {
+        if (_inUse) {
           errorState.value = [
             HttpException(
-                'Stream returned status code ${response.statusCode}: "${response.reasonPhrase}"'),
+              'Stream returned status code ${response.statusCode}: "${response.reasonPhrase}"',
+            ),
             StackTrace.current,
           ];
           imageStream.add(null);
         }
-        stopStream();
       }
     } catch (error, stack) {
       // Timed out
@@ -315,14 +343,16 @@ class MjpegController extends ChangeNotifier {
       } else if (!error // we ignore those errors in case play/pause is triggers
           .toString()
           .contains('Connection closed before full header was received')) {
-        if (_mountedKeys.isNotEmpty) {
+        if (_inUse) {
           errorState.value = [error, stack];
           imageStream.add(null);
         }
       }
     }
 
-    if (byteStream == null) {
+    _attemptingConnection = false;
+
+    if (byteStream == null || !_shouldStream) {
       return;
     }
 
@@ -335,13 +365,15 @@ class MjpegController extends ChangeNotifier {
         _handleData(data);
       },
       onDone: () {
-        stopStream();
+        stopStream(retry: _inUse);
         notifyListeners();
       },
     );
 
-    _metricsTimer ??=
-        Timer.periodic(const Duration(seconds: 1), _updateMetrics);
+    _metricsTimer ??= Timer.periodic(
+      const Duration(seconds: 1),
+      _updateMetrics,
+    );
 
     notifyListeners();
   }
@@ -354,8 +386,17 @@ class MjpegController extends ChangeNotifier {
     _frameCount = 0;
   }
 
-  void stopStream() async {
-    logger.info('Stopping camera stream on URL $stream');
+  void _switchToNextStream() {
+    currentStreamIndex++;
+    if (currentStreamIndex >= streams.length) {
+      currentStreamIndex = 0;
+    }
+    logger.info(
+        'Switching to stream at index $currentStreamIndex: $currentStream');
+  }
+
+  void stopStream({bool retry = false}) async {
+    logger.info('Stopping camera stream on URL $currentStream');
     _metricsTimer?.cancel();
     _metricsTimer = null;
     await _rawSubscription?.cancel();
@@ -365,6 +406,12 @@ class MjpegController extends ChangeNotifier {
     _frameCount = 0;
     httpClient.close();
     httpClient = Client();
+
+    if (retry && !isStreaming) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      _switchToNextStream();
+      startStream();
+    }
   }
 
   void _handleNewPacket() {
