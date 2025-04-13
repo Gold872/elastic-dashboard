@@ -226,24 +226,26 @@ class _ElasticState extends State<Elastic> {
       title: appTitle,
       theme: theme,
       home: DashboardPage(
-        ntConnection: widget.ntConnection,
-        preferences: widget.preferences,
-        version: widget.version,
-        onColorChanged: (color) => setState(() {
-          teamColor = color;
-          widget.preferences.setInt(PrefKeys.teamColor, color.value);
-        }),
-        onThemeVariantChanged: (variant) async {
-          themeVariant = variant;
-          if (variant == Defaults.themeVariant) {
-            await widget.preferences
-                .setString(PrefKeys.themeVariant, Defaults.defaultVariantName);
-          } else {
-            await widget.preferences
-                .setString(PrefKeys.themeVariant, variant.variantName);
-          }
-          setState(() {});
-        },
+        model: DashboardPageViewModelImpl(
+          ntConnection: widget.ntConnection,
+          preferences: widget.preferences,
+          version: widget.version,
+          onColorChanged: (color) => setState(() {
+            teamColor = color;
+            widget.preferences.setInt(PrefKeys.teamColor, color.value);
+          }),
+          onThemeVariantChanged: (variant) async {
+            themeVariant = variant;
+            if (variant == Defaults.themeVariant) {
+              await widget.preferences.setString(
+                  PrefKeys.themeVariant, Defaults.defaultVariantName);
+            } else {
+              await widget.preferences
+                  .setString(PrefKeys.themeVariant, variant.variantName);
+            }
+            setState(() {});
+          },
+        ),
       ),
     );
   }

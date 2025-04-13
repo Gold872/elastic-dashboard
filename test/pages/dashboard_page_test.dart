@@ -56,11 +56,13 @@ Future<void> pumpDashboardPage(
   await widgetTester.pumpWidget(
     MaterialApp(
       home: DashboardPage(
-        ntConnection: ntConnection ?? createMockOfflineNT4(),
-        preferences: preferences,
-        version: '0.0.0.0',
-        updateChecker: updateChecker ?? createMockUpdateChecker(),
-        layoutDownloader: layoutDownloader,
+        model: DashboardPageViewModelImpl(
+          ntConnection: ntConnection ?? createMockOfflineNT4(),
+          preferences: preferences,
+          version: '0.0.0.0',
+          updateChecker: updateChecker ?? createMockUpdateChecker(),
+          layoutDownloader: layoutDownloader,
+        ),
       ),
     ),
   );
