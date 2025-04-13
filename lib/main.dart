@@ -211,6 +211,28 @@ class _ElasticState extends State<Elastic> {
               widget.preferences.getString(PrefKeys.themeVariant)) ??
       FlexSchemeVariant.material3Legacy;
 
+  late final DashboardPageViewModel dashboardViewModel =
+      DashboardPageViewModelImpl(
+    ntConnection: widget.ntConnection,
+    preferences: widget.preferences,
+    version: widget.version,
+    onColorChanged: (color) => setState(() {
+      teamColor = color;
+      widget.preferences.setInt(PrefKeys.teamColor, color.value);
+    }),
+    onThemeVariantChanged: (variant) async {
+      themeVariant = variant;
+      if (variant == Defaults.themeVariant) {
+        await widget.preferences
+            .setString(PrefKeys.themeVariant, Defaults.defaultVariantName);
+      } else {
+        await widget.preferences
+            .setString(PrefKeys.themeVariant, variant.variantName);
+      }
+      setState(() {});
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = ThemeData(
@@ -225,28 +247,7 @@ class _ElasticState extends State<Elastic> {
       debugShowCheckedModeBanner: false,
       title: appTitle,
       theme: theme,
-      home: DashboardPage(
-        model: DashboardPageViewModelImpl(
-          ntConnection: widget.ntConnection,
-          preferences: widget.preferences,
-          version: widget.version,
-          onColorChanged: (color) => setState(() {
-            teamColor = color;
-            widget.preferences.setInt(PrefKeys.teamColor, color.value);
-          }),
-          onThemeVariantChanged: (variant) async {
-            themeVariant = variant;
-            if (variant == Defaults.themeVariant) {
-              await widget.preferences.setString(
-                  PrefKeys.themeVariant, Defaults.defaultVariantName);
-            } else {
-              await widget.preferences
-                  .setString(PrefKeys.themeVariant, variant.variantName);
-            }
-            setState(() {});
-          },
-        ),
-      ),
+      home: DashboardPage(model: dashboardViewModel),
     );
   }
 }

@@ -567,6 +567,19 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   @override
+  void didUpdateWidget(DashboardPage oldWidget) {
+    if (widget.model != oldWidget.model) {
+      oldWidget.model.removeListener(onModelUpdate);
+      oldWidget.model._state = null;
+
+      widget.model.addListener(onModelUpdate);
+      widget.model._state = this;
+      widget.model.init();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() async {
     windowManager.removeListener(this);
     model._state = null;
