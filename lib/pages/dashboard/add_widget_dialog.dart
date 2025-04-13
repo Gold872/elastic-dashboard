@@ -47,6 +47,7 @@ class AddWidgetDialog extends StatefulWidget {
 }
 
 class _AddWidgetDialogState extends State<AddWidgetDialog> {
+  final TextEditingController searchTextController = TextEditingController();
   bool _hideMetadata = true;
   String _searchQuery = '';
 
@@ -161,10 +162,10 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                         child: DialogTextInput(
                           onSubmit: (value) =>
                               setState(() => _searchQuery = value),
-                          initialText: _searchQuery,
                           allowEmptySubmission: true,
                           updateOnChanged: true,
                           label: 'Search',
+                          textEditingController: searchTextController,
                         ),
                       ),
                     ),
