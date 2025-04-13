@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/material.dart';
 
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 mixin DashboardPageWindow on DashboardPageViewModel {
