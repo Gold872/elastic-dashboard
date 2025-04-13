@@ -335,16 +335,17 @@ abstract class WidgetContainerModel extends ChangeNotifier {
         child: Container(
           decoration: BoxDecoration(
             color: (validLocation)
-                ? Colors.white.withOpacity(0.25)
-                : Colors.black.withOpacity(0.1),
+                ? Colors.white.withValues(alpha: 0.25)
+                : Colors.black.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(
                 preferences.getDouble(PrefKeys.cornerRadius) ??
                     Defaults.cornerRadius),
             border: Border.all(
-                color: (validLocation)
-                    ? Colors.lightGreenAccent.shade400
-                    : Colors.red,
-                width: 5.0),
+              color: (validLocation)
+                  ? Colors.lightGreenAccent.shade400
+                  : Colors.red,
+              width: 5.0,
+            ),
           ),
         ),
       ),

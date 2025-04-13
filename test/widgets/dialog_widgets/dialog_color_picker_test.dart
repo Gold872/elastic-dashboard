@@ -62,7 +62,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(calledBackColor, isNotNull);
-    expect(calledBackColor!.value, 0xFF0000FF);
+    expect(calledBackColor!.toARGB32(), 0xFF0000FF);
   });
 
   testWidgets('Color picker cancel', (widgetTester) async {
@@ -114,7 +114,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(calledBackColor, isNotNull);
-    expect(calledBackColor!.value, Colors.green.value);
+    expect(calledBackColor!.toARGB32(), Colors.green.toARGB32());
   });
 
   testWidgets('Color picker restore default', (widgetTester) async {
@@ -157,6 +157,6 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(calledBackColor, isNotNull);
-    expect(calledBackColor!.value, Colors.red.value);
+    expect(calledBackColor!.toARGB32(), Colors.red.toARGB32());
   });
 }

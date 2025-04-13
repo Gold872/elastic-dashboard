@@ -31,8 +31,8 @@ void main() {
     'show_other_objects': true,
     'show_trajectories': true,
     'field_rotation': 90.0,
-    'robot_color': Colors.red.value,
-    'trajectory_color': Colors.white.value,
+    'robot_color': Colors.red.toARGB32(),
+    'trajectory_color': Colors.white.toARGB32(),
   };
 
   late SharedPreferences preferences;
@@ -86,8 +86,11 @@ void main() {
     expect(fieldWidgetModel.showOtherObjects, isTrue);
     expect(fieldWidgetModel.showTrajectories, isTrue);
     expect(fieldWidgetModel.fieldRotation, 90.0);
-    expect(fieldWidgetModel.robotColor.value, Colors.red.value);
-    expect(fieldWidgetModel.trajectoryColor.value, Colors.white.value);
+    expect(fieldWidgetModel.robotColor.toARGB32(), Colors.red.toARGB32());
+    expect(
+      fieldWidgetModel.trajectoryColor.toARGB32(),
+      Colors.white.toARGB32(),
+    );
   });
 
   test('Field from alias json', () {
@@ -110,8 +113,9 @@ void main() {
     expect(fieldWidgetModel.showOtherObjects, isTrue);
     expect(fieldWidgetModel.showTrajectories, isTrue);
     expect(fieldWidgetModel.fieldRotation, 90.0);
-    expect(fieldWidgetModel.robotColor.value, Colors.red.value);
-    expect(fieldWidgetModel.trajectoryColor.value, Colors.white.value);
+    expect(fieldWidgetModel.robotColor.toARGB32(), Colors.red.toARGB32());
+    expect(
+        fieldWidgetModel.trajectoryColor.toARGB32(), Colors.white.toARGB32());
   });
 
   test('Field to json', () {
