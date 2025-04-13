@@ -34,11 +34,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate mocks
-        run: dart run build_runner build
-
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib/* test/*
+
+      - name: Generate mocks
+        run: dart run build_runner build
 
       - name: Verify import sorting
         run: dart run import_sorter:main --exit-if-changed
