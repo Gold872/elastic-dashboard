@@ -26,7 +26,8 @@ void main() {
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration as BoxDecoration).color != null &&
-            (widget.decoration as BoxDecoration).color!.value == color.value,
+            (widget.decoration as BoxDecoration).color!.toARGB32() ==
+                color.toARGB32(),
       );
 
   late SharedPreferences preferences;

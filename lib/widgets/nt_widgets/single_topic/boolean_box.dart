@@ -109,8 +109,8 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
       }
     }
 
-    _trueColor = Color(trueColorValue ?? Colors.green.value);
-    _falseColor = Color(falseColorValue ?? Colors.red.value);
+    _trueColor = Color(trueColorValue ?? Colors.green.toARGB32());
+    _falseColor = Color(falseColorValue ?? Colors.red.toARGB32());
 
     _trueIcon = tryCast(jsonData['true_icon']) ?? 'None';
     _falseIcon = tryCast(jsonData['false_icon']) ?? 'None';
@@ -120,8 +120,8 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'true_color': _trueColor.value,
-      'false_color': _falseColor.value,
+      'true_color': _trueColor.toARGB32(),
+      'false_color': _falseColor.toARGB32(),
       'true_icon': _trueIcon,
       'false_icon': _falseIcon,
     };

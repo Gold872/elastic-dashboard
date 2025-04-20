@@ -25,7 +25,7 @@ void main() {
     'period': 0.100,
     'time_displayed': 10.0,
     'max_value': 1.0,
-    'color': Colors.green.value,
+    'color': Colors.green.toARGB32(),
     'line_width': 3.0,
   };
 
@@ -81,7 +81,7 @@ void main() {
     expect(graphModel.timeDisplayed, 10.0);
     expect(graphModel.minValue, isNull);
     expect(graphModel.maxValue, 1.0);
-    expect(graphModel.mainColor, Color(Colors.green.value));
+    expect(graphModel.mainColor, Color(Colors.green.toARGB32()));
     expect(graphModel.lineWidth, 3.0);
   });
 

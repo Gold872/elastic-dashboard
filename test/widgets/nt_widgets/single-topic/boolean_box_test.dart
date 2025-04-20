@@ -22,8 +22,8 @@ void main() {
     'topic': 'Test/Boolean Value',
     'period': 0.100,
     'data_type': 'boolean',
-    'true_color': Colors.green.value,
-    'false_color': Colors.red.value,
+    'true_color': Colors.green.toARGB32(),
+    'false_color': Colors.red.toARGB32(),
     'true_icon': 'None',
     'false_icon': 'None',
   };
@@ -36,7 +36,8 @@ void main() {
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration as BoxDecoration).color != null &&
-            (widget.decoration as BoxDecoration).color!.value == color.value,
+            (widget.decoration as BoxDecoration).color!.toARGB32() ==
+                color.toARGB32(),
       );
 
   setUp(() async {
@@ -82,8 +83,8 @@ void main() {
       return;
     }
 
-    expect(booleanBoxModel.trueColor, Color(Colors.green.value));
-    expect(booleanBoxModel.falseColor, Color(Colors.red.value));
+    expect(booleanBoxModel.trueColor, Color(Colors.green.toARGB32()));
+    expect(booleanBoxModel.falseColor, Color(Colors.red.toARGB32()));
     expect(booleanBoxModel.trueIcon, 'None');
     expect(booleanBoxModel.falseIcon, 'None');
   });
@@ -233,7 +234,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(booleanBoxModel.trueColor.value, Colors.black.value);
+    expect(booleanBoxModel.trueColor.toARGB32(), Colors.black.toARGB32());
 
     await widgetTester
         .tap(find.byWidget(iconDropdown.evaluate().elementAt(1).widget));
