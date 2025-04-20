@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: 3.29.3
+  FLUTTER_VERSION: 3.29.2
 
 jobs:
   formatting-analysis:
