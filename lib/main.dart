@@ -102,6 +102,8 @@ void main() async {
 
     final Size minimumSize = Size(436.5 + platformWidthAdjust, 320.0);
 
+    await windowManager.ensureInitialized();
+
     await windowManager.setMinimumSize(minimumSize);
     await windowManager.setTitleBarStyle(
       TitleBarStyle.hidden,
