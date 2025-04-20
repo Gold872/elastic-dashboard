@@ -243,9 +243,9 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> saveLayout();
+  Future<void> saveLayout() async {}
 
-  Future<void> saveWindowPosition();
+  Future<void> saveWindowPosition() async {}
 
   Future<void> checkForUpdates({
     bool notifyIfLatest = true,
@@ -331,33 +331,34 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> exportLayout();
+  Future<void> exportLayout() async {}
 
-  Future<void> importLayout();
+  Future<void> importLayout() async {}
 
-  void loadLayout();
+  void loadLayout() {}
 
-  bool validateJsonData(Map<String, dynamic>? jsonData);
+  bool validateJsonData(Map<String, dynamic>? jsonData) => false;
 
-  void clearLayout();
+  void clearLayout() {}
 
-  bool loadLayoutFromJsonData(String jsonString);
+  bool loadLayoutFromJsonData(String jsonString) => false;
 
-  bool mergeLayoutFromJsonData(String jsonString);
+  bool mergeLayoutFromJsonData(String jsonString) => false;
 
-  void overwriteLayoutFromJsonData(String jsonString);
+  void overwriteLayoutFromJsonData(String jsonString) {}
 
   Future<({String layout, LayoutDownloadMode mode})?> showRemoteLayoutSelection(
     List<String> fileNames,
-  );
+  ) =>
+      Future.value(null);
 
-  Future<void> loadLayoutFromRobot();
+  Future<void> loadLayoutFromRobot() async {}
 
-  void createDefaultTabs();
+  void createDefaultTabs() {}
 
-  void lockLayout();
+  void lockLayout() {}
 
-  void unlockLayout();
+  void unlockLayout() {}
 
   void displayAddWidgetDialog() {
     logger.info('Displaying add widget dialog');
@@ -422,37 +423,37 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     );
   }
 
-  void displaySettingsDialog(BuildContext context);
+  void displaySettingsDialog(BuildContext context) {}
 
-  Future<void> changeIPAddressMode(IPAddressMode mode);
+  Future<void> changeIPAddressMode(IPAddressMode mode) async {}
 
-  Future<void> updateIPAddress(String newIPAddress);
+  Future<void> updateIPAddress(String newIPAddress) async {}
 
-  Future<void> onDriverStationDocked();
+  Future<void> onDriverStationDocked() async {}
 
-  Future<void> onDriverStationUndocked();
+  Future<void> onDriverStationUndocked() async {}
 
-  void showWindowCloseConfirmation(BuildContext context);
+  void showWindowCloseConfirmation(BuildContext context) {}
 
   void showTabCloseConfirmation(
     BuildContext context,
     String tabName,
     Function() onClose,
-  );
+  ) {}
 
-  void switchToTab(int tabIndex);
+  void switchToTab(int tabIndex) {}
 
-  void moveTabLeft();
+  void moveTabLeft() {}
 
-  void moveTabRight();
+  void moveTabRight() {}
 
-  void moveToNextTab();
+  void moveToNextTab() {}
 
-  void moveToPreviousTab();
+  void moveToPreviousTab() {}
 
-  void showJsonLoadingError(String errorMessage);
+  void showJsonLoadingError(String errorMessage) {}
 
-  void showJsonLoadingWarning(String warningMessage);
+  void showJsonLoadingWarning(String warningMessage) {}
 
   void showInfoNotification({
     required String title,
@@ -460,7 +461,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  });
+  }) {}
 
   void showWarningNotification({
     required String title,
@@ -468,7 +469,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  });
+  }) {}
 
   void showErrorNotification({
     required String title,
@@ -476,7 +477,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  });
+  }) {}
 
   void showNotification({
     required String title,
@@ -486,7 +487,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  });
+  }) {}
 }
 
 class DashboardPageViewModelImpl extends DashboardPageViewModel

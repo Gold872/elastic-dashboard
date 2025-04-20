@@ -21,128 +21,6 @@ class TestSettingsDashboardViewModel extends DashboardPageViewModel
     super.onColorChanged,
     super.onThemeVariantChanged,
   });
-
-  @override
-  void clearLayout() {}
-
-  @override
-  void createDefaultTabs() {}
-
-  @override
-  Future<void> exportLayout() async {}
-
-  @override
-  Future<void> importLayout() async {}
-
-  @override
-  void loadLayout() {}
-
-  @override
-  bool loadLayoutFromJsonData(String jsonString) => false;
-
-  @override
-  Future<void> loadLayoutFromRobot() async {}
-
-  @override
-  void lockLayout() {}
-
-  @override
-  bool mergeLayoutFromJsonData(String jsonString) => false;
-
-  @override
-  void moveTabLeft() {}
-
-  @override
-  void moveTabRight() {}
-
-  @override
-  void moveToNextTab() {}
-
-  @override
-  void moveToPreviousTab() {}
-
-  @override
-  Future<void> onDriverStationDocked() async {}
-
-  @override
-  Future<void> onDriverStationUndocked() async {}
-
-  @override
-  void overwriteLayoutFromJsonData(String jsonString) {}
-
-  @override
-  Future<void> saveLayout() async {}
-
-  @override
-  Future<void> saveWindowPosition() async {}
-
-  @override
-  void showErrorNotification({
-    required String title,
-    required String message,
-    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
-    double? width,
-    double? height,
-  }) {}
-
-  @override
-  void showInfoNotification({
-    required String title,
-    required String message,
-    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
-    double? width,
-    double? height,
-  }) {}
-
-  @override
-  void showJsonLoadingError(String errorMessage) {}
-
-  @override
-  void showJsonLoadingWarning(String warningMessage) {}
-
-  @override
-  void showNotification({
-    required String title,
-    required String message,
-    required Color color,
-    required Widget icon,
-    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
-    double? width,
-    double? height,
-  }) {}
-
-  @override
-  Future<({String layout, LayoutDownloadMode mode})?> showRemoteLayoutSelection(
-          List<String> fileNames) async =>
-      null;
-
-  @override
-  void showTabCloseConfirmation(
-    BuildContext context,
-    String tabName,
-    Function() onClose,
-  ) {}
-
-  @override
-  void showWarningNotification({
-    required String title,
-    required String message,
-    Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
-    double? width,
-    double? height,
-  }) {}
-
-  @override
-  void showWindowCloseConfirmation(BuildContext context) {}
-
-  @override
-  void switchToTab(int tabIndex) {}
-
-  @override
-  void unlockLayout() {}
-
-  @override
-  bool validateJsonData(Map<String, dynamic>? jsonData) => false;
 }
 
 void main() {
@@ -339,7 +217,7 @@ void main() {
     expect(preferences.getBool(PrefKeys.rememberWindowPosition), false);
   });
 
-  group('Log Level', () {
+  group('[Log Level]:', () {
     setUp(() async {
       await preferences.setString(PrefKeys.logLevel, Level.info.levelName);
     });
