@@ -272,6 +272,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         child: RichText(
           text: TextSpan(
             text: 'Field Image (',
+            style: Theme.of(context).textTheme.bodyMedium,
             children: [
               WidgetSpan(
                 child: Tooltip(
@@ -311,7 +312,10 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
                   ),
                 ),
               ),
-              const TextSpan(text: ')'),
+              TextSpan(
+                text: ')',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ],
           ),
         ),
