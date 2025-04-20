@@ -25,59 +25,61 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   late final Widget trailing = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      InkWell(
-        canRequestFocus: false,
-        onTap: () async => await windowManager.minimize(),
-        child: const AbsorbPointer(
-          child: DecoratedMinimizeButton(
-            width: windowButtonSize,
-            height: windowButtonSize,
-            type: buttonType,
-            onPressed: null,
+      if (!kIsWeb) ...[
+        InkWell(
+          canRequestFocus: false,
+          onTap: () async => await windowManager.minimize(),
+          child: const AbsorbPointer(
+            child: DecoratedMinimizeButton(
+              width: windowButtonSize,
+              height: windowButtonSize,
+              type: buttonType,
+              onPressed: null,
+            ),
           ),
         ),
-      ),
-      InkWell(
-        canRequestFocus: false,
-        onTap: () async {
-          if (!Settings.isWindowMaximizable) {
-            return;
-          }
+        InkWell(
+          canRequestFocus: false,
+          onTap: () async {
+            if (!Settings.isWindowMaximizable) {
+              return;
+            }
 
-          if (await windowManager.isMaximized()) {
-            windowManager.unmaximize();
-          } else {
-            windowManager.maximize();
-          }
-        },
-        child: const AbsorbPointer(
-          child: DecoratedMaximizeButton(
-            width: windowButtonSize,
-            height: windowButtonSize,
-            type: buttonType,
-            onPressed: null,
+            if (await windowManager.isMaximized()) {
+              windowManager.unmaximize();
+            } else {
+              windowManager.maximize();
+            }
+          },
+          child: const AbsorbPointer(
+            child: DecoratedMaximizeButton(
+              width: windowButtonSize,
+              height: windowButtonSize,
+              type: buttonType,
+              onPressed: null,
+            ),
           ),
         ),
-      ),
-      InkWell(
-        canRequestFocus: false,
-        hoverColor: Colors.red,
-        onTap: () async {
-          if (onWindowClose == null) {
-            await windowManager.close();
-          } else {
-            onWindowClose!.call();
-          }
-        },
-        child: const AbsorbPointer(
-          child: DecoratedCloseButton(
-            width: windowButtonSize,
-            height: windowButtonSize,
-            type: buttonType,
-            onPressed: null,
+        InkWell(
+          canRequestFocus: false,
+          hoverColor: Colors.red,
+          onTap: () async {
+            if (onWindowClose == null) {
+              await windowManager.close();
+            } else {
+              onWindowClose!.call();
+            }
+          },
+          child: const AbsorbPointer(
+            child: DecoratedCloseButton(
+              width: windowButtonSize,
+              height: windowButtonSize,
+              type: buttonType,
+              onPressed: null,
+            ),
           ),
         ),
-      ),
+      ]
     ],
   );
 
