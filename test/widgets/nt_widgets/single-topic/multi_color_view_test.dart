@@ -117,12 +117,12 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     List<Color> expectedColors = [
-      Color(Colors.red.value),
-      Color(Colors.orange.value),
-      Color(Colors.yellow.value),
-      Color(Colors.green.value),
-      Color(Colors.blue.value),
-      Color(Colors.purple.value),
+      Color(Colors.red.toARGB32()),
+      Color(Colors.orange.toARGB32()),
+      Color(Colors.yellow.toARGB32()),
+      Color(Colors.green.toARGB32()),
+      Color(Colors.blue.toARGB32()),
+      Color(Colors.purple.toARGB32()),
     ];
 
     expect(findGradient(expectedColors), findsOneWidget);
@@ -166,8 +166,8 @@ void main() {
 
     expect(
         findGradient([
-          Color(Colors.red.value),
-          Color(Colors.red.value),
+          Color(Colors.red.toARGB32()),
+          Color(Colors.red.toARGB32()),
         ]),
         findsOneWidget);
   });
@@ -208,8 +208,8 @@ void main() {
 
     expect(
         findGradient([
-          Color(Colors.transparent.value),
-          Color(Colors.transparent.value),
+          Color(Colors.transparent.toARGB32()),
+          Color(Colors.transparent.toARGB32()),
         ]),
         findsOneWidget);
   });

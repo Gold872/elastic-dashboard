@@ -71,7 +71,7 @@ void main() {
       PrefKeys.ipAddress: '127.0.0.1',
       PrefKeys.teamNumber: 353,
       PrefKeys.ipAddressMode: IPAddressMode.driverStation.index,
-      PrefKeys.teamColor: Colors.blueAccent.value,
+      PrefKeys.teamColor: Colors.blueAccent.toARGB32(),
       PrefKeys.showGrid: false,
       PrefKeys.gridSize: 128,
       PrefKeys.cornerRadius: 15.0,
@@ -362,7 +362,7 @@ void main() {
             onColorChanged: (color) async {
               fakeSettings.changeColor();
 
-              await preferences.setInt(PrefKeys.teamColor, color.value);
+              await preferences.setInt(PrefKeys.teamColor, color.toARGB32());
             },
           ),
         ),
@@ -407,8 +407,10 @@ void main() {
     expect(saveButton, findsOneWidget);
     await widgetTester.tap(saveButton);
 
-    expect(preferences.getInt(PrefKeys.teamColor),
-        const Color.fromARGB(255, 0, 0, 255).value);
+    expect(
+      preferences.getInt(PrefKeys.teamColor),
+      const Color.fromARGB(255, 0, 0, 255).toARGB32(),
+    );
     verify(fakeSettings.changeColor()).called(greaterThanOrEqualTo(1));
   });
 
@@ -448,7 +450,7 @@ void main() {
 
     expect(find.text('Chroma'), findsNWidgets(2));
     expect(find.text('Material-3 Legacy (Default)'), findsOneWidget);
-    expect(find.text('Material-3 Legacy'), findsNothing);
+    expect(find.text('Material-3 legacy'), findsNothing);
 
     await widgetTester.tap(find.text('Material-3 Legacy (Default)'));
     await widgetTester.pumpAndSettle();
@@ -468,7 +470,7 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Material-3 Legacy (Default)'), findsNWidgets(2));
-    expect(find.text('Material-3 Legacy'), findsOneWidget);
+    expect(find.text('Material-3 legacy'), findsOneWidget);
   });
 
   testWidgets('Toggle grid', (widgetTester) async {

@@ -192,24 +192,27 @@ class Elastic extends StatefulWidget {
   final SharedPreferences preferences;
   final String version;
 
-  const Elastic(
-      {super.key,
-      required this.ntConnection,
-      required this.preferences,
-      required this.version});
+  const Elastic({
+    super.key,
+    required this.ntConnection,
+    required this.preferences,
+    required this.version,
+  });
 
   @override
   State<Elastic> createState() => _ElasticState();
 }
 
 class _ElasticState extends State<Elastic> {
-  late Color teamColor = Color(
-      widget.preferences.getInt(PrefKeys.teamColor) ?? Colors.blueAccent.value);
+  late Color teamColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
+      Colors.blueAccent.toARGB32());
   late FlexSchemeVariant themeVariant = FlexSchemeVariant.values
           .firstWhereOrNull((element) =>
               element.variantName ==
               widget.preferences.getString(PrefKeys.themeVariant)) ??
       FlexSchemeVariant.material3Legacy;
+
+  FlexTones get themeTones => themeVariant.tones(Brightness.dark);
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +221,18 @@ class _ElasticState extends State<Elastic> {
       colorScheme: SeedColorScheme.fromSeeds(
         primaryKey: teamColor,
         brightness: Brightness.dark,
-        variant: themeVariant,
+        tones: themeTones.copyWith(
+          // Use older (but incorrect) material 3 legacy tones from 2025 version
+          surfaceTone:
+              themeVariant == FlexSchemeVariant.material3Legacy ? 8 : null,
+          primaryMinChroma:
+              themeVariant == FlexSchemeVariant.material3Legacy ? 0 : null,
+          // Have the dialog color match the card colors
+          surfaceContainerHighTone:
+              themeVariant == FlexSchemeVariant.material3Legacy
+                  ? 8
+                  : themeTones.surfaceTone,
+        ),
       ),
     );
     return MaterialApp(
@@ -231,7 +245,7 @@ class _ElasticState extends State<Elastic> {
         version: widget.version,
         onColorChanged: (color) => setState(() {
           teamColor = color;
-          widget.preferences.setInt(PrefKeys.teamColor, color.value);
+          widget.preferences.setInt(PrefKeys.teamColor, color.toARGB32());
         }),
         onThemeVariantChanged: (variant) async {
           themeVariant = variant;

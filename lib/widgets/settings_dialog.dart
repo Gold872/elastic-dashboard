@@ -190,8 +190,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Widget> _themeSettings() {
-    Color currentColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
-        Colors.blueAccent.value);
+    Color currentColor = Color(
+      widget.preferences.getInt(PrefKeys.teamColor) ??
+          Colors.blueAccent.toARGB32(),
+    );
 
     // Safety feature to prevent theme variants dropdown from not rendering if the current selection doesn't exist
     List<String>? themeVariantsOverride;
