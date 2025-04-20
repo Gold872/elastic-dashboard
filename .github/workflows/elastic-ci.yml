@@ -105,6 +105,11 @@ jobs:
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+          - os: ubuntu-22.04
+            build-option: "web"
+            build-flags: "--wasm"
+            artifact-path: "build/web"
+            artifact-name: Elastic-Web
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
@@ -134,7 +139,7 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Build app
-        run: flutter build ${{ matrix.build-option }}
+        run: flutter build ${{ matrix.build-option }} ${{ matrix.build-flags }}
 
       - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
@@ -192,38 +197,6 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}_installer
           path: build/windows/x64/installer
-          if-no-files-found: error
-
-  build-web:
-    name: "Build Web"
-    needs: [formatting-analysis, test]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-          cache-path: ${{ runner.tool_cache }}/flutter/linux
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate icons
-        run: dart run flutter_launcher_icons
-
-      - name: Build app
-        run: flutter build web --wasm
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Elastic-Web
-          path: build/web
           if-no-files-found: error
 
   build-wpilib:
