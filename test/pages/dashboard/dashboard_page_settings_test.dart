@@ -10,24 +10,14 @@ import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import '../../test_util.dart';
 
-class TestSettingsDashboardViewModel extends DashboardPageViewModel
-    with DashboardPageSettings {
-  TestSettingsDashboardViewModel({
-    required super.ntConnection,
-    required super.preferences,
-    required super.version,
-    super.updateChecker,
-    super.layoutDownloader,
-    super.onColorChanged,
-    super.onThemeVariantChanged,
-  });
-}
+class SettingsDashboardViewModel = DashboardPageViewModel
+    with DashboardPageSettings;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late SharedPreferences preferences;
-  late TestSettingsDashboardViewModel dashboardModel;
+  late SettingsDashboardViewModel dashboardModel;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({
@@ -37,7 +27,7 @@ void main() {
 
     preferences = await SharedPreferences.getInstance();
 
-    dashboardModel = TestSettingsDashboardViewModel(
+    dashboardModel = SettingsDashboardViewModel(
       ntConnection: createMockOfflineNT4(),
       preferences: preferences,
       version: '0.0.0.0',

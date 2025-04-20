@@ -490,23 +490,13 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
   }) {}
 }
 
-class DashboardPageViewModelImpl extends DashboardPageViewModel
+class DashboardPageViewModelImpl = DashboardPageViewModel
     with
         DashboardPageNotifications,
         DashboardPageLayouts,
         DashboardPageSettings,
         DashboardPageTabs,
-        DashboardPageWindow {
-  DashboardPageViewModelImpl({
-    required super.ntConnection,
-    required super.preferences,
-    required super.version,
-    super.updateChecker,
-    super.layoutDownloader,
-    super.onColorChanged,
-    super.onThemeVariantChanged,
-  });
-}
+        DashboardPageWindow;
 
 class DashboardPage extends StatefulWidget {
   final DashboardPageViewModel model;
