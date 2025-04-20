@@ -29,7 +29,6 @@ import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
-import 'package:elastic_dashboard/services/shuffleboard_nt_listener.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
@@ -110,8 +109,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
   late final UpdateChecker _updateChecker;
   late final ElasticLayoutDownloader _layoutDownloader;
 
-  bool _seenShuffleboardWarning = false;
-
   final List<TabData> _tabData = [];
 
   final Function _mapEquals = const DeepCollectionEquality().equals;
@@ -179,105 +176,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
           grid.onNTDisconnect();
         }
       });
-    });
-
-    ShuffleboardNTListener apiListener = ShuffleboardNTListener(
-      ntConnection: widget.ntConnection,
-      preferences: widget.preferences,
-      onTabChanged: (tab) {
-        _showShuffleboardWarningMessage();
-        int? parsedTabIndex = int.tryParse(tab);
-
-        bool isIndex = parsedTabIndex != null;
-
-        List<String> tabNamesList = _tabData.map((data) => data.name).toList();
-
-        // Prevent the program from switching to a non-existent tab
-        if (!isIndex && !tabNamesList.contains(tab)) {
-          return;
-        } else if (isIndex && parsedTabIndex >= _tabData.length) {
-          return;
-        }
-
-        int tabIndex = (isIndex) ? parsedTabIndex : tabNamesList.indexOf(tab);
-
-        if (tabIndex == _currentTabIndex) {
-          return;
-        }
-
-        _switchToTab(tabIndex);
-      },
-      onTabCreated: (tab) {
-        _showShuffleboardWarningMessage();
-        if (preferences.getBool(PrefKeys.layoutLocked) ??
-            Defaults.layoutLocked) {
-          return;
-        }
-
-        Iterable<String> tabNamesList = _tabData.map((data) => data.name);
-
-        if (tabNamesList.contains(tab)) {
-          return;
-        }
-
-        _tabData.add(TabData(
-          name: tab,
-          tabGrid: TabGridModel(
-            ntConnection: widget.ntConnection,
-            preferences: widget.preferences,
-            onAddWidgetPressed: _displayAddWidgetDialog,
-          ),
-        ));
-      },
-      onWidgetAdded: (widgetData) {
-        _showShuffleboardWarningMessage();
-        if (preferences.getBool(PrefKeys.layoutLocked) ??
-            Defaults.layoutLocked) {
-          return;
-        }
-        // Needs to be converted into the tab json format
-        Map<String, dynamic> tabJson = {};
-
-        String tabName = widgetData['tab'];
-        tabJson.addAll({'containers': <Map<String, dynamic>>[]});
-        tabJson.addAll({'layouts': <Map<String, dynamic>>[]});
-
-        if (!(widgetData.containsKey('layout') && widgetData['layout'])) {
-          tabJson['containers']!.add(widgetData);
-        } else {
-          tabJson['layouts']!.add(widgetData);
-        }
-
-        if (!_tabData.any((tab) => tab.name == tabName)) {
-          _tabData.add(
-            TabData(
-              name: tabName,
-              tabGrid: TabGridModel.fromJson(
-                ntConnection: widget.ntConnection,
-                preferences: widget.preferences,
-                jsonData: tabJson,
-                onJsonLoadingWarning: _showJsonLoadingWarning,
-                onAddWidgetPressed: _displayAddWidgetDialog,
-              ),
-            ),
-          );
-        } else {
-          _tabData
-              .firstWhere((tab) => tab.name == tabName)
-              .tabGrid
-              .mergeFromJson(
-                jsonData: tabJson,
-                onJsonLoadingWarning: _showJsonLoadingWarning,
-              );
-        }
-
-        setState(() {});
-      },
-    );
-
-    Future.delayed(const Duration(seconds: 1), () {
-      apiListener.initializeSubscriptions();
-      apiListener.initializeListeners();
     });
 
     _robotNotificationListener = ElasticLibListener(
@@ -976,58 +874,6 @@ class _DashboardPageState extends State<DashboardPage> with WindowListener {
         ]);
       });
     }
-  }
-
-  void _showShuffleboardWarningMessage() {
-    if (_seenShuffleboardWarning) {
-      return;
-    }
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
-    TextTheme textTheme = Theme.of(context).textTheme;
-    ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
-    ElegantNotification notification = ElegantNotification(
-      autoDismiss: false,
-      background: colorScheme.surface,
-      showProgressIndicator: false,
-      width: 450,
-      height: 250,
-      position: Alignment.bottomRight,
-      icon: const Icon(Icons.warning, color: Colors.yellow),
-      action: TextButton(
-        onPressed: () async {
-          Uri url = Uri.parse(
-              'https://frc-elastic.gitbook.io/docs/additional-features-and-references/remote-layout-downloading#shuffleboard-api-migration-guide');
-
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url);
-          }
-        },
-        child: Text(
-          'Documentation',
-          style: textTheme.bodyMedium!.copyWith(
-            color: buttonTheme.colorScheme?.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      title: Text(
-        'Shuffleboard API Deprecation',
-        style: textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      description: const Text(
-        'Support for the Shuffleboard API is deprecated in favor of remote layout downloading and will be removed after the 2025 season.\n\nAn alternative layout system is provided in the form of remote layout downloading. See the documentation for more details about migration.',
-        overflow: TextOverflow.ellipsis,
-        maxLines: 7,
-      ),
-    );
-
-    if (mounted) {
-      notification.show(context);
-    }
-    _seenShuffleboardWarning = true;
   }
 
   void _showJsonLoadingError(String errorMessage) {
