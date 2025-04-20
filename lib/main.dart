@@ -45,21 +45,27 @@ void main() async {
     logger.error('Flutter Error', details.exception, details.stack);
   };
 
-  SharedPreferences preferences = await SharedPreferences.getInstance();
+  SharedPreferences preferences;
   if (!kIsWeb) {
     final String appFolderPath = (await getApplicationSupportDirectory()).path;
     // Prevents data loss if shared_preferences.json gets corrupted
     // More info and original implementation: https://github.com/flutter/flutter/issues/89211#issuecomment-915096452
     try {
+      preferences = await SharedPreferences.getInstance();
+
       // Store a copy of user's preferences on the disk
       await _backupPreferences(appFolderPath);
     } catch (error) {
       logger.warning(
           'Failed to get shared preferences instance, attempting to retrieve from backup',
           error);
+
       // Remove broken preferences files and restore previous settings
       await _restorePreferencesFromBackup(appFolderPath);
+      preferences = await SharedPreferences.getInstance();
     }
+  } else {
+    preferences = await SharedPreferences.getInstance();
   }
 
   Level logLevel = Settings.logLevels.firstWhereOrNull((level) =>
