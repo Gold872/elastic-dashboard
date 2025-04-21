@@ -88,6 +88,14 @@ class NTConnection {
     );
   }
 
+  void startDBModeServer() {
+    _dsClient.startDBModeServer();
+  }
+
+  void stopDBModeServer() {
+    _dsClient.stopDBModeServer();
+  }
+
   void addConnectedListener(VoidCallback callback) {
     onConnectedListeners.add(callback);
   }
@@ -129,12 +137,10 @@ class NTConnection {
 
     T? value;
     try {
-      value =
-          await subscription
-                  .periodicStream()
-                  .firstWhere((element) => element != null && element is T)
-                  .timeout(timeout)
-              as T?;
+      value = await subscription
+          .periodicStream()
+          .firstWhere((element) => element != null && element is T)
+          .timeout(timeout) as T?;
     } catch (e) {
       value = null;
     }

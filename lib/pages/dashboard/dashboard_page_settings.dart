@@ -115,8 +115,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
       return;
     }
 
-    bool? cancel =
-        await showDialog<bool>(
+    bool? cancel = await showDialog<bool>(
           context: state!.context,
           barrierDismissible: false,
           builder: (context) {
@@ -193,9 +192,10 @@ mixin DashboardPageSettings on DashboardPageViewModel {
   }
 
   Future<void> changeResizeToDS(bool value) async {
-    if (value && ntConnection.dsClient.driverStationDocked) {
-      onDriverStationDocked();
+    if (value) {
+      ntConnection.startDBModeServer();
     } else {
+      ntConnection.stopDBModeServer;
       onDriverStationUndocked();
     }
 

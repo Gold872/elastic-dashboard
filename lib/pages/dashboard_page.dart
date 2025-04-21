@@ -190,6 +190,11 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     );
     robotNotificationListener.listen();
 
+    if (preferences.getBool(PrefKeys.autoResizeToDS) ??
+        Defaults.autoResizeToDS) {
+      ntConnection.startDBModeServer();
+    }
+
     ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
         if (preferences.getInt(PrefKeys.ipAddressMode) !=
@@ -260,8 +265,8 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     TextTheme textTheme = state!.theme.textTheme;
     ButtonThemeData buttonTheme = state!.buttonTheme;
 
-    UpdateCheckerResponse updateResponse = await updateChecker!
-        .isUpdateAvailable();
+    UpdateCheckerResponse updateResponse =
+        await updateChecker!.isUpdateAvailable();
 
     lastUpdateResponse = updateResponse;
     notifyListeners();
@@ -352,7 +357,8 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
 
   Future<({String layout, LayoutDownloadMode mode})?> showRemoteLayoutSelection(
     List<String> fileNames,
-  ) => Future.value(null);
+  ) =>
+      Future.value(null);
 
   Future<void> loadLayoutFromRobot() async {}
 
@@ -986,9 +992,8 @@ class _DashboardPageState extends State<DashboardPage>
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed: !layoutLocked
-              ? () => model.displayAddWidgetDialog()
-              : null,
+          onPressed:
+              !layoutLocked ? () => model.displayAddWidgetDialog() : null,
           child: const Text('Add Widget'),
         ),
         if (layoutLocked) ...[
@@ -1109,10 +1114,8 @@ class _DashboardPageState extends State<DashboardPage>
                     onTabChanged: model.switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
-                        Map<String, dynamic> tabJson = model
-                            .tabData[index]
-                            .tabGrid
-                            .toJson();
+                        Map<String, dynamic> tabJson =
+                            model.tabData[index].tabGrid.toJson();
                         TabGridModel newGrid = TabGridModel.fromJson(
                           ntConnection: model.ntConnection,
                           preferences: preferences,
