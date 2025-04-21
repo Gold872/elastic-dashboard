@@ -13,7 +13,6 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard/add_widget_dialog.dart';
 import 'package:elastic_dashboard/pages/dashboard/dashboard_page_footer.dart';
@@ -36,6 +35,9 @@ import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
+
+import 'package:window_manager/window_manager.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
 
 enum LayoutDownloadMode {
   overwrite(
