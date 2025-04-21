@@ -5,6 +5,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:window_manager/window_manager.dart'
+    show DockSide, WindowOptions;
+
 enum TitleBarStyle {
   normal,
   hidden,
@@ -87,15 +90,13 @@ class WindowManager {
   Future<void> ensureInitialized() async {}
 
   /// You can call this to remove the window frame (title bar, outline border, etc), which is basically everything except the Flutter view, also can call setTitleBarStyle(TitleBarStyle.normal) or setTitleBarStyle(TitleBarStyle.hidden) to restore it.
-  Future<void> setAsFrameless() async {
-    // await _channel.invokeMethod('setAsFrameless');
-  }
+  Future<void> setAsFrameless() async {}
 
   /// Wait until ready to show.
-  // Future<void> waitUntilReadyToShow([
-  //   WindowOptions? options,
-  //   VoidCallback? callback,
-  // ]) async {}
+  Future<void> waitUntilReadyToShow([
+    WindowOptions? options,
+    VoidCallback? callback,
+  ]) async {}
 
   /// Force closing the window.
   Future<void> destroy() async {}
@@ -151,7 +152,7 @@ class WindowManager {
   Future<void> restore() async {}
 
   /// Returns `bool` - Whether the window is in fullscreen mode.
-  // Future<bool> isFullScreen() async {}
+  Future<bool> isFullScreen() async => false;
 
   /// Sets whether the window should be in fullscreen mode.
   Future<void> setFullScreen(bool isFullScreen) async {}
@@ -159,23 +160,22 @@ class WindowManager {
   /// Returns `bool` - Whether the window is dockable or not.
   ///
   /// @platforms windows
-  // Future<bool> isDockable() async {}
+  Future<bool> isDockable() async => false;
 
   /// Returns `bool` - Whether the window is docked.
   ///
   /// @platforms windows
-  // Future<DockSide?> isDocked() async {
-  // }
+  Future<DockSide?> isDocked() async => null;
 
   /// Docks the window. only works on Windows
   ///
   /// @platforms windows
-  // Future<void> dock({required DockSide side, required int width}) async {}
+  Future<void> dock({required DockSide side, required int width}) async {}
 
   /// Undocks the window. only works on Windows
   ///
   /// @platforms windows
-  // Future<bool> undock() async {}
+  Future<bool> undock() async => false;
 
   /// This will make a window maintain an aspect ratio.
   Future<void> setAspectRatio(double aspectRatio) async {}
@@ -195,9 +195,7 @@ class WindowManager {
   }) async {}
 
   /// Returns `Rect` - The bounds of the window as Object.
-  Future<Rect> getBounds() async {
-    return Rect.fromLTWH(0, 0, 0, 0);
-  }
+  Future<Rect> getBounds() async => Rect.fromLTWH(0, 0, 0, 0);
 
   /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(
@@ -208,19 +206,17 @@ class WindowManager {
   }) async {}
 
   /// Returns `Size` - Contains the window's width and height.
-  // Future<Size> getSize() async {}
+  Future<Size> getSize() async => Size.zero;
 
   /// Resizes the window to `width` and `height`.
-  Future<void> setSize(Size size, {bool animate = false}) async {
-    await setBounds(
-      null,
-      size: size,
-      animate: animate,
-    );
-  }
+  Future<void> setSize(Size size, {bool animate = false}) => setBounds(
+        null,
+        size: size,
+        animate: animate,
+      );
 
   /// Returns `Offset` - Contains the window's current position.
-  // Future<Offset> getPosition() async {}
+  Future<Offset> getPosition() async => Offset.zero;
 
   /// Moves window to position.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
@@ -238,7 +234,7 @@ class WindowManager {
   Future<void> setMaximumSize(Size size) async {}
 
   /// Returns `bool` - Whether the window can be manually resized by the user.
-  // Future<bool> isResizable() async {}
+  Future<bool> isResizable() async => false;
 
   /// Sets whether the window can be manually resized by the user.
   Future<void> setResizable(bool isResizable) async {}
@@ -246,7 +242,7 @@ class WindowManager {
   /// Returns `bool` - Whether the window can be moved by user.
   ///
   /// @platforms macos
-  // Future<bool> isMovable() async {}
+  Future<bool> isMovable() async => false;
 
   /// Sets whether the window can be moved by user.
   ///
@@ -256,7 +252,7 @@ class WindowManager {
   /// Returns `bool` - Whether the window can be manually minimized by the user.
   ///
   /// @platforms macos,windows
-  // Future<bool> isMinimizable() async {}
+  Future<bool> isMinimizable() async => false;
 
   /// Sets whether the window can be manually minimized by user.
   ///
@@ -266,12 +262,12 @@ class WindowManager {
   /// Returns `bool` - Whether the window can be manually closed by user.
   ///
   /// @platforms windows
-  // Future<bool> isClosable() async {}
+  Future<bool> isClosable() async => false;
 
   /// Returns `bool` - Whether the window can be manually maximized by the user.
   ///
   /// @platforms macos,windows
-  // Future<bool> isMaximizable() async {}
+  Future<bool> isMaximizable() async => false;
 
   /// Sets whether the window can be manually maximized by the user.
   Future<void> setMaximizable(bool isMaximizable) async {}
@@ -288,7 +284,7 @@ class WindowManager {
   Future<void> setAlwaysOnTop(bool isAlwaysOnTop) async {}
 
   /// Returns `bool` - Whether the window is always below other windows.
-  // Future<bool> isAlwaysOnBottom() async {}
+  Future<bool> isAlwaysOnBottom() async => false;
 
   /// Sets whether the window should show always below other windows.
   ///
