@@ -11,7 +11,7 @@ import 'package:elastic_dashboard/services/struct_schemas/swerve_module_state_st
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/struct_swerve.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/struct_swerve.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
