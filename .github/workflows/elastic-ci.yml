@@ -105,6 +105,11 @@ jobs:
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+          - os: ubuntu-22.04
+            build-option: "web"
+            build-flags: "--wasm"
+            artifact-path: "build/web"
+            artifact-name: Elastic-Web
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
@@ -134,7 +139,7 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Build app
-        run: flutter build ${{ matrix.build-option }}
+        run: flutter build ${{ matrix.build-option }} ${{ matrix.build-flags }}
 
       - name: Copy runtime files
         if: ${{ matrix.build-option == 'windows' }}
