@@ -7,15 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/subsystem_widget.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/ultrasonic.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Map<String, dynamic> subsystemJson = {
-    'topic': 'Test/Subsystem',
+  final Map<String, dynamic> ultrasonicJson = {
+    'topic': 'Test/Ultrasonic',
     'period': 0.100,
   };
 
@@ -29,61 +29,56 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-          name: 'Test/Subsystem/.default',
-          type: NT4TypeStr.kString,
-          properties: {},
-        ),
-        NT4Topic(
-          name: 'Test/Subsystem/.command',
-          type: NT4TypeStr.kString,
+          name: 'Test/Ultrasonic/Value',
+          type: NT4TypeStr.kFloat32,
           properties: {},
         ),
       ],
       virtualValues: {
-        'Test/Subsystem/.command': 'TestCommand',
+        'Test/Ultrasonic/Value': 0.12,
       },
     );
   });
 
-  test('Subsystem model from json', () {
-    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
+  test('Ultrasonic from json', () {
+    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Subsystem',
-      subsystemJson,
+      'Ultrasonic',
+      ultrasonicJson,
     );
 
-    expect(subsystemModel.type, 'Subsystem');
-    expect(subsystemModel.runtimeType, SubsystemModel);
+    expect(ultrasonicModel.type, 'Ultrasonic');
+    expect(ultrasonicModel.runtimeType, UltrasonicModel);
   });
 
-  test('Subsystem model to json', () {
-    SubsystemModel subsystemModel = SubsystemModel(
+  test('Ultrasonic to json', () {
+    UltrasonicModel ultrasonicModel = UltrasonicModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/Subsystem',
+      topic: 'Test/Ultrasonic',
       period: 0.100,
     );
 
-    expect(subsystemModel.toJson(), subsystemJson);
+    expect(ultrasonicModel.toJson(), ultrasonicJson);
   });
 
-  testWidgets('Subsystem widget test', (widgetTester) async {
+  testWidgets('Ultrasonic widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Subsystem',
-      subsystemJson,
+      'Ultrasonic',
+      ultrasonicJson,
     );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: subsystemModel,
-            child: const SubsystemWidget(),
+            value: ultrasonicModel,
+            child: const Ultrasonic(),
           ),
         ),
       ),
@@ -91,7 +86,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Default Command: none'), findsOneWidget);
-    expect(find.text('Current Command: TestCommand'), findsOneWidget);
+    expect(find.text('Range'), findsOneWidget);
+    expect(find.text('0.12000 in'), findsOneWidget);
   });
 }

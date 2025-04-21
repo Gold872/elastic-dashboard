@@ -7,15 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/ultrasonic.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Map<String, dynamic> ultrasonicJson = {
-    'topic': 'Test/Ultrasonic',
+  final Map<String, dynamic> accelerometerJson = {
+    'topic': 'Test/Test Accelerometer',
     'period': 0.100,
   };
 
@@ -29,56 +29,59 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-          name: 'Test/Ultrasonic/Value',
+          name: 'Test/Test Accelerometer/Value',
           type: NT4TypeStr.kFloat32,
           properties: {},
-        ),
+        )
       ],
       virtualValues: {
-        'Test/Ultrasonic/Value': 0.12,
+        'Test/Test Accelerometer/Value': 0.50,
       },
     );
   });
 
-  test('Ultrasonic from json', () {
-    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
+  test('Creating accelerometer from json', () {
+    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Ultrasonic',
-      ultrasonicJson,
+      'Accelerometer',
+      accelerometerJson,
     );
 
-    expect(ultrasonicModel.type, 'Ultrasonic');
-    expect(ultrasonicModel.runtimeType, UltrasonicModel);
+    expect(accelerometerModel.type, 'Accelerometer');
+    expect(accelerometerModel.runtimeType, AccelerometerModel);
+
+    expect((accelerometerModel as AccelerometerModel).valueTopic,
+        'Test/Test Accelerometer/Value');
   });
 
-  test('Ultrasonic to json', () {
-    UltrasonicModel ultrasonicModel = UltrasonicModel(
+  test('Saving accelerometer to json', () {
+    AccelerometerModel accelerometerModel = AccelerometerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/Ultrasonic',
+      topic: 'Test/Test Accelerometer',
       period: 0.100,
     );
 
-    expect(ultrasonicModel.toJson(), ultrasonicJson);
+    expect(accelerometerModel.toJson(), accelerometerJson);
   });
 
-  testWidgets('Ultrasonic widget test', (widgetTester) async {
+  testWidgets('Accelerometer widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Ultrasonic',
-      ultrasonicJson,
+      'Accelerometer',
+      accelerometerJson,
     );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: ultrasonicModel,
-            child: const Ultrasonic(),
+            value: accelerometerModel,
+            child: const AccelerometerWidget(),
           ),
         ),
       ),
@@ -86,7 +89,6 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Range'), findsOneWidget);
-    expect(find.text('0.12000 in'), findsOneWidget);
+    expect(find.text('0.50 g'), findsOneWidget);
   });
 }

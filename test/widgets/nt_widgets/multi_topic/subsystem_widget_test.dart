@@ -7,15 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/accelerometer.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Map<String, dynamic> accelerometerJson = {
-    'topic': 'Test/Test Accelerometer',
+  final Map<String, dynamic> subsystemJson = {
+    'topic': 'Test/Subsystem',
     'period': 0.100,
   };
 
@@ -29,59 +29,61 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-          name: 'Test/Test Accelerometer/Value',
-          type: NT4TypeStr.kFloat32,
+          name: 'Test/Subsystem/.default',
+          type: NT4TypeStr.kString,
           properties: {},
-        )
+        ),
+        NT4Topic(
+          name: 'Test/Subsystem/.command',
+          type: NT4TypeStr.kString,
+          properties: {},
+        ),
       ],
       virtualValues: {
-        'Test/Test Accelerometer/Value': 0.50,
+        'Test/Subsystem/.command': 'TestCommand',
       },
     );
   });
 
-  test('Creating accelerometer from json', () {
-    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
+  test('Subsystem model from json', () {
+    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Accelerometer',
-      accelerometerJson,
+      'Subsystem',
+      subsystemJson,
     );
 
-    expect(accelerometerModel.type, 'Accelerometer');
-    expect(accelerometerModel.runtimeType, AccelerometerModel);
-
-    expect((accelerometerModel as AccelerometerModel).valueTopic,
-        'Test/Test Accelerometer/Value');
+    expect(subsystemModel.type, 'Subsystem');
+    expect(subsystemModel.runtimeType, SubsystemModel);
   });
 
-  test('Saving accelerometer to json', () {
-    AccelerometerModel accelerometerModel = AccelerometerModel(
+  test('Subsystem model to json', () {
+    SubsystemModel subsystemModel = SubsystemModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/Test Accelerometer',
+      topic: 'Test/Subsystem',
       period: 0.100,
     );
 
-    expect(accelerometerModel.toJson(), accelerometerJson);
+    expect(subsystemModel.toJson(), subsystemJson);
   });
 
-  testWidgets('Accelerometer widget test', (widgetTester) async {
+  testWidgets('Subsystem widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Accelerometer',
-      accelerometerJson,
+      'Subsystem',
+      subsystemJson,
     );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: accelerometerModel,
-            child: const AccelerometerWidget(),
+            value: subsystemModel,
+            child: const SubsystemWidget(),
           ),
         ),
       ),
@@ -89,6 +91,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('0.50 g'), findsOneWidget);
+    expect(find.text('Default Command: none'), findsOneWidget);
+    expect(find.text('Current Command: TestCommand'), findsOneWidget);
   });
 }

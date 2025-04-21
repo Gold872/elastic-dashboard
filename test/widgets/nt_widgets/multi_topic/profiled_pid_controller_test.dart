@@ -7,15 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/pid_controller.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/profiled_pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Map<String, dynamic> pidControllerJson = {
-    'topic': 'Test/PID Controller',
+  final Map<String, dynamic> profiledPIDControllerJson = {
+    'topic': 'Test/Profiled PID Controller',
     'period': 0.100,
   };
 
@@ -29,86 +29,77 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-          name: 'Test/PID Controller/p',
+          name: 'Test/Profiled PID Controller/p',
           type: NT4TypeStr.kFloat32,
           properties: {},
         ),
         NT4Topic(
-          name: 'Test/PID Controller/i',
+          name: 'Test/Profiled PID Controller/i',
           type: NT4TypeStr.kFloat32,
           properties: {},
         ),
         NT4Topic(
-          name: 'Test/PID Controller/d',
+          name: 'Test/Profiled PID Controller/d',
           type: NT4TypeStr.kFloat32,
           properties: {},
         ),
         NT4Topic(
-          name: 'Test/PID Controller/setpoint',
+          name: 'Test/Profiled PID Controller/goal',
           type: NT4TypeStr.kFloat32,
           properties: {},
         ),
       ],
       virtualValues: {
-        'Test/PID Controller/p': 0.0,
-        'Test/PID Controller/i': 0.0,
-        'Test/PID Controller/d': 0.0,
-        'Test/PID Controller/setpoint': 0.0,
+        'Test/Profiled PID Controller/p': 0.0,
+        'Test/Profiled PID Controller/i': 0.0,
+        'Test/Profiled PID Controller/d': 0.0,
+        'Test/Profiled PID Controller/goal': 0.0,
       },
     );
   });
 
   test('PID controller from json', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel profiledPIDControllerModel =
+        NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'PIDController',
-      pidControllerJson,
+      'ProfiledPIDController',
+      profiledPIDControllerJson,
     );
 
-    expect(pidControllerModel.type, 'PIDController');
-    expect(pidControllerModel.runtimeType, PIDControllerModel);
+    expect(profiledPIDControllerModel.type, 'ProfiledPIDController');
+    expect(profiledPIDControllerModel.runtimeType, ProfiledPIDControllerModel);
   });
 
-  test('PID controller from alias name', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'PID Controller',
-      pidControllerJson,
-    );
-
-    expect(pidControllerModel.type, 'PIDController');
-    expect(pidControllerModel.runtimeType, PIDControllerModel);
-  });
-
-  test('PID controller to json', () {
-    PIDControllerModel pidControllerModel = PIDControllerModel(
+  test('Profiled PID controller to json', () {
+    ProfiledPIDControllerModel profiledPIDControllerModel =
+        ProfiledPIDControllerModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/PID Controller',
+      topic: 'Test/Profiled PID Controller',
       period: 0.100,
     );
 
-    expect(pidControllerModel.toJson(), pidControllerJson);
+    expect(profiledPIDControllerModel.toJson(), profiledPIDControllerJson);
   });
 
-  testWidgets('PID controller widget test', (widgetTester) async {
+  testWidgets('Profiled PID controller widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel profiledPIDControllerModel =
+        NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'PIDController',
-      pidControllerJson,
+      'ProfiledPIDController',
+      profiledPIDControllerJson,
     );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: pidControllerModel,
-            child: const PIDControllerWidget(),
+            value: profiledPIDControllerModel,
+            child: const ProfiledPIDControllerWidget(),
           ),
         ),
       ),
@@ -120,31 +111,35 @@ void main() {
     expect(find.widgetWithText(TextField, 'kP'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'kI'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'kD'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Setpoint'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Goal'), findsOneWidget);
 
     await widgetTester.enterText(find.widgetWithText(TextField, 'kP'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/p'), 0.0);
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
+        0.0);
 
     await widgetTester.enterText(find.widgetWithText(TextField, 'kI'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/i'), 0.0);
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
+        0.0);
 
     await widgetTester.enterText(find.widgetWithText(TextField, 'kD'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.0);
-
-    await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Setpoint'), '0.100');
-    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
-
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
         0.0);
 
-    pidControllerModel.refresh();
+    await widgetTester.enterText(
+        find.widgetWithText(TextField, 'Goal'), '0.100');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+
+    expect(
+        ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
+        0.0);
+
+    profiledPIDControllerModel.refresh();
     await widgetTester.pumpAndSettle();
 
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
@@ -154,13 +149,17 @@ void main() {
     await widgetTester
         .tap(find.widgetWithText(OutlinedButton, 'Publish Values'));
 
-    pidControllerModel.refresh();
+    profiledPIDControllerModel.refresh();
     await widgetTester.pumpAndSettle();
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/p'), 0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/i'), 0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
+        0.1);
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
+        0.1);
+    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
+        0.1);
+    expect(
+        ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
         0.1);
 
     expect(find.byIcon(Icons.priority_high), findsNothing);

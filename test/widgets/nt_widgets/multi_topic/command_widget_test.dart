@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,17 +10,17 @@ import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/gyro.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/command_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Map<String, dynamic> gyroJson = {
-    'topic': 'Test/Gyro',
+  final Map<String, dynamic> commandWidgetJson = {
+    'topic': 'Test/Command',
     'period': 0.100,
-    'counter_clockwise_positive': true,
+    'show_type': true,
   };
 
   late SharedPreferences preferences;
@@ -34,63 +33,69 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-          name: 'Test/Gyro/Value',
-          type: NT4TypeStr.kFloat32,
+          name: 'Test/Command/running',
+          type: NT4TypeStr.kBool,
+          properties: {},
+        ),
+        NT4Topic(
+          name: 'Test/Command/name',
+          type: NT4TypeStr.kString,
           properties: {},
         ),
       ],
       virtualValues: {
-        'Test/Gyro/Value': 183.5,
+        'Test/Commnad/running': false,
+        'Test/Command/name': 'Test Command',
       },
     );
   });
 
-  test('Gyro from json', () {
-    NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
+  test('Command widget from json', () {
+    NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Gyro',
-      gyroJson,
+      'Command',
+      commandWidgetJson,
     );
 
-    expect(gyroModel.type, 'Gyro');
-    expect(gyroModel.runtimeType, GyroModel);
+    expect(commandModel.type, 'Command');
+    expect(commandModel.runtimeType, CommandModel);
 
-    if (gyroModel is! GyroModel) {
+    if (commandModel is! CommandModel) {
       return;
     }
 
-    expect(gyroModel.counterClockwisePositive, isTrue);
+    expect(commandModel.showType, isTrue);
   });
 
-  test('Gyro to json', () {
-    GyroModel gyroModel = GyroModel(
+  test('Command widget to json', () {
+    CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/Gyro',
+      topic: 'Test/Command',
       period: 0.100,
-      counterClockwisePositive: true,
+      showType: true,
     );
 
-    expect(gyroModel.toJson(), gyroJson);
+    expect(commandModel.toJson(), commandWidgetJson);
   });
 
-  testWidgets('Gyro widget', (widgetTester) async {
+  testWidgets('Command widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      'Gyro',
-      gyroJson,
+      'Command',
+      commandWidgetJson,
     );
 
     await widgetTester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ChangeNotifierProvider<NTWidgetModel>.value(
-            value: gyroModel,
-            child: const Gyro(),
+            value: commandModel,
+            child: const CommandWidget(),
           ),
         ),
       ),
@@ -98,27 +103,45 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('176.50'), findsOneWidget);
-    expect(find.byType(RadialGauge), findsOneWidget);
+    expect(find.text('Command'), findsOneWidget);
+    expect(find.text('Type: Test Command'), findsOneWidget);
+
+    await widgetTester.tap(find.text('Command'));
+    await widgetTester.pumpAndSettle();
+
+    expect(ntConnection.getLastAnnouncedValue('Test/Command/running'), isTrue);
+
+    commandModel.refresh();
+    await widgetTester.pumpAndSettle();
+
+    await widgetTester.tap(find.text('Command'));
+    await widgetTester.pumpAndSettle();
+
+    expect(ntConnection.getLastAnnouncedValue('Test/Command/running'), isFalse);
+
+    (commandModel as CommandModel).showType = false;
+    await widgetTester.pumpAndSettle();
+
+    expect(find.text('Type: Test Command'), findsNothing);
   });
 
-  testWidgets('Gyro widget edit properties', (widgetTester) async {
+  testWidgets('Command widget edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    GyroModel gyroModel = GyroModel(
+    CommandModel commandModel = CommandModel(
       ntConnection: ntConnection,
       preferences: preferences,
-      topic: 'Test/Gyro',
+      topic: 'Test/Command',
       period: 0.100,
-      counterClockwisePositive: true,
+      showType: true,
     );
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
       preferences: preferences,
       initialPosition: Rect.zero,
-      title: 'Gyro',
-      childModel: gyroModel,
+      title: 'Command',
+      childModel: commandModel,
     );
 
     final key = GlobalKey();
@@ -141,27 +164,27 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ccwPositive =
-        find.widgetWithText(DialogToggleSwitch, 'Counter Clockwise Positive');
+    final showType =
+        find.widgetWithText(DialogToggleSwitch, 'Show Command Type');
 
-    expect(ccwPositive, findsOneWidget);
+    expect(showType, findsOneWidget);
 
     await widgetTester.tap(
       find.descendant(
-        of: ccwPositive,
+        of: showType,
         matching: find.byType(Switch),
       ),
     );
     await widgetTester.pumpAndSettle();
-    expect(gyroModel.counterClockwisePositive, false);
+    expect(commandModel.showType, false);
 
     await widgetTester.tap(
       find.descendant(
-        of: ccwPositive,
+        of: showType,
         matching: find.byType(Switch),
       ),
     );
     await widgetTester.pumpAndSettle();
-    expect(gyroModel.counterClockwisePositive, true);
+    expect(commandModel.showType, true);
   });
 }
