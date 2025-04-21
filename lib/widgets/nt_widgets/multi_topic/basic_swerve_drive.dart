@@ -9,7 +9,7 @@ import 'package:vector_math/vector_math_64.dart' show radians;
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/struct_schemas/swerve_module_state_struct.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/struct_swerve.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/struct_swerve.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class BasicSwerveModel extends MultiTopicNTWidgetModel {
