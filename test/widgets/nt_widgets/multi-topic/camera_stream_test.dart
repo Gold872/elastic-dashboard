@@ -10,7 +10,7 @@ import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
-import 'package:elastic_dashboard/widgets/nt_widgets/multi-topic/camera_stream.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
 
