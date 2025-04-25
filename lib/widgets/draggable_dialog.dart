@@ -23,13 +23,20 @@ class _DraggableDialogState extends State<DraggableDialog> {
   Widget build(BuildContext context) {
     return TransformableBox(
       constraints: const BoxConstraints(
-          minWidth: 300,
-          minHeight: 400,
-          maxWidth: double.infinity,
-          maxHeight: double.infinity),
+        minWidth: 300,
+        minHeight: 400,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+      ),
       clampingRect: const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
       allowFlippingWhileResizing: false,
       visibleHandles: const {},
+      // supportedDragDevices: PointerDeviceKind.values
+      //     .whereNot((e) => e == PointerDeviceKind.trackpad)
+      //     .toSet(),
+      // supportedResizeDevices: PointerDeviceKind.values
+      //     .whereNot((e) => e == PointerDeviceKind.trackpad)
+      //     .toSet(),
       resizeModeResolver: () => ResizeMode.freeform,
       rect: position,
       onChanged: (result, event) {

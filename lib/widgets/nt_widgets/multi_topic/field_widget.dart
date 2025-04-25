@@ -186,7 +186,9 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
     _fieldRotation = tryCast(jsonData['field_rotation']) ?? 0.0;
 
-    _robotColor = Color(tryCast(jsonData['robot_color']) ?? Colors.red.value);
+    _robotColor = Color(
+      tryCast(jsonData['robot_color']) ?? Colors.red.value,
+    );
     _trajectoryColor =
         Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.value);
 
@@ -533,7 +535,7 @@ class FieldWidget extends NTWidget {
         minHeight: 4.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.35),
+        color: Colors.black.withAlpha(90),
         border: Border.all(
           color: model.robotColor,
           width: 0.125 * min(width, length),

@@ -37,6 +37,8 @@ class NTConnection {
   Map<int, NT4Subscription> subscriptionMap = {};
   Map<NT4Subscription, int> subscriptionUseCount = {};
 
+  Map<String, String> knownSchemas = {};
+
   NTConnection(String ipAddress) {
     nt4Connect(ipAddress);
   }

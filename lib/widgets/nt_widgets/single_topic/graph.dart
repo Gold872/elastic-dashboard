@@ -90,7 +90,8 @@ class GraphModel extends SingleTopicNTWidgetModel {
         5.0;
     _minValue = tryCast(jsonData['min_value']);
     _maxValue = tryCast(jsonData['max_value']);
-    _mainColor = Color(tryCast(jsonData['color']) ?? Colors.cyan.value);
+    _mainColor =
+        Color(tryCast(jsonData['color']) ?? Colors.cyan.shade500.value);
     _lineWidth = tryCast(jsonData['line_width']) ?? 2.0;
   }
 
@@ -285,7 +286,10 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
       // which according to the second law of thermodynamics is literally impossible. In summary, this
       // won't be causing issues unless if the user finds a way of violating the laws of thermodynamics,
       // or for some reason they change their time on their device
-      _graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+      _graphData.add(_GraphPoint(
+        x: 0,
+        y: tryCast(widget.subscription?.value) ?? widget.minValue ?? 0.0,
+      ));
     } else if (_graphData.length > 1) {
       _graphData.removeLast();
     }
@@ -343,7 +347,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         int indexOffset = 0;
 
         while (currentTime - _graphData[0].x > widget.timeDisplayed * 1e6 &&
-            _graphData.length > 1) {
+            _graphData.length > 2) {
           _graphData.removeAt(0);
           removedIndexes.add(indexOffset++);
         }
