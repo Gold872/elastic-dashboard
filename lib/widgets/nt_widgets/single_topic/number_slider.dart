@@ -183,7 +183,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
       ntConnection.publishTopic(ntTopic!);
     }
 
-    if (dataType == NT4TypeStr.kInt) {
+    if (dataType == NT4Type.int()) {
       ntConnection.updateDataFromTopic(ntTopic!, value.round());
     } else {
       ntConnection.updateDataFromTopic(ntTopic!, value);
@@ -219,7 +219,7 @@ class NumberSlider extends NTWidget {
         double divisionSeparation =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return Column(
           children: [
@@ -254,7 +254,7 @@ class NumberSlider extends NTWidget {
                       model.dragging.value = true;
                     },
                     onChanged: (value) {
-                      if (model.dataType == NT4TypeStr.kInt) {
+                      if (model.dataType == NT4Type.int()) {
                         model.displayValue.value = value.roundToDouble();
                       } else {
                         model.displayValue.value = value;

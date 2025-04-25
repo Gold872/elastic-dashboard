@@ -34,7 +34,8 @@ class Log {
         if (kReleaseMode) FileOutput(file: logFile),
       ]),
       filter: ProductionFilter(),
-      level: Level.info,
+      // check if in production mode
+      level: kReleaseMode ? Level.info : Level.trace,
     );
   }
 

@@ -131,11 +131,11 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   Field get field => _field;
 
   bool isPoseStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d';
+    return ntConnection.getTopicFromName(topic)?.type.name == 'Pose2d';
   }
 
   bool isPoseArrayStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d[]';
+    return ntConnection.getTopicFromName(topic)?.type.name == 'Pose2d[]';
   }
 
   FieldWidgetModel({
