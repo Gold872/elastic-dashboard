@@ -22,7 +22,7 @@ void main() {
 
   final Map<String, dynamic> numberBarJson = {
     'topic': 'Test/Double Value',
-    'data_type': NT4Type.double(),
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
