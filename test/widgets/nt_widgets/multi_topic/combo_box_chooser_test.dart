@@ -35,24 +35,24 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Combo Box Chooser/options',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Combo Box Chooser/active',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Combo Box Chooser/selected',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {
             'retained': true,
           },
         ),
         NT4Topic(
           name: 'Test/Combo Box Chooser/default',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -69,6 +69,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ComboBox Chooser',
       comboBoxChooserJson,
     );
@@ -87,6 +88,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'String Chooser',
       comboBoxChooserJson,
     );
@@ -119,6 +121,7 @@ void main() {
     NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'ComboBox Chooser',
       comboBoxChooserJson,
     );

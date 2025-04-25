@@ -35,7 +35,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Gyro/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -49,6 +49,7 @@ void main() {
     NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Gyro',
       gyroJson,
     );
@@ -81,6 +82,7 @@ void main() {
     NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Gyro',
       gyroJson,
     );

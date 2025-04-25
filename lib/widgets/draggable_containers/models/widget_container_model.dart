@@ -335,8 +335,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
         child: Container(
           decoration: BoxDecoration(
             color: (validLocation)
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.1),
+                ? Colors.white.withAlpha(64)
+                : Colors.black.withAlpha(26),
             borderRadius: BorderRadius.circular(
                 preferences.getDouble(PrefKeys.cornerRadius) ??
                     Defaults.cornerRadius),

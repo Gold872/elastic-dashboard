@@ -61,6 +61,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     double minValue = 4.0,
     double maxValue = 13.0,
     int divisions = 5,
@@ -77,6 +78,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
 
   VoltageViewModel.fromJson({
     required super.ntConnection,
+    required super.ntStructMeta,
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
@@ -218,7 +220,8 @@ class VoltageView extends NTWidget {
         double? divisionInterval =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits =
+            (model.dataType?.fragment == NT4TypeFragment.int32) ? 0 : 2;
 
         GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
             ? GaugeOrientation.vertical

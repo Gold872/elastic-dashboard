@@ -196,7 +196,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
-        NT4TypeStr.kString,
+        NT4Type.string(),
         properties: {
           'retained': true,
         },

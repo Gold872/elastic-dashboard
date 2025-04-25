@@ -30,22 +30,22 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/PID Controller/p',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/i',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/d',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/setpoint',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -62,6 +62,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PIDController',
       pidControllerJson,
     );
@@ -74,6 +75,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PID Controller',
       pidControllerJson,
     );
@@ -99,6 +101,7 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'PIDController',
       pidControllerJson,
     );

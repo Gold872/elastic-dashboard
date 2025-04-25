@@ -47,7 +47,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -61,6 +61,7 @@ void main() {
     NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     );
@@ -94,8 +95,9 @@ void main() {
     MatchTimeModel matchTimeModel = MatchTimeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       timeDisplayMode: 'Minutes and Seconds',
       redStartTime: 15,
@@ -111,6 +113,7 @@ void main() {
     NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     );
@@ -166,6 +169,7 @@ void main() {
     MatchTimeModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Match Time',
       matchTimeJson,
     ) as MatchTimeModel;

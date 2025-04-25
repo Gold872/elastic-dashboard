@@ -17,6 +17,8 @@ env:
 
 jobs:
   formatting-analysis:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     name: "Check Formatting & Analyze"
     runs-on: ubuntu-22.04
 
@@ -46,6 +48,8 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos
   test:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     name: "Run Tests"
     runs-on: ubuntu-22.04
 
@@ -107,7 +111,6 @@ jobs:
             artifact-name: Elastic-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
-    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -195,6 +198,8 @@ jobs:
           if-no-files-found: error
 
   build-wpilib:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -213,7 +218,6 @@ jobs:
             artifact-name: Elastic-WPILib-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
-    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
