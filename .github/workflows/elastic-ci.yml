@@ -111,7 +111,6 @@ jobs:
             artifact-name: Elastic-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
-    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -199,6 +198,8 @@ jobs:
           if-no-files-found: error
 
   build-wpilib:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -217,7 +218,6 @@ jobs:
             artifact-name: Elastic-WPILib-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
-    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
