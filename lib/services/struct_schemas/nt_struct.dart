@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:dot_cast/dot_cast.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
 
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
