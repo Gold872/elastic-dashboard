@@ -21,7 +21,7 @@ void main() {
 
   final Map<String, dynamic> radialGaugeJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'start_angle': -140.0,
     'end_angle': 140.0,
@@ -44,7 +44,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -137,7 +137,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -160,7 +160,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -197,7 +197,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
       ],
@@ -211,7 +211,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -250,7 +250,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -288,7 +288,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,

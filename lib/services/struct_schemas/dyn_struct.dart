@@ -125,7 +125,7 @@ class DynamicStructSchema {
       String name, Map<String, String> schemas) {
     try {
       return _parseSchema(name, schemas);
-    } catch (_e) {
+    } catch (ignored) {
       return [];
     }
   }

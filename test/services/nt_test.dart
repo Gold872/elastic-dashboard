@@ -27,7 +27,7 @@ void main() {
     ntConnection.updateDataFromTopic(
         NT4Topic(
             name: '/SmartDashboard/Test Number',
-            type: NT4TypeStr.kFloat32,
+            type: NT4Type.float(),
             properties: {}),
         3.53);
 

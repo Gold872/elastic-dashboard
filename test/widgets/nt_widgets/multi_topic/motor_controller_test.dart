@@ -31,7 +31,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Motor Controller/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],

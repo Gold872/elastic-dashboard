@@ -43,7 +43,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/String Array',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
       ],
@@ -87,7 +87,7 @@ void main() {
       ntStructMeta: null,
       type: 'Multi Color View',
       topic: 'Test/String Array',
-      dataType: 'string[]',
+      dataType: NT4Type.array(NT4Type.string()),
       period: 0.100,
     );
 
@@ -139,7 +139,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],
@@ -184,7 +184,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],

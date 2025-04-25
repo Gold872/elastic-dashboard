@@ -59,32 +59,32 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/FMSInfo/EventName',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/FMSControlData',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/IsRedAlliance',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/MatchNumber',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/MatchType',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/ReplayNumber',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
       ],

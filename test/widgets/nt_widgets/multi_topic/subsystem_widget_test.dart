@@ -30,12 +30,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Subsystem/.default',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Subsystem/.command',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],

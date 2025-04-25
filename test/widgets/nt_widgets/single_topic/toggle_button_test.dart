@@ -31,7 +31,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Boolean Value',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
       ],
@@ -71,7 +71,7 @@ void main() {
       ntStructMeta: null,
       type: 'Toggle Button',
       topic: 'Test/Boolean Value',
-      dataType: 'boolean',
+      dataType: NT4Type.boolean(),
       period: 0.100,
     );
 
