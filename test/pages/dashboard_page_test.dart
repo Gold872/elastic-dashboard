@@ -458,22 +458,22 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Non-Registered/.type',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 1',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 2',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 3',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
           ],
@@ -1004,7 +1004,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Elastic/SelectedTab',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
@@ -1043,7 +1043,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Elastic/SelectedTab',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
@@ -1668,7 +1668,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: '/Elastic/RobotNotifications',
-            type: NT4TypeStr.kString,
+            type: NT4Type.string(),
             properties: {},
           )
         ],

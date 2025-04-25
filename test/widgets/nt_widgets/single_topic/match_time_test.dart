@@ -47,7 +47,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -97,7 +97,7 @@ void main() {
       preferences: preferences,
       ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       timeDisplayMode: 'Minutes and Seconds',
       redStartTime: 15,

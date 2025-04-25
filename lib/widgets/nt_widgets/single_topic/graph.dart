@@ -91,7 +91,7 @@ class GraphModel extends SingleTopicNTWidgetModel {
     _minValue = tryCast(jsonData['min_value']);
     _maxValue = tryCast(jsonData['max_value']);
     _mainColor =
-        Color(tryCast(jsonData['color']) ?? Colors.cyan.shade500.value);
+        Color(tryCast(jsonData['color']) ?? Colors.cyan.shade500.toARGB32());
     _lineWidth = tryCast(jsonData['line_width']) ?? 2.0;
   }
 
@@ -102,7 +102,7 @@ class GraphModel extends SingleTopicNTWidgetModel {
       'time_displayed': _timeDisplayed,
       if (_minValue != null) 'min_value': _minValue,
       if (_maxValue != null) 'max_value': _maxValue,
-      'color': _mainColor.value,
+      'color': _mainColor.toARGB32(),
       'line_width': _lineWidth,
     };
   }
