@@ -399,17 +399,17 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Non-Typed/Value 1',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Typed/Value 2',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Typed/Value 3',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
           ],

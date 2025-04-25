@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -118,32 +119,29 @@ class NetworkTableTreeRow {
       NTConnection ntConnection,
       SharedPreferences preferences,
       TreeTopicEntry entry) {
-    switch (entry.type()) {
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kIntArr:
-      case NT4TypeStr.kString:
-      case NT4TypeStr.kStringArr:
-        return TextDisplayModel(
-          ntConnection: ntConnection,
-          preferences: preferences,
-          topic: entry.topic.name,
-          dataType: entry.type(),
-          ntStructMeta: entry.meta,
-        );
-      case NT4TypeStr.kBool:
-        return BooleanBoxModel(
-          ntConnection: ntConnection,
-          preferences: preferences,
-          topic: entry.topic.name,
-          dataType: entry.type(),
-          ntStructMeta: entry.meta,
-        );
+    NT4Type checked = entry.type().nonNullable;
+
+    logger.info(
+        'meta: ${entry.meta}, name: ${entry.topic.name}, topic.type: ${entry.topic.type}');
+
+    if (checked.fragment == NT4TypeFragment.boolean) {
+      return BooleanBoxModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: entry.topic.name,
+        dataType: entry.type(),
+        ntStructMeta: entry.meta,
+      );
+    } else if (checked.isViewable) {
+      return TextDisplayModel(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: entry.topic.name,
+        dataType: entry.type(),
+        ntStructMeta: entry.meta,
+      );
     }
+
     return null;
   }
 

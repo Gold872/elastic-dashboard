@@ -54,7 +54,7 @@ typedef NTModelJsonProvider = NTWidgetModel Function({
 });
 
 typedef NTModelProvider = NTWidgetModel Function({
-  String dataType,
+  NT4Type? dataType,
   double period,
   NT4StructMeta? ntStructMeta,
   required NTConnection ntConnection,
@@ -383,7 +383,7 @@ class NTWidgetBuilder {
     NT4StructMeta? ntStructMeta,
     String type,
     String topic, {
-    String dataType = 'Unknown',
+    NT4Type? dataType,
     double? period,
   }) {
     period ??=
@@ -440,7 +440,7 @@ class NTWidgetBuilder {
       ntStructMeta: ntStructMeta,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
-      dataType: tryCast(jsonData['data_type']) ?? 'Unknown',
+      dataType: tryCast(jsonData['data_type']),
       period: tryCast(jsonData['period']),
     );
   }
@@ -517,7 +517,7 @@ class NTWidgetBuilder {
       WidgetType extends NTWidget>({
     required String name,
     required SingleTopicNTWidgetModel Function({
-      String dataType,
+      NT4Type? dataType,
       double period,
       required NT4StructMeta? ntStructMeta,
       required NTConnection ntConnection,
@@ -540,7 +540,7 @@ class NTWidgetBuilder {
     registerWithAlias(
         names: {name, ...?aliases},
         model: ({
-          String? dataType,
+          NT4Type? dataType,
           double? period,
           NT4StructMeta? ntStructMeta,
           required NTConnection ntConnection,
@@ -548,7 +548,7 @@ class NTWidgetBuilder {
           required String topic,
         }) =>
             model(
-              dataType: dataType ?? 'Unknown',
+              dataType: dataType,
               period: period ??
                   (preferences.getDouble(PrefKeys.defaultPeriod) ??
                       Defaults.defaultPeriod),
@@ -576,7 +576,7 @@ class NTWidgetBuilder {
       WidgetType extends NTWidget>({
     required String name,
     required MultiTopicNTWidgetModel Function({
-      String dataType,
+      NT4Type? dataType,
       double period,
       required NTConnection ntConnection,
       required SharedPreferences preferences,
@@ -597,7 +597,7 @@ class NTWidgetBuilder {
     registerWithAlias(
         names: {name, ...?aliases},
         model: ({
-          String? dataType,
+          NT4Type? dataType,
           double? period,
           NT4StructMeta? ntStructMeta,
           required NTConnection ntConnection,
@@ -605,7 +605,7 @@ class NTWidgetBuilder {
           required String topic,
         }) =>
             model(
-              dataType: dataType ?? 'Unknown',
+              dataType: dataType,
               period: period ??
                   (preferences.getDouble(PrefKeys.defaultPeriod) ??
                       Defaults.defaultPeriod),

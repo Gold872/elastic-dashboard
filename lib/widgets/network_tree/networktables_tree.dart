@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/struct_schemas/dyn_struct.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -190,17 +190,17 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   List<TreeTopicEntry> parseStruct(
     NT4Topic topic,
-    DynamicStructSchema schema,
-    DynamicStructSchema root,
+    NTStructSchema schema,
+    NTStructSchema root,
     List<String> structPath,
   ) {
     List<TreeTopicEntry> topics = [];
 
-    for (DynamicStructField field in schema.fields) {
+    for (NTFieldSchema field in schema.fields) {
       topics.add(TreeTopicEntry(
           topic: topic,
           meta: NT4StructMeta(
-            path: [...List.of(structPath), field.name],
+            path: [...List.of(structPath), field.field],
             schema: root,
           )));
       if (field.substruct != null) {
@@ -208,7 +208,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           topic,
           field.substruct!,
           root,
-          [...List.of(structPath), field.name],
+          [...List.of(structPath), field.field],
         ));
       }
     }
@@ -227,13 +227,13 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
       topics.add(TreeTopicEntry(topic: topic));
 
-      if (topic.type.startsWith("struct:") && !topic.type.endsWith("[]")) {
-        DynamicStructSchema schema = DynamicStructSchema(
-          type: topic.type.split("?")[0],
-          schemas: widget.ntConnection.knownSchemas,
-        );
+      if (topic.type.nonNullable.isStruct) {
+        NTStructSchema? schema =
+            SchemaInfo.getInstance().getSchema(topic.type.nonNullable.name!);
 
-        topics.addAll(parseStruct(topic, schema, schema, []));
+        if (schema != null) {
+          topics.addAll(parseStruct(topic, schema, schema, []));
+        }
       }
     }
 
@@ -281,7 +281,7 @@ class TreeTopicEntry {
     return 'TreeTopicEntry{topic: $topicData, meta: $meta}';
   }
 
-  String type() {
+  NT4Type type() {
     return meta?.type ?? topic.type;
   }
 }
@@ -426,7 +426,7 @@ class _TreeTileState extends State<TreeTile> {
                           : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
                       trailing: (widget.entry.node.entry != null)
-                          ? Text(widget.entry.node.entry!.type(),
+                          ? Text(widget.entry.node.entry!.type().serialize(),
                               style: trailingStyle)
                           : null,
                     ),

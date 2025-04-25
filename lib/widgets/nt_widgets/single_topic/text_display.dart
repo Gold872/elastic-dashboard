@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/material.dart';
 
 import 'package:decimal/decimal.dart';
@@ -89,47 +88,8 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
       return;
     }
 
-    late Object? formattedData;
-
-    String dataType = super.ntStructMeta?.type ?? ntTopic!.type;
-    switch (dataType) {
-      case NT4TypeStr.kBool:
-        formattedData = bool.tryParse(value);
-        break;
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kFloat64:
-        formattedData = double.tryParse(value);
-        break;
-      case NT4TypeStr.kInt:
-        formattedData = int.tryParse(value);
-        break;
-      case NT4TypeStr.kString:
-        formattedData = value;
-        break;
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kFloat64Arr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
-        break;
-      case NT4TypeStr.kIntArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
-        break;
-      case NT4TypeStr.kBoolArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<bool>()
-            .toList();
-        break;
-      case NT4TypeStr.kStringArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<String>()
-            .toList();
-        break;
-      default:
-        break;
-    }
+    NT4Type dataType = super.ntStructMeta?.type ?? ntTopic!.type;
+    Object? formattedData = dataType.parseStr(value);
 
     if (publishTopic) {
       ntConnection.publishTopic(ntTopic!);

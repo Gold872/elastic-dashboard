@@ -316,7 +316,7 @@ class RadialGaugeWidget extends NTWidget {
 
         value = value.clamp(model.minValue, model.maxValue);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return LayoutBuilder(
           builder: (context, constraints) {
