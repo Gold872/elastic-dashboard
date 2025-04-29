@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../../dialog_widgets/dialog_color_picker.dart';
+
 class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   String type = CameraStreamWidget.widgetType;
@@ -32,6 +34,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   double _crosshairWidth = 15;
   double _crosshairHeight = 15;
   double _crosshairThickness = 2;
+  Color _crosshairColor = Colors.red;
 
   bool get crosshairEnabled => _crosshairEnabled;
 
@@ -106,22 +109,26 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     int? fps,
     Size? resolution,
     int rotation = 0,
+    bool crosshairEnabled = false,
     double crosshairWidth = 50,
     double crosshairHeight = 50,
     double crosshairThickness = 2,
     double crosshairX = 0,
     double crosshairY = 0,
+    Color crosshairColor = Colors.red,
     super.dataType,
     super.period,
   })  : _quality = compression,
         _fps = fps,
         _resolution = resolution,
         _rotationTurns = rotation,
+        _crosshairEnabled = crosshairEnabled,
         _crosshairWidth = crosshairWidth,
         _crosshairHeight = crosshairHeight,
         _crosshairThickness = crosshairThickness,
         _crosshairX = crosshairX,
         _crosshairY = crosshairY,
+        _crosshairColor = crosshairColor,
         super();
 
   CameraStreamModel.fromJson({
@@ -131,6 +138,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
+    _crosshairEnabled = tryCast(jsonData['crosshair_enabled']) ?? false;
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
     _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 15;
     _crosshairHeight = tryCast(jsonData['crosshair_height']) ?? 15;
@@ -175,6 +183,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     return {
       ...super.toJson(),
       'rotation_turns': rotationTurns,
+      'crosshair_enabled': crosshairEnabled,
       'crosshair_width': crosshairWidth,
       'crosshair_height': crosshairWidth,
       'crosshair_thickness': crosshairThickness,
@@ -476,7 +485,20 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                     ),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 10),
+
+              DialogColorPicker(
+                onColorPicked: (color) => setState(
+                  () => setState(
+                    () => _crosshairColor = color,
+                  ),
+                ),
+                label: 'Crosshair Color',
+                initialColor: _crosshairColor,
+                defaultColor: Colors.red,
+                rowSize: MainAxisSize.max,
+              ),
             ],
           );
         },
@@ -617,7 +639,7 @@ class CameraStreamWidget extends NTWidget {
                       crosshairX: model._crosshairX,
                       crosshairY: model._crosshairY,
                       crosshairEnabled: model._crosshairEnabled,
-                      crosshairColor: Colors.blue,
+                      crosshairColor: model._crosshairColor,
                     ),
                   ],
                 ),
