@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-import 'package:http/http.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -23,6 +21,15 @@ class Mjpeg extends StatefulWidget {
   final int quarterTurns;
   final double? width;
   final double? height;
+
+  //Crosshair settings
+  final double? crosshairWidth;
+  final double? crosshairHeight;
+  final double? crosshairThickness;
+  final double? crosshairX;
+  final double? crosshairY;
+  final Color? crosshairColor;
+
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
       error;
@@ -36,6 +43,12 @@ class Mjpeg extends StatefulWidget {
     this.quarterTurns = 0,
     this.error,
     this.loading,
+    this.crosshairWidth,
+    this.crosshairHeight,
+    this.crosshairThickness,
+    this.crosshairX,
+    this.crosshairY,
+    this.crosshairColor,
     super.key,
   });
 
@@ -150,13 +163,26 @@ class _MjpegState extends State<Mjpeg> {
 
             return RotatedBox(
               quarterTurns: widget.quarterTurns,
-              child: Image.memory(
-                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-                width: widget.width,
-                height: widget.height,
-                gaplessPlayback: true,
-                fit: widget.fit,
-                scale: (widget.expandToFit) ? 1e-6 : 1.0,
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    foregroundPainter: CrosshairPainter(
+                        widget.crosshairWidth!,
+                        widget.crosshairHeight!,
+                        widget.crosshairThickness!,
+                        widget.crosshairX!,
+                        widget.crosshairY!),
+                    child: Image.memory(
+                      Uint8List.fromList(
+                          snapshot.data ?? controller.previousImage!),
+                      width: widget.width,
+                      height: widget.height,
+                      gaplessPlayback: true,
+                      fit: widget.fit,
+                      scale: (widget.expandToFit) ? 1e-6 : 1.0,
+                    ),
+                  )
+                ],
               ),
             );
           }),
@@ -456,5 +482,41 @@ class MjpegController extends ChangeNotifier {
         }
       }
     }
+  }
+}
+
+class CrosshairPainter extends CustomPainter {
+  final double? crosshairWidth;
+  final double? crosshairHeight;
+  final double? crosshairThickness;
+  final double? crosshairX;
+  final double? crosshairY;
+
+  CrosshairPainter(this.crosshairWidth, this.crosshairHeight,
+      this.crosshairThickness, this.crosshairX, this.crosshairY);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var width = size.width / 250;
+    var height = size.height / 250;
+    var offsetX = (crosshairX! + crosshairWidth! / 2) * width;
+    var offsetY = (crosshairY! + crosshairHeight! / 2) * width;
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(offsetX, offsetY),
+            width: crosshairWidth! * width,
+            height: crosshairThickness! * height),
+        Paint()..color = Colors.red);
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(offsetX, offsetY),
+            width: crosshairThickness! * height,
+            height: crosshairHeight! * width),
+        Paint()..color = Colors.red);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

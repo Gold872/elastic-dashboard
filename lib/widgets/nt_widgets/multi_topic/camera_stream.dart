@@ -1,15 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:provider/provider.dart';
-
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
@@ -27,8 +25,35 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   Size? _resolution;
   int _rotationTurns = 0;
 
+  double _crosshairX = 50;
+  double _crosshairY = 50;
+  double _crosshairWidth = 15;
+  double _crosshairHeight = 15;
+  double _crosshairThickness = 2;
+
+  double get crosshairX => _crosshairX;
+
+  set crosshairX(double value) {
+    _crosshairX = value;
+  }
+
   MjpegController? controller;
 
+  double get crosshairY => _crosshairY;
+
+  set crosshairY(double value) => _crosshairY = value;
+
+  double get crosshairWidth => _crosshairWidth;
+
+  set crosshairWidth(double value) => _crosshairWidth = value;
+
+  double get crosshairHeight => _crosshairHeight;
+
+  set crosshairHeight(double value) => _crosshairHeight = value;
+
+  double get crosshairThickness => _crosshairThickness;
+
+  set crosshairThickness(double value) => _crosshairThickness = value;
   int? get quality => _quality;
 
   set quality(value) => _quality = value;
@@ -75,12 +100,22 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     int? fps,
     Size? resolution,
     int rotation = 0,
+    double crosshairWidth = 50,
+    double crosshairHeight = 50,
+    double crosshairThickness = 2,
+    double crosshairX = 0,
+    double crosshairY = 0,
     super.dataType,
     super.period,
   })  : _quality = compression,
         _fps = fps,
         _resolution = resolution,
         _rotationTurns = rotation,
+        _crosshairWidth = crosshairWidth,
+        _crosshairHeight = crosshairHeight,
+        _crosshairThickness = crosshairThickness,
+        _crosshairX = crosshairX,
+        _crosshairY = crosshairY,
         super();
 
   CameraStreamModel.fromJson({
@@ -91,6 +126,11 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _quality = tryCast(jsonData['compression']);
     _fps = tryCast(jsonData['fps']);
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
+    _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 15;
+    _crosshairHeight = tryCast(jsonData['crosshair_height']) ?? 15;
+    _crosshairThickness = tryCast(jsonData['crosshair_thickness']) ?? 2;
+    _crosshairX = tryCast(jsonData['crosshair_x']) ?? 0;
+    _crosshairY = tryCast(jsonData['crosshair_y']) ?? 0;
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
         ?.whereType<num>()
@@ -129,6 +169,11 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     return {
       ...super.toJson(),
       'rotation_turns': rotationTurns,
+      'crosshair_width': crosshairWidth,
+      'crosshair_height': crosshairWidth,
+      'crosshair_thickness': crosshairThickness,
+      'crosshair_x': crosshairX,
+      'crosshair_y': crosshairY,
       if (quality != null) 'compression': quality,
       if (fps != null) 'fps': fps,
       if (resolution != null)
@@ -301,6 +346,35 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
           ),
         ],
       ),
+      const SizedBox(height: 5),
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Row(
+            children: [
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: "$crosshairWidth",
+                  label: 'Width',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    double? newWidth = double.tryParse(value);
+
+                    setState(() {
+                      if (newWidth! < 0) {
+                        crosshairWidth = 0;
+                        return;
+                      }
+
+                      crosshairWidth = newWidth;
+                    });
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      )
     ];
   }
 
@@ -424,11 +498,21 @@ class CameraStreamWidget extends NTWidget {
                 ],
               ),
               Flexible(
-                child: Mjpeg(
-                  controller: model.controller!,
-                  fit: BoxFit.contain,
-                  expandToFit: true,
-                  quarterTurns: model.rotationTurns,
+                child: Stack(
+                  children: [
+                    Mjpeg(
+                      controller: model.controller!,
+                      fit: BoxFit.contain,
+                      expandToFit: true,
+                      quarterTurns: model.rotationTurns,
+                      crosshairHeight: model._crosshairHeight,
+                      crosshairThickness: model._crosshairThickness,
+                      crosshairWidth: model._crosshairWidth,
+                      crosshairX: model._crosshairX,
+                      crosshairY: model._crosshairY,
+                      crosshairColor: Colors.blue,
+                    ),
+                  ],
                 ),
               ),
               const Text(''),
