@@ -175,7 +175,7 @@ class _MjpegState extends State<Mjpeg> {
                         widget.crosshairX!,
                       widget.crosshairY!,
                       widget.crosshairEnabled,
-                    ),
+                        widget.crosshairColor),
                     child: Image.memory(
                       Uint8List.fromList(
                           snapshot.data ?? controller.previousImage!),
@@ -496,9 +496,14 @@ class CrosshairPainter extends CustomPainter {
   final double? crosshairThickness;
   final double? crosshairX;
   final double? crosshairY;
+  final Color? crosshairColor;
 
   CrosshairPainter(this.crosshairWidth, this.crosshairHeight,
-      this.crosshairThickness, this.crosshairX, this.crosshairY, this.enabled);
+      this.crosshairThickness,
+      this.crosshairX,
+      this.crosshairY,
+      this.enabled,
+      this.crosshairColor);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -512,13 +517,13 @@ class CrosshairPainter extends CustomPainter {
             center: Offset(offsetX, offsetY),
             width: crosshairWidth! * width,
             height: crosshairThickness! * height),
-        Paint()..color = Colors.red);
+        Paint()..color = crosshairColor!);
     canvas.drawRect(
         Rect.fromCenter(
             center: Offset(offsetX, offsetY),
             width: crosshairThickness! * height,
             height: crosshairHeight! * width),
-        Paint()..color = Colors.red);
+        Paint()..color = crosshairColor!);
   }
 
   @override
