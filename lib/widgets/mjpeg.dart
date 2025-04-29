@@ -23,6 +23,7 @@ class Mjpeg extends StatefulWidget {
   final double? height;
 
   //Crosshair settings
+  final bool? crosshairEnabled;
   final double? crosshairWidth;
   final double? crosshairHeight;
   final double? crosshairThickness;
@@ -43,6 +44,7 @@ class Mjpeg extends StatefulWidget {
     this.quarterTurns = 0,
     this.error,
     this.loading,
+    this.crosshairEnabled,
     this.crosshairWidth,
     this.crosshairHeight,
     this.crosshairThickness,
@@ -171,7 +173,9 @@ class _MjpegState extends State<Mjpeg> {
                         widget.crosshairHeight!,
                         widget.crosshairThickness!,
                         widget.crosshairX!,
-                        widget.crosshairY!),
+                      widget.crosshairY!,
+                      widget.crosshairEnabled,
+                    ),
                     child: Image.memory(
                       Uint8List.fromList(
                           snapshot.data ?? controller.previousImage!),
@@ -486,6 +490,7 @@ class MjpegController extends ChangeNotifier {
 }
 
 class CrosshairPainter extends CustomPainter {
+  final bool? enabled;
   final double? crosshairWidth;
   final double? crosshairHeight;
   final double? crosshairThickness;
@@ -493,10 +498,11 @@ class CrosshairPainter extends CustomPainter {
   final double? crosshairY;
 
   CrosshairPainter(this.crosshairWidth, this.crosshairHeight,
-      this.crosshairThickness, this.crosshairX, this.crosshairY);
+      this.crosshairThickness, this.crosshairX, this.crosshairY, this.enabled);
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (!enabled!) return;
     var width = size.width / 250;
     var height = size.height / 250;
     var offsetX = (crosshairX! + crosshairWidth! / 2) * width;

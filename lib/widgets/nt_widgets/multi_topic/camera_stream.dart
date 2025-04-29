@@ -3,6 +3,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +26,16 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   Size? _resolution;
   int _rotationTurns = 0;
 
+  bool _crosshairEnabled = false;
   double _crosshairX = 50;
   double _crosshairY = 50;
   double _crosshairWidth = 15;
   double _crosshairHeight = 15;
   double _crosshairThickness = 2;
+
+  bool get crosshairEnabled => _crosshairEnabled;
+
+  set crosshairEnabled(bool value) => _crosshairEnabled = value;
 
   double get crosshairX => _crosshairX;
 
@@ -346,31 +352,131 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
           ),
         ],
       ),
-      const SizedBox(height: 5),
+      //Camera Crosshair
       StatefulBuilder(
         builder: (context, setState) {
-          return Row(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Flexible(
-                child: DialogTextInput(
-                  allowEmptySubmission: true,
-                  initialText: "$crosshairWidth",
-                  label: 'Width',
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                  onSubmit: (value) {
-                    double? newWidth = double.tryParse(value);
-
-                    setState(() {
-                      if (newWidth! < 0) {
-                        crosshairWidth = 0;
-                        return;
-                      }
-
-                      crosshairWidth = newWidth;
-                    });
-                  },
-                ),
+              const SizedBox(height: 15),
+              Divider(
+                height: 10,
               ),
+              Text("Crosshair Settings"),
+              const SizedBox(height: 10),
+              DialogToggleSwitch(
+                  onToggle: (value) => setState(
+                        () => _crosshairEnabled = value,
+                      ),
+                  initialValue: _crosshairEnabled,
+                  label: "Enabled"),
+              const SizedBox(height: 10),
+              //Height, Width, Thickness
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: "$_crosshairWidth",
+                      label: 'Width',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
+                        double? newWidth = double.tryParse(value);
+
+                        setState(() {
+                        if (newWidth! >= 0) {
+                          _crosshairWidth = newWidth;
+                          return;
+                        }
+                      });
+                    },
+                  ),
+                ),
+                Flexible(
+                  child: DialogTextInput(
+                    allowEmptySubmission: true,
+                    initialText: "$_crosshairHeight",
+                    label: 'Height',
+                    formatter: FilteringTextInputFormatter.digitsOnly,
+                    onSubmit: (value) {
+                      double? newHeight = double.tryParse(value);
+
+                      setState(() {
+                        if (newHeight! >= 0) {
+                          _crosshairHeight = newHeight;
+                          return;
+                        }
+                      });
+                    },
+                  ),
+                ),
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: "$_crosshairThickness",
+                      label: 'Thickness',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
+                        double? newThickness = double.tryParse(value);
+
+                        setState(() {
+                          if (newThickness! >= 0) {
+                            _crosshairThickness = newThickness;
+                            return;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 10),
+              //X and Y POS
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: "$_crosshairX",
+                      label: 'X Position',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
+                        double? newX = double.tryParse(value);
+
+                        setState(() {
+                          if (newX! >= 0) {
+                            _crosshairX = newX;
+                            return;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: "$_crosshairY",
+                      label: 'Y Position',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
+                        double? newY = double.tryParse(value);
+
+                        setState(() {
+                          if (newY! >= 0) {
+                            _crosshairY = newY;
+                            return;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              )
             ],
           );
         },
@@ -510,6 +616,7 @@ class CameraStreamWidget extends NTWidget {
                       crosshairWidth: model._crosshairWidth,
                       crosshairX: model._crosshairX,
                       crosshairY: model._crosshairY,
+                      crosshairEnabled: model._crosshairEnabled,
                       crosshairColor: Colors.blue,
                     ),
                   ],
