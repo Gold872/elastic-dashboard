@@ -145,6 +145,8 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _crosshairThickness = tryCast(jsonData['crosshair_thickness']) ?? 2;
     _crosshairX = tryCast(jsonData['crosshair_x']) ?? 0;
     _crosshairY = tryCast(jsonData['crosshair_y']) ?? 0;
+    _crosshairColor = Color(
+        tryCast<int>(jsonData['crosshair_color']) ?? Colors.red.toARGB32());
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
         ?.whereType<num>()
@@ -189,6 +191,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
       'crosshair_thickness': crosshairThickness,
       'crosshair_x': crosshairX,
       'crosshair_y': crosshairY,
+      'crosshair_color': _crosshairColor.toARGB32(),
       if (quality != null) 'compression': quality,
       if (fps != null) 'fps': fps,
       if (resolution != null)
