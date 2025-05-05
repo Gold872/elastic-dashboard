@@ -23,46 +23,47 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   List<NT4Subscription> get subscriptions => [streamsSubscription];
 
+  MjpegController? controller;
   int? _quality;
   int? _fps;
   Size? _resolution;
-  int _rotationTurns = 0;
 
+  int _rotationTurns = 0;
   bool _crosshairEnabled = false;
-  double _crosshairX = 50;
-  double _crosshairY = 50;
-  double _crosshairWidth = 15;
-  double _crosshairHeight = 15;
-  double _crosshairThickness = 2;
+  int _crosshairX = 0;
+  int _crosshairY = 0;
+  int _crosshairWidth = 25;
+  int _crosshairHeight = 25;
+  int _crosshairThickness = 2;
   Color _crosshairColor = Colors.red;
+
+  Color get crosshairColor => _crosshairColor;
+
+  set crosshairColor(Color value) => _crosshairColor = value;
 
   bool get crosshairEnabled => _crosshairEnabled;
 
   set crosshairEnabled(bool value) => _crosshairEnabled = value;
 
-  double get crosshairX => _crosshairX;
+  int get crosshairX => _crosshairX;
 
-  set crosshairX(double value) {
-    _crosshairX = value;
-  }
+  set crosshairX(int value) => _crosshairX = value;
 
-  MjpegController? controller;
+  int get crosshairY => _crosshairY;
 
-  double get crosshairY => _crosshairY;
+  set crosshairY(int value) => _crosshairY = value;
 
-  set crosshairY(double value) => _crosshairY = value;
+  int get crosshairWidth => _crosshairWidth;
 
-  double get crosshairWidth => _crosshairWidth;
+  set crosshairWidth(int value) => _crosshairWidth = value;
 
-  set crosshairWidth(double value) => _crosshairWidth = value;
+  int get crosshairHeight => _crosshairHeight;
 
-  double get crosshairHeight => _crosshairHeight;
+  set crosshairHeight(int value) => _crosshairHeight = value;
 
-  set crosshairHeight(double value) => _crosshairHeight = value;
+  int get crosshairThickness => _crosshairThickness;
 
-  double get crosshairThickness => _crosshairThickness;
-
-  set crosshairThickness(double value) => _crosshairThickness = value;
+  set crosshairThickness(int value) => _crosshairThickness = value;
   int? get quality => _quality;
 
   set quality(value) => _quality = value;
@@ -110,11 +111,11 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     Size? resolution,
     int rotation = 0,
     bool crosshairEnabled = false,
-    double crosshairWidth = 50,
-    double crosshairHeight = 50,
-    double crosshairThickness = 2,
-    double crosshairX = 0,
-    double crosshairY = 0,
+    int crosshairWidth = 50,
+    int crosshairHeight = 50,
+    int crosshairThickness = 2,
+    int crosshairX = 0,
+    int crosshairY = 0,
     Color crosshairColor = Colors.red,
     super.dataType,
     super.period,
@@ -140,8 +141,8 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _fps = tryCast(jsonData['fps']);
     _crosshairEnabled = tryCast(jsonData['crosshair_enabled']) ?? false;
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
-    _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 15;
-    _crosshairHeight = tryCast(jsonData['crosshair_height']) ?? 15;
+    _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 25;
+    _crosshairHeight = tryCast(jsonData['crosshair_height']) ?? 25;
     _crosshairThickness = tryCast(jsonData['crosshair_thickness']) ?? 2;
     _crosshairX = tryCast(jsonData['crosshair_x']) ?? 0;
     _crosshairY = tryCast(jsonData['crosshair_y']) ?? 0;
@@ -187,7 +188,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
       'rotation_turns': rotationTurns,
       'crosshair_enabled': crosshairEnabled,
       'crosshair_width': crosshairWidth,
-      'crosshair_height': crosshairWidth,
+      'crosshair_height': crosshairHeight,
       'crosshair_thickness': crosshairThickness,
       'crosshair_x': crosshairX,
       'crosshair_y': crosshairY,
@@ -395,7 +396,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Width',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        double? newWidth = double.tryParse(value);
+                        int? newWidth = int.tryParse(value);
 
                         setState(() {
                         if (newWidth! >= 0) {
@@ -413,9 +414,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                     label: 'Height',
                     formatter: FilteringTextInputFormatter.digitsOnly,
                     onSubmit: (value) {
-                      double? newHeight = double.tryParse(value);
+                        int? newHeight = int.tryParse(value);
 
-                      setState(() {
+                        setState(() {
                         if (newHeight! >= 0) {
                           _crosshairHeight = newHeight;
                           return;
@@ -431,7 +432,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Thickness',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        double? newThickness = double.tryParse(value);
+                        int? newThickness = int.tryParse(value);
 
                         setState(() {
                           if (newThickness! >= 0) {
@@ -458,7 +459,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'X Position',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        double? newX = double.tryParse(value);
+                        int? newX = int.tryParse(value);
 
                         setState(() {
                           if (newX! >= 0) {
@@ -476,7 +477,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Y Position',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        double? newY = double.tryParse(value);
+                        int? newY = int.tryParse(value);
 
                         setState(() {
                           if (newY! >= 0) {

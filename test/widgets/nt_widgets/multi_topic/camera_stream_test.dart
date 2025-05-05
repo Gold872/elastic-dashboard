@@ -1,17 +1,18 @@
-import 'package:flutter/material.dart';
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/camera_stream.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../test_util.dart';
 
 void main() {
@@ -24,6 +25,13 @@ void main() {
     'compression': 50,
     'fps': 60,
     'resolution': [100.0, 100.0],
+    'crosshair_enabled': false,
+    'crosshair_width': 25,
+    'crosshair_height': 35,
+    'crosshair_thickness': 2,
+    'crosshair_x': 15,
+    'crosshair_y': 10,
+    'crosshair_color': 4294198070 //Colors.red.toARGB32()
   };
 
   late SharedPreferences preferences;
@@ -55,6 +63,14 @@ void main() {
     expect(cameraStreamModel.fps, 60);
     expect(cameraStreamModel.quality, 50);
     expect(cameraStreamModel.resolution, const Size(100.0, 100.0));
+
+    expect(cameraStreamModel.crosshairEnabled, false);
+    expect(cameraStreamModel.crosshairWidth, 25);
+    expect(cameraStreamModel.crosshairHeight, 35);
+    expect(cameraStreamModel.crosshairThickness, 2);
+    expect(cameraStreamModel.crosshairX, 15);
+    expect(cameraStreamModel.crosshairY, 10);
+    expect(cameraStreamModel.crosshairColor, Color(Colors.red.toARGB32()));
 
     expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
         '0.0.0.0?resolution=100x100&fps=60&compression=50');
@@ -125,7 +141,13 @@ void main() {
       compression: 50,
       fps: 60,
       resolution: const Size(100.0, 100.0),
-    );
+        crosshairEnabled: false,
+        crosshairWidth: 25,
+        crosshairHeight: 35,
+        crosshairThickness: 2,
+        crosshairX: 15,
+        crosshairY: 10,
+        crosshairColor: Colors.red);
 
     expect(cameraStreamModel.toJson(), cameraStreamJson);
   });
@@ -198,7 +220,13 @@ void main() {
       compression: 50,
       fps: 60,
       resolution: const Size(100.0, 100.0),
-    );
+        crosshairEnabled: false,
+        crosshairWidth: 15,
+        crosshairHeight: 15,
+        crosshairThickness: 2,
+        crosshairX: 0,
+        crosshairY: 0,
+        crosshairColor: Colors.red);
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -241,12 +269,30 @@ void main() {
       matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
     );
 
+    final crosshairEnabled = find.ancestor(
+      of: find.text('Enabled'),
+      matching:
+          find.byWidgetPredicate((widget) => widget is DialogToggleSwitch),
+    );
+    final crosshairX = find.widgetWithText(DialogTextInput, 'X Position');
+    final crosshairY = find.widgetWithText(DialogTextInput, 'Y Position');
+    final crosshairThickness =
+        find.widgetWithText(DialogTextInput, 'Thickness');
+    final crosshairColor = find.ancestor(
+      of: find.text('Crosshair Color'),
+      matching: find.byWidgetPredicate((widget) => widget is DialogColorPicker),
+    );
     expect(fps, findsOneWidget);
-    expect(width, findsOneWidget);
-    expect(height, findsOneWidget);
+    expect(width, findsNWidgets(2));
+    expect(height, findsNWidgets(2));
     expect(quality, findsOneWidget);
     expect(rotateLeft, findsOneWidget);
     expect(rotateRight, findsOneWidget);
+    expect(crosshairEnabled, findsOneWidget);
+    expect(crosshairX, findsOneWidget);
+    expect(crosshairY, findsOneWidget);
+    expect(crosshairColor, findsOneWidget);
+    expect(crosshairThickness, findsOneWidget);
 
     await widgetTester.enterText(fps, '25');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
@@ -258,20 +304,23 @@ void main() {
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.fps, isNull);
 
-    await widgetTester.enterText(width, '640');
+    await widgetTester.enterText(width.first, '640');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.resolution?.width, 640);
+    expect(cameraStreamModel.crosshairWidth, 15);
 
-    await widgetTester.enterText(height, '480');
+    await widgetTester.enterText(height.first, '480');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.resolution?.height, 480);
+    expect(cameraStreamModel.crosshairHeight, 15);
 
-    await widgetTester.enterText(width, '0');
+    await widgetTester.enterText(width.first, '0');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.resolution, isNull);
+    expect(cameraStreamModel.crosshairWidth, 15);
 
     await widgetTester.drag(quality, const Offset(100, 0));
     await widgetTester.pumpAndSettle();
@@ -306,5 +355,41 @@ void main() {
     await widgetTester.tap(rotateLeft);
     await widgetTester.pumpAndSettle();
     expect(cameraStreamModel.rotationTurns, 2);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: crosshairEnabled,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairEnabled, true);
+
+    await widgetTester.enterText(crosshairX, '25');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairX, 25);
+
+    await widgetTester.enterText(crosshairY, '25');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairY, 25);
+
+    await widgetTester.enterText(width.last, '25');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairWidth, 25);
+    expect(cameraStreamModel.resolution, isNull);
+
+    await widgetTester.enterText(height.last, '45');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairHeight, 45);
+    expect(cameraStreamModel.resolution, isNull);
+
+    await widgetTester.enterText(crosshairThickness, '3');
+    await widgetTester.testTextInput.receiveAction(TextInputAction.done);
+    await widgetTester.pumpAndSettle();
+    expect(cameraStreamModel.crosshairThickness, 3);
   });
 }
