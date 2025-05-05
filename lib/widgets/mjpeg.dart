@@ -173,8 +173,8 @@ class _MjpegState extends State<Mjpeg> {
                         widget.crosshairHeight!,
                         widget.crosshairThickness!,
                         widget.crosshairX!,
-                      widget.crosshairY!,
-                      widget.crosshairEnabled,
+                        widget.crosshairY!,
+                        widget.crosshairEnabled,
                         widget.crosshairColor),
                     child: Image.memory(
                       Uint8List.fromList(
@@ -498,7 +498,9 @@ class CrosshairPainter extends CustomPainter {
   final int? crosshairY;
   final Color? crosshairColor;
 
-  CrosshairPainter(this.crosshairWidth, this.crosshairHeight,
+  CrosshairPainter(
+      this.crosshairWidth,
+      this.crosshairHeight,
       this.crosshairThickness,
       this.crosshairX,
       this.crosshairY,
