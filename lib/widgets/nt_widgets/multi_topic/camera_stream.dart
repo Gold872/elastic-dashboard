@@ -64,6 +64,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   int get crosshairThickness => _crosshairThickness;
 
   set crosshairThickness(int value) => _crosshairThickness = value;
+
   int? get quality => _quality;
 
   set quality(value) => _quality = value;
@@ -399,32 +400,32 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                         int? newWidth = int.tryParse(value);
 
                         setState(() {
-                        if (newWidth! >= 0) {
-                          _crosshairWidth = newWidth;
-                          return;
-                        }
-                      });
-                    },
+                          if (newWidth! >= 0) {
+                            _crosshairWidth = newWidth;
+                            return;
+                          }
+                        });
+                      },
+                    ),
                   ),
-                ),
-                Flexible(
-                  child: DialogTextInput(
-                    allowEmptySubmission: true,
-                    initialText: "$_crosshairHeight",
-                    label: 'Height',
-                    formatter: FilteringTextInputFormatter.digitsOnly,
-                    onSubmit: (value) {
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: "$_crosshairHeight",
+                      label: 'Height',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
                         int? newHeight = int.tryParse(value);
 
                         setState(() {
-                        if (newHeight! >= 0) {
-                          _crosshairHeight = newHeight;
-                          return;
-                        }
-                      });
-                    },
+                          if (newHeight! >= 0) {
+                            _crosshairHeight = newHeight;
+                            return;
+                          }
+                        });
+                      },
+                    ),
                   ),
-                ),
                   Flexible(
                     child: DialogTextInput(
                       allowEmptySubmission: true,
