@@ -24,11 +24,11 @@ class Mjpeg extends StatefulWidget {
 
   //Crosshair settings
   final bool? crosshairEnabled;
-  final double? crosshairWidth;
-  final double? crosshairHeight;
-  final double? crosshairThickness;
-  final double? crosshairX;
-  final double? crosshairY;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairX;
+  final int? crosshairY;
   final Color? crosshairColor;
 
   final WidgetBuilder? loading;
@@ -491,11 +491,11 @@ class MjpegController extends ChangeNotifier {
 
 class CrosshairPainter extends CustomPainter {
   final bool? enabled;
-  final double? crosshairWidth;
-  final double? crosshairHeight;
-  final double? crosshairThickness;
-  final double? crosshairX;
-  final double? crosshairY;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairX;
+  final int? crosshairY;
   final Color? crosshairColor;
 
   CrosshairPainter(this.crosshairWidth, this.crosshairHeight,
