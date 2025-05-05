@@ -512,8 +512,12 @@ class CrosshairPainter extends CustomPainter {
     if (!enabled!) return;
     var width = size.width / 250;
     var height = size.height / 250;
-    var offsetX = (crosshairX! + crosshairWidth! / 2) * width;
-    var offsetY = (crosshairY! + crosshairHeight! / 2) * width;
+
+    var offsetX = clampDouble((crosshairX! + crosshairWidth! / 2) * width, 0,
+        size.width - (crosshairWidth! / 2 * width));
+    var offsetY = clampDouble((crosshairY! + crosshairHeight! / 2) * width, 0,
+        size.height - (crosshairHeight! / 2 * width));
+
     canvas.drawRect(
         Rect.fromCenter(
             center: Offset(offsetX, offsetY),
@@ -530,6 +534,6 @@ class CrosshairPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return enabled!;
   }
 }
