@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
-import 'package:http/http.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
@@ -23,6 +21,17 @@ class Mjpeg extends StatefulWidget {
   final int quarterTurns;
   final double? width;
   final double? height;
+
+  //Crosshair settings
+  final bool? crosshairEnabled;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairX;
+  final int? crosshairY;
+  final Color? crosshairColor;
+  final bool? crosshairCentered;
+
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
       error;
@@ -36,6 +45,14 @@ class Mjpeg extends StatefulWidget {
     this.quarterTurns = 0,
     this.error,
     this.loading,
+    this.crosshairEnabled,
+    this.crosshairWidth,
+    this.crosshairHeight,
+    this.crosshairThickness,
+    this.crosshairX,
+    this.crosshairY,
+    this.crosshairColor,
+    this.crosshairCentered,
     super.key,
   });
 
@@ -150,13 +167,29 @@ class _MjpegState extends State<Mjpeg> {
 
             return RotatedBox(
               quarterTurns: widget.quarterTurns,
-              child: Image.memory(
-                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-                width: widget.width,
-                height: widget.height,
-                gaplessPlayback: true,
-                fit: widget.fit,
-                scale: (widget.expandToFit) ? 1e-6 : 1.0,
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    foregroundPainter: CrosshairPainter(
+                        widget.crosshairWidth!,
+                        widget.crosshairHeight!,
+                        widget.crosshairThickness!,
+                        widget.crosshairX!,
+                        widget.crosshairY!,
+                        widget.crosshairEnabled,
+                        widget.crosshairColor,
+                        widget.crosshairCentered),
+                    child: Image.memory(
+                      Uint8List.fromList(
+                          snapshot.data ?? controller.previousImage!),
+                      width: widget.width,
+                      height: widget.height,
+                      gaplessPlayback: true,
+                      fit: widget.fit,
+                      scale: (widget.expandToFit) ? 1e-6 : 1.0,
+                    ),
+                  )
+                ],
               ),
             );
           }),
@@ -456,5 +489,64 @@ class MjpegController extends ChangeNotifier {
         }
       }
     }
+  }
+}
+
+class CrosshairPainter extends CustomPainter {
+  final bool? enabled;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairY;
+  final int? crosshairX;
+  final Color? crosshairColor;
+  final bool? centered;
+
+  CrosshairPainter(
+      this.crosshairWidth,
+      this.crosshairHeight,
+      this.crosshairThickness,
+      this.crosshairX,
+      this.crosshairY,
+      this.enabled,
+      this.crosshairColor,
+      this.centered);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!enabled!) return;
+    var widthModifier = size.width / 250;
+    var heightModifier = size.height / 250;
+    var maxWidth = size.width - (crosshairWidth! / 2 * widthModifier);
+    var maxHeight = size.height - (crosshairHeight! / 2 * widthModifier);
+    double x;
+    double y;
+    if (centered!) {
+      x = (size.width / 2);
+      y = (size.height / 2);
+    } else {
+      x = clampDouble(
+          (crosshairX! + crosshairWidth! / 2) * widthModifier, 0, maxWidth);
+      y = clampDouble(
+          (crosshairY! + crosshairHeight! / 2) * widthModifier, 0, maxHeight);
+    }
+
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(x, y),
+            width: crosshairWidth! * widthModifier,
+            height: crosshairThickness! * heightModifier),
+        Paint()..color = crosshairColor!);
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(x, y),
+            width: crosshairThickness! * heightModifier,
+            height: crosshairHeight! * widthModifier),
+        Paint()..color = crosshairColor!);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return enabled!;
   }
 }
