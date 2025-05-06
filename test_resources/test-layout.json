@@ -152,7 +152,8 @@
               "crosshair_thickness": 3,
               "crosshair_x": 15,
               "crosshair_y": 15,
-              "crosshair_color": 4294198070
+              "crosshair_color": 4294198070,
+              "crosshair_centered": false
             }
           },
           {

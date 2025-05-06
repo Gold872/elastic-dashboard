@@ -31,7 +31,8 @@ void main() {
     'crosshair_thickness': 2,
     'crosshair_x': 15,
     'crosshair_y': 10,
-    'crosshair_color': 4294198070 //Colors.red.toARGB32()
+    'crosshair_color': 4294198070, //Colors.red.toARGB32()
+    'crosshair_centered': false
   };
 
   late SharedPreferences preferences;

@@ -36,6 +36,11 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   int _crosshairHeight = 25;
   int _crosshairThickness = 2;
   Color _crosshairColor = Colors.red;
+  bool _crosshairCentered = false;
+
+  bool get crosshairCentered => _crosshairCentered;
+
+  set crosshairCentered(bool value) => _crosshairCentered = value;
 
   Color get crosshairColor => _crosshairColor;
 
@@ -149,6 +154,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _crosshairY = tryCast(jsonData['crosshair_y']) ?? 0;
     _crosshairColor = Color(
         tryCast<int>(jsonData['crosshair_color']) ?? Colors.red.toARGB32());
+    _crosshairCentered = tryCast(jsonData['crosshair_centered']) ?? false;
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
         ?.whereType<num>()
@@ -194,6 +200,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
       'crosshair_x': crosshairX,
       'crosshair_y': crosshairY,
       'crosshair_color': _crosshairColor.toARGB32(),
+      'crosshair_centered': _crosshairCentered,
       if (quality != null) 'compression': quality,
       if (fps != null) 'fps': fps,
       if (resolution != null)
@@ -448,13 +455,22 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
               ),
 
               SizedBox(height: 10),
-              //X and Y POS
+              //Centered, X and Y POS
+              DialogToggleSwitch(
+                  onToggle: (value) => setState(
+                        () => _crosshairCentered = value,
+                      ),
+                  initialValue: _crosshairCentered,
+                  label: "Centered"),
+              SizedBox(height: 10),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
                     child: DialogTextInput(
+                      enabled: !_crosshairCentered,
                       allowEmptySubmission: true,
                       initialText: "$_crosshairX",
                       label: 'X Position',
@@ -473,6 +489,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                   ),
                   Flexible(
                     child: DialogTextInput(
+                      enabled: !_crosshairCentered,
                       allowEmptySubmission: true,
                       initialText: "$_crosshairY",
                       label: 'Y Position',
@@ -643,6 +660,7 @@ class CameraStreamWidget extends NTWidget {
                   crosshairY: model._crosshairY,
                   crosshairEnabled: model._crosshairEnabled,
                   crosshairColor: model._crosshairColor,
+                  crosshairCentered: model._crosshairCentered,
                 ),
               ),
               const Text(''),
