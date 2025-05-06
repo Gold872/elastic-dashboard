@@ -30,6 +30,7 @@ class Mjpeg extends StatefulWidget {
   final int? crosshairX;
   final int? crosshairY;
   final Color? crosshairColor;
+  final bool? crosshairCentered;
 
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
@@ -51,6 +52,7 @@ class Mjpeg extends StatefulWidget {
     this.crosshairX,
     this.crosshairY,
     this.crosshairColor,
+    this.crosshairCentered,
     super.key,
   });
 
@@ -175,7 +177,8 @@ class _MjpegState extends State<Mjpeg> {
                         widget.crosshairX!,
                         widget.crosshairY!,
                         widget.crosshairEnabled,
-                        widget.crosshairColor),
+                        widget.crosshairColor,
+                        widget.crosshairCentered),
                     child: Image.memory(
                       Uint8List.fromList(
                           snapshot.data ?? controller.previousImage!),
@@ -494,9 +497,10 @@ class CrosshairPainter extends CustomPainter {
   final int? crosshairWidth;
   final int? crosshairHeight;
   final int? crosshairThickness;
-  final int? crosshairX;
   final int? crosshairY;
+  final int? crosshairX;
   final Color? crosshairColor;
+  final bool? centered;
 
   CrosshairPainter(
       this.crosshairWidth,
@@ -505,30 +509,39 @@ class CrosshairPainter extends CustomPainter {
       this.crosshairX,
       this.crosshairY,
       this.enabled,
-      this.crosshairColor);
+      this.crosshairColor,
+      this.centered);
 
   @override
   void paint(Canvas canvas, Size size) {
     if (!enabled!) return;
-    var width = size.width / 250;
-    var height = size.height / 250;
-
-    var offsetX = clampDouble((crosshairX! + crosshairWidth! / 2) * width, 0,
-        size.width - (crosshairWidth! / 2 * width));
-    var offsetY = clampDouble((crosshairY! + crosshairHeight! / 2) * width, 0,
-        size.height - (crosshairHeight! / 2 * width));
+    var widthModifier = size.width / 250;
+    var heightModifier = size.height / 250;
+    var maxWidth = size.width - (crosshairWidth! / 2 * widthModifier);
+    var maxHeight = size.height - (crosshairHeight! / 2 * widthModifier);
+    double x;
+    double y;
+    if (centered!) {
+      x = (size.width / 2);
+      y = (size.height / 2);
+    } else {
+      x = clampDouble(
+          (crosshairX! + crosshairWidth! / 2) * widthModifier, 0, maxWidth);
+      y = clampDouble(
+          (crosshairY! + crosshairHeight! / 2) * widthModifier, 0, maxHeight);
+    }
 
     canvas.drawRect(
         Rect.fromCenter(
-            center: Offset(offsetX, offsetY),
-            width: crosshairWidth! * width,
-            height: crosshairThickness! * height),
+            center: Offset(x, y),
+            width: crosshairWidth! * widthModifier,
+            height: crosshairThickness! * heightModifier),
         Paint()..color = crosshairColor!);
     canvas.drawRect(
         Rect.fromCenter(
-            center: Offset(offsetX, offsetY),
-            width: crosshairThickness! * height,
-            height: crosshairHeight! * width),
+            center: Offset(x, y),
+            width: crosshairThickness! * heightModifier,
+            height: crosshairHeight! * widthModifier),
         Paint()..color = crosshairColor!);
   }
 
