@@ -31,7 +31,6 @@ dependencies:
   import_sorter: ^4.6.0
   intl: ^0.20.2
   logger: ^2.5.0
-  messagepack: ^0.2.1
   msgpack_dart: ^1.0.1
   package_info_plus: ^8.3.0
   path: ^1.9.1
