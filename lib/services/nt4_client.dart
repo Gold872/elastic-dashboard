@@ -1007,7 +1007,7 @@ class NT4Client {
       }
     } else {
       logger.warning(
-        '[NT4] Ignoring websocket message, invalid data type: ${data.runtimeType}',
+        '[NT4] Ignoring websocket message, invalid type: ${data.runtimeType}',
       );
     }
   }
