@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/widgets/drag_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -62,8 +63,8 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {},
-      child: GestureDetector(
-        onPanStart: (details) {
+      child: DragListener(
+        onDragStart: (details) {
           if (draggingWidget != null) {
             return;
           }
@@ -77,14 +78,14 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
 
           setState(() => draggingWidget = widget.layoutBuilder.call());
         },
-        onPanUpdate: (details) {
+        onDragUpdate: (details) {
           if (draggingWidget == null) {
             return;
           }
 
           widget.onDragUpdate.call(details.globalPosition, draggingWidget!);
         },
-        onPanEnd: (details) {
+        onDragEnd: (details) {
           if (draggingWidget == null) {
             return;
           }
