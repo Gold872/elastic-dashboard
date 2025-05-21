@@ -646,7 +646,7 @@ packages:
     description:
       path: "."
       ref: fix-64-bit-ints
-      resolved-ref: "2f9836f1ee11b64e446741119adda033affb5277"
+      resolved-ref: ec451a2662290845add87b5b45f594654fa59b99
       url: "https://github.com/Gold856/msgpack_dart.git"
     source: git
     version: "1.0.1"
