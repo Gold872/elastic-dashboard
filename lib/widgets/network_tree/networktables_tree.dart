@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/widgets/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
@@ -309,11 +310,11 @@ class _TreeTileState extends State<TreeTile> {
         children: [
           InkWell(
             onTap: widget.onTap,
-            child: GestureDetector(
+            child: DragListener(
               supportedDevices: PointerDeviceKind.values
                   .whereNot((element) => element == PointerDeviceKind.trackpad)
                   .toSet(),
-              onPanStart: (details) async {
+              onDragStart: (details) async {
                 if (draggingWidget != null) {
                   return;
                 }
@@ -329,7 +330,7 @@ class _TreeTileState extends State<TreeTile> {
                   draggingWidget = null;
                 }
               },
-              onPanUpdate: (details) {
+              onDragUpdate: (details) {
                 if (draggingWidget == null) {
                   return;
                 }
@@ -341,7 +342,7 @@ class _TreeTileState extends State<TreeTile> {
                   draggingWidget!,
                 );
               },
-              onPanEnd: (details) {
+              onDragEnd: (details) {
                 if (draggingWidget == null) {
                   dragging = false;
                   return;
