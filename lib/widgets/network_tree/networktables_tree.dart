@@ -311,6 +311,7 @@ class _TreeTileState extends State<TreeTile> {
           InkWell(
             onTap: widget.onTap,
             child: DragListener(
+              overrideVertical: false,
               supportedDevices: PointerDeviceKind.values
                   .whereNot((element) => element == PointerDeviceKind.trackpad)
                   .toSet(),
