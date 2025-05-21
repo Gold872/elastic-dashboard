@@ -1,7 +1,7 @@
-import 'package:elastic_dashboard/widgets/drag_listener.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:elastic_dashboard/widgets/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/layout_container_model.dart';
 
 class LayoutDragTile extends StatefulWidget {
