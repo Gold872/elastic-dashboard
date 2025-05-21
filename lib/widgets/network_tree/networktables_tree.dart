@@ -8,10 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/widgets/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
+import 'package:elastic_dashboard/widgets/gesture/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
 typedef ListLayoutBuilder = ListLayoutModel Function({

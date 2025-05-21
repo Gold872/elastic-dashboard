@@ -14,6 +14,7 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
+import 'package:elastic_dashboard/widgets/gesture/context_menu_listener.dart';
 import 'draggable_containers/models/layout_container_model.dart';
 import 'draggable_containers/models/list_layout_model.dart';
 import 'draggable_containers/models/nt_widget_container_model.dart';
@@ -905,9 +906,9 @@ class TabGrid extends StatelessWidget {
       }
 
       dashboardWidgets.add(
-        GestureDetector(
+        ContextMenuListener(
           key: container.key,
-          onSecondaryTapUp: (details) {
+          onContextMenuGesture: (globalPosition, _) {
             if (model.preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked) {
               return;
@@ -921,27 +922,23 @@ class TabGrid extends StatelessWidget {
               MenuItem(
                 label: 'Edit Properties',
                 icon: Icons.edit_outlined,
-                onSelected: () {
-                  container.showEditProperties(context);
-                },
+                onSelected: () => container.showEditProperties(context),
               ),
               ...container.getContextMenuItems(),
               MenuItem(
-                  label: 'Copy',
-                  icon: Icons.copy_outlined,
-                  onSelected: () {
-                    model.copyWidget(container);
-                  }),
+                label: 'Copy',
+                icon: Icons.copy_outlined,
+                onSelected: () => model.copyWidget(container),
+              ),
               MenuItem(
-                  label: 'Remove',
-                  icon: Icons.delete_outlined,
-                  onSelected: () {
-                    model.removeWidget(container);
-                  }),
+                label: 'Remove',
+                icon: Icons.delete_outlined,
+                onSelected: () => model.removeWidget(container),
+              ),
             ];
 
             ContextMenu contextMenu = ContextMenu(
-              position: details.globalPosition,
+              position: globalPosition,
               borderRadius: BorderRadius.circular(5.0),
               padding: const EdgeInsets.all(4.0),
               entries: menuEntries,
@@ -952,13 +949,16 @@ class TabGrid extends StatelessWidget {
               contextMenu: contextMenu,
               transitionDuration: const Duration(milliseconds: 100),
               reverseTransitionDuration: Duration.zero,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
-              },
+              transitionsBuilder: (
+                context,
+                animation,
+                secondaryAnimation,
+                child,
+              ) =>
+                  FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
             );
           },
           child: getWidgetFromModel(container),
@@ -1027,10 +1027,9 @@ class TabGrid extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
+    return ContextMenuListener(
       behavior: HitTestBehavior.translucent,
-      onTap: () {},
-      onSecondaryTapUp: (details) {
+      onContextMenuGesture: (globalPosition, localPosition) {
         if (model.preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
           return;
@@ -1056,14 +1055,17 @@ class TabGrid extends StatelessWidget {
               icon: Icons.paste_outlined,
               onSelected: () {
                 pasteWidget(
-                    model, TabGridModel.copyJsonData, details.localPosition);
+                  model,
+                  TabGridModel.copyJsonData,
+                  localPosition,
+                );
               },
             ),
           );
         }
 
         ContextMenu contextMenu = ContextMenu(
-          position: details.globalPosition,
+          position: globalPosition,
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
           entries: contextMenuEntries,
@@ -1082,13 +1084,17 @@ class TabGrid extends StatelessWidget {
           },
         );
       },
-      child: Stack(
-        children: [
-          ...dashboardWidgets,
-          ...previewOutlines,
-          ...draggingWidgets,
-          ...draggingInWidgets,
-        ],
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {},
+        child: Stack(
+          children: [
+            ...dashboardWidgets,
+            ...previewOutlines,
+            ...draggingWidgets,
+            ...draggingInWidgets,
+          ],
+        ),
       ),
     );
   }
