@@ -80,8 +80,11 @@ class NetworkTableTreeRow {
     throw Exception("Trying to retrieve a row that doesn't exist");
   }
 
-  NetworkTableTreeRow createNewRow(
-      {required String topic, required String name, NT4Topic? ntTopic}) {
+  NetworkTableTreeRow createNewRow({
+    required String topic,
+    required String name,
+    NT4Topic? ntTopic,
+  }) {
     NetworkTableTreeRow newRow = NetworkTableTreeRow(
       ntConnection: ntConnection,
       preferences: preferences,
@@ -115,9 +118,10 @@ class NetworkTableTreeRow {
   }
 
   static SingleTopicNTWidgetModel? getNTWidgetFromTopic(
-      NTConnection ntConnection,
-      SharedPreferences preferences,
-      NT4Topic ntTopic) {
+    NTConnection ntConnection,
+    SharedPreferences preferences,
+    NT4Topic ntTopic,
+  ) {
     switch (ntTopic.type) {
       case NT4TypeStr.kFloat64:
       case NT4TypeStr.kInt:
@@ -151,17 +155,16 @@ class NetworkTableTreeRow {
         return await getTypedWidget('$topic/.type');
       }
 
-      bool isCameraStream = hasRows([
-            'mode',
-            'modes',
-            'source',
-            'streams',
-          ]) &&
+      bool isCameraStream =
+          hasRows(['mode', 'modes', 'source', 'streams']) &&
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
         return CameraStreamModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: topic,
+        );
       }
 
       if (hasRows([
@@ -174,7 +177,10 @@ class NetworkTableTreeRow {
         'sizeLeftRight',
       ])) {
         return YAGSLSwerveDriveModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: topic,
+        );
       }
 
       return null;
@@ -184,8 +190,10 @@ class NetworkTableTreeRow {
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    return ntConnection.subscribeAndRetrieveData(typeTopic,
-        timeout: const Duration(milliseconds: 500));
+    return ntConnection.subscribeAndRetrieveData(
+      typeTopic,
+      timeout: const Duration(milliseconds: 500),
+    );
   }
 
   Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {

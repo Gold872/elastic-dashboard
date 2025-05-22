@@ -22,8 +22,10 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
   Future<void> saveLayout() async {
     Map<String, dynamic> jsonData = toJson();
 
-    bool successful =
-        await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    bool successful = await preferences.setString(
+      PrefKeys.layout,
+      jsonEncode(jsonData),
+    );
     await saveWindowPosition();
 
     if (successful) {
@@ -52,9 +54,7 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       uniformTypeIdentifiers: ['public.json'],
     );
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    const XTypeGroup anyTypeGroup = XTypeGroup(label: 'All Files');
 
     logger.info('Exporting layout');
     final FileSaveLocation? saveLocation = await getSaveLocation(
@@ -102,15 +102,12 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       uniformTypeIdentifiers: ['public.json'],
     );
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    const XTypeGroup anyTypeGroup = XTypeGroup(label: 'All Files');
 
     logger.info('Importing layout');
-    final XFile? file = await openFile(acceptedTypeGroups: [
-      jsonTypeGroup,
-      anyTypeGroup,
-    ]);
+    final XFile? file = await openFile(
+      acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
+    );
 
     hotKeyManager.resetKeysPressed();
 
@@ -175,7 +172,8 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
 
       if (tryCast<Map>(data['grid_layout']) == null) {
         showJsonLoadingError(
-            'Grid layout not specified for tab \'${data['name']}\'');
+          'Grid layout not specified for tab \'${data['name']}\'',
+        );
         return false;
       }
     }
@@ -333,87 +331,95 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       return null;
     }
     ValueNotifier<String?> layoutSelection = ValueNotifier(null);
-    ValueNotifier<LayoutDownloadMode> modeSelection =
-        ValueNotifier(LayoutDownloadMode.overwrite);
+    ValueNotifier<LayoutDownloadMode> modeSelection = ValueNotifier(
+      LayoutDownloadMode.overwrite,
+    );
 
     bool showModes = false;
     return await showDialog(
       context: state!.context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Layout'),
-        content: SizedBox(
-          width: 350,
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Layout File'),
-                  ValueListenableBuilder(
-                    valueListenable: layoutSelection,
-                    builder: (_, value, child) => DialogDropdownChooser<String>(
-                      choices: fileNames,
-                      initialValue: value,
-                      onSelectionChanged: (selection) =>
-                          layoutSelection.value = selection,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Download Mode'),
-                  Row(
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Select Layout'),
+            content: SizedBox(
+              width: 350,
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Flexible(
-                        child: ValueListenableBuilder(
-                          valueListenable: modeSelection,
-                          builder: (_, value, child) =>
-                              DialogDropdownChooser<LayoutDownloadMode>(
-                            choices: LayoutDownloadMode.values,
-                            initialValue: value,
-                            nameMap: (value) => value.name,
-                            onSelectionChanged: (selection) {
-                              if (selection != null) {
-                                modeSelection.value = selection;
-                              }
+                      const Text('Layout File'),
+                      ValueListenableBuilder(
+                        valueListenable: layoutSelection,
+                        builder:
+                            (_, value, child) => DialogDropdownChooser<String>(
+                              choices: fileNames,
+                              initialValue: value,
+                              onSelectionChanged:
+                                  (selection) =>
+                                      layoutSelection.value = selection,
+                            ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text('Download Mode'),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: ValueListenableBuilder(
+                              valueListenable: modeSelection,
+                              builder:
+                                  (_, value, child) =>
+                                      DialogDropdownChooser<LayoutDownloadMode>(
+                                        choices: LayoutDownloadMode.values,
+                                        initialValue: value,
+                                        nameMap: (value) => value.name,
+                                        onSelectionChanged: (selection) {
+                                          if (selection != null) {
+                                            modeSelection.value = selection;
+                                          }
+                                        },
+                                      ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          TextButton.icon(
+                            label: const Text('Help'),
+                            icon: const Icon(Icons.help_outline),
+                            onPressed: () {
+                              setState(() => showModes = !showModes);
                             },
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 5),
-                      TextButton.icon(
-                        label: const Text('Help'),
-                        icon: const Icon(Icons.help_outline),
-                        onPressed: () {
-                          setState(() => showModes = !showModes);
-                        },
-                      ),
+                      if (showModes) ...[
+                        const SizedBox(height: 5),
+                        Text(LayoutDownloadMode.descriptions),
+                      ],
                     ],
-                  ),
-                  if (showModes) ...[
-                    const SizedBox(height: 5),
-                    Text(LayoutDownloadMode.descriptions),
-                  ],
-                ],
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(null),
-            child: const Text('Cancel'),
-          ),
-          ValueListenableBuilder(
-            valueListenable: layoutSelection,
-            builder: (_, value, child) => TextButton(
-              onPressed: (value != null)
-                  ? () => Navigator.of(context)
-                      .pop((layout: value, mode: modeSelection.value))
-                  : null,
-              child: const Text('Download'),
+                  );
+                },
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(null),
+                child: const Text('Cancel'),
+              ),
+              ValueListenableBuilder(
+                valueListenable: layoutSelection,
+                builder:
+                    (_, value, child) => TextButton(
+                      onPressed:
+                          (value != null)
+                              ? () => Navigator.of(
+                                context,
+                              ).pop((layout: value, mode: modeSelection.value))
+                              : null,
+                      child: const Text('Download'),
+                    ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -425,14 +431,15 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
 
     LayoutDownloadResponse<List<String>> layoutsResponse =
         await layoutDownloader!.getAvailableLayouts(
-      ntConnection: ntConnection,
-      preferences: preferences,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+        );
 
     if (!layoutsResponse.successful) {
       showErrorNotification(
         title: 'Failed to Retrieve Layout List',
-        message: layoutsResponse.data.firstOrNull ??
+        message:
+            layoutsResponse.data.firstOrNull ??
             'Unable to retrieve list of available layouts',
         width: 400,
       );

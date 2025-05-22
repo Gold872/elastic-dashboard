@@ -98,15 +98,15 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
     bool showTicks = true,
     super.dataType,
     super.period,
-  })  : _wrapValue = wrapValue,
-        _showTicks = showTicks,
-        _showPointer = showPointer,
-        _numberOfLabels = numberOfLabels,
-        _maxValue = maxValue,
-        _minValue = minValue,
-        _startAngle = startAngle,
-        _endAngle = endAngle,
-        super();
+  }) : _wrapValue = wrapValue,
+       _showTicks = showTicks,
+       _showPointer = showPointer,
+       _numberOfLabels = numberOfLabels,
+       _maxValue = maxValue,
+       _minValue = minValue,
+       _startAngle = startAngle,
+       _endAngle = endAngle,
+       super();
 
   RadialGaugeModel.fromJson({
     required super.ntConnection,
@@ -151,7 +151,8 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
               label: 'Start Angle (CW+)',
               initialText: _startAngle.toString(),
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               onSubmit: (value) {
                 double? newStartAngle = double.tryParse(value);
 
@@ -167,7 +168,8 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
               label: 'End Angle (CW+)',
               initialText: _endAngle.toString(),
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               onSubmit: (value) {
                 double? newEndAngle = double.tryParse(value);
 
@@ -189,7 +191,8 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
               label: 'Min Value',
               initialText: _minValue.toString(),
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               onSubmit: (value) {
                 double? newMin = double.tryParse(value);
 
@@ -205,7 +208,8 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
               label: 'Max Value',
               initialText: _maxValue.toString(),
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               onSubmit: (value) {
                 double? newMax = double.tryParse(value);
 
@@ -318,8 +322,10 @@ class RadialGaugeWidget extends NTWidget {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            double squareSide =
-                min(constraints.maxWidth, constraints.maxHeight);
+            double squareSide = min(
+              constraints.maxWidth,
+              constraints.maxHeight,
+            );
 
             return Stack(
               alignment: Alignment.center,
@@ -342,14 +348,17 @@ class RadialGaugeWidget extends NTWidget {
                       secondaryRulersHeight: model.showTicks ? 8 : 0,
                       rulersOffset: -5,
                       labelOffset: -10,
-                      showLastLabel: _getWrappedValue(
-                              model.endAngle - model.startAngle,
-                              -180.0,
-                              180.0) !=
+                      showLastLabel:
+                          _getWrappedValue(
+                            model.endAngle - model.startAngle,
+                            -180.0,
+                            180.0,
+                          ) !=
                           0.0,
                     ),
-                    trackLabelFormater: (value) =>
-                        num.parse(value.toStringAsFixed(2)).toString(),
+                    trackLabelFormater:
+                        (value) =>
+                            num.parse(value.toStringAsFixed(2)).toString(),
                   ),
                   needlePointer: [
                     if (model.showPointer)

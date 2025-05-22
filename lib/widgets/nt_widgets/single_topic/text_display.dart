@@ -71,10 +71,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_submit_button': showSubmitButton,
-    };
+    return {...super.toJson(), 'show_submit_button': showSubmitButton};
   }
 
   void publishData(String value) {
@@ -106,24 +103,28 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
         break;
       case NT4TypeStr.kFloat32Arr:
       case NT4TypeStr.kFloat64Arr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
+        formattedData =
+            tryCast<List<dynamic>>(
+              jsonDecode(value),
+            )?.whereType<num>().toList();
         break;
       case NT4TypeStr.kIntArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
+        formattedData =
+            tryCast<List<dynamic>>(
+              jsonDecode(value),
+            )?.whereType<num>().toList();
         break;
       case NT4TypeStr.kBoolArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<bool>()
-            .toList();
+        formattedData =
+            tryCast<List<dynamic>>(
+              jsonDecode(value),
+            )?.whereType<bool>().toList();
         break;
       case NT4TypeStr.kStringArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<String>()
-            .toList();
+        formattedData =
+            tryCast<List<dynamic>>(
+              jsonDecode(value),
+            )?.whereType<String>().toList();
         break;
       default:
         break;
@@ -153,10 +154,7 @@ class TextDisplay extends NTWidget {
     ThemeData themeData = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: Listenable.merge([
-        model.subscription!,
-        model.controller,
-      ]),
+      listenable: Listenable.merge([model.subscription!, model.controller]),
       builder: (context, child) {
         Object? data = model.subscription!.value;
 

@@ -19,9 +19,9 @@ class CommandModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        runningSubscription,
-        nameSubscription,
-      ];
+    runningSubscription,
+    nameSubscription,
+  ];
 
   NT4Topic? runningTopic;
 
@@ -41,8 +41,8 @@ class CommandModel extends MultiTopicNTWidgetModel {
     bool showType = true,
     super.dataType,
     super.period,
-  })  : _showType = showType,
-        super();
+  }) : _showType = showType,
+       super();
 
   CommandModel.fromJson({
     required super.ntConnection,
@@ -54,8 +54,10 @@ class CommandModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    runningSubscription =
-        ntConnection.subscribe(runningTopicName, super.period);
+    runningSubscription = ntConnection.subscribe(
+      runningTopicName,
+      super.period,
+    );
     nameSubscription = ntConnection.subscribe(nameTopicName, super.period);
   }
 
@@ -68,10 +70,7 @@ class CommandModel extends MultiTopicNTWidgetModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_type': _showType,
-    };
+    return {...super.toJson(), 'show_type': _showType};
   }
 
   @override
@@ -106,22 +105,26 @@ class CommandWidget extends NTWidget {
         Visibility(
           visible: model.showType,
           child: ValueListenableBuilder(
-              valueListenable: model.nameSubscription,
-              builder: (context, data, child) {
-                String name = tryCast(data) ?? 'Unknown';
+            valueListenable: model.nameSubscription,
+            builder: (context, data, child) {
+              String name = tryCast(data) ?? 'Unknown';
 
-                return Text('Type: $name',
-                    style: theme.textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis);
-              }),
+              return Text(
+                'Type: $name',
+                style: theme.textTheme.bodySmall,
+                overflow: TextOverflow.ellipsis,
+              );
+            },
+          ),
         ),
         const SizedBox(height: 10),
         GestureDetector(
           onTapUp: (_) {
             bool publishTopic = model.runningTopic == null;
 
-            model.runningTopic ??=
-                model.ntConnection.getTopicFromName(model.runningTopicName);
+            model.runningTopic ??= model.ntConnection.getTopicFromName(
+              model.runningTopicName,
+            );
 
             if (model.runningTopic == null) {
               return;
@@ -135,37 +138,45 @@ class CommandWidget extends NTWidget {
             bool running =
                 model.runningSubscription.value?.tryCast<bool>() ?? false;
 
-            model.ntConnection
-                .updateDataFromTopic(model.runningTopic!, !running);
+            model.ntConnection.updateDataFromTopic(
+              model.runningTopic!,
+              !running,
+            );
           },
           child: ValueListenableBuilder(
-              valueListenable: model.runningSubscription,
-              builder: (context, data, child) {
-                bool running = tryCast(data) ?? false;
+            valueListenable: model.runningSubscription,
+            builder: (context, data, child) {
+              bool running = tryCast(data) ?? false;
 
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 50),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        offset: Offset(2, 2),
-                        blurRadius: 10.0,
-                        spreadRadius: -5,
-                        color: Colors.black,
-                      ),
-                    ],
-                    color: (running)
-                        ? theme.colorScheme.primaryContainer
-                        : const Color.fromARGB(255, 50, 50, 50),
-                  ),
-                  child: Text(buttonText,
-                      style: theme.textTheme.bodyLarge,
-                      overflow: TextOverflow.ellipsis),
-                );
-              }),
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 50),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 4.0,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      offset: Offset(2, 2),
+                      blurRadius: 10.0,
+                      spreadRadius: -5,
+                      color: Colors.black,
+                    ),
+                  ],
+                  color:
+                      (running)
+                          ? theme.colorScheme.primaryContainer
+                          : const Color.fromARGB(255, 50, 50, 50),
+                ),
+                child: Text(
+                  buttonText,
+                  style: theme.textTheme.bodyLarge,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            },
+          ),
         ),
       ],
     );

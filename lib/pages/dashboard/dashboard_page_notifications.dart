@@ -44,16 +44,15 @@ mixin DashboardPageNotifications on DashboardPageViewModel {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  }) =>
-      showNotification(
-        title: title,
-        message: message,
-        color: const Color(0xff01CB67),
-        icon: const Icon(Icons.error, color: Color(0xff01CB67)),
-        toastDuration: toastDuration,
-        width: width,
-        height: height,
-      );
+  }) => showNotification(
+    title: title,
+    message: message,
+    color: const Color(0xff01CB67),
+    icon: const Icon(Icons.error, color: Color(0xff01CB67)),
+    toastDuration: toastDuration,
+    width: width,
+    height: height,
+  );
 
   @override
   void showWarningNotification({
@@ -62,16 +61,15 @@ mixin DashboardPageNotifications on DashboardPageViewModel {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  }) =>
-      showNotification(
-        title: title,
-        message: message,
-        color: Colors.yellow,
-        icon: const Icon(Icons.warning, color: Colors.yellow),
-        toastDuration: toastDuration,
-        width: width,
-        height: height,
-      );
+  }) => showNotification(
+    title: title,
+    message: message,
+    color: Colors.yellow,
+    icon: const Icon(Icons.warning, color: Colors.yellow),
+    toastDuration: toastDuration,
+    width: width,
+    height: height,
+  );
 
   @override
   void showErrorNotification({
@@ -80,16 +78,15 @@ mixin DashboardPageNotifications on DashboardPageViewModel {
     Duration toastDuration = const Duration(seconds: 3, milliseconds: 500),
     double? width,
     double? height,
-  }) =>
-      showNotification(
-        title: title,
-        message: message,
-        color: const Color(0xffFE355C),
-        icon: const Icon(Icons.error, color: Color(0xffFE355C)),
-        toastDuration: toastDuration,
-        width: width,
-        height: height,
-      );
+  }) => showNotification(
+    title: title,
+    message: message,
+    color: const Color(0xffFE355C),
+    icon: const Icon(Icons.error, color: Color(0xffFE355C)),
+    toastDuration: toastDuration,
+    width: width,
+    height: height,
+  );
 
   @override
   void showNotification({
@@ -115,9 +112,7 @@ mixin DashboardPageNotifications on DashboardPageViewModel {
       icon: icon,
       title: Text(
         title,
-        style: textTheme.bodyMedium!.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
       ),
       description: Flexible(child: Text(message)),
     );

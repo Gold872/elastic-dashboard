@@ -6,10 +6,7 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_layout_
 import 'models/list_layout_model.dart';
 
 class DraggableListLayout extends DraggableLayoutContainer {
-  const DraggableListLayout({
-    super.key,
-    super.updateFunctions,
-  }) : super();
+  const DraggableListLayout({super.key, super.updateFunctions}) : super();
 
   @override
   Widget build(BuildContext context) {

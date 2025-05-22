@@ -26,11 +26,11 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        optionsSubscription,
-        selectedSubscription,
-        activeSubscription,
-        defaultSubscription,
-      ];
+    optionsSubscription,
+    selectedSubscription,
+    activeSubscription,
+    defaultSubscription,
+  ];
 
   late Listenable chooserStateListenable;
 
@@ -60,8 +60,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     bool sortOptions = false,
     super.dataType,
     super.period,
-  })  : _sortOptions = sortOptions,
-        super();
+  }) : _sortOptions = sortOptions,
+       super();
 
   ComboBoxChooserModel.fromJson({
     required super.ntConnection,
@@ -73,13 +73,19 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    optionsSubscription =
-        ntConnection.subscribe(optionsTopicName, super.period);
-    selectedSubscription =
-        ntConnection.subscribe(selectedTopicName, super.period);
+    optionsSubscription = ntConnection.subscribe(
+      optionsTopicName,
+      super.period,
+    );
+    selectedSubscription = ntConnection.subscribe(
+      selectedTopicName,
+      super.period,
+    );
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
-    defaultSubscription =
-        ntConnection.subscribe(defaultTopicName, super.period);
+    defaultSubscription = ntConnection.subscribe(
+      defaultTopicName,
+      super.period,
+    );
     chooserStateListenable = Listenable.merge(subscriptions);
     chooserStateListenable.addListener(onChooserStateUpdate);
 
@@ -103,10 +109,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'sort_options': _sortOptions,
-    };
+    return {...super.toJson(), 'sort_options': _sortOptions};
   }
 
   @override
@@ -147,7 +150,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
       currentDefault = null;
     }
 
-    bool hasValue = currentOptions != null ||
+    bool hasValue =
+        currentOptions != null ||
         currentActive != null ||
         currentDefault != null;
 
@@ -188,18 +192,14 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
-      existing.properties.addAll({
-        'retained': true,
-      });
+      existing.properties.addAll({'retained': true});
       ntConnection.publishTopic(existing);
       _selectedTopic = existing;
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
         NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        properties: {'retained': true},
       );
     }
   }
@@ -239,9 +239,7 @@ class ComboBoxChooser extends NTWidget {
       children: [
         Flexible(
           child: Container(
-            constraints: const BoxConstraints(
-              minHeight: 36.0,
-            ),
+            constraints: const BoxConstraints(minHeight: 36.0),
             child: _StringChooserDropdown(
               selected: preview,
               options: model.previousOptions ?? [preview ?? ''],
@@ -255,10 +253,10 @@ class ComboBoxChooser extends NTWidget {
         const SizedBox(width: 5),
         (showWarning)
             ? const Tooltip(
-                message:
-                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                child: Icon(Icons.priority_high, color: Colors.red),
-              )
+              message:
+                  'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+              child: Icon(Icons.priority_high, color: Colors.red),
+            )
             : const Icon(Icons.check, color: Colors.green),
       ],
     );
@@ -289,18 +287,19 @@ class _StringChooserDropdown extends StatelessWidget {
             return DropdownButton2<String>(
               isExpanded: true,
               value: selected,
-              selectedItemBuilder: (context) => [
-                ...options.map((String option) {
-                  return Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      option,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }),
-              ],
+              selectedItemBuilder:
+                  (context) => [
+                    ...options.map((String option) {
+                      return Container(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          option,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }),
+                  ],
               dropdownStyleData: DropdownStyleData(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
@@ -311,10 +310,9 @@ class _StringChooserDropdown extends StatelessWidget {
               dropdownSearchData: DropdownSearchData(
                 searchController: textController,
                 searchMatchFn: (item, searchValue) {
-                  return item.value
-                      .toString()
-                      .toLowerCase()
-                      .contains(searchValue.toLowerCase());
+                  return item.value.toString().toLowerCase().contains(
+                    searchValue.toLowerCase(),
+                  );
                 },
                 searchInnerWidgetHeight: 50,
                 searchInnerWidget: Container(
@@ -344,13 +342,16 @@ class _StringChooserDropdown extends StatelessWidget {
                   ),
                 ),
               ),
-              items: options.map((String option) {
-                return DropdownMenuItem(
-                  value: option,
-                  child: Text(option,
-                      style: Theme.of(context).textTheme.bodyMedium),
-                );
-              }).toList(),
+              items:
+                  options.map((String option) {
+                    return DropdownMenuItem(
+                      value: option,
+                      child: Text(
+                        option,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    );
+                  }).toList(),
               onMenuStateChange: (isOpen) {
                 if (!isOpen) {
                   textController.clear();

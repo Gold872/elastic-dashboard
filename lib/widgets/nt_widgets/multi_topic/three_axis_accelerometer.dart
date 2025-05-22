@@ -20,10 +20,10 @@ class ThreeAxisAccelerometerModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        xSubscription,
-        ySubscription,
-        zSubscription,
-      ];
+    xSubscription,
+    ySubscription,
+    zSubscription,
+  ];
 
   ThreeAxisAccelerometerModel({
     required super.ntConnection,
@@ -77,27 +77,26 @@ class ThreeAxisAccelerometer extends NTWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ValueListenableBuilder(
-                      valueListenable: model.xSubscription,
-                      builder: (context, value, child) {
-                        double xAccel = tryCast(value) ?? 0.0;
-                        return Text(
-                          '${xAccel.toStringAsFixed(2)} g',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            overflow: TextOverflow.ellipsis,
-                            fontSize: 12.0,
-                          ),
-                          textAlign: TextAlign.center,
-                        );
-                      }),
+                    valueListenable: model.xSubscription,
+                    builder: (context, value, child) {
+                      double xAccel = tryCast(value) ?? 0.0;
+                      return Text(
+                        '${xAccel.toStringAsFixed(2)} g',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const Flexible(
-          child: SizedBox(height: 4.0),
-        ),
+        const Flexible(child: SizedBox(height: 4.0)),
         // Y Acceleration
         Flexible(
           flex: 16,
@@ -115,27 +114,26 @@ class ThreeAxisAccelerometer extends NTWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ValueListenableBuilder(
-                      valueListenable: model.ySubscription,
-                      builder: (context, value, child) {
-                        double yAccel = tryCast(value) ?? 0.0;
-                        return Text(
-                          '${yAccel.toStringAsFixed(2)} g',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            overflow: TextOverflow.ellipsis,
-                            fontSize: 12.0,
-                          ),
-                          textAlign: TextAlign.center,
-                        );
-                      }),
+                    valueListenable: model.ySubscription,
+                    builder: (context, value, child) {
+                      double yAccel = tryCast(value) ?? 0.0;
+                      return Text(
+                        '${yAccel.toStringAsFixed(2)} g',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const Flexible(
-          child: SizedBox(height: 4.0),
-        ),
+        const Flexible(child: SizedBox(height: 4.0)),
         // Z Acceleration
         Flexible(
           flex: 16,
@@ -153,19 +151,20 @@ class ThreeAxisAccelerometer extends NTWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ValueListenableBuilder(
-                      valueListenable: model.zSubscription,
-                      builder: (context, value, child) {
-                        double zAccel = tryCast(value) ?? 0.0;
-                        return Text(
-                          '${zAccel.toStringAsFixed(2)} g',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            overflow: TextOverflow.ellipsis,
-                            fontSize: 12.0,
-                          ),
-                          textAlign: TextAlign.center,
-                        );
-                      }),
+                    valueListenable: model.zSubscription,
+                    builder: (context, value, child) {
+                      double zAccel = tryCast(value) ?? 0.0;
+                      return Text(
+                        '${zAccel.toStringAsFixed(2)} g',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

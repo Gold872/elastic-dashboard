@@ -47,19 +47,15 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Mjpeg(
-            controller: controller,
-          ),
-        ),
-      ),
+      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
     );
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Attempting to establish HTTP connection.'), findsOneWidget);
+      find.text('Attempting to establish HTTP connection.'),
+      findsOneWidget,
+    );
 
     await widgetTester.pump(const Duration(seconds: 5));
 
@@ -73,8 +69,9 @@ void main() {
 
     // Destroyes the visilibty detector and cancels its timers
     await widgetTester.pumpWidget(const Placeholder());
-    await widgetTester
-        .pump(VisibilityDetectorController.instance.updateInterval);
+    await widgetTester.pump(
+      VisibilityDetectorController.instance.updateInterval,
+    );
   });
 
   testWidgets('Return stream with error code', (widgetTester) async {
@@ -92,38 +89,38 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Mjpeg(
-            controller: controller,
-          ),
-        ),
-      ),
+      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
     );
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Attempting to establish HTTP connection.'), findsOneWidget);
+      find.text('Attempting to establish HTTP connection.'),
+      findsOneWidget,
+    );
 
-    await widgetTester
-        .pump(VisibilityDetectorController.instance.updateInterval);
+    await widgetTester.pump(
+      VisibilityDetectorController.instance.updateInterval,
+    );
 
     await widgetTester.pumpAndSettle();
 
     expect(controller.errorState.value, isNotNull);
     expect(find.byType(CustomLoadingIndicator), findsNothing);
     expect(
-        find.textContaining(
-            'Stream returned status code 400: "Placeholder error message"'),
-        findsOneWidget);
+      find.textContaining(
+        'Stream returned status code 400: "Placeholder error message"',
+      ),
+      findsOneWidget,
+    );
 
     controller.dispose();
 
     // Destroyes the visilibty detector and cancels its timers
     await widgetTester.pumpWidget(const Placeholder());
-    await widgetTester
-        .pump(VisibilityDetectorController.instance.updateInterval);
+    await widgetTester.pump(
+      VisibilityDetectorController.instance.updateInterval,
+    );
   });
 
   test('Cycles through invalid URLs', () async {
@@ -174,22 +171,19 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Mjpeg(
-            controller: controller,
-          ),
-        ),
-      ),
+      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
     );
     await widgetTester.pumpAndSettle();
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Attempting to establish HTTP connection.'), findsOneWidget);
+      find.text('Attempting to establish HTTP connection.'),
+      findsOneWidget,
+    );
 
-    await widgetTester
-        .pump(VisibilityDetectorController.instance.updateInterval);
+    await widgetTester.pump(
+      VisibilityDetectorController.instance.updateInterval,
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -197,15 +191,18 @@ void main() {
     expect(controller.errorState.value, isNull);
 
     expect(
-        find.text(
-            'Connection established but no data received.\nCamera may be disconnected from device.'),
-        findsOneWidget);
+      find.text(
+        'Connection established but no data received.\nCamera may be disconnected from device.',
+      ),
+      findsOneWidget,
+    );
 
     controller.dispose();
 
     // Destroyes the visilibty detector and cancels its timers
     await widgetTester.pumpWidget(const Placeholder());
-    await widgetTester
-        .pump(VisibilityDetectorController.instance.updateInterval);
+    await widgetTester.pump(
+      VisibilityDetectorController.instance.updateInterval,
+    );
   });
 }

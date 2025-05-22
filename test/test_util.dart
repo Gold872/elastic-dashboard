@@ -35,8 +35,9 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.serverTime).thenReturn(0);
 
-  when(mockNT4Connection.connectionStatus())
-      .thenAnswer((_) => Stream.value(false));
+  when(
+    mockNT4Connection.connectionStatus(),
+  ).thenAnswer((_) => Stream.value(false));
 
   when(mockNT4Connection.dsConnected).thenReturn(ValueNotifier(false));
   when(mockNT4Connection.isDSConnected).thenReturn(false);
@@ -91,8 +92,9 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockNT4Connection.announcedTopics()).thenReturn(virtualTopicsMap);
 
-  when(mockNT4Connection.addTopicAnnounceListener(any))
-      .thenAnswer((invocation) {
+  when(mockNT4Connection.addTopicAnnounceListener(any)).thenAnswer((
+    invocation,
+  ) {
     for (NT4Topic topic in virtualTopics!) {
       invocation.positionalArguments[0].call(topic);
     }
@@ -107,8 +109,9 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockNT4Connection.serverTime).thenReturn(serverTime);
 
-  when(mockNT4Connection.connectionStatus())
-      .thenAnswer((_) => Stream.value(true));
+  when(
+    mockNT4Connection.connectionStatus(),
+  ).thenAnswer((_) => Stream.value(true));
 
   when(mockNT4Connection.dsConnected).thenReturn(ValueNotifier(true));
   when(mockNT4Connection.isDSConnected).thenReturn(true);
@@ -125,17 +128,20 @@ MockNTConnection createMockOnlineNT4({
 
   when(mockNT4Connection.getTopicFromName(any)).thenReturn(null);
 
-  when(mockNT4Connection.publishNewTopic(
-    any,
-    any,
-    properties: anyNamed('properties'),
-  )).thenAnswer((invocation) {
+  when(
+    mockNT4Connection.publishNewTopic(
+      any,
+      any,
+      properties: anyNamed('properties'),
+    ),
+  ).thenAnswer((invocation) {
     NT4Topic newTopic = NT4Topic(
       name: invocation.positionalArguments[0],
       type: invocation.positionalArguments[1],
-      properties: invocation.positionalArguments.length >= 3
-          ? invocation.positionalArguments[2]
-          : {},
+      properties:
+          invocation.positionalArguments.length >= 3
+              ? invocation.positionalArguments[2]
+              : {},
     );
 
     virtualTopicsMap[virtualTopicsMap.length] = newTopic;
@@ -155,16 +161,18 @@ MockNTConnection createMockOnlineNT4({
     return publishedTopics.contains(invocation.positionalArguments[0]);
   });
 
-  when(mockNT4Connection.updateDataFromTopic(any, any))
-      .thenAnswer((invocation) {
+  when(mockNT4Connection.updateDataFromTopic(any, any)).thenAnswer((
+    invocation,
+  ) {
     NT4Topic topic = invocation.positionalArguments[0];
     Object? data = invocation.positionalArguments[1];
 
     virtualValues![topic.name] = data;
   });
 
-  when(mockNT4Connection.updateDataFromTopicName(any, any))
-      .thenAnswer((invocation) {
+  when(mockNT4Connection.updateDataFromTopicName(any, any)).thenAnswer((
+    invocation,
+  ) {
     String topic = invocation.positionalArguments[0];
     Object? data = invocation.positionalArguments[1];
 
@@ -198,86 +206,93 @@ MockNTConnection createMockOnlineNT4({
       subscriptionNotifiers.remove(invocation.positionalArguments[0]);
     });
 
-    when(mockNT4Connection.updateDataFromTopic(topic, any))
-        .thenAnswer((invocation) {
+    when(mockNT4Connection.updateDataFromTopic(topic, any)).thenAnswer((
+      invocation,
+    ) {
       virtualValues![topic.name] = invocation.positionalArguments[1];
       topicSubscription.updateValue(invocation.positionalArguments[1], 0);
     });
 
-    when(mockNT4Connection.updateDataFromTopicName(topic.name, any))
-        .thenAnswer((invocation) {
-      virtualValues![topic.name] = invocation.positionalArguments[1];
-      topicSubscription.updateValue(invocation.positionalArguments[1], 0);
-    });
+    when(mockNT4Connection.updateDataFromTopicName(topic.name, any)).thenAnswer(
+      (invocation) {
+        virtualValues![topic.name] = invocation.positionalArguments[1];
+        topicSubscription.updateValue(invocation.positionalArguments[1], 0);
+      },
+    );
 
-    when(mockNT4Connection.updateDataFromSubscription(topicSubscription, any))
-        .thenAnswer((invocation) {
+    when(
+      mockNT4Connection.updateDataFromSubscription(topicSubscription, any),
+    ).thenAnswer((invocation) {
       virtualValues![topic.name] = invocation.positionalArguments[1];
       topicSubscription.updateValue(invocation.positionalArguments[1], 0);
     });
 
     when(mockNT4Connection.getTopicFromName(topic.name)).thenReturn(topic);
 
-    when(topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')))
-        .thenAnswer((_) => Stream.value(virtualValues![topic.name]));
+    when(
+      topicSubscription.periodicStream(yieldAll: anyNamed('yieldAll')),
+    ).thenAnswer((_) => Stream.value(virtualValues![topic.name]));
 
     when(topicSubscription.listen(any)).thenAnswer((invocation) {
       subscriptionListeners.add(invocation.positionalArguments[0]);
     });
 
-    when(topicSubscription.updateValue(any, any)).thenAnswer(
-      (invocation) {
-        virtualValues![topic.name] = invocation.positionalArguments[0];
-        for (var value in subscriptionListeners) {
-          value.call(invocation.positionalArguments[0],
-              invocation.positionalArguments[1]);
-        }
-        topicSubscription.value = invocation.positionalArguments[0];
-      },
-    );
+    when(topicSubscription.updateValue(any, any)).thenAnswer((invocation) {
+      virtualValues![topic.name] = invocation.positionalArguments[0];
+      for (var value in subscriptionListeners) {
+        value.call(
+          invocation.positionalArguments[0],
+          invocation.positionalArguments[1],
+        );
+      }
+      topicSubscription.value = invocation.positionalArguments[0];
+    });
 
-    when(mockNT4Connection.getLastAnnouncedValue(topic.name))
-        .thenAnswer((_) => virtualValues![topic.name]);
+    when(
+      mockNT4Connection.getLastAnnouncedValue(topic.name),
+    ).thenAnswer((_) => virtualValues![topic.name]);
 
-    when(mockNT4Connection.subscribe(topic.name, any))
-        .thenAnswer((_) => topicSubscription);
+    when(
+      mockNT4Connection.subscribe(topic.name, any),
+    ).thenAnswer((_) => topicSubscription);
 
-    when(mockNT4Connection.subscribeAll(topic.name, any))
-        .thenAnswer((_) => topicSubscription);
+    when(
+      mockNT4Connection.subscribeAll(topic.name, any),
+    ).thenAnswer((_) => topicSubscription);
   }
 
   return mockNT4Connection;
 }
 
-@GenerateNiceMocks([
-  MockSpec<UpdateChecker>(),
-])
-MockUpdateChecker createMockUpdateChecker(
-    {bool updateAvailable = false, String latestVersion = '0.0.0.0'}) {
+@GenerateNiceMocks([MockSpec<UpdateChecker>()])
+MockUpdateChecker createMockUpdateChecker({
+  bool updateAvailable = false,
+  String latestVersion = '0.0.0.0',
+}) {
   MockUpdateChecker updateChecker = MockUpdateChecker();
 
   when(updateChecker.isUpdateAvailable()).thenAnswer(
     (_) => Future.value(
       UpdateCheckerResponse(
-          updateAvailable: updateAvailable,
-          error: false,
-          latestVersion: latestVersion),
+        updateAvailable: updateAvailable,
+        error: false,
+        latestVersion: latestVersion,
+      ),
     ),
   );
 
   return updateChecker;
 }
 
-@GenerateNiceMocks([
-  MockSpec<Client>(),
-])
+@GenerateNiceMocks([MockSpec<Client>()])
 MockClient createHttpClient({Map<String, Response>? mockGetResponses}) {
   MockClient mockClient = MockClient();
 
   if (mockGetResponses != null) {
     for (MapEntry<String, Response> mockRequest in mockGetResponses.entries) {
-      when(mockClient.get(Uri.parse(mockRequest.key)))
-          .thenAnswer((_) => Future.value(mockRequest.value));
+      when(
+        mockClient.get(Uri.parse(mockRequest.key)),
+      ).thenAnswer((_) => Future.value(mockRequest.value));
     }
   }
   return mockClient;
@@ -295,12 +310,14 @@ void ignoreOverflowErrors(
   // Detect overflow error.
   var exception = details.exception;
   if (exception is FlutterError) {
-    ifIsOverflowError = !exception.diagnostics.any(
-      (e) => e.value.toString().startsWith('A RenderFlex overflowed by'),
-    );
-    isUnableToLoadAsset = !exception.diagnostics.any(
-      (e) => e.value.toString().startsWith('Unable to load asset'),
-    );
+    ifIsOverflowError =
+        !exception.diagnostics.any(
+          (e) => e.value.toString().startsWith('A RenderFlex overflowed by'),
+        );
+    isUnableToLoadAsset =
+        !exception.diagnostics.any(
+          (e) => e.value.toString().startsWith('Unable to load asset'),
+        );
   }
 
   // Ignore if is overflow error.

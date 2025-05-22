@@ -3,10 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 
-typedef SubscriptionIdentification = ({
-  String topic,
-  NT4SubscriptionOptions options
-});
+typedef SubscriptionIdentification =
+    ({String topic, NT4SubscriptionOptions options});
 
 class NTConnection {
   late NT4Client _ntClient;
@@ -42,21 +40,22 @@ class NTConnection {
 
   void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
-        serverBaseAddress: ipAddress,
-        onConnect: () {
-          _ntConnected.value = true;
+      serverBaseAddress: ipAddress,
+      onConnect: () {
+        _ntConnected.value = true;
 
-          for (VoidCallback callback in onConnectedListeners) {
-            callback.call();
-          }
-        },
-        onDisconnect: () {
-          _ntConnected.value = false;
+        for (VoidCallback callback in onConnectedListeners) {
+          callback.call();
+        }
+      },
+      onDisconnect: () {
+        _ntConnected.value = false;
 
-          for (VoidCallback callback in onDisconnectedListeners) {
-            callback.call();
-          }
-        });
+        for (VoidCallback callback in onDisconnectedListeners) {
+          callback.call();
+        }
+      },
+    );
 
     // Allows all published topics to be announced
     _ntClient.subscribe(
@@ -65,9 +64,10 @@ class NTConnection {
     );
   }
 
-  void dsClientConnect(
-      {Function(String ip)? onIPAnnounced,
-      Function(bool isDocked)? onDriverStationDockChanged}) {
+  void dsClientConnect({
+    Function(String ip)? onIPAnnounced,
+    Function(bool isDocked)? onDriverStationDockChanged,
+  }) {
     _dsClient = DSInteropClient(
       onNewIPAnnounced: onIPAnnounced,
       onDriverStationDockChanged: onDriverStationDockChanged,
@@ -108,17 +108,21 @@ class NTConnection {
     _ntClient.removeTopicUnannounceListener(onUnannounce);
   }
 
-  Future<T?>? subscribeAndRetrieveData<T>(String topic,
-      {period = 0.1,
-      timeout = const Duration(seconds: 2, milliseconds: 500)}) async {
+  Future<T?>? subscribeAndRetrieveData<T>(
+    String topic, {
+    period = 0.1,
+    timeout = const Duration(seconds: 2, milliseconds: 500),
+  }) async {
     NT4Subscription subscription = subscribe(topic, period);
 
     T? value;
     try {
-      value = await subscription
-          .periodicStream()
-          .firstWhere((element) => element != null && element is T)
-          .timeout(timeout) as T?;
+      value =
+          await subscription
+                  .periodicStream()
+                  .firstWhere((element) => element != null && element is T)
+                  .timeout(timeout)
+              as T?;
     } catch (e) {
       value = null;
     }
@@ -158,8 +162,9 @@ class NTConnection {
   }
 
   NT4Subscription subscribe(String topic, [double period = 0.1]) {
-    NT4SubscriptionOptions subscriptionOptions =
-        NT4SubscriptionOptions(periodicRateSeconds: period);
+    NT4SubscriptionOptions subscriptionOptions = NT4SubscriptionOptions(
+      periodicRateSeconds: period,
+    );
 
     int hashCode = Object.hash(topic, subscriptionOptions);
 
@@ -170,8 +175,10 @@ class NTConnection {
       return existingSubscription;
     }
 
-    NT4Subscription newSubscription =
-        _ntClient.subscribe(topic: topic, options: subscriptionOptions);
+    NT4Subscription newSubscription = _ntClient.subscribe(
+      topic: topic,
+      options: subscriptionOptions,
+    );
 
     subscriptionMap[hashCode] = newSubscription;
     subscriptionUseCount[newSubscription] = 1;
@@ -181,11 +188,9 @@ class NTConnection {
 
   NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
     return _ntClient.subscribe(
-        topic: topic,
-        options: NT4SubscriptionOptions(
-          periodicRateSeconds: period,
-          all: true,
-        ));
+      topic: topic,
+      options: NT4SubscriptionOptions(periodicRateSeconds: period, all: true),
+    );
   }
 
   void unSubscribe(NT4Subscription subscription) {

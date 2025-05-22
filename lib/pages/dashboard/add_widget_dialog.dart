@@ -20,11 +20,11 @@ class AddWidgetDialog extends StatefulWidget {
   final int gridIndex;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)
-      onNTDragUpdate;
+  onNTDragUpdate;
   final void Function(WidgetContainerModel widget) onNTDragEnd;
 
   final void Function(Offset globalPosition, LayoutContainerModel widget)
-      onLayoutDragUpdate;
+  onLayoutDragUpdate;
   final void Function(LayoutContainerModel widget) onLayoutDragEnd;
 
   final void Function() onClose;
@@ -70,14 +70,16 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
   Widget build(BuildContext context) {
     return DraggableDialog(
       dialog: Container(
-        decoration: const BoxDecoration(boxShadow: [
-          BoxShadow(
-            blurRadius: 20,
-            spreadRadius: -12.5,
-            offset: Offset(5.0, 5.0),
-            color: Colors.black87,
-          )
-        ]),
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              spreadRadius: -12.5,
+              offset: Offset(5.0, 5.0),
+              color: Colors.black87,
+            ),
+          ],
+        ),
         child: Card(
           margin: const EdgeInsets.all(10.0),
           child: DefaultTabController(
@@ -86,13 +88,12 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
               children: [
                 const Icon(Icons.drag_handle, color: Colors.grey),
                 const SizedBox(height: 10),
-                Text('Add Widget',
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Add Widget',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const TabBar(
-                  tabs: [
-                    Tab(text: 'Network Tables'),
-                    Tab(text: 'Layouts'),
-                  ],
+                  tabs: [Tab(text: 'Network Tables'), Tab(text: 'Layouts')],
                 ),
                 const SizedBox(height: 5),
                 Expanded(
@@ -127,41 +128,44 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                 ),
                 Row(
                   children: [
-                    Builder(builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.settings),
-                        onPressed: () {
-                          showPopover(
-                            context: context,
-                            direction: PopoverDirection.top,
-                            transitionDuration:
-                                const Duration(milliseconds: 100),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.surface,
-                            barrierColor: Colors.transparent,
-                            width: 200.0,
-                            bodyBuilder: (context) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: DialogToggleSwitch(
-                                  label: 'Hide Metadata',
-                                  initialValue: _hideMetadata,
-                                  onToggle: (value) {
-                                    setState(() => _hideMetadata = value);
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    }),
+                    Builder(
+                      builder: (context) {
+                        return IconButton(
+                          icon: const Icon(Icons.settings),
+                          onPressed: () {
+                            showPopover(
+                              context: context,
+                              direction: PopoverDirection.top,
+                              transitionDuration: const Duration(
+                                milliseconds: 100,
+                              ),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surface,
+                              barrierColor: Colors.transparent,
+                              width: 200.0,
+                              bodyBuilder: (context) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: DialogToggleSwitch(
+                                    label: 'Hide Metadata',
+                                    initialValue: _hideMetadata,
+                                    onToggle: (value) {
+                                      setState(() => _hideMetadata = value);
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                     Expanded(
                       child: SizedBox(
                         height: 40.0,
                         child: DialogTextInput(
-                          onSubmit: (value) =>
-                              setState(() => _searchQuery = value),
+                          onSubmit:
+                              (value) => setState(() => _searchQuery = value),
                           allowEmptySubmission: true,
                           updateOnChanged: true,
                           label: 'Search',

@@ -51,8 +51,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   String getUrlWithParameters(String urlString) {
     Uri url = Uri.parse(urlString);
 
-    Map<String, String> parameters =
-        Map<String, String>.from(url.queryParameters);
+    Map<String, String> parameters = Map<String, String>.from(
+      url.queryParameters,
+    );
 
     parameters.addAll({
       if (resolution != null &&
@@ -77,11 +78,11 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     int rotation = 0,
     super.dataType,
     super.period,
-  })  : _quality = compression,
-        _fps = fps,
-        _resolution = resolution,
-        _rotationTurns = rotation,
-        super();
+  }) : _quality = compression,
+       _fps = fps,
+       _resolution = resolution,
+       _rotationTurns = rotation,
+       super();
 
   CameraStreamModel.fromJson({
     required super.ntConnection,
@@ -92,9 +93,10 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _fps = tryCast(jsonData['fps']);
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
 
-    List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
-        ?.whereType<num>()
-        .toList();
+    List<num>? resolution =
+        tryCast<List<Object?>>(
+          jsonData['resolution'],
+        )?.whereType<num>().toList();
 
     if (resolution != null && resolution.length > 1) {
       if (resolution[0] % 2 != 0) {
@@ -132,96 +134,95 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
       if (quality != null) 'compression': quality,
       if (fps != null) 'fps': fps,
       if (resolution != null)
-        'resolution': [
-          resolution!.width,
-          resolution!.height,
-        ],
+        'resolution': [resolution!.width, resolution!.height],
     };
   }
 
   @override
   List<Widget> getEditProperties(BuildContext context) {
     return [
-      StatefulBuilder(builder: (context, setState) {
-        return Row(
-          children: [
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: fps?.toString() ?? '-1',
-                label: 'FPS',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newFPS = int.tryParse(value);
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Row(
+            children: [
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: fps?.toString() ?? '-1',
+                  label: 'FPS',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newFPS = int.tryParse(value);
 
-                  setState(() {
-                    if (newFPS == -1 || newFPS == 0) {
-                      fps = null;
-                      return;
-                    }
+                    setState(() {
+                      if (newFPS == -1 || newFPS == 0) {
+                        fps = null;
+                        return;
+                      }
 
-                    fps = newFPS;
-                  });
-                },
+                      fps = newFPS;
+                    });
+                  },
+                ),
               ),
-            ),
-            const SizedBox(width: 10.0),
-            const Text('Resolution'),
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: resolution?.width.floor().toString() ?? '-1',
-                label: 'Width',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newWidth = int.tryParse(value);
+              const SizedBox(width: 10.0),
+              const Text('Resolution'),
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: resolution?.width.floor().toString() ?? '-1',
+                  label: 'Width',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newWidth = int.tryParse(value);
 
-                  setState(() {
-                    if (newWidth == null || newWidth == 0) {
-                      resolution = null;
-                      return;
-                    }
+                    setState(() {
+                      if (newWidth == null || newWidth == 0) {
+                        resolution = null;
+                        return;
+                      }
 
-                    if (newWidth! % 2 != 0) {
-                      // Won't allow += for some reason
-                      newWidth = newWidth! + 1;
-                    }
+                      if (newWidth! % 2 != 0) {
+                        // Won't allow += for some reason
+                        newWidth = newWidth! + 1;
+                      }
 
-                    resolution = Size(
-                      newWidth!.toDouble(),
-                      resolution?.height.toDouble() ?? 0,
-                    );
-                  });
-                },
+                      resolution = Size(
+                        newWidth!.toDouble(),
+                        resolution?.height.toDouble() ?? 0,
+                      );
+                    });
+                  },
+                ),
               ),
-            ),
-            const Text('x'),
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: resolution?.height.floor().toString() ?? '-1',
-                label: 'Height',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newHeight = int.tryParse(value);
+              const Text('x'),
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: resolution?.height.floor().toString() ?? '-1',
+                  label: 'Height',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newHeight = int.tryParse(value);
 
-                  setState(() {
-                    if (newHeight == null || newHeight == 0) {
-                      resolution = null;
-                      return;
-                    }
+                    setState(() {
+                      if (newHeight == null || newHeight == 0) {
+                        resolution = null;
+                        return;
+                      }
 
-                    resolution = Size(
-                      resolution?.width.toDouble() ?? 0,
-                      newHeight.toDouble(),
-                    );
-                  });
-                },
+                      resolution = Size(
+                        resolution?.width.toDouble() ?? 0,
+                        newHeight.toDouble(),
+                      );
+                    });
+                  },
+                ),
               ),
-            ),
-          ],
-        );
-      }),
+            ],
+          );
+        },
+      ),
       StatefulBuilder(
         builder: (context, setState) {
           return Row(
@@ -389,11 +390,13 @@ class CameraStreamWidget extends NTWidget {
 
         bool createNewWidget = model.controller == null;
 
-        List<String> streamUrls = streams
-            .map((stream) => model.getUrlWithParameters(stream))
-            .toList();
+        List<String> streamUrls =
+            streams
+                .map((stream) => model.getUrlWithParameters(stream))
+                .toList();
 
-        createNewWidget = createNewWidget ||
+        createNewWidget =
+            createNewWidget ||
             !(model.controller?.streams.equals(streamUrls) ?? false);
 
         if (createNewWidget) {
@@ -418,8 +421,9 @@ class CameraStreamWidget extends NTWidget {
                   const Spacer(),
                   ValueListenableBuilder(
                     valueListenable: model.controller!.bandwidth,
-                    builder: (context, value, child) =>
-                        Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
+                    builder:
+                        (context, value, child) =>
+                            Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
                   ),
                 ],
               ),

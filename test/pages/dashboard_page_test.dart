@@ -172,7 +172,9 @@ void main() {
       await pumpDashboardPage(widgetTester, preferences);
 
       expect(
-          find.textContaining('Network Tables: Disconnected'), findsOneWidget);
+        find.textContaining('Network Tables: Disconnected'),
+        findsOneWidget,
+      );
       expect(find.textContaining('Network Tables: Connected'), findsNothing);
       expect(find.textContaining('(10.3.53.2)'), findsNothing);
       expect(find.text('Team 353'), findsOneWidget);
@@ -252,10 +254,14 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
-      final smartDashboardTile =
-          find.widgetWithText(TreeTile, 'SmartDashboard');
+      final smartDashboardTile = find.widgetWithText(
+        TreeTile,
+        'SmartDashboard',
+      );
 
       expect(smartDashboardTile, findsOneWidget);
 
@@ -341,10 +347,14 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
-      final smartDashboardTile =
-          find.widgetWithText(TreeTile, 'SmartDashboard');
+      final smartDashboardTile = find.widgetWithText(
+        TreeTile,
+        'SmartDashboard',
+      );
 
       expect(smartDashboardTile, findsOneWidget);
 
@@ -352,20 +362,28 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       final testValueTile = find.widgetWithText(TreeTile, 'Test Value 1');
-      final testValueContainer =
-          find.widgetWithText(WidgetContainer, 'Test Value 1');
+      final testValueContainer = find.widgetWithText(
+        WidgetContainer,
+        'Test Value 1',
+      );
 
       expect(testValueTile, findsOneWidget);
       expect(find.widgetWithText(TreeTile, 'Test Value 2'), findsOneWidget);
 
-      await widgetTester.drag(testValueTile, const Offset(100, 100),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        testValueTile,
+        const Offset(100, 100),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(testValueContainer, findsNothing);
 
-      await widgetTester.drag(testValueTile, const Offset(300, -150),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        testValueTile,
+        const Offset(300, -150),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(testValueContainer, findsOneWidget);
@@ -398,7 +416,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
       final layoutsTab = find.text('Layouts');
       expect(layoutsTab, findsOneWidget);
@@ -406,28 +426,37 @@ void main() {
       await widgetTester.tap(layoutsTab);
       await widgetTester.pumpAndSettle();
 
-      final listLayoutContainer =
-          find.widgetWithText(WidgetContainer, 'List Layout');
+      final listLayoutContainer = find.widgetWithText(
+        WidgetContainer,
+        'List Layout',
+      );
       expect(listLayoutContainer, findsNothing);
 
       final listLayoutTile = find.widgetWithText(LayoutDragTile, 'List Layout');
       expect(listLayoutTile, findsOneWidget);
 
-      await widgetTester.drag(listLayoutTile, const Offset(100, 100),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        listLayoutTile,
+        const Offset(100, 100),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(listLayoutContainer, findsNothing);
 
-      await widgetTester.drag(listLayoutTile, const Offset(300, -150),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        listLayoutTile,
+        const Offset(300, -150),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(listLayoutContainer, findsOneWidget);
     });
 
-    testWidgets('Add widget dialog (list layout sub-table)',
-        (widgetTester) async {
+    testWidgets('Add widget dialog (list layout sub-table)', (
+      widgetTester,
+    ) async {
       await pumpDashboardPage(
         widgetTester,
         preferences,
@@ -465,14 +494,18 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
       final nonTypedTile = find.widgetWithText(TreeTile, 'Non-Typed');
 
       expect(nonTypedTile, findsOneWidget);
 
-      final nonTypedContainer =
-          find.widgetWithText(WidgetContainer, 'Non-Typed');
+      final nonTypedContainer = find.widgetWithText(
+        WidgetContainer,
+        'Non-Typed',
+      );
       expect(nonTypedContainer, findsNothing);
 
       await widgetTester.drag(
@@ -485,8 +518,9 @@ void main() {
       expect(nonTypedContainer, findsOneWidget);
     });
 
-    testWidgets('Add widget dialog (unregistered sendable)',
-        (widgetTester) async {
+    testWidgets('Add widget dialog (unregistered sendable)', (
+      widgetTester,
+    ) async {
       await pumpDashboardPage(
         widgetTester,
         preferences,
@@ -513,9 +547,7 @@ void main() {
               properties: {},
             ),
           ],
-          virtualValues: {
-            '/Non-Registered/.type': 'Non Registered Type',
-          },
+          virtualValues: {'/Non-Registered/.type': 'Non Registered Type'},
         ),
       );
 
@@ -532,14 +564,18 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
       final nonRegisteredTile = find.widgetWithText(TreeTile, 'Non-Registered');
 
       expect(nonRegisteredTile, findsOneWidget);
 
-      final nonRegistered =
-          find.widgetWithText(WidgetContainer, 'Non-Registered');
+      final nonRegistered = find.widgetWithText(
+        WidgetContainer,
+        'Non-Registered',
+      );
       expect(nonRegistered, findsNothing);
 
       await widgetTester.drag(
@@ -573,7 +609,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(DraggableDialog, 'Add Widget'), findsOneWidget);
+        find.widgetWithText(DraggableDialog, 'Add Widget'),
+        findsOneWidget,
+      );
 
       final layoutsTab = find.text('Layouts');
       expect(layoutsTab, findsOneWidget);
@@ -581,21 +619,29 @@ void main() {
       await widgetTester.tap(layoutsTab);
       await widgetTester.pumpAndSettle();
 
-      final listLayoutContainer =
-          find.widgetWithText(WidgetContainer, 'List Layout');
+      final listLayoutContainer = find.widgetWithText(
+        WidgetContainer,
+        'List Layout',
+      );
       expect(listLayoutContainer, findsNothing);
 
       final listLayoutTile = find.widgetWithText(LayoutDragTile, 'List Layout');
       expect(listLayoutTile, findsOneWidget);
 
-      await widgetTester.drag(listLayoutTile, const Offset(100, 100),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        listLayoutTile,
+        const Offset(100, 100),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(listLayoutContainer, findsNothing);
 
-      await widgetTester.drag(listLayoutTile, const Offset(300, -150),
-          kind: PointerDeviceKind.mouse);
+      await widgetTester.drag(
+        listLayoutTile,
+        const Offset(300, -150),
+        kind: PointerDeviceKind.mouse,
+      );
       await widgetTester.pumpAndSettle();
 
       expect(listLayoutContainer, findsOneWidget);
@@ -607,30 +653,40 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       final listLayout = find.ancestor(
-          of: find.widgetWithText(WidgetContainer, 'List Layout'),
-          matching: find.byType(DraggableListLayout));
+        of: find.widgetWithText(WidgetContainer, 'List Layout'),
+        matching: find.byType(DraggableListLayout),
+      );
       expect(listLayout, findsOneWidget);
 
-      final testBooleanContainer =
-          find.widgetWithText(WidgetContainer, 'Test Boolean');
+      final testBooleanContainer = find.widgetWithText(
+        WidgetContainer,
+        'Test Boolean',
+      );
       expect(testBooleanContainer, findsOneWidget);
 
       final testBooleanInLayout = find.descendant(
-          of: find.widgetWithText(WidgetContainer, 'List Layout'),
-          matching: find.byType(BooleanBox));
+        of: find.widgetWithText(WidgetContainer, 'List Layout'),
+        matching: find.byType(BooleanBox),
+      );
 
       expect(testBooleanInLayout, findsNothing);
 
       // Drag into layout
-      await widgetTester.timedDrag(testBooleanContainer, const Offset(250, 32),
-          const Duration(milliseconds: 500));
+      await widgetTester.timedDrag(
+        testBooleanContainer,
+        const Offset(250, 32),
+        const Duration(milliseconds: 500),
+      );
       await widgetTester.pumpAndSettle();
 
       expect(testBooleanInLayout, findsOneWidget);
 
       // Drag out of layout
-      await widgetTester.timedDrag(testBooleanInLayout, const Offset(-200, -60),
-          const Duration(milliseconds: 500));
+      await widgetTester.timedDrag(
+        testBooleanInLayout,
+        const Offset(-200, -60),
+        const Duration(milliseconds: 500),
+      );
       await widgetTester.pumpAndSettle();
 
       expect(testBooleanInLayout, findsNothing);
@@ -651,13 +707,16 @@ void main() {
       testWidgets('Shows list of layouts', (widgetTester) async {
         Client mockClient = createHttpClient(
           mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode(layoutFiles), 200)
+            'http://127.0.0.1:5800/?format=json': Response(
+              jsonEncode(layoutFiles),
+              200,
+            ),
           },
         );
 
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
+        ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+          mockClient,
+        );
 
         await pumpDashboardPage(
           widgetTester,
@@ -688,13 +747,16 @@ void main() {
         testWidgets('shows help text', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -726,15 +788,18 @@ void main() {
         testWidgets('overwrite mode', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
               'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                   Response(jsonEncode(layoutOne), 200),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           SharedPreferences.setMockInitialValues({
             PrefKeys.layout: jsonEncode({
@@ -757,7 +822,7 @@ void main() {
                           'topic': '/Test Tab/Blocking Widget',
                           'period': 0.06,
                         },
-                      }
+                      },
                     ],
                   },
                 },
@@ -795,10 +860,13 @@ void main() {
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Download Mode'), findsOneWidget);
-          expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
-              findsOneWidget);
-          await widgetTester
-              .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+          expect(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+            findsOneWidget,
+          );
+          await widgetTester.tap(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+          );
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Overwrite'), findsNWidgets(2));
@@ -810,11 +878,16 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                  ElegantNotification, 'Successfully Downloaded Layout'),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Successfully Downloaded Layout',
+            ),
+            findsOneWidget,
+          );
           expect(
-              find.textContaining('1 tabs were overwritten'), findsOneWidget);
+            find.textContaining('1 tabs were overwritten'),
+            findsOneWidget,
+          );
 
           await widgetTester.pumpAndSettle();
 
@@ -829,15 +902,18 @@ void main() {
           testWidgets('without merges', (widgetTester) async {
             Client mockClient = createHttpClient(
               mockGetResponses: {
-                'http://127.0.0.1:5800/?format=json':
-                    Response(jsonEncode(layoutFiles), 200),
+                'http://127.0.0.1:5800/?format=json': Response(
+                  jsonEncode(layoutFiles),
+                  200,
+                ),
                 'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                     Response(jsonEncode(layoutOne), 200),
               },
             );
 
-            ElasticLayoutDownloader layoutDownloader =
-                ElasticLayoutDownloader(mockClient);
+            ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+              mockClient,
+            );
 
             await pumpDashboardPage(
               widgetTester,
@@ -870,9 +946,12 @@ void main() {
             await widgetTester.pump(Duration.zero);
 
             expect(
-                find.widgetWithText(
-                    ElegantNotification, 'Successfully Downloaded Layout'),
-                findsOneWidget);
+              find.widgetWithText(
+                ElegantNotification,
+                'Successfully Downloaded Layout',
+              ),
+              findsOneWidget,
+            );
 
             await widgetTester.pumpAndSettle();
 
@@ -887,15 +966,18 @@ void main() {
         testWidgets('with merges', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
               'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                   Response(jsonEncode(layoutOne), 200),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           SharedPreferences.setMockInitialValues({
             PrefKeys.layout: jsonEncode({
@@ -918,7 +1000,7 @@ void main() {
                           'topic': '/Test Tab/Blocking Widget',
                           'period': 0.06,
                         },
-                      }
+                      },
                     ],
                   },
                 },
@@ -956,10 +1038,13 @@ void main() {
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Download Mode'), findsOneWidget);
-          expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
-              findsOneWidget);
-          await widgetTester
-              .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+          expect(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+            findsOneWidget,
+          );
+          await widgetTester.tap(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+          );
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Merge'), findsOneWidget);
@@ -971,9 +1056,12 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                  ElegantNotification, 'Successfully Downloaded Layout'),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Successfully Downloaded Layout',
+            ),
+            findsOneWidget,
+          );
 
           await widgetTester.pumpAndSettle();
 
@@ -988,15 +1076,18 @@ void main() {
       testWidgets('reload mode', (widgetTester) async {
         Client mockClient = createHttpClient(
           mockGetResponses: {
-            'http://127.0.0.1:5800/?format=json':
-                Response(jsonEncode(layoutFiles), 200),
+            'http://127.0.0.1:5800/?format=json': Response(
+              jsonEncode(layoutFiles),
+              200,
+            ),
             'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                 Response(jsonEncode(layoutOne), 200),
           },
         );
 
-        ElasticLayoutDownloader layoutDownloader =
-            ElasticLayoutDownloader(mockClient);
+        ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+          mockClient,
+        );
 
         await pumpDashboardPage(
           widgetTester,
@@ -1025,10 +1116,13 @@ void main() {
         await widgetTester.pumpAndSettle();
 
         expect(find.text('Download Mode'), findsOneWidget);
-        expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
-            findsOneWidget);
-        await widgetTester
-            .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+        expect(
+          find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+          findsOneWidget,
+        );
+        await widgetTester.tap(
+          find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+        );
         await widgetTester.pumpAndSettle();
 
         expect(find.text('Full Reload'), findsOneWidget);
@@ -1040,9 +1134,12 @@ void main() {
         await widgetTester.pump(Duration.zero);
 
         expect(
-            find.widgetWithText(
-                ElegantNotification, 'Successfully Downloaded Layout'),
-            findsOneWidget);
+          find.widgetWithText(
+            ElegantNotification,
+            'Successfully Downloaded Layout',
+          ),
+          findsOneWidget,
+        );
 
         await widgetTester.pumpAndSettle();
 
@@ -1055,8 +1152,9 @@ void main() {
         testWidgets('network tables is disconnected', (widgetTester) async {
           Client mockClient = createHttpClient();
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -1074,11 +1172,12 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                ElegantNotification,
-                'Cannot fetch remote layouts while disconnected from the robot',
-              ),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Cannot fetch remote layouts while disconnected from the robot',
+            ),
+            findsOneWidget,
+          );
         });
 
         testWidgets('layout fetching is not a json', (widgetTester) async {
@@ -1088,8 +1187,9 @@ void main() {
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -1108,11 +1208,12 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                ElegantNotification,
-                'Response was not a json object',
-              ),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Response was not a json object',
+            ),
+            findsOneWidget,
+          );
         });
 
         testWidgets('layout json does not list files', (widgetTester) async {
@@ -1122,8 +1223,9 @@ void main() {
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -1142,23 +1244,27 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                ElegantNotification,
-                'Response json does not contain files list',
-              ),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Response json does not contain files list',
+            ),
+            findsOneWidget,
+          );
         });
 
         testWidgets('layout json has empty files list', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode({'files': []}), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode({'files': []}),
+                200,
+              ),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -1177,25 +1283,29 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                ElegantNotification,
-                'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
-              ),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'No layouts were found, ensure a valid layout json file is placed in the root directory of your deploy directory.',
+            ),
+            findsOneWidget,
+          );
         });
 
         testWidgets('selected file was not found', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
               'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                   Response('', 404),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           await pumpDashboardPage(
             widgetTester,
@@ -1229,11 +1339,12 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                ElegantNotification,
-                'File "elastic-layout 1.json" was not found',
-              ),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'File "elastic-layout 1.json" was not found',
+            ),
+            findsOneWidget,
+          );
         });
       });
     });
@@ -1272,9 +1383,12 @@ void main() {
 
         await widgetTester.pumpAndSettle();
 
-        expect(editableTabBarWidget().currentIndex, 1,
-            reason:
-                'Selected tab should not change since tab index is out of range');
+        expect(
+          editableTabBarWidget().currentIndex,
+          1,
+          reason:
+              'Selected tab should not change since tab index is out of range',
+        );
       });
 
       testWidgets('Passing in tab names', (widgetTester) async {
@@ -1302,20 +1416,26 @@ void main() {
             (editableTabBar.evaluate().first.widget as EditableTabBar);
 
         ntConnection.updateDataFromTopicName(
-            '/Elastic/SelectedTab', 'Autonomous');
+          '/Elastic/SelectedTab',
+          'Autonomous',
+        );
 
         await widgetTester.pumpAndSettle();
 
         expect(editableTabBarWidget().currentIndex, 1);
 
         ntConnection.updateDataFromTopicName(
-            '/Elastic/SelectedTab', 'Random Tab');
+          '/Elastic/SelectedTab',
+          'Random Tab',
+        );
 
         await widgetTester.pumpAndSettle();
 
-        expect(editableTabBarWidget().currentIndex, 1,
-            reason:
-                'Selected tab should not change since tab name doesnt exist');
+        expect(
+          editableTabBarWidget().currentIndex,
+          1,
+          reason: 'Selected tab should not change since tab name doesnt exist',
+        );
       });
     });
   });
@@ -1348,8 +1468,10 @@ void main() {
 
       expect(find.byType(EditableTabBar), findsOneWidget);
 
-      final autonomousTab =
-          find.widgetWithText(AnimatedContainer, 'Autonomous');
+      final autonomousTab = find.widgetWithText(
+        AnimatedContainer,
+        'Autonomous',
+      );
 
       expect(autonomousTab, findsOneWidget);
 
@@ -1367,7 +1489,9 @@ void main() {
       expect(find.byType(EditableTabBar), findsOneWidget);
 
       final createNewTabButton = find.descendant(
-          of: find.byType(EditableTabBar), matching: find.byIcon(Icons.add));
+        of: find.byType(EditableTabBar),
+        matching: find.byIcon(Icons.add),
+      );
 
       expect(createNewTabButton, findsOneWidget);
 
@@ -1398,11 +1522,13 @@ void main() {
 
       expect(find.byType(EditableTabBar), findsOneWidget);
 
-      final closeTabButton = find
-          .descendant(
-              of: find.byType(EditableTabBar),
-              matching: find.byIcon(Icons.close))
-          .last;
+      final closeTabButton =
+          find
+              .descendant(
+                of: find.byType(EditableTabBar),
+                matching: find.byIcon(Icons.close),
+              )
+              .last;
 
       expect(closeTabButton, findsOneWidget);
 
@@ -1410,10 +1536,15 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
+        find.text('Confirm Tab Close', skipOffstage: false),
+        findsOneWidget,
+      );
 
-      final confirmButton =
-          find.widgetWithText(TextButton, 'OK', skipOffstage: false);
+      final confirmButton = find.widgetWithText(
+        TextButton,
+        'OK',
+        skipOffstage: false,
+      );
 
       expect(confirmButton, findsOneWidget);
 
@@ -1435,10 +1566,15 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.text('Confirm Tab Close', skipOffstage: false), findsOneWidget);
+        find.text('Confirm Tab Close', skipOffstage: false),
+        findsOneWidget,
+      );
 
-      final confirmButton =
-          find.widgetWithText(TextButton, 'OK', skipOffstage: false);
+      final confirmButton = find.widgetWithText(
+        TextButton,
+        'OK',
+        skipOffstage: false,
+      );
 
       expect(confirmButton, findsOneWidget);
 
@@ -1458,9 +1594,13 @@ void main() {
       expect(editableTabBar, findsOneWidget);
 
       final tabLeftButton = find.descendant(
-          of: editableTabBar, matching: find.byIcon(Icons.west));
+        of: editableTabBar,
+        matching: find.byIcon(Icons.west),
+      );
       final tabRightButton = find.descendant(
-          of: editableTabBar, matching: find.byIcon(Icons.east));
+        of: editableTabBar,
+        matching: find.byIcon(Icons.east),
+      );
 
       expect(tabLeftButton, findsOneWidget);
       expect(tabRightButton, findsOneWidget);
@@ -1473,8 +1613,11 @@ void main() {
       await widgetTester.tap(tabLeftButton);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 0,
-          reason: 'Tab index should not change since index is 0');
+      expect(
+        editableTabBarWidget().currentIndex,
+        0,
+        reason: 'Tab index should not change since index is 0',
+      );
 
       await widgetTester.tap(tabRightButton);
       await widgetTester.pumpAndSettle();
@@ -1484,9 +1627,12 @@ void main() {
       await widgetTester.tap(tabRightButton);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 1,
-          reason:
-              'Tab index should not change since index is equal to number of tabs');
+      expect(
+        editableTabBarWidget().currentIndex,
+        1,
+        reason:
+            'Tab index should not change since index is equal to number of tabs',
+      );
 
       await widgetTester.tap(tabLeftButton);
       await widgetTester.pumpAndSettle();
@@ -1514,8 +1660,11 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 0,
-          reason: 'Tab index should not change since index is 0');
+      expect(
+        editableTabBarWidget().currentIndex,
+        0,
+        reason: 'Tab index should not change since index is 0',
+      );
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
@@ -1527,9 +1676,12 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 1,
-          reason:
-              'Tab index should not change since index is equal to number of tabs');
+      expect(
+        editableTabBarWidget().currentIndex,
+        1,
+        reason:
+            'Tab index should not change since index is equal to number of tabs',
+      );
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
@@ -1559,8 +1711,11 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 1,
-          reason: 'Tab index should roll over');
+      expect(
+        editableTabBarWidget().currentIndex,
+        1,
+        reason: 'Tab index should roll over',
+      );
 
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
@@ -1568,15 +1723,21 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 0,
-          reason: 'Tab index should roll back over to 0');
+      expect(
+        editableTabBarWidget().currentIndex,
+        0,
+        reason: 'Tab index should roll back over to 0',
+      );
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.tab);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 1,
-          reason: 'Tab index should increase to 1 (no rollover)');
+      expect(
+        editableTabBarWidget().currentIndex,
+        1,
+        reason: 'Tab index should increase to 1 (no rollover)',
+      );
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.tab);
@@ -1606,8 +1767,11 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit1);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 0,
-          reason: 'Tab index should remain at 0');
+      expect(
+        editableTabBarWidget().currentIndex,
+        0,
+        reason: 'Tab index should remain at 0',
+      );
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.digit2);
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit2);
@@ -1619,9 +1783,11 @@ void main() {
       await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.digit5);
       await widgetTester.pumpAndSettle();
 
-      expect(editableTabBarWidget().currentIndex, 1,
-          reason:
-              'Tab index should remain at 1 since there is no tab at index 4');
+      expect(
+        editableTabBarWidget().currentIndex,
+        1,
+        reason: 'Tab index should remain at 1 since there is no tab at index 4',
+      );
     });
 
     testWidgets('Renaming tab', (widgetTester) async {
@@ -1659,9 +1825,13 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(AnimatedContainer, 'Teleoperated'), findsNothing);
-      expect(find.widgetWithText(AnimatedContainer, 'New Tab Name!'),
-          findsOneWidget);
+        find.widgetWithText(AnimatedContainer, 'Teleoperated'),
+        findsNothing,
+      );
+      expect(
+        find.widgetWithText(AnimatedContainer, 'New Tab Name!'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Duplicating tab', (widgetTester) async {
@@ -1690,8 +1860,9 @@ void main() {
       await pumpDashboardPage(widgetTester, preferences);
 
       final minimizeButton = find.ancestor(
-          of: find.byType(DecoratedMinimizeButton),
-          matching: find.byType(InkWell));
+        of: find.byType(DecoratedMinimizeButton),
+        matching: find.byType(InkWell),
+      );
 
       expect(minimizeButton, findsOneWidget);
 
@@ -1712,8 +1883,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       final maximizeButton = find.ancestor(
-          of: find.byType(DecoratedMaximizeButton),
-          matching: find.byType(InkWell));
+        of: find.byType(DecoratedMaximizeButton),
+        matching: find.byType(InkWell),
+      );
 
       await widgetTester.tap(maximizeButton);
     });
@@ -1734,8 +1906,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       final closeButton = find.ancestor(
-          of: find.byType(DecoratedCloseButton),
-          matching: find.byType(InkWell));
+        of: find.byType(DecoratedCloseButton),
+        matching: find.byType(InkWell),
+      );
 
       await widgetTester.tap(closeButton);
       await widgetTester.pumpAndSettle();
@@ -1756,8 +1929,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       final closeButton = find.ancestor(
-          of: find.byType(DecoratedCloseButton),
-          matching: find.byType(InkWell));
+        of: find.byType(DecoratedCloseButton),
+        matching: find.byType(InkWell),
+      );
 
       expect(closeButton, findsOneWidget);
 
@@ -1765,7 +1939,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          find.widgetWithText(AlertDialog, 'Unsaved Changes'), findsOneWidget);
+        find.widgetWithText(AlertDialog, 'Unsaved Changes'),
+        findsOneWidget,
+      );
 
       final discardButton = find.widgetWithText(TextButton, 'Discard');
 
@@ -1780,8 +1956,10 @@ void main() {
     testWidgets('Opening settings', (widgetTester) async {
       await pumpDashboardPage(widgetTester, preferences);
 
-      final settingsButton =
-          find.widgetWithIcon(MenuItemButton, Icons.settings);
+      final settingsButton = find.widgetWithIcon(
+        MenuItemButton,
+        Icons.settings,
+      );
 
       expect(settingsButton, findsOneWidget);
 
@@ -1837,8 +2015,10 @@ void main() {
 
       await widgetTester.pumpAndSettle();
 
-      expect(preferences.getInt(PrefKeys.ipAddressMode),
-          IPAddressMode.driverStation.index);
+      expect(
+        preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index,
+      );
       expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
 
       await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
@@ -1853,8 +2033,10 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       // IP Address shouldn't change since it's already driver station
-      expect(preferences.getInt(PrefKeys.ipAddressMode),
-          IPAddressMode.driverStation.index);
+      expect(
+        preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.driverStation.index,
+      );
       expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
 
       await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
@@ -1868,8 +2050,10 @@ void main() {
 
       await widgetTester.pumpAndSettle();
 
-      expect(preferences.getInt(PrefKeys.ipAddressMode),
-          IPAddressMode.localhost.index);
+      expect(
+        preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index,
+      );
       expect(preferences.getString(PrefKeys.ipAddress), 'localhost');
 
       await preferences.setString(PrefKeys.ipAddress, '0.0.0.0');
@@ -1886,8 +2070,10 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       // IP address shouldn't change since mode is set to localhost
-      expect(preferences.getInt(PrefKeys.ipAddressMode),
-          IPAddressMode.localhost.index);
+      expect(
+        preferences.getInt(PrefKeys.ipAddressMode),
+        IPAddressMode.localhost.index,
+      );
       expect(preferences.getString(PrefKeys.ipAddress), '0.0.0.0');
     });
   });
@@ -1909,7 +2095,7 @@ void main() {
             name: '/Elastic/RobotNotifications',
             type: NT4TypeStr.kString,
             properties: {},
-          )
+          ),
         ],
         virtualValues: {'/Elastic/RobotNotifications': jsonEncode(data)},
         serverTime: 5000000,
@@ -1917,30 +2103,28 @@ void main() {
       MockNT4Subscription mockSub = MockNT4Subscription();
 
       List<Function(Object?, int)> listeners = [];
-      when(mockSub.listen(any)).thenAnswer(
-        (realInvocation) {
-          listeners.add(realInvocation.positionalArguments[0]);
-          mockSub.updateValue(jsonEncode(data), 0);
-        },
-      );
+      when(mockSub.listen(any)).thenAnswer((realInvocation) {
+        listeners.add(realInvocation.positionalArguments[0]);
+        mockSub.updateValue(jsonEncode(data), 0);
+      });
 
-      when(mockSub.updateValue(any, any)).thenAnswer(
-        (invoc) {
-          for (var value in listeners) {
-            value.call(
-                invoc.positionalArguments[0], invoc.positionalArguments[1]);
-          }
-        },
-      );
+      when(mockSub.updateValue(any, any)).thenAnswer((invoc) {
+        for (var value in listeners) {
+          value.call(
+            invoc.positionalArguments[0],
+            invoc.positionalArguments[1],
+          );
+        }
+      });
 
-      when(connection.subscribeAll(any, any)).thenAnswer(
-        (realInvocation) {
-          return mockSub;
-        },
-      );
+      when(connection.subscribeAll(any, any)).thenAnswer((realInvocation) {
+        return mockSub;
+      });
 
-      final notificationWidget =
-          find.widgetWithText(ElegantNotification, data['title']);
+      final notificationWidget = find.widgetWithText(
+        ElegantNotification,
+        data['title'],
+      );
 
       await pumpDashboardPage(
         widgetTester,
@@ -1978,7 +2162,9 @@ void main() {
       );
 
       final notificationWidget = find.widgetWithText(
-          ElegantNotification, 'Version 2025.0.1 Available');
+        ElegantNotification,
+        'Version 2025.0.1 Available',
+      );
       final notificationIcon = find.byIcon(Icons.update);
 
       expect(notificationWidget, findsOneWidget);

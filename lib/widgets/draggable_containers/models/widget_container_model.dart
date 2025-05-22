@@ -35,10 +35,11 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   bool _forceDispose = false;
 
   late Rect _draggingRect = Rect.fromLTWH(
-      0,
-      0,
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
+    0,
+    0,
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+  );
 
   Rect get draggingRect => _draggingRect;
 
@@ -57,10 +58,11 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   }
 
   late Rect _displayRect = Rect.fromLTWH(
-      0,
-      0,
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
+    0,
+    0,
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+  );
 
   Rect get displayRect => _displayRect;
 
@@ -70,10 +72,11 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   }
 
   late Rect _previewRect = Rect.fromLTWH(
-      0,
-      0,
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
-      (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble());
+    0,
+    0,
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+    (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble(),
+  );
 
   Rect get previewRect => _previewRect;
 
@@ -157,8 +160,8 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     bool enabled = false,
     this.minWidth = 128.0,
     this.minHeight = 128.0,
-  })  : _title = title,
-        _enabled = enabled {
+  }) : _title = title,
+       _enabled = enabled {
     _displayRect = initialPosition;
     init();
   }
@@ -212,18 +215,22 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   }
 
   @mustCallSuper
-  void fromJson(Map<String, dynamic> jsonData,
-      {Function(String warningMessage)? onJsonLoadingWarning}) {
+  void fromJson(
+    Map<String, dynamic> jsonData, {
+    Function(String warningMessage)? onJsonLoadingWarning,
+  }) {
     title = tryCast(jsonData['title']) ?? '';
 
     double x = tryCast(jsonData['x']) ?? 0.0;
 
     double y = tryCast(jsonData['y']) ?? 0.0;
 
-    double width = tryCast(jsonData['width']) ??
+    double width =
+        tryCast(jsonData['width']) ??
         (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
-    double height = tryCast(jsonData['height']) ??
+    double height =
+        tryCast(jsonData['height']) ??
         (preferences.getInt(PrefKeys.gridSize) ?? Defaults.gridSize).toDouble();
 
     displayRect = Rect.fromLTWH(x, y, width, height);
@@ -239,17 +246,23 @@ abstract class WidgetContainerModel extends ChangeNotifier {
 
   @mustCallSuper
   void updateGridSize(int oldGridSize, int newGridSize) {
-    double newX =
-        DraggableWidgetContainer.snapToGrid(displayRect.left, newGridSize);
-    double newY =
-        DraggableWidgetContainer.snapToGrid(displayRect.top, newGridSize);
+    double newX = DraggableWidgetContainer.snapToGrid(
+      displayRect.left,
+      newGridSize,
+    );
+    double newY = DraggableWidgetContainer.snapToGrid(
+      displayRect.top,
+      newGridSize,
+    );
 
-    double newWidth =
-        DraggableWidgetContainer.snapToGrid(displayRect.width, newGridSize)
-            .clamp(minWidth, double.infinity);
-    double newHeight =
-        DraggableWidgetContainer.snapToGrid(displayRect.height, newGridSize)
-            .clamp(minHeight, double.infinity);
+    double newWidth = DraggableWidgetContainer.snapToGrid(
+      displayRect.width,
+      newGridSize,
+    ).clamp(minWidth, double.infinity);
+    double newHeight = DraggableWidgetContainer.snapToGrid(
+      displayRect.height,
+      newGridSize,
+    ).clamp(minHeight, double.infinity);
 
     displayRect = Rect.fromLTWH(newX, newY, newWidth, newHeight);
     draggingRect = displayRect;
@@ -334,16 +347,19 @@ abstract class WidgetContainerModel extends ChangeNotifier {
         visible: previewVisible,
         child: Container(
           decoration: BoxDecoration(
-            color: (validLocation)
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.1),
+            color:
+                (validLocation)
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : Colors.black.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(
-                preferences.getDouble(PrefKeys.cornerRadius) ??
-                    Defaults.cornerRadius),
+              preferences.getDouble(PrefKeys.cornerRadius) ??
+                  Defaults.cornerRadius,
+            ),
             border: Border.all(
-              color: (validLocation)
-                  ? Colors.lightGreenAccent.shade400
-                  : Colors.red,
+              color:
+                  (validLocation)
+                      ? Colors.lightGreenAccent.shade400
+                      : Colors.red,
               width: 5.0,
             ),
           ),
