@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:flutter/foundation.dart';
+import 'package:ini/ini.dart';
 
 class DSInteropClient {
   final String serverBaseAddress = '127.0.0.1';
@@ -26,6 +26,7 @@ class DSInteropClient {
   bool _driverStationDocked = false;
 
   String? get lastAnnouncedIP => _lastAnnouncedIP;
+
   bool get driverStationDocked => _driverStationDocked;
 
   DSInteropClient({
@@ -209,4 +210,49 @@ class DSInteropClient {
 
     Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
   }
+
+  DSDefaultUpdateResult updateDSDefault() {
+    //check OS
+    if (!Platform.isWindows) return DSDefaultUpdateResult.notWindows;
+    //check if we are on a WPILib install for consistency, but bypass for debug mode
+    String launchDir = Platform.resolvedExecutable;
+    logger.debug('Elastic Launch Directory: $launchDir');
+    if (!launchDir.startsWith(
+            RegExp("C:\\Users\\Public\\wpilib\\20[2-9][0-9]\\elastic")) &&
+        !kDebugMode) {
+      return DSDefaultUpdateResult.notWPILibInstall;
+    }
+    if (kDebugMode) {
+      logger.warning(
+          "Despite not being a WPILib install, the default driver station has still been updated to the current executable (which is the flutter build directory) since you are in debug mode.");
+    }
+
+    File dsSettings =
+        File("C:\\Users\\Public\\Documents\\FRC\\FRC DS Data Storage.ini");
+    if (!dsSettings.existsSync()) return DSDefaultUpdateResult.noFileAccess;
+    //try to open
+    try {
+      dsSettings
+          .readAsLines()
+          .then((lines) => Config.fromStrings(lines))
+          .then((Config config) {
+        config.set("Setup", "DashboardCmdLine", "\"\"$launchDir\"\"");
+        config.set("Setup", "DashboardType", "0");
+        dsSettings.writeAsString(config.toString());
+      });
+    } on Exception catch (e) {
+      logger.error(e);
+      return DSDefaultUpdateResult.unknownError;
+    }
+
+    return DSDefaultUpdateResult.success;
+  }
+}
+
+enum DSDefaultUpdateResult {
+  success,
+  notWindows,
+  notWPILibInstall,
+  noFileAccess,
+  unknownError
 }
