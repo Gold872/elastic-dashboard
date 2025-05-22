@@ -70,34 +70,36 @@ mixin DashboardPageWindow on DashboardPageViewModel {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Unsaved Changes'),
-        content: const Text(
-            'You have unsaved changes, are you sure you want to continue? All unsaved changes will be lost!'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await saveLayout();
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Unsaved Changes'),
+            content: const Text(
+              'You have unsaved changes, are you sure you want to continue? All unsaved changes will be lost!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await saveLayout();
 
-              Future.delayed(
-                const Duration(milliseconds: 250),
-                () async => await state!.closeWindow(),
-              );
-            },
-            child: const Text('Save'),
+                  Future.delayed(
+                    const Duration(milliseconds: 250),
+                    () async => await state!.closeWindow(),
+                  );
+                },
+                child: const Text('Save'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await state!.closeWindow();
+                },
+                child: const Text('Discard'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              await state!.closeWindow();
-            },
-            child: const Text('Discard'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
     );
   }
 }

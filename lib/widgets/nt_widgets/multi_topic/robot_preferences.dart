@@ -104,14 +104,15 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
   void initSubscription(String topicName) {
     Object? previousValue = ntConnection.getLastAnnouncedValue(topicName);
 
-    NT4Subscription subscription =
-        ntConnection.subscribe(topicName, super.period);
+    NT4Subscription subscription = ntConnection.subscribe(
+      topicName,
+      super.period,
+    );
 
-    preferenceSubscriptions.addAll({
-      topicName: subscription,
-    });
+    preferenceSubscriptions.addAll({topicName: subscription});
     preferenceTextControllers.addAll({
-      topicName: TextEditingController()..text = previousValue?.toString() ?? ''
+      topicName:
+          TextEditingController()..text = previousValue?.toString() ?? '',
     });
     previousValues.addAll({topicName: previousValue});
 
@@ -223,24 +224,25 @@ class PreferenceSearch extends StatelessWidget {
   final RobotPreferencesModel model;
   final Function(String topic, String? data) onSubmit;
 
-  List<String> filterList(String query) => model.preferenceTopicNames
-      .where((element) =>
-          element.split('/').last.toLowerCase().contains(query.toLowerCase()))
-      .toList();
+  List<String> filterList(String query) =>
+      model.preferenceTopicNames
+          .where(
+            (element) => element
+                .split('/')
+                .last
+                .toLowerCase()
+                .contains(query.toLowerCase()),
+          )
+          .toList();
 
   @override
   Widget build(BuildContext context) {
     return SearchableList<String>(
       inputDecoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 8,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         label: const Text('Search'),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
       searchTextController: model.searchTextController,
       seperatorBuilder: (context, _) => const Divider(height: 4.0),

@@ -25,7 +25,7 @@ class Mjpeg extends StatefulWidget {
   final double? height;
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
-      error;
+  error;
 
   const Mjpeg({
     required this.controller,
@@ -92,74 +92,77 @@ class _MjpegState extends State<Mjpeg> {
       return SizedBox(
         width: widget.width,
         height: widget.height,
-        child: widget.error == null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    errorText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+        child:
+            widget.error == null
+                ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      errorText,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ),
+                )
+                : widget.error!(
+                  context,
+                  controller.errorState.value!.first,
+                  controller.errorState.value!.last,
                 ),
-              )
-            : widget.error!(
-                context,
-                controller.errorState.value!.first,
-                controller.errorState.value!.last,
-              ),
       );
     }
 
     return VisibilityDetector(
       key: streamKey,
       child: StreamBuilder<List<int>?>(
-          stream: controller.imageStream.stream,
-          builder: (context, snapshot) {
-            if (!controller.isStreaming) {
-              // Request has been sent but no status received yet
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CustomLoadingIndicator(),
-                  const SizedBox(height: 10),
-                  const Text('Attempting to establish HTTP connection.'),
-                ],
-              );
-            }
-            if (snapshot.data == null && controller.previousImage == null) {
-              return SizedBox(
-                width: widget.width,
-                height: widget.height,
-                child: widget.loading?.call(context) ??
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        CustomLoadingIndicator(),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Connection established but no data received.\nCamera may be disconnected from device.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-              );
-            }
-
-            return RotatedBox(
-              quarterTurns: widget.quarterTurns,
-              child: Image.memory(
-                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-                width: widget.width,
-                height: widget.height,
-                gaplessPlayback: true,
-                fit: widget.fit,
-                scale: (widget.expandToFit) ? 1e-6 : 1.0,
-              ),
+        stream: controller.imageStream.stream,
+        builder: (context, snapshot) {
+          if (!controller.isStreaming) {
+            // Request has been sent but no status received yet
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CustomLoadingIndicator(),
+                const SizedBox(height: 10),
+                const Text('Attempting to establish HTTP connection.'),
+              ],
             );
-          }),
+          }
+          if (snapshot.data == null && controller.previousImage == null) {
+            return SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child:
+                  widget.loading?.call(context) ??
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CustomLoadingIndicator(),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Connection established but no data received.\nCamera may be disconnected from device.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+            );
+          }
+
+          return RotatedBox(
+            quarterTurns: widget.quarterTurns,
+            child: Image.memory(
+              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+              width: widget.width,
+              height: widget.height,
+              gaplessPlayback: true,
+              fit: widget.fit,
+              scale: (widget.expandToFit) ? 1e-6 : 1.0,
+            ),
+          );
+        },
+      ),
       onVisibilityChanged: (VisibilityInfo info) {
         if (controller.isMounted(streamKey)) {
           controller.setVisible(streamKey, info.visibleFraction != 0);
@@ -223,7 +226,8 @@ class MjpegController extends ChangeNotifier {
 
       if (hasChanged) {
         logger.trace(
-            'Visibility changed to true, notifying listeners for mjpeg stream');
+          'Visibility changed to true, notifying listeners for mjpeg stream',
+        );
         if (!isStreaming && errorState.value == null) {
           startStream();
         }
@@ -317,8 +321,11 @@ class MjpegController extends ChangeNotifier {
     try {
       final request = Request('GET', Uri.parse(stream));
       request.headers.addAll(headers);
-      final response = await httpClient.send(request).timeout(
-          timeout); //timeout is to prevent process to hang forever in some case
+      final response = await httpClient
+          .send(request)
+          .timeout(
+            timeout,
+          ); //timeout is to prevent process to hang forever in some case
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         byteStream = response.stream;
@@ -392,7 +399,8 @@ class MjpegController extends ChangeNotifier {
       currentStreamIndex = 0;
     }
     logger.info(
-        'Switching to stream at index $currentStreamIndex: $currentStream');
+      'Switching to stream at index $currentStreamIndex: $currentStream',
+    );
   }
 
   void stopStream({bool retry = false}) async {

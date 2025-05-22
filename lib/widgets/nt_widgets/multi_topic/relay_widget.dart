@@ -90,8 +90,9 @@ class RelayWidget extends NTWidget {
 
                     bool publishTopic = model.valueTopic == null;
 
-                    model.valueTopic ??= model.ntConnection
-                        .getTopicFromName(model.valueTopicName);
+                    model.valueTopic ??= model.ntConnection.getTopicFromName(
+                      model.valueTopicName,
+                    );
 
                     if (model.valueTopic == null) {
                       return;
@@ -101,18 +102,23 @@ class RelayWidget extends NTWidget {
                       model.ntConnection.publishTopic(model.valueTopic!);
                     }
 
-                    model.ntConnection
-                        .updateDataFromTopic(model.valueTopic!, option);
+                    model.ntConnection.updateDataFromTopic(
+                      model.valueTopic!,
+                      option,
+                    );
                   },
                   isSelected:
                       model.selectedOptions.map((e) => selected == e).toList(),
-                  children: model.selectedOptions.map((element) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 0.0),
-                      child: Text(element),
-                    );
-                  }).toList(),
+                  children:
+                      model.selectedOptions.map((element) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 0.0,
+                          ),
+                          child: Text(element),
+                        );
+                      }).toList(),
                 ),
               ),
             ],

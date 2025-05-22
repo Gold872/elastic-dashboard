@@ -35,7 +35,7 @@ class _DialogTextInputState extends State<DialogTextInput> {
 
   late final TextEditingController textEditingController =
       widget.textEditingController ??
-          TextEditingController(text: widget.initialText);
+      TextEditingController(text: widget.initialText);
 
   @override
   void didUpdateWidget(DialogTextInput oldWidget) {

@@ -24,10 +24,10 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        namesSubscription,
-        idsSubscription,
-        cancelSubscription,
-      ];
+    namesSubscription,
+    idsSubscription,
+    cancelSubscription,
+  ];
 
   CommandSchedulerModel({
     required super.ntConnection,
@@ -66,8 +66,10 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
 
     currentCancellations.add(id);
 
-    _cancelTopic ??=
-        ntConnection.publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??= ntConnection.publishNewTopic(
+      cancelTopicName,
+      NT4TypeStr.kIntArr,
+    );
 
     if (_cancelTopic == null) {
       return;
@@ -106,8 +108,10 @@ class CommandSchedulerWidget extends NTWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(left: 4.0, top: 4.0, right: 4.0),
-              child:
-                  Text('Scheduled Commands:', overflow: TextOverflow.ellipsis),
+              child: Text(
+                'Scheduled Commands:',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const Divider(),
             Flexible(
@@ -116,10 +120,13 @@ class CommandSchedulerWidget extends NTWidget {
                 itemBuilder: (context, index) {
                   return ListTile(
                     dense: true,
-                    contentPadding:
-                        const EdgeInsets.only(left: 16.0, right: 8.0),
+                    contentPadding: const EdgeInsets.only(
+                      left: 16.0,
+                      right: 8.0,
+                    ),
                     visualDensity: const VisualDensity(
-                        vertical: VisualDensity.minimumDensity),
+                      vertical: VisualDensity.minimumDensity,
+                    ),
                     title: Text(names[index], overflow: TextOverflow.ellipsis),
                     trailing: IconButton(
                       tooltip: 'Cancel Command',
@@ -131,9 +138,9 @@ class CommandSchedulerWidget extends NTWidget {
                     ),
                     subtitle: Text(
                       'ID: ${ids[index].toString()}',
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Colors.grey,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall!.copyWith(color: Colors.grey),
                     ),
                   );
                 },

@@ -35,9 +35,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Boolean Value': false,
-      },
+      virtualValues: {'Test/Boolean Value': false},
     );
   });
 

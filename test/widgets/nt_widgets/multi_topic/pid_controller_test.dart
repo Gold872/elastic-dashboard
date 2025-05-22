@@ -138,11 +138,15 @@ void main() {
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.0);
 
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Setpoint'), '0.100');
+      find.widgetWithText(TextField, 'Setpoint'),
+      '0.100',
+    );
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
-        0.0);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+      0.0,
+    );
 
     pidControllerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -150,9 +154,12 @@ void main() {
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
 
     expect(
-        find.widgetWithText(OutlinedButton, 'Publish Values'), findsOneWidget);
-    await widgetTester
-        .tap(find.widgetWithText(OutlinedButton, 'Publish Values'));
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+      findsOneWidget,
+    );
+    await widgetTester.tap(
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+    );
 
     pidControllerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -160,8 +167,10 @@ void main() {
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/p'), 0.1);
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/i'), 0.1);
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
-        0.1);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+      0.1,
+    );
 
     expect(find.byIcon(Icons.priority_high), findsNothing);
   });

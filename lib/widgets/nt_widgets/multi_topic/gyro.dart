@@ -37,8 +37,8 @@ class GyroModel extends MultiTopicNTWidgetModel {
     bool counterClockwisePositive = false,
     super.dataType,
     super.period,
-  })  : _counterClockwisePositive = counterClockwisePositive,
-        super();
+  }) : _counterClockwisePositive = counterClockwisePositive,
+       super();
 
   GyroModel.fromJson({
     required super.ntConnection,
@@ -100,8 +100,10 @@ class Gyro extends NTWidget {
         const double flexCoefficient = 20.0 / 23;
         // measured on a 2x2 gyro widget
         const double normalSquareSide = 199.9 * flexCoefficient;
-        double squareSide =
-            min(constraints.maxWidth, constraints.maxHeight * flexCoefficient);
+        double squareSide = min(
+          constraints.maxWidth,
+          constraints.maxHeight * flexCoefficient,
+        );
         return Transform.scale(
           scale: squareSide / normalSquareSide,
           child: ValueListenableBuilder(
@@ -137,21 +139,26 @@ class Gyro extends NTWidget {
                               steps: 360 ~/ 45,
                               color: const Color.fromRGBO(97, 97, 97, 1),
                               trackStyle: TrackStyle(
-                                  primaryRulerColor: Colors.grey,
-                                  secondaryRulerColor:
-                                      const Color.fromRGBO(97, 97, 97, 1),
-                                  labelStyle:
-                                      Theme.of(context).textTheme.bodySmall,
-                                  primaryRulersHeight: 7.25,
-                                  primaryRulersWidth: 2,
-                                  secondaryRulersHeight: 7.25,
-                                  rulersOffset: -18.5,
-                                  labelOffset: -58.0,
-                                  showLastLabel: false,
-                                  secondaryRulerPerInterval: 8,
-                                  inverseRulers: true),
-                              trackLabelFormater: (value) =>
-                                  value.toStringAsFixed(0),
+                                primaryRulerColor: Colors.grey,
+                                secondaryRulerColor: const Color.fromRGBO(
+                                  97,
+                                  97,
+                                  97,
+                                  1,
+                                ),
+                                labelStyle:
+                                    Theme.of(context).textTheme.bodySmall,
+                                primaryRulersHeight: 7.25,
+                                primaryRulersWidth: 2,
+                                secondaryRulersHeight: 7.25,
+                                rulersOffset: -18.5,
+                                labelOffset: -58.0,
+                                showLastLabel: false,
+                                secondaryRulerPerInterval: 8,
+                                inverseRulers: true,
+                              ),
+                              trackLabelFormater:
+                                  (value) => value.toStringAsFixed(0),
                             ),
                             needlePointer: [
                               NeedlePointer(

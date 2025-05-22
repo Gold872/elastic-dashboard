@@ -22,13 +22,13 @@ void main() {
   };
 
   Finder findColor(Color color) => find.byWidgetPredicate(
-        (widget) =>
-            widget is Container &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color != null &&
-            (widget.decoration as BoxDecoration).color!.toARGB32() ==
-                color.toARGB32(),
-      );
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration as BoxDecoration).color != null &&
+        (widget.decoration as BoxDecoration).color!.toARGB32() ==
+            color.toARGB32(),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;

@@ -61,11 +61,11 @@ void main() {
   test('PID controller from json', () {
     NTWidgetModel profiledPIDControllerModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'ProfiledPIDController',
-      profiledPIDControllerJson,
-    );
+          ntConnection,
+          preferences,
+          'ProfiledPIDController',
+          profiledPIDControllerJson,
+        );
 
     expect(profiledPIDControllerModel.type, 'ProfiledPIDController');
     expect(profiledPIDControllerModel.runtimeType, ProfiledPIDControllerModel);
@@ -74,11 +74,11 @@ void main() {
   test('Profiled PID controller to json', () {
     ProfiledPIDControllerModel profiledPIDControllerModel =
         ProfiledPIDControllerModel(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      topic: 'Test/Profiled PID Controller',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: 'Test/Profiled PID Controller',
+          period: 0.100,
+        );
 
     expect(profiledPIDControllerModel.toJson(), profiledPIDControllerJson);
   });
@@ -88,11 +88,11 @@ void main() {
 
     NTWidgetModel profiledPIDControllerModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'ProfiledPIDController',
-      profiledPIDControllerJson,
-    );
+          ntConnection,
+          preferences,
+          'ProfiledPIDController',
+          profiledPIDControllerJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(
@@ -116,28 +116,37 @@ void main() {
     await widgetTester.enterText(find.widgetWithText(TextField, 'kP'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
-        0.0);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
+      0.0,
+    );
 
     await widgetTester.enterText(find.widgetWithText(TextField, 'kI'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
-        0.0);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
+      0.0,
+    );
 
     await widgetTester.enterText(find.widgetWithText(TextField, 'kD'), '0.100');
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
-        0.0);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
+      0.0,
+    );
 
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Goal'), '0.100');
+      find.widgetWithText(TextField, 'Goal'),
+      '0.100',
+    );
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
-        0.0);
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
+      0.0,
+    );
 
     profiledPIDControllerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -145,22 +154,32 @@ void main() {
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
 
     expect(
-        find.widgetWithText(OutlinedButton, 'Publish Values'), findsOneWidget);
-    await widgetTester
-        .tap(find.widgetWithText(OutlinedButton, 'Publish Values'));
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+      findsOneWidget,
+    );
+    await widgetTester.tap(
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+    );
 
     profiledPIDControllerModel.refresh();
     await widgetTester.pumpAndSettle();
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
-        0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
-        0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
-        0.1);
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
-        0.1);
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/p'),
+      0.1,
+    );
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/i'),
+      0.1,
+    );
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/d'),
+      0.1,
+    );
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Profiled PID Controller/goal'),
+      0.1,
+    );
 
     expect(find.byIcon(Icons.priority_high), findsNothing);
   });

@@ -82,9 +82,13 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(
-        find.widgetWithText(AnimatedContainer, 'Teleoperated'), findsOneWidget);
+      find.widgetWithText(AnimatedContainer, 'Teleoperated'),
+      findsOneWidget,
+    );
     expect(
-        find.widgetWithText(AnimatedContainer, 'Autonomous'), findsOneWidget);
+      find.widgetWithText(AnimatedContainer, 'Autonomous'),
+      findsOneWidget,
+    );
 
     expect(find.byIcon(Icons.close), findsNWidgets(2));
     expect(find.byIcon(Icons.add), findsOneWidget);

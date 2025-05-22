@@ -55,9 +55,7 @@ class EditableTabBar extends StatelessWidget {
         return AlertDialog(
           title: const Text('Rename Tab'),
           content: Container(
-            constraints: const BoxConstraints(
-              maxWidth: 200,
-            ),
+            constraints: const BoxConstraints(maxWidth: 200),
             child: DialogTextInput(
               onSubmit: (value) {
                 tabData[index].name = value;
@@ -109,10 +107,7 @@ class EditableTabBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
           entries: [
-            MenuHeader(
-              text: tabData[index].name,
-              disableUppercase: true,
-            ),
+            MenuHeader(text: tabData[index].name, disableUppercase: true),
             const MenuDivider(),
             MenuItem(
               label: 'Rename',
@@ -139,10 +134,7 @@ class EditableTabBar extends StatelessWidget {
           reverseTransitionDuration: Duration.zero,
           maintainState: true,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
         );
       },
@@ -156,9 +148,10 @@ class EditableTabBar extends StatelessWidget {
           margin: const EdgeInsets.only(left: 5.0, right: 5.0, top: 5.0),
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
           decoration: BoxDecoration(
-            color: (currentIndex == index)
-                ? theme.colorScheme.onPrimaryContainer
-                : Colors.transparent,
+            color:
+                (currentIndex == index)
+                    ? theme.colorScheme.onPrimaryContainer
+                    : Colors.transparent,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(10.0),
               topRight: Radius.circular(10.0),
@@ -170,21 +163,24 @@ class EditableTabBar extends StatelessWidget {
                 Text(
                   tabData[index].name,
                   style: theme.textTheme.bodyMedium!.copyWith(
-                    color: (currentIndex == index)
-                        ? theme.colorScheme.primaryContainer
-                        : theme.colorScheme.onPrimaryContainer,
+                    color:
+                        (currentIndex == index)
+                            ? theme.colorScheme.primaryContainer
+                            : theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
                 // Spacing for close button
                 Visibility(
-                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked),
+                  visible:
+                      !(preferences.getBool(PrefKeys.layoutLocked) ??
+                          Defaults.layoutLocked),
                   child: const SizedBox(width: 10),
                 ),
                 // Close button
                 Visibility(
-                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked),
+                  visible:
+                      !(preferences.getBool(PrefKeys.layoutLocked) ??
+                          Defaults.layoutLocked),
                   child: IconButton(
                     onPressed: () {
                       closeTab(index);
@@ -196,9 +192,10 @@ class EditableTabBar extends StatelessWidget {
                       minHeight: 15.0,
                     ),
                     iconSize: 14,
-                    color: (currentIndex == index)
-                        ? theme.colorScheme.primaryContainer
-                        : theme.colorScheme.onPrimaryContainer,
+                    color:
+                        (currentIndex == index)
+                            ? theme.colorScheme.primaryContainer
+                            : theme.colorScheme.onPrimaryContainer,
                     icon: const Icon(Icons.close),
                   ),
                 ),
@@ -239,8 +236,8 @@ class EditableTabBar extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
                     itemCount: tabData.length,
-                    itemBuilder: (context, index) =>
-                        _buildTab(index, context, theme),
+                    itemBuilder:
+                        (context, index) => _buildTab(index, context, theme),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -250,28 +247,31 @@ class EditableTabBar extends StatelessWidget {
                     if (updateButton != null) updateButton!,
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                              Defaults.layoutLocked)
-                          ? () => onTabMoveLeft.call()
-                          : null,
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
+                                  Defaults.layoutLocked)
+                              ? () => onTabMoveLeft.call()
+                              : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.west),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                              Defaults.layoutLocked)
-                          ? () => createTab()
-                          : null,
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
+                                  Defaults.layoutLocked)
+                              ? () => createTab()
+                              : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.add),
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                              Defaults.layoutLocked)
-                          ? () => onTabMoveRight.call()
-                          : null,
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
+                                  Defaults.layoutLocked)
+                              ? () => onTabMoveRight.call()
+                              : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.east),
                     ),
@@ -289,13 +289,15 @@ class EditableTabBar extends StatelessWidget {
             child: Stack(
               children: [
                 Visibility(
-                  visible: preferences.getBool(PrefKeys.showGrid) ??
+                  visible:
+                      preferences.getBool(PrefKeys.showGrid) ??
                       Defaults.showGrid,
                   child: GridPaper(
                     color: const Color.fromARGB(50, 195, 232, 243),
-                    interval: (preferences.getInt(PrefKeys.gridSize) ??
-                            Defaults.gridSize)
-                        .toDouble(),
+                    interval:
+                        (preferences.getInt(PrefKeys.gridSize) ??
+                                Defaults.gridSize)
+                            .toDouble(),
                     divisions: 1,
                     subdivisions: 1,
                     child: Container(),

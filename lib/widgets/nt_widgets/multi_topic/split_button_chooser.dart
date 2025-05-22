@@ -22,11 +22,11 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        optionsSubscription,
-        selectedSubscription,
-        activeSubscription,
-        defaultSubscription,
-      ];
+    optionsSubscription,
+    selectedSubscription,
+    activeSubscription,
+    defaultSubscription,
+  ];
 
   late Listenable chooserStateListenable;
 
@@ -53,13 +53,19 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    optionsSubscription =
-        ntConnection.subscribe(optionsTopicName, super.period);
-    selectedSubscription =
-        ntConnection.subscribe(selectedTopicName, super.period);
+    optionsSubscription = ntConnection.subscribe(
+      optionsTopicName,
+      super.period,
+    );
+    selectedSubscription = ntConnection.subscribe(
+      selectedTopicName,
+      super.period,
+    );
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
-    defaultSubscription =
-        ntConnection.subscribe(defaultTopicName, super.period);
+    defaultSubscription = ntConnection.subscribe(
+      defaultTopicName,
+      super.period,
+    );
     chooserStateListenable = Listenable.merge(subscriptions);
     chooserStateListenable.addListener(onChooserStateUpdate);
 
@@ -102,7 +108,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
       currentDefault = null;
     }
 
-    bool hasValue = currentOptions != null ||
+    bool hasValue =
+        currentOptions != null ||
         currentActive != null ||
         currentDefault != null;
 
@@ -143,18 +150,14 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
-      existing.properties.addAll({
-        'retained': true,
-      });
+      existing.properties.addAll({'retained': true});
       ntConnection.publishTopic(existing);
       _selectedTopic = existing;
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
         NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        properties: {'retained': true},
       );
     }
   }
@@ -200,15 +203,19 @@ class SplitButtonChooser extends NTWidget {
               onPressed: (index) {
                 model.publishSelectedValue(model.previousOptions?[index]);
               },
-              isSelected: model.previousOptions
+              isSelected:
+                  model.previousOptions
                       ?.map((String option) => option == preview)
                       .toList() ??
                   [],
-              children: model.previousOptions
-                      ?.map((String option) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(option),
-                          ))
+              children:
+                  model.previousOptions
+                      ?.map(
+                        (String option) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(option),
+                        ),
+                      )
                       .toList() ??
                   [],
             ),
@@ -217,10 +224,10 @@ class SplitButtonChooser extends NTWidget {
         const SizedBox(width: 5),
         (showWarning)
             ? const Tooltip(
-                message:
-                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                child: Icon(Icons.priority_high, color: Colors.red),
-              )
+              message:
+                  'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+              child: Icon(Icons.priority_high, color: Colors.red),
+            )
             : const Icon(Icons.check, color: Colors.green),
       ],
     );

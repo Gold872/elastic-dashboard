@@ -68,13 +68,16 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   }
 
   @override
-  void fromJson(Map<String, dynamic> jsonData,
-      {Function(String errorMessage)? onJsonLoadingWarning}) {
+  void fromJson(
+    Map<String, dynamic> jsonData, {
+    Function(String errorMessage)? onJsonLoadingWarning,
+  }) {
     super.fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
     if (!jsonData.containsKey('type')) {
       onJsonLoadingWarning?.call(
-          'NetworkTables widget does not specify a widget type, defaulting to blank placeholder widget');
+        'NetworkTables widget does not specify a widget type, defaulting to blank placeholder widget',
+      );
     }
 
     Map<String, dynamic> widgetProperties = {};
@@ -83,7 +86,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       widgetProperties = tryCast(jsonData['properties']) ?? {};
     } else {
       onJsonLoadingWarning?.call(
-          'Network tables widget does not have any properties, defaulting to an empty properties map.');
+        'Network tables widget does not have any properties, defaulting to an empty properties map.',
+      );
     }
 
     String type = tryCast(jsonData['type']) ?? '';
@@ -135,8 +139,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
             child: SingleChildScrollView(
               child: StatefulBuilder(
                 builder: (context, setState) {
-                  List<Widget>? childProperties =
-                      childModel.getEditProperties(context);
+                  List<Widget>? childProperties = childModel.getEditProperties(
+                    context,
+                  );
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,12 +260,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         ),
       );
     }
-    return [
-      MenuItem.submenu(
-        label: 'Show As',
-        items: widgetTypes,
-      ),
-    ];
+    return [MenuItem.submenu(label: 'Show As', items: widgetTypes)];
   }
 
   @override
@@ -272,10 +272,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       cornerRadius:
           preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
-      child: ChangeNotifierProvider.value(
-        value: childModel,
-        child: child,
-      ),
+      child: ChangeNotifierProvider.value(value: childModel, child: child),
     );
   }
 
@@ -292,10 +289,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         opacity: (enabled) ? 1.00 : 0.50,
         child: AbsorbPointer(
           absorbing: !enabled,
-          child: ChangeNotifierProvider.value(
-            value: childModel,
-            child: child,
-          ),
+          child: ChangeNotifierProvider.value(value: childModel, child: child),
         ),
       ),
     );
@@ -319,13 +313,15 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       preferences,
       type,
       childModel.topic,
-      dataType: (childModel is SingleTopicNTWidgetModel)
-          ? cast<SingleTopicNTWidgetModel>(childModel).dataType
-          : 'Unkown',
-      period: (type != 'Graph')
-          ? childModel.period
-          : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
-              Defaults.defaultGraphPeriod,
+      dataType:
+          (childModel is SingleTopicNTWidgetModel)
+              ? cast<SingleTopicNTWidgetModel>(childModel).dataType
+              : 'Unkown',
+      period:
+          (type != 'Graph')
+              ? childModel.period
+              : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
+                  Defaults.defaultGraphPeriod,
     );
 
     NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);

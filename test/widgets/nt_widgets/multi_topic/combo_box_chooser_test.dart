@@ -46,9 +46,7 @@ void main() {
         NT4Topic(
           name: 'Test/Combo Box Chooser/selected',
           type: NT4TypeStr.kString,
-          properties: {
-            'retained': true,
-          },
+          properties: {'retained': true},
         ),
         NT4Topic(
           name: 'Test/Combo Box Chooser/default',
@@ -215,25 +213,21 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final sortOptions =
-        find.widgetWithText(DialogToggleSwitch, 'Sort Options Alphabetically');
+    final sortOptions = find.widgetWithText(
+      DialogToggleSwitch,
+      'Sort Options Alphabetically',
+    );
 
     expect(sortOptions, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: sortOptions,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: sortOptions, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(comboBoxChooserModel.sortOptions, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: sortOptions,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: sortOptions, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(comboBoxChooserModel.sortOptions, true);
