@@ -105,6 +105,10 @@ jobs:
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+          - os: ubuntu-22.04
+            build-option: "web"
+            artifact-path: "build/web"
+            artifact-name: Elastic-Web
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
