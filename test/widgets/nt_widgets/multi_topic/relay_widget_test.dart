@@ -30,7 +30,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Relay/Value',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -44,6 +44,7 @@ void main() {
     NTWidgetModel relayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Relay',
       relayJson,
     );
@@ -69,6 +70,7 @@ void main() {
     NTWidgetModel relayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Relay',
       relayJson,
     );

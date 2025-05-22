@@ -31,12 +31,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Differential Drive/Left Motor Speed',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Differential Drive/Right Motor Speed',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -51,6 +51,7 @@ void main() {
     NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'DifferentialDrive',
       differentialDriveJson,
     );
@@ -76,6 +77,7 @@ void main() {
     NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'DifferentialDrive',
       differentialDriveJson,
     );

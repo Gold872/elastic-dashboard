@@ -17,7 +17,7 @@ void main() {
 
   final Map<String, dynamic> singleColorViewJson = {
     'topic': 'Test/String Value',
-    'data_type': 'string',
+    'data_type': NT4Type.string().serialize(),
     'period': 0.100,
   };
 
@@ -41,7 +41,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/String Value',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -58,6 +58,7 @@ void main() {
     NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Single Color View',
       singleColorViewJson,
     );
@@ -78,9 +79,10 @@ void main() {
     NTWidgetModel singleColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Single Color View',
       topic: 'Test/String Value',
-      dataType: 'string',
+      dataType: NT4Type.string(),
       period: 0.100,
     );
 
@@ -93,6 +95,7 @@ void main() {
     NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Single Color View',
       singleColorViewJson,
     );

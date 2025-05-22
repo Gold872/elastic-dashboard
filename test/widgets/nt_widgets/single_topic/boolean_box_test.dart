@@ -48,7 +48,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Boolean Value',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
       ],
@@ -62,6 +62,7 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -93,8 +94,9 @@ void main() {
     BooleanBoxModel booleanBoxModel = BooleanBoxModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Boolean Value',
-      dataType: 'boolean',
+      dataType: NT4Type.boolean(),
       period: 0.100,
       trueColor: Colors.green,
       falseColor: Colors.red,
@@ -111,6 +113,7 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -161,6 +164,7 @@ void main() {
     BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Boolean Box',
       booleanBoxJson,
     ) as BooleanBoxModel;

@@ -30,22 +30,22 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Split Button Chooser/options',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/active',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/default',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/selected',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {
             'retained': true,
           },
@@ -65,6 +65,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Split Button Chooser',
       splitButtonChooserJson,
     );
@@ -91,6 +92,7 @@ void main() {
         NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Split Button Chooser',
       splitButtonChooserJson,
     );
