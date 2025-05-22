@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 
 /// A preprocessor for each JPEG frame from an MJPEG stream.
 class MjpegPreprocessor {
