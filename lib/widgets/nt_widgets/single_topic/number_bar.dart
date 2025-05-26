@@ -61,6 +61,7 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     double minValue = -1.0,
     double maxValue = 1.0,
     int divisions = 5,
@@ -78,6 +79,7 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
   NumberBarModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _minValue = tryCast(jsonData['min_value']) ?? -1.0;
@@ -218,7 +220,7 @@ class NumberBar extends NTWidget {
         double? divisionInterval =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
             ? GaugeOrientation.vertical

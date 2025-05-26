@@ -21,7 +21,7 @@ void main() {
 
   final Map<String, dynamic> radialGaugeJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'start_angle': -140.0,
     'end_angle': 140.0,
@@ -44,7 +44,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -58,6 +58,7 @@ void main() {
     NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Radial Gauge',
       radialGaugeJson,
     );
@@ -96,6 +97,7 @@ void main() {
     NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Simple Dial',
       radialGaugeJson,
     );
@@ -133,8 +135,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -155,8 +158,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -191,11 +195,7 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
       virtualValues: {
         'Test/Int Value': -1,
@@ -205,8 +205,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -243,8 +244,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -280,8 +282,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,

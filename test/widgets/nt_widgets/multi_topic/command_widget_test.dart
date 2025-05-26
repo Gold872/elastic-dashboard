@@ -34,12 +34,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Command/running',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Command/name',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -54,6 +54,7 @@ void main() {
     NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Command',
       commandWidgetJson,
     );
@@ -86,6 +87,7 @@ void main() {
     NTWidgetModel commandModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Command',
       commandWidgetJson,
     );

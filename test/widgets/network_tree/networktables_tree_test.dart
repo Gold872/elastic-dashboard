@@ -23,17 +23,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: '/Testing/Integer',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: '/Testing/Double',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
         NT4Topic(
           name: '/Testing/SubTable/String',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -78,17 +78,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Testing/Integer',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Testing/Double',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
         NT4Topic(
           name: 'Testing/SubTable/String',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -132,17 +132,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: '/Testing/Integer',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: '/Testing/Double',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
         NT4Topic(
           name: '/Testing/SubTable/String',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],

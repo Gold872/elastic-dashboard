@@ -13,43 +13,266 @@ import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
-class NT4TypeStr {
-  static final Map<String, int> typeMap = {
-    'boolean': 0,
-    'double': 1,
-    'int': 2,
-    'float': 3,
-    'string': 4,
-    'json': 4,
-    'raw': 5,
-    'rpc': 5,
-    'msgpack': 5,
-    'protobuf': 5,
-    'structschema': 5,
-    'boolean[]': 16,
-    'double[]': 17,
-    'int[]': 18,
-    'float[]': 19,
-    'string[]': 20,
+/// This class represents the different types of NT4 data.
+/// It may not contain the whole type in itself (e.g. array, nullable)
+enum NT4TypeFragment {
+  boolean,
+  int32,
+  float32,
+  float64,
+  string,
+
+  json,
+  raw,
+  rpc,
+  msgpack,
+  protobuf,
+  structschema,
+
+  array,
+  nullable,
+  unknown; // i.e. published a type that is not parsable by NT4Type.
+
+  // i.e. "should this be displayable in a widget?"
+  bool get isViewable => {
+        NT4TypeFragment.boolean,
+        NT4TypeFragment.int32,
+        NT4TypeFragment.float32,
+        NT4TypeFragment.float64,
+        NT4TypeFragment.string,
+      }.contains(this); // handle crazy types like int?[][]? idk
+
+  bool get isNumber => {
+        NT4TypeFragment.int32,
+        NT4TypeFragment.float32,
+        NT4TypeFragment.float64,
+      }.contains(this);
+}
+
+/// This class represents a type in NT4.
+/// It can be a primitive type, an array, or a nullable type.
+/// It can also represent a struct type with a name.
+class NT4Type {
+  final NT4TypeFragment fragment;
+  final NT4Type? tail;
+
+  /// Only available if this is a struct type, or cannot be parsed.
+  final String? name;
+
+  NT4Type({required this.fragment, this.tail, this.name});
+
+  factory NT4Type.boolean() {
+    return NT4Type(fragment: NT4TypeFragment.boolean);
+  }
+
+  factory NT4Type.int() {
+    return NT4Type(fragment: NT4TypeFragment.int32);
+  }
+
+  factory NT4Type.float() {
+    return NT4Type(fragment: NT4TypeFragment.float32);
+  }
+
+  factory NT4Type.double() {
+    return NT4Type(fragment: NT4TypeFragment.float64);
+  }
+
+  factory NT4Type.string() {
+    return NT4Type(fragment: NT4TypeFragment.string);
+  }
+
+  factory NT4Type.json() {
+    return NT4Type(fragment: NT4TypeFragment.json);
+  }
+
+  factory NT4Type.raw() {
+    return NT4Type(fragment: NT4TypeFragment.raw);
+  }
+
+  factory NT4Type.rpc() {
+    return NT4Type(fragment: NT4TypeFragment.rpc);
+  }
+
+  factory NT4Type.msgpack() {
+    return NT4Type(fragment: NT4TypeFragment.msgpack);
+  }
+
+  factory NT4Type.protobuf() {
+    return NT4Type(fragment: NT4TypeFragment.protobuf);
+  }
+
+  factory NT4Type.structschema() {
+    return NT4Type(fragment: NT4TypeFragment.structschema);
+  }
+
+  factory NT4Type.unknown(String type) {
+    return NT4Type(fragment: NT4TypeFragment.unknown, name: type);
+  }
+
+  factory NT4Type.struct(String name) {
+    if (name.contains(':')) {
+      name = name.split(':')[1];
+    }
+
+    return NT4Type(
+      fragment: NT4TypeFragment.raw, // structs are considered raw bytes in NT4
+      name: name,
+    );
+  }
+
+  factory NT4Type.array(NT4Type subType) {
+    return NT4Type(fragment: NT4TypeFragment.array, tail: subType);
+  }
+
+  factory NT4Type.nullable(NT4Type subType) {
+    return NT4Type(fragment: NT4TypeFragment.nullable, tail: subType);
+  }
+
+  static final Map<String, NT4Type Function()> _constructorMap = {
+    'boolean': NT4Type.boolean,
+    'int': NT4Type.int,
+    'float': NT4Type.float,
+    'double': NT4Type.double,
+    'string': NT4Type.string,
+    'json': NT4Type.json,
+    'raw': NT4Type.raw,
+    'rpc': NT4Type.rpc,
+    'msgpack': NT4Type.msgpack,
+    'protobuf': NT4Type.protobuf,
+    'structschema': NT4Type.structschema,
   };
 
-  static const kBool = 'boolean';
-  static const kFloat64 = 'double';
-  static const kInt = 'int';
-  static const kFloat32 = 'float';
-  static const kString = 'string';
-  static const kJson = 'json';
-  static const kBinaryRaw = 'raw';
-  static const kBinaryRPC = 'rpc';
-  static const kBinaryMsgpack = 'msgpack';
-  static const kBinaryProtobuf = 'protobuf';
-  static const kStructSchema = 'structschema';
-  static const kBoolArr = 'boolean[]';
-  static const kFloat64Arr = 'double[]';
-  static const kIntArr = 'int[]';
-  static const kFloat32Arr = 'float[]';
-  static const kStringArr = 'string[]';
+  static NT4Type parse(String type) {
+    if (_constructorMap.containsKey(type)) {
+      return _constructorMap[type]!();
+    } else if (type.endsWith('[]')) {
+      String subType = type.substring(0, type.length - 2);
+      NT4Type sub = parse(subType);
+      return NT4Type.array(sub);
+    } else if (type.endsWith('?')) {
+      String subType = type.substring(0, type.length - 1);
+      NT4Type sub = parse(subType);
+      return NT4Type.nullable(sub);
+    } else if (type.startsWith('struct:') ||
+        SchemaInfo.getInstance().isStruct(type)) {
+      return NT4Type.struct(type);
+    } else {
+      logger.debug('Could not parse type $type, falling back to String');
+      return NT4Type.unknown(type);
+    }
+  }
+
+  /// Parse the string to whatever type this is
+  /// i.e. if this.fragment == bool, then parseStr("true") returns `true`, etc.
+  /// this will not deserialize structs. this only works if isViewable is true
+  parseStr(String str) {
+    if (!isViewable) return null;
+
+    switch (fragment) {
+      case NT4TypeFragment.nullable:
+        if (str.isEmpty || str == 'null') {
+          return null;
+        } else {
+          return tail!.parseStr(str);
+        }
+      case NT4TypeFragment.boolean:
+        return bool.tryParse(str);
+      case NT4TypeFragment.int32:
+        return int.tryParse(str);
+      case NT4TypeFragment.float32:
+      case NT4TypeFragment.float64:
+        return double.tryParse(str);
+      case NT4TypeFragment.string:
+        return str;
+      case NT4TypeFragment.array:
+        if (str.startsWith('[')) {
+          str = str.substring(1, str.length - 1);
+        }
+
+        if (str.isEmpty) {
+          return [];
+        } else {
+          List<String> items = str.split(',');
+          return items.map((e) => tail!.parseStr(e.trim())).toList();
+        }
+      default:
+        return null; // structs and other types are not viewable
+    }
+  }
+
+  bool get isArray => fragment == NT4TypeFragment.array;
+  bool get isNullable => fragment == NT4TypeFragment.nullable;
+  bool get isStruct => name != null;
+  bool get isLeaf => tail == null;
+  bool get isViewable => leaf.fragment.isViewable;
+  NT4Type get leaf => tail?.leaf ?? this;
+  NT4Type get nonNullable => isNullable ? tail!.nonNullable : this;
+
+  String serialize() {
+    if (isStruct) {
+      return 'struct:$name';
+    }
+
+    switch (fragment) {
+      case NT4TypeFragment.boolean:
+        return 'boolean';
+      case NT4TypeFragment.int32:
+        return 'int';
+      case NT4TypeFragment.float32:
+        return 'float';
+      case NT4TypeFragment.float64:
+        return 'double';
+      case NT4TypeFragment.string:
+        return 'string';
+
+      case NT4TypeFragment.json:
+        return 'json';
+      case NT4TypeFragment.raw:
+        return 'raw';
+      case NT4TypeFragment.rpc:
+        return 'rpc';
+      case NT4TypeFragment.msgpack:
+        return 'msgpack';
+      case NT4TypeFragment.protobuf:
+        return 'protobuf';
+      case NT4TypeFragment.structschema:
+        return 'structschema';
+
+      case NT4TypeFragment.array:
+        return '${tail!.serialize()}[]';
+      case NT4TypeFragment.nullable:
+        return '${tail!.serialize()}?';
+
+      case NT4TypeFragment.unknown:
+        return name ?? 'raw';
+    }
+  }
+
+  int get typeId {
+    return switch (fragment) {
+      NT4TypeFragment.boolean => 0,
+      NT4TypeFragment.float64 => 1,
+      NT4TypeFragment.int32 => 2,
+      NT4TypeFragment.float32 => 3,
+      NT4TypeFragment.string || NT4TypeFragment.json => 4,
+      NT4TypeFragment.raw ||
+      NT4TypeFragment.rpc ||
+      NT4TypeFragment.msgpack ||
+      NT4TypeFragment.protobuf ||
+      NT4TypeFragment.structschema ||
+      NT4TypeFragment.unknown =>
+        5,
+      NT4TypeFragment.array => 16 + tail!.typeId,
+      NT4TypeFragment.nullable => tail!.typeId,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'NT4Type(${serialize()})';
+  }
 }
 
 class NT4Subscription extends ValueNotifier<Object?> {
@@ -127,7 +350,18 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
   void updateValue(Object? value, int timestamp) {
     logger.trace(
-        'Updating value for subscription: $this - Value: $value, Time: $timestamp');
+      'Updating value for subscription: $this - Value: $value, Time: $timestamp',
+    );
+
+    if (options.structMeta != null && value is List<int>) {
+      NTStructSchema schema = options.structMeta!.schema;
+      List<String> path = options.structMeta!.path;
+      Uint8List data = Uint8List.fromList(value);
+      NTStruct struct = NTStruct(schema: schema, data: data);
+      NTStructValue dynValue = struct.get(path)!;
+      value = dynValue.value;
+    }
+
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
@@ -161,17 +395,85 @@ class NT4Subscription extends ValueNotifier<Object?> {
   int get hashCode => Object.hashAll([topic, options]);
 }
 
+class NT4StructMeta {
+  final List<String> path;
+  final NTStructSchema schema;
+  final NT4Type type;
+
+  NT4StructMeta({required this.path, required this.schema})
+      : type = _getType(path, schema);
+
+  NT4StructMeta.raw({
+    required this.path,
+    required this.schema,
+    required this.type,
+  });
+
+  static NT4Type _getType(List<String> structPath, NTStructSchema schema) {
+    if (structPath.isEmpty) {
+      return NT4Type.struct(schema.name);
+    }
+
+    NTStructSchema currentSchema = schema;
+    List<String> pathStack = List.from(structPath.reversed);
+
+    while (pathStack.isNotEmpty) {
+      String fieldName = pathStack.removeLast();
+      NTFieldSchema? field = currentSchema[fieldName];
+
+      if (field == null) {
+        return NT4Type.struct(currentSchema.name);
+      }
+
+      if (field.substruct == null) {
+        return field.type;
+      }
+
+      if (pathStack.isEmpty) {
+        return field.type;
+      }
+
+      currentSchema = field.substruct!;
+    }
+
+    return NT4Type.struct(currentSchema.name);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'path': path, 'schema': schema.toJson(), 'type': type};
+  }
+
+  static NT4StructMeta fromJson(Map<String, dynamic> json) {
+    return NT4StructMeta.raw(
+      path: tryCast<List<dynamic>>(
+        json['path'],
+      )!
+          .map((el) => tryCast<String>(el)!)
+          .toList(),
+      schema: NTStructSchema.fromJson(tryCast(json['schema']) ?? {}),
+      type: NT4Type.parse(tryCast<String>(json['type']) ?? ''),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'NT4StructMeta(Path: $path, Schema: $schema, Type: $type)';
+  }
+}
+
 class NT4SubscriptionOptions {
   final double periodicRateSeconds;
   final bool all;
   final bool topicsOnly;
   final bool prefix;
+  final NT4StructMeta? structMeta;
 
   const NT4SubscriptionOptions({
     this.periodicRateSeconds = 0.1,
     this.all = false,
     this.topicsOnly = false,
     this.prefix = true,
+    this.structMeta,
   });
 
   Map<String, dynamic> toJson() {
@@ -204,7 +506,7 @@ class NT4SubscriptionOptions {
 
 class NT4Topic {
   final String name;
-  final String type;
+  final NT4Type type;
   int id;
   int pubUID;
   final Map<String, dynamic> properties;
@@ -245,7 +547,7 @@ class NT4Topic {
   }
 
   int getTypeId() {
-    return NT4TypeStr.typeMap[type]!;
+    return type.typeId;
   }
 
   bool get isRetained =>
@@ -457,7 +759,7 @@ class NT4Client {
 
   NT4Topic publishNewTopic(
     String name,
-    String type, [
+    NT4Type type, [
     Map<String, dynamic> properties = const {},
   ]) {
     NT4Topic newTopic = NT4Topic(
@@ -700,7 +1002,7 @@ class NT4Client {
 
     NT4Topic timeTopic = NT4Topic(
       name: 'Time',
-      type: NT4TypeStr.kInt,
+      type: NT4Type.int(),
       id: -1,
       pubUID: -1,
       properties: {},
@@ -929,7 +1231,7 @@ class NT4Client {
 
           NT4Topic newTopic = NT4Topic(
             name: params['name'],
-            type: params['type'],
+            type: NT4Type.parse(params['type']),
             id: params['id'],
             pubUID: params['pubid'] ?? (currentTopic?.pubUID ?? 0),
             properties: params['properties'],
@@ -943,8 +1245,9 @@ class NT4Client {
           NT4Topic? removedTopic = announcedTopics[params['id']];
           if (removedTopic == null) {
             logger.warning(
-                '[NT4] Ignorining unannounce, topic was not previously announced');
-            return;
+              '[NT4] Ignorining unannounce, topic was not previously announced',
+            );
+            continue;
           }
           announcedTopics.remove(removedTopic.id);
 
@@ -955,9 +1258,10 @@ class NT4Client {
           String topicName = params['name'];
           NT4Topic? topic = getTopicFromName(topicName);
           if (topic == null) {
-            logger
-                .warning('[NT4] Ignoring properties, topic was not announced');
-            return;
+            logger.warning(
+              '[NT4] Ignoring properties, topic was not announced',
+            );
+            continue;
           }
 
           Map<String, dynamic> update = tryCast(params['update']) ?? {};
@@ -969,9 +1273,10 @@ class NT4Client {
             }
           }
         } else {
-          logger
-              .warning('[NT4] Ignoring text message - unknown method $method');
-          return;
+          logger.warning(
+            '[NT4] Ignoring text message - unknown method $method',
+          );
+          continue;
         }
       }
     } else if (data is Uint8List) {
@@ -1033,19 +1338,5 @@ class NT4Client {
   int getNewPubUID() {
     _publishUIDCounter++;
     return _publishUIDCounter + _clientId;
-  }
-}
-
-class NT4ValueReq {
-  final List<String> topics;
-
-  const NT4ValueReq({
-    this.topics = const [],
-  });
-
-  Map<String, dynamic> toGetValsJson() {
-    return {
-      'topics': topics,
-    };
   }
 }

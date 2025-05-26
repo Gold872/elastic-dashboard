@@ -31,7 +31,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Boolean Value',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
       ],
@@ -45,6 +45,7 @@ void main() {
     NTWidgetModel toggleSwitchModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Toggle Switch',
       toggleSwitchJson,
     );
@@ -67,9 +68,10 @@ void main() {
     NTWidgetModel toggleSwitchModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Toggle Switch',
       topic: 'Test/Boolean Value',
-      dataType: 'boolean',
+      dataType: NT4Type.boolean(),
       period: 0.100,
     );
 
@@ -82,6 +84,7 @@ void main() {
     NTWidgetModel toggleSwitchModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Toggle Switch',
       toggleSwitchJson,
     );

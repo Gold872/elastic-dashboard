@@ -21,7 +21,7 @@ void main() {
 
   final Map<String, dynamic> numberSliderJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
@@ -40,7 +40,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -54,6 +54,7 @@ void main() {
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Number Slider',
       numberSliderJson,
     );
@@ -88,8 +89,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -107,6 +109,7 @@ void main() {
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Number Slider',
       numberSliderJson,
     );
@@ -160,8 +163,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -215,11 +219,7 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
       virtualValues: {
         'Test/Int Value': -1,
@@ -229,8 +229,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -289,8 +290,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,

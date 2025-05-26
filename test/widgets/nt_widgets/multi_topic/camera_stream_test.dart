@@ -40,6 +40,7 @@ void main() {
     NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Camera Stream',
       cameraStreamJson,
     );
@@ -78,6 +79,7 @@ void main() {
     NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Camera Stream',
       {...cameraStreamJson}..update('resolution', (_) => [101.0, 100.0]),
     );
@@ -98,6 +100,7 @@ void main() {
     NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Camera Stream',
       {...cameraStreamJson}..update('resolution', (_) => [-1, 100.0]),
     );
@@ -136,6 +139,7 @@ void main() {
     NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Camera Stream',
       cameraStreamJson,
     );
@@ -164,6 +168,7 @@ void main() {
     NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
       createMockOfflineNT4(),
       preferences,
+      null,
       'Camera Stream',
       cameraStreamJson,
     );

@@ -151,10 +151,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
-        NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        NT4Type.string(),
+        properties: {'retained': true},
       );
     }
   }

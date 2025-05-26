@@ -849,7 +849,7 @@ class _DashboardPageState extends State<DashboardPage>
               ],
             ),
           ),
-          // Save
+          // Export layout
           MenuItemButton(
             style: menuButtonStyle,
             onPressed: model.saveLayout,
@@ -858,7 +858,7 @@ class _DashboardPageState extends State<DashboardPage>
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.save_outlined),
+                Icon(Icons.save_as_outlined),
                 SizedBox(width: 8),
                 Text('Save'),
               ],
