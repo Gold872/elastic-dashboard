@@ -35,6 +35,8 @@ class Log {
         if (kReleaseMode && !kIsWeb) FileOutput(file: logFile),
       ]),
       filter: ProductionFilter(),
+      // check if in production mode
+      level: kReleaseMode ? Level.info : Level.trace,
     );
   }
 
@@ -42,6 +44,7 @@ class Log {
     if (Logger.level.value > level.value) {
       return;
     }
+
     _logger?.log(
       level,
       '[${_dateFormat.format(DateTime.now())}]:  $message',

@@ -28,6 +28,8 @@ permissions:
 
 jobs:
   formatting-analysis:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     name: "Check Formatting & Analyze"
     runs-on: ubuntu-22.04
 
@@ -58,6 +60,8 @@ jobs:
         run: flutter analyze --no-fatal-infos
 
   test:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     name: "Run Tests"
     runs-on: ubuntu-22.04
 

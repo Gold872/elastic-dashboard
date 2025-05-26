@@ -125,11 +125,11 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   Field get field => _field;
 
   bool isPoseStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d';
+    return ntConnection.getTopicFromName(topic)?.type.name == 'Pose2d';
   }
 
   bool isPoseArrayStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d[]';
+    return ntConnection.getTopicFromName(topic)?.type.name == 'Pose2d[]';
   }
 
   FieldWidgetModel({
@@ -183,9 +183,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     _robotColor = Color(
       tryCast(jsonData['robot_color']) ?? Colors.red.toARGB32(),
     );
-    _trajectoryColor = Color(
-      tryCast(jsonData['trajectory_color']) ?? Colors.white.toARGB32(),
-    );
+    _trajectoryColor =
+        Color(tryCast(jsonData['trajectory_color']) ?? Colors.white.toARGB32());
 
     if (!FieldImages.hasField(_fieldGame)) {
       _fieldGame = _defaultGame;
@@ -534,7 +533,7 @@ class FieldWidget extends NTWidget {
         minHeight: 4.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.35),
+        color: Colors.black.withAlpha(90),
         border: Border.all(
           color: model.robotColor,
           width: 0.125 * min(width, length),

@@ -32,7 +32,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Large Text',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -46,6 +46,7 @@ void main() {
     NTWidgetModel largeTextModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Large Text Display',
       largeTextDisplayJson,
     );
@@ -67,9 +68,10 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
-      dataType: 'string',
+      dataType: NT4Type.string(),
       period: 0.100,
     );
 
@@ -83,9 +85,10 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
-      dataType: 'string',
+      dataType: NT4Type.string(),
       period: 0.100,
     );
 

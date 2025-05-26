@@ -31,7 +31,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Motor Controller/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -45,6 +45,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Motor Controller',
       motorControllerJson,
     );
@@ -57,6 +58,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Nidec Brushless',
       motorControllerJson,
     );
@@ -82,6 +84,7 @@ void main() {
     NTWidgetModel motorControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Motor Controller',
       motorControllerJson,
     );

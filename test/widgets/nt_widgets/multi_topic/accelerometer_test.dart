@@ -30,7 +30,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Test Accelerometer/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         )
       ],
@@ -44,6 +44,7 @@ void main() {
     NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Accelerometer',
       accelerometerJson,
     );
@@ -72,6 +73,7 @@ void main() {
     NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'Accelerometer',
       accelerometerJson,
     );

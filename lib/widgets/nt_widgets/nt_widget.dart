@@ -20,7 +20,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-abstract class NTWidgetModel extends ChangeNotifier {
+sealed class NTWidgetModel extends ChangeNotifier {
   String get type;
 
   final NTConnection ntConnection;
@@ -123,16 +123,18 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   String get type => _typeOverride;
 
-  String dataType = 'Unknown';
+  NT4Type? dataType;
 
   NT4Subscription? subscription;
+  NT4StructMeta? ntStructMeta;
   NT4Topic? ntTopic;
 
   SingleTopicNTWidgetModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    this.dataType = 'Unknown',
+    required this.ntStructMeta,
+    this.dataType,
     super.period,
   }) : super();
 
@@ -141,7 +143,8 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required String type,
     required super.topic,
-    this.dataType = 'Unknown',
+    required ntStructMeta,
+    this.dataType,
     super.period,
   })  : _typeOverride = type,
         super();
@@ -149,72 +152,77 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    dataType = tryCast(jsonData['data_type']) ?? dataType;
+    String jsonDataType = tryCast(jsonData['data_type']) ?? '';
+    dataType = NT4Type.parse(jsonDataType);
   }
 
   @override
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
+    if (dataType == null && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
     return {
       ...super.toJson(),
-      if (dataType != 'Unknown') 'data_type': dataType,
+      if (dataType != null) 'data_type': dataType?.serialize(),
     };
   }
 
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
-    switch (dataType) {
-      case NT4TypeStr.kBool:
-        return [
-          BooleanBox.widgetType,
-          ToggleSwitch.widgetType,
-          ToggleButton.widgetType,
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-        return [
-          TextDisplay.widgetType,
-          NumberBar.widgetType,
-          NumberSlider.widgetType,
-          VoltageView.widgetType,
-          RadialGaugeWidget.widgetType,
-          GraphWidget.widgetType,
-          MatchTimeWidget.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kString:
-        return [
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-          SingleColorView.widgetType,
-        ];
-      case NT4TypeStr.kStringArr:
-        return [
-          TextDisplay.widgetType,
-          MultiColorView.widgetType,
-        ];
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kIntArr:
-        return [
-          TextDisplay.widgetType,
-        ];
+    NT4Type? display = dataType?.nonNullable;
+    NT4TypeFragment? fragment = display?.fragment;
+
+    if (fragment == null || display == null) {
+      return [type];
     }
 
-    return [type];
+    List<String> availableTypes = [type];
+
+    // everything can be text
+    if (display.isViewable) {
+      availableTypes.addAll([
+        TextDisplay.widgetType,
+        LargeTextDisplay.widgetType,
+      ]);
+    }
+
+    // color for single string or multicolor for array of strings
+    if (display.fragment == NT4TypeFragment.string) {
+      availableTypes.addAll([SingleColorView.widgetType]);
+    } else if (display.isArray &&
+        display.tail!.fragment == NT4TypeFragment.string) {
+      availableTypes.addAll([MultiColorView.widgetType]);
+    }
+
+    // other type-specific widgets
+    if (fragment == NT4TypeFragment.boolean) {
+      availableTypes.addAll([
+        BooleanBox.widgetType,
+        ToggleSwitch.widgetType,
+        ToggleButton.widgetType,
+      ]);
+    }
+
+    if (fragment.isNumber) {
+      availableTypes.addAll([
+        NumberBar.widgetType,
+        NumberSlider.widgetType,
+        VoltageView.widgetType,
+        RadialGaugeWidget.widgetType,
+        GraphWidget.widgetType,
+        MatchTimeWidget.widgetType,
+      ]);
+    }
+
+    return availableTypes.toSet().toList();
   }
 
   @override
@@ -259,9 +267,9 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     createTopicIfNull();
     if (resetDataType) {
       if (ntTopic == null && ntConnection.isNT4Connected) {
-        dataType = 'Unknown';
+        dataType = null;
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
     }
 
@@ -279,7 +287,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    String dataType = '', // To allow for stubbing in NTWidgetBuilder
+    NT4Type? dataType, // To allow for stubbing in NTWidgetBuilder
     super.period,
   }) : super();
 

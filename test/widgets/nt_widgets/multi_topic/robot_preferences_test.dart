@@ -31,22 +31,22 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Preferences/Test Preference',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 1',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 2',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 3',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -63,6 +63,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );
@@ -88,6 +89,7 @@ void main() {
     NTWidgetModel preferencesModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
+      null,
       'RobotPreferences',
       robotPreferencesJson,
     );

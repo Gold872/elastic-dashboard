@@ -177,19 +177,20 @@ class RobotPreferences extends NTWidget {
 
         Object? formattedData;
 
-        String dataType = nt4Topic.type;
-        switch (dataType) {
-          case NT4TypeStr.kBool:
+        NT4Type dataType = nt4Topic.type.nonNullable;
+
+        switch (dataType.fragment) {
+          case NT4TypeFragment.boolean:
             formattedData = bool.tryParse(data);
             break;
-          case NT4TypeStr.kFloat32:
-          case NT4TypeStr.kFloat64:
+          case NT4TypeFragment.float32:
+          case NT4TypeFragment.float64:
             formattedData = double.tryParse(data);
             break;
-          case NT4TypeStr.kInt:
+          case NT4TypeFragment.int32:
             formattedData = int.tryParse(data);
             break;
-          case NT4TypeStr.kString:
+          case NT4TypeFragment.string:
             formattedData = data;
             break;
           default:

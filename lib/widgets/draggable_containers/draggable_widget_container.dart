@@ -1,8 +1,8 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:provider/provider.dart';
 
