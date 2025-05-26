@@ -687,6 +687,120 @@ void main() {
           expect(find.textContaining('Keeps existing tabs'), findsOneWidget);
         });
 
+        testWidgets('overwrite mode', (widgetTester) async {
+          Client mockClient = createHttpClient(
+            mockGetResponses: {
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
+              'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
+                  Response(jsonEncode(layoutOne), 200),
+            },
+          );
+
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
+
+          SharedPreferences.setMockInitialValues({
+            PrefKeys.layout: jsonEncode({
+              'version': 1.0,
+              'grid_size': 128.0,
+              'tabs': [
+                {
+                  'name': 'Test Tab',
+                  'grid_layout': {
+                    'layouts': [],
+                    'containers': [
+                      {
+                        'title': 'Blocking Widget',
+                        'x': 384.0,
+                        'y': 128.0,
+                        'width': 256.0,
+                        'height': 256.0,
+                        'type': 'Text Display',
+                        'properties': {
+                          'topic': '/Test Tab/Blocking Widget',
+                          'period': 0.06,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            PrefKeys.ipAddress: '127.0.0.1',
+          });
+
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+
+          await pumpDashboardPage(
+            widgetTester,
+            preferences,
+            ntConnection: createMockOnlineNT4(),
+            layoutDownloader: layoutDownloader,
+          );
+
+          expect(find.text('File'), findsOneWidget);
+          await widgetTester.tap(find.text('File'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download From Robot'), findsOneWidget);
+          await widgetTester.tap(find.text('Download From Robot'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Select Layout'), findsOneWidget);
+          expect(find.byType(DialogDropdownChooser<String>), findsOneWidget);
+
+          await widgetTester.tap(find.byType(DialogDropdownChooser<String>));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('elastic-layout 1'), findsOneWidget);
+
+          await widgetTester.tap(find.text('elastic-layout 1'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download Mode'), findsOneWidget);
+          expect(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+            findsOneWidget,
+          );
+          await widgetTester.tap(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+          );
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Overwrite'), findsNWidgets(2));
+          await widgetTester.tap(find.text('Overwrite').last);
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Download'), findsOneWidget);
+          await widgetTester.tap(find.text('Download'));
+          await widgetTester.pump(Duration.zero);
+
+          expect(
+            find.widgetWithText(
+              ElegantNotification,
+              'Successfully Downloaded Layout',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.textContaining('1 tabs were overwritten'),
+            findsOneWidget,
+          );
+
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Test Tab'), findsOneWidget);
+          await widgetTester.tap(find.text('Test Tab'));
+          await widgetTester.pumpAndSettle();
+
+          expect(find.text('Blocking Widget'), findsNothing);
+          expect(find.byType(Gyro), findsNWidgets(2));
+        });
+
         group('merge mode', () {
           testWidgets('without merges', (widgetTester) async {
             Client mockClient = createHttpClient(
