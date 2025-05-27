@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:provider/provider.dart';
-
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
 import '../../dialog_widgets/dialog_color_picker.dart';
 
 class CameraStreamModel extends MultiTopicNTWidgetModel {
@@ -649,20 +650,24 @@ class CameraStreamWidget extends NTWidget {
                 ],
               ),
               Flexible(
-                child: Mjpeg(
-                  controller: model.controller!,
-                  fit: BoxFit.contain,
-                  expandToFit: true,
-                  quarterTurns: model.rotationTurns,
-                  crosshairHeight: model._crosshairHeight,
-                  crosshairThickness: model._crosshairThickness,
-                  crosshairWidth: model._crosshairWidth,
-                  crosshairX: model._crosshairX,
-                  crosshairY: model._crosshairY,
-                  crosshairEnabled: model._crosshairEnabled,
-                  crosshairColor: model._crosshairColor,
-                  crosshairCentered: model._crosshairCentered,
-                ),
+                child: Stack(children: [
+                  CustomPaint(
+                      foregroundPainter: CrosshairPainter(
+                          model._crosshairWidth,
+                          model._crosshairHeight,
+                          model._crosshairThickness,
+                          model._crosshairX,
+                          model._crosshairY,
+                          model._crosshairEnabled,
+                          model._crosshairColor,
+                          model._crosshairCentered),
+                      child: Mjpeg(
+                        controller: model.controller!,
+                        fit: BoxFit.contain,
+                        expandToFit: true,
+                        quarterTurns: model.rotationTurns,
+                      ))
+                ]),
               ),
               const Text(''),
             ],
@@ -670,5 +675,64 @@ class CameraStreamWidget extends NTWidget {
         );
       },
     );
+  }
+}
+
+class CrosshairPainter extends CustomPainter {
+  final bool? enabled;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairY;
+  final int? crosshairX;
+  final Color? crosshairColor;
+  final bool? centered;
+
+  CrosshairPainter(
+      this.crosshairWidth,
+      this.crosshairHeight,
+      this.crosshairThickness,
+      this.crosshairX,
+      this.crosshairY,
+      this.enabled,
+      this.crosshairColor,
+      this.centered);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!enabled!) return;
+    var widthModifier = size.width / 250;
+    var heightModifier = size.height / 250;
+    var maxWidth = size.width - (crosshairWidth! / 2 * widthModifier);
+    var maxHeight = size.height - (crosshairHeight! / 2 * widthModifier);
+    double x;
+    double y;
+    if (centered!) {
+      x = (size.width / 2);
+      y = (size.height / 2);
+    } else {
+      x = clampDouble(
+          (crosshairX! + crosshairWidth! / 2) * widthModifier, 0, maxWidth);
+      y = clampDouble(
+          (crosshairY! + crosshairHeight! / 2) * widthModifier, 0, maxHeight);
+    }
+
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(x, y),
+            width: crosshairWidth! * widthModifier,
+            height: crosshairThickness! * heightModifier),
+        Paint()..color = crosshairColor!);
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(x, y),
+            width: crosshairThickness! * heightModifier,
+            height: crosshairHeight! * widthModifier),
+        Paint()..color = crosshairColor!);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return enabled!;
   }
 }
