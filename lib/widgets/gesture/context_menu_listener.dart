@@ -7,10 +7,8 @@ import 'package:collection/collection.dart';
 class ContextMenuListener extends StatefulWidget {
   final HitTestBehavior? behavior;
 
-  final void Function(
-    Offset globalPosition,
-    Offset localPosition,
-  ) onContextMenuGesture;
+  final void Function(Offset globalPosition, Offset localPosition)
+  onContextMenuGesture;
 
   final Widget child;
 

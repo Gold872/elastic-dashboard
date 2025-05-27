@@ -100,9 +100,15 @@ void main() {
   }
 
   Future<void> pushFMSInfoWidget(
-      WidgetTester widgetTester, NTConnection ntConnection) async {
+    WidgetTester widgetTester,
+    NTConnection ntConnection,
+  ) async {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
-        ntConnection, preferences, 'FMSInfo', fmsInfoJson);
+      ntConnection,
+      preferences,
+      'FMSInfo',
+      fmsInfoJson,
+    );
 
     return widgetTester.pumpWidget(
       MaterialApp(
@@ -169,29 +175,33 @@ void main() {
 
     expect(find.text('Robot State: Teleoperated'), findsOneWidget);
     expect(
-        find.byWidgetPredicate((widget) =>
+      find.byWidgetPredicate(
+        (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == Colors.blue.shade900),
-        findsOneWidget);
+            (widget.decoration as BoxDecoration).color == Colors.blue.shade900,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('FMSInfo NYSU Q72, Auto Enabled', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await pushFMSInfoWidget(
-        widgetTester,
-        createNTConnection(
-          eventName: 'NYSU',
-          redAlliance: false,
-          matchNumber: 72,
-          matchType: 2,
-          replayNumber: 1,
-          enabled: true,
-          auto: true,
-          fmsAttached: true,
-          dsAttached: true,
-        ));
+      widgetTester,
+      createNTConnection(
+        eventName: 'NYSU',
+        redAlliance: false,
+        matchNumber: 72,
+        matchType: 2,
+        replayNumber: 1,
+        enabled: true,
+        auto: true,
+        fmsAttached: true,
+        dsAttached: true,
+      ),
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -202,28 +212,32 @@ void main() {
 
     expect(find.text('Robot State: Autonomous'), findsOneWidget);
     expect(
-        find.byWidgetPredicate((widget) =>
+      find.byWidgetPredicate(
+        (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == Colors.blue.shade900),
-        findsOneWidget);
+            (widget.decoration as BoxDecoration).color == Colors.blue.shade900,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('FMSInfo NYLI2 P7, Estopped', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await pushFMSInfoWidget(
-        widgetTester,
-        createNTConnection(
-          eventName: 'NYLI2',
-          redAlliance: true,
-          matchNumber: 7,
-          matchType: 1,
-          replayNumber: 1,
-          estop: true,
-          fmsAttached: true,
-          dsAttached: true,
-        ));
+      widgetTester,
+      createNTConnection(
+        eventName: 'NYLI2',
+        redAlliance: true,
+        matchNumber: 7,
+        matchType: 1,
+        replayNumber: 1,
+        estop: true,
+        fmsAttached: true,
+        dsAttached: true,
+      ),
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -235,29 +249,33 @@ void main() {
     expect(find.text('EMERGENCY STOPPED'), findsOneWidget);
     expect(find.byType(CustomPaint), findsAtLeastNWidgets(2));
     expect(
-        find.byWidgetPredicate((widget) =>
+      find.byWidgetPredicate(
+        (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == Colors.red.shade900),
-        findsOneWidget);
+            (widget.decoration as BoxDecoration).color == Colors.red.shade900,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('FMSInfo Unkown Match, test enabled', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await pushFMSInfoWidget(
-        widgetTester,
-        createNTConnection(
-          eventName: '',
-          redAlliance: true,
-          matchNumber: 0,
-          matchType: 0,
-          replayNumber: 0,
-          enabled: true,
-          test: true,
-          fmsAttached: false,
-          dsAttached: true,
-        ));
+      widgetTester,
+      createNTConnection(
+        eventName: '',
+        redAlliance: true,
+        matchNumber: 0,
+        matchType: 0,
+        replayNumber: 0,
+        enabled: true,
+        test: true,
+        fmsAttached: false,
+        dsAttached: true,
+      ),
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -269,26 +287,31 @@ void main() {
 
     expect(find.text('Robot State: Test'), findsOneWidget);
     expect(
-        find.byWidgetPredicate((widget) =>
+      find.byWidgetPredicate(
+        (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == Colors.red.shade900),
-        findsOneWidget);
+            (widget.decoration as BoxDecoration).color == Colors.red.shade900,
+      ),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('FMSInfo Unknown Match, everything disconnected',
-      (widgetTester) async {
+  testWidgets('FMSInfo Unknown Match, everything disconnected', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     await pushFMSInfoWidget(
-        widgetTester,
-        createNTConnection(
-          eventName: '',
-          redAlliance: true,
-          matchNumber: 0,
-          matchType: 0,
-          replayNumber: 0,
-        ));
+      widgetTester,
+      createNTConnection(
+        eventName: '',
+        redAlliance: true,
+        matchNumber: 0,
+        matchType: 0,
+        replayNumber: 0,
+      ),
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -300,10 +323,13 @@ void main() {
 
     expect(find.text('Robot State: Disabled'), findsOneWidget);
     expect(
-        find.byWidgetPredicate((widget) =>
+      find.byWidgetPredicate(
+        (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color == Colors.red.shade900),
-        findsOneWidget);
+            (widget.decoration as BoxDecoration).color == Colors.red.shade900,
+      ),
+      findsOneWidget,
+    );
   });
 }

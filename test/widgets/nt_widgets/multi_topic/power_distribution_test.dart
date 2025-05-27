@@ -30,11 +30,13 @@ void main() {
     Map<String, double> virtualChannelValues = {};
 
     for (int i = 0; i <= PowerDistributionModel.numberOfChannels; i++) {
-      channelTopics.add(NT4Topic(
-        name: 'Test/Power Distribution/Chan$i',
-        type: NT4TypeStr.kFloat32,
-        properties: {},
-      ));
+      channelTopics.add(
+        NT4Topic(
+          name: 'Test/Power Distribution/Chan$i',
+          type: NT4TypeStr.kFloat32,
+          properties: {},
+        ),
+      );
 
       virtualChannelValues.addAll({'Test/Power Distribution/Chan$i': 0.00});
     }

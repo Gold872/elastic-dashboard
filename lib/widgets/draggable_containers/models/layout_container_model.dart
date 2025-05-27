@@ -27,11 +27,7 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
   @override
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'type': type,
-      'properties': getProperties(),
-    };
+    return {...super.toJson(), 'type': type, 'properties': getProperties()};
   }
 
   Map<String, dynamic> getProperties() {

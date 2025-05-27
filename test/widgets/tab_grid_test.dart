@@ -189,8 +189,10 @@ void main() async {
 
     await widgetTester.pumpAndSettle();
 
-    await widgetTester.tap(find.text('Test Number'),
-        buttons: kSecondaryMouseButton);
+    await widgetTester.tap(
+      find.text('Test Number'),
+      buttons: kSecondaryMouseButton,
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -264,8 +266,10 @@ void main() async {
 
     await widgetTester.pumpAndSettle();
 
-    await widgetTester.tapAt(const Offset(320.0, 64.0),
-        buttons: kSecondaryButton);
+    await widgetTester.tapAt(
+      const Offset(320.0, 64.0),
+      buttons: kSecondaryButton,
+    );
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Paste'), findsNothing);
@@ -274,8 +278,10 @@ void main() async {
     await widgetTester.tapAt(const Offset(320.0, 64.0));
     await widgetTester.pumpAndSettle();
 
-    await widgetTester.tap(find.text('Test Number'),
-        buttons: kSecondaryMouseButton);
+    await widgetTester.tap(
+      find.text('Test Number'),
+      buttons: kSecondaryMouseButton,
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -286,8 +292,10 @@ void main() async {
 
     await widgetTester.pumpAndSettle();
 
-    await widgetTester.tapAt(const Offset(320.0, 64.0),
-        buttons: kSecondaryButton);
+    await widgetTester.tapAt(
+      const Offset(320.0, 64.0),
+      buttons: kSecondaryButton,
+    );
     await widgetTester.pumpAndSettle();
 
     expect(find.text('Paste'), findsOneWidget);

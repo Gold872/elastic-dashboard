@@ -56,18 +56,24 @@ void main() {
     expect(cameraStreamModel.quality, 50);
     expect(cameraStreamModel.resolution, const Size(100.0, 100.0));
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=100x100&fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=100x100&fps=60&compression=50',
+    );
 
     cameraStreamModel.fps = null;
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=100x100&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=100x100&compression=50',
+    );
 
     cameraStreamModel.resolution = const Size(0.0, 100);
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?compression=50',
+    );
 
     cameraStreamModel.quality = null;
 
@@ -90,8 +96,10 @@ void main() {
     }
     expect(cameraStreamModel.resolution, const Size(102.0, 100.0));
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=102x100&fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=102x100&fps=60&compression=50',
+    );
   });
 
   test('Camera stream from json (with negative resolution)', () {
@@ -111,8 +119,10 @@ void main() {
 
     expect(cameraStreamModel.resolution, isNull);
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?fps=60&compression=50',
+    );
   });
 
   test('Camera stream to json', () {
@@ -155,7 +165,9 @@ void main() {
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Waiting for Camera Stream connection...'), findsOneWidget);
+      find.text('Waiting for Camera Stream connection...'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Camera stream offline widget test', (widgetTester) async {
@@ -183,7 +195,9 @@ void main() {
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Waiting for Network Tables connection...'), findsOneWidget);
+      find.text('Waiting for Network Tables connection...'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Camera stream edit properties', (widgetTester) async {

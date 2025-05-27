@@ -43,9 +43,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NetworkTableTree(
-              ntConnection: ntConnection,
-              preferences: preferences,
-              hideMetadata: false),
+            ntConnection: ntConnection,
+            preferences: preferences,
+            hideMetadata: false,
+          ),
         ),
       ),
     );
@@ -72,8 +73,9 @@ void main() {
     expect(find.text('string'), findsOneWidget);
   });
 
-  testWidgets('Network Tables Tree without leading slashes',
-      (widgetTester) async {
+  testWidgets('Network Tables Tree without leading slashes', (
+    widgetTester,
+  ) async {
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
@@ -98,9 +100,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NetworkTableTree(
-              ntConnection: ntConnection,
-              preferences: preferences,
-              hideMetadata: false),
+            ntConnection: ntConnection,
+            preferences: preferences,
+            hideMetadata: false,
+          ),
         ),
       ),
     );

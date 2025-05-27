@@ -60,9 +60,7 @@ class MotorController extends NTWidget {
               value.toStringAsFixed(2),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            const Flexible(
-              child: SizedBox(height: 5),
-            ),
+            const Flexible(child: SizedBox(height: 5)),
             LinearGauge(
               rulers: RulerStyle(
                 rulerPosition: RulerPosition.bottom,
@@ -83,7 +81,7 @@ class MotorController extends NTWidget {
                   color: Theme.of(context).colorScheme.primary,
                   width: 10.0,
                   height: 14.0,
-                )
+                ),
               ],
               enableGaugeAnimation: false,
               start: -1.0,

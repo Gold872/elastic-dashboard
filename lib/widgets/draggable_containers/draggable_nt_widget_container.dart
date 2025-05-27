@@ -6,10 +6,8 @@ import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_
 import 'models/nt_widget_container_model.dart';
 
 class DraggableNTWidgetContainer extends DraggableWidgetContainer {
-  const DraggableNTWidgetContainer({
-    super.key,
-    super.updateFunctions,
-  }) : super();
+  const DraggableNTWidgetContainer({super.key, super.updateFunctions})
+    : super();
 
   @override
   Widget build(BuildContext context) {
