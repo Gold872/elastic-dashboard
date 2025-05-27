@@ -9,27 +9,21 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'models/widget_container_model.dart';
 
-typedef DraggableContainerUpdateFunctions =
-    ({
-      Function(
-        WidgetContainerModel widget,
-        Rect newRect,
-        TransformResult result,
-      )
-      onUpdate,
-      Function(WidgetContainerModel widget) onDragBegin,
-      Function(
-        WidgetContainerModel widget,
-        Rect releaseRect, {
-        Offset? globalPosition,
-      })
-      onDragEnd,
-      Function(WidgetContainerModel widget) onDragCancel,
-      Function(WidgetContainerModel widget) onResizeBegin,
-      Function(WidgetContainerModel widget, Rect releaseRect) onResizeEnd,
-      bool Function(WidgetContainerModel widget, Rect location)
-      isValidMoveLocation,
-    });
+typedef DraggableContainerUpdateFunctions = ({
+  Function(WidgetContainerModel widget, Rect newRect, TransformResult result)
+  onUpdate,
+  Function(WidgetContainerModel widget) onDragBegin,
+  Function(
+    WidgetContainerModel widget,
+    Rect releaseRect, {
+    Offset? globalPosition,
+  })
+  onDragEnd,
+  Function(WidgetContainerModel widget) onDragCancel,
+  Function(WidgetContainerModel widget) onResizeBegin,
+  Function(WidgetContainerModel widget, Rect releaseRect) onResizeEnd,
+  bool Function(WidgetContainerModel widget, Rect location) isValidMoveLocation,
+});
 
 class DraggableWidgetContainer extends StatelessWidget {
   final DraggableContainerUpdateFunctions? updateFunctions;
@@ -57,14 +51,12 @@ class DraggableWidgetContainer extends StatelessWidget {
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
         visibleHandles: const {},
-        supportedDragDevices:
-            PointerDeviceKind.values
-                .whereNot((e) => e == PointerDeviceKind.trackpad)
-                .toSet(),
-        supportedResizeDevices:
-            PointerDeviceKind.values
-                .whereNot((e) => e == PointerDeviceKind.trackpad)
-                .toSet(),
+        supportedDragDevices: PointerDeviceKind.values
+            .whereNot((e) => e == PointerDeviceKind.trackpad)
+            .toSet(),
+        supportedResizeDevices: PointerDeviceKind.values
+            .whereNot((e) => e == PointerDeviceKind.trackpad)
+            .toSet(),
         draggable: model.draggable,
         resizable: model.draggable,
         contentBuilder: (BuildContext context, Rect rect, Flip flip) {

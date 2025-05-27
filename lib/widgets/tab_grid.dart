@@ -260,8 +260,8 @@ class TabGridModel extends ChangeNotifier {
       return Offset.zero;
     }
 
-    RenderBox? ancestor =
-        tabGridContext!.findAncestorRenderObjectOfType<RenderBox>();
+    RenderBox? ancestor = tabGridContext!
+        .findAncestorRenderObjectOfType<RenderBox>();
 
     Offset localPosition = ancestor!.globalToLocal(globalPosition);
 
@@ -651,8 +651,9 @@ class TabGridModel extends ChangeNotifier {
     // If dragging into layout
     if (widget is NTWidgetContainerModel &&
         isValidLayoutLocation(widget.cursorGlobalLocation)) {
-      LayoutContainerModel layoutContainer =
-          getLayoutAtLocation(widget.cursorGlobalLocation)!;
+      LayoutContainerModel layoutContainer = getLayoutAtLocation(
+        widget.cursorGlobalLocation,
+      )!;
 
       if (layoutContainer.willAcceptWidget(widget)) {
         layoutContainer.addWidget(widget);
@@ -758,29 +759,28 @@ class TabGridModel extends ChangeNotifier {
   void confirmClearWidgets(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirm Clear'),
-            content: const Text(
-              'Are you sure you want to remove all widgets from this tab?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Clear'),
+        content: const Text(
+          'Are you sure you want to remove all widgets from this tab?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
 
-                  clearWidgets();
-                },
-                child: const Text('Confirm'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel'),
-              ),
-            ],
+              clearWidgets();
+            },
+            child: const Text('Confirm'),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1018,12 +1018,14 @@ class TabGrid extends StatelessWidget {
           model.isValidMoveLocation(container, previewLocation) ||
           model.isValidLayoutLocation(container.cursorGlobalLocation);
 
-      Color borderColor =
-          (validLocation) ? Colors.lightGreenAccent.shade400 : Colors.red;
+      Color borderColor = (validLocation)
+          ? Colors.lightGreenAccent.shade400
+          : Colors.red;
 
       if (model.isValidLayoutLocation(container.cursorGlobalLocation)) {
-        LayoutContainerModel layoutContainer =
-            model.getLayoutAtLocation(container.cursorGlobalLocation)!;
+        LayoutContainerModel layoutContainer = model.getLayoutAtLocation(
+          container.cursorGlobalLocation,
+        )!;
 
         previewLocation = layoutContainer.displayRect;
 
@@ -1038,10 +1040,9 @@ class TabGrid extends StatelessWidget {
           height: previewLocation.height,
           child: Container(
             decoration: BoxDecoration(
-              color:
-                  (validLocation)
-                      ? Colors.white.withValues(alpha: 0.25)
-                      : Colors.black.withValues(alpha: 0.1),
+              color: (validLocation)
+                  ? Colors.white.withValues(alpha: 0.25)
+                  : Colors.black.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(
                 model.preferences.getDouble(PrefKeys.cornerRadius) ??
                     Defaults.cornerRadius,

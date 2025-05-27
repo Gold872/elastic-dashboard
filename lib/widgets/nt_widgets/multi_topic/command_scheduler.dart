@@ -61,8 +61,9 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
     List<Object?> currentCancellationsRaw =
         cancelSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-    List<int> currentCancellations =
-        currentCancellationsRaw.whereType<int>().toList();
+    List<int> currentCancellations = currentCancellationsRaw
+        .whereType<int>()
+        .toList();
 
     currentCancellations.add(id);
 

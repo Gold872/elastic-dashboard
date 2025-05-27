@@ -191,10 +191,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ) &&
         widget.preferences.getString(PrefKeys.themeVariant) != null) {
       // Weird way of copying the list
-      themeVariantsOverride =
-          SettingsDialog.themeVariants.toList()
-            ..add(widget.preferences.getString(PrefKeys.themeVariant)!)
-            ..sort();
+      themeVariantsOverride = SettingsDialog.themeVariants.toList()
+        ..add(widget.preferences.getString(PrefKeys.themeVariant)!)
+        ..sort();
       themeVariantsOverride = Set.of(themeVariantsOverride).toList();
     }
 

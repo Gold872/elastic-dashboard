@@ -103,28 +103,24 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
         break;
       case NT4TypeStr.kFloat32Arr:
       case NT4TypeStr.kFloat64Arr:
-        formattedData =
-            tryCast<List<dynamic>>(
-              jsonDecode(value),
-            )?.whereType<num>().toList();
+        formattedData = tryCast<List<dynamic>>(
+          jsonDecode(value),
+        )?.whereType<num>().toList();
         break;
       case NT4TypeStr.kIntArr:
-        formattedData =
-            tryCast<List<dynamic>>(
-              jsonDecode(value),
-            )?.whereType<num>().toList();
+        formattedData = tryCast<List<dynamic>>(
+          jsonDecode(value),
+        )?.whereType<num>().toList();
         break;
       case NT4TypeStr.kBoolArr:
-        formattedData =
-            tryCast<List<dynamic>>(
-              jsonDecode(value),
-            )?.whereType<bool>().toList();
+        formattedData = tryCast<List<dynamic>>(
+          jsonDecode(value),
+        )?.whereType<bool>().toList();
         break;
       case NT4TypeStr.kStringArr:
-        formattedData =
-            tryCast<List<dynamic>>(
-              jsonDecode(value),
-            )?.whereType<String>().toList();
+        formattedData = tryCast<List<dynamic>>(
+          jsonDecode(value),
+        )?.whereType<String>().toList();
         break;
       default:
         break;

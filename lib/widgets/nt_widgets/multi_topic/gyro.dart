@@ -146,8 +146,9 @@ class Gyro extends NTWidget {
                                   97,
                                   1,
                                 ),
-                                labelStyle:
-                                    Theme.of(context).textTheme.bodySmall,
+                                labelStyle: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall,
                                 primaryRulersHeight: 7.25,
                                 primaryRulersWidth: 2,
                                 secondaryRulersHeight: 7.25,
@@ -157,8 +158,8 @@ class Gyro extends NTWidget {
                                 secondaryRulerPerInterval: 8,
                                 inverseRulers: true,
                               ),
-                              trackLabelFormater:
-                                  (value) => value.toStringAsFixed(0),
+                              trackLabelFormater: (value) =>
+                                  value.toStringAsFixed(0),
                             ),
                             needlePointer: [
                               NeedlePointer(

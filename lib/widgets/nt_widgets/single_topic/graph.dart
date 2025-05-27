@@ -343,8 +343,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
             List<int> addedIndexes = [];
             List<int> removedIndexes = [];
 
-            double currentTime =
-                DateTime.now().microsecondsSinceEpoch.toDouble();
+            double currentTime = DateTime.now().microsecondsSinceEpoch
+                .toDouble();
 
             _graphData.add(
               _GraphPoint(x: currentTime, y: tryCast(data) ?? 0.0),

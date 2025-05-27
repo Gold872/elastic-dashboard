@@ -93,10 +93,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     _fps = tryCast(jsonData['fps']);
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
 
-    List<num>? resolution =
-        tryCast<List<Object?>>(
-          jsonData['resolution'],
-        )?.whereType<num>().toList();
+    List<num>? resolution = tryCast<List<Object?>>(
+      jsonData['resolution'],
+    )?.whereType<num>().toList();
 
     if (resolution != null && resolution.length > 1) {
       if (resolution[0] % 2 != 0) {
@@ -390,10 +389,9 @@ class CameraStreamWidget extends NTWidget {
 
         bool createNewWidget = model.controller == null;
 
-        List<String> streamUrls =
-            streams
-                .map((stream) => model.getUrlWithParameters(stream))
-                .toList();
+        List<String> streamUrls = streams
+            .map((stream) => model.getUrlWithParameters(stream))
+            .toList();
 
         createNewWidget =
             createNewWidget ||
@@ -421,9 +419,8 @@ class CameraStreamWidget extends NTWidget {
                   const Spacer(),
                   ValueListenableBuilder(
                     valueListenable: model.controller!.bandwidth,
-                    builder:
-                        (context, value, child) =>
-                            Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
+                    builder: (context, value, child) =>
+                        Text('Bandwidth: ${value.toStringAsFixed(2)} Mbps'),
                   ),
                 ],
               ),

@@ -17,12 +17,11 @@ import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'nt_widget_container_model.dart';
 import 'widget_container_model.dart';
 
-typedef DragOutFunctions =
-    ({
-      bool Function(WidgetContainerModel widget) dragOutEnd,
-      void Function(WidgetContainerModel widget, Offset globalPosition)
-      dragOutUpdate,
-    });
+typedef DragOutFunctions = ({
+  bool Function(WidgetContainerModel widget) dragOutEnd,
+  void Function(WidgetContainerModel widget, Offset globalPosition)
+  dragOutUpdate,
+});
 
 class ListLayoutModel extends LayoutContainerModel {
   @override
@@ -222,58 +221,55 @@ class ListLayoutModel extends LayoutContainerModel {
                           header: const Text('Children Order & Properties'),
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children:
-                              children
-                                  .map(
-                                    (container) => Padding(
-                                      key: UniqueKey(),
-                                      padding: EdgeInsets.zero,
-                                      child: ExpansionTile(
-                                        title: Text(container.title ?? ''),
-                                        subtitle: Text(
-                                          container.childModel.type,
-                                        ),
-                                        controlAffinity:
-                                            ListTileControlAffinity.leading,
-                                        trailing: IconButton(
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              children.remove(container);
-
-                                              container.unSubscribe();
-                                              container.disposeModel(
-                                                deleting: true,
-                                              );
-                                              container.forceDispose();
-
-                                              notifyListeners();
-                                            });
-                                          },
-                                        ),
-                                        tilePadding: const EdgeInsets.only(
-                                          right: 40.0,
-                                        ),
-                                        childrenPadding: const EdgeInsets.only(
-                                          left: 16.0,
-                                          top: 8.0,
-                                          right: 32.0,
-                                          bottom: 8.0,
-                                        ),
-                                        expandedCrossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: getChildEditProperties(
-                                          context,
-                                          container,
-                                          setState,
-                                        ),
+                          children: children
+                              .map(
+                                (container) => Padding(
+                                  key: UniqueKey(),
+                                  padding: EdgeInsets.zero,
+                                  child: ExpansionTile(
+                                    title: Text(container.title ?? ''),
+                                    subtitle: Text(container.childModel.type),
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    trailing: IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
                                       ),
+                                      onPressed: () {
+                                        setState(() {
+                                          children.remove(container);
+
+                                          container.unSubscribe();
+                                          container.disposeModel(
+                                            deleting: true,
+                                          );
+                                          container.forceDispose();
+
+                                          notifyListeners();
+                                        });
+                                      },
                                     ),
-                                  )
-                                  .toList(),
+                                    tilePadding: const EdgeInsets.only(
+                                      right: 40.0,
+                                    ),
+                                    childrenPadding: const EdgeInsets.only(
+                                      left: 16.0,
+                                      top: 8.0,
+                                      right: 32.0,
+                                      bottom: 8.0,
+                                    ),
+                                    expandedCrossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: getChildEditProperties(
+                                      context,
+                                      container,
+                                      setState,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                           onReorder: (oldIndex, newIndex) {
                             setState(() {
                               if (newIndex > oldIndex) {
@@ -486,10 +482,9 @@ class ListLayoutModel extends LayoutContainerModel {
 
       column.add(
         GestureDetector(
-          supportedDevices:
-              PointerDeviceKind.values
-                  .whereNot((element) => element == PointerDeviceKind.trackpad)
-                  .toSet(),
+          supportedDevices: PointerDeviceKind.values
+              .whereNot((element) => element == PointerDeviceKind.trackpad)
+              .toSet(),
           onPanDown: (details) {
             if (preferences.getBool(PrefKeys.layoutLocked) ??
                 Defaults.layoutLocked) {

@@ -222,15 +222,14 @@ class VoltageView extends NTWidget {
 
         int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
 
-        GaugeOrientation gaugeOrientation =
-            (model.orientation == 'vertical')
-                ? GaugeOrientation.vertical
-                : GaugeOrientation.horizontal;
+        GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
+            ? GaugeOrientation.vertical
+            : GaugeOrientation.horizontal;
 
         RulerPosition rulerPosition =
             (gaugeOrientation == GaugeOrientation.vertical)
-                ? RulerPosition.right
-                : RulerPosition.bottom;
+            ? RulerPosition.right
+            : RulerPosition.bottom;
 
         List<Widget> children = [
           Text(

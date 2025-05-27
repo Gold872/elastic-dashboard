@@ -31,26 +31,23 @@ class _ContextMenuListenerState extends State<ContextMenuListener> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: widget.behavior,
-      supportedDevices:
-          PointerDeviceKind.values
-              .whereNot((e) => e == PointerDeviceKind.mouse)
-              .toSet(),
+      supportedDevices: PointerDeviceKind.values
+          .whereNot((e) => e == PointerDeviceKind.mouse)
+          .toSet(),
       onLongPressDown: (details) {
         longPressGlobalPosition = details.globalPosition;
         longPressLocalPosition = details.localPosition;
       },
-      onLongPress:
-          () => widget.onContextMenuGesture(
-            longPressGlobalPosition,
-            longPressLocalPosition,
-          ),
+      onLongPress: () => widget.onContextMenuGesture(
+        longPressGlobalPosition,
+        longPressLocalPosition,
+      ),
       child: GestureDetector(
         behavior: widget.behavior,
-        onSecondaryTapUp:
-            (details) => widget.onContextMenuGesture(
-              details.globalPosition,
-              details.localPosition,
-            ),
+        onSecondaryTapUp: (details) => widget.onContextMenuGesture(
+          details.globalPosition,
+          details.localPosition,
+        ),
         child: widget.child,
       ),
     );

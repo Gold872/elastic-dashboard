@@ -128,8 +128,10 @@ Future<void> _restoreWindowPosition(
     return;
   }
 
-  List<double> position =
-      rawPosition.whereType<num>().map((n) => n.toDouble()).toList();
+  List<double> position = rawPosition
+      .whereType<num>()
+      .map((n) => n.toDouble())
+      .toList();
 
   if (position.length < 4) {
     return;
@@ -224,11 +226,10 @@ class _ElasticState extends State<Elastic> {
         ntConnection: widget.ntConnection,
         preferences: widget.preferences,
         version: widget.version,
-        onColorChanged:
-            (color) => setState(() {
-              teamColor = color;
-              widget.preferences.setInt(PrefKeys.teamColor, color.toARGB32());
-            }),
+        onColorChanged: (color) => setState(() {
+          teamColor = color;
+          widget.preferences.setInt(PrefKeys.teamColor, color.toARGB32());
+        }),
         onThemeVariantChanged: (variant) async {
           themeVariant = variant;
           if (variant == Defaults.themeVariant) {
@@ -257,15 +258,17 @@ class _ElasticState extends State<Elastic> {
         brightness: Brightness.dark,
         tones: themeTones.copyWith(
           // Use older (but incorrect) material 3 legacy tones from 2025 version
-          surfaceTone:
-              themeVariant == FlexSchemeVariant.material3Legacy ? 8 : null,
-          primaryMinChroma:
-              themeVariant == FlexSchemeVariant.material3Legacy ? 0 : null,
+          surfaceTone: themeVariant == FlexSchemeVariant.material3Legacy
+              ? 8
+              : null,
+          primaryMinChroma: themeVariant == FlexSchemeVariant.material3Legacy
+              ? 0
+              : null,
           // Have the dialog color match the card colors
           surfaceContainerHighTone:
               themeVariant == FlexSchemeVariant.material3Legacy
-                  ? 8
-                  : themeTones.surfaceTone,
+              ? 8
+              : themeTones.surfaceTone,
         ),
       ),
     );

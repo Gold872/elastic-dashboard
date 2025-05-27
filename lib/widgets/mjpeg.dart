@@ -92,23 +92,22 @@ class _MjpegState extends State<Mjpeg> {
       return SizedBox(
         width: widget.width,
         height: widget.height,
-        child:
-            widget.error == null
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      errorText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+        child: widget.error == null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    errorText,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
                   ),
-                )
-                : widget.error!(
-                  context,
-                  controller.errorState.value!.first,
-                  controller.errorState.value!.last,
                 ),
+              )
+            : widget.error!(
+                context,
+                controller.errorState.value!.first,
+                controller.errorState.value!.last,
+              ),
       );
     }
 

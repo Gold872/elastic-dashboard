@@ -294,11 +294,10 @@ class _DifferentialDrivePainter extends CustomPainter {
   void _drawRobotFrame(Canvas canvas, Size size) {
     final double scaleFactor = size.width / 108.15;
 
-    Paint outlinePainter =
-        Paint()
-          ..color = Colors.grey
-          ..strokeWidth = 2 * scaleFactor
-          ..style = PaintingStyle.stroke;
+    Paint outlinePainter = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 2 * scaleFactor
+      ..style = PaintingStyle.stroke;
 
     double wheelWidth = size.width / 8;
     double wheelHeight = size.height / 3.25;
@@ -346,11 +345,10 @@ class _DifferentialDrivePainter extends CustomPainter {
   void _drawMotionVector(Canvas canvas, Size size, Offset center) {
     final double scaleFactor = size.width / 94.6;
 
-    Paint vectorArc =
-        Paint()
-          ..color = Colors.red
-          ..strokeWidth = 2 * scaleFactor
-          ..style = PaintingStyle.stroke;
+    Paint vectorArc = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2 * scaleFactor
+      ..style = PaintingStyle.stroke;
 
     final double forwardSpeed = (leftSpeed + rightSpeed) / 2;
     final double turnSpeed = (leftSpeed - rightSpeed) / 2;
@@ -360,13 +358,12 @@ class _DifferentialDrivePainter extends CustomPainter {
       // Draw an X since the robot isn't really moving
       Size xSize = size / 3;
 
-      Path xPath =
-          Path()
-            ..moveTo(center.dx, center.dy)
-            ..relativeMoveTo(-xSize.width / 2, -xSize.height / 2)
-            ..relativeLineTo(xSize.width, xSize.height)
-            ..relativeMoveTo(0, -xSize.height)
-            ..relativeLineTo(-xSize.width, xSize.height);
+      Path xPath = Path()
+        ..moveTo(center.dx, center.dy)
+        ..relativeMoveTo(-xSize.width / 2, -xSize.height / 2)
+        ..relativeLineTo(xSize.width, xSize.height)
+        ..relativeMoveTo(0, -xSize.height)
+        ..relativeLineTo(-xSize.width, xSize.height);
 
       canvas.drawPath(xPath, vectorArc);
       return;
@@ -400,17 +397,15 @@ class _DifferentialDrivePainter extends CustomPainter {
         vectorY *= maxRadius;
       }
 
-      Path vectorPath =
-          Path()
-            ..moveTo(center.dx, center.dy)
-            ..relativeArcToPoint(
-              Offset(vectorX, vectorY),
-              radius:
-                  (radius != double.infinity)
-                      ? Radius.circular(radius)
-                      : Radius.zero,
-              clockwise: arcSign * forwardSpeedSign == 1,
-            );
+      Path vectorPath = Path()
+        ..moveTo(center.dx, center.dy)
+        ..relativeArcToPoint(
+          Offset(vectorX, vectorY),
+          radius: (radius != double.infinity)
+              ? Radius.circular(radius)
+              : Radius.zero,
+          clockwise: arcSign * forwardSpeedSign == 1,
+        );
 
       canvas.drawPath(vectorPath, vectorArc);
 
@@ -518,29 +513,27 @@ class _DifferentialDrivePainter extends CustomPainter {
     double arrowAngle,
     double base,
   ) {
-    Paint arrowHead =
-        Paint()
-          ..color = Colors.red
-          ..strokeWidth = 2
-          ..style = PaintingStyle.fill;
+    Paint arrowHead = Paint()
+      ..color = Colors.red
+      ..strokeWidth = 2
+      ..style = PaintingStyle.fill;
 
     double triangleHeight = base / (2 * tan(arrowAngle / 2));
 
     double xOffset = cos(arrowRotation) * triangleHeight / 2;
     double yOffset = sin(arrowRotation) * triangleHeight / 2;
 
-    Path arrowPath =
-        Path()
-          ..moveTo(
-            center.dx + tipX + xOffset - base * cos(arrowRotation - arrowAngle),
-            center.dy + tipY + yOffset - base * sin(arrowRotation - arrowAngle),
-          )
-          ..lineTo(center.dx + tipX + xOffset, center.dy + tipY + yOffset)
-          ..lineTo(
-            center.dx + tipX + xOffset - base * cos(arrowRotation + arrowAngle),
-            center.dy + tipY + yOffset - base * sin(arrowRotation + arrowAngle),
-          )
-          ..close();
+    Path arrowPath = Path()
+      ..moveTo(
+        center.dx + tipX + xOffset - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY + yOffset - base * sin(arrowRotation - arrowAngle),
+      )
+      ..lineTo(center.dx + tipX + xOffset, center.dy + tipY + yOffset)
+      ..lineTo(
+        center.dx + tipX + xOffset - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY + yOffset - base * sin(arrowRotation + arrowAngle),
+      )
+      ..close();
 
     canvas.drawPath(arrowPath, arrowHead);
   }

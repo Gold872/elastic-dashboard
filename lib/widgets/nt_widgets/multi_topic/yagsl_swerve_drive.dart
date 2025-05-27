@@ -199,10 +199,12 @@ class YAGSLSwerveDrive extends NTWidget {
         List<Object?> desiredStatesRaw =
             tryCast(model.desiredStatesSubscription.value) ?? [];
 
-        List<double> measuredStates =
-            measuredStatesRaw.whereType<double>().toList();
-        List<double> desiredStates =
-            desiredStatesRaw.whereType<double>().toList();
+        List<double> measuredStates = measuredStatesRaw
+            .whereType<double>()
+            .toList();
+        List<double> desiredStates = desiredStatesRaw
+            .whereType<double>()
+            .toList();
 
         double width = tryCast(model.robotWidthSubscription.value) ?? 1.0;
         double length = tryCast(model.robotLengthSubscription.value) ?? width;
@@ -253,8 +255,9 @@ class YAGSLSwerveDrive extends NTWidget {
                     rotationUnit: rotationUnit,
                     maxSpeed: maxSpeed,
                     moduleStates: measuredStates,
-                    desiredStates:
-                        (model.showDesiredStates) ? desiredStates : [],
+                    desiredStates: (model.showDesiredStates)
+                        ? desiredStates
+                        : [],
                   ),
                 ),
               ),
@@ -356,11 +359,10 @@ class SwerveDrivePainter extends CustomPainter {
     final double scaleFactor = min(size.width, size.height) / 128.95 / 0.9;
     final double circleRadius = min(size.width, size.height) / 8;
 
-    Paint framePainter =
-        Paint()
-          ..strokeWidth = 1.75 * scaleFactor
-          ..color = Colors.grey
-          ..style = PaintingStyle.stroke;
+    Paint framePainter = Paint()
+      ..strokeWidth = 1.75 * scaleFactor
+      ..color = Colors.grey
+      ..style = PaintingStyle.stroke;
 
     // Front left circle
     canvas.drawCircle(
@@ -455,18 +457,16 @@ class SwerveDrivePainter extends CustomPainter {
     final double minArrowBase = 6.5 * scaleFactor;
     final double maxArrowBase = 16.0 * scaleFactor;
 
-    Paint arrowPaint =
-        Paint()
-          ..strokeWidth = 2 * scaleFactor
-          ..color = color
-          ..style = PaintingStyle.stroke;
+    Paint arrowPaint = Paint()
+      ..strokeWidth = 2 * scaleFactor
+      ..color = color
+      ..style = PaintingStyle.stroke;
 
-    Paint anglePaint =
-        Paint()
-          ..strokeWidth = 3.5 * scaleFactor
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
+    Paint anglePaint = Paint()
+      ..strokeWidth = 3.5 * scaleFactor
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
     // Front left angle indicator thing
     Rect frontLeftWheel = Rect.fromCenter(
@@ -740,17 +740,16 @@ class SwerveDrivePainter extends CustomPainter {
     double base,
     Paint arrowPaint,
   ) {
-    Path arrowPath =
-        Path()
-          ..moveTo(
-            center.dx + tipX - base * cos(arrowRotation - arrowAngle),
-            center.dy + tipY - base * sin(arrowRotation - arrowAngle),
-          )
-          ..lineTo(center.dx + tipX, center.dy + tipY)
-          ..lineTo(
-            center.dx + tipX - base * cos(arrowRotation + arrowAngle),
-            center.dy + tipY - base * sin(arrowRotation + arrowAngle),
-          );
+    Path arrowPath = Path()
+      ..moveTo(
+        center.dx + tipX - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation - arrowAngle),
+      )
+      ..lineTo(center.dx + tipX, center.dy + tipY)
+      ..lineTo(
+        center.dx + tipX - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation + arrowAngle),
+      );
 
     canvas.drawPath(arrowPath, arrowPaint);
   }
@@ -766,23 +765,21 @@ class SwerveDrivePainter extends CustomPainter {
 
     Offset center = Offset(size.width, size.height) / 2 + offset;
 
-    Paint arrowPainter =
-        Paint()
-          ..strokeWidth = 3.5 * scaleFactor
-          ..color = Colors.red
-          ..style = PaintingStyle.stroke;
+    Paint arrowPainter = Paint()
+      ..strokeWidth = 3.5 * scaleFactor
+      ..color = Colors.red
+      ..style = PaintingStyle.stroke;
 
-    Path arrowHead =
-        Path()
-          ..moveTo(
-            center.dx + tipX - base * cos(arrowRotation - arrowAngle),
-            center.dy + tipY - base * sin(arrowRotation - arrowAngle),
-          )
-          ..lineTo(center.dx + tipX, center.dy + tipY)
-          ..lineTo(
-            center.dx + tipX - base * cos(arrowRotation + arrowAngle),
-            center.dy + tipY - base * sin(arrowRotation + arrowAngle),
-          );
+    Path arrowHead = Path()
+      ..moveTo(
+        center.dx + tipX - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation - arrowAngle),
+      )
+      ..lineTo(center.dx + tipX, center.dy + tipY)
+      ..lineTo(
+        center.dx + tipX - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation + arrowAngle),
+      );
 
     canvas.drawPath(arrowHead, arrowPainter);
     canvas.drawLine(

@@ -64,10 +64,9 @@ class ToggleButton extends NTWidget {
                     color: Colors.black,
                   ),
                 ],
-                color:
-                    (value)
-                        ? theme.colorScheme.primaryContainer
-                        : const Color.fromARGB(255, 50, 50, 50),
+                color: (value)
+                    ? theme.colorScheme.primaryContainer
+                    : const Color.fromARGB(255, 50, 50, 50),
               ),
               child: Center(
                 child: Text(

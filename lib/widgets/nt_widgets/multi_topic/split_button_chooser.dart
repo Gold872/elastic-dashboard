@@ -88,8 +88,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
   }
 
   void onChooserStateUpdate() {
-    List<Object?>? rawOptions =
-        optionsSubscription.value?.tryCast<List<Object?>>();
+    List<Object?>? rawOptions = optionsSubscription.value
+        ?.tryCast<List<Object?>>();
 
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
@@ -224,10 +224,10 @@ class SplitButtonChooser extends NTWidget {
         const SizedBox(width: 5),
         (showWarning)
             ? const Tooltip(
-              message:
-                  'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-              child: Icon(Icons.priority_high, color: Colors.red),
-            )
+                message:
+                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                child: Icon(Icons.priority_high, color: Colors.red),
+              )
             : const Icon(Icons.check, color: Colors.green),
       ],
     );

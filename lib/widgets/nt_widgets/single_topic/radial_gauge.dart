@@ -356,9 +356,8 @@ class RadialGaugeWidget extends NTWidget {
                           ) !=
                           0.0,
                     ),
-                    trackLabelFormater:
-                        (value) =>
-                            num.parse(value.toStringAsFixed(2)).toString(),
+                    trackLabelFormater: (value) =>
+                        num.parse(value.toStringAsFixed(2)).toString(),
                   ),
                   needlePointer: [
                     if (model.showPointer)

@@ -164,10 +164,9 @@ class CommandWidget extends NTWidget {
                       color: Colors.black,
                     ),
                   ],
-                  color:
-                      (running)
-                          ? theme.colorScheme.primaryContainer
-                          : const Color.fromARGB(255, 50, 50, 50),
+                  color: (running)
+                      ? theme.colorScheme.primaryContainer
+                      : const Color.fromARGB(255, 50, 50, 50),
                 ),
                 child: Text(
                   buttonText,

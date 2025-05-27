@@ -295,20 +295,19 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
                     text: TextSpan(
                       text: 'Source',
                       style: const TextStyle(color: Colors.blue),
-                      recognizer:
-                          TapGestureRecognizer()
-                            ..onTap = () async {
-                              if (_field.sourceURL == null) {
-                                return;
-                              }
-                              Uri? url = Uri.tryParse(_field.sourceURL!);
-                              if (url == null) {
-                                return;
-                              }
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url);
-                              }
-                            },
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          if (_field.sourceURL == null) {
+                            return;
+                          }
+                          Uri? url = Uri.tryParse(_field.sourceURL!);
+                          if (url == null) {
+                            return;
+                          }
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url);
+                          }
+                        },
                     ),
                   ),
                 ),
@@ -615,8 +614,9 @@ class FieldWidget extends NTWidget {
               robotY = poseStruct.y;
               robotTheta = poseStruct.angle;
             } else {
-              List<double> robotPosition =
-                  robotPositionRaw.whereType<double>().toList();
+              List<double> robotPosition = robotPositionRaw
+                  .whereType<double>()
+                  .toList();
 
               if (robotPosition.length >= 3) {
                 robotX = robotPosition[0];
@@ -651,7 +651,7 @@ class FieldWidget extends NTWidget {
                 (fittedSizes.destination.width / fittedSizes.source.width);
             double rotatedScaleReduction =
                 (rotatedFittedSizes.destination.width /
-                    rotatedFittedSizes.source.width);
+                rotatedFittedSizes.source.width);
 
             if (scaleReduction.isNaN) {
               scaleReduction = 0;
@@ -693,8 +693,8 @@ class FieldWidget extends NTWidget {
             if (model.showOtherObjects || model.showTrajectories) {
               for (NT4Subscription objectSubscription
                   in model._otherObjectSubscriptions) {
-                List<Object?>? objectPositionRaw =
-                    objectSubscription.value?.tryCast<List<Object?>>();
+                List<Object?>? objectPositionRaw = objectSubscription.value
+                    ?.tryCast<List<Object?>>();
 
                 if (objectPositionRaw == null) {
                   continue;
@@ -731,8 +731,9 @@ class FieldWidget extends NTWidget {
                   List<Offset> objectTrajectory = [];
 
                   if (isStructObject) {
-                    List<int> structArrayBytes =
-                        objectPositionRaw.whereType<int>().toList();
+                    List<int> structArrayBytes = objectPositionRaw
+                        .whereType<int>()
+                        .toList();
 
                     List<Pose2dStruct> poseArray = Pose2dStruct.listFromBytes(
                       Uint8List.fromList(structArrayBytes),
@@ -750,8 +751,9 @@ class FieldWidget extends NTWidget {
                       );
                     }
                   } else {
-                    List<double> objectPosition =
-                        objectPositionRaw.whereType<double>().toList();
+                    List<double> objectPosition = objectPositionRaw
+                        .whereType<double>()
+                        .toList();
 
                     for (int i = 0; i < objectPosition.length - 2; i += 3) {
                       objectTrajectory.add(
@@ -771,8 +773,9 @@ class FieldWidget extends NTWidget {
                   }
                 } else {
                   if (isStructObject) {
-                    List<int> structBytes =
-                        objectPositionRaw.whereType<int>().toList();
+                    List<int> structBytes = objectPositionRaw
+                        .whereType<int>()
+                        .toList();
                     if (isStructArray) {
                       List<Pose2dStruct> poses = Pose2dStruct.listFromBytes(
                         Uint8List.fromList(structBytes),
@@ -807,8 +810,9 @@ class FieldWidget extends NTWidget {
                       );
                     }
                   } else {
-                    List<double> objectPosition =
-                        objectPositionRaw.whereType<double>().toList();
+                    List<double> objectPosition = objectPositionRaw
+                        .whereType<double>()
+                        .toList();
 
                     for (int i = 0; i < objectPosition.length - 2; i += 3) {
                       List<double> positionArray = objectPosition.sublist(
@@ -882,11 +886,10 @@ class TrianglePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint =
-        Paint()
-          ..color = strokeColor
-          ..strokeWidth = strokeWidth
-          ..style = paintingStyle;
+    Paint paint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..style = paintingStyle;
 
     canvas.drawPath(getTrianglePath(size.width, size.height), paint);
   }
@@ -926,12 +929,11 @@ class TrajectoryPainter extends CustomPainter {
     if (points.isEmpty) {
       return;
     }
-    Paint trajectoryPaint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
+    Paint trajectoryPaint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
     Path trajectoryPath = Path();
 
     trajectoryPath.moveTo(points[0].dx + center.dx, points[0].dy + center.dy);

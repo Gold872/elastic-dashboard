@@ -126,8 +126,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   }
 
   void onChooserStateUpdate() {
-    List<Object?>? rawOptions =
-        optionsSubscription.value?.tryCast<List<Object?>>();
+    List<Object?>? rawOptions = optionsSubscription.value
+        ?.tryCast<List<Object?>>();
 
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
@@ -253,10 +253,10 @@ class ComboBoxChooser extends NTWidget {
         const SizedBox(width: 5),
         (showWarning)
             ? const Tooltip(
-              message:
-                  'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-              child: Icon(Icons.priority_high, color: Colors.red),
-            )
+                message:
+                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                child: Icon(Icons.priority_high, color: Colors.red),
+              )
             : const Icon(Icons.check, color: Colors.green),
       ],
     );
@@ -287,19 +287,18 @@ class _StringChooserDropdown extends StatelessWidget {
             return DropdownButton2<String>(
               isExpanded: true,
               value: selected,
-              selectedItemBuilder:
-                  (context) => [
-                    ...options.map((String option) {
-                      return Container(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          option,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }),
-                  ],
+              selectedItemBuilder: (context) => [
+                ...options.map((String option) {
+                  return Container(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      option,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }),
+              ],
               dropdownStyleData: DropdownStyleData(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
@@ -342,16 +341,15 @@ class _StringChooserDropdown extends StatelessWidget {
                   ),
                 ),
               ),
-              items:
-                  options.map((String option) {
-                    return DropdownMenuItem(
-                      value: option,
-                      child: Text(
-                        option,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    );
-                  }).toList(),
+              items: options.map((String option) {
+                return DropdownMenuItem(
+                  value: option,
+                  child: Text(
+                    option,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                );
+              }).toList(),
               onMenuStateChange: (isOpen) {
                 if (!isOpen) {
                   textController.clear();

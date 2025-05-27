@@ -207,17 +207,16 @@ void main() {
       NTConnection intNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            intNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kInt,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {'Test/Display Value': 0},
+        ntConnection: intNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kInt,
+              properties: {},
             ),
+          ],
+          virtualValues: {'Test/Display Value': 0},
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'int',
@@ -261,17 +260,16 @@ void main() {
       NTConnection boolNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            boolNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kBool,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {'Test/Display Value': false},
+        ntConnection: boolNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kBool,
+              properties: {},
             ),
+          ],
+          virtualValues: {'Test/Display Value': false},
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'boolean',
@@ -323,17 +321,16 @@ void main() {
       NTConnection stringNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            stringNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kString,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {'Test/Display Value': 'Hello'},
+        ntConnection: stringNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kString,
+              properties: {},
             ),
+          ],
+          virtualValues: {'Test/Display Value': 'Hello'},
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'string',
@@ -388,19 +385,18 @@ void main() {
       NTConnection intArrNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            intArrNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kIntArr,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                'Test/Display Value': [0, 0],
-              },
+        ntConnection: intArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kIntArr,
+              properties: {},
             ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [0, 0],
+          },
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'int[]',
@@ -453,19 +449,18 @@ void main() {
       NTConnection boolArrNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            boolArrNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kBoolArr,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                'Test/Display Value': [false, true],
-              },
+        ntConnection: boolArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kBoolArr,
+              properties: {},
             ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [false, true],
+          },
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'boolean[]',
@@ -521,19 +516,18 @@ void main() {
       NTConnection doubleArrNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            doubleArrNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kFloat64Arr,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                'Test/Display Value': [0.0, 0.0],
-              },
+        ntConnection: doubleArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kFloat64Arr,
+              properties: {},
             ),
+          ],
+          virtualValues: {
+            'Test/Display Value': [0.0, 0.0],
+          },
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'double[]',
@@ -585,19 +579,18 @@ void main() {
       NTConnection stringArrNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            stringArrNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kStringArr,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                'Test/Display Value': ['Hello', 'There'],
-              },
+        ntConnection: stringArrNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kStringArr,
+              properties: {},
             ),
+          ],
+          virtualValues: {
+            'Test/Display Value': ['Hello', 'There'],
+          },
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'string[]',
@@ -652,19 +645,16 @@ void main() {
       NTConnection stringNTConnection;
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
-        ntConnection:
-            stringNTConnection = createMockOnlineNT4(
-              virtualTopics: [
-                NT4Topic(
-                  name: 'Test/Display Value',
-                  type: NT4TypeStr.kString,
-                  properties: {},
-                ),
-              ],
-              virtualValues: {
-                'Test/Display Value': 'There isn\'t a submit button',
-              },
+        ntConnection: stringNTConnection = createMockOnlineNT4(
+          virtualTopics: [
+            NT4Topic(
+              name: 'Test/Display Value',
+              type: NT4TypeStr.kString,
+              properties: {},
             ),
+          ],
+          virtualValues: {'Test/Display Value': 'There isn\'t a submit button'},
+        ),
         preferences: preferences,
         topic: 'Test/Display Value',
         dataType: 'string',

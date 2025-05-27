@@ -121,8 +121,9 @@ class FMSInfo extends NTWidget {
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);
-        String replayNumberDisplay =
-            (replayNumber != 0) ? ' (replay $replayNumber)' : '';
+        String replayNumberDisplay = (replayNumber != 0)
+            ? ' (replay $replayNumber)'
+            : '';
 
         bool fmsConnected = _flagMatches(controlData, FMS_ATTACHED_FLAG);
         bool dsAttached = _flagMatches(controlData, DS_ATTACHED_FLAG);
@@ -149,8 +150,9 @@ class FMSInfo extends NTWidget {
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               decoration: BoxDecoration(
-                color:
-                    (redAlliance) ? Colors.red.shade900 : Colors.blue.shade900,
+                color: (redAlliance)
+                    ? Colors.red.shade900
+                    : Colors.blue.shade900,
                 borderRadius: BorderRadius.circular(5.0),
               ),
               child: Text(
@@ -161,21 +163,19 @@ class FMSInfo extends NTWidget {
           ],
         );
 
-        String fmsDisplayString =
-            (fmsConnected) ? 'FMS Connected' : 'FMS Disconnected';
-        String dsDisplayString =
-            (dsAttached)
-                ? 'DriverStation Connected'
-                : 'DriverStation Disconnected';
+        String fmsDisplayString = (fmsConnected)
+            ? 'FMS Connected'
+            : 'FMS Disconnected';
+        String dsDisplayString = (dsAttached)
+            ? 'DriverStation Connected'
+            : 'DriverStation Disconnected';
 
-        Icon fmsDisplayIcon =
-            (fmsConnected)
-                ? const Icon(Icons.check, color: Colors.green, size: 18)
-                : const Icon(Icons.clear, color: Colors.red, size: 18);
-        Icon dsDisplayIcon =
-            (dsAttached)
-                ? const Icon(Icons.check, color: Colors.green, size: 18)
-                : const Icon(Icons.clear, color: Colors.red, size: 18);
+        Icon fmsDisplayIcon = (fmsConnected)
+            ? const Icon(Icons.check, color: Colors.green, size: 18)
+            : const Icon(Icons.clear, color: Colors.red, size: 18);
+        Icon dsDisplayIcon = (dsAttached)
+            ? const Icon(Icons.check, color: Colors.green, size: 18)
+            : const Icon(Icons.clear, color: Colors.red, size: 18);
 
         String robotStateDisplayString = 'Robot State: $robotControlState';
 

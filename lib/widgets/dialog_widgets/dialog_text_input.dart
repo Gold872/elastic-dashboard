@@ -81,8 +81,9 @@ class _DialogTextInputState extends State<DialogTextInput> {
             FocusManager.instance.primaryFocus?.unfocus();
           },
           controller: textEditingController,
-          inputFormatters:
-              (widget.formatter != null) ? [widget.formatter!] : null,
+          inputFormatters: (widget.formatter != null)
+              ? [widget.formatter!]
+              : null,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
             labelText: widget.label,

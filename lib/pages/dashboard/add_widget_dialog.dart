@@ -93,7 +93,10 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const TabBar(
-                  tabs: [Tab(text: 'Network Tables'), Tab(text: 'Layouts')],
+                  tabs: [
+                    Tab(text: 'Network Tables'),
+                    Tab(text: 'Layouts'),
+                  ],
                 ),
                 const SizedBox(height: 5),
                 Expanded(
@@ -139,8 +142,9 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                               transitionDuration: const Duration(
                                 milliseconds: 100,
                               ),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surface,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.surface,
                               barrierColor: Colors.transparent,
                               width: 200.0,
                               bodyBuilder: (context) {
@@ -164,8 +168,8 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                       child: SizedBox(
                         height: 40.0,
                         child: DialogTextInput(
-                          onSubmit:
-                              (value) => setState(() => _searchQuery = value),
+                          onSubmit: (value) =>
+                              setState(() => _searchQuery = value),
                           allowEmptySubmission: true,
                           updateOnChanged: true,
                           label: 'Search',

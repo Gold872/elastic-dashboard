@@ -148,10 +148,9 @@ class EditableTabBar extends StatelessWidget {
           margin: const EdgeInsets.only(left: 5.0, right: 5.0, top: 5.0),
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
           decoration: BoxDecoration(
-            color:
-                (currentIndex == index)
-                    ? theme.colorScheme.onPrimaryContainer
-                    : Colors.transparent,
+            color: (currentIndex == index)
+                ? theme.colorScheme.onPrimaryContainer
+                : Colors.transparent,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(10.0),
               topRight: Radius.circular(10.0),
@@ -163,10 +162,9 @@ class EditableTabBar extends StatelessWidget {
                 Text(
                   tabData[index].name,
                   style: theme.textTheme.bodyMedium!.copyWith(
-                    color:
-                        (currentIndex == index)
-                            ? theme.colorScheme.primaryContainer
-                            : theme.colorScheme.onPrimaryContainer,
+                    color: (currentIndex == index)
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
                 // Spacing for close button
@@ -192,10 +190,9 @@ class EditableTabBar extends StatelessWidget {
                       minHeight: 15.0,
                     ),
                     iconSize: 14,
-                    color:
-                        (currentIndex == index)
-                            ? theme.colorScheme.primaryContainer
-                            : theme.colorScheme.onPrimaryContainer,
+                    color: (currentIndex == index)
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.onPrimaryContainer,
                     icon: const Icon(Icons.close),
                   ),
                 ),
@@ -236,8 +233,8 @@ class EditableTabBar extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
                     itemCount: tabData.length,
-                    itemBuilder:
-                        (context, index) => _buildTab(index, context, theme),
+                    itemBuilder: (context, index) =>
+                        _buildTab(index, context, theme),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -249,9 +246,9 @@ class EditableTabBar extends StatelessWidget {
                       style: endButtonStyle,
                       onPressed:
                           !(preferences.getBool(PrefKeys.layoutLocked) ??
-                                  Defaults.layoutLocked)
-                              ? () => onTabMoveLeft.call()
-                              : null,
+                              Defaults.layoutLocked)
+                          ? () => onTabMoveLeft.call()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.west),
                     ),
@@ -259,9 +256,9 @@ class EditableTabBar extends StatelessWidget {
                       style: endButtonStyle,
                       onPressed:
                           !(preferences.getBool(PrefKeys.layoutLocked) ??
-                                  Defaults.layoutLocked)
-                              ? () => createTab()
-                              : null,
+                              Defaults.layoutLocked)
+                          ? () => createTab()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.add),
                     ),
@@ -269,9 +266,9 @@ class EditableTabBar extends StatelessWidget {
                       style: endButtonStyle,
                       onPressed:
                           !(preferences.getBool(PrefKeys.layoutLocked) ??
-                                  Defaults.layoutLocked)
-                              ? () => onTabMoveRight.call()
-                              : null,
+                              Defaults.layoutLocked)
+                          ? () => onTabMoveRight.call()
+                          : null,
                       alignment: Alignment.center,
                       icon: const Icon(Icons.east),
                     ),

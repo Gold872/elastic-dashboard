@@ -256,8 +256,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
           ),
         );
       } else {
-        TabGridModel existingTab =
-            tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        TabGridModel existingTab = tabData
+            .firstWhere((tab) => tab.name == tabName)
+            .tabGrid;
         existingTab.mergeFromJson(
           jsonData: tabJson['grid_layout'],
           onJsonLoadingWarning: showJsonLoadingWarning,
@@ -302,8 +303,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
         );
       } else {
         overwritten++;
-        TabGridModel existingTab =
-            tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        TabGridModel existingTab = tabData
+            .firstWhere((tab) => tab.name == tabName)
+            .tabGrid;
         existingTab.onDestroy();
         existingTab.loadFromJson(
           jsonData: tabJson['grid_layout'],
@@ -338,88 +340,82 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
     bool showModes = false;
     return await showDialog(
       context: state!.context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Select Layout'),
-            content: SizedBox(
-              width: 350,
-              child: StatefulBuilder(
-                builder: (context, setState) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('Layout File'),
-                      ValueListenableBuilder(
-                        valueListenable: layoutSelection,
-                        builder:
-                            (_, value, child) => DialogDropdownChooser<String>(
-                              choices: fileNames,
-                              initialValue: value,
-                              onSelectionChanged:
-                                  (selection) =>
-                                      layoutSelection.value = selection,
-                            ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text('Download Mode'),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: ValueListenableBuilder(
-                              valueListenable: modeSelection,
-                              builder:
-                                  (_, value, child) =>
-                                      DialogDropdownChooser<LayoutDownloadMode>(
-                                        choices: LayoutDownloadMode.values,
-                                        initialValue: value,
-                                        nameMap: (value) => value.name,
-                                        onSelectionChanged: (selection) {
-                                          if (selection != null) {
-                                            modeSelection.value = selection;
-                                          }
-                                        },
-                                      ),
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          TextButton.icon(
-                            label: const Text('Help'),
-                            icon: const Icon(Icons.help_outline),
-                            onPressed: () {
-                              setState(() => showModes = !showModes);
-                            },
-                          ),
-                        ],
-                      ),
-                      if (showModes) ...[
-                        const SizedBox(height: 5),
-                        Text(LayoutDownloadMode.descriptions),
-                      ],
-                    ],
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(null),
-                child: const Text('Cancel'),
-              ),
-              ValueListenableBuilder(
-                valueListenable: layoutSelection,
-                builder:
-                    (_, value, child) => TextButton(
-                      onPressed:
-                          (value != null)
-                              ? () => Navigator.of(
-                                context,
-                              ).pop((layout: value, mode: modeSelection.value))
-                              : null,
-                      child: const Text('Download'),
+      builder: (context) => AlertDialog(
+        title: const Text('Select Layout'),
+        content: SizedBox(
+          width: 350,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Layout File'),
+                  ValueListenableBuilder(
+                    valueListenable: layoutSelection,
+                    builder: (_, value, child) => DialogDropdownChooser<String>(
+                      choices: fileNames,
+                      initialValue: value,
+                      onSelectionChanged: (selection) =>
+                          layoutSelection.value = selection,
                     ),
-              ),
-            ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Download Mode'),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: ValueListenableBuilder(
+                          valueListenable: modeSelection,
+                          builder: (_, value, child) =>
+                              DialogDropdownChooser<LayoutDownloadMode>(
+                                choices: LayoutDownloadMode.values,
+                                initialValue: value,
+                                nameMap: (value) => value.name,
+                                onSelectionChanged: (selection) {
+                                  if (selection != null) {
+                                    modeSelection.value = selection;
+                                  }
+                                },
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      TextButton.icon(
+                        label: const Text('Help'),
+                        icon: const Icon(Icons.help_outline),
+                        onPressed: () {
+                          setState(() => showModes = !showModes);
+                        },
+                      ),
+                    ],
+                  ),
+                  if (showModes) ...[
+                    const SizedBox(height: 5),
+                    Text(LayoutDownloadMode.descriptions),
+                  ],
+                ],
+              );
+            },
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Cancel'),
+          ),
+          ValueListenableBuilder(
+            valueListenable: layoutSelection,
+            builder: (_, value, child) => TextButton(
+              onPressed: (value != null)
+                  ? () => Navigator.of(
+                      context,
+                    ).pop((layout: value, mode: modeSelection.value))
+                  : null,
+              child: const Text('Download'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

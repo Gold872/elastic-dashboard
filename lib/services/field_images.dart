@@ -38,13 +38,10 @@ class FieldImages {
       rootBundle,
     );
 
-    List<String> filePaths =
-        assetManifest
-            .listAssets()
-            .where(
-              (String key) => key.contains(directory) && key.contains('.json'),
-            )
-            .toList();
+    List<String> filePaths = assetManifest
+        .listAssets()
+        .where((String key) => key.contains(directory) && key.contains('.json'))
+        .toList();
 
     filePaths.sort();
 
@@ -74,8 +71,8 @@ class Field {
 
   Size? get fieldImageSize =>
       (fieldImageWidth != null && fieldImageHeight != null)
-          ? Size(fieldImageWidth!.toDouble(), fieldImageHeight!.toDouble())
-          : null;
+      ? Size(fieldImageWidth!.toDouble(), fieldImageHeight!.toDouble())
+      : null;
 
   late double fieldWidthMeters;
   late double fieldHeightMeters;
@@ -83,14 +80,13 @@ class Field {
   late Offset topLeftCorner;
   late Offset bottomRightCorner;
 
-  Offset get center =>
-      (fieldImageLoaded)
-          ? Offset(
-                bottomRightCorner.dx - topLeftCorner.dx,
-                bottomRightCorner.dy - topLeftCorner.dy,
-              ) /
-              2
-          : const Offset(0, 0);
+  Offset get center => (fieldImageLoaded)
+      ? Offset(
+              bottomRightCorner.dx - topLeftCorner.dx,
+              bottomRightCorner.dy - topLeftCorner.dy,
+            ) /
+            2
+      : const Offset(0, 0);
 
   late Image fieldImage;
 

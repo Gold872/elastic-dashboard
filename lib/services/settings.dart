@@ -29,8 +29,9 @@ class Settings {
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
 
-  static final List<Level> logLevels =
-      Level.values.where((level) => level.value % 1000 == 0).toList();
+  static final List<Level> logLevels = Level.values
+      .where((level) => level.value % 1000 == 0)
+      .toList();
 }
 
 class Defaults {

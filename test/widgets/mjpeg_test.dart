@@ -47,7 +47,9 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: Mjpeg(controller: controller)),
+      ),
     );
     await widgetTester.pumpAndSettle();
 
@@ -89,7 +91,9 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: Mjpeg(controller: controller)),
+      ),
     );
     await widgetTester.pumpAndSettle();
 
@@ -171,7 +175,9 @@ void main() {
     );
 
     await widgetTester.pumpWidget(
-      MaterialApp(home: Scaffold(body: Mjpeg(controller: controller))),
+      MaterialApp(
+        home: Scaffold(body: Mjpeg(controller: controller)),
+      ),
     );
     await widgetTester.pumpAndSettle();
 

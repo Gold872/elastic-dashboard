@@ -98,7 +98,9 @@ void main() {
 
     testWidgets('Pressing okay updates preference', (widgetTester) async {
       await widgetTester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DashboardPage(model: dashboardModel))),
+        MaterialApp(
+          home: Scaffold(body: DashboardPage(model: dashboardModel)),
+        ),
       );
 
       dashboardModel.changeGridSize('128');
@@ -118,7 +120,9 @@ void main() {
 
     testWidgets('Pressing cancel does nothing', (widgetTester) async {
       await widgetTester.pumpWidget(
-        MaterialApp(home: Scaffold(body: DashboardPage(model: dashboardModel))),
+        MaterialApp(
+          home: Scaffold(body: DashboardPage(model: dashboardModel)),
+        ),
       );
 
       dashboardModel.changeGridSize('128');

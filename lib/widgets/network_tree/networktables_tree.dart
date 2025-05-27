@@ -168,8 +168,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     for (String row in rows) {
       currentTopic += '/$row';
 
-      String effectiveTopic =
-          hasLeading ? currentTopic : currentTopic.substring(1);
+      String effectiveTopic = hasLeading
+          ? currentTopic
+          : currentTopic.substring(1);
 
       bool lastElement = currentTopic == topic;
 
@@ -219,26 +220,24 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
     return TreeView<NetworkTableTreeRow>(
       treeController: treeController,
-      nodeBuilder: (
-        BuildContext context,
-        TreeEntry<NetworkTableTreeRow> entry,
-      ) {
-        return TreeTile(
-          gridIndex: widget.gridIndex,
-          preferences: widget.preferences,
-          entry: entry,
-          listLayoutBuilder: widget.listLayoutBuilder,
-          onDragUpdate: widget.onDragUpdate,
-          onDragEnd: widget.onDragEnd,
-          onRemoveWidget: widget.onRemoveWidget,
-          onTap: () {
-            if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
-              return;
-            }
-            setState(() => treeController.toggleExpansion(entry.node));
+      nodeBuilder:
+          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
+            return TreeTile(
+              gridIndex: widget.gridIndex,
+              preferences: widget.preferences,
+              entry: entry,
+              listLayoutBuilder: widget.listLayoutBuilder,
+              onDragUpdate: widget.onDragUpdate,
+              onDragEnd: widget.onDragEnd,
+              onRemoveWidget: widget.onRemoveWidget,
+              onTap: () {
+                if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
+                  return;
+                }
+                setState(() => treeController.toggleExpansion(entry.node));
+              },
+            );
           },
-        );
-      },
     );
   }
 }
@@ -319,12 +318,9 @@ class _TreeTileState extends State<TreeTile> {
             onTap: widget.onTap,
             child: DragListener(
               overrideVertical: false,
-              supportedDevices:
-                  PointerDeviceKind.values
-                      .whereNot(
-                        (element) => element == PointerDeviceKind.trackpad,
-                      )
-                      .toSet(),
+              supportedDevices: PointerDeviceKind.values
+                  .whereNot((element) => element == PointerDeviceKind.trackpad)
+                  .toSet(),
               onDragStart: (details) async {
                 if (draggingWidget != null) {
                   return;
@@ -377,28 +373,26 @@ class _TreeTileState extends State<TreeTile> {
                       contentPadding: const EdgeInsets.only(right: 20.0),
                       leading:
                           (widget.entry.hasChildren ||
-                                  widget.entry.node.containsOnlyMetadata())
-                              ? FolderButton(
-                                openedIcon: const Icon(Icons.arrow_drop_down),
-                                closedIcon: const Icon(Icons.arrow_right),
-                                iconSize: 24,
-                                isOpen:
-                                    widget.entry.hasChildren &&
-                                    widget.entry.isExpanded,
-                                onPressed:
-                                    widget.entry.hasChildren
-                                        ? widget.onTap
-                                        : null,
-                              )
-                              : const SizedBox(width: 8.0),
+                              widget.entry.node.containsOnlyMetadata())
+                          ? FolderButton(
+                              openedIcon: const Icon(Icons.arrow_drop_down),
+                              closedIcon: const Icon(Icons.arrow_right),
+                              iconSize: 24,
+                              isOpen:
+                                  widget.entry.hasChildren &&
+                                  widget.entry.isExpanded,
+                              onPressed: widget.entry.hasChildren
+                                  ? widget.onTap
+                                  : null,
+                            )
+                          : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
-                      trailing:
-                          (widget.entry.node.ntTopic != null)
-                              ? Text(
-                                widget.entry.node.ntTopic!.type,
-                                style: trailingStyle,
-                              )
-                              : null,
+                      trailing: (widget.entry.node.ntTopic != null)
+                          ? Text(
+                              widget.entry.node.ntTopic!.type,
+                              style: trailingStyle,
+                            )
+                          : null,
                     ),
                   ],
                 ),

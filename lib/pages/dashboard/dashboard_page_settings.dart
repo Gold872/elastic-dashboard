@@ -18,49 +18,48 @@ mixin DashboardPageSettings on DashboardPageViewModel {
   void displaySettingsDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder:
-          (context) => SettingsDialog(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            onTeamNumberChanged: changeTeamNumber,
-            onIPAddressModeChanged: (mode) async {
-              if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
-                return;
-              }
+      builder: (context) => SettingsDialog(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        onTeamNumberChanged: changeTeamNumber,
+        onIPAddressModeChanged: (mode) async {
+          if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
+            return;
+          }
 
-              changeIPAddressMode(mode);
-            },
-            onIPAddressChanged: (String? data) async {
-              if (data == null ||
-                  data == preferences.getString(PrefKeys.ipAddress)) {
-                return;
-              }
+          changeIPAddressMode(mode);
+        },
+        onIPAddressChanged: (String? data) async {
+          if (data == null ||
+              data == preferences.getString(PrefKeys.ipAddress)) {
+            return;
+          }
 
-              updateIPAddress(data);
-            },
-            onGridToggle: toggleGrid,
-            onGridSizeChanged: changeGridSize,
-            onCornerRadiusChanged: changeCornerRadius,
-            onResizeToDSChanged: changeResizeToDS,
-            onRememberWindowPositionChanged: changeRememberWindowPosition,
-            onLayoutLock: changeLayoutLock,
-            onDefaultPeriodChanged: changeDefaultPeriod,
-            onDefaultGraphPeriodChanged: changeDefaultGraphPeriod,
-            onColorChanged: onColorChanged,
-            onThemeVariantChanged: onThemeVariantChanged,
-            onLogLevelChanged: changeLogLevel,
-            onGridDPIChanged: changeGridDPI,
-            onAutoSubmitButtonChanged: changeAutoSubmitButton,
-            onOpenAssetsFolderPressed: () async {
-              Uri uri = Uri.file(
-                '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/',
-              );
-              if (await canLaunchUrl(uri)) {
-                logger.info('Opening URL (assets folder): ${uri.toString()}');
-                launchUrl(uri);
-              }
-            },
-          ),
+          updateIPAddress(data);
+        },
+        onGridToggle: toggleGrid,
+        onGridSizeChanged: changeGridSize,
+        onCornerRadiusChanged: changeCornerRadius,
+        onResizeToDSChanged: changeResizeToDS,
+        onRememberWindowPositionChanged: changeRememberWindowPosition,
+        onLayoutLock: changeLayoutLock,
+        onDefaultPeriodChanged: changeDefaultPeriod,
+        onDefaultGraphPeriodChanged: changeDefaultGraphPeriod,
+        onColorChanged: onColorChanged,
+        onThemeVariantChanged: onThemeVariantChanged,
+        onLogLevelChanged: changeLogLevel,
+        onGridDPIChanged: changeGridDPI,
+        onAutoSubmitButtonChanged: changeAutoSubmitButton,
+        onOpenAssetsFolderPressed: () async {
+          Uri uri = Uri.file(
+            '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/',
+          );
+          if (await canLaunchUrl(uri)) {
+            logger.info('Opening URL (assets folder): ${uri.toString()}');
+            launchUrl(uri);
+          }
+        },
+      ),
     );
   }
 

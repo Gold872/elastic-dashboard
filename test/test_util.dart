@@ -138,10 +138,9 @@ MockNTConnection createMockOnlineNT4({
     NT4Topic newTopic = NT4Topic(
       name: invocation.positionalArguments[0],
       type: invocation.positionalArguments[1],
-      properties:
-          invocation.positionalArguments.length >= 3
-              ? invocation.positionalArguments[2]
-              : {},
+      properties: invocation.positionalArguments.length >= 3
+          ? invocation.positionalArguments[2]
+          : {},
     );
 
     virtualTopicsMap[virtualTopicsMap.length] = newTopic;
@@ -310,14 +309,12 @@ void ignoreOverflowErrors(
   // Detect overflow error.
   var exception = details.exception;
   if (exception is FlutterError) {
-    ifIsOverflowError =
-        !exception.diagnostics.any(
-          (e) => e.value.toString().startsWith('A RenderFlex overflowed by'),
-        );
-    isUnableToLoadAsset =
-        !exception.diagnostics.any(
-          (e) => e.value.toString().startsWith('Unable to load asset'),
-        );
+    ifIsOverflowError = !exception.diagnostics.any(
+      (e) => e.value.toString().startsWith('A RenderFlex overflowed by'),
+    );
+    isUnableToLoadAsset = !exception.diagnostics.any(
+      (e) => e.value.toString().startsWith('Unable to load asset'),
+    );
   }
 
   // Ignore if is overflow error.

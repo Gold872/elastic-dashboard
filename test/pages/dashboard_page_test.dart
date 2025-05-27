@@ -1522,13 +1522,12 @@ void main() {
 
       expect(find.byType(EditableTabBar), findsOneWidget);
 
-      final closeTabButton =
-          find
-              .descendant(
-                of: find.byType(EditableTabBar),
-                matching: find.byIcon(Icons.close),
-              )
-              .last;
+      final closeTabButton = find
+          .descendant(
+            of: find.byType(EditableTabBar),
+            matching: find.byIcon(Icons.close),
+          )
+          .last;
 
       expect(closeTabButton, findsOneWidget);
 

@@ -245,8 +245,8 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     TextTheme textTheme = state!.theme.textTheme;
     ButtonThemeData buttonTheme = state!.buttonTheme;
 
-    UpdateCheckerResponse updateResponse =
-        await updateChecker!.isUpdateAvailable();
+    UpdateCheckerResponse updateResponse = await updateChecker!
+        .isUpdateAvailable();
 
     lastUpdateResponse = updateResponse;
     notifyListeners();
@@ -866,15 +866,14 @@ class _DashboardPageState extends State<DashboardPage>
           // Clear layout
           MenuItemButton(
             style: menuButtonStyle,
-            onPressed:
-                !layoutLocked
-                    ? () {
-                      setState(() {
-                        model.tabData[model.currentTabIndex].tabGrid
-                            .confirmClearWidgets(context);
-                      });
-                    }
-                    : null,
+            onPressed: !layoutLocked
+                ? () {
+                    setState(() {
+                      model.tabData[model.currentTabIndex].tabGrid
+                          .confirmClearWidgets(context);
+                    });
+                  }
+                : null,
             leadingIcon: const Icon(Icons.clear),
             child: const Text('Clear Layout'),
           ),
@@ -890,10 +889,9 @@ class _DashboardPageState extends State<DashboardPage>
 
               setState(() {});
             },
-            leadingIcon:
-                layoutLocked
-                    ? const Icon(Icons.lock_open)
-                    : const Icon(Icons.lock_outline),
+            leadingIcon: layoutLocked
+                ? const Icon(Icons.lock_open)
+                : const Icon(Icons.lock_outline),
             child: Text('${layoutLocked ? 'Unlock' : 'Lock'} Layout'),
           ),
         ],
@@ -972,8 +970,9 @@ class _DashboardPageState extends State<DashboardPage>
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed:
-              !layoutLocked ? () => model.displayAddWidgetDialog() : null,
+          onPressed: !layoutLocked
+              ? () => model.displayAddWidgetDialog()
+              : null,
           child: const Text('Add Widget'),
         ),
         if (layoutLocked) ...[
@@ -1049,9 +1048,8 @@ class _DashboardPageState extends State<DashboardPage>
                     currentIndex: model.currentTabIndex,
                     onTabMoveLeft: model.moveTabLeft,
                     onTabMoveRight: model.moveTabRight,
-                    onTabRename:
-                        (index, newData) =>
-                            setState(() => model.tabData[index] = newData),
+                    onTabRename: (index, newData) =>
+                        setState(() => model.tabData[index] = newData),
                     onTabCreate: () {
                       String tabName = 'Tab ${model.tabData.length + 1}';
                       setState(() {
@@ -1095,8 +1093,10 @@ class _DashboardPageState extends State<DashboardPage>
                     onTabChanged: model.switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
-                        Map<String, dynamic> tabJson =
-                            model.tabData[index].tabGrid.toJson();
+                        Map<String, dynamic> tabJson = model
+                            .tabData[index]
+                            .tabGrid
+                            .toJson();
                         TabGridModel newGrid = TabGridModel.fromJson(
                           ntConnection: model.ntConnection,
                           preferences: preferences,
@@ -1137,10 +1137,8 @@ class _DashboardPageState extends State<DashboardPage>
                         model.tabData[model.currentTabIndex].tabGrid
                             .placeDragInWidget(widget);
                       },
-                      onClose:
-                          () => setState(
-                            () => model.addWidgetDialogVisible = false,
-                          ),
+                      onClose: () =>
+                          setState(() => model.addWidgetDialogVisible = false),
                     ),
                 ],
               ),

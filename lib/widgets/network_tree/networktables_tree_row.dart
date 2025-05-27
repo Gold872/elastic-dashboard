@@ -216,8 +216,9 @@ class NetworkTableTreeRow {
         .whereNot((e) => e.rowName.startsWith('.'))
         .map((e) => e.toWidgetContainerModel(resortToListLayout: false));
 
-    Iterable<NTWidgetContainerModel> listChildren =
-        (await Future.wait(childrenFutures)).whereType();
+    Iterable<NTWidgetContainerModel> listChildren = (await Future.wait(
+      childrenFutures,
+    )).whereType();
 
     if (listChildren.isEmpty) {
       return null;

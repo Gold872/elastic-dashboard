@@ -167,8 +167,9 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
                     trueIcon = value;
                   },
                   choices: _trueIconOptions,
-                  initialValue:
-                      (_trueIconOptions.contains(_trueIcon)) ? _trueIcon : null,
+                  initialValue: (_trueIconOptions.contains(_trueIcon))
+                      ? _trueIcon
+                      : null,
                 ),
               ],
             ),
@@ -185,10 +186,9 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
                     falseIcon = value;
                   },
                   choices: _falseIconOptions,
-                  initialValue:
-                      (_falseIconOptions.contains(_falseIcon))
-                          ? _falseIcon
-                          : null,
+                  initialValue: (_falseIconOptions.contains(_falseIcon))
+                      ? _falseIcon
+                      : null,
                 ),
               ],
             ),

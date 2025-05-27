@@ -111,8 +111,8 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
 
     preferenceSubscriptions.addAll({topicName: subscription});
     preferenceTextControllers.addAll({
-      topicName:
-          TextEditingController()..text = previousValue?.toString() ?? '',
+      topicName: TextEditingController()
+        ..text = previousValue?.toString() ?? '',
     });
     previousValues.addAll({topicName: previousValue});
 
@@ -198,8 +198,9 @@ class RobotPreferences extends NTWidget {
         }
 
         if (formattedData == null) {
-          model.preferenceTextControllers[topic]?.text =
-              model.previousValues[topic].toString();
+          model.preferenceTextControllers[topic]?.text = model
+              .previousValues[topic]
+              .toString();
           model.ntConnection.unpublishTopic(nt4Topic);
           return;
         }
@@ -224,16 +225,12 @@ class PreferenceSearch extends StatelessWidget {
   final RobotPreferencesModel model;
   final Function(String topic, String? data) onSubmit;
 
-  List<String> filterList(String query) =>
-      model.preferenceTopicNames
-          .where(
-            (element) => element
-                .split('/')
-                .last
-                .toLowerCase()
-                .contains(query.toLowerCase()),
-          )
-          .toList();
+  List<String> filterList(String query) => model.preferenceTopicNames
+      .where(
+        (element) =>
+            element.split('/').last.toLowerCase().contains(query.toLowerCase()),
+      )
+      .toList();
 
   @override
   Widget build(BuildContext context) {
