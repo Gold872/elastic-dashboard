@@ -406,10 +406,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Width',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newWidth = int.tryParse(value);
-
+                        int? newWidth = int.tryParse(value) ?? 0;
                         setState(() {
-                          if (newWidth! >= 0) {
+                          if (newWidth >= 0) {
                             _crosshairWidth = newWidth;
                             return;
                           }
@@ -424,10 +423,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Height',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newHeight = int.tryParse(value);
-
+                        int? newHeight = int.tryParse(value) ?? 0;
                         setState(() {
-                          if (newHeight! >= 0) {
+                          if (newHeight >= 0) {
                             _crosshairHeight = newHeight;
                             return;
                           }
@@ -442,10 +440,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Thickness',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newThickness = int.tryParse(value);
-
+                        int? newThickness = int.tryParse(value) ?? 0;
                         setState(() {
-                          if (newThickness! >= 0) {
+                          if (newThickness >= 0) {
                             _crosshairThickness = newThickness;
                             return;
                           }
@@ -478,10 +475,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'X Position',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newX = int.tryParse(value);
-
+                        int? newX = int.tryParse(value) ?? 0;
                         setState(() {
-                          if (newX! >= 0) {
+                          if (newX >= 0) {
                             _crosshairX = newX;
                             return;
                           }
@@ -497,10 +493,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
                       label: 'Y Position',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newY = int.tryParse(value);
-
+                        int? newY = int.tryParse(value) ?? 0;
                         setState(() {
-                          if (newY! >= 0) {
+                          if (newY >= 0) {
                             _crosshairY = newY;
                             return;
                           }
