@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -50,7 +51,6 @@ void main() {
     NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Text Display',
       textDisplayJson,
     );
@@ -69,7 +69,6 @@ void main() {
     NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Text View',
       textDisplayJson,
     );

@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
@@ -75,6 +76,11 @@ sealed class NTWidgetModel extends ChangeNotifier {
     return {
       'topic': topic,
       'period': period,
+      'ntStructMeta': switch (this) {
+        SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) =>
+          ntStructMeta?.toJson(),
+        MultiTopicNTWidgetModel _ => null,
+      }
     };
   }
 
@@ -133,7 +139,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    required this.ntStructMeta,
+    this.ntStructMeta,
     this.dataType,
     super.period,
   }) : super();
@@ -152,7 +158,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
-    required ntStructMeta,
+    this.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     String jsonDataType = tryCast(jsonData['data_type']) ?? '';

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -70,7 +71,6 @@ void main() {
     NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Field',
       fieldWidgetJson,
     );
@@ -98,7 +98,6 @@ void main() {
     NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Field2d',
       fieldWidgetJson,
     );
@@ -149,7 +148,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -196,7 +194,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -257,7 +254,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -316,7 +312,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -363,7 +358,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -410,7 +404,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -455,7 +448,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );
@@ -506,7 +498,6 @@ void main() {
       NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
         ntConnection,
         preferences,
-        null,
         'Field',
         fieldWidgetJson,
       );

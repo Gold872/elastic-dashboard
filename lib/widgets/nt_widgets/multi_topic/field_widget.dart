@@ -533,7 +533,7 @@ class FieldWidget extends NTWidget {
         minHeight: 4.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.black.withAlpha(90),
+        color: Colors.black.withValues(alpha: 0.35),
         border: Border.all(
           color: model.robotColor,
           width: 0.125 * min(width, length),

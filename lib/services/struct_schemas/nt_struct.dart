@@ -6,6 +6,7 @@ import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
@@ -284,12 +285,17 @@ class NTStruct {
   }
 
   static (int, Map<String, NTStructValue>) _parseData(
-      NTStructSchema schema, Uint8List data) {
+    NTStructSchema schema,
+    Uint8List data,
+  ) {
     Map<String, NTStructValue> values = {};
     int offset = 0;
 
     for (final field in schema.fields) {
-      var (consumed, value) = _parseValue(field, data.sublist(offset));
+      var (consumed, value) = _parseValue(
+        field,
+        data.sublist(offset),
+      );
       values[field.field] = value;
       offset += consumed;
     }
@@ -297,7 +303,10 @@ class NTStruct {
     return (offset, values);
   }
 
-  static (int, NTStructValue) _parseValue(NTFieldSchema field, Uint8List data) {
+  static (int, NTStructValue) _parseValue(
+    NTFieldSchema field,
+    Uint8List data,
+  ) {
     if (field.type.isArray) {
       int length = data.buffer.asByteData().getInt32(0, Endian.little);
       var (consumed, value) = _parseArray(field, data.sublist(4), length);

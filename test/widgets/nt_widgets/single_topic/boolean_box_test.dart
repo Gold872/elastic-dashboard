@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -62,7 +63,6 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -113,7 +113,6 @@ void main() {
     NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Boolean Box',
       booleanBoxJson,
     );
@@ -164,7 +163,6 @@ void main() {
     BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Boolean Box',
       booleanBoxJson,
     ) as BooleanBoxModel;

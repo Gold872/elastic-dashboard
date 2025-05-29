@@ -111,8 +111,8 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
       }
     }
 
-    _trueColor = trueColor;
-    _falseColor = falseColor;
+    _trueColor = Color(trueColorValue ?? Colors.green.toARGB32());
+    _falseColor = Color(falseColorValue ?? Colors.red.toARGB32());
 
     _trueIcon = tryCast(jsonData['true_icon']) ?? 'None';
     _falseIcon = tryCast(jsonData['false_icon']) ?? 'None';

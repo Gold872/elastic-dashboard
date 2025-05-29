@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
@@ -60,7 +60,6 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     rowName: '',
   );
   late final TreeController<NetworkTableTreeRow> treeController;
-  late final HashMap<String, void> topics = HashMap<String, void>();
 
   void onTopicAnnounced(NT4Topic topic) {
     treeController.roots = _filterChildren(root.children);
