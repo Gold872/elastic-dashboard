@@ -39,7 +39,6 @@ void main() {
     NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'YAGSL Swerve Drive',
       yagslSwerveJson,
     );
@@ -76,7 +75,6 @@ void main() {
     NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'YAGSL Swerve Drive',
       yagslSwerveJson,
     );

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -54,7 +55,6 @@ void main() {
     NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Graph',
       graphJson,
     );
@@ -109,7 +109,6 @@ void main() {
     NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Graph',
       graphJson,
     );
@@ -134,7 +133,6 @@ void main() {
     GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'Graph',
       graphJson,
     ) as GraphModel;

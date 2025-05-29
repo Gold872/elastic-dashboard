@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/pid_controller.dart';
@@ -62,7 +63,6 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'PIDController',
       pidControllerJson,
     );
@@ -75,7 +75,6 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'PID Controller',
       pidControllerJson,
     );
@@ -101,7 +100,6 @@ void main() {
     NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'PIDController',
       pidControllerJson,
     );

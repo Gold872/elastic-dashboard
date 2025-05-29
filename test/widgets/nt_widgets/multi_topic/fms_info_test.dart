@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -104,7 +105,6 @@ void main() {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'FMSInfo',
       fmsInfoJson,
     );
@@ -141,7 +141,6 @@ void main() {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
       ntConnection,
       preferences,
-      null,
       'FMSInfo',
       fmsInfoJson,
     );

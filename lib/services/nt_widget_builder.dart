@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -447,12 +448,18 @@ class NTWidgetBuilder {
   static NTWidgetModel buildNTModelFromJson(
     NTConnection ntConnection,
     SharedPreferences preferences,
-    NT4StructMeta? ntStructMeta,
     String type,
     Map<String, dynamic> jsonData, {
     Function(String message)? onWidgetTypeNotFound,
   }) {
     ensureInitialized();
+
+    NT4StructMeta? ntStructMeta;
+    if (jsonData['ntStructMeta'] != null) {
+      ntStructMeta = NT4StructMeta.fromJson(
+        tryCast(jsonData['ntStructMeta']) ?? {},
+      );
+    }
 
     if (_modelJsonBuildMap.containsKey(type)) {
       return _modelJsonBuildMap[type]!(

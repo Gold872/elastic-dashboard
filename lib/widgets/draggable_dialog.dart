@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 
 class DraggableDialog extends StatefulWidget {
@@ -31,12 +34,12 @@ class _DraggableDialogState extends State<DraggableDialog> {
       clampingRect: const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
       allowFlippingWhileResizing: false,
       visibleHandles: const {},
-      // supportedDragDevices: PointerDeviceKind.values
-      //     .whereNot((e) => e == PointerDeviceKind.trackpad)
-      //     .toSet(),
-      // supportedResizeDevices: PointerDeviceKind.values
-      //     .whereNot((e) => e == PointerDeviceKind.trackpad)
-      //     .toSet(),
+      supportedDragDevices: PointerDeviceKind.values
+          .whereNot((e) => e == PointerDeviceKind.trackpad)
+          .toSet(),
+      supportedResizeDevices: PointerDeviceKind.values
+          .whereNot((e) => e == PointerDeviceKind.trackpad)
+          .toSet(),
       resizeModeResolver: () => ResizeMode.freeform,
       rect: position,
       onChanged: (result, event) {
