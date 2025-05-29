@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -43,7 +44,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/String Array',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
       ],
@@ -83,9 +84,10 @@ void main() {
     NTWidgetModel multiColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       type: 'Multi Color View',
       topic: 'Test/String Array',
-      dataType: 'string[]',
+      dataType: NT4Type.array(NT4Type.string()),
       period: 0.100,
     );
 
@@ -136,7 +138,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],
@@ -180,7 +182,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],

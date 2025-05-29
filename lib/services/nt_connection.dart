@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -63,6 +65,9 @@ class NTConnection {
       topic: '',
       options: const NT4SubscriptionOptions(topicsOnly: true),
     );
+
+    // add all struct schemas to the schema manager
+    SchemaInfo.getInstance().listen(_ntClient);
   }
 
   void dsClientConnect(
@@ -219,7 +224,7 @@ class NTConnection {
 
   NT4Topic publishNewTopic(
     String name,
-    String type, {
+    NT4Type type, {
     Map<String, dynamic> properties = const {},
   }) {
     return _ntClient.publishNewTopic(name, type, properties);

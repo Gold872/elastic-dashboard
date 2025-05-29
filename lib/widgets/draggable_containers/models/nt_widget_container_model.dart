@@ -83,7 +83,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       widgetProperties = tryCast(jsonData['properties']) ?? {};
     } else {
       onJsonLoadingWarning?.call(
-          'Network tables widget does not have any properties, defaulting to an empty properties map.');
+        'Network tables widget does not have any properties, defaulting to an empty properties map.',
+      );
     }
 
     String type = tryCast(jsonData['type']) ?? '';
@@ -317,11 +318,16 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      switch (childModel) {
+        SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) =>
+          ntStructMeta,
+        MultiTopicNTWidgetModel() => null,
+      },
       type,
       childModel.topic,
       dataType: (childModel is SingleTopicNTWidgetModel)
           ? cast<SingleTopicNTWidgetModel>(childModel).dataType
-          : 'Unkown',
+          : null,
       period: (type != 'Graph')
           ? childModel.period
           : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
