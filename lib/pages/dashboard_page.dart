@@ -37,10 +37,9 @@ import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
 import 'package:elastic_dashboard/util/stub/unload_handler_stub.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/unload_handler_web.dart';
-
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/unload_handler.dart';
 import 'package:window_manager/window_manager.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/window_stub.dart';
 
 enum LayoutDownloadMode {
   overwrite(

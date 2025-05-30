@@ -9,7 +9,7 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 import 'package:window_manager/window_manager.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/window_stub.dart';
 
 mixin DashboardPageWindow on DashboardPageViewModel {
   @override
