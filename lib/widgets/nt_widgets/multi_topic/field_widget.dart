@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -14,6 +13,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/struct_schemas/pose2d_struct.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
+import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -272,6 +272,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         child: RichText(
           text: TextSpan(
             text: 'Field Image (',
+            style: Theme.of(context).textTheme.bodyMedium,
             children: [
               WidgetSpan(
                 child: Tooltip(
@@ -311,7 +312,10 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
                   ),
                 ),
               ),
-              const TextSpan(text: ')'),
+              TextSpan(
+                text: ')',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ],
           ),
         ),
@@ -671,8 +675,7 @@ class FieldWidget extends NTWidget {
 
             // Try rebuilding again if the image isn't fully rendered
             // Can't do it if it's in a unit test cause it causes issues with timers running
-            if (!model.rendered &&
-                !Platform.environment.containsKey('FLUTTER_TEST')) {
+            if (!model.rendered && !isUnitTest) {
               Future.delayed(const Duration(milliseconds: 100), model.refresh);
             }
 

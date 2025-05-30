@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+
+import 'package:path_provider/path_provider.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/path_stub.dart';
 
 class Log {
   static final DateFormat _dateFormat = DateFormat('HH:mm:ss.S');
@@ -22,7 +24,6 @@ class Log {
   Future<void> initialize() async {
     Directory logPath = await getApplicationSupportDirectory();
     File logFile = File(join(logPath.path, 'elastic-log.txt'));
-
     _logger = Logger(
       printer: HybridPrinter(
         SimplePrinter(colors: kDebugMode),
@@ -31,7 +32,7 @@ class Log {
       ),
       output: MultiOutput([
         ConsoleOutput(),
-        if (kReleaseMode) FileOutput(file: logFile),
+        if (kReleaseMode && !kIsWeb) FileOutput(file: logFile),
       ]),
       filter: ProductionFilter(),
     );

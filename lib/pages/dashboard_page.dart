@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,7 +13,6 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'package:elastic_dashboard/pages/dashboard/add_widget_dialog.dart';
 import 'package:elastic_dashboard/pages/dashboard/dashboard_page_footer.dart';
@@ -31,9 +31,15 @@ import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
+import 'package:elastic_dashboard/util/test_utils.dart';
 import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
+
+import 'package:elastic_dashboard/util/stub/unload_handler_stub.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/unload_handler.dart';
+import 'package:window_manager/window_manager.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/window_stub.dart';
 
 enum LayoutDownloadMode {
   overwrite(
@@ -241,6 +247,15 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
             notifyIfError: false,
           ));
     }
+  }
+
+  bool hasUnsavedChanges() {
+    Map<String, dynamic> savedJson = jsonDecode(
+      preferences.getString(PrefKeys.layout) ?? '{}',
+    );
+    Map<String, dynamic> currentJson = toJson();
+
+    return !mapEquals(savedJson, currentJson);
   }
 
   Future<void> saveLayout() async {}
@@ -525,7 +540,8 @@ class _DashboardPageState extends State<DashboardPage>
     model.addListener(onModelUpdate);
 
     windowManager.addListener(this);
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    setupUnloadHandler(() => model.hasUnsavedChanges());
+    if (!isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
 
@@ -536,11 +552,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   @override
   void onWindowClose() async {
-    Map<String, dynamic> savedJson =
-        jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
-    Map<String, dynamic> currentJson = model.toJson();
-
-    bool showConfirmation = !model.mapEquals(savedJson, currentJson);
+    bool showConfirmation = model.hasUnsavedChanges();
 
     if (showConfirmation) {
       widget.model.showWindowCloseConfirmation(context);
@@ -572,6 +584,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   @override
   void dispose() async {
+    removeUnloadHandler();
     windowManager.removeListener(this);
     model._state = null;
     model.removeListener(onModelUpdate);
@@ -817,10 +830,14 @@ class _DashboardPageState extends State<DashboardPage>
         preferences.getBool(PrefKeys.layoutLocked) ?? Defaults.layoutLocked;
 
     late final double platformWidthAdjust;
-    if (Platform.isMacOS) {
-      platformWidthAdjust = 30;
-    } else if (Platform.isLinux) {
-      platformWidthAdjust = 10;
+    if (!kIsWeb) {
+      if (Platform.isMacOS) {
+        platformWidthAdjust = 30;
+      } else if (Platform.isLinux) {
+        platformWidthAdjust = 10;
+      } else {
+        platformWidthAdjust = 0;
+      }
     } else {
       platformWidthAdjust = 0;
     }
