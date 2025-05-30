@@ -21,11 +21,11 @@ import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 import 'package:path_provider/path_provider.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/path_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/path_stub.dart';
 import 'package:screen_retriever/screen_retriever.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/screen_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/screen_stub.dart';
 import 'package:window_manager/window_manager.dart'
-    if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/stub/window_stub.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
