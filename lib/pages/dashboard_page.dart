@@ -36,6 +36,9 @@ import 'package:elastic_dashboard/widgets/custom_appbar.dart';
 import 'package:elastic_dashboard/widgets/editable_tab_bar.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
+import 'package:elastic_dashboard/util/stub/unload_handler_stub.dart'
+    if (dart.library.js_interop) 'package:elastic_dashboard/util/unload_handler_web.dart';
+
 import 'package:window_manager/window_manager.dart'
     if (dart.library.js_interop) 'package:elastic_dashboard/util/window_stub.dart';
 
@@ -245,6 +248,15 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
             notifyIfError: false,
           ));
     }
+  }
+
+  bool hasUnsavedChanges() {
+    Map<String, dynamic> savedJson = jsonDecode(
+      preferences.getString(PrefKeys.layout) ?? '{}',
+    );
+    Map<String, dynamic> currentJson = toJson();
+
+    return !mapEquals(savedJson, currentJson);
   }
 
   Future<void> saveLayout() async {}
@@ -529,6 +541,7 @@ class _DashboardPageState extends State<DashboardPage>
     model.addListener(onModelUpdate);
 
     windowManager.addListener(this);
+    setupUnloadHandler(() => model.hasUnsavedChanges());
     if (!isUnitTest) {
       Future(() async => await windowManager.setPreventClose(true));
     }
@@ -540,11 +553,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   @override
   void onWindowClose() async {
-    Map<String, dynamic> savedJson =
-        jsonDecode(preferences.getString(PrefKeys.layout) ?? '{}');
-    Map<String, dynamic> currentJson = model.toJson();
-
-    bool showConfirmation = !model.mapEquals(savedJson, currentJson);
+    bool showConfirmation = model.hasUnsavedChanges();
 
     if (showConfirmation) {
       widget.model.showWindowCloseConfirmation(context);
@@ -576,6 +585,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   @override
   void dispose() async {
+    removeUnloadHandler();
     windowManager.removeListener(this);
     model._state = null;
     model.removeListener(onModelUpdate);
