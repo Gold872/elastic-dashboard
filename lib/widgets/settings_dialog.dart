@@ -1,8 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:collection/collection.dart';
-import 'package:elastic_dashboard/services/ds_interop.dart';
+import 'package:flex_seed_scheme/flex_seed_scheme.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
@@ -11,11 +17,6 @@ import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dar
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsDialog extends StatefulWidget {
   final NTConnection ntConnection;
@@ -52,7 +53,6 @@ class SettingsDialog extends StatefulWidget {
   final FutureOr<void> Function(String? value)? onGridDPIChanged;
   final void Function()? onOpenAssetsFolderPressed;
   final FutureOr<void> Function(bool value)? onAutoSubmitButtonChanged;
-  final DSDefaultUpdateResult Function()? onFRCDSDefaultChanged;
 
   const SettingsDialog({
     super.key,
@@ -75,7 +75,6 @@ class SettingsDialog extends StatefulWidget {
     this.onGridDPIChanged,
     this.onOpenAssetsFolderPressed,
     this.onAutoSubmitButtonChanged,
-    this.onFRCDSDefaultChanged,
   });
 
   @override
@@ -89,7 +88,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       title: const Text('Settings'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: DefaultTabController(
-        length: 4,
+        length: 3,
         child: SizedBox(
           width: 450,
           height: 400,
@@ -108,15 +107,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       Icons.color_lens_outlined,
                     ),
                     child: Text('Appearance'),
-                  ),
-                  Tab(
-                    icon: Icon(
-                      Icons.precision_manufacturing,
-                    ),
-                    child: Text(
-                      'FRC Driver Station',
-                      textAlign: TextAlign.center,
-                    ),
                   ),
                   Tab(
                     icon: Icon(
@@ -169,21 +159,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                         ),
                       ),
                     ),
-                    //FRC Driver Station Tab
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 205),
-                          child: Column(
-                            children: [
-                              ..._frcDriverStationSettings(),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
                     // Advanced Settings Tab
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -536,50 +511,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
     ];
   }
 
-  List<Widget> _frcDriverStationSettings() {
-    return [
-      const Align(
-        alignment: Alignment.topLeft,
-        child: Text('FRC Driver Station'),
-      ),
-      const SizedBox(height: 5),
-      Flexible(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Flexible(
-                child: TextButton(
-              child: const Text("Set Elastic as Default Driver Station"),
-              onPressed: () {
-                var result = widget.onFRCDSDefaultChanged!();
-                if (result == DSDefaultUpdateResult.notWindows) {
-                  _showSimpleDialog("Incompatible OS",
-                      "You must be on Windows to use this feature.");
-                }
-                if (result == DSDefaultUpdateResult.notWPILibInstall) {
-                  _showSimpleDialog("Use WPILib Install",
-                      "You must use the version of elastic bundled into the WPILib installer.");
-                }
-                if (result == DSDefaultUpdateResult.noFileAccess) {
-                  _showSimpleDialog("Cannot modify DS Config File",
-                      "Elastic was unable to change the configuration. Please verify that the Driver Station is properly installed.");
-                }
-                if (result == DSDefaultUpdateResult.unknownError) {
-                  _showSimpleDialog("Unknown Error",
-                      "An unknown error prevented Elastic from modifying the configuration.");
-                }
-                if (result == DSDefaultUpdateResult.success) {
-                  _showSimpleDialog("Success!",
-                      "The default driver station has been changed successfully.\nPlease restart the FRC Driver Station.");
-                }
-              },
-            ))
-          ],
-        ),
-      ),
-    ];
-  }
-
   List<Widget> _advancedSettings() {
     String initialLogLevel = widget.preferences.getString(PrefKeys.logLevel) ??
         Defaults.defaultLogLevelName;
@@ -657,23 +588,5 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ],
       ),
     ];
-  }
-
-  void _showSimpleDialog(String title, String description) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(description),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Ok'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
   }
 }
