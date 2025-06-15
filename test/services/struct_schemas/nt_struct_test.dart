@@ -1,6 +1,7 @@
+import 'package:flutter_test/flutter_test.dart';
+
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 String testSchema1 = 'float32 vx;float32 vy;float32 omega';
 

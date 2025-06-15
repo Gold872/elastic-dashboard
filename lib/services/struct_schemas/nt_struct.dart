@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
@@ -140,16 +140,18 @@ enum StructValueType {
 /// It also provides a method to get type information for the field if it is a struct.
 class NTFieldSchema {
   final String field;
-  final NT4Type type;
-  final StructValueType valueType;
+  final String type;
   final int? bitLength;
   final int? arrayLength;
   final (int start, int end) bitRange;
 
+  StructValueType get valueType => StructValueType.parse(type);
+
+  bool get isArray => arrayLength != null;
+
   NTFieldSchema({
     required this.field,
     required this.type,
-    required this.valueType,
     this.bitLength,
     this.arrayLength,
     required this.bitRange,
@@ -160,14 +162,19 @@ class NTFieldSchema {
   ) {
     return NTFieldSchema(
       field: json['name'] ?? json['field'],
-      type: NT4Type.parse('struct:${json['type']}'),
+      type: json['type'],
+      bitLength: json['bit_length'],
+      bitRange: (json['bit_range_start'], json['bit_range_end']),
+      arrayLength: json['array_length'],
     );
   }
 
-  static NTFieldSchema _parseField(String definition, String type) {
-    NT4Type fieldType = NT4Type.parse(type);
+  static NTFieldSchema _parseField(int start, String definition, String type) {
+    StructValueType fieldType = StructValueType.parse(type);
     late String fieldName;
+    late (int start, int end) bitRange;
     int? bitLength;
+    int? arrayLength;
 
     if (definition.contains(':')) {
       var [name, length] = definition.split(':');
@@ -177,37 +184,36 @@ class NTFieldSchema {
       fieldName = definition;
     }
 
-    if (fieldType.leaf.isStruct) {
-      return NTFieldSchema(
-        field: fieldName,
-        type: fieldType,
-        bitLength: bitLength,
+    if (definition.contains('[')) {
+      String rawLength = definition.substring(
+        definition.indexOf('['),
+        definition.indexOf(']'),
       );
-    } else {
-      return NTFieldSchema(
-        field: fieldName,
-        type: fieldType,
-        bitLength: bitLength,
-      );
+      arrayLength = int.parse(rawLength);
+      bitLength = fieldType.maxBits * arrayLength;
     }
-  }
 
-  NTFieldSchema clone() {
+    bitRange = (start, start + (bitLength ?? fieldType.maxBits));
+
     return NTFieldSchema(
-      field: field,
+      field: fieldName,
       type: type,
+      bitRange: bitRange,
+      arrayLength: arrayLength,
+      bitLength: bitLength,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'field': field,
-      'type': type.serialize(),
+      'type': type,
     };
   }
 
-  NTStructSchema? get substruct =>
-      type.isStruct ? SchemaInfo.getInstance().getSchema(type.name!) : null;
+  NTStructSchema? get substruct => valueType == StructValueType.struct
+      ? SchemaInfo.getInstance().getSchema(type)
+      : null;
 }
 
 /// This class represents a schema for an NTStruct.
@@ -248,6 +254,7 @@ class NTStructSchema {
     List<NTFieldSchema> fields = [];
     List<String> schemaParts = schema.split(';');
 
+    int bitStart = 0;
     for (final String part in schemaParts.map((e) => e.trim())) {
       if (part.isEmpty) {
         continue;
@@ -256,7 +263,8 @@ class NTStructSchema {
         part.substring(0, part.indexOf(' ')),
         part.substring(part.indexOf(' ') + 1)
       ];
-      var field = NTFieldSchema._parseField(definition, type);
+      var field = NTFieldSchema._parseField(bitStart, definition, type);
+      bitStart += field.bitLength ?? field.valueType.maxBits;
       fields.add(field);
     }
 
@@ -265,14 +273,7 @@ class NTStructSchema {
 
   @override
   String toString() {
-    return '$name { ${fields.map((field) => '${field.field}: ${field.type.serialize()}').join(', ')} }';
-  }
-
-  NTStructSchema clone() {
-    return NTStructSchema.raw(
-      name: name,
-      fields: fields.map((field) => field.clone()).toList(),
-    );
+    return '$name { ${fields.map((field) => '${field.field}: ${field.type}').join(', ')} }';
   }
 
   Map<String, dynamic> toJson() {
@@ -382,18 +383,9 @@ class NTStruct {
     NTFieldSchema field,
     Uint8List data,
   ) {
-    if (field.type.isArray) {
-      int length = data.buffer.asByteData().getInt32(0, Endian.little);
-      var (consumed, value) = _parseArray(field, data.sublist(4), length);
-      return (consumed + 4, value);
-    } else if (field.type.isNullable) {
-      bool isNull = data[0] != 0;
-      if (isNull) {
-        return (1, NTStructValue.fromNullable(null));
-      } else {
-        var (consumed, value) = _parseValueInner(field, data.sublist(1));
-        return (consumed + 1, NTStructValue.fromNullable(value));
-      }
+    if (field.isArray) {
+      var (consumed, value) = _parseArray(field, data, field.arrayLength!);
+      return (consumed, value);
     } else {
       return _parseValueInner(field, data);
     }
