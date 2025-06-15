@@ -234,7 +234,13 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribeWithOptions(
+      topic,
+      NT4SubscriptionOptions(
+        periodicRateSeconds: period,
+        structMeta: ntStructMeta,
+      ),
+    );
   }
 
   void createTopicIfNull() {
