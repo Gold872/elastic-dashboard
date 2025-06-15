@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -87,18 +88,71 @@ class SchemaInfo {
   }
 }
 
+enum StructValueType {
+  bool('bool', 8),
+
+  char('char', 8),
+
+  int8('int8', 8),
+
+  int16('int16', 16),
+
+  int32('int32', 32),
+
+  int64('int64', 64),
+
+  uint8('uint8', 8),
+
+  uint16('uint16', 16),
+
+  uint32('uint32', 32),
+
+  uint64('uint64', 64),
+
+  float('float', 32),
+
+  float32('float32', 32),
+
+  double('double', 64),
+
+  float64('float64', 64),
+
+  struct('struct', 0);
+
+  const StructValueType(this.name, this.maxBits);
+
+  final String name;
+  final int maxBits;
+
+  static StructValueType parse(String type) {
+    return StructValueType.values.firstWhereOrNull((e) => e.name == type) ??
+        StructValueType.struct;
+  }
+
+  @override
+  String toString() {
+    return name;
+  }
+}
+
 /// This class represents a field schema in an NTStruct.
 /// It contains the field name and its type.
 /// It also provides a method to get type information for the field if it is a struct.
 class NTFieldSchema {
   final String field;
   final NT4Type type;
-  final int? customBitLength;
+  final StructValueType valueType;
+  final int? bitLength;
+  final int? arrayLength;
+  final (int start, int end) bitRange;
 
   NTFieldSchema({
     required this.field,
     required this.type,
-    this.customBitLength,
+    required this.valueType,
+    this.bitLength,
+    this.arrayLength,
+    required this.bitRange,
   });
 
   static NTFieldSchema fromJson(
@@ -127,13 +181,13 @@ class NTFieldSchema {
       return NTFieldSchema(
         field: fieldName,
         type: fieldType,
-        customBitLength: bitLength,
+        bitLength: bitLength,
       );
     } else {
       return NTFieldSchema(
         field: fieldName,
         type: fieldType,
-        customBitLength: bitLength,
+        bitLength: bitLength,
       );
     }
   }
