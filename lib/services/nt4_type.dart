@@ -201,39 +201,22 @@ class NT4Type {
       return 'struct:$name';
     }
 
-    switch (fragment) {
-      case NT4TypeFragment.boolean:
-        return 'boolean';
-      case NT4TypeFragment.int32:
-        return 'int';
-      case NT4TypeFragment.float32:
-        return 'float';
-      case NT4TypeFragment.float64:
-        return 'double';
-      case NT4TypeFragment.string:
-        return 'string';
-
-      case NT4TypeFragment.json:
-        return 'json';
-      case NT4TypeFragment.raw:
-        return 'raw';
-      case NT4TypeFragment.rpc:
-        return 'rpc';
-      case NT4TypeFragment.msgpack:
-        return 'msgpack';
-      case NT4TypeFragment.protobuf:
-        return 'protobuf';
-      case NT4TypeFragment.structschema:
-        return 'structschema';
-
-      case NT4TypeFragment.array:
-        return '${tail!.serialize()}[]';
-      case NT4TypeFragment.nullable:
-        return '${tail!.serialize()}?';
-
-      case NT4TypeFragment.unknown:
-        return name ?? 'raw';
-    }
+    return switch (fragment) {
+      NT4TypeFragment.boolean => 'boolean',
+      NT4TypeFragment.int32 => 'int',
+      NT4TypeFragment.float32 => 'float',
+      NT4TypeFragment.float64 => 'double',
+      NT4TypeFragment.string => 'string',
+      NT4TypeFragment.json => 'json',
+      NT4TypeFragment.raw => 'raw',
+      NT4TypeFragment.rpc => 'rpc',
+      NT4TypeFragment.msgpack => 'msgpack',
+      NT4TypeFragment.protobuf => 'protobuf',
+      NT4TypeFragment.structschema => 'structschema',
+      NT4TypeFragment.array => '${tail!.serialize()}[]',
+      NT4TypeFragment.nullable => '${tail!.serialize()}?',
+      NT4TypeFragment.unknown => name ?? 'raw',
+    };
   }
 
   int get typeId {

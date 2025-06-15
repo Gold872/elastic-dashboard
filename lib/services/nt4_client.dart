@@ -268,7 +268,7 @@ class NT4Topic {
   Map<String, dynamic> toPublishJson() {
     return {
       'name': name,
-      'type': type,
+      'type': type.serialize(),
       'pubuid': pubUID,
     };
   }
