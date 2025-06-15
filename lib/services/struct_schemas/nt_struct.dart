@@ -25,14 +25,14 @@ class SchemaInfo {
   void listen(NT4Client client) {
     client.addTopicAnnounceListener((topic) {
       if (topic.type.fragment == NT4TypeFragment.structschema) {
-        String name = topic.name.split("/").last.split(':')[1];
-        logger.debug("Subscribing to schema topic: ${topic.name} ($name)");
+        String name = topic.name.split('/').last.split(':')[1];
+        logger.debug('Subscribing to schema topic: ${topic.name} ($name)');
         knownStructs.add(name);
 
         client.subscribe(topic: topic.name).listen((data, _) {
           if (data == null) return;
           String schema = String.fromCharCodes(data as List<int>);
-          String key = topic.name.split("/").last;
+          String key = topic.name.split('/').last;
           addStringSchema(key, schema);
         });
       }
