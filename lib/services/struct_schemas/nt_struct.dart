@@ -232,7 +232,7 @@ class NTFieldSchema {
       StructValueType.double ||
       StructValueType.float64 =>
         NTStructValue.fromDouble(view.getFloat64(0, Endian.little)),
-      StructValueType.struct => NTStructValue.fromInt(0),
+      StructValueType.struct => NTStructValue.fromNullable<NTStruct>(null),
     };
   }
 
