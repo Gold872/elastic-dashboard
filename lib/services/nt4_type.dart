@@ -153,7 +153,7 @@ class NT4Type {
   /// Parse the string to whatever type this is
   /// i.e. if this.fragment == bool, then parseStr("true") returns `true`, etc.
   /// this will not deserialize structs. this only works if isViewable is true
-  parseStr(String str) {
+  dynamic convertString(String str) {
     if (!isViewable) return null;
 
     switch (fragment) {
@@ -161,7 +161,7 @@ class NT4Type {
         if (str.isEmpty || str == 'null') {
           return null;
         } else {
-          return tail!.parseStr(str);
+          return tail!.convertString(str);
         }
       case NT4TypeFragment.boolean:
         return bool.tryParse(str);
@@ -181,7 +181,7 @@ class NT4Type {
           return [];
         } else {
           List<String> items = str.split(',');
-          return items.map((e) => tail!.parseStr(e.trim())).toList();
+          return items.map((e) => tail!.convertString(e.trim())).toList();
         }
       default:
         return null; // structs and other types are not viewable
