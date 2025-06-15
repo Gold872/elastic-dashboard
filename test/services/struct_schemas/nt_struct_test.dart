@@ -58,7 +58,7 @@ void main() {
       expect(schema.fields[0].type.toString(), NT4Type.int().toString());
       expect(schema.fields[0].field, 'one');
       expect(schema.fields[0].substruct, isNull);
-      expect(schema.fields[0].customBitLength, 2);
+      expect(schema.fields[0].bitLength, 2);
     });
   });
 }
