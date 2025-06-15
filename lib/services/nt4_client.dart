@@ -167,11 +167,11 @@ class NT4StructMeta {
       }
 
       if (field.substruct == null) {
-        return field.type;
+        return field.valueType.ntType;
       }
 
       if (pathStack.isEmpty) {
-        return field.type;
+        return field.valueType.ntType;
       }
 
       currentSchema = field.substruct!;
