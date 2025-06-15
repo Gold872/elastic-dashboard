@@ -7,7 +7,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -88,6 +88,7 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    required super.ntStructMeta,
     double startAngle = -140.0,
     double endAngle = 140.0,
     double minValue = 0.0,
@@ -111,6 +112,7 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
   RadialGaugeModel.fromJson({
     required super.ntConnection,
     required super.preferences,
+    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _startAngle = tryCast(jsonData['start_angle']) ?? _startAngle;
@@ -314,7 +316,7 @@ class RadialGaugeWidget extends NTWidget {
 
         value = value.clamp(model.minValue, model.maxValue);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return LayoutBuilder(
           builder: (context, constraints) {

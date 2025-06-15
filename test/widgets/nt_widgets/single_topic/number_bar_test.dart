@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -22,7 +23,7 @@ void main() {
 
   final Map<String, dynamic> numberBarJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
@@ -42,7 +43,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
@@ -91,8 +92,9 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -110,8 +112,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -148,8 +151,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -185,11 +189,7 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
       virtualValues: {
         'Test/Int Value': -1,
@@ -199,8 +199,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -233,8 +234,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -270,8 +272,9 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,

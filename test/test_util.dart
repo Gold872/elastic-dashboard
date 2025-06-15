@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'test_util.mocks.dart';
@@ -69,12 +70,12 @@ MockNTConnection createMockOnlineNT4({
   virtualTopics ??= [
     NT4Topic(
       name: '/SmartDashboard/Test Value 1',
-      type: NT4TypeStr.kInt,
+      type: NT4Type.int(),
       properties: {},
     ),
     NT4Topic(
       name: '/SmartDashboard/Test Value 2',
-      type: NT4TypeStr.kFloat32,
+      type: NT4Type.float(),
       properties: {},
     ),
   ];

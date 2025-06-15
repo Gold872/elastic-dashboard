@@ -9,6 +9,8 @@ on:
 
 jobs:
   wpiformat-analyze:
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+
     name: "Verify Formatting"
     runs-on: ubuntu-22.04
     steps:
