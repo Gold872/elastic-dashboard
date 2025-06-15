@@ -9,6 +9,36 @@ import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 
+extension on Uint8List {
+  List<bool> toBitArray() {
+    List<bool> output = [];
+
+    for (int value in this) {
+      for (int shift = 0; shift < 8; shift++) {
+        output.add(((1 << shift) & value) > 0);
+      }
+    }
+
+    return output;
+  }
+}
+
+extension on List<bool> {
+  Uint8List toUint8List() {
+    Uint8List output = Uint8List((length / 8).ceil());
+
+    for (int i = 0; i < length; i++) {
+      if (this[i]) {
+        int byte = (i / 8).floor();
+        int bit = i % 8;
+        output[byte] |= 1 << bit;
+      }
+    }
+
+    return output;
+  }
+}
+
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
 /// It also provides a method to parse a schema string into a list of field schemas.
@@ -90,33 +120,19 @@ class SchemaInfo {
 
 enum StructValueType {
   bool('bool', 8),
-
   char('char', 8),
-
   int8('int8', 8),
-
   int16('int16', 16),
-
   int32('int32', 32),
-
   int64('int64', 64),
-
   uint8('uint8', 8),
-
   uint16('uint16', 16),
-
   uint32('uint32', 32),
-
   uint64('uint64', 64),
-
   float('float', 32),
-
   float32('float32', 32),
-
   double('double', 64),
-
   float64('float64', 64),
-
   struct('struct', 0);
 
   const StructValueType(this.name, this.maxBits);
@@ -128,6 +144,26 @@ enum StructValueType {
     return StructValueType.values.firstWhereOrNull((e) => e.name == type) ??
         StructValueType.struct;
   }
+
+  NT4Type get ntType => switch (this) {
+        StructValueType.bool => NT4Type.boolean(),
+        StructValueType.char ||
+        StructValueType.int8 ||
+        StructValueType.int16 ||
+        StructValueType.int32 ||
+        StructValueType.int64 ||
+        StructValueType.uint8 ||
+        StructValueType.uint16 ||
+        StructValueType.uint32 ||
+        StructValueType.uint64 =>
+          NT4Type.int(),
+        StructValueType.float ||
+        StructValueType.float32 ||
+        StructValueType.double ||
+        StructValueType.float64 =>
+          NT4Type.double(),
+        StructValueType.struct => NT4Type.struct(name),
+      };
 
   @override
   String toString() {
@@ -167,6 +203,37 @@ class NTFieldSchema {
       bitRange: (json['bit_range_start'], json['bit_range_end']),
       arrayLength: json['array_length'],
     );
+  }
+
+  int get startByte => (bitRange.$1 / 8).ceil();
+
+  NTStructValue toValue(Uint8List data) {
+    final view = data.buffer.asByteData();
+    return switch (valueType) {
+      StructValueType.bool => NTStructValue.fromBool(view.getUint8(0) > 0),
+      StructValueType.char => NTStructValue.fromInt(0),
+      StructValueType.int8 => NTStructValue.fromInt(view.getInt8(0)),
+      StructValueType.int16 =>
+        NTStructValue.fromInt(view.getInt16(0, Endian.little)),
+      StructValueType.int32 =>
+        NTStructValue.fromInt(view.getInt32(0, Endian.little)),
+      StructValueType.int64 =>
+        NTStructValue.fromInt(view.getInt64(0, Endian.little)),
+      StructValueType.uint8 => NTStructValue.fromInt(view.getUint8(0)),
+      StructValueType.uint16 =>
+        NTStructValue.fromInt(view.getUint16(0, Endian.little)),
+      StructValueType.uint32 =>
+        NTStructValue.fromInt(view.getUint32(0, Endian.little)),
+      StructValueType.uint64 =>
+        NTStructValue.fromInt(view.getUint32(0, Endian.little)),
+      StructValueType.float ||
+      StructValueType.float32 =>
+        NTStructValue.fromDouble(view.getFloat32(0, Endian.little)),
+      StructValueType.double ||
+      StructValueType.float64 =>
+        NTStructValue.fromDouble(view.getFloat64(0, Endian.little)),
+      StructValueType.struct => NTStructValue.fromInt(0),
+    };
   }
 
   static NTFieldSchema _parseField(int start, String definition, String type) {
@@ -331,7 +398,6 @@ class NTStructValue<T> {
 class NTStruct {
   final NTStructSchema schema;
   late final Map<String, NTStructValue> values;
-  late final int consumed;
 
   NTStruct({
     required this.schema,
@@ -339,7 +405,6 @@ class NTStruct {
   }) {
     var (consumed, values) = _parseData(schema, data);
     this.values = values;
-    this.consumed = consumed;
   }
 
   NTStructValue? operator [](String key) {
@@ -364,91 +429,99 @@ class NTStruct {
     NTStructSchema schema,
     Uint8List data,
   ) {
+    List<bool> dataBitArray = data.toBitArray();
+
     Map<String, NTStructValue> values = {};
     int offset = 0;
 
     for (final field in schema.fields) {
-      var (consumed, value) = _parseValue(
-        field,
-        data.sublist(offset),
-      );
+      final value = field.toValue(dataBitArray
+          .slice(field.bitRange.$1, field.bitRange.$2)
+          .toUint8List());
+
       values[field.field] = value;
-      offset += consumed;
+
+      // var (consumed, value) = _parseValue(
+      //   field,
+      //   data.sublist(offset),
+      // );
+      // values[field.field] = value;
+      // offset += consumed;
     }
 
     return (offset, values);
   }
 
-  static (int, NTStructValue) _parseValue(
-    NTFieldSchema field,
-    Uint8List data,
-  ) {
-    if (field.isArray) {
-      var (consumed, value) = _parseArray(field, data, field.arrayLength!);
-      return (consumed, value);
-    } else {
-      return _parseValueInner(field, data);
-    }
-  }
+  // static (int, NTStructValue) _parseValue(
+  //   NTFieldSchema field,
+  //   Uint8List data,
+  // ) {
+  //   if (field.isArray) {
+  //     var (consumed, value) = _parseArray(field, data, field.arrayLength!);
+  //     return (consumed, value);
+  //   } else {
+  //     return _parseValueInner(field, data);
+  //   }
+  // }
 
-  static (int, NTStructValue) _parseValueInner(
-      NTFieldSchema field, Uint8List data) {
-    if (field.type.fragment == NT4TypeFragment.boolean) {
-      return (1, NTStructValue.fromBool(data[0] != 0));
-    } else if (field.type.fragment == NT4TypeFragment.int32) {
-      return (
-        4,
-        NTStructValue.fromInt(
-            data.buffer.asByteData().getInt32(0, Endian.little))
-      );
-    } else if (field.type.fragment == NT4TypeFragment.float32) {
-      return (
-        4,
-        NTStructValue.fromDouble(
-            data.buffer.asByteData().getFloat32(0, Endian.little))
-      );
-    } else if (field.type.fragment == NT4TypeFragment.float64) {
-      return (
-        8,
-        NTStructValue.fromDouble(
-            data.buffer.asByteData().getFloat64(0, Endian.little))
-      );
-    } else if (field.type.fragment == NT4TypeFragment.string) {
-      int length = data.buffer.asByteData().getInt32(0, Endian.little);
-      return (
-        length + 4,
-        NTStructValue.fromString(
-            String.fromCharCodes(data.sublist(4, 4 + length)))
-      );
-    } else if (field.type.isStruct) {
-      NTStructSchema? substruct = field.substruct;
+  // static (int, NTStructValue) _parseValueInner(
+  //     NTFieldSchema field, Uint8List data) {
+  //   if (field.type.fragment == NT4TypeFragment.boolean) {
+  //     return (1, NTStructValue.fromBool(data[0] != 0));
+  //   } else if (field.type.fragment == NT4TypeFragment.int32) {
+  //     return (
+  //       4,
+  //       NTStructValue.fromInt(
+  //           data.buffer.asByteData().getInt32(0, Endian.little))
+  //     );
+  //   } else if (field.type.fragment == NT4TypeFragment.float32) {
+  //     return (
+  //       4,
+  //       NTStructValue.fromDouble(
+  //           data.buffer.asByteData().getFloat32(0, Endian.little))
+  //     );
+  //   } else if (field.type.fragment == NT4TypeFragment.float64) {
+  //     return (
+  //       8,
+  //       NTStructValue.fromDouble(
+  //           data.buffer.asByteData().getFloat64(0, Endian.little))
+  //     );
+  //   } else if (field.type.fragment == NT4TypeFragment.string) {
+  //     int length = data.buffer.asByteData().getInt32(0, Endian.little);
+  //     return (
+  //       length + 4,
+  //       NTStructValue.fromString(
+  //           String.fromCharCodes(data.sublist(4, 4 + length)))
+  //     );
+  //   } else if (field.type.isStruct) {
+  //     NTStructSchema? substruct = field.substruct;
 
-      if (substruct == null) {
-        throw Exception('No schema found for struct: ${field.type.name}');
-      }
+  //     if (substruct == null) {
+  //       throw Exception('No schema found for struct: ${field.type.name}');
+  //     }
 
-      NTStruct sub = NTStruct(
-        schema: substruct,
-        data: data,
-      );
+  //     NTStruct sub = NTStruct(
+  //       schema: substruct,
+  //       data: data,
+  //     );
 
-      return (sub.consumed, NTStructValue.fromStruct(sub));
-    } else {
-      throw Exception('Unknown type: ${field.type}');
-    }
-  }
+  //     return (sub.consumed, NTStructValue.fromStruct(sub));
+  //   } else {
+  //     throw Exception('Unknown type: ${field.type}');
+  //   }
+  // }
 
-  static (int, NTStructValue<List<NTStructValue>>) _parseArray(
-      NTFieldSchema field, Uint8List data, int length) {
-    List<NTStructValue> values = [];
-    int offset = 0;
+  // static (int, NTStructValue<List<NTStructValue>>) _parseArray(
+  //     NTFieldSchema field, Uint8List data, int length) {
+  //   List<NTStructValue> values = [];
+  //   int offset = 0;
 
-    for (int i = 0; i < length; i++) {
-      var (consumed, value) = _parseValueInner(field, data.sublist(offset));
-      values.add(value);
-      offset += consumed;
-    }
+  //   for (int i = 0; i < length; i++) {
+  //     var (consumed, value) = _parseValueInner(field, data.sublist(offset));
+  //     values.add(value);
+  //     offset += consumed;
+  //   }
 
-    return (offset, NTStructValue.fromArray(values));
-  }
+  //   return (offset, NTStructValue.fromArray(values));
+  // }
 }
