@@ -176,7 +176,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4Type.struct("Pose2d"),
+            type: NT4Type.struct('Pose2d'),
             properties: {},
           ),
           NT4Topic(
