@@ -67,6 +67,7 @@ class SchemaInfo {
     if (name.contains(':')) {
       name = name.split(':')[1];
     }
+    name = name.trim();
 
     if (_schemas.containsKey(name)) {
       return;
@@ -92,10 +93,12 @@ class SchemaInfo {
 class NTFieldSchema {
   final String field;
   final NT4Type type;
+  final int? customBitLength;
 
   NTFieldSchema({
     required this.field,
     required this.type,
+    this.customBitLength,
   });
 
   static NTFieldSchema fromJson(
@@ -107,18 +110,30 @@ class NTFieldSchema {
     );
   }
 
-  static NTFieldSchema _parseField(String name, String type) {
+  static NTFieldSchema _parseField(String definition, String type) {
     NT4Type fieldType = NT4Type.parse(type);
+    late String fieldName;
+    int? bitLength;
+
+    if (definition.contains(':')) {
+      var [name, length] = definition.split(':');
+      fieldName = name.trim();
+      bitLength = int.tryParse(length.trim());
+    } else {
+      fieldName = definition;
+    }
 
     if (fieldType.leaf.isStruct) {
       return NTFieldSchema(
-        field: name,
+        field: fieldName,
         type: fieldType,
+        customBitLength: bitLength,
       );
     } else {
       return NTFieldSchema(
-        field: name,
+        field: fieldName,
         type: fieldType,
+        customBitLength: bitLength,
       );
     }
   }
@@ -169,7 +184,7 @@ class NTStructSchema {
 
   static List<NTFieldSchema> _tryParseSchema(String name, String schema) {
     try {
-      return _parseSchema(name, schema);
+      return _parseSchema(name, schema.replaceAll('\n', ''));
     } catch (ignored) {
       return [];
     }
@@ -179,9 +194,15 @@ class NTStructSchema {
     List<NTFieldSchema> fields = [];
     List<String> schemaParts = schema.split(';');
 
-    for (final String part in schemaParts) {
-      var [type, name] = part.split(' ');
-      var field = NTFieldSchema._parseField(name, type);
+    for (final String part in schemaParts.map((e) => e.trim())) {
+      if (part.isEmpty) {
+        continue;
+      }
+      var [type, definition] = [
+        part.substring(0, part.indexOf(' ')),
+        part.substring(part.indexOf(' ') + 1)
+      ];
+      var field = NTFieldSchema._parseField(definition, type);
       fields.add(field);
     }
 
