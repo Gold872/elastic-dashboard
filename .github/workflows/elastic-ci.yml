@@ -107,6 +107,7 @@ jobs:
             artifact-name: Elastic-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
+    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -212,6 +213,7 @@ jobs:
             artifact-name: Elastic-WPILib-Linux
 
     name: "Build - ${{ matrix.artifact-name }}"
+    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
