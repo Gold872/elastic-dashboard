@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dot_cast/dot_cast.dart';
+
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
