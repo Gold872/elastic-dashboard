@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 String testSchema1 = 'float32 vx;float32 vy;float32 omega';
@@ -19,15 +18,15 @@ void main() {
       final schema = NTStructSchema(name: 'ChassisSpeeds', schema: testSchema1);
 
       expect(schema.fields.length, 3);
-      expect(schema.fields[0].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[0].type.toString(), 'float32');
       expect(schema.fields[0].field, 'vx');
       expect(schema.fields[0].substruct, isNull);
 
-      expect(schema.fields[1].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[1].type.toString(), 'float32');
       expect(schema.fields[1].field, 'vy');
       expect(schema.fields[1].substruct, isNull);
 
-      expect(schema.fields[2].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[2].type.toString(), 'float32');
       expect(schema.fields[2].field, 'omega');
       expect(schema.fields[2].substruct, isNull);
     });
@@ -36,15 +35,15 @@ void main() {
       final schema = NTStructSchema(name: 'ChassisSpeeds', schema: testSchema2);
 
       expect(schema.fields.length, 3);
-      expect(schema.fields[0].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[0].type.toString(), 'float32');
       expect(schema.fields[0].field, 'vx');
       expect(schema.fields[0].substruct, isNull);
 
-      expect(schema.fields[1].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[1].type.toString(), 'float32');
       expect(schema.fields[1].field, 'vy');
       expect(schema.fields[1].substruct, isNull);
 
-      expect(schema.fields[2].type.toString(), NT4Type.float().toString());
+      expect(schema.fields[2].type.toString(), 'float32');
       expect(schema.fields[2].field, 'omega');
       expect(schema.fields[2].substruct, isNull);
     });
@@ -56,7 +55,7 @@ void main() {
       );
 
       expect(schema.fields.length, 1);
-      expect(schema.fields[0].type.toString(), NT4Type.int().toString());
+      expect(schema.fields[0].type.toString(), 'int32');
       expect(schema.fields[0].field, 'one');
       expect(schema.fields[0].substruct, isNull);
       expect(schema.fields[0].bitLength, 2);
