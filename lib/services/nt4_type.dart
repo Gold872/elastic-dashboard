@@ -249,4 +249,15 @@ class NT4Type {
   String toString() {
     return 'NT4Type(${serialize()})';
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is NT4Type &&
+        fragment == other.fragment &&
+        tail == other.tail &&
+        name == other.name;
+  }
+
+  @override
+  int get hashCode => Object.hashAll([fragment, tail, name]);
 }
