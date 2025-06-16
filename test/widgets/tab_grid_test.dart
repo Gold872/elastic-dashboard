@@ -381,7 +381,9 @@ void main() async {
 
     await widgetTester.pumpAndSettle();
 
-    int subscribeCallCount = verify(ntConnection.subscribe(any, any)).callCount;
+    int subscribeCallCount =
+        verify(ntConnection.subscribe(any, any)).callCount +
+            verify(ntConnection.subscribeWithOptions(any, any)).callCount;
 
     expect(subscribeCallCount, greaterThan(10));
 

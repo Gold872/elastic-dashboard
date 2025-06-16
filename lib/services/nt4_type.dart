@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
@@ -180,15 +183,11 @@ class NT4Type {
       case NT4TypeFragment.string:
         return str;
       case NT4TypeFragment.array:
-        if (str.startsWith('[')) {
-          str = str.substring(1, str.length - 1);
-        }
-
-        if (str.isEmpty) {
-          return [];
-        } else {
-          List<String> items = str.split(',');
-          return items.map((e) => tail!.convertString(e.trim())).toList();
+        final dynamicList = tryCast<List<dynamic>>(jsonDecode(str));
+        if (tail == NT4Type.boolean()) {
+          return dynamicList?.whereType<bool>().toList();
+        } else if (tail == NT4Type.float() || tail == NT4Type.int()) {
+          return dynamicList?.whereType<num>();
         }
       default:
         return null; // structs and other types are not viewable
