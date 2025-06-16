@@ -68,7 +68,6 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
       dataType: NT4Type.string(),
@@ -85,7 +84,6 @@ void main() {
         SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       type: 'Large Text Display',
       topic: 'Test/Large Text',
       dataType: NT4Type.string(),

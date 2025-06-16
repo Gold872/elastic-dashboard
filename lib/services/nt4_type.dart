@@ -132,6 +132,13 @@ class NT4Type {
     'structschema': NT4Type.structschema,
   };
 
+  static NT4Type? parseNullable(String? type) {
+    if (type == null) {
+      return null;
+    }
+    return parse(type);
+  }
+
   static NT4Type parse(String type) {
     if (_constructorMap.containsKey(type)) {
       return _constructorMap[type]!();

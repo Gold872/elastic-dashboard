@@ -51,7 +51,6 @@ typedef NTModelJsonProvider = NTWidgetModel Function({
   required Map<String, dynamic> jsonData,
   required NTConnection ntConnection,
   required SharedPreferences preferences,
-  NT4StructMeta? ntStructMeta,
 });
 
 typedef NTModelProvider = NTWidgetModel Function({
@@ -428,9 +427,9 @@ class NTWidgetBuilder {
         ntConnection: ntConnection,
         preferences: preferences,
         topic: topic,
+        ntStructMeta: ntStructMeta,
         dataType: dataType,
         period: period,
-        ntStructMeta: ntStructMeta,
       );
     }
 
@@ -439,9 +438,9 @@ class NTWidgetBuilder {
       preferences: preferences,
       type: type,
       topic: topic,
+      ntStructMeta: ntStructMeta,
       dataType: dataType,
       period: period,
-      ntStructMeta: ntStructMeta,
     );
   }
 
@@ -454,19 +453,11 @@ class NTWidgetBuilder {
   }) {
     ensureInitialized();
 
-    NT4StructMeta? ntStructMeta;
-    if (jsonData['ntStructMeta'] != null) {
-      ntStructMeta = NT4StructMeta.fromJson(
-        tryCast(jsonData['ntStructMeta']) ?? {},
-      );
-    }
-
     if (_modelJsonBuildMap.containsKey(type)) {
       return _modelJsonBuildMap[type]!(
         ntConnection: ntConnection,
         preferences: preferences,
         jsonData: jsonData,
-        ntStructMeta: ntStructMeta,
       );
     }
 
@@ -475,10 +466,9 @@ class NTWidgetBuilder {
     return SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: ntStructMeta,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
-      dataType: tryCast(jsonData['data_type']),
+      dataType: NT4Type.parseNullable(tryCast(jsonData['data_type'])),
       period: tryCast(jsonData['period']),
     );
   }
@@ -567,7 +557,6 @@ class NTWidgetBuilder {
       required Map<String, dynamic> jsonData,
       required NTConnection ntConnection,
       required SharedPreferences preferences,
-      required NT4StructMeta? ntStructMeta,
     }) fromJson,
     double? minWidth,
     double? minHeight,
@@ -600,13 +589,11 @@ class NTWidgetBuilder {
         required Map<String, dynamic> jsonData,
         required NTConnection ntConnection,
         required SharedPreferences preferences,
-        NT4StructMeta? ntStructMeta,
       }) =>
           fromJson(
         jsonData: jsonData,
         ntConnection: ntConnection,
         preferences: preferences,
-        ntStructMeta: ntStructMeta,
       ),
     );
   }
