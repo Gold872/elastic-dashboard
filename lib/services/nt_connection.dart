@@ -67,7 +67,7 @@ class NTConnection {
     );
 
     // add all struct schemas to the schema manager
-    SchemaInfo.getInstance().listen(_ntClient);
+    SchemaInfo.getInstance().listen(this);
   }
 
   void dsClientConnect(
