@@ -75,7 +75,7 @@ def send_notification(notification: Notification):
         __notification_publisher.set(
             json.dumps(
                 {
-                    "level": notification.level,
+                    "level": notification.level.name,
                     "title": notification.title,
                     "description": notification.description,
                     "displayTime": notification.display_time,
