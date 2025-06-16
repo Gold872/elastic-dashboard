@@ -63,7 +63,6 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
   NumberSliderModel.fromJson({
     required super.ntConnection,
     required super.preferences,
-    required super.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
     _minValue =

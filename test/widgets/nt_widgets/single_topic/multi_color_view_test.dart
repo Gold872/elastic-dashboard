@@ -84,7 +84,6 @@ void main() {
     NTWidgetModel multiColorViewModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       type: 'Multi Color View',
       topic: 'Test/String Array',
       dataType: NT4Type.array(NT4Type.string()),

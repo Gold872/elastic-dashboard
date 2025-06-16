@@ -76,11 +76,6 @@ sealed class NTWidgetModel extends ChangeNotifier {
     return {
       'topic': topic,
       'period': period,
-      'ntStructMeta': switch (this) {
-        SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) =>
-          ntStructMeta?.toJson(),
-        MultiTopicNTWidgetModel _ => null,
-      }
     };
   }
 
@@ -149,7 +144,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required String type,
     required super.topic,
-    required ntStructMeta,
+    this.ntStructMeta,
     this.dataType,
     super.period,
   })  : _typeOverride = type,
@@ -158,11 +153,14 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
-    this.ntStructMeta,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    String jsonDataType = tryCast(jsonData['data_type']) ?? '';
-    dataType = NT4Type.parse(jsonDataType);
+    dataType = NT4Type.parseNullable(tryCast(jsonData['data_type']));
+
+    Map<String, dynamic>? structMetaJson = jsonData['struct_meta'];
+    if (structMetaJson != null) {
+      ntStructMeta = NT4StructMeta.fromJson(structMetaJson);
+    }
   }
 
   @override
@@ -175,6 +173,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     return {
       ...super.toJson(),
       if (dataType != null) 'data_type': dataType?.serialize(),
+      if (ntStructMeta != null) 'struct_meta': ntStructMeta!.toJson(),
     };
   }
 

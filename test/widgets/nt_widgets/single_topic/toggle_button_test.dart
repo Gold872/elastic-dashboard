@@ -68,7 +68,6 @@ void main() {
     NTWidgetModel toggleButtonModel = SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
-      ntStructMeta: null,
       type: 'Toggle Button',
       topic: 'Test/Boolean Value',
       dataType: NT4Type.boolean(),
