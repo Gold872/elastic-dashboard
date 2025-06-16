@@ -32,13 +32,13 @@ void main() {
   late NTConnection ntConnection;
 
   Finder findColor(Color color) => find.byWidgetPredicate(
-        (widget) =>
-            widget is Container &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color != null &&
-            (widget.decoration as BoxDecoration).color!.toARGB32() ==
-                color.toARGB32(),
-      );
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration as BoxDecoration).color != null &&
+        (widget.decoration as BoxDecoration).color!.toARGB32() ==
+            color.toARGB32(),
+  );
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -52,9 +52,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Boolean Value': false,
-      },
+      virtualValues: {'Test/Boolean Value': false},
     );
   });
 
@@ -158,12 +156,14 @@ void main() {
   testWidgets('Boolean box edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    BooleanBoxModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Boolean Box',
-      booleanBoxJson,
-    ) as BooleanBoxModel;
+    BooleanBoxModel booleanBoxModel =
+        NTWidgetBuilder.buildNTModelFromJson(
+              ntConnection,
+              preferences,
+              'Boolean Box',
+              booleanBoxJson,
+            )
+            as BooleanBoxModel;
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -193,10 +193,14 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final trueColorPicker =
-        find.widgetWithText(DialogColorPicker, 'True Color');
-    final falseColorPicker =
-        find.widgetWithText(DialogColorPicker, 'False Color');
+    final trueColorPicker = find.widgetWithText(
+      DialogColorPicker,
+      'True Color',
+    );
+    final falseColorPicker = find.widgetWithText(
+      DialogColorPicker,
+      'False Color',
+    );
 
     final trueIcon = find.text('True Icon');
     final falseIcon = find.text('False Icon');
@@ -212,9 +216,13 @@ void main() {
     expect(iconDropdown, findsNWidgets(3));
 
     final trueColorButton = find.descendant(
-        of: trueColorPicker, matching: find.byType(ElevatedButton));
+      of: trueColorPicker,
+      matching: find.byType(ElevatedButton),
+    );
     final falseColorButton = find.descendant(
-        of: falseColorPicker, matching: find.byType(ElevatedButton));
+      of: falseColorPicker,
+      matching: find.byType(ElevatedButton),
+    );
 
     expect(trueColorButton, findsOneWidget);
     expect(falseColorButton, findsOneWidget);
@@ -224,7 +232,9 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Hex Code'), findsOneWidget);
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Hex Code'), '000000');
+      find.widgetWithText(TextField, 'Hex Code'),
+      '000000',
+    );
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     await widgetTester.pump();
@@ -236,8 +246,9 @@ void main() {
 
     expect(booleanBoxModel.trueColor.toARGB32(), Colors.black.toARGB32());
 
-    await widgetTester
-        .tap(find.byWidget(iconDropdown.evaluate().elementAt(1).widget));
+    await widgetTester.tap(
+      find.byWidget(iconDropdown.evaluate().elementAt(1).widget),
+    );
 
     await widgetTester.pumpAndSettle();
 
@@ -249,8 +260,9 @@ void main() {
 
     expect(booleanBoxModel.trueIcon, 'Checkmark');
 
-    await widgetTester
-        .tap(find.byWidget(iconDropdown.evaluate().elementAt(2).widget));
+    await widgetTester.tap(
+      find.byWidget(iconDropdown.evaluate().elementAt(2).widget),
+    );
 
     await widgetTester.pumpAndSettle();
 

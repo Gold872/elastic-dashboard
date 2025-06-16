@@ -99,11 +99,7 @@ void main() {
     testWidgets('Pressing okay updates preference', (widgetTester) async {
       await widgetTester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: DashboardPage(
-              model: dashboardModel,
-            ),
-          ),
+          home: Scaffold(body: DashboardPage(model: dashboardModel)),
         ),
       );
 
@@ -125,11 +121,7 @@ void main() {
     testWidgets('Pressing cancel does nothing', (widgetTester) async {
       await widgetTester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: DashboardPage(
-              model: dashboardModel,
-            ),
-          ),
+          home: Scaffold(body: DashboardPage(model: dashboardModel)),
         ),
       );
 

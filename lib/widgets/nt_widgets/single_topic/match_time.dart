@@ -52,10 +52,10 @@ class MatchTimeModel extends SingleTopicNTWidgetModel {
     int yellowStartTime = 30,
     super.dataType,
     super.period,
-  })  : _timeDisplayMode = timeDisplayMode,
-        _yellowStartTime = yellowStartTime,
-        _redStartTime = redStartTime,
-        super();
+  }) : _timeDisplayMode = timeDisplayMode,
+       _yellowStartTime = yellowStartTime,
+       _redStartTime = redStartTime,
+       super();
 
   MatchTimeModel.fromJson({
     required super.ntConnection,
@@ -66,12 +66,14 @@ class MatchTimeModel extends SingleTopicNTWidgetModel {
         tryCast(jsonData['time_display_mode']) ?? 'Minutes and Seconds';
 
     _timeDisplayOptions.firstWhere(
-        (e) => e.toUpperCase() == _timeDisplayMode.toUpperCase(),
-        orElse: () => 'Minutes and Seconds');
+      (e) => e.toUpperCase() == _timeDisplayMode.toUpperCase(),
+      orElse: () => 'Minutes and Seconds',
+    );
 
     _redStartTime =
         tryCast<num>(jsonData['red_start_time'])?.toInt() ?? _redStartTime;
-    _yellowStartTime = tryCast<num>(jsonData['yellow_start_time'])?.toInt() ??
+    _yellowStartTime =
+        tryCast<num>(jsonData['yellow_start_time'])?.toInt() ??
         _yellowStartTime;
   }
 

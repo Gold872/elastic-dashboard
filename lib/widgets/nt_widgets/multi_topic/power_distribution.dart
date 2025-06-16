@@ -24,10 +24,10 @@ class PowerDistributionModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        voltageSubscription,
-        currentSubscription,
-        ...channelSubscriptions,
-      ];
+    voltageSubscription,
+    currentSubscription,
+    ...channelSubscriptions,
+  ];
 
   PowerDistributionModel({
     required super.ntConnection,
@@ -67,7 +67,11 @@ class PowerDistribution extends NTWidget {
   const PowerDistribution({super.key}) : super();
 
   Widget _getChannelsColumn(
-      PowerDistributionModel model, BuildContext context, int start, int end) {
+    PowerDistributionModel model,
+    BuildContext context,
+    int start,
+    int end,
+  ) {
     List<Widget> channels = [];
 
     for (int channel = start; channel <= end; channel++) {
@@ -86,10 +90,15 @@ class PowerDistribution extends NTWidget {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 4.0),
-                  child: Text('${current.toStringAsFixed(2).padLeft(5, '0')} A',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface)),
+                    horizontal: 24.0,
+                    vertical: 4.0,
+                  ),
+                  child: Text(
+                    '${current.toStringAsFixed(2).padLeft(5, '0')} A',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 );
               },
             ),
@@ -108,7 +117,11 @@ class PowerDistribution extends NTWidget {
   }
 
   Widget _getReversedChannelsColumn(
-      PowerDistributionModel model, BuildContext context, int start, int end) {
+    PowerDistributionModel model,
+    BuildContext context,
+    int start,
+    int end,
+  ) {
     List<Widget> channels = [];
 
     for (int channel = start; channel >= end; channel--) {
@@ -120,22 +133,27 @@ class PowerDistribution extends NTWidget {
             Text('Ch. $channel'),
             const SizedBox(width: 10),
             ValueListenableBuilder(
-                valueListenable: model.channelSubscriptions[channel],
-                builder: (context, value, child) {
-                  double current = tryCast(value) ?? 0.0;
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10.0),
+              valueListenable: model.channelSubscriptions[channel],
+              builder: (context, value, child) {
+                double current = tryCast(value) ?? 0.0;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 4.0,
+                  ),
+                  child: Text(
+                    '${current.toStringAsFixed(2).padLeft(5, '0')} A',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0, vertical: 4.0),
-                    child: Text(
-                        '${current.toStringAsFixed(2).padLeft(5, '0')} A',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface)),
-                  );
-                }),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       );
@@ -163,25 +181,28 @@ class PowerDistribution extends NTWidget {
                 const Text('Voltage'),
                 const SizedBox(height: 2.5),
                 ValueListenableBuilder(
-                    valueListenable: model.voltageSubscription,
-                    builder: (context, value, child) {
-                      double voltage = tryCast(value) ?? 0.0;
+                  valueListenable: model.voltageSubscription,
+                  builder: (context, value, child) {
+                    double voltage = tryCast(value) ?? 0.0;
 
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 48.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(10.0),
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48.0,
+                        vertical: 4.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Text(
+                        '${voltage.toStringAsFixed(2).padLeft(5, '0')} V',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        child: Text(
-                          '${voltage.toStringAsFixed(2).padLeft(5, '0')} V',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      );
-                    }),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             // Current
@@ -190,25 +211,28 @@ class PowerDistribution extends NTWidget {
                 const Text('Total Current'),
                 const SizedBox(height: 2.5),
                 ValueListenableBuilder(
-                    valueListenable: model.currentSubscription,
-                    builder: (context, value, child) {
-                      double totalCurrent = tryCast(value) ?? 0.0;
+                  valueListenable: model.currentSubscription,
+                  builder: (context, value, child) {
+                    double totalCurrent = tryCast(value) ?? 0.0;
 
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 48.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(10.0),
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48.0,
+                        vertical: 4.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Text(
+                        '${totalCurrent.toStringAsFixed(2).padLeft(5, '0')} A',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        child: Text(
-                          '${totalCurrent.toStringAsFixed(2).padLeft(5, '0')} A',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      );
-                    }),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ],

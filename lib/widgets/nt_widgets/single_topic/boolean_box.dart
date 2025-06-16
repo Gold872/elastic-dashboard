@@ -14,10 +14,7 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   Color _trueColor = Colors.green;
   Color _falseColor = Colors.red;
 
-  static const List<String> _trueIconOptions = [
-    'None',
-    'Checkmark',
-  ];
+  static const List<String> _trueIconOptions = ['None', 'Checkmark'];
   static const List<String> _falseIconOptions = [
     'None',
     'X',
@@ -65,11 +62,11 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
     String falseIcon = 'None',
     super.dataType,
     super.period,
-  })  : _falseColor = falseColor,
-        _trueColor = trueColor,
-        _trueIcon = trueIcon,
-        _falseIcon = falseIcon,
-        super();
+  }) : _falseColor = falseColor,
+       _trueColor = trueColor,
+       _trueIcon = trueIcon,
+       _falseIcon = falseIcon,
+       super();
 
   BooleanBoxModel.fromJson({
     required super.ntConnection,
@@ -170,8 +167,9 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
                     trueIcon = value;
                   },
                   choices: _trueIconOptions,
-                  initialValue:
-                      (_trueIconOptions.contains(_trueIcon)) ? _trueIcon : null,
+                  initialValue: (_trueIconOptions.contains(_trueIcon))
+                      ? _trueIcon
+                      : null,
                 ),
               ],
             ),
@@ -216,11 +214,11 @@ class BooleanBox extends NTWidget {
         bool value = tryCast(data) ?? false;
 
         Widget defaultWidget() => Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                color: (value) ? model.trueColor : model.falseColor,
-              ),
-            );
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: (value) ? model.trueColor : model.falseColor,
+          ),
+        );
 
         Widget? widgetToDisplay;
         if (value && model.trueIcon.toUpperCase() != 'NONE') {

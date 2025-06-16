@@ -54,10 +54,7 @@ class Ultrasonic extends NTWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade700,
-                  width: 1.5,
-                ),
+                bottom: BorderSide(color: Colors.grey.shade700, width: 1.5),
               ),
             ),
             child: ValueListenableBuilder(
@@ -69,8 +66,8 @@ class Ultrasonic extends NTWidget {
                   maxLines: 1,
                   showCursor: true,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 );
               },
             ),

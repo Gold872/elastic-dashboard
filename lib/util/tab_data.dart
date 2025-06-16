@@ -4,8 +4,5 @@ class TabData {
   String name;
   TabGridModel tabGrid;
 
-  TabData({
-    required this.name,
-    required this.tabGrid,
-  });
+  TabData({required this.name, required this.tabGrid});
 }
