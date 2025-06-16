@@ -39,6 +39,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
+    onChanged(value, timestamp);
   }
 
   Stream<Object?> periodicStream({bool yieldAll = true}) async* {
@@ -168,11 +169,11 @@ class NT4StructMeta {
       }
 
       if (field.substruct == null) {
-        return field.valueType.ntType;
+        return field.ntType;
       }
 
       if (pathStack.isEmpty) {
-        return field.valueType.ntType;
+        return field.ntType;
       }
 
       currentSchema = field.substruct!;
@@ -1041,6 +1042,13 @@ class NT4Client {
               if (sub.topic == topic.name) {
                 sub.updateValue(value, timestampUS);
               }
+            }
+
+            if (topic.name.startsWith('/.schema')) {
+              String structName =
+                  topic.name.split('/').last.replaceFirst('struct:', '');
+              SchemaInfo.getInstance()
+                  .processNewSchema(structName, value as List<int>);
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);

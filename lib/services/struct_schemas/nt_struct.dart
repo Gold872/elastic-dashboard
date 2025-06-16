@@ -1,12 +1,13 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 
 extension on Uint8List {
@@ -50,24 +51,11 @@ class SchemaInfo {
     return _instance;
   }
 
+  final Map<String, String> _uncompiledSchemas = {};
   final Map<String, NTStructSchema> _schemas = {};
-  final List<String> knownStructs = [];
 
-  void listen(NT4Client client) {
-    client.addTopicAnnounceListener((topic) {
-      if (topic.type.fragment == NT4TypeFragment.structschema) {
-        String name = topic.name.split('/').last.split(':')[1];
-        logger.debug('Subscribing to schema topic: ${topic.name} ($name)');
-        knownStructs.add(name);
-
-        client.subscribe(topic: topic.name).listen((data, _) {
-          if (data == null) return;
-          String schema = String.fromCharCodes(data as List<int>);
-          String key = topic.name.split('/').last;
-          addStringSchema(key, schema);
-        });
-      }
-    });
+  void listen(NTConnection ntConnection) {
+    ntConnection.subscribeAll('/.schema');
   }
 
   NTStructSchema? getSchema(String name) {
@@ -76,6 +64,41 @@ class SchemaInfo {
     }
 
     return _schemas[name];
+  }
+
+  void processNewSchema(String name, List<int> rawData) {
+    String schema = utf8.decode(rawData);
+    if (name.contains(':')) {
+      name = name.split(':').last;
+    }
+
+    _uncompiledSchemas[name] = schema;
+
+    while (_uncompiledSchemas.isNotEmpty) {
+      bool compiled = false;
+
+      List<String> newlyCompiled = [];
+
+      for (final uncompiled in _uncompiledSchemas.entries) {
+        if (!_schemas.containsKey(uncompiled.key)) {
+          bool success = addStringSchema(uncompiled.key, uncompiled.value);
+          if (success) {
+            newlyCompiled.add(uncompiled.key);
+          }
+          compiled = compiled || success;
+        }
+      }
+
+      _uncompiledSchemas.removeWhere((k, v) => newlyCompiled.contains(k));
+
+      if (!compiled) {
+        break;
+      }
+    }
+
+    if (_uncompiledSchemas.containsKey(name)) {
+      return;
+    }
   }
 
   void addSchema(String name, NTStructSchema schema) {
@@ -94,27 +117,33 @@ class SchemaInfo {
     _schemas[name] = schema;
   }
 
-  void addStringSchema(String name, String schema) {
+  bool addStringSchema(String name, String schema) {
     if (name.contains(':')) {
       name = name.split(':')[1];
     }
     name = name.trim();
 
     if (_schemas.containsKey(name)) {
-      return;
+      return true;
     }
 
-    NTStructSchema parsedSchema = NTStructSchema(name: name, schema: schema);
-
-    addSchema(name, parsedSchema);
+    try {
+      NTStructSchema parsedSchema = NTStructSchema(name: name, schema: schema);
+      addSchema(name, parsedSchema);
+      return true;
+    } catch (err) {
+      logger.info('Failed to parse schema: $name - $schema');
+      return false;
+    }
   }
 
   bool isStruct(String name) {
+    name = name.trim();
     if (name.contains(':')) {
       name = name.split(':')[1];
     }
 
-    return _schemas.containsKey(name) || knownStructs.contains(name);
+    return _schemas.containsKey(name);
   }
 }
 
@@ -177,18 +206,22 @@ enum StructValueType {
 class NTFieldSchema {
   final String field;
   final String type;
-  final int? bitLength;
+  final int bitLength;
   final int? arrayLength;
   final (int start, int end) bitRange;
 
   StructValueType get valueType => StructValueType.parse(type);
+
+  NT4Type get ntType => valueType != StructValueType.struct
+      ? valueType.ntType
+      : NT4Type.struct(type);
 
   bool get isArray => arrayLength != null;
 
   NTFieldSchema({
     required this.field,
     required this.type,
-    this.bitLength,
+    required this.bitLength,
     this.arrayLength,
     required this.bitRange,
   });
@@ -232,7 +265,13 @@ class NTFieldSchema {
       StructValueType.double ||
       StructValueType.float64 =>
         NTStructValue.fromDouble(view.getFloat64(0, Endian.little)),
-      StructValueType.struct => NTStructValue.fromNullable<NTStruct>(null),
+      StructValueType.struct => () {
+          NTStructSchema? schema = SchemaInfo.getInstance().getSchema(type);
+          if (schema == null) {
+            return NTStructValue.fromNullable(null);
+          }
+          return NTStructValue.fromStruct(NTStruct(schema: schema, data: data));
+        }(),
     };
   }
 
@@ -242,6 +281,15 @@ class NTFieldSchema {
     late (int start, int end) bitRange;
     int? bitLength;
     int? arrayLength;
+
+    if (fieldType == StructValueType.struct) {
+      NTStructSchema? schema = SchemaInfo.getInstance().getSchema(type);
+      if (schema == null) {
+        logger.debug('Unknown struct type: $type');
+        throw Exception();
+      }
+      bitLength = schema.bitLength;
+    }
 
     if (definition.contains(':')) {
       var [name, length] = definition.split(':');
@@ -257,10 +305,12 @@ class NTFieldSchema {
         definition.indexOf(']'),
       );
       arrayLength = int.parse(rawLength);
-      bitLength = fieldType.maxBits * arrayLength;
+      bitLength = (bitLength ?? fieldType.maxBits) * arrayLength;
     }
 
-    bitRange = (start, start + (bitLength ?? fieldType.maxBits));
+    bitLength ??= fieldType.maxBits;
+
+    bitRange = (start, start + bitLength);
 
     return NTFieldSchema(
       field: fieldName,
@@ -288,11 +338,18 @@ class NTFieldSchema {
 class NTStructSchema {
   final String name;
   final List<NTFieldSchema> fields;
+  late final int bitLength;
 
   NTStructSchema({
     required this.name,
     required String schema,
-  }) : fields = _tryParseSchema(name, schema);
+  }) : fields = _tryParseSchema(name, schema) {
+    int bits = 0;
+    for (final field in fields) {
+      bits += field.bitLength;
+    }
+    bitLength = bits;
+  }
 
   NTStructSchema.raw({
     required this.name,
@@ -310,11 +367,7 @@ class NTStructSchema {
   }
 
   static List<NTFieldSchema> _tryParseSchema(String name, String schema) {
-    try {
-      return _parseSchema(name, schema.replaceAll('\n', ''));
-    } catch (ignored) {
-      return [];
-    }
+    return _parseSchema(name, schema.replaceAll('\n', ''));
   }
 
   static List<NTFieldSchema> _parseSchema(String name, String schema) {
@@ -331,7 +384,7 @@ class NTStructSchema {
         part.substring(part.indexOf(' ') + 1)
       ];
       var field = NTFieldSchema._parseField(bitStart, definition, type);
-      bitStart += field.bitLength ?? field.valueType.maxBits;
+      bitStart += field.bitLength;
       fields.add(field);
     }
 
