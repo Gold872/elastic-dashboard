@@ -1,0 +1,12 @@
+Package: elastic-dashboard
+Version: 1.0.0
+Description: A simple and modern dashboard for FRC.
+Section: development
+Priority: optional
+Maintainer: Elastic
+Architecture: all
+Source: local
+X-Port: 4902
+X-Display-Name: Elastic
+X-Has-UI: false
+X-Auto-Start: true

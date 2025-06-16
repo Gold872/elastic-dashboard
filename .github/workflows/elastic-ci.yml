@@ -198,6 +198,19 @@ jobs:
           path: build/windows/x64/installer
           if-no-files-found: error
 
+      - name: Create SystemCore installer
+        if: ${{ matrix.build-option == 'web' }}
+        working-directory: .github/ipk_build
+        run: ./build.sh
+
+      - name: Upload SystemCore installer
+        if: ${{ matrix.build-option == 'web' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elastic-SystemCore
+          path: .github/ipk_build/elastic-dashboard_*.ipk
+          if-no-files-found: error
+
   build-wpilib:
     strategy:
       fail-fast: false
