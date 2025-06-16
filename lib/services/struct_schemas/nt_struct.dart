@@ -8,7 +8,6 @@ import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
-import 'package:elastic_dashboard/services/nt_connection.dart';
 
 extension on Uint8List {
   List<bool> toBitArray() {
@@ -53,10 +52,6 @@ class SchemaManager {
 
   final Map<String, String> _uncompiledSchemas = {};
   final Map<String, NTStructSchema> _schemas = {};
-
-  void listen(NTConnection ntConnection) {
-    ntConnection.subscribeAll('/.schema');
-  }
 
   NTStructSchema? getSchema(String name) {
     if (name.contains(':')) {
