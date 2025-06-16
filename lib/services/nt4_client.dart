@@ -1047,7 +1047,7 @@ class NT4Client {
             if (topic.name.startsWith('/.schema')) {
               String structName =
                   topic.name.split('/').last.replaceFirst('struct:', '');
-              SchemaInfo.getInstance()
+              SchemaManager.getInstance()
                   .processNewSchema(structName, value as List<int>);
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {

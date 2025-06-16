@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
@@ -9,6 +8,7 @@ import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 
 extension on Uint8List {
   List<bool> toBitArray() {
@@ -43,11 +43,11 @@ extension on List<bool> {
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
 /// It also provides a method to parse a schema string into a list of field schemas.
-class SchemaInfo {
-  static final SchemaInfo _instance = SchemaInfo._internal();
-  SchemaInfo._internal();
+class SchemaManager {
+  static final SchemaManager _instance = SchemaManager._internal();
+  SchemaManager._internal();
 
-  factory SchemaInfo.getInstance() {
+  factory SchemaManager.getInstance() {
     return _instance;
   }
 
@@ -94,10 +94,6 @@ class SchemaInfo {
       if (!compiled) {
         break;
       }
-    }
-
-    if (_uncompiledSchemas.containsKey(name)) {
-      return;
     }
   }
 
@@ -266,7 +262,7 @@ class NTFieldSchema {
       StructValueType.float64 =>
         NTStructValue.fromDouble(view.getFloat64(0, Endian.little)),
       StructValueType.struct => () {
-          NTStructSchema? schema = SchemaInfo.getInstance().getSchema(type);
+          NTStructSchema? schema = SchemaManager.getInstance().getSchema(type);
           if (schema == null) {
             return NTStructValue.fromNullable(null);
           }
@@ -283,7 +279,7 @@ class NTFieldSchema {
     int? arrayLength;
 
     if (fieldType == StructValueType.struct) {
-      NTStructSchema? schema = SchemaInfo.getInstance().getSchema(type);
+      NTStructSchema? schema = SchemaManager.getInstance().getSchema(type);
       if (schema == null) {
         logger.debug('Unknown struct type: $type');
         throw Exception();
@@ -329,7 +325,7 @@ class NTFieldSchema {
   }
 
   NTStructSchema? get substruct => valueType == StructValueType.struct
-      ? SchemaInfo.getInstance().getSchema(type)
+      ? SchemaManager.getInstance().getSchema(type)
       : null;
 }
 

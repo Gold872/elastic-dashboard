@@ -144,7 +144,7 @@ class NT4Type {
       NT4Type sub = parse(subType);
       return NT4Type.nullable(sub);
     } else if (type.startsWith('struct:') ||
-        SchemaInfo.getInstance().isStruct(type)) {
+        SchemaManager.getInstance().isStruct(type)) {
       return NT4Type.struct(type);
     } else {
       logger.debug('Could not parse type $type, falling back to String');
