@@ -46,6 +46,9 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
+
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
@@ -117,6 +120,9 @@ MockNTConnection createMockOnlineNT4({
   when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
+
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
@@ -239,6 +245,9 @@ MockNTConnection createMockOnlineNT4({
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
         .thenAnswer((_) => virtualValues![topic.name]);
+
+    when(mockNT4Connection.subscribeWithOptions(topic.name, any))
+        .thenAnswer((_) => topicSubscription);
 
     when(mockNT4Connection.subscribe(topic.name, any))
         .thenAnswer((_) => topicSubscription);
