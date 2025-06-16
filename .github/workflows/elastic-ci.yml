@@ -201,7 +201,9 @@ jobs:
       - name: Create SystemCore installer
         if: ${{ matrix.build-option == 'web' }}
         working-directory: .github/ipk_build
-        run: ./build.sh
+        run: |
+          chmod +X ./build.sh
+          ./build.sh
 
       - name: Upload SystemCore installer
         if: ${{ matrix.build-option == 'web' }}
