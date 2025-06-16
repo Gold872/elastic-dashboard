@@ -595,6 +595,10 @@ class NTWidgetBuilder {
         ntConnection: ntConnection,
         preferences: preferences,
       ),
+      minWidth: minWidth,
+      minHeight: minHeight,
+      defaultWidth: defaultWidth,
+      defaultHeight: defaultHeight,
     );
   }
 
@@ -651,6 +655,10 @@ class NTWidgetBuilder {
         ntConnection: ntConnection,
         preferences: preferences,
       ),
+      minWidth: minWidth,
+      minHeight: minHeight,
+      defaultWidth: defaultWidth,
+      defaultHeight: defaultHeight,
     );
   }
 
