@@ -21,7 +21,11 @@ void main() {
     String filePath =
         '${Directory.current.path}/test_resources/test-layout.json';
 
-    SharedPreferences.setMockInitialValues({PrefKeys.layoutPath: filePath});
+    String jsonString = File(filePath).readAsStringSync();
+
+    SharedPreferences.setMockInitialValues({
+      PrefKeys.layout: jsonString,
+    });
 
     SharedPreferences preferences = await SharedPreferences.getInstance();
 

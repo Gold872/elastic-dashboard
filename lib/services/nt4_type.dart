@@ -187,8 +187,12 @@ class NT4Type {
         final dynamicList = tryCast<List<dynamic>>(jsonDecode(str));
         if (tail == NT4Type.boolean()) {
           return dynamicList?.whereType<bool>().toList();
-        } else if (tail == NT4Type.float() || tail == NT4Type.int()) {
-          return dynamicList?.whereType<num>();
+        } else if (tail == NT4Type.double() || tail == NT4Type.float()) {
+          return dynamicList?.whereType<num>().toList();
+        } else if (tail == NT4Type.int()) {
+          return dynamicList?.whereType<num>().map((e) => e.toInt()).toList();
+        } else if (tail == NT4Type.string()) {
+          return dynamicList?.whereType<String>().toList();
         }
       default:
         return null; // structs and other types are not viewable

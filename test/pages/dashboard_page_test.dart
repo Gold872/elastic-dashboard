@@ -77,15 +77,19 @@ void main() {
   String jsonFilePath =
       '${Directory.current.path}/test_resources/test-layout.json';
 
+  late String jsonString;
+
   late SharedPreferences preferences;
 
   setUpAll(() async {
     await FieldImages.loadFields('assets/fields/');
+
+    jsonString = jsonEncode(jsonDecode(File(jsonFilePath).readAsStringSync()));
   });
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({
-      PrefKeys.layoutPath: jsonFilePath,
+      PrefKeys.layout: jsonString,
       PrefKeys.teamNumber: 353,
       PrefKeys.ipAddress: '10.3.53.2',
     });
@@ -97,7 +101,7 @@ void main() {
     hotKeyManager.tearDown();
   });
 
-  group('[Responsive Layout]:', skip: true, () {
+  group('[Responsive Layout]:', () {
     final fileButton = find.widgetWithText(SubmenuButton, 'File');
     final collapsedMenu = find.widgetWithIcon(SubmenuButton, Icons.menu);
     final title = find.text('Elastic');
@@ -164,7 +168,7 @@ void main() {
     });
   });
 
-  group('[Loading and Saving]:', skip: true, () {
+  group('[Loading and Saving]:', () {
     testWidgets('offline loading', (widgetTester) async {
       await pumpDashboardPage(widgetTester, preferences);
 
