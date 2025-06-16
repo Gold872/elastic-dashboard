@@ -76,6 +76,7 @@ void main() {
       unorderedEquals([
         'Multi Color View',
         'Text Display',
+        'Large Text Display',
       ]),
     );
   });
