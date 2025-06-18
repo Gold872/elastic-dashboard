@@ -146,7 +146,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 415),
+                          constraints: BoxConstraints(
+                            maxHeight: kIsWeb ? 360 : 415,
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -189,6 +191,28 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ],
     );
   }
+
+  Widget _resizeToDSSwitch(BuildContext context) => DialogToggleSwitch(
+        initialValue: widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
+            Defaults.autoResizeToDS,
+        label: 'Resize to Driver Station Height',
+        onToggle: (value) {
+          setState(() {
+            widget.onResizeToDSChanged?.call(value);
+          });
+        },
+      );
+
+  Widget _lockLayoutSwitch(BuildContext context) => DialogToggleSwitch(
+        initialValue: widget.preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked,
+        label: 'Lock Layout',
+        onToggle: (value) {
+          setState(() {
+            widget.onLayoutLock?.call(value);
+          });
+        },
+      );
 
   List<Widget> _themeSettings() {
     Color currentColor = Color(
@@ -395,53 +419,38 @@ class _SettingsDialogState extends State<SettingsDialog> {
           ),
           Flexible(
             flex: 3,
-            child: DialogToggleSwitch(
-              initialValue:
-                  widget.preferences.getBool(PrefKeys.autoResizeToDS) ??
-                      Defaults.autoResizeToDS,
-              label: 'Resize to Driver Station Height',
-              onToggle: (value) {
-                setState(() {
-                  widget.onResizeToDSChanged?.call(value);
-                });
-              },
-            ),
+            child: kIsWeb
+                ? _lockLayoutSwitch(context)
+                : _resizeToDSSwitch(context),
           ),
         ],
       ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Flexible(
-            flex: 5,
-            child: DialogToggleSwitch(
-              initialValue:
-                  widget.preferences.getBool(PrefKeys.rememberWindowPosition) ??
-                      false,
-              label: 'Remember Window Position',
-              onToggle: (value) {
-                setState(() {
-                  widget.onRememberWindowPositionChanged?.call(value);
-                });
-              },
+      if (!kIsWeb) ...[
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Flexible(
+              flex: 5,
+              child: DialogToggleSwitch(
+                initialValue: widget.preferences
+                        .getBool(PrefKeys.rememberWindowPosition) ??
+                    false,
+                label: 'Remember Window Position',
+                onToggle: (value) {
+                  setState(() {
+                    widget.onRememberWindowPositionChanged?.call(value);
+                  });
+                },
+              ),
             ),
-          ),
-          Flexible(
-            flex: 4,
-            child: DialogToggleSwitch(
-              initialValue: widget.preferences.getBool(PrefKeys.layoutLocked) ??
-                  Defaults.layoutLocked,
-              label: 'Lock Layout',
-              onToggle: (value) {
-                setState(() {
-                  widget.onLayoutLock?.call(value);
-                });
-              },
+            Flexible(
+              flex: 4,
+              child: _lockLayoutSwitch(context),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     ];
   }
 
