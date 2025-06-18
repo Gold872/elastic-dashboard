@@ -265,7 +265,8 @@ class _GraphWidgetGraph extends StatefulWidget {
   State<_GraphWidgetGraph> createState() => _GraphWidgetGraphState();
 }
 
-class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
+class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
+    with WidgetsBindingObserver {
   ChartSeriesController? _seriesController;
   late List<_GraphPoint> _graphData;
   StreamSubscription<Object?>? _subscriptionListener;
@@ -273,6 +274,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
 
     _graphData = List.of(widget.initialData);
 
@@ -294,6 +297,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
     _subscriptionListener?.cancel();
 
     super.dispose();
@@ -308,6 +313,19 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
     }
 
     super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (widget.subscription?.value == null) {
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      logger.debug(
+        "State resumed, refreshing graph for ${widget.subscription?.topic}",
+      );
+      setState(() {});
+    }
   }
 
   void _resetGraphData() {
@@ -367,7 +385,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
           newPoints.add(padding);
         }
 
-        final newPoint = _GraphPoint(x: time, y: y);
+        final _GraphPoint newPoint = _GraphPoint(x: time, y: y);
         _graphData.add(newPoint);
         newPoints.add(newPoint);
 
