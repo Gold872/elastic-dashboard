@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -373,10 +374,20 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         List<int> addedIndexes =
             newPoints.map((point) => _graphData.indexOf(point)).toList();
 
-        _seriesController?.updateDataSource(
-          addedDataIndexes: addedIndexes,
-          removedDataIndexes: removedIndexes.isEmpty ? null : removedIndexes,
-        );
+        try {
+          _seriesController?.updateDataSource(
+            addedDataIndexes: addedIndexes,
+            removedDataIndexes: removedIndexes.isEmpty ? null : removedIndexes,
+          );
+        } catch (_) {
+          // The update data source can get very finnicky, so if there's an error,
+          // just set state to refresh everything
+          setState(() {
+            logger.debug(
+              'Error in graph for topic ${widget.subscription?.topic}, resetting',
+            );
+          });
+        }
       } else if (_graphData.length > 2) {
         // Only reset if there's more than 2 points to prevent infinite resetting
         _resetGraphData();
