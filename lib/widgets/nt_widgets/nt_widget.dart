@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
@@ -20,7 +21,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-abstract class NTWidgetModel extends ChangeNotifier {
+sealed class NTWidgetModel extends ChangeNotifier {
   String get type;
 
   final NTConnection ntConnection;
@@ -34,9 +35,10 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   set topic(value) => _topic = value;
 
-  get period => _period;
+  // ignore: unnecessary_getters_setters
+  double get period => _period;
 
-  set period(value) => _period = value;
+  set period(double value) => _period = value;
 
   bool _disposed = false;
   bool _forceDispose = false;
@@ -121,16 +123,18 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   String get type => _typeOverride;
 
-  String dataType = 'Unknown';
+  NT4Type? dataType;
 
   NT4Subscription? subscription;
+  NT4StructMeta? ntStructMeta;
   NT4Topic? ntTopic;
 
   SingleTopicNTWidgetModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    this.dataType = 'Unknown',
+    this.ntStructMeta,
+    this.dataType,
     super.period,
   }) : super();
 
@@ -139,7 +143,8 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required String type,
     required super.topic,
-    this.dataType = 'Unknown',
+    this.ntStructMeta,
+    this.dataType,
     super.period,
   })  : _typeOverride = type,
         super();
@@ -149,76 +154,91 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    dataType = tryCast(jsonData['data_type']) ?? dataType;
+    dataType = NT4Type.parseNullable(tryCast(jsonData['data_type']));
+
+    Map<String, dynamic>? structMetaJson = jsonData['struct_meta'];
+    if (structMetaJson != null) {
+      ntStructMeta = NT4StructMeta.fromJson(structMetaJson);
+    }
   }
 
   @override
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
+    if (dataType == null && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
     return {
       ...super.toJson(),
-      if (dataType != 'Unknown') 'data_type': dataType,
+      if (dataType != null) 'data_type': dataType?.serialize(),
+      if (ntStructMeta != null) 'struct_meta': ntStructMeta!.toJson(),
     };
   }
 
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
-    switch (dataType) {
-      case NT4TypeStr.kBool:
-        return [
-          BooleanBox.widgetType,
-          ToggleSwitch.widgetType,
-          ToggleButton.widgetType,
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-        return [
-          TextDisplay.widgetType,
-          NumberBar.widgetType,
-          NumberSlider.widgetType,
-          VoltageView.widgetType,
-          RadialGaugeWidget.widgetType,
-          GraphWidget.widgetType,
-          MatchTimeWidget.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kString:
-        return [
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-          SingleColorView.widgetType,
-        ];
-      case NT4TypeStr.kStringArr:
-        return [
-          TextDisplay.widgetType,
-          MultiColorView.widgetType,
-        ];
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kIntArr:
-        return [
-          TextDisplay.widgetType,
-        ];
+    NT4Type? display = dataType?.nonNullable;
+    NT4TypeFragment? fragment = display?.fragment;
+
+    if (fragment == null || display == null) {
+      return [type];
     }
 
-    return [type];
+    List<String> availableTypes = [type];
+
+    // everything can be text
+    if (display.isViewable) {
+      availableTypes.addAll([
+        TextDisplay.widgetType,
+        LargeTextDisplay.widgetType,
+      ]);
+    }
+
+    // color for single string or multicolor for array of strings
+    if (display.fragment == NT4TypeFragment.string) {
+      availableTypes.addAll([SingleColorView.widgetType]);
+    } else if (display.isArray &&
+        display.tail!.fragment == NT4TypeFragment.string) {
+      availableTypes.addAll([MultiColorView.widgetType]);
+    }
+
+    // other type-specific widgets
+    if (fragment == NT4TypeFragment.boolean) {
+      availableTypes.addAll([
+        BooleanBox.widgetType,
+        ToggleSwitch.widgetType,
+        ToggleButton.widgetType,
+      ]);
+    }
+
+    if (fragment.isNumber) {
+      availableTypes.addAll([
+        NumberBar.widgetType,
+        NumberSlider.widgetType,
+        VoltageView.widgetType,
+        RadialGaugeWidget.widgetType,
+        GraphWidget.widgetType,
+        MatchTimeWidget.widgetType,
+      ]);
+    }
+
+    return availableTypes.toSet().toList();
   }
 
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribeWithOptions(
+      topic,
+      NT4SubscriptionOptions(
+        periodicRateSeconds: period,
+        structMeta: ntStructMeta,
+      ),
+    );
   }
 
   void createTopicIfNull() {
@@ -257,9 +277,9 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     createTopicIfNull();
     if (resetDataType) {
       if (ntTopic == null && ntConnection.isNT4Connected) {
-        dataType = 'Unknown';
+        dataType = null;
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
     }
 
@@ -277,7 +297,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    String dataType = '', // To allow for stubbing in NTWidgetBuilder
+    NT4Type? dataType, // To allow for stubbing in NTWidgetBuilder
     super.period,
   }) : super();
 
