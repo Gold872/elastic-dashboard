@@ -380,8 +380,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
             removedDataIndexes: removedIndexes.isEmpty ? null : removedIndexes,
           );
         } catch (_) {
-          // The update data source can get very finnicky, so if there's an error,
-          // just set state to refresh everything
+          // The update data source can get very finicky, so if there's an error,
+          // just refresh everything
           setState(() {
             logger.debug(
               'Error in graph for topic ${widget.subscription?.topic}, resetting',
