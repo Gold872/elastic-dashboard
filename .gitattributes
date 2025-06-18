@@ -1,6 +1,6 @@
-# All text files should use LF
+# All text files use LF by default
 * text=auto eol=lf
 
-# Windows files use CRLF
+# Windows related files use CRLF
 windows/ text=auto eol=crlf
 *.ps1 text eol=crlf
