@@ -645,9 +645,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: fix-64-bit-ints
-      resolved-ref: ec451a2662290845add87b5b45f594654fa59b99
-      url: "https://github.com/Gold856/msgpack_dart.git"
+      ref: fix-cereal
+      resolved-ref: "5f158a86c65ee2735e5bf3f9c9e746bad5081d97"
+      url: "https://github.com/TheTripleV/msgpack_dart.git"
     source: git
     version: "1.0.1"
   nested:
