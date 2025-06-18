@@ -273,7 +273,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
             child: DialogTextInput(
               initialText:
                   widget.preferences.getInt(PrefKeys.teamNumber)?.toString() ??
-                      Defaults.teamNumber.toString(),
+                      '',
               label: 'Team Number',
               onSubmit: (data) async {
                 await widget.onTeamNumberChanged?.call(data);
@@ -287,12 +287,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
             child: ValueListenableBuilder(
               valueListenable: widget.ntConnection.dsConnected,
               builder: (context, connected, child) {
+                int addressModeIndex =
+                    widget.preferences.getInt(PrefKeys.ipAddressMode) ??
+                        Defaults.ipAddressMode.index;
+                bool canEditIP = addressModeIndex ==
+                        IPAddressMode.custom.index ||
+                    (addressModeIndex == IPAddressMode.driverStation.index &&
+                        !connected);
                 return DialogTextInput(
-                  enabled: widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                          IPAddressMode.custom.index ||
-                      (widget.preferences.getInt(PrefKeys.ipAddressMode) ==
-                              IPAddressMode.driverStation.index &&
-                          !connected),
+                  enabled: canEditIP,
                   initialText:
                       widget.preferences.getString(PrefKeys.ipAddress) ??
                           Defaults.ipAddress,
