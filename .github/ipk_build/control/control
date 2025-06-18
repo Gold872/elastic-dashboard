@@ -8,6 +8,5 @@ Architecture: all
 Source: local
 X-Port: 4902
 X-Display-Name: Elastic
-X-Has-UI: true
+X-Has-UI: false
 X-Auto-Start: true
-X-Icon-Path: /usr/local/bin/elastic/icons/Icon-512.png
