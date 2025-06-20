@@ -1,0 +1,7 @@
+# All text files use LF by default
+* text=auto eol=lf
+
+# Windows related files use CRLF
+windows/ text=auto eol=crlf
+*.ps1 text eol=crlf
+installer_setup_script.iss text eol=crlf
