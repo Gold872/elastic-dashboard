@@ -293,3 +293,16 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
+
+  github-pages:
+    name: "Upload to GitHub Pages"
+    runs-on: ubuntu-22.04
+    needs: [build]
+    steps:
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Web
+
+      - name: List files (debugging)
+        run: ls -al
