@@ -23,18 +23,23 @@ runs:
         cache-path: ${{ runner.tool_cache }}/flutter/${{ inputs.platform }}
 
     - name: Flutter Doctor
+      shell: bash
       run: flutter doctor -v
 
     - name: Install dependencies
+      shell: bash
       run: flutter pub get
 
     - name: Generate icons
+      shell: bash
       if: ${{ inputs.is_wpilib == false }}
       run: dart run flutter_launcher_icons
 
     - name: Generate icons (WPILib)
+      shell: bash
       if: ${{ inputs.is_wpilib }}
       run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
 
     - name: Build app
+      shell: bash
       run: flutter build ${{ inputs.platform }} --dart-define=ELASTIC_WPILIB=${{ inputs.is_wpilib }}
