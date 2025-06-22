@@ -173,7 +173,7 @@ jobs:
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
         run: |
           cd build/macos/Build/Products/Release
-          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app --symlinks
+          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app
 
       - name: Upload artifact
         if: ${{ matrix.wpilib || matrix.platform != 'windows' }}
