@@ -171,17 +171,15 @@ jobs:
 
       - name: Zip Windows Executable
         if: ${{ matrix.platform == 'windows' }}
-        run: tar -acf ${{ matrix.artifact-name }}.zip -C ${{ matrix.artifact-path }}/ *
+        run: tar -cvf ${{ matrix.artifact-name }}.zip -C ${{ matrix.artifact-path }}/ *
 
       - name: Zip Linux Executable
         if: ${{ matrix.platform == 'linux' }}
-        run: tar -acf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ $(ls -A ${{ matrix.artifact-path }}/)
+        run: tar -cvf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ $(ls -A ${{ matrix.artifact-path }}/)
 
       - name: Zip MacOS Release
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
-        run: |
-          cd build/macos/Build/Products/Release
-          zip -r ../../../../../${{ matrix.artifact-file }} elastic_dashboard.app --symlinks
+        run: tar -cvf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ $(ls -A ${{ matrix.artifact-path }}/)
 
       - name: Zip MacOS Release (WPILib)
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
