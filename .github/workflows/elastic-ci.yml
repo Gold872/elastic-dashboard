@@ -242,30 +242,22 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup flutter
-        uses: subosito/flutter-action@v2
+      - name: Build for Web
+        uses: ./.github/workflows/elastic-build
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-          cache-path: ${{ runner.tool_cache }}/flutter/web
+          flutter_version: ${{ env.FLUTTER_VERSION }}
+          platform: web
+          is_wpilib: false
 
-      - name: Flutter Doctor
-        run: flutter doctor -v
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate icons
-        run: dart run flutter_launcher_icons
-
-      - name: Build app
-        run: flutter build web
+      - name: Zip Artifact
+        working-directory: build/web
+        run: zip -r ${{ github.workspace }}/Elastic-Web.zip . --symlinks
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Elastic-Web
-          path: build/web
+          path: Elastic-Web.zip
           if-no-files-found: error
 
       - name: Create SystemCore installer
