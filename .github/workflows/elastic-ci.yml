@@ -369,9 +369,9 @@ jobs:
             elastic-setup-macos.dmg
             Elastic-WPILib-macOS.tar.gz
             Elastic-Linux.zip
-            Elastic-WPILib-Linux.tar.gz
+            Elastic-WPILib-Linux.zip
             Elastic-Web.zip
-            *.ipk
+          # *.ipk
           name: Elastic Draft Release
           generate_release_notes: true
           fail_on_unmatched_files: true
