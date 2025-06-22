@@ -218,17 +218,6 @@ jobs:
           path: .github/ipk_build/elastic-dashboard_*.ipk
           if-no-files-found: error
 
-      - name: Upload GitHub Pages Artifact
-        if: ${{ matrix.build-option == 'web' && github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
-        uses: actions/upload-pages-artifact@v3.0.0
-        with:
-          path: ${{ matrix.artifact-path }}
-          retention-days: 31
-
-      - name: Deploy to GitHub Pages
-        if: ${{ matrix.build-option == 'web' && github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
-        uses: actions/deploy-pages@v4.0.2
-
   build-wpilib:
     strategy:
       fail-fast: false
@@ -303,6 +292,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Elastic-Web
+          path: Elastic-Web
 
       - name: List files (debugging)
         run: ls -al
+
+      - name: Upload GitHub Pages Artifact
+        if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+        uses: actions/upload-pages-artifact@v3.0.0
+        with:
+          path: Elastic-Web
+          retention-days: 31
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
+        uses: actions/deploy-pages@v4.0.2
