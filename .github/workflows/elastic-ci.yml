@@ -110,10 +110,6 @@ jobs:
             build-option: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
-          - os: ubuntu-22.04
-            build-option: "web"
-            artifact-path: "build/web"
-            artifact-name: Elastic-Web
 
     name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
@@ -203,21 +199,6 @@ jobs:
           path: build/windows/x64/installer
           if-no-files-found: error
 
-      - name: Create SystemCore installer
-        if: ${{ matrix.build-option == 'web' }}
-        working-directory: .github/ipk_build
-        run: |
-          chmod +x ./build.sh
-          ./build.sh
-
-      - name: Upload SystemCore installer
-        if: ${{ matrix.build-option == 'web' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Elastic-SystemCore
-          path: .github/ipk_build/elastic-dashboard_*.ipk
-          if-no-files-found: error
-
   build-wpilib:
     strategy:
       fail-fast: false
@@ -283,10 +264,58 @@ jobs:
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
+  build-web:
+    name: "Build - Web"
+    needs: [formatting-analysis, test]
+    runs-on: "ubuntu-22.04"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-path: ${{ runner.tool_cache }}/flutter/web
+
+      - name: Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate icons
+        run: dart run flutter_launcher_icons
+
+      - name: Build app
+        run: flutter build web
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elastic-Web
+          path: build/web
+          if-no-files-found: error
+
+      - name: Create SystemCore installer
+        working-directory: .github/ipk_build
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+
+      - name: Upload SystemCore installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elastic-SystemCore
+          path: .github/ipk_build/elastic-dashboard_*.ipk
+          if-no-files-found: error
+
   github-pages:
     name: "Upload to GitHub Pages"
     runs-on: ubuntu-22.04
-    needs: [build]
+    needs: [build-web]
     steps:
       - name: Download Web Build
         uses: actions/download-artifact@v4
