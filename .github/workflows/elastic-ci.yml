@@ -16,6 +16,8 @@ env:
   FLUTTER_VERSION: 3.32.0
 
 permissions:
+  contents: write
+  id-token: write
   pages: write
 
 jobs:
