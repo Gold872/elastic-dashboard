@@ -33,11 +33,11 @@
         switch (event.key) {
           case '=': // Prevent zooming in.
           case '-': // Prevent zooming out.
-          case 't': // Prevent creating new tab (doesn't work)
-          case 'w': // Prevent closing tab (doesn't work)
+          case 't': // Prevent creating new tab
+          case 'w': // Prevent closing tab
           case 's': // Prevent saving html page
           case 'd': // Prevent creating a bookmark
-          case 'tab': // Prevent tab switching (also doesn't work)
+          case 'tab': // Prevent tab switching
             event.preventDefault();
             break;
         }
