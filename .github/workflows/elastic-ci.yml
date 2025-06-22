@@ -15,6 +15,9 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
 
+permissions:
+  pages: write
+
 jobs:
   formatting-analysis:
     name: "Check Formatting & Analyze"
@@ -212,6 +215,17 @@ jobs:
           name: Elastic-SystemCore
           path: .github/ipk_build/elastic-dashboard_*.ipk
           if-no-files-found: error
+
+      - name: Upload GitHub Pages Artifact
+        if: ${{ matrix.build-option == 'web' && github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-pages-artifact@v3.0.0
+        with:
+          path: ${{ matrix.artifact-path }}
+          retention-days: 31
+
+      - name: Deploy to GitHub Pages
+        if: ${{ matrix.build-option == 'web' && github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
+        uses: actions/deploy-pages@v4.0.2
 
   build-wpilib:
     strategy:
