@@ -93,215 +93,169 @@ jobs:
         with:
           files: reports/junit-report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  build-windows:
+  build:
     strategy:
       fail-fast: false
       matrix:
-        wpilib: [true, false]
+        include:
+          - os: windows-latest
+            platform-name: "Windows"
+            platform: "windows"
+            artifact-path: "build/windows/x64/runner/Release"
+            artifact-name: Elastic-Windows
+            wpilib: false
+          - os: macos-latest
+            platform-name: "MacOS"
+            platform: "macos"
+            artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
+            artifact-name: Elastic-macOS
+            wpilib: false
+          - os: ubuntu-22.04
+            platform-name: "Linux"
+            platform: "linux"
+            artifact-path: "build/linux/x64/release/bundle"
+            artifact-name: Elastic-Linux
+            wpilib: false
 
-    name: "Build - Windows"
+    name: "Build - ${{ matrix.platform-name }}"
     needs: [formatting-analysis, test]
-    runs-on: windows-latest
-    env:
-      ARTIFACT_NAME: ${{ matrix.wpilib && 'Elastic-WPILib-Windows' || 'Elastic-Windows' }}
-      ARTIFACT_PATH: build/windows/x64/runner/Release
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Install flutter build dependencies
+        if: ${{ matrix.platform == 'linux' }}
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libglu1-mesa ninja-build libgtk-3-dev liblzma-dev
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Build for ${{ matrix-platform-name }}
+        uses: ./.github/workflows/elastic-build.yml
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-          cache-path: ${{ runner.tool_cache }}/flutter/windows
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generated icons
-        if: ${{ matrix.wpilib == false }}
-        run: dart run flutter_launcher_icons
-
-      - name: Generate icons (WPILib)
-        if: ${{ matrix.wpilib }}
-        run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
-
-      - name: Build app
-        if: ${{ matrix.wpilib == false }}
-        run: flutter build windows
-
-      - name: Build app (WPILib)
-        if: ${{ matrix.wpilib }}
-        run: flutter build windows --dart-define=ELASTIC_WPILIB=true
+          flutter_version: ${{ env.FLUTTER_VERSION }}
+          platform: ${{ matrix.platform }}
+          is_wpilib: ${{ matrix.wpilib }}
 
       - name: Copy runtime files
-        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ env.ARTIFACT_PATH }}
+        if: ${{ matrix.platform == 'windows' }}
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
-      - name: Upload WPILib Windows
-        if: ${{ matrix.wpilib }}
+      - name: Zip release
+        if: ${{ matrix.platform == 'macos' }}
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
+
+      - name: Upload artifact
+        if: ${{ matrix.platform != 'windows' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
-      - name: Upload Windows Portable
-        if: ${{ matrix.wpilib == false }}
+      - name: Upload windows portable
+        if: ${{ matrix.platform == 'windows' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}_portable
-          path: ${{ env.ARTIFACT_PATH }}
+          name: ${{ matrix.artifact-name }}_portable
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+      - name: Create macOS installer
+        if: ${{ matrix.platform == 'macos' }}
+        uses: L-Super/create-dmg-actions@v1.0.3
+        with:
+          dmg_name: build/macos/Build/Products/Release/elastic-setup-macos
+          src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
+
+      - name: Upload macOS installer
+        if: ${{ matrix.platform == 'macos' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}_installer
+          path: ${{ }}/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Install Inno Setup
-        if: ${{ matrix.wpilib == false }}
+        if: ${{ matrix.platform == 'windows' && matrix.wpilib == false }}
         run: choco install innosetup -y
 
-      - name: Create Windows Installer
-        if: ${{ matrix.wpilib == false }}
+      - name: Create windows installer
+        if: ${{ matrix.platform == 'windows' && matrix.wpilib == false }}
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer_setup_script.iss
 
-      - name: Upload Windows Installer
-        if: ${{ matrix.wpilib == false }}
+      - name: Upload windows installer
+        if: ${{ matrix.platform == 'windows' && matrix.wpilib == false }}
         uses: actions/upload-artifact@v4
         with:
-          name: Elastic-Windows_installer
+          name: ${{ matrix.artifact-name }}_installer
           path: build/windows/x64/installer
           if-no-files-found: error
 
-  build-macos:
+  build-wpilib:
     strategy:
       fail-fast: false
       matrix:
-        wpilib: [true, false]
+        include:
+          - os: windows-latest
+            build-option: "windows"
+            artifact-path: "build/windows/x64/runner/Release"
+            artifact-name: Elastic-WPILib-Windows
+          - os: macos-latest
+            build-option: "macos"
+            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.tar.gz"
+            artifact-name: Elastic-WPILib-macOS
+          - os: ubuntu-22.04
+            build-option: "linux"
+            artifact-path: "build/linux/x64/release/bundle"
+            artifact-name: Elastic-WPILib-Linux
 
-    name: "Build - MacOS"
+    name: "Build - ${{ matrix.artifact-name }}"
     needs: [formatting-analysis, test]
-    runs-on: macos-latest
-    env:
-      ARTIFACT_NAME: ${{ matrix.wpilib && 'Elastic-WPILib-Macos' || 'Elastic-MacOS' }}
-      ARTIFACT_PATH: build/macos/Build/Products/Release
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+    runs-on: ${{ matrix.os }}
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-          cache-path: ${{ runner.tool_cache }}/flutter/macos
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate icons
-        if: ${{ matrix.wpilib == false }}
-        run: dart run flutter_launcher_icons
-
-      - name: Generate icons (WPILib)
-        if: ${{ matrix.wpilib }}
-        run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
-
-      - name: Build app
-        if: ${{ matrix.wpilib == false }}
-        run: flutter build macos
-
-      - name: Build app (WPILib)
-        if: ${{ matrix.wpilib }}
-        run: flutter build macos --dart-define=ELASTIC_WPILIB=true
-
-      - name: Zip Release
-        run: |
-          cd build/macos/Build/Products/Release
-          zip -r ${{ env.ARTIFACT_NAME }}.zip elastic_dashboard.app --symlinks
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}/${{ env.ARTIFACT_NAME }}.zip
-          if-no-files-found: error
-
-      - name: Create DMG
-        if: ${{ matrix.wpilib == false }}
-        uses: L-Super/create-dmg-actions@v1.0.3
-        with:
-          dmg_name: ${{ env.ARTIFACT_PATH }}/elastic-setup-macos
-          src_dir: ${{ env.ARTIFACT_PATH }}/elastic_dashboard.app
-
-      - name: Upload MacOS Installer
-        if: ${{ matrix.wpilib == false }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.ARTIFACT_NAME }}_installer
-          path: ${{ env.ARTIFACT_PATH }}/elastic-setup-macos.dmg
-          if-no-files-found: error
-
-  build-linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        wpilib: [true, false]
-
-    name: "Build - Linux"
-    needs: [formatting-analysis, test]
-    runs-on: ubuntu-22.04
-    env:
-      ARTIFACT_PATH: "build/linux/x64/release/bundle"
-      ARTIFACT_NAME: ${{ matrix.wpilib && 'Elastic-WPILib-Linux' || 'Elastic-Linux' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install flutter build dependencies
+        if: ${{ matrix.build-option == 'linux' }}
         run: |
           sudo apt-get update -y
           sudo apt-get install -y libglu1-mesa ninja-build libgtk-3-dev liblzma-dev
 
-      - name: Setup Flutter
+      - name: Setup flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          cache-path: ${{ runner.tool_cache }}/flutter/linux
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
+          cache-path: ${{ runner.tool_cache }}/flutter/${{ matrix.build-option }}
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Generate icons
-        if: ${{ matrix.wpilib == false }}
-        run: dart run flutter_launcher_icons
-
-      - name: Generate icons (WPILib)
-        if: ${{ matrix.wpilib }}
         run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
 
       - name: Build app
-        if: ${{ matrix.wpilib == false }}
-        run: flutter build linux
+        run: flutter build ${{ matrix.build-option }} --dart-define=ELASTIC_WPILIB=true
 
-      - name: Build app (WPILib)
-        if: ${{ matrix.wpilib }}
-        run: flutter build linux --dart-define=ELASTIC_WPILIB=true
+      - name: Copy runtime files
+        if: ${{ matrix.build-option == 'windows' }}
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
-      - name: Upload Artifact
+      - name: Zip release
+        if: ${{ matrix.build-option == 'macos' }}
+        run: |
+          cd build/macos/Build/Products/Release
+          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_PATH }}
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
   build-web:
