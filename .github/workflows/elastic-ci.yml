@@ -179,13 +179,11 @@ jobs:
 
       - name: Zip MacOS Release
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
-        run: tar -cvf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ $(ls -A ${{ matrix.artifact-path }}/)
+        run: tar -cvf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ elastic_dashboard.app
 
       - name: Zip MacOS Release (WPILib)
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
-        run: |
-          cd build/macos/Build/Products/Release
-          tar -zcvf ../../../../../${{ matrix.artifact-file }} elastic_dashboard.app
+        run: tar -zcvf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ elastic_dashboard.app
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -206,7 +204,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: ${{ matrix.artifact-path }}}/elastic-setup-macos.dmg
+          path: ${{ matrix.artifact-path }}/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Install Inno Setup
