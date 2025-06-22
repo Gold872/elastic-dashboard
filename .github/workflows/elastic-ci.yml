@@ -175,18 +175,17 @@ jobs:
 
       - name: Zip Linux Executable
         if: ${{ matrix.platform == 'linux' }}
-        run: |
-          cd ${{ matrix.artifact-path }}
-          zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} . --symlinks
+        working-directory: ${{ matrix.artifact-path }}
+        run: zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} . --symlinks
 
       - name: Zip MacOS Release
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
-        run: |
-          cd ${{ matrix.artifact-path }}
-          zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} elastic_dashboard.app --symlinks
+        working-directory: ${{ matrix.artifact-path }}
+        run: zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} elastic_dashboard.app --symlinks
 
       - name: Zip MacOS Release (WPILib)
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
+        working-directory: ${{ matrix.artifact-path }}
         run: tar -zcvf ${{ github.workspace }}/${{ matrix.artifact-file }} elastic_dashboard.app
 
       - name: Upload artifact
