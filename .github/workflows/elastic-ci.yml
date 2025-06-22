@@ -11,6 +11,12 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      publish-release:
+        type: boolean
+        description: Publish Draft Release
+        default: false
+        required: false
 
 env:
   FLUTTER_VERSION: 3.32.0
@@ -295,3 +301,78 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4.0.2
+
+  generate-release:
+    name: Generate Release
+    runs-on: ubuntu-22.04
+    needs: [build, build-web]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish-release }}
+    steps:
+      # Windows
+      - name: Download Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Windows
+      - name: Download Windows Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Windows_installer
+      - name: Download WPILib Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-WPILib-Windows
+      # MacOS
+      - name: Download MacOS
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-macOS
+      - name: Download MacOS Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-macOS_installer
+      - name: Download WPILib MacOS
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-WPILib-macOS
+      # Linux
+      - name: Download Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Linux
+      - name: Download WPILib Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-WPILib-Linux
+      # Web
+      - name: Download Web
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Web
+      - name: Download SystemCore
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-SystemCore
+
+      - name: Rename Files
+        run: |
+          ls -al
+          mv Elastic-Windows.zip Elastic-Windows_portable.zip
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Elastic-Windows_portable.zip
+            elastic-setup-windows.exe
+            Elastic-WPILib-Windows.zip
+            Elastic-macos.zip
+            elastic-setup-macos.dmg
+            Elastic-WPILib-macOS.tar.gz
+            Elastic-Linux.zip
+            Elastic-WPILib-Linux.tar.gz
+            Elastic-Web.zip
+            *.ipk
+          name: Elastic Draft Release
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          draft: true
