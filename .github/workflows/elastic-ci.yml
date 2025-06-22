@@ -15,6 +15,11 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
 
+permissions:
+  contents: write
+  id-token: write
+  pages: write
+
 jobs:
   formatting-analysis:
     name: "Check Formatting & Analyze"
@@ -258,3 +263,72 @@ jobs:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
           if-no-files-found: error
+
+  build-web:
+    name: "Build - Web"
+    needs: [formatting-analysis, test]
+    runs-on: "ubuntu-22.04"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-path: ${{ runner.tool_cache }}/flutter/web
+
+      - name: Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate icons
+        run: dart run flutter_launcher_icons
+
+      - name: Build app
+        run: flutter build web
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elastic-Web
+          path: build/web
+          if-no-files-found: error
+
+      - name: Create SystemCore installer
+        working-directory: .github/ipk_build
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+
+      - name: Upload SystemCore installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elastic-SystemCore
+          path: .github/ipk_build/elastic-dashboard_*.ipk
+          if-no-files-found: error
+
+  github-pages:
+    name: "Upload to GitHub Pages"
+    runs-on: ubuntu-22.04
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
+    needs: [build-web]
+    steps:
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: Elastic-Web
+          path: Elastic-Web
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3.0.0
+        with:
+          path: Elastic-Web
+          retention-days: 31
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4.0.2
