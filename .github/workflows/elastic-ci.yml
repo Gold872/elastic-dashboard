@@ -235,7 +235,7 @@ jobs:
 
   build-web:
     name: "Build - Web"
-    needs: [formatting-analysis, test]
+    # needs: [formatting-analysis, test]
     runs-on: "ubuntu-22.04"
 
     steps:
