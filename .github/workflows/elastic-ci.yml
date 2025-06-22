@@ -104,18 +104,21 @@ jobs:
             platform: "windows"
             artifact-path: "build/windows/x64/runner/Release"
             artifact-name: Elastic-Windows
+            artifact-file: Elastic-Windows.zip
             wpilib: false
           - os: macos-latest
             platform-name: "MacOS"
             platform: "macos"
-            artifact-path: "build/macos/Build/Products/Release/Elastic-macOS.zip"
+            artifact-path: "build/macos/Build/Products/Release"
             artifact-name: Elastic-macOS
+            artifact-file: Elastic-macOS.zip
             wpilib: false
           - os: ubuntu-22.04
             platform-name: "Linux"
             platform: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
+            artifact-file: Elastic-Linux.zip
             wpilib: false
 
           # WPILib builds
@@ -124,18 +127,21 @@ jobs:
             platform: "windows"
             artifact-path: "build/windows/x64/runner/Release"
             artifact-name: Elastic-WPILib-Windows
+            artifact-file: Elastic-WPILib-Windows.zip
             wpilib: true
           - os: macos-latest
             platform-name: "WPILib MacOS"
             platform: "macos"
-            artifact-path: "build/macos/Build/Products/Release/Elastic-WPILib-macOS.tar.gz"
+            artifact-path: "build/macos/Build/Products/Release"
             artifact-name: Elastic-WPILib-macOS
+            artifact-file: Elastic-WPILib-macOS.tar.gz
             wpilib: true
           - os: ubuntu-22.04
             platform-name: "WPILib Linux"
             platform: "linux"
             artifact-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-WPILib-Linux
+            artifact-file: Elastic-WPILib-Linux.zip
             wpilib: true
 
     name: "Build - ${{ matrix.platform-name }}"
@@ -163,24 +169,32 @@ jobs:
         if: ${{ matrix.platform == 'windows' }}
         run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
 
+      - name: Zip Windows Executable
+        if: ${{ matrix.platform == 'windows' }}
+        run: tar -acf ${{ matrix.artifact-name }}.zip -C ${{ matrix.artifact-path }}/ *
+
+      - name: Zip Linux Executable
+        if: ${{ matrix.platform == 'linux' }}
+        run: tar -acf ${{ matrix.artifact-file }} -C ${{ matrix.artifact-path }}/ $(ls -A ${{ matrix.artifact-path }}/)
+
       - name: Zip MacOS Release
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
         run: |
           cd build/macos/Build/Products/Release
-          zip -r ${{ matrix.artifact-name }}.zip elastic_dashboard.app --symlinks
+          zip -r ../../../../../${{ matrix.artifact-file }} elastic_dashboard.app --symlinks
 
       - name: Zip MacOS Release (WPILib)
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
         run: |
           cd build/macos/Build/Products/Release
-          tar -zcvf ${{ matrix.artifact-name }}.tar.gz elastic_dashboard.app
+          tar -zcvf ../../../../../${{ matrix.artifact-file }} elastic_dashboard.app
 
       - name: Upload artifact
         if: ${{ matrix.wpilib || matrix.platform != 'windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          path: ${{ matrix.artifact-file }}
           if-no-files-found: error
 
       - name: Upload windows portable
@@ -188,22 +202,22 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_portable
-          path: ${{ matrix.artifact-path }}
+          path: ${{ matrix.artifact-file }}
           if-no-files-found: error
 
       - name: Create macOS installer
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
         uses: L-Super/create-dmg-actions@v1.0.3
         with:
-          dmg_name: build/macos/Build/Products/Release/elastic-setup-macos
-          src_dir: build/macos/Build/Products/Release/elastic_dashboard.app
+          dmg_name: ${{ matrix.artifact-path }}/elastic-setup-macos
+          src_dir: ${{ matrix.artifact-path }}/elastic_dashboard.app
 
       - name: Upload macOS installer
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: build/macos/Build/Products/Release/elastic-setup-macos.dmg
+          path: ${{ matrix.artifact-path }}}/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Install Inno Setup
