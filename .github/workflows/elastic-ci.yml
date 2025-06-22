@@ -315,6 +315,7 @@ jobs:
   github-pages:
     name: "Upload to GitHub Pages"
     runs-on: ubuntu-22.04
+    if: ${{ github.repository == 'Gold872/elastic-dashboard' && github.ref == 'refs/heads/main' }}
     needs: [build-web]
     steps:
       - name: Download Web Build
@@ -323,16 +324,11 @@ jobs:
           name: Elastic-Web
           path: Elastic-Web
 
-      - name: List files (debugging)
-        run: ls -al
-
       - name: Upload GitHub Pages Artifact
-        if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
         uses: actions/upload-pages-artifact@v3.0.0
         with:
           path: Elastic-Web
           retention-days: 31
 
       - name: Deploy to GitHub Pages
-        if: ${{ github.repository == 'Gold872/elastic-dashboard' }}
         uses: actions/deploy-pages@v4.0.2
