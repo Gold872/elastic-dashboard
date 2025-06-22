@@ -365,7 +365,7 @@ jobs:
             Elastic-Windows_portable.zip
             elastic-setup-windows.exe
             Elastic-WPILib-Windows.zip
-            Elastic-macos.zip
+            Elastic-macOS.zip
             elastic-setup-macos.dmg
             Elastic-WPILib-macOS.tar.gz
             Elastic-Linux.zip

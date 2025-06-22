@@ -31,13 +31,13 @@ runs:
       run: flutter pub get
 
     - name: Generate icons
-      shell: bash
       if: ${{ inputs.is_wpilib == false }}
+      shell: bash
       run: dart run flutter_launcher_icons
 
     - name: Generate icons (WPILib)
-      shell: bash
       if: ${{ inputs.is_wpilib }}
+      shell: bash
       run: dart run flutter_launcher_icons -f wpilib_icon_config.yaml
 
     - name: Build app
