@@ -4,5 +4,5 @@
 {{flutter_build_config}}
 
 _flutter.loader.load({
-  config: { renderer: "canvaskit", canvasKitBaseUrl: "/canvaskit/" },
+  config: { renderer: "canvaskit", canvasKitBaseUrl: "canvaskit/" },
 });
