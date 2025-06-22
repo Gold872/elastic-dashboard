@@ -102,21 +102,21 @@ jobs:
           - os: windows-latest
             platform-name: "Windows"
             platform: "windows"
-            artifact-path: "build/windows/x64/runner/Release"
+            build-path: "build/windows/x64/runner/Release"
             artifact-name: Elastic-Windows
             artifact-file: Elastic-Windows.zip
             wpilib: false
           - os: macos-latest
             platform-name: "MacOS"
             platform: "macos"
-            artifact-path: "build/macos/Build/Products/Release"
+            build-path: "build/macos/Build/Products/Release"
             artifact-name: Elastic-macOS
             artifact-file: Elastic-macOS.zip
             wpilib: false
           - os: ubuntu-22.04
             platform-name: "Linux"
             platform: "linux"
-            artifact-path: "build/linux/x64/release/bundle"
+            build-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-Linux
             artifact-file: Elastic-Linux.zip
             wpilib: false
@@ -125,21 +125,21 @@ jobs:
           - os: windows-latest
             platform-name: "WPILib Windows"
             platform: "windows"
-            artifact-path: "build/windows/x64/runner/Release"
+            build-path: "build/windows/x64/runner/Release"
             artifact-name: Elastic-WPILib-Windows
             artifact-file: Elastic-WPILib-Windows.zip
             wpilib: true
           - os: macos-latest
             platform-name: "WPILib MacOS"
             platform: "macos"
-            artifact-path: "build/macos/Build/Products/Release"
+            build-path: "build/macos/Build/Products/Release"
             artifact-name: Elastic-WPILib-macOS
             artifact-file: Elastic-WPILib-macOS.tar.gz
             wpilib: true
           - os: ubuntu-22.04
             platform-name: "WPILib Linux"
             platform: "linux"
-            artifact-path: "build/linux/x64/release/bundle"
+            build-path: "build/linux/x64/release/bundle"
             artifact-name: Elastic-WPILib-Linux
             artifact-file: Elastic-WPILib-Linux.zip
             wpilib: true
@@ -167,25 +167,25 @@ jobs:
 
       - name: Copy runtime files
         if: ${{ matrix.platform == 'windows' }}
-        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.artifact-path }}
+        run: ./.github/CopyRuntime.ps1 -OutputPath ${{ matrix.build-path }}
 
       - name: Zip Windows Executable
         if: ${{ matrix.platform == 'windows' }}
-        run: tar -cvf ${{ matrix.artifact-name }}.zip -C ${{ matrix.artifact-path }}/ *
+        run: tar -cvf ${{ matrix.artifact-name }}.zip -C ${{ matrix.build-path }}/ *
 
       - name: Zip Linux Executable
         if: ${{ matrix.platform == 'linux' }}
-        working-directory: ${{ matrix.artifact-path }}
+        working-directory: ${{ matrix.build-path }}
         run: zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} . --symlinks
 
       - name: Zip MacOS Release
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
-        working-directory: ${{ matrix.artifact-path }}
+        working-directory: ${{ matrix.build-path }}
         run: zip -r ${{ github.workspace }}/${{ matrix.artifact-file }} elastic_dashboard.app --symlinks
 
       - name: Zip MacOS Release (WPILib)
         if: ${{ matrix.platform == 'macos' && matrix.wpilib }}
-        working-directory: ${{ matrix.artifact-path }}
+        working-directory: ${{ matrix.build-path }}
         run: tar -zcvf ${{ github.workspace }}/${{ matrix.artifact-file }} elastic_dashboard.app
 
       - name: Upload artifact
@@ -199,15 +199,15 @@ jobs:
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
         uses: L-Super/create-dmg-actions@v1.0.3
         with:
-          dmg_name: ${{ matrix.artifact-path }}/elastic-setup-macos
-          src_dir: ${{ matrix.artifact-path }}/elastic_dashboard.app
+          dmg_name: ${{ matrix.build-path }}/elastic-setup-macos
+          src_dir: ${{ matrix.build-path }}/elastic_dashboard.app
 
       - name: Upload macOS installer
         if: ${{ matrix.platform == 'macos' && matrix.wpilib == false }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}_installer
-          path: ${{ matrix.artifact-path }}/elastic-setup-macos.dmg
+          path: ${{ matrix.build-path }}/elastic-setup-macos.dmg
           if-no-files-found: error
 
       - name: Install Inno Setup
