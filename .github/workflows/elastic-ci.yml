@@ -353,8 +353,7 @@ jobs:
       - name: Get Draft Release Info
         id: release_info
         run: |
-          release_info=$(gh api repos/${{ github.repository }}/releases \
-            --jq '[.[] | select(.draft == true)] | sort_by(.created_at) | reverse | first')
+          release_info=$(gh api repos/${{ github.repository }}/releases --jq '[.[] | select(.draft == true)] | sort_by(.created_at) | reverse | first')
 
           if [ "$release_info" = "null" ]; then
             echo "No draft release found"
