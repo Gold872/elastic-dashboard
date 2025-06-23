@@ -378,7 +378,7 @@ jobs:
             Elastic-Linux.zip
             Elastic-WPILib-Linux.zip
             Elastic-Web.zip
-          # *.ipk
+            elastic-dashboard_*.ipk
           upload_url: ${{ steps.release_info.outputs.upload_url }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
