@@ -23,7 +23,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
         preferences: preferences,
         onTeamNumberChanged: changeTeamNumber,
         onIPAddressModeChanged: (mode) async {
-          if (mode.index == preferences.getInt(PrefKeys.ipAddressMode)) {
+          if (mode.id == preferences.getInt(PrefKeys.ipAddressMode)) {
             return;
           }
 
@@ -76,11 +76,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
     await preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-    switch (
-        IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode))) {
-      case IPAddressMode.roboRIOmDNS:
-        updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(newTeamNumber));
-        break;
+    switch (IPAddressMode.fromID(preferences.getInt(PrefKeys.ipAddressMode))) {
       case IPAddressMode.teamNumber:
         updateIPAddress(IPAddressUtil.teamNumberToIP(newTeamNumber));
         break;
@@ -282,7 +278,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
   @override
   Future<void> changeIPAddressMode(IPAddressMode mode) async {
-    await preferences.setInt(PrefKeys.ipAddressMode, mode.index);
+    await preferences.setInt(PrefKeys.ipAddressMode, mode.id);
     switch (mode) {
       case IPAddressMode.driverStation:
         String? lastAnnouncedIP = ntConnection.dsClient.lastAnnouncedIP;
@@ -293,13 +289,15 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
         updateIPAddress(lastAnnouncedIP);
         break;
-      case IPAddressMode.roboRIOmDNS:
-        updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
-            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
-        break;
       case IPAddressMode.teamNumber:
         updateIPAddress(IPAddressUtil.teamNumberToIP(
             preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        break;
+      case IPAddressMode.systemCoremDNS:
+        updateIPAddress('robot.local');
+        break;
+      case IPAddressMode.systemCoreAP:
+        updateIPAddress('172.30.0.1');
         break;
       case IPAddressMode.localhost:
         updateIPAddress('localhost');
