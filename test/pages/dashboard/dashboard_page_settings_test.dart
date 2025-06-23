@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
+import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/pages/dashboard/dashboard_page_settings.dart';
@@ -9,6 +10,7 @@ import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import '../../test_util.dart';
+import '../../test_util.mocks.dart';
 
 class SettingsDashboardViewModel = DashboardPageViewModel
     with DashboardPageSettings;
@@ -63,16 +65,37 @@ void main() {
         await dashboardModel.changeTeamNumber('2053');
         expect(preferences.getString(PrefKeys.ipAddress), '10.20.53.2');
       });
+    });
+  });
+
+  group('[IP Address Mode]:', () {
+    group('Changing IP address mode to', () {
+      setUp(() async {
+        await preferences.setString(PrefKeys.ipAddress, '10.3.53.2');
+
+        MockNTConnection mockConnection = createMockOfflineNT4();
+        when(mockConnection.dsClient).thenReturn(MockDSInteropClient());
+
+        dashboardModel = SettingsDashboardViewModel(
+          ntConnection: mockConnection,
+          preferences: preferences,
+          version: '0.0.0.0',
+        );
+      });
+      test('Driver Station', () async {
+        await dashboardModel.changeIPAddressMode(IPAddressMode.driverStation);
+
+        expect(preferences.getString(PrefKeys.ipAddress), '10.3.53.2');
+      });
+      test('SystemCore Wifi', () async {
+        await dashboardModel.changeIPAddressMode(IPAddressMode.systemCoreAP);
+
+        expect(preferences.getString(PrefKeys.ipAddress), '172.30.0.1');
+      });
       test('SystemCore mDNS', () async {
-        await preferences.setInt(
-          PrefKeys.ipAddressMode,
-          IPAddressMode.systemCoremDNS.id,
-        );
-        await dashboardModel.changeTeamNumber('2053');
-        expect(
-          preferences.getString(PrefKeys.ipAddress),
-          'robot.local',
-        );
+        await dashboardModel.changeIPAddressMode(IPAddressMode.systemCoremDNS);
+
+        expect(preferences.getString(PrefKeys.ipAddress), 'robot.local');
       });
     });
   });
