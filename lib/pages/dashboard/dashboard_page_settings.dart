@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/settings_dialog.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
@@ -37,6 +38,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
           updateIPAddress(data);
         },
+        onNTServerModeChanged: changeNTServerMode,
         onGridToggle: toggleGrid,
         onGridSizeChanged: changeGridSize,
         onCornerRadiusChanged: changeCornerRadius,
@@ -306,6 +308,17 @@ mixin DashboardPageSettings on DashboardPageViewModel {
         notifyListeners();
         break;
     }
+  }
+
+  @override
+  Future<void> changeNTServerMode(NTServerMode mode) async {
+    if (mode.index == preferences.getInt(PrefKeys.ntServerMode)) {
+      return;
+    }
+    await preferences.setInt(PrefKeys.ntServerMode, mode.index);
+
+    ntConnection.changeServerMode(mode);
+    notifyListeners();
   }
 
   @override

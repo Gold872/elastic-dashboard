@@ -40,6 +40,7 @@ class SettingsDialog extends StatefulWidget {
   final FutureOr<void> Function(String? data)? onIPAddressChanged;
   final FutureOr<void> Function(String? data)? onTeamNumberChanged;
   final void Function(IPAddressMode mode)? onIPAddressModeChanged;
+  final FutureOr<void> Function(NTServerMode mode)? onNTServerModeChanged;
   final void Function(Color color)? onColorChanged;
   final void Function(bool value)? onGridToggle;
   final FutureOr<void> Function(String? gridSize)? onGridSizeChanged;
@@ -61,6 +62,7 @@ class SettingsDialog extends StatefulWidget {
     required this.preferences,
     this.onTeamNumberChanged,
     this.onIPAddressModeChanged,
+    this.onNTServerModeChanged,
     this.onIPAddressChanged,
     this.onColorChanged,
     this.onGridToggle,
@@ -129,7 +131,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: SingleChildScrollView(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 250),
+                          constraints: const BoxConstraints(maxHeight: 320),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -484,6 +486,32 @@ class _SettingsDialogState extends State<SettingsDialog> {
       const Align(
         alignment: Alignment.topLeft,
         child: Text('Network Tables Settings'),
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          const Text('Server Mode'),
+          const SizedBox(width: 5),
+          Flexible(
+            child: DialogDropdownChooser<NTServerMode>(
+              onSelectionChanged: (mode) async {
+                if (mode == null) {
+                  return;
+                }
+
+                await widget.onNTServerModeChanged?.call(mode);
+
+                setState(() {});
+              },
+              choices: NTServerMode.values,
+              initialValue: NTServerMode.fromIndex(
+                    widget.preferences.getInt(PrefKeys.ntServerMode),
+                  ) ??
+                  Defaults.serverMode,
+              nameMap: (e) => e.name,
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: 5),
       Flexible(

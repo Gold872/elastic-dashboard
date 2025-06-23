@@ -4,6 +4,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:logger/logger.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 
 extension LogLevelUtil on Level {
   String get levelName => switch (this) {
@@ -42,6 +43,7 @@ class Defaults {
   }
 
   static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
+  static const NTServerMode serverMode = NTServerMode.robot;
 
   static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
 
@@ -67,6 +69,7 @@ class PrefKeys {
   static String layout = 'layout';
   static String ipAddress = 'ip_address';
   static String ipAddressMode = 'ip_address_mode';
+  static String ntServerMode = 'nt_server_mode';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
   static String themeVariant = 'theme_variant';

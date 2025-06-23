@@ -78,7 +78,11 @@ void main() async {
   String ipAddress =
       preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
 
-  NTConnection ntConnection = NTConnection(ipAddress);
+  NTServerMode serverMode =
+      NTServerMode.fromIndex(preferences.getInt(PrefKeys.ntServerMode)) ??
+          Defaults.serverMode;
+
+  NTConnection ntConnection = NTConnection(ipAddress, serverMode);
 
   await FieldImages.loadFields('assets/fields/');
   if (!kIsWeb) {
