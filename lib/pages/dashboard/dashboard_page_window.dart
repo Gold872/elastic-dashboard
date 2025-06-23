@@ -75,7 +75,8 @@ mixin DashboardPageWindow on DashboardPageViewModel {
       builder: (context) => AlertDialog(
         title: const Text('Unsaved Changes'),
         content: const Text(
-            'You have unsaved changes, are you sure you want to continue? All unsaved changes will be lost!'),
+          'You have unsaved changes, are you sure you want to continue? All unsaved changes will be lost!',
+        ),
         actions: [
           TextButton(
             onPressed: () async {

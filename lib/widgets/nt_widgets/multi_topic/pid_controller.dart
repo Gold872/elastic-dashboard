@@ -28,11 +28,11 @@ class PIDControllerModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        kpSubscription,
-        kiSubscription,
-        kdSubscription,
-        setpointSubscription,
-      ];
+    kpSubscription,
+    kiSubscription,
+    kdSubscription,
+    setpointSubscription,
+  ];
 
   TextEditingController? kpTextController;
   TextEditingController? kiTextController;
@@ -79,8 +79,10 @@ class PIDControllerModel extends MultiTopicNTWidgetModel {
     kpSubscription = ntConnection.subscribe(kpTopicName, super.period);
     kiSubscription = ntConnection.subscribe(kiTopicName, super.period);
     kdSubscription = ntConnection.subscribe(kdTopicName, super.period);
-    setpointSubscription =
-        ntConnection.subscribe(setpointTopicName, super.period);
+    setpointSubscription = ntConnection.subscribe(
+      setpointTopicName,
+      super.period,
+    );
   }
 
   @override
@@ -176,210 +178,216 @@ class PIDControllerWidget extends NTWidget {
     PIDControllerModel model = cast(context.watch<NTWidgetModel>());
 
     return ListenableBuilder(
-        listenable: Listenable.merge([
-          ...model.subscriptions,
-          model.kpTextController,
-          model.kiTextController,
-          model.kdTextController,
-          model.setpointTextController,
-        ]),
-        builder: (context, child) {
-          double kP = tryCast(model.kpSubscription.value) ?? 0.0;
-          double kI = tryCast(model.kiSubscription.value) ?? 0.0;
-          double kD = tryCast(model.kdSubscription.value) ?? 0.0;
-          double setpoint = tryCast(model.setpointSubscription.value) ?? 0.0;
+      listenable: Listenable.merge([
+        ...model.subscriptions,
+        model.kpTextController,
+        model.kiTextController,
+        model.kdTextController,
+        model.setpointTextController,
+      ]),
+      builder: (context, child) {
+        double kP = tryCast(model.kpSubscription.value) ?? 0.0;
+        double kI = tryCast(model.kiSubscription.value) ?? 0.0;
+        double kD = tryCast(model.kdSubscription.value) ?? 0.0;
+        double setpoint = tryCast(model.setpointSubscription.value) ?? 0.0;
 
-          // Creates the text editing controllers if they are null
-          bool wasNull = model.kpTextController == null ||
-              model.kiTextController == null ||
-              model.kdTextController == null ||
-              model.setpointTextController == null;
+        // Creates the text editing controllers if they are null
+        bool wasNull =
+            model.kpTextController == null ||
+            model.kiTextController == null ||
+            model.kdTextController == null ||
+            model.setpointTextController == null;
 
-          model.kpTextController ??= TextEditingController(text: kP.toString());
-          model.kiTextController ??= TextEditingController(text: kI.toString());
-          model.kdTextController ??= TextEditingController(text: kD.toString());
-          model.setpointTextController ??=
-              TextEditingController(text: setpoint.toString());
+        model.kpTextController ??= TextEditingController(text: kP.toString());
+        model.kiTextController ??= TextEditingController(text: kI.toString());
+        model.kdTextController ??= TextEditingController(text: kD.toString());
+        model.setpointTextController ??= TextEditingController(
+          text: setpoint.toString(),
+        );
 
-          // Since they were null they're not being listened to when created during build
-          if (wasNull) {
-            model.refresh();
-          }
+        // Since they were null they're not being listened to when created during build
+        if (wasNull) {
+          model.refresh();
+        }
 
-          // Updates the text of the text editing controller if the kp value has changed
-          if (kP != model.kpLastValue) {
-            model.kpTextController!.text = kP.toString();
-          }
-          model.kpLastValue = kP;
+        // Updates the text of the text editing controller if the kp value has changed
+        if (kP != model.kpLastValue) {
+          model.kpTextController!.text = kP.toString();
+        }
+        model.kpLastValue = kP;
 
-          // Updates the text of the text editing controller if the ki value has changed
-          if (kI != model.kiLastValue) {
-            model.kiTextController!.text = kI.toString();
-          }
-          model.kiLastValue = kI;
+        // Updates the text of the text editing controller if the ki value has changed
+        if (kI != model.kiLastValue) {
+          model.kiTextController!.text = kI.toString();
+        }
+        model.kiLastValue = kI;
 
-          // Updates the text of the text editing controller if the kd value has changed
-          if (kD != model.kdLastValue) {
-            model.kdTextController!.text = kD.toString();
-          }
-          model.kdLastValue = kD;
+        // Updates the text of the text editing controller if the kd value has changed
+        if (kD != model.kdLastValue) {
+          model.kdTextController!.text = kD.toString();
+        }
+        model.kdLastValue = kD;
 
-          // Updates the text of the text editing controller if the setpoint value has changed
-          if (setpoint != model.setpointLastValue) {
-            model.setpointTextController!.text = setpoint.toString();
-          }
-          model.setpointLastValue = setpoint;
+        // Updates the text of the text editing controller if the setpoint value has changed
+        if (setpoint != model.setpointLastValue) {
+          model.setpointTextController!.text = setpoint.toString();
+        }
+        model.setpointLastValue = setpoint;
 
-          TextStyle labelStyle = Theme.of(context)
-              .textTheme
-              .bodyLarge!
-              .copyWith(fontWeight: FontWeight.bold);
+        TextStyle labelStyle = Theme.of(
+          context,
+        ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold);
 
-          bool showWarning = kP !=
-                  double.tryParse(model.kpTextController!.text) ||
-              kI != double.tryParse(model.kiTextController!.text) ||
-              kD != double.tryParse(model.kdTextController!.text) ||
-              setpoint != double.tryParse(model.setpointTextController!.text);
+        bool showWarning =
+            kP != double.tryParse(model.kpTextController!.text) ||
+            kI != double.tryParse(model.kiTextController!.text) ||
+            kD != double.tryParse(model.kdTextController!.text) ||
+            setpoint != double.tryParse(model.setpointTextController!.text);
 
-          // The text fields can't be DialogTextInput since DialogTextInput
-          // manages its own state which causes setState() while build errors
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // kP
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Spacer(),
-                  Text('P', style: labelStyle),
-                  const Spacer(),
-                  Flexible(
-                    flex: 5,
-                    child: TextField(
-                      controller: model.kpTextController,
-                      textAlign: TextAlign.left,
-                      inputFormatters: [
-                        TextFormatterBuilder.decimalTextFormatter()
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                        labelText: 'kP',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onSubmitted: (value) {},
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              // kI
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Spacer(),
-                  Text('I', style: labelStyle),
-                  const Spacer(),
-                  Flexible(
-                    flex: 5,
-                    child: TextField(
-                      controller: model.kiTextController,
-                      textAlign: TextAlign.left,
-                      inputFormatters: [
-                        TextFormatterBuilder.decimalTextFormatter()
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                        labelText: 'kI',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onSubmitted: (value) {},
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              // kD
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Spacer(),
-                  Text('D', style: labelStyle),
-                  const Spacer(),
-                  Flexible(
-                    flex: 5,
-                    child: TextField(
-                      controller: model.kdTextController,
-                      textAlign: TextAlign.left,
-                      inputFormatters: [
-                        TextFormatterBuilder.decimalTextFormatter()
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                        labelText: 'kD',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onSubmitted: (value) {},
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              Row(
-                children: [
-                  const Spacer(),
-                  Text('Setpoint', style: labelStyle),
-                  const Spacer(),
-                  Flexible(
-                    flex: 5,
-                    child: TextField(
-                      controller: model.setpointTextController,
-                      textAlign: TextAlign.left,
-                      inputFormatters: [
-                        TextFormatterBuilder.decimalTextFormatter()
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                        labelText: 'Setpoint',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                      ),
-                      onSubmitted: (value) {},
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      model.publishKP();
-                      model.publishKI();
-                      model.publishKD();
-                      model.publishSetpoint();
-                    },
-                    style: ButtonStyle(
-                      shape: WidgetStatePropertyAll(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
+        // The text fields can't be DialogTextInput since DialogTextInput
+        // manages its own state which causes setState() while build errors
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // kP
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(),
+                Text('P', style: labelStyle),
+                const Spacer(),
+                Flexible(
+                  flex: 5,
+                  child: TextField(
+                    controller: model.kpTextController,
+                    textAlign: TextAlign.left,
+                    inputFormatters: [
+                      TextFormatterBuilder.decimalTextFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      labelText: 'kP',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    child: const Text('Publish Values'),
+                    onSubmitted: (value) {},
                   ),
-                  const SizedBox(width: 10),
-                  Icon(
-                    (showWarning) ? Icons.priority_high : Icons.check,
-                    color: (showWarning) ? Colors.red : Colors.green,
+                ),
+                const Spacer(),
+              ],
+            ),
+            // kI
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(),
+                Text('I', style: labelStyle),
+                const Spacer(),
+                Flexible(
+                  flex: 5,
+                  child: TextField(
+                    controller: model.kiTextController,
+                    textAlign: TextAlign.left,
+                    inputFormatters: [
+                      TextFormatterBuilder.decimalTextFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      labelText: 'kI',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    onSubmitted: (value) {},
                   ),
-                ],
-              ),
-            ],
-          );
-        });
+                ),
+                const Spacer(),
+              ],
+            ),
+            // kD
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(),
+                Text('D', style: labelStyle),
+                const Spacer(),
+                Flexible(
+                  flex: 5,
+                  child: TextField(
+                    controller: model.kdTextController,
+                    textAlign: TextAlign.left,
+                    inputFormatters: [
+                      TextFormatterBuilder.decimalTextFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      labelText: 'kD',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    onSubmitted: (value) {},
+                  ),
+                ),
+                const Spacer(),
+              ],
+            ),
+            Row(
+              children: [
+                const Spacer(),
+                Text('Setpoint', style: labelStyle),
+                const Spacer(),
+                Flexible(
+                  flex: 5,
+                  child: TextField(
+                    controller: model.setpointTextController,
+                    textAlign: TextAlign.left,
+                    inputFormatters: [
+                      TextFormatterBuilder.decimalTextFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      labelText: 'Setpoint',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    onSubmitted: (value) {},
+                  ),
+                ),
+                const Spacer(),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    model.publishKP();
+                    model.publishKI();
+                    model.publishKD();
+                    model.publishSetpoint();
+                  },
+                  style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Publish Values'),
+                ),
+                const SizedBox(width: 10),
+                Icon(
+                  (showWarning) ? Icons.priority_high : Icons.check,
+                  color: (showWarning) ? Colors.red : Colors.green,
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -32,11 +32,9 @@ void main() {
           name: 'Test/Test Accelerometer/Value',
           type: NT4TypeStr.kFloat32,
           properties: {},
-        )
+        ),
       ],
-      virtualValues: {
-        'Test/Test Accelerometer/Value': 0.50,
-      },
+      virtualValues: {'Test/Test Accelerometer/Value': 0.50},
     );
   });
 
@@ -51,8 +49,10 @@ void main() {
     expect(accelerometerModel.type, 'Accelerometer');
     expect(accelerometerModel.runtimeType, AccelerometerModel);
 
-    expect((accelerometerModel as AccelerometerModel).valueTopic,
-        'Test/Test Accelerometer/Value');
+    expect(
+      (accelerometerModel as AccelerometerModel).valueTopic,
+      'Test/Test Accelerometer/Value',
+    );
   });
 
   test('Saving accelerometer to json', () {

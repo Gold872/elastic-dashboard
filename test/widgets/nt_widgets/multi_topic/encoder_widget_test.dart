@@ -29,13 +29,15 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-            name: 'Test/Encoder/Distance',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
+          name: 'Test/Encoder/Distance',
+          type: NT4TypeStr.kFloat32,
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Encoder/Speed',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
+          name: 'Test/Encoder/Speed',
+          type: NT4TypeStr.kFloat32,
+          properties: {},
+        ),
       ],
       virtualValues: {
         'Test/Encoder/Distance': 5.50,
@@ -106,14 +108,18 @@ void main() {
     expect(find.text('Speed'), findsOneWidget);
 
     expect(
-        find.descendant(
-            of: find.byType(SelectableText),
-            matching: find.textContaining('5.50')),
-        findsOneWidget);
+      find.descendant(
+        of: find.byType(SelectableText),
+        matching: find.textContaining('5.50'),
+      ),
+      findsOneWidget,
+    );
     expect(
-        find.descendant(
-            of: find.byType(SelectableText),
-            matching: find.textContaining('-10.00')),
-        findsOneWidget);
+      find.descendant(
+        of: find.byType(SelectableText),
+        matching: find.textContaining('-10.00'),
+      ),
+      findsOneWidget,
+    );
   });
 }

@@ -98,25 +98,35 @@ void main() {
     expect(find.byType(Pointer), findsNWidgets(2));
 
     await widgetTester.drag(
-        find.byType(Pointer).first, const Offset(0.0, 200.0));
+      find.byType(Pointer).first,
+      const Offset(0.0, 200.0),
+    );
     await widgetTester.pumpAndSettle();
 
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Left Motor Speed'),
-        isNot(0.50));
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Left Motor Speed',
+      ),
+      isNot(0.50),
+    );
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Right Motor Speed'),
-        0.50);
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Right Motor Speed',
+      ),
+      0.50,
+    );
 
     await widgetTester.drag(
-        find.byType(Pointer).last, const Offset(0.0, 300.0));
+      find.byType(Pointer).last,
+      const Offset(0.0, 300.0),
+    );
     await widgetTester.pumpAndSettle();
 
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Right Motor Speed'),
-        isNot(0.50));
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Right Motor Speed',
+      ),
+      isNot(0.50),
+    );
   });
 }

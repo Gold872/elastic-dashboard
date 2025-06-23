@@ -55,39 +55,43 @@ void main() {
   test('Three axis accelerometer from json', () {
     NTWidgetModel threeAxisAccelerometerModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3-Axis Accelerometer',
-      threeAxisAccelerometerJson,
-    );
+          ntConnection,
+          preferences,
+          '3-Axis Accelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     expect(threeAxisAccelerometerModel.type, '3-Axis Accelerometer');
     expect(
-        threeAxisAccelerometerModel.runtimeType, ThreeAxisAccelerometerModel);
+      threeAxisAccelerometerModel.runtimeType,
+      ThreeAxisAccelerometerModel,
+    );
   });
 
   test('Three axis accelerometer from alias name', () {
     NTWidgetModel threeAxisAccelerometerModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3AxisAccelerometer',
-      threeAxisAccelerometerJson,
-    );
+          ntConnection,
+          preferences,
+          '3AxisAccelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     expect(threeAxisAccelerometerModel.type, '3-Axis Accelerometer');
     expect(
-        threeAxisAccelerometerModel.runtimeType, ThreeAxisAccelerometerModel);
+      threeAxisAccelerometerModel.runtimeType,
+      ThreeAxisAccelerometerModel,
+    );
   });
 
   test('Three axis accelerometer to json', () {
     ThreeAxisAccelerometerModel threeAxisAccelerometerModel =
         ThreeAxisAccelerometerModel(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      topic: 'Test/Three Axis Accelerometer',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: 'Test/Three Axis Accelerometer',
+          period: 0.100,
+        );
 
     expect(threeAxisAccelerometerModel.toJson(), threeAxisAccelerometerJson);
   });
@@ -97,11 +101,11 @@ void main() {
 
     NTWidgetModel threeAxisAccelerometerModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3-Axis Accelerometer',
-      threeAxisAccelerometerJson,
-    );
+          ntConnection,
+          preferences,
+          '3-Axis Accelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

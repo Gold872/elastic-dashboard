@@ -46,9 +46,7 @@ void main() {
         NT4Topic(
           name: 'Test/Split Button Chooser/selected',
           type: NT4TypeStr.kString,
-          properties: {
-            'retained': true,
-          },
+          properties: {'retained': true},
         ),
       ],
       virtualValues: {
@@ -63,11 +61,11 @@ void main() {
   test('Split button chooser from json', () {
     NTWidgetModel splitButtonChooserModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     expect(splitButtonChooserModel.type, 'Split Button Chooser');
     expect(splitButtonChooserModel.runtimeType, SplitButtonChooserModel);
@@ -89,11 +87,11 @@ void main() {
 
     NTWidgetModel splitButtonChooserModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

@@ -140,63 +140,54 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     for (int i = 0; i < tabData.length; i++) {
       TabData data = tabData[i];
 
-      gridData.add({
-        'name': data.name,
-        'grid_layout': data.tabGrid.toJson(),
-      });
+      gridData.add({'name': data.name, 'grid_layout': data.tabGrid.toJson()});
     }
 
-    return {
-      'version': 1.0,
-      'grid_size': gridSize,
-      'tabs': gridData,
-    };
+    return {'version': 1.0, 'grid_size': gridSize, 'tabs': gridData};
   }
 
   void init() {
     robotNotificationListener = ElasticLibListener(
-        ntConnection: ntConnection,
-        onTabSelected: (tabIdentifier) {
-          if (tabIdentifier is int) {
-            if (tabIdentifier >= tabData.length) {
-              return;
-            }
-            switchToTab(tabIdentifier);
-          } else if (tabIdentifier is String) {
-            int tabIndex =
-                tabData.indexWhere((tab) => tab.name == tabIdentifier);
-            if (tabIndex == -1) {
-              return;
-            }
-            switchToTab(tabIndex);
+      ntConnection: ntConnection,
+      onTabSelected: (tabIdentifier) {
+        if (tabIdentifier is int) {
+          if (tabIdentifier >= tabData.length) {
+            return;
           }
-        },
-        onNotification: (title, description, icon, time, width, height) {
-          ColorScheme colorScheme = state!.theme.colorScheme;
-          TextTheme textTheme = state!.theme.textTheme;
-          var widget = ElegantNotification(
-            autoDismiss: time.inMilliseconds > 0,
-            showProgressIndicator: time.inMilliseconds > 0,
-            background: colorScheme.surface,
-            width: width,
-            height: height,
-            position: Alignment.bottomRight,
-            title: Text(
-              title,
-              style: textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            toastDuration: time,
-            icon: icon,
-            description: Text(description),
-            stackedOptions: StackedOptions(
-              key: 'robot_notification',
-              type: StackedType.above,
-            ),
-          );
-          state!.showNotification(widget);
-        });
+          switchToTab(tabIdentifier);
+        } else if (tabIdentifier is String) {
+          int tabIndex = tabData.indexWhere((tab) => tab.name == tabIdentifier);
+          if (tabIndex == -1) {
+            return;
+          }
+          switchToTab(tabIndex);
+        }
+      },
+      onNotification: (title, description, icon, time, width, height) {
+        ColorScheme colorScheme = state!.theme.colorScheme;
+        TextTheme textTheme = state!.theme.textTheme;
+        var widget = ElegantNotification(
+          autoDismiss: time.inMilliseconds > 0,
+          showProgressIndicator: time.inMilliseconds > 0,
+          background: colorScheme.surface,
+          width: width,
+          height: height,
+          position: Alignment.bottomRight,
+          title: Text(
+            title,
+            style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+          ),
+          toastDuration: time,
+          icon: icon,
+          description: Text(description),
+          stackedOptions: StackedOptions(
+            key: 'robot_notification',
+            type: StackedType.above,
+          ),
+        );
+        state!.showNotification(widget);
+      },
+    );
     robotNotificationListener.listen();
 
     ntConnection.dsClientConnect(
@@ -242,10 +233,9 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     loadLayout();
 
     if (!isWPILib) {
-      Future(() => checkForUpdates(
-            notifyIfLatest: false,
-            notifyIfError: false,
-          ));
+      Future(
+        () => checkForUpdates(notifyIfLatest: false, notifyIfError: false),
+      );
     }
   }
 
@@ -270,8 +260,8 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     TextTheme textTheme = state!.theme.textTheme;
     ButtonThemeData buttonTheme = state!.buttonTheme;
 
-    UpdateCheckerResponse updateResponse =
-        await updateChecker!.isUpdateAvailable();
+    UpdateCheckerResponse updateResponse = await updateChecker!
+        .isUpdateAvailable();
 
     lastUpdateResponse = updateResponse;
     notifyListeners();
@@ -286,10 +276,10 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
         position: Alignment.bottomRight,
         toastDuration: const Duration(seconds: 3, milliseconds: 500),
         icon: const Icon(Icons.error, color: Color(0xffFE355C)),
-        title: Text('Failed to check for updates',
-            style: textTheme.bodyMedium!.copyWith(
-              fontWeight: FontWeight.bold,
-            )),
+        title: Text(
+          'Failed to check for updates',
+          style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+        ),
         description: Text(
           updateResponse.errorMessage!,
           overflow: TextOverflow.ellipsis,
@@ -311,9 +301,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
         position: Alignment.bottomRight,
         title: Text(
           'Version ${updateResponse.latestVersion!} Available',
-          style: textTheme.bodyMedium!.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
         ),
         icon: const Icon(Icons.info, color: Color(0xff0066FF)),
         description: const Text('A new update is available!'),
@@ -364,8 +352,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
 
   Future<({String layout, LayoutDownloadMode mode})?> showRemoteLayoutSelection(
     List<String> fileNames,
-  ) =>
-      Future.value(null);
+  ) => Future.value(null);
 
   Future<void> loadLayoutFromRobot() async {}
 
@@ -516,10 +503,7 @@ class DashboardPageViewModelImpl = DashboardPageViewModel
 class DashboardPage extends StatefulWidget {
   final DashboardPageViewModel model;
 
-  const DashboardPage({
-    super.key,
-    required this.model,
-  });
+  const DashboardPage({super.key, required this.model});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -595,18 +579,12 @@ class _DashboardPageState extends State<DashboardPage>
     logger.info('Setting up shortcuts');
     // Import Layout (Ctrl + O)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyO,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyO, modifiers: [KeyModifier.control]),
       callback: model.importLayout,
     );
     // Save (Ctrl + S)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyS,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyS, modifiers: [KeyModifier.control]),
       callback: model.saveLayout,
     );
     // Export (Ctrl + Shift + S)
@@ -619,10 +597,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Download from robot (Ctrl + D)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyD,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyD, modifiers: [KeyModifier.control]),
       callback: () {
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
@@ -635,10 +610,7 @@ class _DashboardPageState extends State<DashboardPage>
     // Switch to Tab (Ctrl + Tab #)
     for (int i = 1; i <= 9; i++) {
       hotKeyManager.register(
-        HotKey(
-          LogicalKeyboardKey(48 + i),
-          modifiers: [KeyModifier.control],
-        ),
+        HotKey(LogicalKeyboardKey(48 + i), modifiers: [KeyModifier.control]),
         callback: () {
           if (model.currentTabIndex == i - 1) {
             logger.debug(
@@ -647,8 +619,9 @@ class _DashboardPageState extends State<DashboardPage>
             return;
           }
           if (i - 1 < model.tabData.length) {
-            logger
-                .info('Switching tab to index ${i - 1} via keyboard shortcut');
+            logger.info(
+              'Switching tab to index ${i - 1} via keyboard shortcut',
+            );
             model.switchToTab(i - 1);
           }
         },
@@ -656,10 +629,7 @@ class _DashboardPageState extends State<DashboardPage>
     }
     // Move to next tab (Ctrl + Tab)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.tab,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.tab, modifiers: [KeyModifier.control]),
       callback: () {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
           model.moveToNextTab();
@@ -680,10 +650,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Move Tab Left (Ctrl + <-)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.arrowLeft,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.arrowLeft, modifiers: [KeyModifier.control]),
       callback: () {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
           model.moveTabLeft();
@@ -692,10 +659,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Move Tab Right (Ctrl + ->)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.arrowRight,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.arrowRight, modifiers: [KeyModifier.control]),
       callback: () {
         if (ModalRoute.of(context)?.isCurrent ?? false) {
           model.moveTabRight();
@@ -704,10 +668,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // New Tab (Ctrl + T)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyT,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyT, modifiers: [KeyModifier.control]),
       callback: () {
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
@@ -732,10 +693,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Close Tab (Ctrl + W)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyW,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyW, modifiers: [KeyModifier.control]),
       callback: () {
         if (preferences.getBool(PrefKeys.layoutLocked) ??
             Defaults.layoutLocked) {
@@ -765,10 +723,7 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Open settings dialog (Ctrl + ,)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.comma,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.comma, modifiers: [KeyModifier.control]),
       callback: () {
         if ((ModalRoute.of(context)?.isCurrent ?? false) && mounted) {
           model.displaySettingsDialog(context);
@@ -777,17 +732,17 @@ class _DashboardPageState extends State<DashboardPage>
     );
     // Connect to robot (Ctrl + K)
     hotKeyManager.register(
-      HotKey(
-        LogicalKeyboardKey.keyK,
-        modifiers: [KeyModifier.control],
-      ),
+      HotKey(LogicalKeyboardKey.keyK, modifiers: [KeyModifier.control]),
       callback: () {
         if (preferences.getInt(PrefKeys.ipAddressMode) ==
             IPAddressMode.driverStation.index) {
           return;
         }
-        model.updateIPAddress(IPAddressUtil.teamNumberToIP(
-            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        model.updateIPAddress(
+          IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber,
+          ),
+        );
         model.changeIPAddressMode(IPAddressMode.driverStation);
       },
     );
@@ -795,10 +750,7 @@ class _DashboardPageState extends State<DashboardPage>
     hotKeyManager.register(
       HotKey(
         LogicalKeyboardKey.keyK,
-        modifiers: [
-          KeyModifier.control,
-          KeyModifier.shift,
-        ],
+        modifiers: [KeyModifier.control, KeyModifier.shift],
       ),
       callback: () {
         if (preferences.getInt(PrefKeys.ipAddressMode) ==
@@ -855,8 +807,10 @@ class _DashboardPageState extends State<DashboardPage>
           MenuItemButton(
             style: menuButtonStyle,
             onPressed: !layoutLocked ? model.importLayout : null,
-            shortcut:
-                const SingleActivator(LogicalKeyboardKey.keyO, control: true),
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyO,
+              control: true,
+            ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -870,8 +824,10 @@ class _DashboardPageState extends State<DashboardPage>
           MenuItemButton(
             style: menuButtonStyle,
             onPressed: model.saveLayout,
-            shortcut:
-                const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.keyS,
+              control: true,
+            ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -917,9 +873,7 @@ class _DashboardPageState extends State<DashboardPage>
             ),
           ),
         ],
-        child: const Text(
-          'File',
-        ),
+        child: const Text('File'),
       ),
       // Edit
       SubmenuButton(
@@ -955,11 +909,9 @@ class _DashboardPageState extends State<DashboardPage>
                 ? const Icon(Icons.lock_open)
                 : const Icon(Icons.lock_outline),
             child: Text('${layoutLocked ? 'Unlock' : 'Lock'} Layout'),
-          )
+          ),
         ],
-        child: const Text(
-          'Edit',
-        ),
+        child: const Text('Edit'),
       ),
       // Help
       SubmenuButton(
@@ -995,9 +947,7 @@ class _DashboardPageState extends State<DashboardPage>
               ),
             ),
         ],
-        child: const Text(
-          'Help',
-        ),
+        child: const Text('Help'),
       ),
     ];
 
@@ -1009,13 +959,7 @@ class _DashboardPageState extends State<DashboardPage>
         elevation: WidgetStatePropertyAll(0),
       ),
       children: [
-        Center(
-          child: Image.asset(
-            logoPath,
-            width: 24,
-            height: 24,
-          ),
-        ),
+        Center(child: Image.asset(logoPath, width: 24, height: 24)),
         const SizedBox(width: 5),
         if (!consolidateMenu)
           ...menuChildren
@@ -1042,8 +986,9 @@ class _DashboardPageState extends State<DashboardPage>
         MenuItemButton(
           style: menuButtonStyle,
           leadingIcon: const Icon(Icons.add),
-          onPressed:
-              !layoutLocked ? () => model.displayAddWidgetDialog() : null,
+          onPressed: !layoutLocked
+              ? () => model.displayAddWidgetDialog()
+              : null,
           child: const Text('Add Widget'),
         ),
         if (layoutLocked) ...[
@@ -1053,10 +998,12 @@ class _DashboardPageState extends State<DashboardPage>
             message: 'Unlock Layout',
             child: MenuItemButton(
               style: menuButtonStyle.copyWith(
-                minimumSize:
-                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
-                maximumSize:
-                    const WidgetStatePropertyAll(Size(36.0, double.infinity)),
+                minimumSize: const WidgetStatePropertyAll(
+                  Size(36.0, double.infinity),
+                ),
+                maximumSize: const WidgetStatePropertyAll(
+                  Size(36.0, double.infinity),
+                ),
               ),
               onPressed: () {
                 model.unlockLayout();
@@ -1110,8 +1057,9 @@ class _DashboardPageState extends State<DashboardPage>
                 children: [
                   EditableTabBar(
                     preferences: preferences,
-                    gridDpiOverride:
-                        preferences.getDouble(PrefKeys.gridDpiOverride),
+                    gridDpiOverride: preferences.getDouble(
+                      PrefKeys.gridDpiOverride,
+                    ),
                     updateButton: updateButton,
                     currentIndex: model.currentTabIndex,
                     onTabMoveLeft: model.moveTabLeft,
@@ -1161,8 +1109,10 @@ class _DashboardPageState extends State<DashboardPage>
                     onTabChanged: model.switchToTab,
                     onTabDuplicate: (index) {
                       setState(() {
-                        Map<String, dynamic> tabJson =
-                            model.tabData[index].tabGrid.toJson();
+                        Map<String, dynamic> tabJson = model
+                            .tabData[index]
+                            .tabGrid
+                            .toJson();
                         TabGridModel newGrid = TabGridModel.fromJson(
                           ntConnection: model.ntConnection,
                           preferences: preferences,
@@ -1171,10 +1121,12 @@ class _DashboardPageState extends State<DashboardPage>
                           onJsonLoadingWarning: model.showJsonLoadingWarning,
                         );
                         model.tabData.insert(
-                            index + 1,
-                            TabData(
-                                name: '${model.tabData[index].name} (Copy)',
-                                tabGrid: newGrid));
+                          index + 1,
+                          TabData(
+                            name: '${model.tabData[index].name} (Copy)',
+                            tabGrid: newGrid,
+                          ),
+                        );
                       });
                     },
                     tabData: model.tabData,
