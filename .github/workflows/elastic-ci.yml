@@ -7,9 +7,9 @@ name: Elastic
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "2027"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "2027"]
   workflow_dispatch:
     inputs:
       upload-release:
