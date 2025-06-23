@@ -9,16 +9,16 @@ typedef SubscriptionIdentification = ({
   NT4SubscriptionOptions options
 });
 
-enum NTServerMode {
-  robot('Robot', 5810),
-  system('System', 6810);
+enum NTServerTarget {
+  robotCode('Robot Code', 5810),
+  systemCore('SystemCore Internal', 6810);
 
-  const NTServerMode(this.name, this.port);
+  const NTServerTarget(this.name, this.port);
 
   final String name;
   final int port;
 
-  static NTServerMode? fromIndex(int? index) {
+  static NTServerTarget? fromIndex(int? index) {
     if (index == null || index < 0 || index >= values.length) {
       return null;
     }
@@ -30,7 +30,7 @@ class NTConnection {
   late NT4Client _ntClient;
   late DSInteropClient _dsClient;
 
-  NTServerMode serverMode;
+  NTServerTarget serverMode;
   List<VoidCallback> onConnectedListeners = [];
   List<VoidCallback> onDisconnectedListeners = [];
 
@@ -55,7 +55,7 @@ class NTConnection {
   Map<int, NT4Subscription> subscriptionMap = {};
   Map<NT4Subscription, int> subscriptionUseCount = {};
 
-  NTConnection(String ipAddress, [this.serverMode = Defaults.serverMode]) {
+  NTConnection(String ipAddress, [this.serverMode = Defaults.targetServer]) {
     nt4Connect(ipAddress);
   }
 
@@ -177,7 +177,7 @@ class NTConnection {
     _ntClient.setServerBaseAddreess(ipAddress);
   }
 
-  void changeServerMode(NTServerMode mode) {
+  void changeServerMode(NTServerTarget mode) {
     if (serverMode == mode) {
       return;
     }

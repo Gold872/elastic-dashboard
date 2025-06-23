@@ -101,17 +101,23 @@ void main() {
     });
   });
 
-  test('NT Server Mode', () async {
-    await preferences.setInt(PrefKeys.ntServerMode, NTServerMode.robot.index);
-    await dashboardModel.changeNTServerMode(NTServerMode.robot);
-
-    expect(preferences.getInt(PrefKeys.ntServerMode), NTServerMode.robot.index);
-
-    await dashboardModel.changeNTServerMode(NTServerMode.system);
+  test('NT Target Server', () async {
+    await preferences.setInt(
+      PrefKeys.ntTargetServer,
+      NTServerTarget.robotCode.index,
+    );
+    await dashboardModel.changeNTTargetServer(NTServerTarget.robotCode);
 
     expect(
-      preferences.getInt(PrefKeys.ntServerMode),
-      NTServerMode.system.index,
+      preferences.getInt(PrefKeys.ntTargetServer),
+      NTServerTarget.robotCode.index,
+    );
+
+    await dashboardModel.changeNTTargetServer(NTServerTarget.systemCore);
+
+    expect(
+      preferences.getInt(PrefKeys.ntTargetServer),
+      NTServerTarget.systemCore.index,
     );
   });
 

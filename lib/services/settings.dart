@@ -43,7 +43,7 @@ class Defaults {
   }
 
   static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
-  static const NTServerMode serverMode = NTServerMode.robot;
+  static const NTServerTarget targetServer = NTServerTarget.robotCode;
 
   static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
 
@@ -69,7 +69,7 @@ class PrefKeys {
   static String layout = 'layout';
   static String ipAddress = 'ip_address';
   static String ipAddressMode = 'ip_address_mode';
-  static String ntServerMode = 'nt_server_mode';
+  static String ntTargetServer = 'nt_target_server';
   static String teamNumber = 'team_number';
   static String teamColor = 'team_color';
   static String themeVariant = 'theme_variant';

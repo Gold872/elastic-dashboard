@@ -38,7 +38,7 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
           updateIPAddress(data);
         },
-        onNTServerModeChanged: changeNTServerMode,
+        onNTTargetServerChanged: changeNTTargetServer,
         onGridToggle: toggleGrid,
         onGridSizeChanged: changeGridSize,
         onCornerRadiusChanged: changeCornerRadius,
@@ -311,11 +311,11 @@ mixin DashboardPageSettings on DashboardPageViewModel {
   }
 
   @override
-  Future<void> changeNTServerMode(NTServerMode mode) async {
-    if (mode.index == preferences.getInt(PrefKeys.ntServerMode)) {
+  Future<void> changeNTTargetServer(NTServerTarget mode) async {
+    if (mode.index == preferences.getInt(PrefKeys.ntTargetServer)) {
       return;
     }
-    await preferences.setInt(PrefKeys.ntServerMode, mode.index);
+    await preferences.setInt(PrefKeys.ntTargetServer, mode.index);
 
     ntConnection.changeServerMode(mode);
     notifyListeners();

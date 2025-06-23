@@ -78,9 +78,9 @@ void main() async {
   String ipAddress =
       preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
 
-  NTServerMode serverMode =
-      NTServerMode.fromIndex(preferences.getInt(PrefKeys.ntServerMode)) ??
-          Defaults.serverMode;
+  NTServerTarget serverMode =
+      NTServerTarget.fromIndex(preferences.getInt(PrefKeys.ntTargetServer)) ??
+          Defaults.targetServer;
 
   NTConnection ntConnection = NTConnection(ipAddress, serverMode);
 

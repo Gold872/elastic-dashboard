@@ -74,7 +74,7 @@ void main() {
       PrefKeys.ipAddress: '127.0.0.1',
       PrefKeys.teamNumber: 353,
       PrefKeys.ipAddressMode: IPAddressMode.driverStation.id,
-      PrefKeys.ntServerMode: NTServerMode.robot.index,
+      PrefKeys.ntTargetServer: NTServerTarget.robotCode.index,
       PrefKeys.teamColor: Colors.blueAccent.toARGB32(),
       PrefKeys.showGrid: false,
       PrefKeys.gridSize: 128,
@@ -119,7 +119,7 @@ void main() {
     expect(find.text('Team Number'), findsOneWidget);
     expect(find.text('IP Address Mode'), findsOneWidget);
     expect(find.text('IP Address'), findsOneWidget);
-    expect(find.text('Server Mode'), findsOneWidget);
+    expect(find.text('Target Server'), findsOneWidget);
     expect(find.text('Default Period'), findsOneWidget);
     expect(find.text('Default Graph Period'), findsOneWidget);
 
@@ -294,10 +294,10 @@ void main() {
           body: SettingsDialog(
             ntConnection: createMockOfflineNT4(),
             preferences: preferences,
-            onNTServerModeChanged: (mode) async {
+            onNTTargetServerChanged: (mode) async {
               fakeSettings.changeNTServerMode();
 
-              await preferences.setInt(PrefKeys.ntServerMode, mode.index);
+              await preferences.setInt(PrefKeys.ntTargetServer, mode.index);
             },
           ),
         ),
@@ -306,37 +306,37 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ntServerMode = find.byType(DialogDropdownChooser<NTServerMode>);
+    final ntServerMode = find.byType(DialogDropdownChooser<NTServerTarget>);
 
     expect(ntServerMode, findsOneWidget);
 
-    expect(find.text('Robot'), findsOneWidget);
+    expect(find.text('Robot Code'), findsOneWidget);
 
     await widgetTester.tap(ntServerMode);
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('System'), findsOneWidget);
+    expect(find.text('SystemCore Internal'), findsOneWidget);
 
-    await widgetTester.tap(find.text('System'));
+    await widgetTester.tap(find.text('SystemCore Internal'));
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Robot'), findsNothing);
-    expect(find.text('System'), findsOneWidget);
+    expect(find.text('Robot Code'), findsNothing);
+    expect(find.text('SystemCore Internal'), findsOneWidget);
     expect(
-      preferences.getInt(PrefKeys.ntServerMode),
-      NTServerMode.system.index,
+      preferences.getInt(PrefKeys.ntTargetServer),
+      NTServerTarget.systemCore.index,
     );
 
-    await widgetTester.tap(find.text('System'));
+    await widgetTester.tap(find.text('SystemCore Internal'));
     await widgetTester.pumpAndSettle();
 
-    expect(find.text('Robot'), findsOneWidget);
+    expect(find.text('Robot Code'), findsOneWidget);
 
-    await widgetTester.tap(find.text('Robot'));
+    await widgetTester.tap(find.text('Robot Code'));
     await widgetTester.pumpAndSettle();
     expect(
-      preferences.getInt(PrefKeys.ntServerMode),
-      NTServerMode.robot.index,
+      preferences.getInt(PrefKeys.ntTargetServer),
+      NTServerTarget.robotCode.index,
     );
 
     verify(fakeSettings.changeNTServerMode()).called(2);

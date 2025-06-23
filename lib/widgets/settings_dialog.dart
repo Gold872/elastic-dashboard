@@ -40,7 +40,7 @@ class SettingsDialog extends StatefulWidget {
   final FutureOr<void> Function(String? data)? onIPAddressChanged;
   final FutureOr<void> Function(String? data)? onTeamNumberChanged;
   final void Function(IPAddressMode mode)? onIPAddressModeChanged;
-  final FutureOr<void> Function(NTServerMode mode)? onNTServerModeChanged;
+  final FutureOr<void> Function(NTServerTarget mode)? onNTTargetServerChanged;
   final void Function(Color color)? onColorChanged;
   final void Function(bool value)? onGridToggle;
   final FutureOr<void> Function(String? gridSize)? onGridSizeChanged;
@@ -62,7 +62,7 @@ class SettingsDialog extends StatefulWidget {
     required this.preferences,
     this.onTeamNumberChanged,
     this.onIPAddressModeChanged,
-    this.onNTServerModeChanged,
+    this.onNTTargetServerChanged,
     this.onIPAddressChanged,
     this.onColorChanged,
     this.onGridToggle,
@@ -490,24 +490,34 @@ class _SettingsDialogState extends State<SettingsDialog> {
       const SizedBox(height: 5),
       Row(
         children: [
-          const Text('Server Mode'),
+          Tooltip(
+            waitDuration: const Duration(milliseconds: 100),
+            message: '''
+There are 2 Network Tables servers on the SystemCore:
+
+Robot Code - The Network Tables server displaying data from the robot code.
+SystemCore Internal - The Network Tables server displaying internal data from the SystemCore (RAM, CPU %, etc).''',
+            child: Icon(Icons.help_outline),
+          ),
+          const SizedBox(width: 5),
+          const Text('Target Server'),
           const SizedBox(width: 5),
           Flexible(
-            child: DialogDropdownChooser<NTServerMode>(
+            child: DialogDropdownChooser<NTServerTarget>(
               onSelectionChanged: (mode) async {
                 if (mode == null) {
                   return;
                 }
 
-                await widget.onNTServerModeChanged?.call(mode);
+                await widget.onNTTargetServerChanged?.call(mode);
 
                 setState(() {});
               },
-              choices: NTServerMode.values,
-              initialValue: NTServerMode.fromIndex(
-                    widget.preferences.getInt(PrefKeys.ntServerMode),
+              choices: NTServerTarget.values,
+              initialValue: NTServerTarget.fromIndex(
+                    widget.preferences.getInt(PrefKeys.ntTargetServer),
                   ) ??
-                  Defaults.serverMode,
+                  Defaults.targetServer,
               nameMap: (e) => e.name,
             ),
           ),
