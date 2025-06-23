@@ -62,11 +62,11 @@ void main() {
   test('Split button chooser from json', () {
     NTWidgetModel splitButtonChooserModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     expect(splitButtonChooserModel.type, 'Split Button Chooser');
     expect(splitButtonChooserModel.runtimeType, SplitButtonChooserModel);
@@ -88,11 +88,11 @@ void main() {
 
     NTWidgetModel splitButtonChooserModel =
         NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

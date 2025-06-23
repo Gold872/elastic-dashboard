@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart'
     show DockSide, WindowOptions;
 
-enum TitleBarStyle {
-  normal,
-  hidden,
-}
+enum TitleBarStyle { normal, hidden }
 
 abstract mixin class WindowListener {
   /// Emitted when the window is going to be closed.
@@ -190,9 +187,7 @@ class WindowManager {
   }) async {}
 
   /// Moves window to the center of the screen.
-  Future<void> center({
-    bool animate = false,
-  }) async {}
+  Future<void> center({bool animate = false}) async {}
 
   /// Returns `Rect` - The bounds of the window as Object.
   Future<Rect> getBounds() async => Rect.fromLTWH(0, 0, 0, 0);
@@ -209,22 +204,15 @@ class WindowManager {
   Future<Size> getSize() async => Size.zero;
 
   /// Resizes the window to `width` and `height`.
-  Future<void> setSize(Size size, {bool animate = false}) => setBounds(
-        null,
-        size: size,
-        animate: animate,
-      );
+  Future<void> setSize(Size size, {bool animate = false}) =>
+      setBounds(null, size: size, animate: animate);
 
   /// Returns `Offset` - Contains the window's current position.
   Future<Offset> getPosition() async => Offset.zero;
 
   /// Moves window to position.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
-    await setBounds(
-      null,
-      position: position,
-      animate: animate,
-    );
+    await setBounds(null, position: position, animate: animate);
   }
 
   /// Sets the minimum size of window to `width` and `height`.

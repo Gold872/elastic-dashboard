@@ -5,12 +5,15 @@ import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
 class KeyModifier {
-  static final KeyModifier control =
-      KeyModifier._(() => HardwareKeyboard.instance.isControlPressed);
-  static final KeyModifier shift =
-      KeyModifier._(() => HardwareKeyboard.instance.isShiftPressed);
-  static final KeyModifier alt =
-      KeyModifier._(() => HardwareKeyboard.instance.isAltPressed);
+  static final KeyModifier control = KeyModifier._(
+    () => HardwareKeyboard.instance.isControlPressed,
+  );
+  static final KeyModifier shift = KeyModifier._(
+    () => HardwareKeyboard.instance.isShiftPressed,
+  );
+  static final KeyModifier alt = KeyModifier._(
+    () => HardwareKeyboard.instance.isAltPressed,
+  );
 
   const KeyModifier._(this.active);
 
@@ -79,29 +82,27 @@ class HotKeyManager {
     if (value is KeyUpEvent) {
       if (value is KeyRepeatEvent) return false;
       int modifierCount = _getNumberModifiersPressed();
-      HotKey? hotKey = _hotKeyList.firstWhereOrNull(
-        (e) {
-          if (value.logicalKey != e.logicalKey) {
-            return false;
-          }
+      HotKey? hotKey = _hotKeyList.firstWhereOrNull((e) {
+        if (value.logicalKey != e.logicalKey) {
+          return false;
+        }
 
-          if (e.modifiers == null) {
-            return true;
-          }
-
-          if (e.modifiers!.length != modifierCount) {
-            return false;
-          }
-
-          for (KeyModifier modifier in e.modifiers!) {
-            if (!modifier.active()) {
-              return false;
-            }
-          }
-
+        if (e.modifiers == null) {
           return true;
-        },
-      );
+        }
+
+        if (e.modifiers!.length != modifierCount) {
+          return false;
+        }
+
+        for (KeyModifier modifier in e.modifiers!) {
+          if (!modifier.active()) {
+            return false;
+          }
+        }
+
+        return true;
+      });
 
       if (hotKey != null) {
         HotKeyCallback? callback = _callbackMap[hotKey.identifier];
@@ -118,10 +119,7 @@ class HotKeyManager {
 
   List<HotKey> get registeredHotKeyList => _hotKeyList;
 
-  void register(
-    HotKey shortcut, {
-    HotKeyCallback? callback,
-  }) {
+  void register(HotKey shortcut, {HotKeyCallback? callback}) {
     if (!_initialized) _init();
 
     if (callback != null) {

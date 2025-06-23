@@ -43,8 +43,9 @@ class NT4Subscription extends ValueNotifier<Object?> {
   }
 
   Stream<Object?> periodicStream({bool yieldAll = true}) async* {
-    final Duration delayTime =
-        Duration(microseconds: (options.periodicRateSeconds * 1e6).round());
+    final Duration delayTime = Duration(
+      microseconds: (options.periodicRateSeconds * 1e6).round(),
+    );
 
     yield currentValue;
     Object? lastYielded = currentValue;
@@ -59,8 +60,9 @@ class NT4Subscription extends ValueNotifier<Object?> {
     }
   }
 
-  Stream<({Object? value, DateTime timestamp})> timestampedStream(
-      {bool yieldAll = false}) async* {
+  Stream<({Object? value, DateTime timestamp})> timestampedStream({
+    bool yieldAll = false,
+  }) async* {
     yield (
       value: currentValue,
       timestamp: DateTime.fromMicrosecondsSinceEpoch(timestamp),
@@ -71,7 +73,8 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
     while (true) {
       await Future.delayed(
-          Duration(microseconds: (options.periodicRateSeconds * 1e6).round()));
+        Duration(microseconds: (options.periodicRateSeconds * 1e6).round()),
+      );
 
       if (lastTimestamp != timestamp || yieldAll) {
         yield (
@@ -129,9 +132,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
   }
 
   Map<String, dynamic> _toUnsubscribeJson() {
-    return {
-      'subuid': uid,
-    };
+    return {'subuid': uid};
   }
 
   @override
@@ -201,9 +202,8 @@ class NT4StructMeta {
       );
 
   factory NT4StructMeta.fromJson(Map<String, dynamic> json) {
-    List<String> path = tryCast<List<dynamic>>(
-          json['path'],
-        )?.whereType<String>().toList() ??
+    List<String> path =
+        tryCast<List<dynamic>>(json['path'])?.whereType<String>().toList() ??
         [];
 
     NT4Type? type;
@@ -277,12 +277,12 @@ class NT4SubscriptionOptions {
 
   @override
   int get hashCode => Object.hashAll([
-        periodicRateSeconds,
-        all,
-        topicsOnly,
-        prefix,
-        structMeta,
-      ]);
+    periodicRateSeconds,
+    all,
+    topicsOnly,
+    prefix,
+    structMeta,
+  ]);
 
   @override
   String toString() {
@@ -311,25 +311,15 @@ class NT4Topic {
   }
 
   Map<String, dynamic> toPublishJson() {
-    return {
-      'name': name,
-      'type': type.serialize(),
-      'pubuid': pubUID,
-    };
+    return {'name': name, 'type': type.serialize(), 'pubuid': pubUID};
   }
 
   Map<String, dynamic> toUnpublishJson() {
-    return {
-      'name': name,
-      'pubuid': pubUID,
-    };
+    return {'name': name, 'pubuid': pubUID};
   }
 
   Map<String, dynamic> toPropertiesJson() {
-    return {
-      'name': name,
-      'update': properties,
-    };
+    return {'name': name, 'update': properties};
   }
 
   int getTypeId() {
@@ -412,13 +402,10 @@ class NT4Client {
     Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
       _connect();
 
-      _connectionTimer = Timer.periodic(
-        const Duration(milliseconds: 500),
-        (_) {
-          _connect();
-          _rttConnect();
-        },
-      );
+      _connectionTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+        _connect();
+        _rttConnect();
+      });
     });
   }
 
@@ -508,16 +495,20 @@ class NT4Client {
     _wsUnsubscribe(sub);
 
     // If there are no other subscriptions that are in the same table/tree
-    if (!_subscribedTopics.any((element) =>
-        element.topic.isNotEmpty &&
-        (element.topic.startsWith('${sub.topic}/') ||
-            sub.topic.startsWith('${element.topic}/') ||
-            sub.topic == element.topic))) {
+    if (!_subscribedTopics.any(
+      (element) =>
+          element.topic.isNotEmpty &&
+          (element.topic.startsWith('${sub.topic}/') ||
+              sub.topic.startsWith('${element.topic}/') ||
+              sub.topic == element.topic),
+    )) {
       // If there are any topics associated with the table/tree, unpublish them
-      for (NT4Topic topic in _clientPublishedTopics.values.where((element) =>
-          element.name.startsWith('${sub.topic}/') ||
-          sub.topic.startsWith('${element.name}/') ||
-          sub.topic == element.name)) {
+      for (NT4Topic topic in _clientPublishedTopics.values.where(
+        (element) =>
+            element.name.startsWith('${sub.topic}/') ||
+            sub.topic.startsWith('${element.name}/') ||
+            sub.topic == element.name,
+      )) {
         Future(() => unpublishTopic(topic));
       }
     }
@@ -532,7 +523,8 @@ class NT4Client {
 
   void setProperties(NT4Topic topic, bool isPersistent, bool isRetained) {
     logger.trace(
-        'Updating properties - Topic: $topic, Persistent: $isPersistent, Retained: $isRetained');
+      'Updating properties - Topic: $topic, Persistent: $isPersistent, Retained: $isRetained',
+    );
     topic.properties['persistent'] = isPersistent;
     topic.properties['retained'] = isRetained;
     _wsSetProperties(topic);
@@ -589,15 +581,11 @@ class NT4Client {
     timestamp ??= getServerTimeUS();
 
     logger.trace(
-        'Adding sample - Topic: $topic, Data: $data, Timestamp: $timestamp');
+      'Adding sample - Topic: $topic, Data: $data, Timestamp: $timestamp',
+    );
 
     _wsSendBinary(
-      serialize([
-        topic.pubUID,
-        timestamp,
-        topic.getTypeId(),
-        data,
-      ]),
+      serialize([topic.pubUID, timestamp, topic.getTypeId(), data]),
     );
 
     lastAnnouncedValues[topic.name] = data;
@@ -649,7 +637,8 @@ class NT4Client {
 
   void _rttHandleRecieveTimestamp(int serverTimestamp, int clientTimestamp) {
     logger.trace(
-        'RTT Received - Server Time: $serverTimestamp, Client Time: $clientTimestamp');
+      'RTT Received - Server Time: $serverTimestamp, Client Time: $clientTimestamp',
+    );
     int rxTime = _getClientTimeUS();
 
     int rtt = rxTime - clientTimestamp;
@@ -686,12 +675,11 @@ class NT4Client {
       return;
     }
 
-    _mainWebsocket?.sink.add(jsonEncode([
-      {
-        'method': method,
-        'params': params,
-      }
-    ]));
+    _mainWebsocket?.sink.add(
+      jsonEncode([
+        {'method': method, 'params': params},
+      ]),
+    );
   }
 
   void _wsSendBinary(dynamic data) {
@@ -739,7 +727,8 @@ class NT4Client {
       // that is from an old connection attempt
       if (mainServerAddr.contains(serverBaseAddress)) {
         logger.info(
-            'Failed to connect to network tables, attempting to reconnect in 500 ms');
+          'Failed to connect to network tables, attempting to reconnect in 500 ms',
+        );
 
         _attemptingNTConnection = false;
       }
@@ -851,7 +840,8 @@ class NT4Client {
       await connectionAttempt.ready;
     } catch (e) {
       logger.info(
-          'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms');
+        'Failed to connect to RTT Network Tables protocol, attempting to reconnect in 500 ms',
+      );
       // Only reset connection attempt if the address hasn't changed, see explanation above
       if (rttServerAddr.contains(serverBaseAddress)) {
         _attemptingRTTConnection = false;
@@ -860,7 +850,8 @@ class NT4Client {
     }
     if (!rttServerAddr.contains(serverBaseAddress)) {
       logger.info(
-          'IP Addressed changed while connecting to RTT, aborting RTT connection');
+        'IP Addressed changed while connecting to RTT, aborting RTT connection',
+      );
       connectionAttempt.sink.close().ignore();
       return;
     }
@@ -910,7 +901,8 @@ class NT4Client {
 
   void _onFirstMessageReceived() {
     logger.info(
-        'Network Tables connected on IP address $serverBaseAddress with protocol ${_mainWebsocket!.protocol}');
+      'Network Tables connected on IP address $serverBaseAddress with protocol ${_mainWebsocket!.protocol}',
+    );
     lastAnnouncedValues.clear();
     lastAnnouncedTimestamps.clear();
 
@@ -981,7 +973,8 @@ class NT4Client {
     logger.debug('[NT4] Connection closed. Attempting to reconnect in 500 ms');
     if (autoReconnect) {
       logger.trace(
-          'Auto reconnect set to true, setting attempt connection to true');
+        'Auto reconnect set to true, setting attempt connection to true',
+      );
       _attemptConnection = true;
     }
   }
@@ -1098,8 +1091,10 @@ class NT4Client {
             // all subscriptions which don't currently have a processed schema
             if (topic.name.startsWith('/.schema') &&
                 topic.type == NT4Type.structschema()) {
-              String structName =
-                  topic.name.split('/').last.replaceFirst('struct:', '');
+              String structName = topic.name
+                  .split('/')
+                  .last
+                  .replaceFirst('struct:', '');
               if (schemaManager.processNewSchema(
                 structName,
                 value as List<int>,
@@ -1130,7 +1125,8 @@ class NT4Client {
             _rttHandleRecieveTimestamp(timestampUS, value as int);
           } else {
             logger.warning(
-                '[NT4] ignoring binary data, invalid topic ID: $topicID');
+              '[NT4] ignoring binary data, invalid topic ID: $topicID',
+            );
           }
         } catch (err) {
           done = true;

@@ -22,8 +22,10 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
   Future<void> saveLayout() async {
     Map<String, dynamic> jsonData = toJson();
 
-    bool successful =
-        await preferences.setString(PrefKeys.layout, jsonEncode(jsonData));
+    bool successful = await preferences.setString(
+      PrefKeys.layout,
+      jsonEncode(jsonData),
+    );
     await saveWindowPosition();
 
     if (successful) {
@@ -52,9 +54,7 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       uniformTypeIdentifiers: ['public.json'],
     );
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    const XTypeGroup anyTypeGroup = XTypeGroup(label: 'All Files');
 
     logger.info('Exporting layout');
     final FileSaveLocation? saveLocation = await getSaveLocation(
@@ -102,15 +102,12 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       uniformTypeIdentifiers: ['public.json'],
     );
 
-    const XTypeGroup anyTypeGroup = XTypeGroup(
-      label: 'All Files',
-    );
+    const XTypeGroup anyTypeGroup = XTypeGroup(label: 'All Files');
 
     logger.info('Importing layout');
-    final XFile? file = await openFile(acceptedTypeGroups: [
-      jsonTypeGroup,
-      anyTypeGroup,
-    ]);
+    final XFile? file = await openFile(
+      acceptedTypeGroups: [jsonTypeGroup, anyTypeGroup],
+    );
 
     hotKeyManager.resetKeysPressed();
 
@@ -175,7 +172,8 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
 
       if (tryCast<Map>(data['grid_layout']) == null) {
         showJsonLoadingError(
-            'Grid layout not specified for tab \'${data['name']}\'');
+          'Grid layout not specified for tab \'${data['name']}\'',
+        );
         return false;
       }
     }
@@ -258,8 +256,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
           ),
         );
       } else {
-        TabGridModel existingTab =
-            tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        TabGridModel existingTab = tabData
+            .firstWhere((tab) => tab.name == tabName)
+            .tabGrid;
         existingTab.mergeFromJson(
           jsonData: tabJson['grid_layout'],
           onJsonLoadingWarning: showJsonLoadingWarning,
@@ -304,8 +303,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
         );
       } else {
         overwritten++;
-        TabGridModel existingTab =
-            tabData.firstWhere((tab) => tab.name == tabName).tabGrid;
+        TabGridModel existingTab = tabData
+            .firstWhere((tab) => tab.name == tabName)
+            .tabGrid;
         existingTab.onDestroy();
         existingTab.loadFromJson(
           jsonData: tabJson['grid_layout'],
@@ -333,8 +333,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
       return null;
     }
     ValueNotifier<String?> layoutSelection = ValueNotifier(null);
-    ValueNotifier<LayoutDownloadMode> modeSelection =
-        ValueNotifier(LayoutDownloadMode.overwrite);
+    ValueNotifier<LayoutDownloadMode> modeSelection = ValueNotifier(
+      LayoutDownloadMode.overwrite,
+    );
 
     bool showModes = false;
     return await showDialog(
@@ -367,15 +368,15 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
                           valueListenable: modeSelection,
                           builder: (_, value, child) =>
                               DialogDropdownChooser<LayoutDownloadMode>(
-                            choices: LayoutDownloadMode.values,
-                            initialValue: value,
-                            nameMap: (value) => value.name,
-                            onSelectionChanged: (selection) {
-                              if (selection != null) {
-                                modeSelection.value = selection;
-                              }
-                            },
-                          ),
+                                choices: LayoutDownloadMode.values,
+                                initialValue: value,
+                                nameMap: (value) => value.name,
+                                onSelectionChanged: (selection) {
+                                  if (selection != null) {
+                                    modeSelection.value = selection;
+                                  }
+                                },
+                              ),
                         ),
                       ),
                       const SizedBox(width: 5),
@@ -406,8 +407,9 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
             valueListenable: layoutSelection,
             builder: (_, value, child) => TextButton(
               onPressed: (value != null)
-                  ? () => Navigator.of(context)
-                      .pop((layout: value, mode: modeSelection.value))
+                  ? () => Navigator.of(
+                      context,
+                    ).pop((layout: value, mode: modeSelection.value))
                   : null,
               child: const Text('Download'),
             ),
@@ -425,14 +427,15 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
 
     LayoutDownloadResponse<List<String>> layoutsResponse =
         await layoutDownloader!.getAvailableLayouts(
-      ntConnection: ntConnection,
-      preferences: preferences,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+        );
 
     if (!layoutsResponse.successful) {
       showErrorNotification(
         title: 'Failed to Retrieve Layout List',
-        message: layoutsResponse.data.firstOrNull ??
+        message:
+            layoutsResponse.data.firstOrNull ??
             'Unable to retrieve list of available layouts',
         width: 400,
       );

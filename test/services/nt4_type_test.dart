@@ -83,10 +83,7 @@ void main() {
         NT4Type.array(NT4Type.struct('Pose2d')).serialize(),
         'struct:Pose2d[]',
       );
-      expect(
-        NT4Type.structArray('Pose2d').serialize(),
-        'struct:Pose2d[]',
-      );
+      expect(NT4Type.structArray('Pose2d').serialize(), 'struct:Pose2d[]');
       expect(NT4Type.struct('struct:Pose2d[]').serialize(), 'struct:Pose2d[]');
     });
   });
@@ -112,25 +109,31 @@ void main() {
 
     test('Array string conversion', () {
       NT4Type boolArray = NT4Type.array(NT4Type.boolean());
-      expect(
-        boolArray.convertString('[true, false, true]'),
-        [true, false, true],
-      );
+      expect(boolArray.convertString('[true, false, true]'), [
+        true,
+        false,
+        true,
+      ]);
 
       NT4Type intArray = NT4Type.array(NT4Type.int());
       expect(intArray.convertString('[1, 2, 3.0, 4, 5]'), [1, 2, 3, 4, 5]);
 
       NT4Type doubleArray = NT4Type.array(NT4Type.double());
-      expect(
-        doubleArray.convertString('[1.0, 2, 3.0, 4, 5.0]'),
-        [1.0, 2.0, 3.0, 4.0, 5.0],
-      );
+      expect(doubleArray.convertString('[1.0, 2, 3.0, 4, 5.0]'), [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+      ]);
 
       NT4Type stringArray = NT4Type.array(NT4Type.string());
-      expect(
-        stringArray.convertString('["this", "is", "a", "string"]'),
-        ['this', 'is', 'a', 'string'],
-      );
+      expect(stringArray.convertString('["this", "is", "a", "string"]'), [
+        'this',
+        'is',
+        'a',
+        'string',
+      ]);
     });
   });
 

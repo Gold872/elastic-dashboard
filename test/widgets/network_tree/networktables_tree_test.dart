@@ -25,11 +25,7 @@ void main() {
   testWidgets('Network Tables Tree with leading slashes', (widgetTester) async {
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: '/Testing/Integer',
-          type: NT4Type.int(),
-          properties: {},
-        ),
+        NT4Topic(name: '/Testing/Integer', type: NT4Type.int(), properties: {}),
         NT4Topic(
           name: '/Testing/Double',
           type: NT4Type.double(),
@@ -77,15 +73,12 @@ void main() {
     expect(find.text('string'), findsOneWidget);
   });
 
-  testWidgets('Network Tables Tree without leading slashes',
-      (widgetTester) async {
+  testWidgets('Network Tables Tree without leading slashes', (
+    widgetTester,
+  ) async {
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Testing/Integer',
-          type: NT4Type.int(),
-          properties: {},
-        ),
+        NT4Topic(name: 'Testing/Integer', type: NT4Type.int(), properties: {}),
         NT4Topic(
           name: 'Testing/Double',
           type: NT4Type.double(),
@@ -103,9 +96,10 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NetworkTableTree(
-              ntConnection: ntConnection,
-              preferences: preferences,
-              hideMetadata: false),
+            ntConnection: ntConnection,
+            preferences: preferences,
+            hideMetadata: false,
+          ),
         ),
       ),
     );
@@ -135,11 +129,7 @@ void main() {
   testWidgets('Network Tables Tree searching', (widgetTester) async {
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: '/Testing/Integer',
-          type: NT4Type.int(),
-          properties: {},
-        ),
+        NT4Topic(name: '/Testing/Integer', type: NT4Type.int(), properties: {}),
         NT4Topic(
           name: '/Testing/Double',
           type: NT4Type.double(),
@@ -193,10 +183,7 @@ void main() {
       'Translation2d',
       utf8.encode('double x;double y'),
     );
-    schemaManager.processNewSchema(
-      'Rotation2d',
-      utf8.encode('double value'),
-    );
+    schemaManager.processNewSchema('Rotation2d', utf8.encode('double value'));
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [

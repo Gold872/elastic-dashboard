@@ -19,8 +19,8 @@ import 'widget_container_model.dart';
 
 typedef DragOutFunctions = ({
   bool Function(WidgetContainerModel widget) dragOutEnd,
-  void Function(
-      WidgetContainerModel widget, Offset globalPosition) dragOutUpdate
+  void Function(WidgetContainerModel widget, Offset globalPosition)
+  dragOutUpdate,
 });
 
 class ListLayoutModel extends LayoutContainerModel {
@@ -37,7 +37,8 @@ class ListLayoutModel extends LayoutContainerModel {
     Map<String, dynamic> jsonData,
     bool enabled, {
     Function(String errorMessage)? onJsonLoadingWarning,
-  })? ntWidgetBuilder;
+  })?
+  ntWidgetBuilder;
 
   final Function(WidgetContainerModel model)? onDragCancel;
 
@@ -80,10 +81,7 @@ class ListLayoutModel extends LayoutContainerModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      ...getChildrenJson(),
-    };
+    return {...super.toJson(), ...getChildrenJson()};
   }
 
   Map<String, dynamic> getChildrenJson() {
@@ -93,26 +91,25 @@ class ListLayoutModel extends LayoutContainerModel {
       childrenJson.add(childContainer.toJson());
     }
 
-    return {
-      'children': childrenJson,
-    };
+    return {'children': childrenJson};
   }
 
   @override
   Map<String, dynamic> getProperties() {
-    return {
-      'label_position': labelPosition,
-    };
+    return {'label_position': labelPosition};
   }
 
   @override
-  void fromJson(Map<String, dynamic> jsonData,
-      {Function(String errorMessage)? onJsonLoadingWarning}) {
+  void fromJson(
+    Map<String, dynamic> jsonData, {
+    Function(String errorMessage)? onJsonLoadingWarning,
+  }) {
     super.fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
     if (jsonData.containsKey('properties') &&
         jsonData['properties'] is Map<String, dynamic>) {
-      labelPosition = tryCast(jsonData['properties']['label_position']) ??
+      labelPosition =
+          tryCast(jsonData['properties']['label_position']) ??
           tryCast(jsonData['properties']['Label position']) ??
           'TOP';
 
@@ -124,21 +121,26 @@ class ListLayoutModel extends LayoutContainerModel {
     }
 
     if (!jsonData.containsKey('children')) {
-      onJsonLoadingWarning
-          ?.call('List Layout JSON data does not contain any children');
+      onJsonLoadingWarning?.call(
+        'List Layout JSON data does not contain any children',
+      );
       return;
     }
 
     if (jsonData['children'] is! List<dynamic>) {
-      onJsonLoadingWarning
-          ?.call('List Layout JSON data does not contain any children');
+      onJsonLoadingWarning?.call(
+        'List Layout JSON data does not contain any children',
+      );
       return;
     }
 
     for (Map<String, dynamic> childData in jsonData['children']) {
       NTWidgetContainerModel? widgetModel = ntWidgetBuilder!(
-          preferences, childData, enabled,
-          onJsonLoadingWarning: onJsonLoadingWarning);
+        preferences,
+        childData,
+        enabled,
+        onJsonLoadingWarning: onJsonLoadingWarning,
+      );
 
       if (widgetModel != null) {
         children.add(widgetModel);
@@ -190,9 +192,7 @@ class ListLayoutModel extends LayoutContainerModel {
                   children: [
                     ...getContainerEditProperties(),
                     const Divider(),
-                    const Center(
-                      child: Text('Label Position'),
-                    ),
+                    const Center(child: Text('Label Position')),
                     DialogDropdownChooser(
                       onSelectionChanged: (value) {
                         if (value == null) {
@@ -212,7 +212,7 @@ class ListLayoutModel extends LayoutContainerModel {
                       choices: labelPositions,
                       initialValue:
                           labelPosition.substring(0, 1).toUpperCase() +
-                              labelPosition.substring(1).toLowerCase(),
+                          labelPosition.substring(1).toLowerCase(),
                     ),
                     const Divider(),
                     if (children.isNotEmpty)
@@ -232,24 +232,27 @@ class ListLayoutModel extends LayoutContainerModel {
                                     controlAffinity:
                                         ListTileControlAffinity.leading,
                                     trailing: IconButton(
-                                        icon: const Icon(
-                                          Icons.delete,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            children.remove(container);
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          children.remove(container);
 
-                                            container.unSubscribe();
-                                            container.disposeModel(
-                                                deleting: true);
-                                            container.forceDispose();
+                                          container.unSubscribe();
+                                          container.disposeModel(
+                                            deleting: true,
+                                          );
+                                          container.forceDispose();
 
-                                            notifyListeners();
-                                          });
-                                        }),
-                                    tilePadding:
-                                        const EdgeInsets.only(right: 40.0),
+                                          notifyListeners();
+                                        });
+                                      },
+                                    ),
+                                    tilePadding: const EdgeInsets.only(
+                                      right: 40.0,
+                                    ),
                                     childrenPadding: const EdgeInsets.only(
                                       left: 16.0,
                                       top: 8.0,
@@ -259,7 +262,10 @@ class ListLayoutModel extends LayoutContainerModel {
                                     expandedCrossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: getChildEditProperties(
-                                        context, container, setState),
+                                      context,
+                                      container,
+                                      setState,
+                                    ),
                                   ),
                                 ),
                               )
@@ -296,8 +302,11 @@ class ListLayoutModel extends LayoutContainerModel {
     );
   }
 
-  List<Widget> getChildEditProperties(BuildContext context,
-      NTWidgetContainerModel container, StateSetter setState) {
+  List<Widget> getChildEditProperties(
+    BuildContext context,
+    NTWidgetContainerModel container,
+    StateSetter setState,
+  ) {
     List<Widget> containerEditProperties = [
       // Settings for the widget container
       const Text('Container Settings'),
@@ -315,8 +324,9 @@ class ListLayoutModel extends LayoutContainerModel {
       ),
     ];
 
-    List<Widget> childEditProperties =
-        container.childModel.getEditProperties(context);
+    List<Widget> childEditProperties = container.childModel.getEditProperties(
+      context,
+    );
 
     return [
       ...containerEditProperties,
@@ -367,8 +377,10 @@ class ListLayoutModel extends LayoutContainerModel {
           children: [
             Flexible(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 1.5, vertical: 2.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 1.5,
+                  vertical: 2.0,
+                ),
                 child: AbsorbPointer(
                   absorbing: !widget.enabled,
                   child: ChangeNotifierProvider<NTWidgetModel>.value(
@@ -401,9 +413,7 @@ class ListLayoutModel extends LayoutContainerModel {
                 ),
               ),
               const SizedBox(width: 5),
-              Flexible(
-                child: widgetInContainer,
-              ),
+              Flexible(child: widgetInContainer),
             ],
           );
           break;
@@ -412,9 +422,7 @@ class ListLayoutModel extends LayoutContainerModel {
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
-                child: widgetInContainer,
-              ),
+              Flexible(child: widgetInContainer),
               const SizedBox(width: 5),
               Align(
                 alignment: Alignment.centerRight,
@@ -527,8 +535,10 @@ class ListLayoutModel extends LayoutContainerModel {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4.0,
+                vertical: 2.0,
+              ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7.5),
                 color: const Color.fromARGB(255, 45, 45, 45),
@@ -567,11 +577,7 @@ class ListLayoutModel extends LayoutContainerModel {
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: Column(
-                children: [
-                  ..._getListColumn(),
-                ],
-              ),
+              child: Column(children: [..._getListColumn()]),
             ),
           ),
         ],
@@ -598,11 +604,7 @@ class ListLayoutModel extends LayoutContainerModel {
             SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(2.0),
-                child: Column(
-                  children: [
-                    ..._getListColumn(),
-                  ],
-                ),
+                child: Column(children: [..._getListColumn()]),
               ),
             ),
           ],

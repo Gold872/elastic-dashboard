@@ -7,7 +7,7 @@ import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
-  NT4SubscriptionOptions options
+  NT4SubscriptionOptions options,
 });
 
 class NTConnection {
@@ -45,22 +45,23 @@ class NTConnection {
 
   void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
-        serverBaseAddress: ipAddress,
-        schemaManager: schemaManager,
-        onConnect: () {
-          _ntConnected.value = true;
+      serverBaseAddress: ipAddress,
+      schemaManager: schemaManager,
+      onConnect: () {
+        _ntConnected.value = true;
 
-          for (VoidCallback callback in onConnectedListeners) {
-            callback.call();
-          }
-        },
-        onDisconnect: () {
-          _ntConnected.value = false;
+        for (VoidCallback callback in onConnectedListeners) {
+          callback.call();
+        }
+      },
+      onDisconnect: () {
+        _ntConnected.value = false;
 
-          for (VoidCallback callback in onDisconnectedListeners) {
-            callback.call();
-          }
-        });
+        for (VoidCallback callback in onDisconnectedListeners) {
+          callback.call();
+        }
+      },
+    );
 
     // Allows all published topics to be announced
     _ntClient.subscribe(
@@ -75,9 +76,10 @@ class NTConnection {
     );
   }
 
-  void dsClientConnect(
-      {Function(String ip)? onIPAnnounced,
-      Function(bool isDocked)? onDriverStationDockChanged}) {
+  void dsClientConnect({
+    Function(String ip)? onIPAnnounced,
+    Function(bool isDocked)? onDriverStationDockChanged,
+  }) {
     _dsClient = DSInteropClient(
       onNewIPAnnounced: onIPAnnounced,
       onDriverStationDockChanged: onDriverStationDockChanged,
@@ -118,17 +120,21 @@ class NTConnection {
     _ntClient.removeTopicUnannounceListener(onUnannounce);
   }
 
-  Future<T?>? subscribeAndRetrieveData<T>(String topic,
-      {period = 0.1,
-      timeout = const Duration(seconds: 2, milliseconds: 500)}) async {
+  Future<T?>? subscribeAndRetrieveData<T>(
+    String topic, {
+    period = 0.1,
+    timeout = const Duration(seconds: 2, milliseconds: 500),
+  }) async {
     NT4Subscription subscription = subscribe(topic, period);
 
     T? value;
     try {
-      value = await subscription
-          .periodicStream()
-          .firstWhere((element) => element != null && element is T)
-          .timeout(timeout) as T?;
+      value =
+          await subscription
+                  .periodicStream()
+                  .firstWhere((element) => element != null && element is T)
+                  .timeout(timeout)
+              as T?;
     } catch (e) {
       value = null;
     }
@@ -170,9 +176,7 @@ class NTConnection {
   NT4Subscription subscribe(String topic, [double period = 0.1]) =>
       subscribeWithOptions(
         topic,
-        NT4SubscriptionOptions(
-          periodicRateSeconds: period,
-        ),
+        NT4SubscriptionOptions(periodicRateSeconds: period),
       );
 
   NT4Subscription subscribeWithOptions(
@@ -208,10 +212,7 @@ class NTConnection {
   NT4Subscription subscribeAll(String topic, [double period = 0.1]) =>
       subscribeWithOptions(
         topic,
-        NT4SubscriptionOptions(
-          periodicRateSeconds: period,
-          all: true,
-        ),
+        NT4SubscriptionOptions(periodicRateSeconds: period, all: true),
       );
 
   void unSubscribe(NT4Subscription subscription) {

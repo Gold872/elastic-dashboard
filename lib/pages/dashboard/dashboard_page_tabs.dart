@@ -47,19 +47,22 @@ mixin DashboardPageTabs on DashboardPageViewModel {
         return AlertDialog(
           actions: [
             TextButton(
-                onPressed: () {
-                  logger.debug('Closing tab: $tabName');
-                  Navigator.of(context).pop();
-                  onClose.call();
-                },
-                child: const Text('OK')),
+              onPressed: () {
+                logger.debug('Closing tab: $tabName');
+                Navigator.of(context).pop();
+                onClose.call();
+              },
+              child: const Text('OK'),
+            ),
             TextButton(
-                onPressed: () {
-                  logger.debug(
-                      'Ignoring tab close for tab: $tabName, user canceled the request.');
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancel')),
+              onPressed: () {
+                logger.debug(
+                  'Ignoring tab close for tab: $tabName, user canceled the request.',
+                );
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
           ],
           content: Text('Do you want to close the tab "$tabName"?'),
           title: const Text('Confirm Tab Close'),
@@ -81,7 +84,8 @@ mixin DashboardPageTabs on DashboardPageViewModel {
     }
     if (currentTabIndex <= 0) {
       logger.debug(
-          'Ignoring move tab left, tab index is already $currentTabIndex');
+        'Ignoring move tab left, tab index is already $currentTabIndex',
+      );
       return;
     }
 
@@ -103,7 +107,8 @@ mixin DashboardPageTabs on DashboardPageViewModel {
     }
     if (currentTabIndex >= tabData.length - 1) {
       logger.debug(
-          'Ignoring move tab left, tab index is already $currentTabIndex');
+        'Ignoring move tab left, tab index is already $currentTabIndex',
+      );
       return;
     }
 

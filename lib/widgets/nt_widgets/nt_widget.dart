@@ -50,7 +50,8 @@ sealed class NTWidgetModel extends ChangeNotifier {
     required String topic,
     double? period,
   }) : _topic = topic {
-    this.period = period ??
+    this.period =
+        period ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
   }
@@ -62,17 +63,15 @@ sealed class NTWidgetModel extends ChangeNotifier {
   }) {
     _topic = tryCast(jsonData['topic']) ?? '';
 
-    _period = tryCast(jsonData['period']) ??
+    _period =
+        tryCast(jsonData['period']) ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
   }
 
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    return {
-      'topic': topic,
-      'period': period,
-    };
+    return {'topic': topic, 'period': period};
   }
 
   void init();
@@ -145,8 +144,8 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     this.ntStructMeta,
     this.dataType,
     super.period,
-  })  : _typeOverride = type,
-        super() {
+  }) : _typeOverride = type,
+       super() {
     init();
   }
 

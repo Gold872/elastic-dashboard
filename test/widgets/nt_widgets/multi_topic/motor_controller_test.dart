@@ -36,9 +36,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Motor Controller/Value': -0.5,
-      },
+      virtualValues: {'Test/Motor Controller/Value': -0.5},
     );
   });
 

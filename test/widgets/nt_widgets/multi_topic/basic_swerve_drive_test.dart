@@ -51,25 +51,41 @@ void main() {
     expect(swerveModel.showRobotRotation, isFalse);
     expect(swerveModel.rotationUnit, 'Radians');
 
-    expect(swerveModel.frontLeftAngleTopic,
-        'Test/Basic Swerve Drive/Front Left Angle');
-    expect(swerveModel.frontLeftVelocityTopic,
-        'Test/Basic Swerve Drive/Front Left Velocity');
+    expect(
+      swerveModel.frontLeftAngleTopic,
+      'Test/Basic Swerve Drive/Front Left Angle',
+    );
+    expect(
+      swerveModel.frontLeftVelocityTopic,
+      'Test/Basic Swerve Drive/Front Left Velocity',
+    );
 
-    expect(swerveModel.frontRightAngleTopic,
-        'Test/Basic Swerve Drive/Front Right Angle');
-    expect(swerveModel.frontRightVelocityTopic,
-        'Test/Basic Swerve Drive/Front Right Velocity');
+    expect(
+      swerveModel.frontRightAngleTopic,
+      'Test/Basic Swerve Drive/Front Right Angle',
+    );
+    expect(
+      swerveModel.frontRightVelocityTopic,
+      'Test/Basic Swerve Drive/Front Right Velocity',
+    );
 
-    expect(swerveModel.backLeftAngleTopic,
-        'Test/Basic Swerve Drive/Back Left Angle');
-    expect(swerveModel.backLeftVelocityTopic,
-        'Test/Basic Swerve Drive/Back Left Velocity');
+    expect(
+      swerveModel.backLeftAngleTopic,
+      'Test/Basic Swerve Drive/Back Left Angle',
+    );
+    expect(
+      swerveModel.backLeftVelocityTopic,
+      'Test/Basic Swerve Drive/Back Left Velocity',
+    );
 
-    expect(swerveModel.backRightAngleTopic,
-        'Test/Basic Swerve Drive/Back Right Angle');
-    expect(swerveModel.backRightVelocityTopic,
-        'Test/Basic Swerve Drive/Back Right Velocity');
+    expect(
+      swerveModel.backRightAngleTopic,
+      'Test/Basic Swerve Drive/Back Right Angle',
+    );
+    expect(
+      swerveModel.backRightVelocityTopic,
+      'Test/Basic Swerve Drive/Back Right Velocity',
+    );
   });
 
   test('Basic swerve model to json', () {
@@ -151,8 +167,10 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showRobotRotation =
-        find.widgetWithText(DialogToggleSwitch, 'Show Robot Rotation');
+    final showRobotRotation = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Robot Rotation',
+    );
     final radiansUnit = find.widgetWithText(ListTile, 'Radians');
     final degreesUnit = find.widgetWithText(ListTile, 'Degrees');
     final rotationsUnit = find.widgetWithText(ListTile, 'Rotations');
@@ -163,40 +181,28 @@ void main() {
     expect(rotationsUnit, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showRobotRotation,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showRobotRotation, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(swerveModel.showRobotRotation, true);
 
     await widgetTester.ensureVisible(radiansUnit);
     await widgetTester.tap(
-      find.descendant(
-        of: radiansUnit,
-        matching: find.byType(Radio<String>),
-      ),
+      find.descendant(of: radiansUnit, matching: find.byType(Radio<String>)),
     );
     await widgetTester.pumpAndSettle();
     expect(swerveModel.rotationUnit, 'Radians');
 
     await widgetTester.ensureVisible(degreesUnit);
     await widgetTester.tap(
-      find.descendant(
-        of: degreesUnit,
-        matching: find.byType(Radio<String>),
-      ),
+      find.descendant(of: degreesUnit, matching: find.byType(Radio<String>)),
     );
     await widgetTester.pumpAndSettle();
     expect(swerveModel.rotationUnit, 'Degrees');
 
     await widgetTester.ensureVisible(rotationsUnit);
     await widgetTester.tap(
-      find.descendant(
-        of: rotationsUnit,
-        matching: find.byType(Radio<String>),
-      ),
+      find.descendant(of: rotationsUnit, matching: find.byType(Radio<String>)),
     );
     await widgetTester.pumpAndSettle();
     expect(swerveModel.rotationUnit, 'Rotations');

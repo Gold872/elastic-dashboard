@@ -16,10 +16,11 @@ import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_con
 import 'package:elastic_dashboard/widgets/gesture/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
-typedef ListLayoutBuilder = ListLayoutModel Function({
-  required String title,
-  required List<NTWidgetContainerModel> children,
-});
+typedef ListLayoutBuilder =
+    ListLayoutModel Function({
+      required String title,
+      required List<NTWidgetContainerModel> children,
+    });
 
 class NetworkTableTree extends StatefulWidget {
   final NTConnection ntConnection;
@@ -29,7 +30,7 @@ class NetworkTableTree extends StatefulWidget {
   final int gridIndex;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)?
-      onDragUpdate;
+  onDragUpdate;
   final void Function(WidgetContainerModel widget)? onDragEnd;
   final void Function()? onRemoveWidget;
   final String searchQuery;
@@ -172,8 +173,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     for (String row in rows) {
       currentTopic += '/$row';
 
-      String effectiveTopic =
-          hasLeading ? currentTopic : currentTopic.substring(1);
+      String effectiveTopic = hasLeading
+          ? currentTopic
+          : currentTopic.substring(1);
 
       bool lastElement = currentTopic == '/${rows.join('/')}';
 
@@ -255,22 +257,22 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
       treeController: treeController,
       nodeBuilder:
           (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
-        return TreeTile(
-          gridIndex: widget.gridIndex,
-          preferences: widget.preferences,
-          entry: entry,
-          listLayoutBuilder: widget.listLayoutBuilder,
-          onDragUpdate: widget.onDragUpdate,
-          onDragEnd: widget.onDragEnd,
-          onRemoveWidget: widget.onRemoveWidget,
-          onTap: () {
-            if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
-              return;
-            }
-            setState(() => treeController.toggleExpansion(entry.node));
+            return TreeTile(
+              gridIndex: widget.gridIndex,
+              preferences: widget.preferences,
+              entry: entry,
+              listLayoutBuilder: widget.listLayoutBuilder,
+              onDragUpdate: widget.onDragUpdate,
+              onDragEnd: widget.onDragEnd,
+              onRemoveWidget: widget.onRemoveWidget,
+              onTap: () {
+                if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
+                  return;
+                }
+                setState(() => treeController.toggleExpansion(entry.node));
+              },
+            );
           },
-        );
-      },
     );
   }
 }
@@ -300,7 +302,7 @@ class TreeTile extends StatefulWidget {
   final ListLayoutBuilder? listLayoutBuilder;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)?
-      onDragUpdate;
+  onDragUpdate;
   final void Function(WidgetContainerModel widget)? onDragEnd;
   final void Function()? onRemoveWidget;
 
@@ -418,13 +420,15 @@ class _TreeTileState extends State<TreeTile> {
                     ListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.only(right: 20.0),
-                      leading: (widget.entry.hasChildren ||
+                      leading:
+                          (widget.entry.hasChildren ||
                               widget.entry.node.containsOnlyMetadata())
                           ? FolderButton(
                               openedIcon: const Icon(Icons.arrow_drop_down),
                               closedIcon: const Icon(Icons.arrow_right),
                               iconSize: 24,
-                              isOpen: widget.entry.hasChildren &&
+                              isOpen:
+                                  widget.entry.hasChildren &&
                                   widget.entry.isExpanded,
                               onPressed: widget.entry.hasChildren
                                   ? widget.onTap

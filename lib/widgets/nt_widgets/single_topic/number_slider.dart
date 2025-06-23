@@ -55,10 +55,10 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
     this.updateContinuously = false,
     super.dataType,
     super.period,
-  })  : _divisions = divisions,
-        _minValue = minValue,
-        _maxValue = maxValue,
-        super();
+  }) : _divisions = divisions,
+       _minValue = minValue,
+       _maxValue = maxValue,
+       super();
 
   NumberSliderModel.fromJson({
     required super.ntConnection,
@@ -69,11 +69,13 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
     _maxValue =
         tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 1.0;
-    _divisions = tryCast(jsonData['divisions']) ??
+    _divisions =
+        tryCast(jsonData['divisions']) ??
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    updateContinuously = tryCast(jsonData['update_continuously']) ??
+    updateContinuously =
+        tryCast(jsonData['update_continuously']) ??
         tryCast(jsonData['publish_all']) ??
         false;
   }
@@ -107,7 +109,8 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
                 minValue = newMin;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Min Value',
               initialText: _minValue.toString(),
             ),
@@ -122,7 +125,8 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
                 maxValue = newMax;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Max Value',
               initialText: _maxValue.toString(),
             ),

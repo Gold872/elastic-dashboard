@@ -35,9 +35,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Relay/Value': 'Off',
-      },
+      virtualValues: {'Test/Relay/Value': 'Off'},
     );
   });
 

@@ -112,12 +112,15 @@ void main() {
     await widgetTester.tap(find.byIcon(Icons.cancel_outlined).first);
     await widgetTester.pumpAndSettle();
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Command Scheduler/Cancel'),
-        [1]);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Command Scheduler/Cancel'),
+      [1],
+    );
 
     ntConnection.updateDataFromTopicName('Test/Command Scheduler/Ids', [2]);
-    ntConnection
-        .updateDataFromTopicName('Test/Command Scheduler/Names', ['Command 2']);
+    ntConnection.updateDataFromTopicName('Test/Command Scheduler/Names', [
+      'Command 2',
+    ]);
 
     commandSchedulerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -129,7 +132,9 @@ void main() {
     await widgetTester.tap(find.byIcon(Icons.cancel_outlined));
     await widgetTester.pumpAndSettle();
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Command Scheduler/Cancel'),
-        [1, 2]);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Command Scheduler/Cancel'),
+      [1, 2],
+    );
   });
 }

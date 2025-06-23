@@ -45,9 +45,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': -1.0,
-      },
+      virtualValues: {'Test/Double Value': -1.0},
     );
   });
 
@@ -102,8 +100,9 @@ void main() {
     expect(numberSliderModel.toJson(), numberSliderJson);
   });
 
-  testWidgets('Number slider widget test continuous update',
-      (widgetTester) async {
+  testWidgets('Number slider widget test continuous update', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
@@ -151,12 +150,15 @@ void main() {
     expect(draggingDuringDrag, isTrue);
     expect(valueDuringDrag, isNot(-1.0));
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
-        greaterThan(0.0));
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Double Value'),
+      greaterThan(0.0),
+    );
   });
 
-  testWidgets('Number slider widget test non-continuous update',
-      (widgetTester) async {
+  testWidgets('Number slider widget test non-continuous update', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     NumberSliderModel numberSliderModel = NumberSliderModel(
@@ -209,8 +211,10 @@ void main() {
     expect(draggingDuringDrag, isTrue);
     expect(valueDuringDrag, -1.0);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
-        greaterThan(0.0));
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Double Value'),
+      greaterThan(0.0),
+    );
   });
 
   testWidgets('Number slider widget test integer', (widgetTester) async {
@@ -220,9 +224,7 @@ void main() {
       virtualTopics: [
         NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
-      virtualValues: {
-        'Test/Int Value': -1,
-      },
+      virtualValues: {'Test/Int Value': -1},
     );
 
     NumberSliderModel numberSliderModel = NumberSliderModel(
@@ -277,10 +279,14 @@ void main() {
     expect(valueDuringDrag, -1);
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Int Value'), greaterThan(0));
+      ntConnection.getLastAnnouncedValue('Test/Int Value'),
+      greaterThan(0),
+    );
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType, int);
+      ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType,
+      int,
+    );
   });
 
   testWidgets('Number slider edit properties', (widgetTester) async {
@@ -335,8 +341,10 @@ void main() {
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
     final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
-    final updateWhileDragging =
-        find.widgetWithText(DialogToggleSwitch, 'Update While Dragging');
+    final updateWhileDragging = find.widgetWithText(
+      DialogToggleSwitch,
+      'Update While Dragging',
+    );
 
     expect(minimum, findsOneWidget);
     expect(maximum, findsOneWidget);
@@ -372,10 +380,7 @@ void main() {
     expect(numberSliderModel.divisions, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: updateWhileDragging,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: updateWhileDragging, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

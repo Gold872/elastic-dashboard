@@ -151,7 +151,8 @@ class NetworkTableTreeRow {
         return await getTypedWidget('$topic/.type');
       }
 
-      bool isCameraStream = hasRows(['mode', 'modes', 'source', 'streams']) &&
+      bool isCameraStream =
+          hasRows(['mode', 'modes', 'source', 'streams']) &&
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
@@ -214,8 +215,7 @@ class NetworkTableTreeRow {
 
     Iterable<NTWidgetContainerModel> listChildren = (await Future.wait(
       childrenFutures,
-    ))
-        .whereType();
+    )).whereType();
 
     if (listChildren.isEmpty) {
       return null;

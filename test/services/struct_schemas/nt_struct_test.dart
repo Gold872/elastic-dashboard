@@ -140,18 +140,13 @@ void main() {
 
       test('Invalid data types', () {
         expect(
-          () => NTStructSchema.parse(
-            name: 'TestSchema',
-            schema: 'invalid one;',
-          ),
+          () =>
+              NTStructSchema.parse(name: 'TestSchema', schema: 'invalid one;'),
           throwsA(isA<SchemaParseException>()),
         );
 
         expect(
-          () => NTStructSchema.parse(
-            name: 'TestSchema',
-            schema: 'long one;',
-          ),
+          () => NTStructSchema.parse(name: 'TestSchema', schema: 'long one;'),
           throwsA(isA<SchemaParseException>()),
         );
       });
@@ -167,10 +162,8 @@ void main() {
         );
 
         expect(
-          () => NTStructSchema.parse(
-            name: 'TestSchema',
-            schema: 'int32 one[];',
-          ),
+          () =>
+              NTStructSchema.parse(name: 'TestSchema', schema: 'int32 one[];'),
           throwsException,
           reason: 'Unspecified array length',
         );
@@ -336,10 +329,7 @@ void main() {
       expect(decoded['floatArray'], isA<List>());
 
       for (int i = 0; i < 16; i++) {
-        expect(
-          decoded['floatArray']?[i],
-          i * 0.5,
-        );
+        expect(decoded['floatArray']?[i], i * 0.5);
       }
     });
 
@@ -477,10 +467,7 @@ void main() {
         final decodedValue = decodedStruct['val${i + 1}'];
         // Floating points are annoying
         if (decodedValue is double) {
-          expect(
-            (expectedData[i] - decodedValue).abs(),
-            lessThan(0.01),
-          );
+          expect((expectedData[i] - decodedValue).abs(), lessThan(0.01));
         } else {
           expect(decodedStruct['val${i + 1}'], expectedData[i]);
         }
@@ -490,14 +477,15 @@ void main() {
 
   group('[NT Struct Meta]:', () {
     final NTStructSchema schema = NTStructSchema.parse(
-        name: 'TestStruct',
-        schema: 'SubStruct subStruct;',
-        knownSchemas: {
-          'SubStruct': NTStructSchema.parse(
-            name: 'SubStruct',
-            schema: 'int32 val1;',
-          ),
-        });
+      name: 'TestStruct',
+      schema: 'SubStruct subStruct;',
+      knownSchemas: {
+        'SubStruct': NTStructSchema.parse(
+          name: 'SubStruct',
+          schema: 'int32 val1;',
+        ),
+      },
+    );
 
     group('Struct Meta Type:', () {
       test('With valid path', () {
@@ -560,14 +548,26 @@ void main() {
 
   group('[Data Util]:', () {
     test('Uint8List to Bit array', () {
-      final bitArray = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
-          .map((e) => e == 1)
-          .toList();
+      final bitArray = [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ].map((e) => e == 1).toList();
 
-      expect(
-        Uint8List.fromList([1, 1]).toBitArray(),
-        bitArray,
-      );
+      expect(Uint8List.fromList([1, 1]).toBitArray(), bitArray);
 
       expect(
         Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8]).toBitArray().length,
@@ -576,19 +576,28 @@ void main() {
     });
 
     test('Bit array to Uint8List', () {
-      final bitArray = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
-          .map((e) => e == 1)
-          .toList();
+      final bitArray = [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ].map((e) => e == 1).toList();
 
-      expect(
-        bitArray.toUint8List(),
-        Uint8List.fromList([1, 1]),
-      );
+      expect(bitArray.toUint8List(), Uint8List.fromList([1, 1]));
 
-      expect(
-        List.generate(64, (_) => false).toUint8List().length,
-        8,
-      );
+      expect(List.generate(64, (_) => false).toUint8List().length, 8);
     });
 
     test('Web-safe 64 bit int reading (signed)', () {

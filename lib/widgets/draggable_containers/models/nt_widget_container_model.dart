@@ -68,13 +68,16 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   }
 
   @override
-  void fromJson(Map<String, dynamic> jsonData,
-      {Function(String errorMessage)? onJsonLoadingWarning}) {
+  void fromJson(
+    Map<String, dynamic> jsonData, {
+    Function(String errorMessage)? onJsonLoadingWarning,
+  }) {
     super.fromJson(jsonData, onJsonLoadingWarning: onJsonLoadingWarning);
 
     if (!jsonData.containsKey('type')) {
       onJsonLoadingWarning?.call(
-          'NetworkTables widget does not specify a widget type, defaulting to blank placeholder widget');
+        'NetworkTables widget does not specify a widget type, defaulting to blank placeholder widget',
+      );
     }
 
     Map<String, dynamic> widgetProperties = {};
@@ -136,8 +139,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
             child: SingleChildScrollView(
               child: StatefulBuilder(
                 builder: (context, setState) {
-                  List<Widget>? childProperties =
-                      childModel.getEditProperties(context);
+                  List<Widget>? childProperties = childModel.getEditProperties(
+                    context,
+                  );
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,15 +252,17 @@ class NTWidgetContainerModel extends WidgetContainerModel {
             Flexible(
               child: DialogTextInput(
                 onSubmit: (value) {
-                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
-                      childModel
-                          .cast<SingleTopicNTWidgetModel>()
-                          .ntStructMeta!
-                          .copyWith(schemaName: value);
+                  childModel
+                      .cast<SingleTopicNTWidgetModel>()
+                      .ntStructMeta = childModel
+                      .cast<SingleTopicNTWidgetModel>()
+                      .ntStructMeta!
+                      .copyWith(schemaName: value);
                   childModel.resetSubscription();
                 },
                 label: 'Struct Name',
-                initialText: (childModel as SingleTopicNTWidgetModel)
+                initialText:
+                    (childModel as SingleTopicNTWidgetModel)
                         .ntStructMeta
                         ?.schemaName ??
                     '',
@@ -267,13 +273,16 @@ class NTWidgetContainerModel extends WidgetContainerModel {
             Flexible(
               child: DialogTextInput(
                 onSubmit: (value) {
-                  List<String>? newPath =
-                      value.split('/').where((e) => e.isNotEmpty).toList();
-                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
-                      childModel
-                          .cast<SingleTopicNTWidgetModel>()
-                          .ntStructMeta!
-                          .copyWith(path: newPath);
+                  List<String>? newPath = value
+                      .split('/')
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+                  childModel
+                      .cast<SingleTopicNTWidgetModel>()
+                      .ntStructMeta = childModel
+                      .cast<SingleTopicNTWidgetModel>()
+                      .ntStructMeta!
+                      .copyWith(path: newPath);
                   childModel.resetSubscription();
                 },
                 label: 'Path',
@@ -307,12 +316,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         ),
       );
     }
-    return [
-      MenuItem.submenu(
-        label: 'Show As',
-        items: widgetTypes,
-      ),
-    ];
+    return [MenuItem.submenu(label: 'Show As', items: widgetTypes)];
   }
 
   @override
@@ -324,10 +328,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       cornerRadius:
           preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
       opacity: 0.80,
-      child: ChangeNotifierProvider.value(
-        value: childModel,
-        child: child,
-      ),
+      child: ChangeNotifierProvider.value(value: childModel, child: child),
     );
   }
 
@@ -344,10 +345,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
         opacity: (enabled) ? 1.00 : 0.50,
         child: AbsorbPointer(
           absorbing: !enabled,
-          child: ChangeNotifierProvider.value(
-            value: childModel,
-            child: child,
-          ),
+          child: ChangeNotifierProvider.value(value: childModel, child: child),
         ),
       ),
     );
@@ -382,7 +380,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       period: (type != 'Graph')
           ? childModel.period
           : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??
-              Defaults.defaultGraphPeriod,
+                Defaults.defaultGraphPeriod,
     );
 
     NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);

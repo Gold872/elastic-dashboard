@@ -69,12 +69,12 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
     super.ntStructMeta,
     super.dataType,
     super.period,
-  })  : _orientation = orientation,
-        _divisions = divisions,
-        _inverted = inverted,
-        _maxValue = maxValue,
-        _minValue = minValue,
-        super();
+  }) : _orientation = orientation,
+       _divisions = divisions,
+       _inverted = inverted,
+       _maxValue = maxValue,
+       _minValue = minValue,
+       super();
 
   VoltageViewModel.fromJson({
     required super.ntConnection,
@@ -137,7 +137,8 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
                 minValue = newMin;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Min Value',
               initialText: _minValue.toString(),
             ),
@@ -152,7 +153,8 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
                 maxValue = newMax;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Max Value',
               initialText: _maxValue.toString(),
             ),
@@ -219,8 +221,9 @@ class VoltageView extends NTWidget {
         double? divisionInterval =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits =
-            (model.dataType?.dataType == NT4DataType.int32) ? 0 : 2;
+        int fractionDigits = (model.dataType?.dataType == NT4DataType.int32)
+            ? 0
+            : 2;
 
         GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
             ? GaugeOrientation.vertical
@@ -228,8 +231,8 @@ class VoltageView extends NTWidget {
 
         RulerPosition rulerPosition =
             (gaugeOrientation == GaugeOrientation.vertical)
-                ? RulerPosition.right
-                : RulerPosition.bottom;
+            ? RulerPosition.right
+            : RulerPosition.bottom;
 
         List<Widget> children = [
           Text(
@@ -237,9 +240,7 @@ class VoltageView extends NTWidget {
             style: Theme.of(context).textTheme.bodyLarge,
             overflow: TextOverflow.ellipsis,
           ),
-          const Flexible(
-            child: SizedBox(width: 5.0, height: 5.0),
-          ),
+          const Flexible(child: SizedBox(width: 5.0, height: 5.0)),
           LinearGauge(
             key: UniqueKey(),
             rulers: RulerStyle(

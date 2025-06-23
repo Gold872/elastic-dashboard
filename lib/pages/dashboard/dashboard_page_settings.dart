@@ -52,7 +52,8 @@ mixin DashboardPageSettings on DashboardPageViewModel {
         onAutoSubmitButtonChanged: changeAutoSubmitButton,
         onOpenAssetsFolderPressed: () async {
           Uri uri = Uri.file(
-              '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/');
+            '${path.dirname(Platform.resolvedExecutable)}/data/flutter_assets/assets/',
+          );
           if (await canLaunchUrl(uri)) {
             logger.info('Opening URL (assets folder): ${uri.toString()}');
             launchUrl(uri);
@@ -76,8 +77,9 @@ mixin DashboardPageSettings on DashboardPageViewModel {
 
     await preferences.setInt(PrefKeys.teamNumber, newTeamNumber);
 
-    switch (
-        IPAddressMode.fromIndex(preferences.getInt(PrefKeys.ipAddressMode))) {
+    switch (IPAddressMode.fromIndex(
+      preferences.getInt(PrefKeys.ipAddressMode),
+    )) {
       case IPAddressMode.roboRIOmDNS:
         updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(newTeamNumber));
         break;
@@ -113,7 +115,8 @@ mixin DashboardPageSettings on DashboardPageViewModel {
       return;
     }
 
-    bool? cancel = await showDialog<bool>(
+    bool? cancel =
+        await showDialog<bool>(
           context: state!.context,
           barrierDismissible: false,
           builder: (context) {
@@ -133,7 +136,8 @@ mixin DashboardPageSettings on DashboardPageViewModel {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        'Resizing the grid may cause widgets to become misaligned due to sizing constraints. Manual work may be required after resizing.'),
+                      'Resizing the grid may cause widgets to become misaligned due to sizing constraints. Manual work may be required after resizing.',
+                    ),
                   ],
                 ),
               ),
@@ -267,7 +271,9 @@ mixin DashboardPageSettings on DashboardPageViewModel {
     if (dpiOverride != null) {
       logger.info('Setting DPI override to ${dpiOverride.toDouble()}');
       await preferences.setDouble(
-          PrefKeys.gridDpiOverride, dpiOverride.toDouble());
+        PrefKeys.gridDpiOverride,
+        dpiOverride.toDouble(),
+      );
     } else {
       logger.info('Removing DPI override preference');
       await preferences.remove(PrefKeys.gridDpiOverride);
@@ -294,12 +300,18 @@ mixin DashboardPageSettings on DashboardPageViewModel {
         updateIPAddress(lastAnnouncedIP);
         break;
       case IPAddressMode.roboRIOmDNS:
-        updateIPAddress(IPAddressUtil.teamNumberToRIOmDNS(
-            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        updateIPAddress(
+          IPAddressUtil.teamNumberToRIOmDNS(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber,
+          ),
+        );
         break;
       case IPAddressMode.teamNumber:
-        updateIPAddress(IPAddressUtil.teamNumberToIP(
-            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber));
+        updateIPAddress(
+          IPAddressUtil.teamNumberToIP(
+            preferences.getInt(PrefKeys.teamNumber) ?? Defaults.teamNumber,
+          ),
+        );
         break;
       case IPAddressMode.localhost:
         updateIPAddress('localhost');

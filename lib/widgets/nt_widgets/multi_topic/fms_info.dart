@@ -30,13 +30,13 @@ class FMSInfoModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        eventNameSubscription,
-        controlDataSubscription,
-        allianceSubscription,
-        matchNumberSubscription,
-        matchTypeSubscription,
-        replayNumberSubscription,
-      ];
+    eventNameSubscription,
+    controlDataSubscription,
+    allianceSubscription,
+    matchNumberSubscription,
+    matchTypeSubscription,
+    replayNumberSubscription,
+  ];
 
   FMSInfoModel({
     required super.ntConnection,
@@ -53,17 +53,27 @@ class FMSInfoModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    eventNameSubscription =
-        ntConnection.subscribe(eventNameTopic, super.period);
-    controlDataSubscription =
-        ntConnection.subscribe(controlDataTopic, super.period);
+    eventNameSubscription = ntConnection.subscribe(
+      eventNameTopic,
+      super.period,
+    );
+    controlDataSubscription = ntConnection.subscribe(
+      controlDataTopic,
+      super.period,
+    );
     allianceSubscription = ntConnection.subscribe(allianceTopic, super.period);
-    matchNumberSubscription =
-        ntConnection.subscribe(matchNumberTopic, super.period);
-    matchTypeSubscription =
-        ntConnection.subscribe(matchTypeTopic, super.period);
-    replayNumberSubscription =
-        ntConnection.subscribe(replayNumberTopic, super.period);
+    matchNumberSubscription = ntConnection.subscribe(
+      matchNumberTopic,
+      super.period,
+    );
+    matchTypeSubscription = ntConnection.subscribe(
+      matchTypeTopic,
+      super.period,
+    );
+    replayNumberSubscription = ntConnection.subscribe(
+      replayNumberTopic,
+      super.period,
+    );
   }
 }
 
@@ -112,8 +122,9 @@ class FMSInfo extends NTWidget {
 
         String eventNameDisplay = '$eventName${(eventName != '') ? ' ' : ''}';
         String matchTypeString = _getMatchTypeString(matchType);
-        String replayNumberDisplay =
-            (replayNumber != 0) ? ' (replay $replayNumber)' : '';
+        String replayNumberDisplay = (replayNumber != 0)
+            ? ' (replay $replayNumber)'
+            : '';
 
         bool fmsConnected = _flagMatches(controlData, FMS_ATTACHED_FLAG);
         bool dsAttached = _flagMatches(controlData, DS_ATTACHED_FLAG);
@@ -140,29 +151,29 @@ class FMSInfo extends NTWidget {
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               decoration: BoxDecoration(
-                color:
-                    (redAlliance) ? Colors.red.shade900 : Colors.blue.shade900,
+                color: (redAlliance)
+                    ? Colors.red.shade900
+                    : Colors.blue.shade900,
                 borderRadius: BorderRadius.circular(5.0),
               ),
-              child: Text(matchDisplayString,
-                  style: Theme.of(context).textTheme.titleSmall),
+              child: Text(
+                matchDisplayString,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
             ),
           ],
         );
 
-        String fmsDisplayString =
-            (fmsConnected) ? 'FMS Connected' : 'FMS Disconnected';
+        String fmsDisplayString = (fmsConnected)
+            ? 'FMS Connected'
+            : 'FMS Disconnected';
         String dsDisplayString = (dsAttached)
             ? 'DriverStation Connected'
             : 'DriverStation Disconnected';
 
         Icon fmsDisplayIcon = (fmsConnected)
             ? const Icon(Icons.check, color: Colors.green, size: 18)
-            : const Icon(
-                Icons.clear,
-                color: Colors.red,
-                size: 18,
-              );
+            : const Icon(Icons.clear, color: Colors.red, size: 18);
         Icon dsDisplayIcon = (dsAttached)
             ? const Icon(Icons.check, color: Colors.green, size: 18)
             : const Icon(Icons.clear, color: Colors.red, size: 18);
@@ -245,8 +256,10 @@ class _BlackAndYellowStripes extends CustomPainter {
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
     const DiagonalStripesThick(
-            bgColor: Colors.black, fgColor: Colors.yellow, featuresCount: 10)
-        .paintOnRect(canvas, size, rect);
+      bgColor: Colors.black,
+      fgColor: Colors.yellow,
+      featuresCount: 10,
+    ).paintOnRect(canvas, size, rect);
   }
 
   @override

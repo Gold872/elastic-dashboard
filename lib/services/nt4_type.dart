@@ -24,34 +24,29 @@ enum NT4DataType {
 
   // i.e. "should this be displayable in a widget?"
   bool get isViewable => {
-        NT4DataType.boolean,
-        NT4DataType.int32,
-        NT4DataType.float32,
-        NT4DataType.float64,
-        NT4DataType.string,
-      }.contains(this); // handle crazy types like int?[][]? idk
+    NT4DataType.boolean,
+    NT4DataType.int32,
+    NT4DataType.float32,
+    NT4DataType.float64,
+    NT4DataType.string,
+  }.contains(this); // handle crazy types like int?[][]? idk
 
   bool get isNumber => {
-        NT4DataType.int32,
-        NT4DataType.float32,
-        NT4DataType.float64,
-      }.contains(this);
+    NT4DataType.int32,
+    NT4DataType.float32,
+    NT4DataType.float64,
+  }.contains(this);
 
   bool get isBinary => {
-        NT4DataType.raw,
-        NT4DataType.rpc,
-        NT4DataType.msgpack,
-        NT4DataType.protobuf,
-        NT4DataType.structschema,
-      }.contains(this);
+    NT4DataType.raw,
+    NT4DataType.rpc,
+    NT4DataType.msgpack,
+    NT4DataType.protobuf,
+    NT4DataType.structschema,
+  }.contains(this);
 }
 
-enum NT4TypeModifier {
-  array,
-  struct,
-  structarray,
-  normal;
-}
+enum NT4TypeModifier { array, struct, structarray, normal }
 
 /// This class represents a type in NT4.
 /// It can be a primitive type, an array, or a struct type.
@@ -212,8 +207,7 @@ class NT4Type {
       return switch (dataType) {
         NT4DataType.boolean => dynamicList?.whereType<bool>().toList(),
         NT4DataType.float32 ||
-        NT4DataType.float64 =>
-          dynamicList?.whereType<num>().toList(),
+        NT4DataType.float64 => dynamicList?.whereType<num>().toList(),
         NT4DataType.int32 =>
           dynamicList?.whereType<num>().map((e) => e.toInt()).toList(),
         NT4DataType.string => dynamicList?.whereType<String>().toList(),
@@ -281,8 +275,7 @@ class NT4Type {
       NT4DataType.msgpack ||
       NT4DataType.protobuf ||
       NT4DataType.structschema ||
-      NT4DataType.unknown =>
-        5,
+      NT4DataType.unknown => 5,
     };
   }
 
