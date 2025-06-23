@@ -19,13 +19,15 @@ class UpdateChecker {
       int alphaNumber = int.parse(alphaInfo.split('alpha').last);
 
       String nextVersion = current.toString().replaceAll(
-            alphaInfo,
-            'alpha${alphaNumber + 1}',
-          );
+        alphaInfo,
+        'alpha${alphaNumber + 1}',
+      );
 
       try {
         await _github.repositories.getReleaseByTagName(
-            RepositorySlug('Gold872', 'elastic-dashboard'), 'v$nextVersion');
+          RepositorySlug('Gold872', 'elastic-dashboard'),
+          'v$nextVersion',
+        );
 
         return UpdateCheckerResponse(
           updateAvailable: true,
@@ -34,7 +36,8 @@ class UpdateChecker {
         );
       } catch (error) {
         if (error.toString().contains(
-            'GitHub Error: Release for tagName v$nextVersion Not Found.')) {
+          'GitHub Error: Release for tagName v$nextVersion Not Found.',
+        )) {
           logger.debug('Error when checking for 2027 alpha update', error);
           return UpdateCheckerResponse(
             updateAvailable: false,
