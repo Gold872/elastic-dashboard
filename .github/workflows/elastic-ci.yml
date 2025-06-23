@@ -354,23 +354,22 @@ jobs:
         id: release_info
         run: |
           release_info=$(gh api repos/${{ github.repository }}/releases \
-                          --jq '[.[] | select(.draft == true)]           \
-                                | sort_by(.created_at) | reverse | first')
+            --jq '[.[] | select(.draft == true)] | sort_by(.created_at) | reverse | first')
 
           if [ "$release_info" = "null" ]; then
             echo "No draft release found"
             exit 1
           fi
 
-          tag_name=$(echo "$release_info" | jq -r '.tag_name')
-          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+          upload_url=$(echo "$release_info" | jq -r '.upload_url')
+          echo "upload_url=$upload_url" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Release Assets
-        uses: softprops/action-gh-release@v2
+        uses: shogo82148/actions-upload-release-asset@v1
         with:
-          files: |
+          asset_path: |
             Elastic-Windows_portable.zip
             elastic-setup-windows.exe
             Elastic-WPILib-Windows.zip
@@ -381,5 +380,5 @@ jobs:
             Elastic-WPILib-Linux.zip
             Elastic-Web.zip
           # *.ipk
-          tag_name: ${{ steps.release_info.outputs.tag_name }}
+          upload_url: ${{ steps.release_info.outputs.upload_url }}
           fail_on_unmatched_files: true
