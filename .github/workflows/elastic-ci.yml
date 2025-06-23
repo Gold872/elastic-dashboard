@@ -283,7 +283,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Elastic-Web
-          path: Elastic-Web
+
+      - name: Extract Web Build
+        run: unzip Elastic-Web.zip -d Elastic-Web
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3.0.0
@@ -349,6 +351,7 @@ jobs:
         run: |
           ls -al
           mv Elastic-Windows.zip Elastic-Windows_portable.zip
+          mv elastic-dashboard_*.ipk Elastic-SystemCore.ipk
 
       - name: Get Draft Release Info
         id: release_info
@@ -378,7 +381,7 @@ jobs:
             Elastic-Linux.zip
             Elastic-WPILib-Linux.zip
             Elastic-Web.zip
-            elastic-dashboard_*.ipk
+            Elastic-SystemCore.ipk
           upload_url: ${{ steps.release_info.outputs.upload_url }}
           overwrite: true
         env:
