@@ -42,7 +42,9 @@ class DSInteropClient {
       return;
     }
     _tcpSocketConnect();
-    _dbModeServerConnect();
+    if (!kIsWeb) {
+      _dbModeServerConnect();
+    }
   }
 
   void _tcpSocketConnect() async {
