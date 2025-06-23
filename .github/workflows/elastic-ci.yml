@@ -152,7 +152,7 @@ jobs:
             wpilib: true
 
     name: "Build - ${{ matrix.platform-name }}"
-    # needs: [formatting-analysis, test]
+    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -236,7 +236,7 @@ jobs:
 
   build-web:
     name: "Build - Web"
-    # needs: [formatting-analysis, test]
+    needs: [formatting-analysis, test]
     runs-on: "ubuntu-22.04"
 
     steps:
