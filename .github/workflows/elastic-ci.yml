@@ -352,9 +352,9 @@ jobs:
 
       - name: Get Release Info
         id: release_info
-        uses: jossef/action-latest-release-info@v1.2.2
-        with:
-          token: ${{ github.token }}
+        uses: jossef/action-latest-release-info@v1.2.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Ensure draft release
         if: ${{ steps.release_info.outputs.draft != 'true' }}
