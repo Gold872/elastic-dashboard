@@ -49,7 +49,7 @@ void main() {
       test('Driver station', () async {
         await preferences.setInt(
           PrefKeys.ipAddressMode,
-          IPAddressMode.driverStation.index,
+          IPAddressMode.driverStation.id,
         );
         await dashboardModel.changeTeamNumber('2053');
         // If driver station is disconnect, it does not change from the team number

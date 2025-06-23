@@ -33,10 +33,6 @@ class IPAddressUtil {
     return int.tryParse(ipAddress) != null;
   }
 
-  static String teamNumberToRIOmDNS(int teamNumber) {
-    return 'roboRIO-$teamNumber-FRC.local';
-  }
-
   static String teamNumberToIP(int teamNumber) {
     String te = (teamNumber ~/ 100).toString();
     String am = (teamNumber % 100).toString().padLeft(2, '0');
