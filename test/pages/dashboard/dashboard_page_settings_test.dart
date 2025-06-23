@@ -58,20 +58,20 @@ void main() {
       test('Team number', () async {
         await preferences.setInt(
           PrefKeys.ipAddressMode,
-          IPAddressMode.teamNumber.index,
+          IPAddressMode.teamNumber.id,
         );
         await dashboardModel.changeTeamNumber('2053');
         expect(preferences.getString(PrefKeys.ipAddress), '10.20.53.2');
       });
-      test('RoboRIO mDNS', () async {
+      test('SystemCore mDNS', () async {
         await preferences.setInt(
           PrefKeys.ipAddressMode,
-          IPAddressMode.roboRIOmDNS.index,
+          IPAddressMode.systemCoremDNS.id,
         );
         await dashboardModel.changeTeamNumber('2053');
         expect(
           preferences.getString(PrefKeys.ipAddress),
-          'roboRIO-2053-FRC.local',
+          'robot.local',
         );
       });
     });
