@@ -202,7 +202,7 @@ abstract class DashboardPageViewModel extends ChangeNotifier {
     ntConnection.dsClientConnect(
       onIPAnnounced: (ip) async {
         if (preferences.getInt(PrefKeys.ipAddressMode) !=
-            IPAddressMode.driverStation.index) {
+            IPAddressMode.driverStation.id) {
           return;
         }
 
@@ -783,7 +783,7 @@ class _DashboardPageState extends State<DashboardPage>
       ),
       callback: () {
         if (preferences.getInt(PrefKeys.ipAddressMode) ==
-            IPAddressMode.driverStation.index) {
+            IPAddressMode.driverStation.id) {
           return;
         }
         model.updateIPAddress(IPAddressUtil.teamNumberToIP(
@@ -802,7 +802,7 @@ class _DashboardPageState extends State<DashboardPage>
       ),
       callback: () {
         if (preferences.getInt(PrefKeys.ipAddressMode) ==
-            IPAddressMode.localhost.index) {
+            IPAddressMode.localhost.id) {
           return;
         }
         widget.model.changeIPAddressMode(IPAddressMode.localhost);
