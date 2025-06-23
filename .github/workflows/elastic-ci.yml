@@ -152,7 +152,7 @@ jobs:
             wpilib: true
 
     name: "Build - ${{ matrix.platform-name }}"
-    needs: [formatting-analysis, test]
+    # needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -236,7 +236,7 @@ jobs:
 
   build-web:
     name: "Build - Web"
-    needs: [formatting-analysis, test]
+    # needs: [formatting-analysis, test]
     runs-on: "ubuntu-22.04"
 
     steps:
@@ -303,52 +303,17 @@ jobs:
     needs: [build, build-web]
     if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upload-release }}
     steps:
-      # Windows
-      - name: Download Windows
+      - run: mkdir -p artifacts
+
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Elastic-Windows
-      - name: Download Windows Installer
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-Windows_installer
-      - name: Download WPILib Windows
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-WPILib-Windows
-      # MacOS
-      - name: Download MacOS
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-macOS
-      - name: Download MacOS Installer
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-macOS_installer
-      - name: Download WPILib MacOS
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-WPILib-macOS
-      # Linux
-      - name: Download Linux
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-Linux
-      - name: Download WPILib Linux
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-WPILib-Linux
-      # Web
-      - name: Download Web
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-Web
-      - name: Download SystemCore
-        uses: actions/download-artifact@v4
-        with:
-          name: Elastic-SystemCore
+          path: artifacts
+          pattern: Elastic-*
+          merge-multiple: true
 
       - name: Rename Files
+        working-directory: artifacts
         run: |
           ls -al
           mv Elastic-Windows.zip Elastic-Windows_portable.zip
@@ -372,17 +337,7 @@ jobs:
       - name: Update Release Assets
         uses: shogo82148/actions-upload-release-asset@v1
         with:
-          asset_path: |
-            Elastic-Windows_portable.zip
-            elastic-setup-windows.exe
-            Elastic-WPILib-Windows.zip
-            Elastic-macOS.zip
-            elastic-setup-macos.dmg
-            Elastic-WPILib-macOS.tar.gz
-            Elastic-Linux.zip
-            Elastic-WPILib-Linux.zip
-            Elastic-Web.zip
-            Elastic-SystemCore.ipk
+          asset_path: artifacts/*
           upload_url: ${{ steps.release_info.outputs.upload_url }}
           overwrite: true
         env:
