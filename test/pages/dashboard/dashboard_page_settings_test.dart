@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/pages/dashboard/dashboard_page_settings.dart';
 import 'package:elastic_dashboard/pages/dashboard_page.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
+import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import '../../test_util.dart';
 import '../../test_util.mocks.dart';
@@ -98,6 +99,20 @@ void main() {
         expect(preferences.getString(PrefKeys.ipAddress), 'robot.local');
       });
     });
+  });
+
+  test('NT Server Mode', () async {
+    await preferences.setInt(PrefKeys.ntServerMode, NTServerMode.robot.index);
+    await dashboardModel.changeNTServerMode(NTServerMode.robot);
+
+    expect(preferences.getInt(PrefKeys.ntServerMode), NTServerMode.robot.index);
+
+    await dashboardModel.changeNTServerMode(NTServerMode.system);
+
+    expect(
+      preferences.getInt(PrefKeys.ntServerMode),
+      NTServerMode.system.index,
+    );
   });
 
   test('Toggle Grid', () async {
