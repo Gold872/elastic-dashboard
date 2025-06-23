@@ -12,6 +12,44 @@ class UpdateChecker {
   Future<UpdateCheckerResponse> isUpdateAvailable() async {
     logger.info('Checking for updates');
 
+    Version current = Version.parse(currentVersion);
+
+    if (current.major == 2027 && current.preRelease.isNotEmpty) {
+      String alphaInfo = current.preRelease.first;
+      int alphaNumber = int.parse(alphaInfo.split('alpha').last);
+
+      String nextVersion = current.toString().replaceAll(
+            alphaInfo,
+            'alpha${alphaNumber + 1}',
+          );
+
+      try {
+        await _github.repositories.getReleaseByTagName(
+            RepositorySlug('Gold872', 'elastic-dashboard'), 'v$nextVersion');
+
+        return UpdateCheckerResponse(
+          updateAvailable: true,
+          latestVersion: nextVersion,
+          error: false,
+        );
+      } catch (error) {
+        if (error.toString().contains(
+            'GitHub Error: Release for tagName v$nextVersion Not Found.')) {
+          logger.debug('Error when checking for 2027 alpha update', error);
+          return UpdateCheckerResponse(
+            updateAvailable: false,
+            latestVersion: current.toString(),
+            error: false,
+          );
+        }
+        return UpdateCheckerResponse(
+          updateAvailable: false,
+          errorMessage: error.toString(),
+          error: true,
+        );
+      }
+    }
+
     try {
       Release latestRelease = await _github.repositories
           .getLatestRelease(RepositorySlug('Gold872', 'elastic-dashboard'));
@@ -37,7 +75,6 @@ class UpdateChecker {
 
       String versionName = tagName.substring(1);
 
-      Version current = Version.parse(currentVersion);
       Version latest = Version.parse(versionName);
 
       bool updateAvailable = current < latest;
