@@ -34,6 +34,13 @@ class Settings {
 }
 
 class Defaults {
+  static String defaultIPForPlatform() {
+    if (kIsWeb) {
+      return Uri.base.host;
+    }
+    return '127.0.0.1';
+  }
+
   static IPAddressMode ipAddressMode = IPAddressMode.driverStation;
 
   static FlexSchemeVariant themeVariant = FlexSchemeVariant.material3Legacy;
@@ -41,7 +48,7 @@ class Defaults {
   static const String defaultVariantName = 'Material-3 Legacy (Default)';
   static const String defaultLogLevelName = 'Automatic';
   static const Level logLevel = kDebugMode ? Level.debug : Level.info;
-  static const String ipAddress = '127.0.0.1';
+  static final String ipAddress = defaultIPForPlatform();
 
   static const int teamNumber = 9999;
   static const int gridSize = 128;
