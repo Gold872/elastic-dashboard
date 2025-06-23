@@ -380,4 +380,5 @@ jobs:
             Elastic-Web.zip
           # *.ipk
           upload_url: ${{ steps.release_info.outputs.upload_url }}
-          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
