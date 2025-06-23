@@ -56,6 +56,7 @@ jobs:
 
       - name: Analyze project source
         run: flutter analyze --no-fatal-infos
+
   test:
     name: "Run Tests"
     runs-on: ubuntu-22.04
@@ -151,7 +152,7 @@ jobs:
             wpilib: true
 
     name: "Build - ${{ matrix.platform-name }}"
-    # needs: [formatting-analysis, test]
+    needs: [formatting-analysis, test]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -235,7 +236,7 @@ jobs:
 
   build-web:
     name: "Build - Web"
-    # needs: [formatting-analysis, test]
+    needs: [formatting-analysis, test]
     runs-on: "ubuntu-22.04"
 
     steps:
