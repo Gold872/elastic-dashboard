@@ -350,15 +350,22 @@ jobs:
           ls -al
           mv Elastic-Windows.zip Elastic-Windows_portable.zip
 
-      - name: Get Release Info
+      - name: Get Draft Release Info
         id: release_info
-        uses: jossef/action-latest-release-info@v1.2.1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          release_info=$(gh api repos/${{ github.repository }}/releases \
+                          --jq '[.[] | select(.draft == true)]           \
+                                | sort_by(.created_at) | reverse | first')
 
-      - name: Ensure draft release
-        if: ${{ steps.release_info.outputs.draft != 'true' }}
-        run: echo "No draft release found" && exit 1
+          if [ "$release_info" = "null" ]; then
+            echo "No draft release found"
+            exit 1
+          fi
+
+          tag_name=$(echo "$release_info" | jq -r '.tag_name')
+          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Release Assets
         uses: softprops/action-gh-release@v2
