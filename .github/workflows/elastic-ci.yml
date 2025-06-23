@@ -350,7 +350,17 @@ jobs:
           ls -al
           mv Elastic-Windows.zip Elastic-Windows_portable.zip
 
-      - name: Create Release
+      - name: Get Release Info
+        id: release_info
+        uses: jossef/action-latest-release-info@v1.2.2
+        with:
+          token: ${{ github.token }}
+
+      - name: Ensure draft release
+        if: ${{ steps.release_info.outputs.draft != 'true' }}
+        run: echo "No draft release found" && exit 1
+
+      - name: Update Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -364,7 +374,5 @@ jobs:
             Elastic-WPILib-Linux.zip
             Elastic-Web.zip
           # *.ipk
-          name: Elastic Draft Release
-          generate_release_notes: true
+          tag_name: ${{ steps.release_info.outputs.tag_name }}
           fail_on_unmatched_files: true
-          draft: true
