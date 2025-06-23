@@ -12,9 +12,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
     inputs:
-      publish-release:
+      upload-release:
         type: boolean
-        description: Publish Draft Release
+        description: Upload to Draft Release
         default: false
         required: false
 
@@ -294,11 +294,11 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4.0.2
 
-  generate-release:
-    name: Generate Release
+  upload-release:
+    name: Upload to Release
     runs-on: ubuntu-22.04
     needs: [build, build-web]
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish-release }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upload-release }}
     steps:
       # Windows
       - name: Download Windows
@@ -380,5 +380,6 @@ jobs:
             Elastic-Web.zip
             elastic-dashboard_*.ipk
           upload_url: ${{ steps.release_info.outputs.upload_url }}
+          overwrite: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
