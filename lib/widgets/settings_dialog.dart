@@ -549,9 +549,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
   }
 
   List<Widget> _frcDriverStationSettings() {
+
+
     var scrollController = ScrollController();
     final localURL =
         "file:///C:/Users/Public/wpilib/2025/documentation/rtd/frc-docs-latest/index.html#document-docs/software/driverstation/manually-setting-the-driver-station-to-start-custom-dashboard";
+    if(kIsWeb){
+      return [
+        const SizedBox(height: 5,),
+        Flexible(child: Text("This feature is unsupported on the Web version of Elastic.", style: Theme.of(context).textTheme.titleMedium),)
+      ];
+    }
+    //running on pc
+
     return [
       const SizedBox(height: 5),
       Flexible(
