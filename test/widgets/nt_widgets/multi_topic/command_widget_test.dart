@@ -164,25 +164,21 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showType =
-        find.widgetWithText(DialogToggleSwitch, 'Show Command Type');
+    final showType = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Command Type',
+    );
 
     expect(showType, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showType,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showType, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.showType, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showType,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showType, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.showType, true);

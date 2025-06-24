@@ -76,16 +76,19 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                           controller: hexInputController,
                           autofocus: false,
                           decoration: InputDecoration(
-                            constraints: const BoxConstraints(
-                              maxWidth: 150,
+                            constraints: const BoxConstraints(maxWidth: 150),
+                            contentPadding: const EdgeInsets.fromLTRB(
+                              8,
+                              4,
+                              8,
+                              4,
                             ),
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 4, 8, 4),
                             labelText: 'Hex Code',
                             prefixText: '#',
                             counterText: '',
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4)),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                           maxLength: 6,
                           inputFormatters: [
@@ -93,10 +96,11 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                             // here or use any Form validator you want.
                             UpperCaseTextFormatter(),
                             FilteringTextInputFormatter.allow(
-                                RegExp(kValidHexPattern)),
+                              RegExp(kValidHexPattern),
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                   actions: [
@@ -126,8 +130,9 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop(false);
-                        widget.onColorPicked
-                            .call(selectedColor ?? initialColor);
+                        widget.onColorPicked.call(
+                          selectedColor ?? initialColor,
+                        );
 
                         setState(() {
                           initialColor = selectedColor ?? initialColor;

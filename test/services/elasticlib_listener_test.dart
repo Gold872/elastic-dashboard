@@ -11,8 +11,14 @@ import '../test_util.dart';
 import '../test_util.mocks.dart';
 
 class MockNotificationCallback extends Mock {
-  void call(String? title, String? description, Icon? icon, Duration time,
-      double width, double? height);
+  void call(
+    String? title,
+    String? description,
+    Icon? icon,
+    Duration time,
+    double width,
+    double? height,
+  );
 }
 
 class MockTabChangeCallback extends Mock {
@@ -40,8 +46,9 @@ void main() {
         notifications.listen();
 
         // Verify that subscribeAll was called with the specific parameters
-        verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
-            .called(1);
+        verify(
+          mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2),
+        ).called(1);
         verify(mockConnection.subscribe('/Elastic/SelectedTab', 0.2)).called(1);
         verify(mockConnection.addDisconnectedListener(any)).called(1);
 
@@ -49,13 +56,22 @@ void main() {
         verifyNoMoreInteractions(mockConnection);
 
         // Verify that the onNotification callback was never called
-        verifyNever(mockOnNotification.call(
-            any, any, any, const Duration(seconds: 3), 350, 300.0));
+        verifyNever(
+          mockOnNotification.call(
+            any,
+            any,
+            any,
+            const Duration(seconds: 3),
+            350,
+            300.0,
+          ),
+        );
       });
 
       test('old existing data', () {
-        MockNTConnection mockConnection =
-            createMockOnlineNT4(serverTime: 5000000);
+        MockNTConnection mockConnection = createMockOnlineNT4(
+          serverTime: 5000000,
+        );
         MockNT4Subscription mockSub = MockNT4Subscription();
 
         Map<String, dynamic> data = {
@@ -64,32 +80,30 @@ void main() {
           'level': 'Info',
           'width': 300.0,
           'height': 300.0,
-          'displayTime': 3000
+          'displayTime': 3000,
         };
 
         List<Function(Object?, int)> listeners = [];
-        when(mockSub.listen(any)).thenAnswer(
-          (realInvocation) {
-            listeners.add(realInvocation.positionalArguments[0]);
-            mockSub.updateValue(jsonEncode(data), 0);
-          },
-        );
+        when(mockSub.listen(any)).thenAnswer((realInvocation) {
+          listeners.add(realInvocation.positionalArguments[0]);
+          mockSub.updateValue(jsonEncode(data), 0);
+        });
 
-        when(mockSub.updateValue(any, any)).thenAnswer(
-          (invoc) {
-            for (var value in listeners) {
-              value.call(
-                  invoc.positionalArguments[0], invoc.positionalArguments[1]);
-            }
-          },
-        );
+        when(mockSub.updateValue(any, any)).thenAnswer((invoc) {
+          for (var value in listeners) {
+            value.call(
+              invoc.positionalArguments[0],
+              invoc.positionalArguments[1],
+            );
+          }
+        });
 
-        when(mockConnection.subscribeAll(any, any)).thenAnswer(
-          (realInvocation) {
-            mockSub.updateValue(jsonEncode(data), 0);
-            return mockSub;
-          },
-        );
+        when(mockConnection.subscribeAll(any, any)).thenAnswer((
+          realInvocation,
+        ) {
+          mockSub.updateValue(jsonEncode(data), 0);
+          return mockSub;
+        });
 
         // Create a mock for the onNotification callback
         MockNotificationCallback mockOnNotification =
@@ -106,13 +120,22 @@ void main() {
         notifications.listen();
 
         // Verify that subscribeAll was called with the specific parameters
-        verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
-            .called(1);
+        verify(
+          mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2),
+        ).called(1);
         verify(mockConnection.addDisconnectedListener(any)).called(1);
 
         // Verify that the onNotification callback was never called
-        verifyNever(mockOnNotification(
-            any, any, any, const Duration(seconds: 3), 350, any));
+        verifyNever(
+          mockOnNotification(
+            any,
+            any,
+            any,
+            const Duration(seconds: 3),
+            350,
+            any,
+          ),
+        );
 
         // Publish some data and expect an update
         data['title'] = 'Title2';
@@ -120,13 +143,16 @@ void main() {
         data['level'] = 'INFO';
         mockSub.updateValue(jsonEncode(data), 2);
 
-        verify(mockOnNotification(
+        verify(
+          mockOnNotification(
             data['title'],
             data['description'],
             any,
             Duration(milliseconds: data['displayTime']),
             data['width'],
-            data['height']));
+            data['height'],
+          ),
+        );
 
         // Try malformed data
         data['title'] = null;
@@ -135,8 +161,16 @@ void main() {
 
         mockSub.updateValue(jsonEncode(data), 3);
         clearInteractions(mockOnNotification);
-        verifyNever(mockOnNotification(
-            any, any, any, const Duration(seconds: 3), 350, any));
+        verifyNever(
+          mockOnNotification(
+            any,
+            any,
+            any,
+            const Duration(seconds: 3),
+            350,
+            any,
+          ),
+        );
 
         // Try with missing data
         data.remove('level');
@@ -146,13 +180,22 @@ void main() {
 
         mockSub.updateValue(jsonEncode(data), 4);
         clearInteractions(mockOnNotification);
-        verifyNever(mockOnNotification(
-            any, any, any, const Duration(seconds: 3), 350, any));
+        verifyNever(
+          mockOnNotification(
+            any,
+            any,
+            any,
+            const Duration(seconds: 3),
+            350,
+            any,
+          ),
+        );
       });
 
       test('newer existing data', () {
-        MockNTConnection mockConnection =
-            createMockOnlineNT4(serverTime: 5000000);
+        MockNTConnection mockConnection = createMockOnlineNT4(
+          serverTime: 5000000,
+        );
         MockNT4Subscription mockSub = MockNT4Subscription();
 
         Map<String, dynamic> data = {
@@ -161,32 +204,30 @@ void main() {
           'level': 'Info',
           'width': 300.0,
           'height': null,
-          'displayTime': 3000
+          'displayTime': 3000,
         };
 
         List<Function(Object?, int)> listeners = [];
-        when(mockSub.listen(any)).thenAnswer(
-          (realInvocation) {
-            listeners.add(realInvocation.positionalArguments[0]);
-            mockSub.updateValue(jsonEncode(data), 5000000);
-          },
-        );
+        when(mockSub.listen(any)).thenAnswer((realInvocation) {
+          listeners.add(realInvocation.positionalArguments[0]);
+          mockSub.updateValue(jsonEncode(data), 5000000);
+        });
 
-        when(mockSub.updateValue(any, any)).thenAnswer(
-          (invoc) {
-            for (var value in listeners) {
-              value.call(
-                  invoc.positionalArguments[0], invoc.positionalArguments[1]);
-            }
-          },
-        );
+        when(mockSub.updateValue(any, any)).thenAnswer((invoc) {
+          for (var value in listeners) {
+            value.call(
+              invoc.positionalArguments[0],
+              invoc.positionalArguments[1],
+            );
+          }
+        });
 
-        when(mockConnection.subscribeAll(any, any)).thenAnswer(
-          (realInvocation) {
-            mockSub.updateValue(jsonEncode(data), 0);
-            return mockSub;
-          },
-        );
+        when(mockConnection.subscribeAll(any, any)).thenAnswer((
+          realInvocation,
+        ) {
+          mockSub.updateValue(jsonEncode(data), 0);
+          return mockSub;
+        });
 
         // Create a mock for the onNotification callback
         MockNotificationCallback mockOnNotification =
@@ -203,13 +244,22 @@ void main() {
         notifications.listen();
 
         // Verify that subscribeAll was called with the specific parameters
-        verify(mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2))
-            .called(1);
+        verify(
+          mockConnection.subscribeAll('/Elastic/RobotNotifications', 0.2),
+        ).called(1);
         verify(mockConnection.addDisconnectedListener(any)).called(1);
 
         // Verify that the onNotification callback was called
-        verify(mockOnNotification(any, any, any,
-            Duration(milliseconds: data['displayTime']), data['width'], any));
+        verify(
+          mockOnNotification(
+            any,
+            any,
+            any,
+            Duration(milliseconds: data['displayTime']),
+            data['width'],
+            any,
+          ),
+        );
       });
     });
   });

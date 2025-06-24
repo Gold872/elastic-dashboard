@@ -7,16 +7,16 @@ import 'package:elastic_dashboard/services/ip_address_util.dart';
 
 extension LogLevelUtil on Level {
   String get levelName => switch (this) {
-        Level.all => 'All',
-        Level.trace => 'Trace',
-        Level.debug => 'Debug',
-        Level.info => 'Info',
-        Level.warning => 'Warning',
-        Level.error => 'Error',
-        Level.fatal => 'Fatal',
-        Level.off => 'Off',
-        _ => 'Unknown',
-      };
+    Level.all => 'All',
+    Level.trace => 'Trace',
+    Level.debug => 'Debug',
+    Level.info => 'Info',
+    Level.warning => 'Warning',
+    Level.error => 'Error',
+    Level.fatal => 'Fatal',
+    Level.off => 'Off',
+    _ => 'Unknown',
+  };
 }
 
 class Settings {
@@ -29,8 +29,9 @@ class Settings {
   static bool isWindowDraggable = true;
   static bool isWindowMaximizable = true;
 
-  static final List<Level> logLevels =
-      Level.values.where((level) => level.value % 1000 == 0).toList();
+  static final List<Level> logLevels = Level.values
+      .where((level) => level.value % 1000 == 0)
+      .toList();
 }
 
 class Defaults {

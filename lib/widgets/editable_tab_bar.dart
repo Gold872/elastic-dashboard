@@ -55,9 +55,7 @@ class EditableTabBar extends StatelessWidget {
         return AlertDialog(
           title: const Text('Rename Tab'),
           content: Container(
-            constraints: const BoxConstraints(
-              maxWidth: 200,
-            ),
+            constraints: const BoxConstraints(maxWidth: 200),
             child: DialogTextInput(
               onSubmit: (value) {
                 tabData[index].name = value;
@@ -109,10 +107,7 @@ class EditableTabBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(5.0),
           padding: const EdgeInsets.all(4.0),
           entries: [
-            MenuHeader(
-              text: tabData[index].name,
-              disableUppercase: true,
-            ),
+            MenuHeader(text: tabData[index].name, disableUppercase: true),
             const MenuDivider(),
             MenuItem(
               label: 'Rename',
@@ -139,10 +134,7 @@ class EditableTabBar extends StatelessWidget {
           reverseTransitionDuration: Duration.zero,
           maintainState: true,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
         );
       },
@@ -177,14 +169,16 @@ class EditableTabBar extends StatelessWidget {
                 ),
                 // Spacing for close button
                 Visibility(
-                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked),
+                  visible:
+                      !(preferences.getBool(PrefKeys.layoutLocked) ??
+                          Defaults.layoutLocked),
                   child: const SizedBox(width: 10),
                 ),
                 // Close button
                 Visibility(
-                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
-                      Defaults.layoutLocked),
+                  visible:
+                      !(preferences.getBool(PrefKeys.layoutLocked) ??
+                          Defaults.layoutLocked),
                   child: IconButton(
                     onPressed: () {
                       closeTab(index);
@@ -250,7 +244,8 @@ class EditableTabBar extends StatelessWidget {
                     if (updateButton != null) updateButton!,
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
                               Defaults.layoutLocked)
                           ? () => onTabMoveLeft.call()
                           : null,
@@ -259,7 +254,8 @@ class EditableTabBar extends StatelessWidget {
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
                               Defaults.layoutLocked)
                           ? () => createTab()
                           : null,
@@ -268,7 +264,8 @@ class EditableTabBar extends StatelessWidget {
                     ),
                     IconButton(
                       style: endButtonStyle,
-                      onPressed: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      onPressed:
+                          !(preferences.getBool(PrefKeys.layoutLocked) ??
                               Defaults.layoutLocked)
                           ? () => onTabMoveRight.call()
                           : null,
@@ -289,13 +286,15 @@ class EditableTabBar extends StatelessWidget {
             child: Stack(
               children: [
                 Visibility(
-                  visible: preferences.getBool(PrefKeys.showGrid) ??
+                  visible:
+                      preferences.getBool(PrefKeys.showGrid) ??
                       Defaults.showGrid,
                   child: GridPaper(
                     color: const Color.fromARGB(50, 195, 232, 243),
-                    interval: (preferences.getInt(PrefKeys.gridSize) ??
-                            Defaults.gridSize)
-                        .toDouble(),
+                    interval:
+                        (preferences.getInt(PrefKeys.gridSize) ??
+                                Defaults.gridSize)
+                            .toDouble(),
                     divisions: 1,
                     subdivisions: 1,
                     child: Container(),

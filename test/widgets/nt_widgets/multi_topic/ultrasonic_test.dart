@@ -34,9 +34,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Ultrasonic/Value': 0.12,
-      },
+      virtualValues: {'Test/Ultrasonic/Value': 0.12},
     );
   });
 

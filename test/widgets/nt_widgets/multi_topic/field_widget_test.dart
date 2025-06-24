@@ -115,7 +115,9 @@ void main() {
     expect(fieldWidgetModel.fieldRotation, 90.0);
     expect(fieldWidgetModel.robotColor.toARGB32(), Colors.red.toARGB32());
     expect(
-        fieldWidgetModel.trajectoryColor.toARGB32(), Colors.white.toARGB32());
+      fieldWidgetModel.trajectoryColor.toARGB32(),
+      Colors.white.toARGB32(),
+    );
   });
 
   test('Field to json', () {
@@ -567,12 +569,18 @@ void main() {
 
     final game = find.byType(DialogDropdownChooser<String?>);
     final width = find.widgetWithText(DialogTextInput, 'Robot Width (meters)');
-    final length =
-        find.widgetWithText(DialogTextInput, 'Robot Length (meters)');
-    final showNonRobot =
-        find.widgetWithText(DialogToggleSwitch, 'Show Non-Robot Objects');
-    final showTrajectories =
-        find.widgetWithText(DialogToggleSwitch, 'Show Trajectories');
+    final length = find.widgetWithText(
+      DialogTextInput,
+      'Robot Length (meters)',
+    );
+    final showNonRobot = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Non-Robot Objects',
+    );
+    final showTrajectories = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Trajectories',
+    );
     final rotateLeft = find.ancestor(
       of: find.text('Rotate Left'),
       matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
@@ -582,8 +590,10 @@ void main() {
       matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
     );
     final robotColor = find.widgetWithText(DialogColorPicker, 'Robot Color');
-    final trajectoryColor =
-        find.widgetWithText(DialogColorPicker, 'Trajectory Color');
+    final trajectoryColor = find.widgetWithText(
+      DialogColorPicker,
+      'Trajectory Color',
+    );
 
     expect(game, findsOneWidget);
     expect(width, findsOneWidget);
@@ -619,20 +629,14 @@ void main() {
 
     await widgetTester.ensureVisible(showNonRobot);
     await widgetTester.tap(
-      find.descendant(
-        of: showNonRobot,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showNonRobot, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(fieldWidgetModel.showOtherObjects, false);
 
     await widgetTester.ensureVisible(showTrajectories);
     await widgetTester.tap(
-      find.descendant(
-        of: showTrajectories,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showTrajectories, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(fieldWidgetModel.showTrajectories, false);
