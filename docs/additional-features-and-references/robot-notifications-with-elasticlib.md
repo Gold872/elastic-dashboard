@@ -40,7 +40,7 @@ An example of a `Notification` for an error notification would be
 
 {% tabs %}
 {% tab title="Java" %}
-<pre class="language-java"><code class="lang-java"><strong>Elastic.Notification notification = new Elastic.Notification(Elastic.Notification.NotificationLevel.ERROR, "Error Notification", "This is an example error notification.");
+<pre class="language-java"><code class="lang-java"><strong>Elastic.Notification notification = new Elastic.Notification(Elastic.NotificationLevel.ERROR, "Error Notification", "This is an example error notification.");
 </strong></code></pre>
 {% endtab %}
 
