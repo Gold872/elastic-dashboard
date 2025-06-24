@@ -25,6 +25,15 @@ In addition, you will also need the following includes at the top of your file:
 #include <wpinet/WebServer.h>
 ```
 {% endtab %}
+
+{% tab title="Python" %}
+```python
+import wpilib
+import wpinet
+
+wpinet.WebServer.getInstance().start(5800, wpilib.getDeployDirectory())
+```
+{% endtab %}
 {% endtabs %}
 
 Next, you will have to deploy the Elastic configuration file to your robot:
