@@ -283,6 +283,8 @@ Displays a button to run a command.
 
 * `show_type` - Whether or not to show text that says the type of command (defaults to true)
   * `true` or `false`
+* `maximize_button_space` - Whether or not to have the button fill the entire widget
+  * `true` or `false`
 
 ### Subsystem
 
