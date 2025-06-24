@@ -273,7 +273,8 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.033,
-              "show_type": true
+              "show_type": true,
+              "maximize_button_space": true
             }
           },
           {

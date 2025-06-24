@@ -21,6 +21,7 @@ void main() {
     'topic': 'Test/Command',
     'period': 0.100,
     'show_type': true,
+    'maximize_button_space': true,
   };
 
   late SharedPreferences preferences;
@@ -66,6 +67,7 @@ void main() {
     }
 
     expect(commandModel.showType, isTrue);
+    expect(commandModel.maximizeButtonSpace, isTrue);
   });
 
   test('Command widget to json', () {
@@ -75,6 +77,7 @@ void main() {
       topic: 'Test/Command',
       period: 0.100,
       showType: true,
+      maximizeButtonSpace: true,
     );
 
     expect(commandModel.toJson(), commandWidgetJson);
@@ -134,6 +137,7 @@ void main() {
       topic: 'Test/Command',
       period: 0.100,
       showType: true,
+      maximizeButtonSpace: true,
     );
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
@@ -164,8 +168,7 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showType =
-        find.widgetWithText(DialogToggleSwitch, 'Show Command Type');
+    final showType = find.widgetWithText(DialogToggleSwitch, 'Show Type');
 
     expect(showType, findsOneWidget);
 
@@ -186,5 +189,28 @@ void main() {
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.showType, true);
+
+    final maximizeSpace =
+        find.widgetWithText(DialogToggleSwitch, 'Maximize Button Space');
+
+    expect(maximizeSpace, findsOneWidget);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: maximizeSpace,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(commandModel.maximizeButtonSpace, false);
+
+    await widgetTester.tap(
+      find.descendant(
+        of: maximizeSpace,
+        matching: find.byType(Switch),
+      ),
+    );
+    await widgetTester.pumpAndSettle();
+    expect(commandModel.maximizeButtonSpace, true);
   });
 }
