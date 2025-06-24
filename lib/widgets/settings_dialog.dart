@@ -496,7 +496,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
 There are 2 Network Tables servers on the SystemCore:
 
 Robot Code - The Network Tables server displaying data from the robot code.
-SystemCore Internal - The Network Tables server displaying internal data from the SystemCore (RAM, CPU %, etc).''',
+SystemCore Internal - The Network Tables server displaying internal data from the SystemCore (RAM, CPU, etc).''',
             child: Icon(Icons.help_outline),
           ),
           const SizedBox(width: 5),
