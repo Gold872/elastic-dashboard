@@ -25,7 +25,9 @@ class UpdateChecker {
 
       try {
         await _github.repositories.getReleaseByTagName(
-            RepositorySlug('Gold872', 'elastic-dashboard'), 'v$nextVersion');
+          RepositorySlug('Gold872', 'elastic-dashboard'),
+          'v$nextVersion',
+        );
 
         return UpdateCheckerResponse(
           updateAvailable: true,
