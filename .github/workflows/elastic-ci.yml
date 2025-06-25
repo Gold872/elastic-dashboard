@@ -178,7 +178,8 @@ jobs:
 
       - name: Zip Windows Executable
         if: ${{ matrix.platform == 'windows' }}
-        run: tar -cvf ${{ matrix.artifact-name }}.zip -C ${{ matrix.build-path }}/ *
+        working-directory: ${{ matrix.build-path }}
+        run: Compress-Archive -Path * -DestinationPath ${{ github.workspace }}/${{ matrix.artifact-file }}
 
       - name: Zip Linux Executable
         if: ${{ matrix.platform == 'linux' }}
