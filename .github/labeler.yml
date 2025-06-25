@@ -1,3 +1,6 @@
+'2027':
+- base-branch: '2027'
+
 GUI:
 - changed-files:
   - any-glob-to-any-file: ['lib/**', 'test/**', 'pubspec.yaml']

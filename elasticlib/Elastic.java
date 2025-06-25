@@ -25,6 +25,19 @@ public final class Elastic {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
+   * Represents the possible levels of notifications for the Elastic dashboard. These levels are
+   * used to indicate the severity or type of notification.
+   */
+  public enum NotificationLevel {
+    /** Informational Message */
+    INFO,
+    /** Warning message */
+    WARNING,
+    /** Error message */
+    ERROR
+  }
+
+  /**
    * Sends an notification to the Elastic dashboard. The notification is serialized as a JSON string
    * before being published.
    *
@@ -372,19 +385,6 @@ public final class Elastic {
     public Notification withNoAutoDismiss() {
       setDisplayTimeMillis(0);
       return this;
-    }
-
-    /**
-     * Represents the possible levels of notifications for the Elastic dashboard. These levels are
-     * used to indicate the severity or type of notification.
-     */
-    public enum NotificationLevel {
-      /** Informational Message */
-      INFO,
-      /** Warning message */
-      WARNING,
-      /** Error message */
-      ERROR
     }
   }
 }
