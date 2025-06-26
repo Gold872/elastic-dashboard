@@ -85,6 +85,14 @@ void main() async {
       'assets/third_party_licenses/OFL.txt',
     );
     yield LicenseEntryWithLineBreaks(['google_fonts'], robotoLicense);
+
+    final advantageScopeLicense = await rootBundle.loadString(
+      'assets/third_party_licenses/AdvantageScopeAssets.txt',
+    );
+    yield LicenseEntryWithLineBreaks(
+      ['advantagescope_assets'],
+      advantageScopeLicense,
+    );
   });
 
   await FieldImages.loadFields('assets/fields/');
