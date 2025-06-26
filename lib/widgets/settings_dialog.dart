@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
@@ -89,7 +90,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
       title: const Text('Settings'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: DefaultTabController(
-        length: 3,
+        length: 4,
         child: SizedBox(
           width: 450,
           height: 400,
@@ -108,6 +109,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       Icons.color_lens_outlined,
                     ),
                     child: Text('Appearance'),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.precision_manufacturing,
+                    ),
+                    child: Text(
+                      'FRC Driver Station',
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   Tab(
                     icon: Icon(
@@ -157,6 +167,20 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               ..._gridSettings(),
                               const Divider(),
                               ..._otherSettings(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    //FRC Driver Station Tab
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 205),
+                          child: Column(
+                            children: [
+                              ..._frcDriverStationSettings(),
                             ],
                           ),
                         ),
@@ -518,6 +542,143 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 formatter: TextFormatterBuilder.decimalTextFormatter(),
               ),
             ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _frcDriverStationSettings() {
+
+
+    var scrollController = ScrollController();
+    final localURL =
+        "file:///C:/Users/Public/wpilib/2025/documentation/rtd/frc-docs-latest/index.html#document-docs/software/driverstation/manually-setting-the-driver-station-to-start-custom-dashboard";
+    if(kIsWeb){
+      return [
+        const SizedBox(height: 5,),
+        Flexible(child: Text("This feature is unsupported on the Web version of Elastic.", style: Theme.of(context).textTheme.titleMedium),)
+      ];
+    }
+    //running on pc
+
+    return [
+      const SizedBox(height: 5),
+      Flexible(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              "Elastic as Default Driver Station",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+                "While Elastic can't set itself as a default driver station, the following links to the WPILib Docs provide a manual option in order to startup Elastic automatically."),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: Row(
+                    children: [
+                      Icon(Icons.download_for_offline),
+                      Text(" Offline Docs"),
+                    ],
+                  ),
+                  onPressed: () async {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Opening Offline Docs"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                "Copy and paste the offline docs link to your web browser. It will automatically bring you to the correct article."),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: localURL));
+                            },
+                            child: Text("Copy"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Close"),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                TextButton(
+                  child: Row(
+                    children: [
+                      Icon(Icons.language),
+                      Text("Open Online Docs"),
+                    ],
+                  ),
+                  onPressed: () async {
+                    var link =
+                        "https://docs.wpilib.org/en/stable/docs/software/driverstation/manually-setting-the-driver-station-to-start-custom-dashboard.html#manually-setting-the-driver-station-to-start-custom-dashboard";
+                    Uri url = Uri.parse(link);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    }
+                  },
+                )
+              ],
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Text(
+              "Your current Elastic install directory is",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Theme.of(context).disabledColor,
+              ),
+              padding: EdgeInsets.all(4),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Scrollbar(
+                      controller: scrollController,
+                      scrollbarOrientation: ScrollbarOrientation.bottom,
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        physics: AlwaysScrollableScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                          child: Text(Platform.resolvedExecutable,
+                              style: TextStyle(fontFamily: "Consolas")),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                      iconSize: 16,
+                      padding: EdgeInsets.all(0),
+                      onPressed: () {
+                        Clipboard.setData(
+                            ClipboardData(text: Platform.resolvedExecutable));
+                      },
+                      icon: Icon(
+                        Icons.copy,
+                        size: 16,
+                      ))
+                ],
+              ),
+            )
           ],
         ),
       ),
