@@ -80,6 +80,13 @@ void main() async {
 
   NTConnection ntConnection = NTConnection(ipAddress);
 
+  LicenseRegistry.addLicense(() async* {
+    final robotoLicense = await rootBundle.loadString(
+      'assets/third_party_licenses/OFL.txt',
+    );
+    yield LicenseEntryWithLineBreaks(['google_fonts'], robotoLicense);
+  });
+
   await FieldImages.loadFields('assets/fields/');
   if (!kIsWeb) {
     Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
