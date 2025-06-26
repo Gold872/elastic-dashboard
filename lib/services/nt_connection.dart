@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -62,6 +63,12 @@ class NTConnection {
     _ntClient.subscribe(
       topic: '',
       options: const NT4SubscriptionOptions(topicsOnly: true),
+    );
+
+    // add all struct schemas to the schema manager
+    _ntClient.subscribe(
+      topic: '/.schema',
+      options: const NT4SubscriptionOptions(all: true),
     );
   }
 
@@ -157,11 +164,19 @@ class NTConnection {
     _ntClient.setServerBaseAddreess(ipAddress);
   }
 
-  NT4Subscription subscribe(String topic, [double period = 0.1]) {
-    NT4SubscriptionOptions subscriptionOptions =
-        NT4SubscriptionOptions(periodicRateSeconds: period);
+  NT4Subscription subscribe(String topic, [double period = 0.1]) =>
+      subscribeWithOptions(
+        topic,
+        NT4SubscriptionOptions(
+          periodicRateSeconds: period,
+        ),
+      );
 
-    int hashCode = Object.hash(topic, subscriptionOptions);
+  NT4Subscription subscribeWithOptions(
+    String topic,
+    NT4SubscriptionOptions options,
+  ) {
+    int hashCode = Object.hash(topic, options);
 
     if (subscriptionMap.containsKey(hashCode)) {
       NT4Subscription existingSubscription = subscriptionMap[hashCode]!;
@@ -170,8 +185,10 @@ class NTConnection {
       return existingSubscription;
     }
 
-    NT4Subscription newSubscription =
-        _ntClient.subscribe(topic: topic, options: subscriptionOptions);
+    NT4Subscription newSubscription = _ntClient.subscribe(
+      topic: topic,
+      options: options,
+    );
 
     subscriptionMap[hashCode] = newSubscription;
     subscriptionUseCount[newSubscription] = 1;
@@ -179,14 +196,14 @@ class NTConnection {
     return newSubscription;
   }
 
-  NT4Subscription subscribeAll(String topic, [double period = 0.1]) {
-    return _ntClient.subscribe(
-        topic: topic,
-        options: NT4SubscriptionOptions(
+  NT4Subscription subscribeAll(String topic, [double period = 0.1]) =>
+      subscribeWithOptions(
+        topic,
+        NT4SubscriptionOptions(
           periodicRateSeconds: period,
           all: true,
-        ));
-  }
+        ),
+      );
 
   void unSubscribe(NT4Subscription subscription) {
     if (!subscriptionUseCount.containsKey(subscription)) {
@@ -219,7 +236,7 @@ class NTConnection {
 
   NT4Topic publishNewTopic(
     String name,
-    String type, {
+    NT4Type type, {
     Map<String, dynamic> properties = const {},
   }) {
     return _ntClient.publishNewTopic(name, type, properties);
