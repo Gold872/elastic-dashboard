@@ -288,7 +288,8 @@ class MjpegController extends ChangeNotifier {
         errorState.value?.lastOrNull,
       );
       if (errorState.value!.first is TimeoutException ||
-          errorState.value!.first is HttpException) {
+          errorState.value!.first is HttpException ||
+          errorState.value!.first is ClientException) {
         stopStream(retry: _inUse);
       } else {
         stopStream();
