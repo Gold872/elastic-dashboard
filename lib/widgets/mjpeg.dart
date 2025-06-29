@@ -270,9 +270,7 @@ class MjpegController extends ChangeNotifier {
   }
 
   void changeCycleState(StreamCycleState next) {
-    if (cycleState == next ||
-        cycleState == StreamCycleState.disposed ||
-        next == StreamCycleState.disposed) {
+    if (cycleState == next || cycleState == StreamCycleState.disposed) {
       return;
     }
 
@@ -346,10 +344,10 @@ class MjpegController extends ChangeNotifier {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     errorState.removeListener(_onError);
-    stopStream();
-    imageStream.close();
+    await stopStream();
+    await imageStream.close();
     changeCycleState(StreamCycleState.disposed);
     super.dispose();
   }
