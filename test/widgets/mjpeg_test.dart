@@ -148,12 +148,16 @@ void main() {
 
     // Wait for the error to throw
     await Future<void>.delayed(Duration.zero);
+    DateTime startTime = DateTime.now();
 
     expect(controller.errorState.value, isNotNull);
     expect(controller.cycleState, StreamCycleState.attemptReconnect);
 
     // Begins reconnect in 100 ms
-    await Future.delayed(const Duration(milliseconds: 100));
+    // Timing has to be very precise so any delays could throw it off
+    await Future.delayed(
+      startTime.difference(DateTime.now()) + const Duration(milliseconds: 100),
+    );
 
     expect(
       controller.cycleState,
@@ -165,6 +169,7 @@ void main() {
 
     // Wait for the error to throw
     await Future<void>.delayed(Duration.zero);
+    startTime = DateTime.now();
 
     expect(controller.errorState.value, isNotNull);
     expect(
@@ -175,7 +180,10 @@ void main() {
     expect(controller.currentStreamIndex, 1);
     expect(controller.currentStream, 'http://10.0.0.2:1182/?action=stream');
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    // 100 ms timing has to be very precise
+    await Future.delayed(
+      startTime.difference(DateTime.now()) + const Duration(milliseconds: 100),
+    );
 
     expect(controller.currentStreamIndex, 0);
     expect(controller.cycleState, StreamCycleState.connecting);
