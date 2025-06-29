@@ -24,8 +24,8 @@ Client createStreamClient({
     if (mockRequests.containsKey(request.url.toString())) {
       return Future.value(mockRequests[request.url.toString()]);
     } else {
-      await Future<void>.delayed(errorWaitTime);
       // throw an exception by default
+      await Future<void>.delayed(errorWaitTime);
       throw ClientException('Connection attempt cancelled');
     }
   });
