@@ -318,7 +318,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     if (ntConnection.ntConnected.value) {
       closeClient();
     } else {
-      controller?.stopStream();
+      controller?.changeCycleState(StreamCycleState.idle);
     }
   }
 

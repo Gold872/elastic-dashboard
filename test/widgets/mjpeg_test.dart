@@ -17,12 +17,13 @@ Client createStreamClient([
 ]) {
   MockClient mockClient = MockClient();
 
-  when(mockClient.send(any)).thenAnswer((invocation) {
+  when(mockClient.send(any)).thenAnswer((invocation) async {
     Request request = invocation.positionalArguments[0];
 
     if (mockRequests.containsKey(request.url.toString())) {
       return Future.value(mockRequests[request.url.toString()]);
     } else {
+      await Future<void>.delayed(Duration.zero);
       // throw an exception by default
       throw ClientException('Connection attempt cancelled');
     }
@@ -141,20 +142,43 @@ void main() {
     controller.setMounted(visibleKey, true);
     controller.setVisible(visibleKey, true);
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    expect(controller.errorState.value, isNull);
+    expect(controller.cycleState, StreamCycleState.connecting);
+    expect(controller.currentStreamIndex, 0);
+
+    // Wait for the error to throw
+    await Future<void>.delayed(Duration.zero);
 
     expect(controller.errorState.value, isNotNull);
+    expect(controller.cycleState, StreamCycleState.attemptReconnect);
 
+    // Begins reconnect in 100 ms
     await Future.delayed(const Duration(milliseconds: 100));
 
+    expect(
+      controller.cycleState,
+      StreamCycleState.connecting,
+      reason: 'Waits 100 ms between reconnection and connection',
+    );
     expect(controller.currentStreamIndex, 1);
     expect(controller.currentStream, 'http://10.0.0.2:1182/?action=stream');
 
-    await Future.delayed(const Duration(milliseconds: 100 + 100));
+    // Wait for the error to throw
+    await Future<void>.delayed(Duration.zero);
 
     expect(controller.errorState.value, isNotNull);
+    expect(
+      controller.cycleState,
+      StreamCycleState.attemptReconnect,
+      reason: 'Immediately retries connection after error',
+    );
+    expect(controller.currentStreamIndex, 1);
+    expect(controller.currentStream, 'http://10.0.0.2:1182/?action=stream');
+
+    await Future.delayed(const Duration(milliseconds: 100));
 
     expect(controller.currentStreamIndex, 0);
+    expect(controller.cycleState, StreamCycleState.connecting);
     expect(controller.currentStream, 'http://10.0.0.2:1181/?action=stream');
 
     controller.dispose();
