@@ -155,7 +155,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     expect(controller.errorState.value, isNotNull);
-    expect(controller.cycleState, StreamCycleState.attemptReconnect);
+    expect(controller.cycleState, StreamCycleState.reconnecting);
 
     // Begins reconnect in 100 ms
     await Future.delayed(const Duration(milliseconds: 100));
@@ -174,7 +174,7 @@ void main() {
     expect(controller.errorState.value, isNotNull);
     expect(
       controller.cycleState,
-      StreamCycleState.attemptReconnect,
+      StreamCycleState.reconnecting,
       reason: 'Immediately retries connection after error',
     );
     expect(controller.currentStreamIndex, 1);

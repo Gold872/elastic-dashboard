@@ -176,8 +176,8 @@ class _MjpegState extends State<Mjpeg> {
 enum StreamCycleState {
   idle,
   connecting,
+  reconnecting,
   streaming,
-  attemptReconnect,
   disposed,
 }
 
@@ -239,8 +239,7 @@ class MjpegController extends ChangeNotifier {
         logger.trace(
           'Visibility changed to true, notifying listeners for mjpeg stream',
         );
-        if (!isStreamActive &&
-            cycleState != StreamCycleState.attemptReconnect) {
+        if (!isStreamActive && cycleState != StreamCycleState.reconnecting) {
           changeCycleState(StreamCycleState.connecting);
         }
         notifyListeners();
@@ -294,14 +293,14 @@ class MjpegController extends ChangeNotifier {
         break;
       case StreamCycleState.streaming:
         break;
-      case StreamCycleState.attemptReconnect:
+      case StreamCycleState.reconnecting:
         if (isStreamActive) stopStream();
         unawaited(
           Future.delayed(
             const Duration(milliseconds: 100),
             () {
               // State changed during delay
-              if (cycleState != StreamCycleState.attemptReconnect) return;
+              if (cycleState != StreamCycleState.reconnecting) return;
               _switchToNextStream();
               changeCycleState(StreamCycleState.connecting);
             },
@@ -401,7 +400,7 @@ class MjpegController extends ChangeNotifier {
     }
 
     if (byteStream == null || !_shouldStream) {
-      changeCycleState(StreamCycleState.attemptReconnect);
+      changeCycleState(StreamCycleState.reconnecting);
       return;
     }
 
@@ -416,7 +415,7 @@ class MjpegController extends ChangeNotifier {
         _handleData(data);
       },
       onDone: () {
-        changeCycleState(StreamCycleState.attemptReconnect);
+        changeCycleState(StreamCycleState.reconnecting);
         notifyListeners();
       },
     );
