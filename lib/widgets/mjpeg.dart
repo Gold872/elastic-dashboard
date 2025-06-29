@@ -46,18 +46,15 @@ class Mjpeg extends StatefulWidget {
 class _MjpegState extends State<Mjpeg> {
   final streamKey = UniqueKey();
 
-  late void Function() listener;
-
   @override
   void initState() {
-    listener = () => setState(() {});
-    widget.controller.addListener(listener);
+    widget.controller.addListener(_onControllerUpdate);
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(listener);
+    widget.controller.removeListener(_onControllerUpdate);
 
     widget.controller.setMounted(streamKey, false);
     widget.controller.setVisible(streamKey, false);
@@ -71,13 +68,17 @@ class _MjpegState extends State<Mjpeg> {
     final oldController = oldWidget.controller;
 
     if (oldController != controller) {
-      oldController.removeListener(listener);
-      controller.addListener(listener);
+      oldController.removeListener(_onControllerUpdate);
+      controller.addListener(_onControllerUpdate);
 
       controller.setMounted(streamKey, oldController.isMounted(streamKey));
       controller.setVisible(streamKey, oldController.isVisible(streamKey));
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  void _onControllerUpdate() {
+    setState(() {});
   }
 
   @override
