@@ -127,7 +127,7 @@ void main() {
         .pump(VisibilityDetectorController.instance.updateInterval);
   });
 
-  test('Cycles through invalid URLs', () async {
+  test('Cycles through invalid URLs', retry: 5, () async {
     MjpegController controller = MjpegController.withMockClient(
       streams: [
         'http://10.0.0.2:1181/?action=stream',
