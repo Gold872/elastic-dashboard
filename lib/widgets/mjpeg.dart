@@ -399,7 +399,11 @@ class MjpegController extends ChangeNotifier {
       }
     }
 
-    if (byteStream == null || !_shouldStream) {
+    if (!_shouldStream) {
+      return;
+    }
+
+    if (byteStream == null) {
       changeCycleState(StreamCycleState.reconnecting);
       return;
     }
