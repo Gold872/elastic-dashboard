@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 
 void main() {
@@ -25,11 +26,13 @@ void main() {
         isNull);
 
     ntConnection.updateDataFromTopic(
-        NT4Topic(
-            name: '/SmartDashboard/Test Number',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
-        3.53);
+      NT4Topic(
+        name: '/SmartDashboard/Test Number',
+        type: NT4Type.float(),
+        properties: {},
+      ),
+      3.53,
+    );
 
     expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
         3.53);

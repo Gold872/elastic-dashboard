@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:decimal/decimal.dart';
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -35,6 +33,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     bool? showSubmitButton,
+    super.ntStructMeta,
     super.dataType,
     super.period,
   }) : super() {
@@ -87,47 +86,8 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
       return;
     }
 
-    late Object? formattedData;
-
-    String dataType = ntTopic!.type;
-    switch (dataType) {
-      case NT4TypeStr.kBool:
-        formattedData = bool.tryParse(value);
-        break;
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kFloat64:
-        formattedData = double.tryParse(value);
-        break;
-      case NT4TypeStr.kInt:
-        formattedData = int.tryParse(value);
-        break;
-      case NT4TypeStr.kString:
-        formattedData = value;
-        break;
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kFloat64Arr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
-        break;
-      case NT4TypeStr.kIntArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<num>()
-            .toList();
-        break;
-      case NT4TypeStr.kBoolArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<bool>()
-            .toList();
-        break;
-      case NT4TypeStr.kStringArr:
-        formattedData = tryCast<List<dynamic>>(jsonDecode(value))
-            ?.whereType<String>()
-            .toList();
-        break;
-      default:
-        break;
-    }
+    NT4Type dataType = super.ntStructMeta?.type ?? ntTopic!.type;
+    Object? formattedData = dataType.convertString(value);
 
     if (publishTopic) {
       ntConnection.publishTopic(ntTopic!);

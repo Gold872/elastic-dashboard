@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/network_alerts.dart';
@@ -30,17 +31,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Alerts/errors',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Alerts/warnings',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Alerts/infos',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
       ],

@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:elastic_dashboard/services/elasticlib_listener.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import '../test_util.dart';
 import '../test_util.mocks.dart';
 
@@ -220,7 +221,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: '/Elastic/SelectedTab',
-            type: NT4TypeStr.kString,
+            type: NT4Type.string(),
             properties: {},
           ),
         ],
@@ -253,7 +254,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: '/Elastic/SelectedTab',
-            type: NT4TypeStr.kString,
+            type: NT4Type.string(),
             properties: {},
           ),
         ],
@@ -286,7 +287,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: '/Elastic/SelectedTab',
-            type: NT4TypeStr.kString,
+            type: NT4Type.string(),
             properties: {},
           ),
         ],

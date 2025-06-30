@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'test_util.mocks.dart';
@@ -45,6 +46,9 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
+
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
@@ -69,12 +73,12 @@ MockNTConnection createMockOnlineNT4({
   virtualTopics ??= [
     NT4Topic(
       name: '/SmartDashboard/Test Value 1',
-      type: NT4TypeStr.kInt,
+      type: NT4Type.int(),
       properties: {},
     ),
     NT4Topic(
       name: '/SmartDashboard/Test Value 2',
-      type: NT4TypeStr.kFloat32,
+      type: NT4Type.float(),
       properties: {},
     ),
   ];
@@ -116,6 +120,9 @@ MockNTConnection createMockOnlineNT4({
   when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
+
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
@@ -238,6 +245,9 @@ MockNTConnection createMockOnlineNT4({
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
         .thenAnswer((_) => virtualValues![topic.name]);
+
+    when(mockNT4Connection.subscribeWithOptions(topic.name, any))
+        .thenAnswer((_) => topicSubscription);
 
     when(mockNT4Connection.subscribe(topic.name, any))
         .thenAnswer((_) => topicSubscription);
