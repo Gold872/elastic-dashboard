@@ -208,9 +208,16 @@ class NTFieldSchema {
 
   StructValueType get valueType => StructValueType.parse(type);
 
-  NT4Type get ntType => valueType != StructValueType.struct
-      ? valueType.ntType
-      : NT4Type.struct(type);
+  NT4Type get ntType {
+    NT4Type innerType = valueType != StructValueType.struct
+        ? valueType.ntType
+        : NT4Type.struct(type);
+
+    if (isArray) {
+      return NT4Type.array(innerType);
+    }
+    return innerType;
+  }
 
   bool get isArray => arrayLength != null;
 
@@ -250,17 +257,16 @@ class NTFieldSchema {
       var [name, length] = definition.split(':');
       fieldName = name.trim();
       bitLength = int.tryParse(length.trim());
+    } else if (definition.contains('[')) {
+      List<String> split = definition.split('[');
+      String rawLength = split[1].split(']')[0];
+      arrayLength = int.parse(rawLength);
+
+      bitLength = (bitLength ?? fieldType.maxBits) * arrayLength;
+
+      fieldName = split[0];
     } else {
       fieldName = definition;
-    }
-
-    if (definition.contains('[')) {
-      String rawLength = definition.substring(
-        definition.indexOf('['),
-        definition.indexOf(']'),
-      );
-      arrayLength = int.parse(rawLength);
-      bitLength = (bitLength ?? fieldType.maxBits) * arrayLength;
     }
 
     bitLength ??= fieldType.maxBits;
@@ -430,6 +436,8 @@ typedef ArrayValue<T> = List<NTStructValue<T>>;
 class NTStructValue<T> {
   final T value;
 
+  NTStructValue._(this.value);
+
   static NTStructValue<int> fromInt(int value) => NTStructValue._(value);
 
   static NTStructValue<bool> fromBool(bool value) => NTStructValue._(value);
@@ -447,8 +455,6 @@ class NTStructValue<T> {
 
   static NTStructValue<NTStruct> fromStruct(NTStruct value) =>
       NTStructValue._(value);
-
-  NTStructValue._(this.value);
 }
 
 /// This class represents an NTStruct.
@@ -473,11 +479,32 @@ class NTStruct {
     Map<String, NTStructValue> values = {};
 
     for (final field in schema.fields) {
-      final value = field.toValue(dataBitArray
-          .slice(field.bitRange.$1, field.bitRange.$2)
-          .toUint8List());
+      if (field.isArray) {
+        List<NTStructValue<dynamic>> value = [];
 
-      values[field.field] = value;
+        int itemLength =
+            (field.bitRange.$1 - field.bitRange.$2) ~/ field.arrayLength!;
+
+        for (int position = 0;
+            position < dataBitArray.length;
+            position += itemLength) {
+          value.add(
+            field.toValue(
+              dataBitArray.slice(position, position + itemLength).toUint8List(),
+            ),
+          );
+        }
+
+        values[field.field] = NTStructValue.fromArray(value);
+      } else {
+        final value = field.toValue(
+          dataBitArray
+              .slice(field.bitRange.$1, field.bitRange.$2)
+              .toUint8List(),
+        );
+
+        values[field.field] = value;
+      }
     }
 
     return NTStruct(schema: schema, values: values);
