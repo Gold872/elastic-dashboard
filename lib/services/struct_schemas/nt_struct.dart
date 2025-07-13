@@ -354,7 +354,7 @@ class NTFieldSchema {
     final view = data.buffer.asByteData();
     return switch (valueType) {
       StructValueType.bool => view.getUint8(0) > 0,
-      StructValueType.char => view.getUint8(0),
+      StructValueType.char => utf8.decode([view.getUint8(0)]),
       StructValueType.int8 => view.getInt8(0),
       StructValueType.int16 => view.getInt16(0, Endian.little),
       StructValueType.int32 => view.getInt32(0, Endian.little),
@@ -510,7 +510,11 @@ class NTStruct {
           );
         }
 
-        values[field.fieldName] = value;
+        if (field.valueType == StructValueType.char) {
+          values[field.fieldName] = value.join();
+        } else {
+          values[field.fieldName] = value;
+        }
       } else {
         final value = field.toValue(
           dataBitArray

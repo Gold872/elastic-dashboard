@@ -320,7 +320,7 @@ void main() {
 
       List<dynamic> expectedData = [
         true,
-        96,
+        'a',
         -125,
         -353,
         -25000,
@@ -340,7 +340,7 @@ void main() {
       int offset = 0;
       rawData.setUint8(offset, (expectedData[0] as bool) ? 1 : 0);
       offset += 1;
-      rawData.setUint8(offset, expectedData[1]);
+      rawData.setUint8(offset, utf8.encode(expectedData[1]).first);
       offset += 1;
 
       // Signed types
