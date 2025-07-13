@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
@@ -137,6 +139,52 @@ void main() {
           reason: 'Unspecified array length',
         );
       });
+    });
+  });
+
+  group('[Schema Manager]:', () {
+    test('Registering new schema', () {
+      SchemaManager schemaManager = SchemaManager();
+
+      schemaManager.processNewSchema(
+        'TestStruct',
+        utf8.encode('int32 field1; int32 field2;'),
+      );
+
+      expect(schemaManager.getSchema('TestStruct'), isNotNull);
+
+      expect(schemaManager.isStruct('TestStruct'), true);
+    });
+
+    test('Registering schemas with dependencies', () {
+      SchemaManager schemaManager = SchemaManager();
+
+      schemaManager.processNewSchema(
+        'Pose2d',
+        utf8.encode('Translation2d translation; Rotation2d rotation'),
+      );
+
+      expect(schemaManager.getSchema('Pose2d'), isNull);
+      expect(schemaManager.isStruct('Pose2d'), false);
+
+      schemaManager.processNewSchema('Rotation2d', utf8.encode('double value'));
+
+      expect(schemaManager.getSchema('Rotation2d'), isNotNull);
+      expect(schemaManager.isStruct('Rotation2d'), true);
+
+      expect(schemaManager.getSchema('Pose2d'), isNull);
+      expect(schemaManager.isStruct('Pose2d'), false);
+
+      schemaManager.processNewSchema(
+        'Translation2d',
+        utf8.encode('double x; double y'),
+      );
+
+      expect(schemaManager.getSchema('Translation2d'), isNotNull);
+      expect(schemaManager.isStruct('Translation2d'), true);
+
+      expect(schemaManager.getSchema('Pose2d'), isNotNull);
+      expect(schemaManager.isStruct('Pose2d'), true);
     });
   });
 }

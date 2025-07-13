@@ -116,7 +116,7 @@ class SchemaManager {
 
       for (final uncompiled in _uncompiledSchemas.entries) {
         if (!_schemas.containsKey(uncompiled.key)) {
-          bool success = addStringSchema(uncompiled.key, uncompiled.value);
+          bool success = _addStringSchema(uncompiled.key, uncompiled.value);
           if (success) {
             newlyCompiled.add(uncompiled.key);
           }
@@ -132,7 +132,7 @@ class SchemaManager {
     }
   }
 
-  void addSchema(String name, NTStructSchema schema) {
+  void _addSchema(String name, NTStructSchema schema) {
     if (name.contains(':')) {
       name = name.split(':')[1];
     }
@@ -148,7 +148,7 @@ class SchemaManager {
     _schemas[name] = schema;
   }
 
-  bool addStringSchema(String name, String schema) {
+  bool _addStringSchema(String name, String schema) {
     if (name.contains(':')) {
       name = name.split(':')[1];
     }
@@ -164,7 +164,7 @@ class SchemaManager {
         schema: schema,
         knownSchemas: _schemas,
       );
-      addSchema(name, parsedSchema);
+      _addSchema(name, parsedSchema);
       return true;
     } catch (err) {
       logger.info('Failed to parse schema: $name - $schema');
