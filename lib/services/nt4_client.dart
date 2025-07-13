@@ -312,6 +312,8 @@ class NT4Client {
   final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
   final List<Function(NT4Topic topic)> _topicUnannounceListeners = [];
 
+  final SchemaManager schemaManager;
+
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
   int _subscriptionUIDCounter = 0;
@@ -359,6 +361,7 @@ class NT4Client {
 
   NT4Client({
     required this.serverBaseAddress,
+    required this.schemaManager,
     this.onConnect,
     this.onDisconnect,
   }) {
@@ -1046,8 +1049,7 @@ class NT4Client {
             if (topic.name.startsWith('/.schema')) {
               String structName =
                   topic.name.split('/').last.replaceFirst('struct:', '');
-              SchemaManager.getInstance()
-                  .processNewSchema(structName, value as List<int>);
+              schemaManager.processNewSchema(structName, value as List<int>);
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);

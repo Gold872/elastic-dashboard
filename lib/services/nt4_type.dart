@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
-import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 /// This class represents the different types of NT4 data.
 /// It may not contain the whole type in itself (e.g. array, nullable)
@@ -152,8 +151,7 @@ class NT4Type {
       String subType = type.substring(0, type.length - 1);
       NT4Type sub = parse(subType);
       return NT4Type.nullable(sub);
-    } else if (type.startsWith('struct:') ||
-        SchemaManager.getInstance().isStruct(type)) {
+    } else if (type.startsWith('struct:')) {
       return NT4Type.struct(type);
     } else {
       logger.debug('Could not parse type $type, falling back to String');

@@ -86,13 +86,6 @@ extension on ByteData {
 /// It allows adding new schemas and retrieving existing ones by name.
 /// It also provides a method to parse a schema string into a list of field schemas.
 class SchemaManager {
-  static final SchemaManager _instance = SchemaManager._internal();
-  SchemaManager._internal();
-
-  factory SchemaManager.getInstance() {
-    return _instance;
-  }
-
   final Map<String, String> _uncompiledSchemas = {};
   final Map<String, NTStructSchema> _schemas = {};
 

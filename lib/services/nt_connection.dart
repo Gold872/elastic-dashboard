@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 typedef SubscriptionIdentification = ({
   String topic,
@@ -12,6 +13,7 @@ typedef SubscriptionIdentification = ({
 class NTConnection {
   late NT4Client _ntClient;
   late DSInteropClient _dsClient;
+  final SchemaManager schemaManager = SchemaManager();
 
   List<VoidCallback> onConnectedListeners = [];
   List<VoidCallback> onDisconnectedListeners = [];
@@ -44,6 +46,7 @@ class NTConnection {
   void nt4Connect(String ipAddress) {
     _ntClient = NT4Client(
         serverBaseAddress: ipAddress,
+        schemaManager: schemaManager,
         onConnect: () {
           _ntConnected.value = true;
 
