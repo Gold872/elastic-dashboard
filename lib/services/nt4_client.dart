@@ -188,11 +188,10 @@ class NT4StructMeta {
 
   static NT4StructMeta fromJson(Map<String, dynamic> json) {
     return NT4StructMeta.raw(
-      path: tryCast<List<dynamic>>(
-        json['path'],
-      )!
-          .map((el) => tryCast<String>(el)!)
-          .toList(),
+      path: tryCast<List<Object?>>(
+            json['path'],
+          )?.whereType<String>().toList() ??
+          [],
       schema: NTStructSchema.fromJson(tryCast(json['schema']) ?? {}),
       type: NT4Type.parse(tryCast<String>(json['type']) ?? ''),
     );
