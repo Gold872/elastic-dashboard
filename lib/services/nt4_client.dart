@@ -100,9 +100,8 @@ class NT4Subscription extends ValueNotifier<Object?> {
       List<String> path = options.structMeta!.path;
       Uint8List data = Uint8List.fromList(value);
       NTStruct struct = NTStruct.parse(schema: schema, data: data);
-      NTStructValue dynValue =
-          struct.get(path) ?? NTStructValue.fromNullable(null);
-      value = dynValue.value;
+      Object? dynValue = struct.get(path);
+      value = dynValue;
     }
 
     for (var listener in _listeners) {

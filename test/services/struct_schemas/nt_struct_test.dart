@@ -229,10 +229,10 @@ void main() {
       final decodedValues = decodedStruct.values;
 
       expect(decodedValues.length, 2);
-      expect(decodedValues['one'], isA<NTStructValue<int>>());
-      expect(decodedValues['one']?.value, -15000);
-      expect(decodedValues['two'], isA<NTStructValue<int>>());
-      expect(decodedValues['two']?.value, 15000);
+      expect(decodedValues['one'], isA<int>());
+      expect(decodedValues['one'], -15000);
+      expect(decodedValues['two'], isA<int>());
+      expect(decodedValues['two'], 15000);
     });
 
     test('Decoding with nested types', () {
@@ -261,17 +261,17 @@ void main() {
       );
 
       expect(decodedStruct.values.length, 2);
-      expect(decodedStruct['subSchema'], isA<NTStructValue<NTStruct>>());
+      expect(decodedStruct['subSchema'], isA<NTStruct>());
 
-      final decodedSubStruct = decodedStruct['subSchema']?.value as NTStruct;
+      final decodedSubStruct = decodedStruct['subSchema'] as NTStruct;
 
-      expect(decodedSubStruct['field1'], isA<NTStructValue<int>>());
-      expect(decodedSubStruct['field1']?.value, -15000);
-      expect(decodedSubStruct['field2'], isA<NTStructValue<double>>());
-      expect(decodedSubStruct['field2']?.value, -10.0);
+      expect(decodedSubStruct['field1'], isA<int>());
+      expect(decodedSubStruct['field1'], -15000);
+      expect(decodedSubStruct['field2'], isA<double>());
+      expect(decodedSubStruct['field2'], -10.0);
 
-      expect(decodedStruct['field2'], isA<NTStructValue<double>>());
-      expect(decodedStruct['field2']?.value, 1500.0);
+      expect(decodedStruct['field2'], isA<double>());
+      expect(decodedStruct['field2'], 1500.0);
     });
 
     test('Decoding arrays', () {
@@ -295,18 +295,18 @@ void main() {
       );
 
       expect(decoded.values.length, 2);
-      expect(decoded['intArray'], isA<NTStructValue<ArrayValue>>());
+      expect(decoded['intArray'], isA<List>());
 
       for (int i = 0; i < 16; i++) {
-        expect(decoded['intArray']?.value[i], NTStructValue.fromInt(i));
+        expect(decoded['intArray']?[i], i);
       }
 
-      expect(decoded['floatArray'], isA<NTStructValue<ArrayValue>>());
+      expect(decoded['floatArray'], isA<List>());
 
       for (int i = 0; i < 16; i++) {
         expect(
-          decoded['floatArray']?.value[i],
-          NTStructValue.fromDouble(i * 0.5),
+          decoded['floatArray']?[i],
+          i * 0.5,
         );
       }
     });
@@ -318,19 +318,19 @@ void main() {
             'bool val1; char val2; int8 val3; int16 val4; int32 val5; int64 val6; uint8 val7; uint16 val8; uint32 val9; uint64 val10; float val11; double val12',
       );
 
-      List<NTStructValue> expectedData = [
-        NTStructValue.fromBool(true),
-        NTStructValue.fromInt(96),
-        NTStructValue.fromInt(-125),
-        NTStructValue.fromInt(-353),
-        NTStructValue.fromInt(-25000),
-        NTStructValue.fromInt(-pow(2, 63).toInt()),
-        NTStructValue.fromInt(125),
-        NTStructValue.fromInt(353),
-        NTStructValue.fromInt(25000),
-        NTStructValue.fromInt(pow(2, 63).toInt()),
-        NTStructValue.fromDouble(3.53),
-        NTStructValue.fromDouble(3.53),
+      List<dynamic> expectedData = [
+        true,
+        96,
+        -125,
+        -353,
+        -25000,
+        -pow(2, 63).toInt(),
+        125,
+        353,
+        25000,
+        pow(2, 63).toInt(),
+        3.53,
+        3.53,
       ];
 
       ByteData rawData = ByteData(
@@ -338,35 +338,35 @@ void main() {
       );
       final Endian endian = Endian.little;
       int offset = 0;
-      rawData.setUint8(offset, (expectedData[0].value as bool) ? 1 : 0);
+      rawData.setUint8(offset, (expectedData[0] as bool) ? 1 : 0);
       offset += 1;
-      rawData.setUint8(offset, expectedData[1].value);
+      rawData.setUint8(offset, expectedData[1]);
       offset += 1;
 
       // Signed types
-      rawData.setInt8(offset, expectedData[2].value);
+      rawData.setInt8(offset, expectedData[2]);
       offset += 1;
-      rawData.setInt16(offset, expectedData[3].value, endian);
+      rawData.setInt16(offset, expectedData[3], endian);
       offset += 2;
-      rawData.setInt32(offset, expectedData[4].value, endian);
+      rawData.setInt32(offset, expectedData[4], endian);
       offset += 4;
-      rawData.setInt64(offset, expectedData[5].value, endian);
+      rawData.setInt64(offset, expectedData[5], endian);
       offset += 8;
 
       // Unsigned types
-      rawData.setUint8(offset, expectedData[6].value);
+      rawData.setUint8(offset, expectedData[6]);
       offset += 1;
-      rawData.setUint16(offset, expectedData[7].value, endian);
+      rawData.setUint16(offset, expectedData[7], endian);
       offset += 2;
-      rawData.setUint32(offset, expectedData[8].value, endian);
+      rawData.setUint32(offset, expectedData[8], endian);
       offset += 4;
-      rawData.setUint64(offset, expectedData[9].value, endian);
+      rawData.setUint64(offset, expectedData[9], endian);
       offset += 8;
 
       // Floating point types
-      rawData.setFloat32(offset, expectedData[10].value, endian);
+      rawData.setFloat32(offset, expectedData[10], endian);
       offset += 4;
-      rawData.setFloat64(offset, expectedData[11].value, endian);
+      rawData.setFloat64(offset, expectedData[11], endian);
       offset += 8;
 
       final NTStruct decodedStruct = NTStruct.parse(
@@ -379,9 +379,9 @@ void main() {
       for (int i = 0; i < expectedData.length; i++) {
         final decodedValue = decodedStruct['val${i + 1}'];
         // Floating points are annoying
-        if (decodedValue is NTStructValue<double>) {
+        if (decodedValue is double) {
           expect(
-            (expectedData[i].value - decodedValue.value).abs(),
+            (expectedData[i] - decodedValue).abs(),
             lessThan(0.01),
           );
         } else {
