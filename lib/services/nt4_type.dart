@@ -6,7 +6,7 @@ import 'package:elastic_dashboard/services/log.dart';
 
 /// This class represents the different types of NT4 data.
 /// It may not contain the whole type in itself (e.g. array, nullable)
-enum NT4TypeFragment {
+enum NT4DataType {
   boolean,
   int32,
   float32,
@@ -20,84 +20,94 @@ enum NT4TypeFragment {
   protobuf,
   structschema,
 
-  array,
-  nullable,
-  unknown; // i.e. published a type that is not parsable by NT4Type.
+  unknown; // published type that is not parsable;
 
   // i.e. "should this be displayable in a widget?"
   bool get isViewable => {
-        NT4TypeFragment.boolean,
-        NT4TypeFragment.int32,
-        NT4TypeFragment.float32,
-        NT4TypeFragment.float64,
-        NT4TypeFragment.string,
+        NT4DataType.boolean,
+        NT4DataType.int32,
+        NT4DataType.float32,
+        NT4DataType.float64,
+        NT4DataType.string,
       }.contains(this); // handle crazy types like int?[][]? idk
 
   bool get isNumber => {
-        NT4TypeFragment.int32,
-        NT4TypeFragment.float32,
-        NT4TypeFragment.float64,
+        NT4DataType.int32,
+        NT4DataType.float32,
+        NT4DataType.float64,
       }.contains(this);
+}
+
+enum NT4TypeModifier {
+  array,
+  struct,
+  structarray,
+  normal,
+  nullable;
 }
 
 /// This class represents a type in NT4.
 /// It can be a primitive type, an array, or a nullable type.
 /// It can also represent a struct type with a name.
 class NT4Type {
-  final NT4TypeFragment fragment;
-  final NT4Type? tail;
+  final NT4DataType dataType;
+  final NT4TypeModifier modifier;
 
   /// Only available if this is a struct type, or cannot be parsed.
   final String? name;
 
-  NT4Type({required this.fragment, this.tail, this.name});
+  NT4Type({
+    required this.dataType,
+    this.modifier = NT4TypeModifier.normal,
+    this.name,
+  });
 
   factory NT4Type.boolean() {
-    return NT4Type(fragment: NT4TypeFragment.boolean);
+    return NT4Type(dataType: NT4DataType.boolean);
   }
 
   factory NT4Type.int() {
-    return NT4Type(fragment: NT4TypeFragment.int32);
+    return NT4Type(dataType: NT4DataType.int32);
   }
 
   factory NT4Type.float() {
-    return NT4Type(fragment: NT4TypeFragment.float32);
+    return NT4Type(dataType: NT4DataType.float32);
   }
 
   factory NT4Type.double() {
-    return NT4Type(fragment: NT4TypeFragment.float64);
+    return NT4Type(dataType: NT4DataType.float64);
   }
 
   factory NT4Type.string() {
-    return NT4Type(fragment: NT4TypeFragment.string);
+    return NT4Type(dataType: NT4DataType.string);
   }
 
   factory NT4Type.json() {
-    return NT4Type(fragment: NT4TypeFragment.json);
+    return NT4Type(dataType: NT4DataType.json);
   }
 
   factory NT4Type.raw() {
-    return NT4Type(fragment: NT4TypeFragment.raw);
+    return NT4Type(dataType: NT4DataType.raw);
   }
 
   factory NT4Type.rpc() {
-    return NT4Type(fragment: NT4TypeFragment.rpc);
+    return NT4Type(dataType: NT4DataType.rpc);
   }
 
   factory NT4Type.msgpack() {
-    return NT4Type(fragment: NT4TypeFragment.msgpack);
+    return NT4Type(dataType: NT4DataType.msgpack);
   }
 
   factory NT4Type.protobuf() {
-    return NT4Type(fragment: NT4TypeFragment.protobuf);
+    return NT4Type(dataType: NT4DataType.protobuf);
   }
 
   factory NT4Type.structschema() {
-    return NT4Type(fragment: NT4TypeFragment.structschema);
+    return NT4Type(dataType: NT4DataType.structschema);
   }
 
   factory NT4Type.unknown(String type) {
-    return NT4Type(fragment: NT4TypeFragment.unknown, name: type);
+    return NT4Type(dataType: NT4DataType.unknown, name: type);
   }
 
   factory NT4Type.struct(String name) {
@@ -105,18 +115,47 @@ class NT4Type {
       name = name.split(':')[1];
     }
 
+    NT4TypeModifier modifier = NT4TypeModifier.struct;
+
+    if (name.contains('[]')) {
+      modifier = NT4TypeModifier.structarray;
+      name = name.substring(0, name.indexOf('[]'));
+    }
+
     return NT4Type(
-      fragment: NT4TypeFragment.raw, // structs are considered raw bytes in NT4
+      dataType: NT4DataType.raw, // structs are considered raw bytes in NT4
+      modifier: modifier,
+      name: name,
+    );
+  }
+
+  factory NT4Type.structArray(String name) {
+    if (name.contains(':')) {
+      name = name.split(':')[1];
+    }
+
+    return NT4Type(
+      dataType: NT4DataType.raw,
+      modifier: NT4TypeModifier.structarray,
       name: name,
     );
   }
 
   factory NT4Type.array(NT4Type subType) {
-    return NT4Type(fragment: NT4TypeFragment.array, tail: subType);
+    return NT4Type(
+      dataType: subType.dataType,
+      modifier: subType.isStruct
+          ? NT4TypeModifier.structarray
+          : NT4TypeModifier.array,
+      name: subType.name,
+    );
   }
 
   factory NT4Type.nullable(NT4Type subType) {
-    return NT4Type(fragment: NT4TypeFragment.nullable, tail: subType);
+    return NT4Type(
+      dataType: subType.dataType,
+      modifier: NT4TypeModifier.nullable,
+    );
   }
 
   static final Map<String, NT4Type Function()> _constructorMap = {
@@ -143,6 +182,8 @@ class NT4Type {
   static NT4Type parse(String type) {
     if (_constructorMap.containsKey(type)) {
       return _constructorMap[type]!();
+    } else if (type.startsWith('struct:')) {
+      return NT4Type.struct(type);
     } else if (type.endsWith('[]')) {
       String subType = type.substring(0, type.length - 2);
       NT4Type sub = parse(subType);
@@ -151,8 +192,6 @@ class NT4Type {
       String subType = type.substring(0, type.length - 1);
       NT4Type sub = parse(subType);
       return NT4Type.nullable(sub);
-    } else if (type.startsWith('struct:')) {
-      return NT4Type.struct(type);
     } else {
       logger.debug('Could not parse type $type, falling back to String');
       return NT4Type.unknown(type);
@@ -165,85 +204,91 @@ class NT4Type {
   dynamic convertString(String str) {
     if (!isViewable) return null;
 
-    switch (fragment) {
-      case NT4TypeFragment.nullable:
-        if (str.isEmpty || str == 'null') {
-          return null;
-        } else {
-          return tail!.convertString(str);
-        }
-      case NT4TypeFragment.boolean:
+    if (modifier == NT4TypeModifier.array) {
+      final dynamicList = tryCast<List<dynamic>>(jsonDecode(str));
+      return switch (dataType) {
+        NT4DataType.boolean => dynamicList?.whereType<bool>().toList(),
+        NT4DataType.float32 ||
+        NT4DataType.float64 =>
+          dynamicList?.whereType<num>().toList(),
+        NT4DataType.int32 =>
+          dynamicList?.whereType<num>().map((e) => e.toInt()).toList(),
+        NT4DataType.string => dynamicList?.whereType<String>().toList(),
+        _ => null,
+      };
+    }
+
+    switch (dataType) {
+      case NT4DataType.boolean:
         return bool.tryParse(str);
-      case NT4TypeFragment.int32:
+      case NT4DataType.int32:
         return int.tryParse(str);
-      case NT4TypeFragment.float32:
-      case NT4TypeFragment.float64:
+      case NT4DataType.float32:
+      case NT4DataType.float64:
         return double.tryParse(str);
-      case NT4TypeFragment.string:
+      case NT4DataType.string:
         return str;
-      case NT4TypeFragment.array:
-        final dynamicList = tryCast<List<dynamic>>(jsonDecode(str));
-        if (tail == NT4Type.boolean()) {
-          return dynamicList?.whereType<bool>().toList();
-        } else if (tail == NT4Type.double() || tail == NT4Type.float()) {
-          return dynamicList?.whereType<num>().toList();
-        } else if (tail == NT4Type.int()) {
-          return dynamicList?.whereType<num>().map((e) => e.toInt()).toList();
-        } else if (tail == NT4Type.string()) {
-          return dynamicList?.whereType<String>().toList();
-        }
       default:
         return null; // structs and other types are not viewable
     }
   }
 
-  bool get isArray => fragment == NT4TypeFragment.array;
-  bool get isNullable => fragment == NT4TypeFragment.nullable;
-  bool get isStruct => name != null;
-  bool get isLeaf => tail == null;
-  bool get isViewable => leaf.fragment.isViewable;
-  NT4Type get leaf => tail?.leaf ?? this;
-  NT4Type get nonNullable => isNullable ? tail!.nonNullable : this;
+  bool get isArray =>
+      modifier == NT4TypeModifier.array ||
+      modifier == NT4TypeModifier.structarray;
+  bool get isNullable => modifier == NT4TypeModifier.nullable;
+  bool get isStruct =>
+      modifier == NT4TypeModifier.struct ||
+      modifier == NT4TypeModifier.structarray;
+
+  bool get isViewable => dataType.isViewable;
+
+  NT4Type get nonNullable => isNullable
+      ? NT4Type(dataType: dataType, modifier: modifier, name: name)
+      : this;
 
   String serialize() {
-    if (isStruct) {
+    if (modifier == NT4TypeModifier.struct) {
       return 'struct:$name';
+    } else if (modifier == NT4TypeModifier.structarray) {
+      return 'struct:$name[]';
     }
 
-    return switch (fragment) {
-      NT4TypeFragment.boolean => 'boolean',
-      NT4TypeFragment.int32 => 'int',
-      NT4TypeFragment.float32 => 'float',
-      NT4TypeFragment.float64 => 'double',
-      NT4TypeFragment.string => 'string',
-      NT4TypeFragment.json => 'json',
-      NT4TypeFragment.raw => 'raw',
-      NT4TypeFragment.rpc => 'rpc',
-      NT4TypeFragment.msgpack => 'msgpack',
-      NT4TypeFragment.protobuf => 'protobuf',
-      NT4TypeFragment.structschema => 'structschema',
-      NT4TypeFragment.array => '${tail!.serialize()}[]',
-      NT4TypeFragment.nullable => '${tail!.serialize()}?',
-      NT4TypeFragment.unknown => name ?? 'raw',
+    String typeString = switch (dataType) {
+      NT4DataType.boolean => 'boolean',
+      NT4DataType.int32 => 'int',
+      NT4DataType.float32 => 'float',
+      NT4DataType.float64 => 'double',
+      NT4DataType.string => 'string',
+      NT4DataType.json => 'json',
+      NT4DataType.raw => 'raw',
+      NT4DataType.rpc => 'rpc',
+      NT4DataType.msgpack => 'msgpack',
+      NT4DataType.protobuf => 'protobuf',
+      NT4DataType.structschema => 'structschema',
+      NT4DataType.unknown => name ?? 'raw',
     };
+
+    if (modifier == NT4TypeModifier.array) {
+      return '$typeString[]';
+    }
+    return typeString;
   }
 
   int get typeId {
-    return switch (fragment) {
-      NT4TypeFragment.boolean => 0,
-      NT4TypeFragment.float64 => 1,
-      NT4TypeFragment.int32 => 2,
-      NT4TypeFragment.float32 => 3,
-      NT4TypeFragment.string || NT4TypeFragment.json => 4,
-      NT4TypeFragment.raw ||
-      NT4TypeFragment.rpc ||
-      NT4TypeFragment.msgpack ||
-      NT4TypeFragment.protobuf ||
-      NT4TypeFragment.structschema ||
-      NT4TypeFragment.unknown =>
+    return switch (dataType) {
+      NT4DataType.boolean => 0,
+      NT4DataType.float64 => 1,
+      NT4DataType.int32 => 2,
+      NT4DataType.float32 => 3,
+      NT4DataType.string || NT4DataType.json => 4,
+      NT4DataType.raw ||
+      NT4DataType.rpc ||
+      NT4DataType.msgpack ||
+      NT4DataType.protobuf ||
+      NT4DataType.structschema ||
+      NT4DataType.unknown =>
         5,
-      NT4TypeFragment.array => 16 + tail!.typeId,
-      NT4TypeFragment.nullable => tail!.typeId,
     };
   }
 
@@ -255,11 +300,11 @@ class NT4Type {
   @override
   bool operator ==(Object other) {
     return other is NT4Type &&
-        fragment == other.fragment &&
-        tail == other.tail &&
+        dataType == other.dataType &&
+        modifier == other.modifier &&
         name == other.name;
   }
 
   @override
-  int get hashCode => Object.hashAll([fragment, tail, name]);
+  int get hashCode => Object.hashAll([dataType, modifier, name]);
 }

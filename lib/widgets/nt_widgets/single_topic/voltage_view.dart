@@ -220,7 +220,7 @@ class VoltageView extends NTWidget {
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
         int fractionDigits =
-            (model.dataType?.fragment == NT4TypeFragment.int32) ? 0 : 2;
+            (model.dataType?.dataType == NT4DataType.int32) ? 0 : 2;
 
         GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
             ? GaugeOrientation.vertical

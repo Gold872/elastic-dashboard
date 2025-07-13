@@ -129,7 +129,7 @@ class NetworkTableTreeRow {
       'meta: ${entry.meta}, name: ${entry.topic.name}, topic.type: ${entry.topic.type}',
     );
 
-    if (checked.fragment == NT4TypeFragment.boolean) {
+    if (checked.dataType == NT4DataType.boolean) {
       return BooleanBoxModel(
         ntConnection: ntConnection,
         preferences: preferences,

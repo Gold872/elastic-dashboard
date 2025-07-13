@@ -183,9 +183,9 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
     NT4Type? display = dataType?.nonNullable;
-    NT4TypeFragment? fragment = display?.fragment;
+    NT4DataType? ntDataType = display?.dataType;
 
-    if (fragment == null || display == null) {
+    if (ntDataType == null || display == null) {
       return [type];
     }
 
@@ -200,15 +200,14 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     }
 
     // color for single string or multicolor for array of strings
-    if (display.fragment == NT4TypeFragment.string) {
+    if (display.dataType == NT4DataType.string && !display.isArray) {
       availableTypes.addAll([SingleColorView.widgetType]);
-    } else if (display.isArray &&
-        display.tail!.fragment == NT4TypeFragment.string) {
+    } else if (display.isArray && display.dataType == NT4DataType.string) {
       availableTypes.addAll([MultiColorView.widgetType]);
     }
 
     // other type-specific widgets
-    if (fragment == NT4TypeFragment.boolean) {
+    if (ntDataType == NT4DataType.boolean) {
       availableTypes.addAll([
         BooleanBox.widgetType,
         ToggleSwitch.widgetType,
@@ -216,7 +215,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       ]);
     }
 
-    if (fragment.isNumber) {
+    if (ntDataType.isNumber) {
       availableTypes.addAll([
         NumberBar.widgetType,
         NumberSlider.widgetType,
