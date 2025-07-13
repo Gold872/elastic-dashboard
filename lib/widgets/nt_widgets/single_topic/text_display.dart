@@ -165,6 +165,7 @@ class TextDisplay extends NTWidget {
                     isDense: true,
                     error: (showWarning) ? const SizedBox() : null,
                   ),
+                  readOnly: model.ntStructMeta != null,
                   onChanged: (value) {
                     model.typing = true;
                   },
@@ -175,7 +176,8 @@ class TextDisplay extends NTWidget {
                 ),
               ),
             ),
-            if (model.showSubmitButton) ...[
+            // Don't show submit button if it's displaying a struct value
+            if (model.showSubmitButton && model.ntStructMeta == null) ...[
               const SizedBox(width: 1.5),
               Tooltip(
                 message: 'Publish Data',
