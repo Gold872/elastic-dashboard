@@ -235,7 +235,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           topic.type.name!,
         );
 
-        if (schema != null) {
+        if (schema != null && !topic.type.isArray) {
           topics.addAll(parseStruct(topic, schema, schema, []));
         }
       }
