@@ -182,17 +182,16 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     createTopicIfNull();
     dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
-    NT4Type? display = dataType?.nonNullable;
-    NT4DataType? ntDataType = display?.dataType;
+    NT4DataType? ntDataType = dataType?.dataType;
 
-    if (ntDataType == null || display == null) {
+    if (ntDataType == null || dataType == null) {
       return [type];
     }
 
     List<String> availableTypes = [type];
 
     // everything can be text
-    if (display.isViewable) {
+    if (dataType!.isViewable) {
       availableTypes.addAll([
         TextDisplay.widgetType,
         LargeTextDisplay.widgetType,
@@ -200,9 +199,9 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     }
 
     // color for single string or multicolor for array of strings
-    if (display.dataType == NT4DataType.string && !display.isArray) {
+    if (dataType!.dataType == NT4DataType.string && !dataType!.isArray) {
       availableTypes.addAll([SingleColorView.widgetType]);
-    } else if (display.isArray && display.dataType == NT4DataType.string) {
+    } else if (dataType!.isArray && dataType!.dataType == NT4DataType.string) {
       availableTypes.addAll([MultiColorView.widgetType]);
     }
 

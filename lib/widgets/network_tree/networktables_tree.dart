@@ -230,9 +230,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
       topics.add(TreeTopicEntry(topic: topic));
 
-      if (topic.type.nonNullable.isStruct) {
+      if (topic.type.isStruct) {
         NTStructSchema? schema = widget.ntConnection.schemaManager.getSchema(
-          topic.type.nonNullable.name!,
+          topic.type.name!,
         );
 
         if (schema != null) {

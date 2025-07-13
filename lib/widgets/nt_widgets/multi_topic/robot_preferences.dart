@@ -178,7 +178,7 @@ class RobotPreferences extends NTWidget {
 
         Object? formattedData;
 
-        NT4Type dataType = nt4Topic.type.nonNullable;
+        NT4Type dataType = nt4Topic.type;
 
         switch (dataType.dataType) {
           case NT4DataType.boolean:

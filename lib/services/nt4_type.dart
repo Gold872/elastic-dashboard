@@ -50,12 +50,11 @@ enum NT4TypeModifier {
   array,
   struct,
   structarray,
-  normal,
-  nullable;
+  normal;
 }
 
 /// This class represents a type in NT4.
-/// It can be a primitive type, an array, or a nullable type.
+/// It can be a primitive type, an array, or a struct type.
 /// It can also represent a struct type with a name.
 class NT4Type {
   final NT4DataType dataType;
@@ -159,13 +158,6 @@ class NT4Type {
     );
   }
 
-  factory NT4Type.nullable(NT4Type subType) {
-    return NT4Type(
-      dataType: subType.dataType,
-      modifier: NT4TypeModifier.nullable,
-    );
-  }
-
   static final Map<String, NT4Type Function()> _constructorMap = {
     'boolean': NT4Type.boolean,
     'int': NT4Type.int,
@@ -196,10 +188,6 @@ class NT4Type {
       String subType = type.substring(0, type.length - 2);
       NT4Type sub = parse(subType);
       return NT4Type.array(sub);
-    } else if (type.endsWith('?')) {
-      String subType = type.substring(0, type.length - 1);
-      NT4Type sub = parse(subType);
-      return NT4Type.nullable(sub);
     } else {
       logger.debug('Could not parse type $type, falling back to String');
       return NT4Type.unknown(type);
@@ -244,16 +232,11 @@ class NT4Type {
   bool get isArray =>
       modifier == NT4TypeModifier.array ||
       modifier == NT4TypeModifier.structarray;
-  bool get isNullable => modifier == NT4TypeModifier.nullable;
   bool get isStruct =>
       modifier == NT4TypeModifier.struct ||
       modifier == NT4TypeModifier.structarray;
 
   bool get isViewable => dataType.isViewable;
-
-  NT4Type get nonNullable => isNullable
-      ? NT4Type(dataType: dataType, modifier: modifier, name: name)
-      : this;
 
   String serialize() {
     if (modifier == NT4TypeModifier.struct) {

@@ -123,26 +123,26 @@ class NetworkTableTreeRow {
     SharedPreferences preferences,
     TreeTopicEntry entry,
   ) {
-    NT4Type checked = entry.type().nonNullable;
+    NT4Type entryType = entry.type();
 
     logger.info(
       'meta: ${entry.meta}, name: ${entry.topic.name}, topic.type: ${entry.topic.type}',
     );
 
-    if (checked.dataType == NT4DataType.boolean) {
+    if (entryType.dataType == NT4DataType.boolean) {
       return BooleanBoxModel(
         ntConnection: ntConnection,
         preferences: preferences,
         topic: entry.topic.name,
-        dataType: entry.type(),
+        dataType: entryType,
         ntStructMeta: entry.meta,
       );
-    } else if (checked.isViewable) {
+    } else if (entryType.isViewable) {
       return TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
         topic: entry.topic.name,
-        dataType: entry.type(),
+        dataType: entryType,
         ntStructMeta: entry.meta,
       );
     }
