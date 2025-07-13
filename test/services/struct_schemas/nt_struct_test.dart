@@ -210,6 +210,187 @@ void main() {
     });
   });
 
+  group('[Struct Decoding]:', () {
+    test('Decoding with basic data types', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestSchema',
+        schema: 'int64 one;uint64 two',
+      );
+
+      ByteData rawData = ByteData(16);
+      rawData.setInt64(0, -15000.toInt(), Endian.little);
+      rawData.setUint64(8, 15000, Endian.little);
+
+      final decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      final decodedValues = decodedStruct.values;
+
+      expect(decodedValues.length, 2);
+      expect(decodedValues['one'], isA<NTStructValue<int>>());
+      expect(decodedValues['one']?.value, -15000);
+      expect(decodedValues['two'], isA<NTStructValue<int>>());
+      expect(decodedValues['two']?.value, 15000);
+    });
+
+    test('Decoding with nested types', () {
+      final subSchema = NTStructSchema.parse(
+        name: 'SubSchema',
+        schema: 'int32 field1;float field2',
+      );
+
+      final schema = NTStructSchema.parse(
+        name: 'Schema',
+        schema: 'SubSchema subSchema;float field2',
+        knownSchemas: {'SubSchema': subSchema},
+      );
+
+      ByteData rawData = ByteData(12);
+      int offset = 0;
+      rawData.setInt32(offset, -15000.toInt(), Endian.little);
+      offset += 4;
+      rawData.setFloat32(offset, -10.0, Endian.little);
+      offset += 4;
+      rawData.setFloat32(offset, 1500.0, Endian.little);
+
+      final decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      expect(decodedStruct.values.length, 2);
+      expect(decodedStruct['subSchema'], isA<NTStructValue<NTStruct>>());
+
+      final decodedSubStruct = decodedStruct['subSchema']?.value as NTStruct;
+
+      expect(decodedSubStruct['field1'], isA<NTStructValue<int>>());
+      expect(decodedSubStruct['field1']?.value, -15000);
+      expect(decodedSubStruct['field2'], isA<NTStructValue<double>>());
+      expect(decodedSubStruct['field2']?.value, -10.0);
+
+      expect(decodedStruct['field2'], isA<NTStructValue<double>>());
+      expect(decodedStruct['field2']?.value, 1500.0);
+    });
+
+    test('Decoding arrays', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestStruct',
+        schema: 'int8 intArray[16]; float floatArray[16]',
+      );
+
+      ByteData rawData = ByteData((8 * 16 + 32 * 16) ~/ 8);
+
+      for (int i = 0; i < 16; i++) {
+        rawData.setInt8(i, i);
+      }
+      for (int i = 0; i < 16; i++) {
+        rawData.setFloat32(i * 4 + 16, i * 0.5, Endian.little);
+      }
+
+      final NTStruct decoded = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      expect(decoded.values.length, 2);
+      expect(decoded['intArray'], isA<NTStructValue<ArrayValue>>());
+
+      for (int i = 0; i < 16; i++) {
+        expect(decoded['intArray']?.value[i], NTStructValue.fromInt(i));
+      }
+
+      expect(decoded['floatArray'], isA<NTStructValue<ArrayValue>>());
+
+      for (int i = 0; i < 16; i++) {
+        expect(
+          decoded['floatArray']?.value[i],
+          NTStructValue.fromDouble(i * 0.5),
+        );
+      }
+    });
+
+    test('Decoding all possible primitive types', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestStruct',
+        schema:
+            'bool val1; char val2; int8 val3; int16 val4; int32 val5; int64 val6; uint8 val7; uint16 val8; uint32 val9; uint64 val10; float val11; double val12',
+      );
+
+      List<NTStructValue> expectedData = [
+        NTStructValue.fromBool(true),
+        NTStructValue.fromInt(96),
+        NTStructValue.fromInt(-125),
+        NTStructValue.fromInt(-353),
+        NTStructValue.fromInt(-25000),
+        NTStructValue.fromInt(-pow(2, 63).toInt()),
+        NTStructValue.fromInt(125),
+        NTStructValue.fromInt(353),
+        NTStructValue.fromInt(25000),
+        NTStructValue.fromInt(pow(2, 63).toInt()),
+        NTStructValue.fromDouble(3.53),
+        NTStructValue.fromDouble(3.53),
+      ];
+
+      ByteData rawData = ByteData(
+        (8 + 8 + 8 + 16 + 32 + 64 + 8 + 16 + 32 + 64 + 32 + 64) ~/ 8,
+      );
+      final Endian endian = Endian.little;
+      int offset = 0;
+      rawData.setUint8(offset, (expectedData[0].value as bool) ? 1 : 0);
+      offset += 1;
+      rawData.setUint8(offset, expectedData[1].value);
+      offset += 1;
+
+      // Signed types
+      rawData.setInt8(offset, expectedData[2].value);
+      offset += 1;
+      rawData.setInt16(offset, expectedData[3].value, endian);
+      offset += 2;
+      rawData.setInt32(offset, expectedData[4].value, endian);
+      offset += 4;
+      rawData.setInt64(offset, expectedData[5].value, endian);
+      offset += 8;
+
+      // Unsigned types
+      rawData.setUint8(offset, expectedData[6].value);
+      offset += 1;
+      rawData.setUint16(offset, expectedData[7].value, endian);
+      offset += 2;
+      rawData.setUint32(offset, expectedData[8].value, endian);
+      offset += 4;
+      rawData.setUint64(offset, expectedData[9].value, endian);
+      offset += 8;
+
+      // Floating point types
+      rawData.setFloat32(offset, expectedData[10].value, endian);
+      offset += 4;
+      rawData.setFloat64(offset, expectedData[11].value, endian);
+      offset += 8;
+
+      final NTStruct decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      expect(decodedStruct.values.length, 12);
+
+      for (int i = 0; i < expectedData.length; i++) {
+        final decodedValue = decodedStruct['val${i + 1}'];
+        // Floating points are annoying
+        if (decodedValue is NTStructValue<double>) {
+          expect(
+            (expectedData[i].value - decodedValue.value).abs(),
+            lessThan(0.01),
+          );
+        } else {
+          expect(decodedStruct['val${i + 1}'], expectedData[i]);
+        }
+      }
+    });
+  });
+
   group('[Data Util]:', () {
     test('Uint8List to Bit array', () {
       final bitArray = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]

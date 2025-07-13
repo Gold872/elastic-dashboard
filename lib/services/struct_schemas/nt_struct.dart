@@ -354,20 +354,24 @@ class NTFieldSchema {
     final view = data.buffer.asByteData();
     return switch (valueType) {
       StructValueType.bool => NTStructValue.fromBool(view.getUint8(0) > 0),
-      StructValueType.char => NTStructValue.fromInt(0),
+      StructValueType.char => NTStructValue.fromInt(view.getUint8(0)),
       StructValueType.int8 => NTStructValue.fromInt(view.getInt8(0)),
-      StructValueType.int16 =>
-        NTStructValue.fromInt(view.getInt16(0, Endian.little)),
-      StructValueType.int32 =>
-        NTStructValue.fromInt(view.getInt32(0, Endian.little)),
+      StructValueType.int16 => NTStructValue.fromInt(
+          view.getInt16(0, Endian.little),
+        ),
+      StructValueType.int32 => NTStructValue.fromInt(
+          view.getInt32(0, Endian.little),
+        ),
       StructValueType.int64 => NTStructValue.fromInt(
           view.getInt64Web(0, Endian.little),
         ),
       StructValueType.uint8 => NTStructValue.fromInt(view.getUint8(0)),
-      StructValueType.uint16 =>
-        NTStructValue.fromInt(view.getUint16(0, Endian.little)),
-      StructValueType.uint32 =>
-        NTStructValue.fromInt(view.getUint32(0, Endian.little)),
+      StructValueType.uint16 => NTStructValue.fromInt(
+          view.getUint16(0, Endian.little),
+        ),
+      StructValueType.uint32 => NTStructValue.fromInt(
+          view.getUint32(0, Endian.little),
+        ),
       StructValueType.uint64 => NTStructValue.fromInt(
           view.getUint64Web(0, Endian.little),
         ),
@@ -494,23 +498,39 @@ class NTStructValue<T> {
 
   NTStructValue._(this.value);
 
-  static NTStructValue<int> fromInt(int value) => NTStructValue._(value);
+  static NTStructValue<int> fromInt(int value) => NTStructValue<int>._(value);
 
-  static NTStructValue<bool> fromBool(bool value) => NTStructValue._(value);
+  static NTStructValue<bool> fromBool(bool value) =>
+      NTStructValue<bool>._(value);
 
   static NTStructValue<double> fromDouble(double value) =>
-      NTStructValue._(value);
+      NTStructValue<double>._(value);
 
   static NTStructValue<String> fromString(String value) =>
-      NTStructValue._(value);
+      NTStructValue<String>._(value);
 
-  static NTStructValue<K?> fromNullable<K>(K? value) => NTStructValue._(value);
+  static NTStructValue<K?> fromNullable<K>(K? value) =>
+      NTStructValue<K?>._(value);
 
   static NTStructValue<ArrayValue<K>> fromArray<K>(ArrayValue<K> value) =>
-      NTStructValue._(value);
+      NTStructValue<ArrayValue<K>>._(value);
 
   static NTStructValue<NTStruct> fromStruct(NTStruct value) =>
-      NTStructValue._(value);
+      NTStructValue<NTStruct>._(value);
+
+  @override
+  bool operator ==(Object other) =>
+      other is NTStructValue &&
+      runtimeType == other.runtimeType &&
+      value == other.value;
+
+  @override
+  int get hashCode => Object.hashAll([runtimeType, value]);
+
+  @override
+  String toString() {
+    return 'NTStructValue<${T.toString()}>($value)';
+  }
 }
 
 /// This class represents an NTStruct.
@@ -539,9 +559,9 @@ class NTStruct {
         List<NTStructValue<dynamic>> value = [];
 
         int itemLength =
-            (field.bitRange.$1 - field.bitRange.$2) ~/ field.arrayLength!;
+            (field.bitRange.$2 - field.bitRange.$1) ~/ field.arrayLength!;
 
-        for (int position = 0;
+        for (int position = field.bitRange.$1;
             position < dataBitArray.length;
             position += itemLength) {
           value.add(
