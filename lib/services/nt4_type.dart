@@ -36,6 +36,14 @@ enum NT4DataType {
         NT4DataType.float32,
         NT4DataType.float64,
       }.contains(this);
+
+  bool get isBinary => {
+        NT4DataType.raw,
+        NT4DataType.rpc,
+        NT4DataType.msgpack,
+        NT4DataType.protobuf,
+        NT4DataType.structschema,
+      }.contains(this);
 }
 
 enum NT4TypeModifier {
@@ -130,18 +138,18 @@ class NT4Type {
   }
 
   factory NT4Type.structArray(String name) {
-    if (name.contains(':')) {
-      name = name.split(':')[1];
-    }
-
-    return NT4Type(
-      dataType: NT4DataType.raw,
-      modifier: NT4TypeModifier.structarray,
-      name: name,
-    );
+    return NT4Type.array(NT4Type.struct(name));
   }
 
   factory NT4Type.array(NT4Type subType) {
+    if (subType.dataType.isBinary && !subType.isStruct) {
+      return subType;
+    }
+
+    if (subType.isArray) {
+      return subType;
+    }
+
     return NT4Type(
       dataType: subType.dataType,
       modifier: subType.isStruct
