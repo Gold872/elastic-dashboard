@@ -119,7 +119,11 @@ class SchemaManager {
     }
 
     try {
-      NTStructSchema parsedSchema = NTStructSchema(name: name, schema: schema);
+      NTStructSchema parsedSchema = NTStructSchema.parse(
+        name: name,
+        schema: schema,
+        knownSchemas: _schemas,
+      );
       addSchema(name, parsedSchema);
       return true;
     } catch (err) {
@@ -197,6 +201,7 @@ enum StructValueType {
 class NTFieldSchema {
   final String field;
   final String type;
+  final NTStructSchema? subSchema;
   final int bitLength;
   final int? arrayLength;
   final (int start, int end) bitRange;
@@ -214,8 +219,63 @@ class NTFieldSchema {
     required this.type,
     required this.bitLength,
     this.arrayLength,
+    this.subSchema,
     required this.bitRange,
   });
+
+  factory NTFieldSchema.parse({
+    required int start,
+    required String definition,
+    required String type,
+    required Map<String, NTStructSchema> knownSchemas,
+  }) {
+    StructValueType fieldType = StructValueType.parse(type);
+    late String fieldName;
+    late (int start, int end) bitRange;
+    int? bitLength;
+    int? arrayLength;
+    NTStructSchema? subSchema;
+
+    if (fieldType == StructValueType.struct) {
+      NTStructSchema? schema = knownSchemas[type];
+      if (schema == null) {
+        logger.debug('Unknown struct type: $type');
+        throw Exception();
+      }
+      bitLength = schema.bitLength;
+      subSchema = schema;
+    }
+
+    if (definition.contains(':')) {
+      var [name, length] = definition.split(':');
+      fieldName = name.trim();
+      bitLength = int.tryParse(length.trim());
+    } else {
+      fieldName = definition;
+    }
+
+    if (definition.contains('[')) {
+      String rawLength = definition.substring(
+        definition.indexOf('['),
+        definition.indexOf(']'),
+      );
+      arrayLength = int.parse(rawLength);
+      bitLength = (bitLength ?? fieldType.maxBits) * arrayLength;
+    }
+
+    bitLength ??= fieldType.maxBits;
+
+    bitRange = (start, start + bitLength);
+
+    return NTFieldSchema(
+      field: fieldName,
+      type: type,
+      subSchema: subSchema,
+      bitRange: bitRange,
+      arrayLength: arrayLength,
+      bitLength: bitLength,
+    );
+  }
 
   static NTFieldSchema fromJson(
     Map<String, dynamic> json,
@@ -257,59 +317,17 @@ class NTFieldSchema {
       StructValueType.float64 =>
         NTStructValue.fromDouble(view.getFloat64(0, Endian.little)),
       StructValueType.struct => () {
-          NTStructSchema? schema = SchemaManager.getInstance().getSchema(type);
-          if (schema == null) {
+          if (subSchema == null) {
             return NTStructValue.fromNullable(null);
           }
-          return NTStructValue.fromStruct(NTStruct(schema: schema, data: data));
+          return NTStructValue.fromStruct(
+            NTStruct.parse(
+              schema: subSchema!,
+              data: data,
+            ),
+          );
         }(),
     };
-  }
-
-  static NTFieldSchema _parseField(int start, String definition, String type) {
-    StructValueType fieldType = StructValueType.parse(type);
-    late String fieldName;
-    late (int start, int end) bitRange;
-    int? bitLength;
-    int? arrayLength;
-
-    if (fieldType == StructValueType.struct) {
-      NTStructSchema? schema = SchemaManager.getInstance().getSchema(type);
-      if (schema == null) {
-        logger.debug('Unknown struct type: $type');
-        throw Exception();
-      }
-      bitLength = schema.bitLength;
-    }
-
-    if (definition.contains(':')) {
-      var [name, length] = definition.split(':');
-      fieldName = name.trim();
-      bitLength = int.tryParse(length.trim());
-    } else {
-      fieldName = definition;
-    }
-
-    if (definition.contains('[')) {
-      String rawLength = definition.substring(
-        definition.indexOf('['),
-        definition.indexOf(']'),
-      );
-      arrayLength = int.parse(rawLength);
-      bitLength = (bitLength ?? fieldType.maxBits) * arrayLength;
-    }
-
-    bitLength ??= fieldType.maxBits;
-
-    bitRange = (start, start + bitLength);
-
-    return NTFieldSchema(
-      field: fieldName,
-      type: type,
-      bitRange: bitRange,
-      arrayLength: arrayLength,
-      bitLength: bitLength,
-    );
   }
 
   Map<String, dynamic> toJson() {
@@ -318,10 +336,6 @@ class NTFieldSchema {
       'type': type,
     };
   }
-
-  NTStructSchema? get substruct => valueType == StructValueType.struct
-      ? SchemaManager.getInstance().getSchema(type)
-      : null;
 }
 
 /// This class represents a schema for an NTStruct.
@@ -329,23 +343,48 @@ class NTFieldSchema {
 class NTStructSchema {
   final String name;
   final List<NTFieldSchema> fields;
-  late final int bitLength;
+  final int bitLength;
 
   NTStructSchema({
     required this.name,
+    required this.fields,
+    required this.bitLength,
+  });
+
+  factory NTStructSchema.parse({
+    required String name,
     required String schema,
-  }) : fields = _tryParseSchema(name, schema) {
+    required Map<String, NTStructSchema> knownSchemas,
+  }) {
+    List<NTFieldSchema> fields = [];
+    List<String> schemaParts = schema.replaceAll('\n', '').split(';');
+
+    int bitStart = 0;
+    for (final String part in schemaParts.map((e) => e.trim())) {
+      if (part.isEmpty) {
+        continue;
+      }
+      var [type, definition] = [
+        part.substring(0, part.indexOf(' ')),
+        part.substring(part.indexOf(' ') + 1)
+      ];
+      NTFieldSchema field = NTFieldSchema.parse(
+        start: bitStart,
+        definition: definition,
+        type: type,
+        knownSchemas: knownSchemas,
+      );
+      bitStart += field.bitLength;
+      fields.add(field);
+    }
+
     int bits = 0;
     for (final field in fields) {
       bits += field.bitLength;
     }
-    bitLength = bits;
-  }
 
-  NTStructSchema.raw({
-    required this.name,
-    required this.fields,
-  });
+    return NTStructSchema(name: name, fields: fields, bitLength: bits);
+  }
 
   NTFieldSchema? operator [](String key) {
     for (final field in fields) {
@@ -357,31 +396,6 @@ class NTStructSchema {
     return null;
   }
 
-  static List<NTFieldSchema> _tryParseSchema(String name, String schema) {
-    return _parseSchema(name, schema.replaceAll('\n', ''));
-  }
-
-  static List<NTFieldSchema> _parseSchema(String name, String schema) {
-    List<NTFieldSchema> fields = [];
-    List<String> schemaParts = schema.split(';');
-
-    int bitStart = 0;
-    for (final String part in schemaParts.map((e) => e.trim())) {
-      if (part.isEmpty) {
-        continue;
-      }
-      var [type, definition] = [
-        part.substring(0, part.indexOf(' ')),
-        part.substring(part.indexOf(' ') + 1)
-      ];
-      var field = NTFieldSchema._parseField(bitStart, definition, type);
-      bitStart += field.bitLength;
-      fields.add(field);
-    }
-
-    return fields;
-  }
-
   @override
   String toString() {
     return '$name { ${fields.map((field) => '${field.field}: ${field.type}').join(', ')} }';
@@ -391,15 +405,17 @@ class NTStructSchema {
     return {
       'name': name,
       'fields': fields.map((field) => field.toJson()).toList(),
+      'bit_length': bitLength,
     };
   }
 
   static NTStructSchema fromJson(Map<String, dynamic> json) {
-    return NTStructSchema.raw(
+    return NTStructSchema(
       name: json['name'] ?? json['type'],
       fields: (tryCast<List<dynamic>>(json['fields']) ?? [])
           .map((field) => NTFieldSchema.fromJson(tryCast(field) ?? {}))
           .toList(),
+      bitLength: json['bit_length'],
     );
   }
 }
@@ -441,14 +457,30 @@ class NTStructValue<T> {
 /// and to retrieve values by key.
 class NTStruct {
   final NTStructSchema schema;
-  late final Map<String, NTStructValue> values;
+  final Map<String, NTStructValue> values;
 
   NTStruct({
     required this.schema,
+    required this.values,
+  });
+
+  factory NTStruct.parse({
+    required NTStructSchema schema,
     required Uint8List data,
   }) {
-    var (consumed, values) = _parseData(schema, data);
-    this.values = values;
+    List<bool> dataBitArray = data.toBitArray();
+
+    Map<String, NTStructValue> values = {};
+
+    for (final field in schema.fields) {
+      final value = field.toValue(dataBitArray
+          .slice(field.bitRange.$1, field.bitRange.$2)
+          .toUint8List());
+
+      values[field.field] = value;
+    }
+
+    return NTStruct(schema: schema, values: values);
   }
 
   NTStructValue? operator [](String key) {
@@ -467,33 +499,6 @@ class NTStruct {
     }
 
     return value;
-  }
-
-  static (int, Map<String, NTStructValue>) _parseData(
-    NTStructSchema schema,
-    Uint8List data,
-  ) {
-    List<bool> dataBitArray = data.toBitArray();
-
-    Map<String, NTStructValue> values = {};
-    int offset = 0;
-
-    for (final field in schema.fields) {
-      final value = field.toValue(dataBitArray
-          .slice(field.bitRange.$1, field.bitRange.$2)
-          .toUint8List());
-
-      values[field.field] = value;
-
-      // var (consumed, value) = _parseValue(
-      //   field,
-      //   data.sublist(offset),
-      // );
-      // values[field.field] = value;
-      // offset += consumed;
-    }
-
-    return (offset, values);
   }
 
   // static (int, NTStructValue) _parseValue(

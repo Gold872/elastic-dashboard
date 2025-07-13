@@ -206,9 +206,9 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           ),
         ),
       );
-      if (field.substruct != null) {
+      if (field.subSchema != null) {
         topics.addAll(
-          parseStruct(topic, field.substruct!, root, [
+          parseStruct(topic, field.subSchema!, root, [
             ...List.of(structPath),
             field.field,
           ]),

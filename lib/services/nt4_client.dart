@@ -99,7 +99,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
       NTStructSchema schema = options.structMeta!.schema;
       List<String> path = options.structMeta!.path;
       Uint8List data = Uint8List.fromList(value);
-      NTStruct struct = NTStruct(schema: schema, data: data);
+      NTStruct struct = NTStruct.parse(schema: schema, data: data);
       NTStructValue dynValue =
           struct.get(path) ?? NTStructValue.fromNullable(null);
       value = dynValue.value;
@@ -168,7 +168,7 @@ class NT4StructMeta {
         return NT4Type.struct(currentSchema.name);
       }
 
-      if (field.substruct == null) {
+      if (field.subSchema == null) {
         return field.ntType;
       }
 
@@ -176,7 +176,7 @@ class NT4StructMeta {
         return field.ntType;
       }
 
-      currentSchema = field.substruct!;
+      currentSchema = field.subSchema!;
     }
 
     return NT4Type.struct(currentSchema.name);
