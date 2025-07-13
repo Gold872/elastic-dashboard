@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -9,7 +8,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 
-extension on Uint8List {
+extension Uint8ListToBitArray on Uint8List {
   List<bool> toBitArray() {
     List<bool> output = [];
 
@@ -23,7 +22,7 @@ extension on Uint8List {
   }
 }
 
-extension on List<bool> {
+extension BitArrayToUint8List on List<bool> {
   Uint8List toUint8List() {
     Uint8List output = Uint8List((length / 8).ceil());
 
@@ -39,23 +38,44 @@ extension on List<bool> {
   }
 }
 
-extension on ByteData {
+extension ByteDataWebUtil on ByteData {
+  @visibleForTesting
+  int extractWebInt64(int byteOffset, [Endian endian = Endian.big]) {
+    late int hi;
+    late int lo;
+
+    if (endian == Endian.big) {
+      hi = getInt32(byteOffset, endian);
+      lo = getUint32(byteOffset + 4, endian);
+    } else {
+      hi = getInt32(byteOffset + 4, endian);
+      lo = getUint32(byteOffset, endian);
+    }
+
+    return (hi * 0x100000000) + lo;
+  }
+
+  @visibleForTesting
+  int extractWebUint64(int byteOffset, [Endian endian = Endian.big]) {
+    late int hi;
+    late int lo;
+
+    if (endian == Endian.big) {
+      hi = getUint32(byteOffset, endian);
+      lo = getUint32(byteOffset + 4, endian);
+    } else {
+      hi = getUint32(byteOffset + 4, endian);
+      lo = getUint32(byteOffset, endian);
+    }
+
+    return (hi * 0x100000000) + lo;
+  }
+
   int getInt64Web(int byteOffset, [Endian endian = Endian.big]) {
     const bool isWeb = bool.fromEnvironment('dart.library.html');
 
     if (isWeb) {
-      late int hi;
-      late int lo;
-
-      if (endian == Endian.big) {
-        hi = getInt32(byteOffset);
-        lo = getUint32(byteOffset + 4);
-      } else {
-        hi = getInt32(byteOffset + 4);
-        lo = getUint32(byteOffset);
-      }
-
-      return (hi * 0x100000000) + lo;
+      return extractWebInt64(byteOffset, endian);
     }
     return getInt64(byteOffset, endian);
   }
@@ -64,18 +84,7 @@ extension on ByteData {
     const bool isWeb = bool.fromEnvironment('dart.library.html');
 
     if (isWeb) {
-      late int hi;
-      late int lo;
-
-      if (endian == Endian.big) {
-        hi = getUint32(byteOffset);
-        lo = getUint32(byteOffset + 4);
-      } else {
-        hi = getUint32(byteOffset + 4);
-        lo = getUint32(byteOffset);
-      }
-
-      return (hi * 0x100000000) + lo;
+      return extractWebUint64(byteOffset, endian);
     }
 
     return getUint64(byteOffset, endian);
