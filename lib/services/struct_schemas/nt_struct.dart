@@ -82,6 +82,10 @@ extension on ByteData {
   }
 }
 
+class SchemaParseException implements Exception {
+  SchemaParseException([var message]);
+}
+
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
 /// It also provides a method to parse a schema string into a list of field schemas.
@@ -235,7 +239,7 @@ enum StructValueType {
 /// It contains the field name and its type.
 /// It also provides a method to get type information for the field if it is a struct.
 class NTFieldSchema {
-  final String field;
+  final String fieldName;
   final String type;
   final NTStructSchema? subSchema;
   final int bitLength;
@@ -258,7 +262,7 @@ class NTFieldSchema {
   bool get isArray => arrayLength != null;
 
   NTFieldSchema({
-    required this.field,
+    required this.fieldName,
     required this.type,
     required this.bitLength,
     this.arrayLength,
@@ -283,7 +287,7 @@ class NTFieldSchema {
       NTStructSchema? schema = knownSchemas[type];
       if (schema == null) {
         logger.debug('Unknown struct type: $type');
-        throw Exception();
+        throw SchemaParseException('Unknown struct type: $type');
       }
       bitLength = schema.bitLength;
       subSchema = schema;
@@ -305,12 +309,16 @@ class NTFieldSchema {
       fieldName = definition;
     }
 
+    if (fieldName.contains(' ')) {
+      throw SchemaParseException('Field name cannot contain spaces');
+    }
+
     bitLength ??= fieldType.maxBits;
 
     bitRange = (start, start + bitLength);
 
     return NTFieldSchema(
-      field: fieldName,
+      fieldName: fieldName,
       type: type,
       subSchema: subSchema,
       bitRange: bitRange,
@@ -323,7 +331,7 @@ class NTFieldSchema {
     Map<String, dynamic> json,
   ) {
     return NTFieldSchema(
-      field: json['name'] ?? json['field'],
+      fieldName: json['name'] ?? json['field'],
       type: json['type'],
       bitLength: json['bit_length'],
       bitRange: (json['bit_range_start'], json['bit_range_end']),
@@ -376,7 +384,7 @@ class NTFieldSchema {
 
   Map<String, dynamic> toJson() {
     return {
-      'field': field,
+      'field': fieldName,
       'type': type,
     };
   }
@@ -412,6 +420,7 @@ class NTStructSchema {
         part.substring(0, part.indexOf(' ')),
         part.substring(part.indexOf(' ') + 1)
       ];
+
       NTFieldSchema field = NTFieldSchema.parse(
         start: bitStart,
         definition: definition,
@@ -432,7 +441,7 @@ class NTStructSchema {
 
   NTFieldSchema? operator [](String key) {
     for (final field in fields) {
-      if (field.field == key) {
+      if (field.fieldName == key) {
         return field;
       }
     }
@@ -442,7 +451,7 @@ class NTStructSchema {
 
   @override
   String toString() {
-    return '$name { ${fields.map((field) => '${field.field}: ${field.type}').join(', ')} }';
+    return '$name { ${fields.map((field) => '${field.fieldName}: ${field.type}').join(', ')} }';
   }
 
   Map<String, dynamic> toJson() {
@@ -533,7 +542,7 @@ class NTStruct {
           );
         }
 
-        values[field.field] = NTStructValue.fromArray(value);
+        values[field.fieldName] = NTStructValue.fromArray(value);
       } else {
         final value = field.toValue(
           dataBitArray
@@ -541,7 +550,7 @@ class NTStruct {
               .toUint8List(),
         );
 
-        values[field.field] = value;
+        values[field.fieldName] = value;
       }
     }
 

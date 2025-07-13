@@ -201,7 +201,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         TreeTopicEntry(
           topic: topic,
           meta: NT4StructMeta(
-            path: [...structPath, field.field],
+            path: [...structPath, field.fieldName],
             schema: root,
           ),
         ),
@@ -210,7 +210,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
         topics.addAll(
           parseStruct(topic, field.subSchema!, root, [
             ...structPath,
-            field.field,
+            field.fieldName,
           ]),
         );
       }
