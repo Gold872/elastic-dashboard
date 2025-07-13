@@ -354,7 +354,7 @@ class NTStructSchema {
   factory NTStructSchema.parse({
     required String name,
     required String schema,
-    required Map<String, NTStructSchema> knownSchemas,
+    Map<String, NTStructSchema> knownSchemas = const {},
   }) {
     List<NTFieldSchema> fields = [];
     List<String> schemaParts = schema.replaceAll('\n', '').split(';');

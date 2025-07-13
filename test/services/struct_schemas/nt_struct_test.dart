@@ -15,41 +15,47 @@ String schemaWithBitLengths = 'int32 one : 2;';
 void main() {
   group('[Schema Parsing]:', () {
     test('Can parse schema with 3 floats', () {
-      final schema = NTStructSchema(name: 'ChassisSpeeds', schema: testSchema1);
+      final schema = NTStructSchema.parse(
+        name: 'ChassisSpeeds',
+        schema: testSchema1,
+      );
 
       expect(schema.fields.length, 3);
       expect(schema.fields[0].type.toString(), 'float32');
       expect(schema.fields[0].field, 'vx');
-      expect(schema.fields[0].substruct, isNull);
+      expect(schema.fields[0].subSchema, isNull);
 
       expect(schema.fields[1].type.toString(), 'float32');
       expect(schema.fields[1].field, 'vy');
-      expect(schema.fields[1].substruct, isNull);
+      expect(schema.fields[1].subSchema, isNull);
 
       expect(schema.fields[2].type.toString(), 'float32');
       expect(schema.fields[2].field, 'omega');
-      expect(schema.fields[2].substruct, isNull);
+      expect(schema.fields[2].subSchema, isNull);
     });
 
     test('Can parse schema with new lines', () {
-      final schema = NTStructSchema(name: 'ChassisSpeeds', schema: testSchema2);
+      final schema = NTStructSchema.parse(
+        name: 'ChassisSpeeds',
+        schema: testSchema2,
+      );
 
       expect(schema.fields.length, 3);
       expect(schema.fields[0].type.toString(), 'float32');
       expect(schema.fields[0].field, 'vx');
-      expect(schema.fields[0].substruct, isNull);
+      expect(schema.fields[0].subSchema, isNull);
 
       expect(schema.fields[1].type.toString(), 'float32');
       expect(schema.fields[1].field, 'vy');
-      expect(schema.fields[1].substruct, isNull);
+      expect(schema.fields[1].subSchema, isNull);
 
       expect(schema.fields[2].type.toString(), 'float32');
       expect(schema.fields[2].field, 'omega');
-      expect(schema.fields[2].substruct, isNull);
+      expect(schema.fields[2].subSchema, isNull);
     });
 
     test('Can parse schema with custom bit length', () {
-      final schema = NTStructSchema(
+      final schema = NTStructSchema.parse(
         name: 'TestStruct',
         schema: schemaWithBitLengths,
       );
@@ -57,7 +63,7 @@ void main() {
       expect(schema.fields.length, 1);
       expect(schema.fields[0].type.toString(), 'int32');
       expect(schema.fields[0].field, 'one');
-      expect(schema.fields[0].substruct, isNull);
+      expect(schema.fields[0].subSchema, isNull);
       expect(schema.fields[0].bitLength, 2);
     });
   });
