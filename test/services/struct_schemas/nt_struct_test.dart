@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 String testSchema1 = 'float32 vx;float32 vy;float32 omega';
@@ -81,6 +82,25 @@ void main() {
       expect(schema.fields[0].type, 'int32');
       expect(schema.fields[0].isArray, true);
       expect(schema.fields[0].arrayLength, 3);
+    });
+
+    test('Schema with sub-type', () {
+      final subSchema = NTStructSchema.parse(
+        name: 'SubSchema',
+        schema: 'int32 field1',
+      );
+
+      final schema = NTStructSchema.parse(
+        name: 'Schema',
+        schema: 'SubSchema subSchema',
+        knownSchemas: {'SubSchema': subSchema},
+      );
+
+      expect(schema.fields.length, 1);
+      expect(schema.fields[0].type, 'SubSchema');
+      expect(schema.fields[0].fieldName, 'subSchema');
+      expect(schema.fields[0].subSchema, subSchema);
+      expect(schema.fields[0].ntType, NT4Type.struct('SubSchema'));
     });
 
     group('Error Handling:', () {
