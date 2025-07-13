@@ -39,6 +39,49 @@ extension on List<bool> {
   }
 }
 
+extension on ByteData {
+  int getInt64Web(int byteOffset, [Endian endian = Endian.big]) {
+    const bool isWeb = bool.fromEnvironment('dart.library.html');
+
+    if (isWeb) {
+      late int hi;
+      late int lo;
+
+      if (endian == Endian.big) {
+        hi = getInt32(byteOffset);
+        lo = getUint32(byteOffset + 4);
+      } else {
+        hi = getInt32(byteOffset + 4);
+        lo = getUint32(byteOffset);
+      }
+
+      return (hi * 0x100000000) + lo;
+    }
+    return getInt64(byteOffset, endian);
+  }
+
+  int getUint64Web(int byteOffset, [Endian endian = Endian.big]) {
+    const bool isWeb = bool.fromEnvironment('dart.library.html');
+
+    if (isWeb) {
+      late int hi;
+      late int lo;
+
+      if (endian == Endian.big) {
+        hi = getUint32(byteOffset);
+        lo = getUint32(byteOffset + 4);
+      } else {
+        hi = getUint32(byteOffset + 4);
+        lo = getUint32(byteOffset);
+      }
+
+      return (hi * 0x100000000) + lo;
+    }
+
+    return getUint64(byteOffset, endian);
+  }
+}
+
 /// This class is a singleton that manages the schemas of NTStructs.
 /// It allows adding new schemas and retrieving existing ones by name.
 /// It also provides a method to parse a schema string into a list of field schemas.
@@ -307,15 +350,17 @@ class NTFieldSchema {
         NTStructValue.fromInt(view.getInt16(0, Endian.little)),
       StructValueType.int32 =>
         NTStructValue.fromInt(view.getInt32(0, Endian.little)),
-      StructValueType.int64 =>
-        NTStructValue.fromInt(view.getInt64(0, Endian.little)),
+      StructValueType.int64 => NTStructValue.fromInt(
+          view.getInt64Web(0, Endian.little),
+        ),
       StructValueType.uint8 => NTStructValue.fromInt(view.getUint8(0)),
       StructValueType.uint16 =>
         NTStructValue.fromInt(view.getUint16(0, Endian.little)),
       StructValueType.uint32 =>
         NTStructValue.fromInt(view.getUint32(0, Endian.little)),
-      StructValueType.uint64 =>
-        NTStructValue.fromInt(view.getUint32(0, Endian.little)),
+      StructValueType.uint64 => NTStructValue.fromInt(
+          view.getUint64Web(0, Endian.little),
+        ),
       StructValueType.float ||
       StructValueType.float32 =>
         NTStructValue.fromDouble(view.getFloat32(0, Endian.little)),
