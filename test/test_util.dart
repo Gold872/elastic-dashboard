@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart';
@@ -24,6 +25,8 @@ MockNTConnection createMockOfflineNT4() {
 
   final mockNT4Connection = MockNTConnection();
   final mockSubscription = MockNT4Subscription();
+
+  when(mockNT4Connection.schemaManager).thenReturn(SchemaManager());
 
   when(mockNT4Connection.announcedTopics()).thenReturn({});
 
@@ -64,6 +67,7 @@ MockNTConnection createMockOnlineNT4({
   List<NT4Topic>? virtualTopics,
   Map<String, dynamic>? virtualValues,
   int serverTime = 0,
+  SchemaManager? schemaManager,
 }) {
   HttpOverrides.global = null;
 
@@ -84,6 +88,10 @@ MockNTConnection createMockOnlineNT4({
   ];
 
   virtualValues ??= {};
+
+  schemaManager ??= SchemaManager();
+
+  when(mockNT4Connection.schemaManager).thenReturn(schemaManager);
 
   Map<int, NT4Topic> virtualTopicsMap = {};
 
