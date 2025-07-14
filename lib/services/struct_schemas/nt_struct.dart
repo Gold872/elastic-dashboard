@@ -380,13 +380,6 @@ class NTFieldSchema {
         }(),
     };
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'field': fieldName,
-      'type': type,
-    };
-  }
 }
 
 /// This class represents a schema for an NTStruct.
@@ -451,14 +444,6 @@ class NTStructSchema {
   @override
   String toString() {
     return '$name { ${fields.map((field) => '${field.fieldName}: ${field.type}').join(', ')} }';
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'fields': fields.map((field) => field.toJson()).toList(),
-      'bit_length': bitLength,
-    };
   }
 
   static NTStructSchema fromJson(Map<String, dynamic> json) {

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
@@ -388,6 +389,76 @@ void main() {
           expect(decodedStruct['val${i + 1}'], expectedData[i]);
         }
       }
+    });
+  });
+
+  group('[NT Struct Meta]:', () {
+    final NTStructSchema schema = NTStructSchema.parse(
+        name: 'TestStruct',
+        schema: 'SubStruct subStruct;',
+        knownSchemas: {
+          'SubStruct': NTStructSchema.parse(
+            name: 'SubStruct',
+            schema: 'int32 val1;',
+          ),
+        });
+
+    group('Struct Meta Type:', () {
+      test('With valid path', () {
+        final NT4StructMeta structMeta = NT4StructMeta(
+          path: ['subStruct', 'val1'],
+          schemaName: 'TestStruct',
+          schema: schema,
+        );
+
+        expect(structMeta.type, NT4Type.int());
+      });
+
+      test('With no path', () {
+        final NT4StructMeta structMeta = NT4StructMeta(
+          path: [],
+          schemaName: 'TestStruct',
+          schema: schema,
+        );
+
+        expect(structMeta.type, NT4Type.struct('TestStruct'));
+      });
+
+      test('With invalid path', () {
+        final NT4StructMeta structMeta = NT4StructMeta(
+          path: ['subStruct', 'random thing'],
+          schemaName: 'TestStruct',
+          schema: schema,
+        );
+
+        expect(structMeta.type, NT4Type.struct('SubStruct'));
+      });
+    });
+
+    final Map<String, dynamic> structMetaJson = {
+      'path': ['subStruct', 'val1'],
+      'schema_name': 'TestStruct',
+      'type': 'int',
+    };
+
+    test('Struct meta to json', () {
+      final NT4StructMeta structMeta = NT4StructMeta(
+        path: ['subStruct', 'val1'],
+        schemaName: 'TestStruct',
+        schema: schema,
+      );
+
+      expect(structMeta.toJson(), structMetaJson);
+    });
+
+    test('Struct meta from json', () {
+      final NT4StructMeta structMeta = NT4StructMeta(
+        path: ['subStruct', 'val1'],
+        schemaName: 'TestStruct',
+        type: NT4Type.int(),
+      );
+
+      expect(NT4StructMeta.fromJson(structMetaJson), structMeta);
     });
   });
 

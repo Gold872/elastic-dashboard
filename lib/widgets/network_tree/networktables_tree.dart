@@ -202,6 +202,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
           topic: topic,
           meta: NT4StructMeta(
             path: [...structPath, field.fieldName],
+            schemaName: root.name,
             schema: root,
           ),
         ),

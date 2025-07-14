@@ -95,13 +95,16 @@ class NT4Subscription extends ValueNotifier<Object?> {
       'Updating value for subscription: $this - Value: $value, Time: $timestamp',
     );
 
-    if (options.structMeta != null && value is List<int>) {
-      NTStructSchema schema = options.structMeta!.schema;
+    if (options.structMeta != null &&
+        value is List<int> &&
+        options.structMeta!.schema != null) {
+      NTStructSchema schema = options.structMeta!.schema!;
       List<String> path = options.structMeta!.path;
-      Uint8List data = Uint8List.fromList(value);
-      NTStruct struct = NTStruct.parse(schema: schema, data: data);
-      Object? dynValue = struct.get(path);
-      value = dynValue;
+      NTStruct struct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.fromList(value),
+      );
+      value = struct.get(path);
     }
 
     for (var listener in _listeners) {
@@ -139,25 +142,21 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
 class NT4StructMeta {
   final List<String> path;
-  final NTStructSchema schema;
-  final NT4Type type;
+  final String schemaName;
 
-  NT4StructMeta({required this.path, required this.schema})
-      : type = _getType(path, schema);
+  NT4Type? _type;
 
-  NT4StructMeta.raw({
-    required this.path,
-    required this.schema,
-    required this.type,
-  });
-
-  static NT4Type _getType(List<String> structPath, NTStructSchema schema) {
-    if (structPath.isEmpty) {
-      return NT4Type.struct(schema.name);
+  NT4Type? get type {
+    if (schema == null) {
+      return _type;
     }
 
-    NTStructSchema currentSchema = schema;
-    List<String> pathStack = List.from(structPath.reversed);
+    if (path.isEmpty) {
+      return NT4Type.struct(schema!.name);
+    }
+
+    NTStructSchema currentSchema = schema!;
+    List<String> pathStack = List.from(path.reversed);
 
     while (pathStack.isNotEmpty) {
       String fieldName = pathStack.removeLast();
@@ -167,11 +166,7 @@ class NT4StructMeta {
         return NT4Type.struct(currentSchema.name);
       }
 
-      if (field.subSchema == null) {
-        return field.ntType;
-      }
-
-      if (pathStack.isEmpty) {
+      if (field.subSchema == null || pathStack.isEmpty) {
         return field.ntType;
       }
 
@@ -181,25 +176,59 @@ class NT4StructMeta {
     return NT4Type.struct(currentSchema.name);
   }
 
-  Map<String, dynamic> toJson() {
-    return {'path': path, 'schema': schema.toJson(), 'type': type};
+  NTStructSchema? schema;
+
+  NT4StructMeta({
+    required this.path,
+    required this.schemaName,
+    this.schema,
+    NT4Type? type,
+  }) {
+    if (type != null) {
+      _type = type;
+    }
   }
 
-  static NT4StructMeta fromJson(Map<String, dynamic> json) {
-    return NT4StructMeta.raw(
-      path: tryCast<List<Object?>>(
-            json['path'],
-          )?.whereType<String>().toList() ??
-          [],
-      schema: NTStructSchema.fromJson(tryCast(json['schema']) ?? {}),
-      type: NT4Type.parse(tryCast<String>(json['type']) ?? ''),
+  factory NT4StructMeta.fromJson(Map<String, dynamic> json) {
+    List<String> path = tryCast<List<dynamic>>(
+          json['path'],
+        )?.whereType<String>().toList() ??
+        [];
+
+    NT4Type? type;
+    if (json.containsKey('type')) {
+      type = NT4Type.parse(tryCast<String>(json['type']) ?? '');
+    }
+
+    return NT4StructMeta(
+      path: path,
+      schemaName: tryCast(json['schema_name']) ?? '',
+      type: type,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'schema_name': schemaName,
+      if (type != null) 'type': type!.serialize(),
+    };
   }
 
   @override
   String toString() {
-    return 'NT4StructMeta(Path: $path, Schema: $schema, Type: $type)';
+    return 'NT4StructMeta(Path: $path, Schema Name: $schemaName, Type: $type)';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NT4StructMeta &&
+      path.equals(other.path) &&
+      schemaName == other.schemaName &&
+      type == other.type;
+
+  @override
+  int get hashCode => Object.hashAll([path, schemaName, type]);
 }
 
 class NT4SubscriptionOptions {
@@ -1049,6 +1078,13 @@ class NT4Client {
               String structName =
                   topic.name.split('/').last.replaceFirst('struct:', '');
               schemaManager.processNewSchema(structName, value as List<int>);
+
+              for (final subscription in _subscribedTopics.where((e) =>
+                  e.options.structMeta != null &&
+                  e.options.structMeta!.schemaName == structName)) {
+                subscription.options.structMeta!.schema =
+                    schemaManager.getSchema(structName);
+              }
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {
             _rttHandleRecieveTimestamp(timestampUS, value as int);

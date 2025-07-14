@@ -86,7 +86,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
       return;
     }
 
-    NT4Type dataType = super.ntStructMeta?.type ?? ntTopic!.type;
+    NT4Type dataType = ntStructMeta?.type ?? ntTopic!.type;
     Object? formattedData = dataType.convertString(value);
 
     if (publishTopic) {
