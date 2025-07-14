@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
-import 'package:dot_cast/dot_cast.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
@@ -336,20 +335,6 @@ class NTFieldSchema {
     );
   }
 
-  static NTFieldSchema fromJson(
-    Map<String, dynamic> json,
-  ) {
-    return NTFieldSchema(
-      fieldName: json['name'] ?? json['field'],
-      type: json['type'],
-      bitLength: json['bit_length'],
-      bitRange: (json['bit_range_start'], json['bit_range_end']),
-      arrayLength: json['array_length'],
-    );
-  }
-
-  int get startByte => (bitRange.$1 / 8).ceil();
-
   Object? toValue(Uint8List data) {
     final view = data.buffer.asByteData();
     return switch (valueType) {
@@ -445,16 +430,6 @@ class NTStructSchema {
   String toString() {
     return '$name { ${fields.map((field) => '${field.fieldName}: ${field.type}').join(', ')} }';
   }
-
-  static NTStructSchema fromJson(Map<String, dynamic> json) {
-    return NTStructSchema(
-      name: json['name'] ?? json['type'],
-      fields: (tryCast<List<dynamic>>(json['fields']) ?? [])
-          .map((field) => NTFieldSchema.fromJson(tryCast(field) ?? {}))
-          .toList(),
-      bitLength: json['bit_length'],
-    );
-  }
 }
 
 /// This class represents an NTStruct.
@@ -531,77 +506,4 @@ class NTStruct {
 
     return value;
   }
-
-  // static (int, NTStructValue) _parseValue(
-  //   NTFieldSchema field,
-  //   Uint8List data,
-  // ) {
-  //   if (field.isArray) {
-  //     var (consumed, value) = _parseArray(field, data, field.arrayLength!);
-  //     return (consumed, value);
-  //   } else {
-  //     return _parseValueInner(field, data);
-  //   }
-  // }
-
-  // static (int, NTStructValue) _parseValueInner(
-  //     NTFieldSchema field, Uint8List data) {
-  //   if (field.type.fragment == NT4TypeFragment.boolean) {
-  //     return (1, NTStructValue.fromBool(data[0] != 0));
-  //   } else if (field.type.fragment == NT4TypeFragment.int32) {
-  //     return (
-  //       4,
-  //       NTStructValue.fromInt(
-  //           data.buffer.asByteData().getInt32(0, Endian.little))
-  //     );
-  //   } else if (field.type.fragment == NT4TypeFragment.float32) {
-  //     return (
-  //       4,
-  //       NTStructValue.fromDouble(
-  //           data.buffer.asByteData().getFloat32(0, Endian.little))
-  //     );
-  //   } else if (field.type.fragment == NT4TypeFragment.float64) {
-  //     return (
-  //       8,
-  //       NTStructValue.fromDouble(
-  //           data.buffer.asByteData().getFloat64(0, Endian.little))
-  //     );
-  //   } else if (field.type.fragment == NT4TypeFragment.string) {
-  //     int length = data.buffer.asByteData().getInt32(0, Endian.little);
-  //     return (
-  //       length + 4,
-  //       NTStructValue.fromString(
-  //           String.fromCharCodes(data.sublist(4, 4 + length)))
-  //     );
-  //   } else if (field.type.isStruct) {
-  //     NTStructSchema? substruct = field.substruct;
-
-  //     if (substruct == null) {
-  //       throw Exception('No schema found for struct: ${field.type.name}');
-  //     }
-
-  //     NTStruct sub = NTStruct(
-  //       schema: substruct,
-  //       data: data,
-  //     );
-
-  //     return (sub.consumed, NTStructValue.fromStruct(sub));
-  //   } else {
-  //     throw Exception('Unknown type: ${field.type}');
-  //   }
-  // }
-
-  // static (int, NTStructValue<List<NTStructValue>>) _parseArray(
-  //     NTFieldSchema field, Uint8List data, int length) {
-  //   List<NTStructValue> values = [];
-  //   int offset = 0;
-
-  //   for (int i = 0; i < length; i++) {
-  //     var (consumed, value) = _parseValueInner(field, data.sublist(offset));
-  //     values.add(value);
-  //     offset += consumed;
-  //   }
-
-  //   return (offset, NTStructValue.fromArray(values));
-  // }
 }
