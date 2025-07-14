@@ -339,7 +339,7 @@ class NTFieldSchema {
     final view = data.buffer.asByteData();
     return switch (valueType) {
       StructValueType.bool => view.getUint8(0) > 0,
-      StructValueType.char => utf8.decode([view.getUint8(0)]),
+      StructValueType.char => utf8.decode(data),
       StructValueType.int8 => view.getInt8(0),
       StructValueType.int16 => view.getInt16(0, Endian.little),
       StructValueType.int32 => view.getInt32(0, Endian.little),
