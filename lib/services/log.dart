@@ -35,8 +35,6 @@ class Log {
         if (kReleaseMode && !kIsWeb) FileOutput(file: logFile),
       ]),
       filter: ProductionFilter(),
-      // check if in production mode
-      level: kReleaseMode ? Level.info : Level.trace,
     );
   }
 
