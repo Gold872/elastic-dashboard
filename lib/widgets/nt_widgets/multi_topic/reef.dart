@@ -220,7 +220,7 @@ class ReefModel extends MultiTopicNTWidgetModel {
 }
 
 class Reef extends NTWidget {
-  static const String widgetType = 'reff';
+  static const String widgetType = 'reef';
 
   const Reef({super.key}) : super();
 
@@ -286,36 +286,48 @@ class _CoralLevel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeFocus(
-      child: Tooltip(
-        message: selected ?? '',
-        waitDuration: const Duration(microseconds: 250),
-        child: Row(
-          children: [
-            _createIncrementDicrementButton(
-                Icons.remove, Colors.red, () => onValueChanged(-1)),
-            Text("L" + (selected ?? '')),
-            _createIncrementDicrementButton(
-                Icons.add, Colors.green, () => onValueChanged(1))
-          ],
-        ),
+    return Tooltip(
+      message: selected ?? '',
+      waitDuration: const Duration(milliseconds: 250),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildControlButton(
+            icon: Icons.remove,
+            color: Colors.red,
+            onPressed: () => onValueChanged(-1),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              "L${selected ?? ''}",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          _buildControlButton(
+            icon: Icons.add,
+            color: Colors.green,
+            onPressed: () => onValueChanged(1),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _createIncrementDicrementButton(
-      IconData icon, Color color, VoidCallback? onPressed) {
-    return RawMaterialButton(
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      constraints: BoxConstraints(minWidth: 20.0, minHeight: 20.0),
+
+  Widget _buildControlButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onPressed,
+  }) {
+    return IconButton(
+      icon: Icon(icon, size: 16.0, color: color),
+      padding: const EdgeInsets.all(4),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      splashRadius: 18,
       onPressed: onPressed,
-      elevation: 2.0,
-      child: Icon(
-        icon,
-        color: color,
-        size: 12.0,
-      ),
-      shape: CircleBorder(),
+      tooltip: icon == Icons.add ? "Increase" : "Decrease",
     );
   }
+
 }
