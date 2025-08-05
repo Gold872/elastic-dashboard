@@ -399,13 +399,13 @@ class _CoralLevel extends StatelessWidget {
     required Color color,
     required VoidCallback? onPressed,
   }) {
-    return Position //IconButton(
+    return IconButton(
 
-      // icon: Icon(icon, size: 16.0, color: color),
-      // padding: const EdgeInsets.all(4),
-      // constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-      // splashRadius: 18,
-      // onPressed: onPressedת
-    // );
+      icon: Icon(icon, size: 16.0, color: color),
+      padding: const EdgeInsets.all(4),
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      splashRadius: 18,
+      onPressed: onPressed,
+    );
   }
 }
