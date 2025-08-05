@@ -133,7 +133,7 @@ class NTWidgetBuilder {
 
 
     registerWithAlias(
-        names: {Reef.widgetType, 'reef'},
+        names: {Reef.widgetType, 'Reef'},
         model: ReefModel.new,
         widget: Reef.new,
         fromJson: ReefModel.fromJson);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
@@ -220,7 +221,7 @@ class ReefModel extends MultiTopicNTWidgetModel {
 }
 
 class Reef extends NTWidget {
-  static const String widgetType = 'reef';
+  static const String widgetType = 'Reef';
 
   const Reef({super.key}) : super();
 
@@ -232,42 +233,121 @@ class Reef extends NTWidget {
 
     bool showWarning = model.previousActive != preview;
 
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(
-              minHeight: 36.0,
+        // Hexagon at 20% of widget size
+        _RotatingHexagon(),
+        const SizedBox(height: 10),
+        // Original Reef Controls
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Container(
+                constraints: const BoxConstraints(
+                  minHeight: 36.0,
+                ),
+                child: _CoralLevel(
+                  selected: preview,
+                  options: model.previousOptions ?? [preview ?? ''],
+                  textController: model._searchController,
+                  onValueChanged: (int value) {
+                    model.indexCurrnetOption += value;
+                    if (model.indexCurrnetOption < 0) {
+                      model.indexCurrnetOption = 0;
+                    } else if (model.indexCurrnetOption >=
+                        model.previousOptions!.length) {
+                      model.indexCurrnetOption = model.previousOptions!.length - 1;
+                    }
+                    model.publishSelectedValue(
+                        model.previousOptions?.elementAt(model.indexCurrnetOption));
+                  },
+                ),
+              ),
             ),
-            child: _CoralLevel(
-              selected: preview,
-              options: model.previousOptions ?? [preview ?? ''],
-              textController: model._searchController,
-              onValueChanged: (int value) {
-                model.indexCurrnetOption += value;
-                if (model.indexCurrnetOption < 0) {
-                  model.indexCurrnetOption = 0;
-                } else if (model.indexCurrnetOption >=
-                    model.previousOptions!.length) {
-                  model.indexCurrnetOption = model.previousOptions!.length - 1;
-                }
-                model.publishSelectedValue(
-                    model.previousOptions?.elementAt(model.indexCurrnetOption));
-              },
-            ),
-          ),
+            const SizedBox(width: 5),
+            (showWarning)
+                ? const Tooltip(
+              message:
+              'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+              child: Icon(Icons.priority_high, color: Colors.red),
+            )
+                : const Icon(Icons.check, color: Colors.green),
+          ],
         ),
-        const SizedBox(width: 5),
-        (showWarning)
-            ? const Tooltip(
-          message:
-          'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-          child: Icon(Icons.priority_high, color: Colors.red),
-        )
-            : const Icon(Icons.check, color: Colors.green),
       ],
     );
+  }
+}
+
+class _RotatingHexagon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use 20% of the available space from the parent widget
+        double availableSize = min(constraints.maxWidth, constraints.maxHeight);
+        double hexagonSize = availableSize * 0.2; // 20% of widget size
+
+        return CustomPaint(
+          size: Size(hexagonSize, hexagonSize),
+          painter: HexagonPainter(),
+        );
+      },
+    );
+  }
+}
+
+class HexagonPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.cyan
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    // Use the full available space minus a small margin
+    final radius = min(size.width, size.height) / 2 - 10;
+
+    // Save the canvas state
+    canvas.save();
+
+    // Move to center for rotation
+    canvas.translate(center.dx, center.dy);
+
+    // Define ONE side of the hexagon (from one vertex to the next)
+    final sideLength = radius;
+
+    // Start at the top vertex and draw to the next vertex
+    final path = Path();
+    path.moveTo(0, -radius);  // Top vertex
+    path.lineTo(sideLength * cos(pi/6), -radius + sideLength * sin(pi/6)); // Next vertex
+    canvas.rotate(pi / 2); // Rotate 60 degrees (π/3 radians)
+
+    // Draw the same side 6 times, rotating 60 degrees each time
+    for (int i = 0; i < 6; i++) {
+      canvas.drawPath(path, paint);
+      canvas.rotate(pi / 3); // Rotate 60 degrees (π/3 radians)
+    }
+
+    // Restore canvas state
+    canvas.restore();
+
+    // Add center dot (scale with size)
+    final centerPaint = Paint()
+      ..color = Colors.cyan
+      ..style = PaintingStyle.fill;
+
+    final dotSize = min(size.width, size.height) * 0.05; // 5% of the smallest dimension
+    canvas.drawCircle(center, dotSize, centerPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
 
@@ -314,20 +394,18 @@ class _CoralLevel extends StatelessWidget {
     );
   }
 
-
   Widget _buildControlButton({
     required IconData icon,
     required Color color,
     required VoidCallback? onPressed,
   }) {
-    return IconButton(
-      icon: Icon(icon, size: 16.0, color: color),
-      padding: const EdgeInsets.all(4),
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-      splashRadius: 18,
-      onPressed: onPressed,
-      tooltip: icon == Icons.add ? "Increase" : "Decrease",
-    );
-  }
+    return Position //IconButton(
 
+      // icon: Icon(icon, size: 16.0, color: color),
+      // padding: const EdgeInsets.all(4),
+      // constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      // splashRadius: 18,
+      // onPressed: onPressedת
+    // );
+  }
 }
