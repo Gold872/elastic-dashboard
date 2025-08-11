@@ -24,11 +24,11 @@ class ReefModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-    optionsSubscription,
-    selectedSubscription,
-    activeSubscription,
-    defaultSubscription,
-  ];
+        optionsSubscription,
+        selectedSubscription,
+        activeSubscription,
+        defaultSubscription,
+      ];
 
   late Listenable chooserStateListenable;
 
@@ -38,7 +38,10 @@ class ReefModel extends MultiTopicNTWidgetModel {
   String? previousSelected;
   String? previousActive;
   List<String>? previousOptions;
-  int indexCurrnetOption = 0;
+  int indexCurrentOption = 0;
+
+  // Track which buttons are currently selected
+  Set<int> selectedButtonIndices = {};
 
   NT4Topic? _selectedTopic;
 
@@ -86,9 +89,8 @@ class ReefModel extends MultiTopicNTWidgetModel {
     previousActive = null;
     previousDefault = null;
     previousSelected = null;
+    selectedButtonIndices.clear();
 
-    // Initial caching of the chooser state, when switching
-    // topics the listener won't be called, so we have to call it manually
     onChooserStateUpdate();
   }
 
@@ -96,7 +98,6 @@ class ReefModel extends MultiTopicNTWidgetModel {
   void resetSubscription() {
     _selectedTopic = null;
     chooserStateListenable.removeListener(onChooserStateUpdate);
-
     super.resetSubscription();
   }
 
@@ -123,8 +124,7 @@ class ReefModel extends MultiTopicNTWidgetModel {
 
   void onChooserStateUpdate() {
     List<Object?>? rawOptions =
-    optionsSubscription.value?.tryCast<List<Object?>>();
-
+        optionsSubscription.value?.tryCast<List<Object?>>();
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
     if (sortOptions) {
@@ -153,8 +153,6 @@ class ReefModel extends MultiTopicNTWidgetModel {
     bool publishCurrent =
         hasValue && previousSelected != null && currentSelected == null;
 
-    // We only want to publish the selected topic if we're getting values
-    // from the others, since it means the chooser is published on network tables
     if (hasValue) {
       publishSelectedTopic();
     }
@@ -180,43 +178,57 @@ class ReefModel extends MultiTopicNTWidgetModel {
   }
 
   void publishSelectedTopic() {
-    if (_selectedTopic != null) {
-      return;
-    }
+    if (_selectedTopic != null) return;
 
     NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
-      existing.properties.addAll({
-        'retained': true,
-      });
+      existing.properties.addAll({'retained': true});
       ntConnection.publishTopic(existing);
       _selectedTopic = existing;
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
         NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        properties: {'retained': true},
       );
     }
   }
 
   void publishSelectedValue(String? selected, [bool initial = false]) {
-    if (selected == null || !ntConnection.isNT4Connected) {
-      return;
-    }
+    if (selected == null || !ntConnection.isNT4Connected) return;
 
-    if (_selectedTopic == null) {
-      publishSelectedTopic();
-    }
+    if (_selectedTopic == null) publishSelectedTopic();
 
     ntConnection.updateDataFromTopic(
       _selectedTopic!,
       selected,
       initial ? 0 : null,
     );
+  }
+
+  void selectOptionByIndex(int index) {
+    // Allow any button index from 0 to 35 (36 total buttons)
+    if (index < 0 || index >= 36) {
+      return;
+    }
+
+    // Toggle the button selection
+    if (selectedButtonIndices.contains(index)) {
+      selectedButtonIndices.remove(index);
+    } else {
+      selectedButtonIndices.add(index);
+    }
+
+    indexCurrentOption = index;
+
+    // Only publish value if we have actual options and index is within options range
+    if (previousOptions != null && index < previousOptions!.length) {
+      String selectedOption = previousOptions![index];
+      publishSelectedValue(selectedOption);
+    }
+
+    notifyListeners();
   }
 }
 
@@ -230,49 +242,47 @@ class Reef extends NTWidget {
     ReefModel model = cast(context.watch<NTWidgetModel>());
 
     String? preview = model.previousSelected ?? model.previousDefault;
-
     bool showWarning = model.previousActive != preview;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Hexagon at 20% of widget size
-        _RotatingHexagon(),
+        SizedBox(
+          width: 450,
+          height: 450,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Rotating hexagon is now a child of the Stack
+              _RotatingHexagon(),
+              // CoralLevel buttons are also a child of the Stack
+              _CoralLevel(
+                selected: preview,
+                options: model.previousOptions ?? [],
+                selectedButtonIndices: model.selectedButtonIndices,
+                textController: model._searchController,
+                onOptionSelected: (int index) {
+                  model.selectOptionByIndex(index);
+                },
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 10),
-        // Original Reef Controls
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: 36.0,
-                ),
-                child: _CoralLevel(
-                  selected: preview,
-                  options: model.previousOptions ?? [preview ?? ''],
-                  textController: model._searchController,
-                  onValueChanged: (int value) {
-                    model.indexCurrnetOption += value;
-                    if (model.indexCurrnetOption < 0) {
-                      model.indexCurrnetOption = 0;
-                    } else if (model.indexCurrnetOption >=
-                        model.previousOptions!.length) {
-                      model.indexCurrnetOption = model.previousOptions!.length - 1;
-                    }
-                    model.publishSelectedValue(
-                        model.previousOptions?.elementAt(model.indexCurrnetOption));
-                  },
-                ),
-              ),
+            Text(
+              "L${preview ?? ''}",
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(width: 5),
             (showWarning)
                 ? const Tooltip(
-              message:
-              'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-              child: Icon(Icons.priority_high, color: Colors.red),
-            )
+                    message:
+                        'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                    child: Icon(Icons.priority_high, color: Colors.red),
+                  )
                 : const Icon(Icons.check, color: Colors.green),
           ],
         ),
@@ -286,13 +296,17 @@ class _RotatingHexagon extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use 20% of the available space from the parent widget
-        double availableSize = min(constraints.maxWidth, constraints.maxHeight);
-        double hexagonSize = availableSize * 0.2; // 20% of widget size
+        final side = min(constraints.maxWidth, constraints.maxHeight) * 0.5;
 
-        return CustomPaint(
-          size: Size(hexagonSize, hexagonSize),
-          painter: HexagonPainter(),
+        return Center(
+          child: SizedBox(
+            width: side,
+            height: side,
+            child: CustomPaint(
+              size: Size(side, side),
+              painter: HexagonPainter(),
+            ),
+          ),
         );
       },
     );
@@ -304,108 +318,163 @@ class HexagonPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.cyan
-      ..strokeWidth = 2.0
+      ..strokeWidth = 5.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     final center = Offset(size.width / 2, size.height / 2);
-    // Use the full available space minus a small margin
-    final radius = min(size.width, size.height) / 2 - 10;
+    final radius = min(size.width, size.height) / 2;
 
-    // Save the canvas state
     canvas.save();
-
-    // Move to center for rotation
     canvas.translate(center.dx, center.dy);
 
-    // Define ONE side of the hexagon (from one vertex to the next)
-    final sideLength = radius;
-
-    // Start at the top vertex and draw to the next vertex
-    final path = Path();
-    path.moveTo(0, -radius);  // Top vertex
-    path.lineTo(sideLength * cos(pi/6), -radius + sideLength * sin(pi/6)); // Next vertex
-    canvas.rotate(pi / 2); // Rotate 60 degrees (π/3 radians)
-
-    // Draw the same side 6 times, rotating 60 degrees each time
+    final path = Path()..moveTo(radius * cos(-pi / 6), radius * sin(-pi / 6));
+    canvas.rotate(pi / 2);
     for (int i = 0; i < 6; i++) {
-      canvas.drawPath(path, paint);
-      canvas.rotate(pi / 3); // Rotate 60 degrees (π/3 radians)
+      path.lineTo(radius * cos(i * pi / 3 + -pi / 6),
+          radius * sin(i * pi / 3 + -pi / 6));
     }
 
-    // Restore canvas state
+    path.close();
+    canvas.drawPath(path, paint);
     canvas.restore();
 
-    // Add center dot (scale with size)
-    final centerPaint = Paint()
-      ..color = Colors.cyan
-      ..style = PaintingStyle.fill;
-
-    final dotSize = min(size.width, size.height) * 0.05; // 5% of the smallest dimension
+    final centerPaint = Paint()..color = Colors.cyan;
+    final dotSize = min(size.width, size.height) * 0.05;
     canvas.drawCircle(center, dotSize, centerPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _CoralLevel extends StatelessWidget {
   final List<String> options;
   final String? selected;
-  final Function(int value) onValueChanged;
+  final Set<int> selectedButtonIndices;
+  final Function(int index) onOptionSelected;
   final TextEditingController textController;
 
   const _CoralLevel({
     required this.options,
-    required this.onValueChanged,
+    required this.onOptionSelected,
     required this.textController,
     this.selected,
+    required this.selectedButtonIndices,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: selected ?? '',
-      waitDuration: const Duration(milliseconds: 250),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildControlButton(
-            icon: Icons.remove,
-            color: Colors.red,
-            onPressed: () => onValueChanged(-1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              "L${selected ?? ''}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          _buildControlButton(
-            icon: Icons.add,
-            color: Colors.green,
-            onPressed: () => onValueChanged(1),
-          ),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return _buildControlButton(constraints);
+      },
     );
   }
 
-  Widget _buildControlButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback? onPressed,
-  }) {
-    return IconButton(
+  Widget _buildControlButton(BoxConstraints constraints) {
+    final double widgetSize = min(constraints.maxWidth, constraints.maxHeight);
+    final double buttonSize =
+        widgetSize * 0.08; // Smaller buttons for better fit
+    final double offsetFromCenter =
+        widgetSize * 0.38; // Increased offset now that we have more space
+    const double globalRotation = pi / 6;
 
-      icon: Icon(icon, size: 16.0, color: color),
-      padding: const EdgeInsets.all(4),
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-      splashRadius: 18,
-      onPressed: onPressed,
+    // Generate all 36 buttons (6 faces × 6 buttons per face)
+    List<String> allButtons = List.generate(36, (index) {
+      if (index < options.length) {
+        return options[index];
+      } else {
+        return 'Button ${index + 1}'; // Default text for buttons without options
+      }
+    });
+
+    Widget buildSquare(int faceIndex, double iconCounterRotate) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (int row = 0; row < 2; row++)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int col = 0; col < 3; col++)
+                  () {
+                    final int buttonIndex = faceIndex * 6 + row * 3 + col;
+                    final String buttonText = allButtons[buttonIndex];
+
+                    // Check if this button is selected
+                    final bool isSelected =
+                        selectedButtonIndices.contains(buttonIndex);
+
+                    return Container(
+                      padding: EdgeInsets.all(buttonSize * 0.1),
+                      child: SizedBox(
+                        width: buttonSize,
+                        height: buttonSize,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size(buttonSize, buttonSize),
+                            maximumSize: Size(buttonSize, buttonSize),
+                            backgroundColor: isSelected ? Colors.blue : null,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () {
+                            print('Button $buttonIndex pressed'); // Debug print
+                            onOptionSelected(buttonIndex);
+                          },
+                          child: Transform.rotate(
+                            angle: -iconCounterRotate,
+                            child: Text(
+                              buttonText.length <= 2
+                                  ? buttonText
+                                  : buttonText.substring(0, 2),
+                              style: TextStyle(
+                                fontSize: buttonSize * 0.25,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? Colors.white : null,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }(),
+              ],
+            ),
+        ],
+      );
+    }
+
+    return Container(
+      width: constraints.maxWidth,
+      height: constraints.maxHeight,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          for (int face = 0; face < 6; face++)
+            () {
+              final double midAngle =
+                  -pi / 2 + face * (pi / 3) + pi / 6 + globalRotation;
+
+              final Offset basePos = Offset(
+                offsetFromCenter * cos(midAngle),
+                offsetFromCenter * sin(midAngle),
+              );
+
+              final double rotation = midAngle;
+
+              return Transform.translate(
+                offset: basePos,
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: buildSquare(face, rotation),
+                ),
+              );
+            }(),
+        ],
+      ),
     );
   }
 }
