@@ -12,6 +12,9 @@ class ReefModel extends MultiTopicNTWidgetModel {
   @override
   String type = Reef.widgetType;
 
+  String get branchsTopicName => 'reeftalbe/branchs';
+  late NT4Subscription branchesSub;
+
   String get optionsTopicName => '$topic/options';
   String get selectedTopicName => '$topic/selected';
   String get activeTopicName => '$topic/active';
@@ -75,6 +78,8 @@ class ReefModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
+    branchesSub = ntConnection.subscribe(branchsTopicName, super.period);
+
     optionsSubscription =
         ntConnection.subscribe(optionsTopicName, super.period);
     selectedSubscription =
@@ -208,8 +213,8 @@ class ReefModel extends MultiTopicNTWidgetModel {
   }
 
   void selectOptionByIndex(int index) {
-    // Allow any button index from 0 to 35 (36 total buttons)
-    if (index < 0 || index >= 36) {
+    // Allow any button index from 0 to 41 (42 total buttons now: 36 + 6 edge buttons)
+    if (index < 0 || index >= 42) {
       return;
     }
 
@@ -244,49 +249,43 @@ class Reef extends NTWidget {
     String? preview = model.previousSelected ?? model.previousDefault;
     bool showWarning = model.previousActive != preview;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 450,
-          height: 450,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Rotating hexagon is now a child of the Stack
-              _RotatingHexagon(),
-              // CoralLevel buttons are also a child of the Stack
-              _CoralLevel(
-                selected: preview,
-                options: model.previousOptions ?? [],
-                selectedButtonIndices: model.selectedButtonIndices,
-                textController: model._searchController,
-                onOptionSelected: (int index) {
-                  model.selectOptionByIndex(index);
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "L${preview ?? ''}",
-              style: Theme.of(context).textTheme.bodyMedium,
+    return ListenableBuilder(
+      listenable: model.branchesSub,
+      builder: (context, child) {
+        print(
+            '${model.branchesSub.topic}, ${model.branchesSub.value} daskdaosdkasodaskdoasj');
+        return Transform.scale(
+          scale: 1,
+          child: child,
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 450,
+            height: 450,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Rotating hexagon is now a child of the Stack
+                _RotatingHexagon(),
+                // CoralLevel buttons are also a child of the Stack
+                _CoralLevel(
+                  selected: preview,
+                  options: model.previousOptions ?? [],
+                  selectedButtonIndices: model.selectedButtonIndices,
+                  textController: model._searchController,
+                  onOptionSelected: (int index) {
+                    model.selectOptionByIndex(index);
+                  },
+                ),
+              ],
             ),
-            const SizedBox(width: 5),
-            (showWarning)
-                ? const Tooltip(
-                    message:
-                        'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                    child: Icon(Icons.priority_high, color: Colors.red),
-                  )
-                : const Icon(Icons.check, color: Colors.green),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 }
@@ -378,12 +377,16 @@ class _CoralLevel extends StatelessWidget {
         widgetSize * 0.08; // Smaller buttons for better fit
     final double offsetFromCenter =
         widgetSize * 0.38; // Increased offset now that we have more space
+    final double edgeButtonOffset =
+        widgetSize * 0.25; // Offset for edge buttons (closer to hexagon)
     const double globalRotation = pi / 6;
 
-    // Generate all 36 buttons (6 faces × 6 buttons per face)
-    List<String> allButtons = List.generate(36, (index) {
+    // Generate all 42 buttons (36 face buttons + 6 edge buttons)
+    List<String> allButtons = List.generate(42, (index) {
       if (index < options.length) {
         return options[index];
+      } else if (index >= 36) {
+        return 'E${index - 35}'; // Edge buttons labeled E1, E2, E3, E4, E5, E6
       } else {
         return 'Button ${index + 1}'; // Default text for buttons without options
       }
@@ -446,6 +449,45 @@ class _CoralLevel extends StatelessWidget {
       );
     }
 
+    Widget buildEdgeButton(int buttonIndex) {
+      final String buttonText = allButtons[buttonIndex];
+      final bool isSelected = selectedButtonIndices.contains(buttonIndex);
+
+      return SizedBox(
+        width: buttonSize,
+        height: buttonSize,
+        child: OutlinedButton(
+          // Changed from ElevatedButton to OutlinedButton
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size(buttonSize, buttonSize),
+            maximumSize: Size(buttonSize, buttonSize),
+            // Set background color to transparent for no fill
+            backgroundColor: Colors.transparent,
+            // Define the border (outline) color and width
+            side: BorderSide(
+              color: isSelected ? Colors.black : Colors.tealAccent[400]!,
+              width: 2.0, // Adjust the thickness of the outline
+            ),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          onPressed: () {
+            print('Edge Button $buttonIndex pressed');
+            onOptionSelected(buttonIndex);
+          },
+          child: Text(
+            buttonText.length <= 2 ? buttonText : buttonText.substring(0, 2),
+            style: TextStyle(
+              fontSize: buttonSize * 0.25,
+              fontWeight: FontWeight.bold,
+              // Text color will be the same as the outline for a consistent look
+              color: isSelected ? Colors.black : Colors.tealAccent[400],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       width: constraints.maxWidth,
       height: constraints.maxHeight,
@@ -453,6 +495,7 @@ class _CoralLevel extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
+          // Original 6 faces with 6 buttons each (36 buttons total)
           for (int face = 0; face < 6; face++)
             () {
               final double midAngle =
@@ -471,6 +514,31 @@ class _CoralLevel extends StatelessWidget {
                   angle: rotation,
                   child: buildSquare(face, rotation),
                 ),
+              );
+            }(),
+
+          // 6 edge buttons positioned on all hexagon vertices
+          for (int edgeButton = 0; edgeButton < 6; edgeButton++)
+            () {
+              // Position edge buttons on all 6 hexagon vertices
+              // Hexagon vertices are at 60° intervals starting from the top-right
+              final double vertexAngle =
+                  (edgeButton * pi / 3) + globalRotation; // pi / 2;
+
+              final double hexagonRadius =
+                  widgetSize * 0.15; // Match hexagon radius
+
+              final Offset edgePos = Offset(
+                hexagonRadius * cos(vertexAngle),
+                hexagonRadius * sin(vertexAngle),
+              );
+
+              final int buttonIndex =
+                  36 + edgeButton; // Buttons 36, 37, 38, 39, 40, 41
+
+              return Transform.translate(
+                offset: edgePos,
+                child: buildEdgeButton(buttonIndex),
               );
             }(),
         ],

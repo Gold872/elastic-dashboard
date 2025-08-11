@@ -130,10 +130,8 @@ class NTWidgetBuilder {
         minWidth: _normalSize * 1.6,
         minHeight: _normalSize * 1.6);
 
-
-
     registerWithAlias(
-        names: {Reef.widgetType, 'Reef'},
+        names: {Reef.widgetType, 'Reef2d'},
         model: ReefModel.new,
         widget: Reef.new,
         fromJson: ReefModel.fromJson);
