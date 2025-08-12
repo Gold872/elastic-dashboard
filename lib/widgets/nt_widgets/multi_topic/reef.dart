@@ -8,18 +8,118 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
+// Constants for better maintainability
+class ReefConstants {
+  static const String widgetType = 'Reef';
+  static const int totalButtons = 42;
+  static const int faceButtons = 36;
+  static const int edgeButtons = 6;
+  static const int buttonsPerFace = 6;
+  static const int facesCount = 6;
+  static const double globalRotation = pi / 6;
+
+  // Color scheme
+  static const Color hexagonColor = Color.fromARGB(255, 100, 2, 93);
+  static const double hexagonStrokeWidth = 5.0;
+}
+
+// Button status enum for better type safety
+enum ButtonStatus {
+  normal(0),
+  active(1),
+  warning(2),
+  success(3);
+
+  const ButtonStatus(this.value);
+  final int value;
+
+  static ButtonStatus fromInt(int value) {
+    return ButtonStatus.values.firstWhere(
+      (status) => status.value == value,
+      orElse: () => ButtonStatus.normal,
+    );
+  }
+
+  ButtonStatus getNextStatus() {
+    switch (this) {
+      case ButtonStatus.active:
+        return ButtonStatus.normal;
+      case ButtonStatus.normal:
+      case ButtonStatus.warning:
+      case ButtonStatus.success:
+        return ButtonStatus.active;
+    }
+  }
+}
+
+// Immutable color configuration
+@immutable
+class ButtonColorScheme {
+  final Color? background;
+  final Color? text;
+  final Color? border;
+
+  const ButtonColorScheme({
+    this.background,
+    this.text,
+    this.border,
+  });
+
+  // Face button color schemes
+  static const Map<ButtonStatus, ButtonColorScheme> faceColors = {
+    ButtonStatus.normal: ButtonColorScheme(),
+    ButtonStatus.active: ButtonColorScheme(
+      background: Colors.white,
+      text: Colors.black,
+    ),
+    ButtonStatus.warning: ButtonColorScheme(
+      background: Colors.purple,
+      text: Colors.white,
+    ),
+    ButtonStatus.success: ButtonColorScheme(
+      background: Colors.green,
+      text: Colors.white,
+    ),
+  };
+
+  // Edge button color schemes
+  static final Map<ButtonStatus, ButtonColorScheme> edgeColors = {
+    ButtonStatus.normal: ButtonColorScheme(
+      background: Colors.transparent,
+      text: Colors.black,
+      border: Colors.tealAccent[400],
+    ),
+    ButtonStatus.active: ButtonColorScheme(
+      background: Colors.tealAccent[400],
+      text: Colors.black,
+      border: Colors.tealAccent[400],
+    ),
+    ButtonStatus.warning: ButtonColorScheme(
+      background: Colors.yellow,
+      text: Colors.black,
+      border: Colors.yellow,
+    ),
+    ButtonStatus.success: ButtonColorScheme(
+      background: Colors.lime,
+      text: Colors.black,
+      border: Colors.lime,
+    ),
+  };
+}
+
 class ReefModel extends MultiTopicNTWidgetModel {
   @override
-  String type = Reef.widgetType;
+  String type = ReefConstants.widgetType;
 
-  String get branchsTopicName => 'reeftalbe/branchs';
-  late NT4Subscription branchesSub;
-
+  // Topic names - computed properties for cleaner access
+  String get branchsTopicName => '/reeftalbe/branchs';
   String get optionsTopicName => '$topic/options';
   String get selectedTopicName => '$topic/selected';
   String get activeTopicName => '$topic/active';
   String get defaultTopicName => '$topic/default';
 
+  // Subscriptions
+  late NT4Subscription branchesSub;
   late NT4Subscription optionsSubscription;
   late NT4Subscription selectedSubscription;
   late NT4Subscription activeSubscription;
@@ -27,6 +127,7 @@ class ReefModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
+        branchesSub,
         optionsSubscription,
         selectedSubscription,
         activeSubscription,
@@ -34,30 +135,64 @@ class ReefModel extends MultiTopicNTWidgetModel {
       ];
 
   late Listenable chooserStateListenable;
-
   final TextEditingController _searchController = TextEditingController();
 
-  String? previousDefault;
-  String? previousSelected;
-  String? previousActive;
-  List<String>? previousOptions;
-  int indexCurrentOption = 0;
-
-  // Track which buttons are currently selected
-  Set<int> selectedButtonIndices = {};
-
+  // State variables
+  String? _previousDefault;
+  String? _previousSelected;
+  String? _previousActive;
+  List<String>? _previousOptions;
+  int _currentOptionIndex = 0;
+  final Set<int> _selectedButtonIndices = <int>{};
   NT4Topic? _selectedTopic;
-
   bool _sortOptions = false;
 
-  bool get sortOptions => _sortOptions;
+  // Getters for encapsulation
+  String? get previousDefault => _previousDefault;
+  String? get previousSelected => _previousSelected;
+  String? get previousActive => _previousActive;
+  List<String>? get previousOptions => _previousOptions;
+  Set<int> get selectedButtonIndices => Set.from(_selectedButtonIndices);
+  TextEditingController get searchController => _searchController;
 
+  bool get sortOptions => _sortOptions;
   set sortOptions(bool value) {
-    _sortOptions = value;
-    previousOptions?.sort();
-    refresh();
+    if (_sortOptions != value) {
+      _sortOptions = value;
+      _previousOptions?.sort();
+      refresh();
+    }
   }
 
+  // Enhanced button status retrieval with better error handling
+  ButtonStatus getButtonStatus(int buttonIndex) {
+    if (buttonIndex < 0 || buttonIndex >= ReefConstants.totalButtons) {
+      return ButtonStatus.normal;
+    }
+
+    final branchData = branchesSub.value;
+    if (branchData is! List || buttonIndex >= branchData.length) {
+      return ButtonStatus.normal;
+    }
+
+    final value = branchData[buttonIndex];
+    final intValue = switch (value) {
+      int v => v,
+      String v => int.tryParse(v) ?? 0,
+      double v => v.toInt(),
+      _ => 0,
+    };
+
+    return ButtonStatus.fromInt(intValue);
+  }
+
+  // Legacy support method
+  bool isButtonPressed(int buttonIndex) {
+    return _selectedButtonIndices.contains(buttonIndex) ||
+        getButtonStatus(buttonIndex) == ButtonStatus.active;
+  }
+
+  // Constructors
   ReefModel({
     required super.ntConnection,
     required super.preferences,
@@ -78,8 +213,8 @@ class ReefModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
+    // Initialize all subscriptions
     branchesSub = ntConnection.subscribe(branchsTopicName, super.period);
-
     optionsSubscription =
         ntConnection.subscribe(optionsTopicName, super.period);
     selectedSubscription =
@@ -87,22 +222,19 @@ class ReefModel extends MultiTopicNTWidgetModel {
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
     defaultSubscription =
         ntConnection.subscribe(defaultTopicName, super.period);
+
     chooserStateListenable = Listenable.merge(subscriptions);
-    chooserStateListenable.addListener(onChooserStateUpdate);
+    chooserStateListenable.addListener(_onChooserStateUpdate);
 
-    previousOptions = null;
-    previousActive = null;
-    previousDefault = null;
-    previousSelected = null;
-    selectedButtonIndices.clear();
-
-    onChooserStateUpdate();
+    // Reset state
+    _resetState();
+    _onChooserStateUpdate();
   }
 
   @override
   void resetSubscription() {
     _selectedTopic = null;
-    chooserStateListenable.removeListener(onChooserStateUpdate);
+    chooserStateListenable.removeListener(_onChooserStateUpdate);
     super.resetSubscription();
   }
 
@@ -120,72 +252,77 @@ class ReefModel extends MultiTopicNTWidgetModel {
       DialogToggleSwitch(
         label: 'Sort Options Alphabetically',
         initialValue: _sortOptions,
-        onToggle: (value) {
-          sortOptions = value;
-        },
+        onToggle: (value) => sortOptions = value,
       ),
     ];
   }
 
-  void onChooserStateUpdate() {
-    List<Object?>? rawOptions =
-        optionsSubscription.value?.tryCast<List<Object?>>();
+  // Private helper methods
+  void _resetState() {
+    _previousOptions = null;
+    _previousActive = null;
+    _previousDefault = null;
+    _previousSelected = null;
+    _selectedButtonIndices.clear();
+  }
+
+  void _onChooserStateUpdate() {
+    // Process options
+    final rawOptions = optionsSubscription.value?.tryCast<List<Object?>>();
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
-    if (sortOptions) {
-      currentOptions?.sort();
+    if (sortOptions && currentOptions != null) {
+      currentOptions.sort();
     }
 
-    String? currentActive = tryCast(activeSubscription.value);
-    if (currentActive != null && currentActive.isEmpty) {
-      currentActive = null;
-    }
+    // Process other values with null safety
+    final currentActive = _processStringValue(activeSubscription.value);
+    final currentSelected = _processStringValue(selectedSubscription.value);
+    final currentDefault = _processStringValue(defaultSubscription.value);
 
-    String? currentSelected = tryCast(selectedSubscription.value);
-    if (currentSelected != null && currentSelected.isEmpty) {
-      currentSelected = null;
-    }
-
-    String? currentDefault = tryCast(defaultSubscription.value);
-    if (currentDefault != null && currentDefault.isEmpty) {
-      currentDefault = null;
-    }
-
-    bool hasValue = currentOptions != null ||
+    final hasValue = currentOptions != null ||
         currentActive != null ||
         currentDefault != null;
 
-    bool publishCurrent =
-        hasValue && previousSelected != null && currentSelected == null;
+    final shouldPublishCurrent =
+        hasValue && _previousSelected != null && currentSelected == null;
 
     if (hasValue) {
-      publishSelectedTopic();
+      _publishSelectedTopic();
     }
 
-    if (currentOptions != null) {
-      previousOptions = currentOptions;
-    }
-    if (currentSelected != null) {
-      previousSelected = currentSelected;
-    }
-    if (currentActive != null) {
-      previousActive = currentActive;
-    }
-    if (currentDefault != null) {
-      previousDefault = currentDefault;
-    }
+    // Update state
+    _updateState(
+        currentOptions, currentSelected, currentActive, currentDefault);
 
-    if (publishCurrent) {
-      publishSelectedValue(previousSelected, true);
+    if (shouldPublishCurrent) {
+      _publishSelectedValue(_previousSelected, true);
     }
 
     notifyListeners();
   }
 
-  void publishSelectedTopic() {
+  String? _processStringValue(dynamic value) {
+    final stringValue = tryCast<String>(value);
+    return (stringValue?.isEmpty ?? true) ? null : stringValue;
+  }
+
+  void _updateState(
+    List<String>? options,
+    String? selected,
+    String? active,
+    String? defaultValue,
+  ) {
+    if (options != null) _previousOptions = options;
+    if (selected != null) _previousSelected = selected;
+    if (active != null) _previousActive = active;
+    if (defaultValue != null) _previousDefault = defaultValue;
+  }
+
+  void _publishSelectedTopic() {
     if (_selectedTopic != null) return;
 
-    NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
+    final existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
       existing.properties.addAll({'retained': true});
@@ -200,10 +337,10 @@ class ReefModel extends MultiTopicNTWidgetModel {
     }
   }
 
-  void publishSelectedValue(String? selected, [bool initial = false]) {
+  void _publishSelectedValue(String? selected, [bool initial = false]) {
     if (selected == null || !ntConnection.isNT4Connected) return;
 
-    if (_selectedTopic == null) publishSelectedTopic();
+    _selectedTopic ??= _createSelectedTopic();
 
     ntConnection.updateDataFromTopic(
       _selectedTopic!,
@@ -212,53 +349,84 @@ class ReefModel extends MultiTopicNTWidgetModel {
     );
   }
 
+  NT4Topic _createSelectedTopic() {
+    _publishSelectedTopic();
+    return _selectedTopic!;
+  }
+
+  // Public methods
   void selectOptionByIndex(int index) {
-    // Allow any button index from 0 to 41 (42 total buttons now: 36 + 6 edge buttons)
-    if (index < 0 || index >= 42) {
-      return;
-    }
+    if (!_isValidButtonIndex(index)) return;
 
-    // Toggle the button selection
-    if (selectedButtonIndices.contains(index)) {
-      selectedButtonIndices.remove(index);
-    } else {
-      selectedButtonIndices.add(index);
-    }
+    final currentStatus = getButtonStatus(index);
+    final newStatus = currentStatus.getNextStatus();
 
-    indexCurrentOption = index;
+    _updateButtonStatus(index, newStatus.value);
+    _currentOptionIndex = index;
 
-    // Only publish value if we have actual options and index is within options range
-    if (previousOptions != null && index < previousOptions!.length) {
-      String selectedOption = previousOptions![index];
-      publishSelectedValue(selectedOption);
+    // Publish value if within options range
+    if (_previousOptions != null && index < _previousOptions!.length) {
+      _publishSelectedValue(_previousOptions![index]);
     }
 
     notifyListeners();
   }
+
+  bool _isValidButtonIndex(int index) {
+    return index >= 0 && index < ReefConstants.totalButtons;
+  }
+
+  void _updateButtonStatus(int buttonIndex, int newStatus) {
+    final currentBranchData = branchesSub.value;
+    List<dynamic> branchList;
+
+    if (currentBranchData is List) {
+      branchList = List.from(currentBranchData);
+    } else {
+      branchList = List.filled(ReefConstants.totalButtons, 0);
+    }
+
+    // Ensure array is large enough
+    while (branchList.length <= buttonIndex) {
+      branchList.add(0);
+    }
+
+    branchList[buttonIndex] = newStatus;
+
+    if (ntConnection.isNT4Connected) {
+      _publishBranchStatus(branchList);
+      debugPrint('Updated button $buttonIndex to status $newStatus');
+    }
+  }
+
+  void _publishBranchStatus(List<dynamic> branchList) {
+    NT4Topic? branchTopic = ntConnection.getTopicFromName(branchsTopicName);
+
+    branchTopic ??= ntConnection.publishNewTopic(
+      branchsTopicName,
+      NT4TypeStr.kIntArr,
+    );
+
+    ntConnection.updateDataFromTopic(branchTopic, branchList);
+  }
 }
 
 class Reef extends NTWidget {
-  static const String widgetType = 'Reef';
+  static const String widgetType = ReefConstants.widgetType;
 
-  const Reef({super.key}) : super();
+  const Reef({super.key});
 
   @override
   Widget build(BuildContext context) {
-    ReefModel model = cast(context.watch<NTWidgetModel>());
-
-    String? preview = model.previousSelected ?? model.previousDefault;
-    bool showWarning = model.previousActive != preview;
+    final model = context.watch<NTWidgetModel>() as ReefModel;
+    final preview = model.previousSelected ?? model.previousDefault;
 
     return ListenableBuilder(
-      listenable: model.branchesSub,
-      builder: (context, child) {
-        print(
-            '${model.branchesSub.topic}, ${model.branchesSub.value} daskdaosdkasodaskdoasj');
-        return Transform.scale(
-          scale: 1,
-          child: child,
-        );
-      },
+      listenable: Listenable.merge([
+        model.branchesSub,
+        model.chooserStateListenable,
+      ]),
+      builder: (context, child) => Transform.scale(scale: 1, child: child),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -268,17 +436,11 @@ class Reef extends NTWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Rotating hexagon is now a child of the Stack
-                _RotatingHexagon(),
-                // CoralLevel buttons are also a child of the Stack
-                _CoralLevel(
-                  selected: preview,
-                  options: model.previousOptions ?? [],
-                  selectedButtonIndices: model.selectedButtonIndices,
-                  textController: model._searchController,
-                  onOptionSelected: (int index) {
-                    model.selectOptionByIndex(index);
-                  },
+                const _HexagonWidget(),
+                _ButtonGridWidget(
+                  model: model,
+                  preview: preview,
+                  onOptionSelected: model.selectOptionByIndex,
                 ),
               ],
             ),
@@ -290,21 +452,18 @@ class Reef extends NTWidget {
   }
 }
 
-class _RotatingHexagon extends StatelessWidget {
+class _HexagonWidget extends StatelessWidget {
+  const _HexagonWidget();
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = min(constraints.maxWidth, constraints.maxHeight) * 0.5;
-
+        final size = min(constraints.maxWidth, constraints.maxHeight) * 0.5;
         return Center(
-          child: SizedBox(
-            width: side,
-            height: side,
-            child: CustomPaint(
-              size: Size(side, side),
-              painter: HexagonPainter(),
-            ),
+          child: CustomPaint(
+            size: Size(size, size),
+            painter: _HexagonPainter(),
           ),
         );
       },
@@ -312,236 +471,277 @@ class _RotatingHexagon extends StatelessWidget {
   }
 }
 
-class HexagonPainter extends CustomPainter {
+class _HexagonPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.cyan
-      ..strokeWidth = 5.0
+      ..color = ReefConstants.hexagonColor
+      ..strokeWidth = ReefConstants.hexagonStrokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
 
+    _drawHexagon(canvas, paint, center, radius);
+    _drawCenterDot(canvas, center, size);
+  }
+
+  void _drawHexagon(Canvas canvas, Paint paint, Offset center, double radius) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
+    canvas.rotate(pi / 2);
 
     final path = Path()..moveTo(radius * cos(-pi / 6), radius * sin(-pi / 6));
-    canvas.rotate(pi / 2);
+
     for (int i = 0; i < 6; i++) {
-      path.lineTo(radius * cos(i * pi / 3 + -pi / 6),
-          radius * sin(i * pi / 3 + -pi / 6));
+      final angle = i * pi / 3 + -pi / 6;
+      path.lineTo(radius * cos(angle), radius * sin(angle));
     }
 
     path.close();
     canvas.drawPath(path, paint);
     canvas.restore();
+  }
 
-    final centerPaint = Paint()..color = Colors.cyan;
-    final dotSize = min(size.width, size.height) * 0.05;
-    canvas.drawCircle(center, dotSize, centerPaint);
+  void _drawCenterDot(Canvas canvas, Offset center, Size size) {
+    final centerPaint = Paint()..color = ReefConstants.hexagonColor;
+    final dotRadius = min(size.width, size.height) * 0.025;
+    canvas.drawCircle(center, dotRadius, centerPaint);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _CoralLevel extends StatelessWidget {
-  final List<String> options;
-  final String? selected;
-  final Set<int> selectedButtonIndices;
-  final Function(int index) onOptionSelected;
-  final TextEditingController textController;
+class _ButtonGridWidget extends StatelessWidget {
+  final ReefModel model;
+  final String? preview;
+  final Function(int) onOptionSelected;
 
-  const _CoralLevel({
-    required this.options,
+  const _ButtonGridWidget({
+    required this.model,
+    required this.preview,
     required this.onOptionSelected,
-    required this.textController,
-    this.selected,
-    required this.selectedButtonIndices,
   });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return _buildControlButton(constraints);
+        return _ButtonLayout(
+          model: model,
+          constraints: constraints,
+          onOptionSelected: onOptionSelected,
+        );
       },
     );
   }
+}
 
-  Widget _buildControlButton(BoxConstraints constraints) {
-    final double widgetSize = min(constraints.maxWidth, constraints.maxHeight);
-    final double buttonSize =
-        widgetSize * 0.08; // Smaller buttons for better fit
-    final double offsetFromCenter =
-        widgetSize * 0.38; // Increased offset now that we have more space
-    final double edgeButtonOffset =
-        widgetSize * 0.25; // Offset for edge buttons (closer to hexagon)
-    const double globalRotation = pi / 6;
+class _ButtonLayout extends StatelessWidget {
+  final ReefModel model;
+  final BoxConstraints constraints;
+  final Function(int) onOptionSelected;
 
-    // Generate all 42 buttons (36 face buttons + 6 edge buttons)
-    List<String> allButtons = List.generate(42, (index) {
-      if (index < options.length) {
-        return options[index];
-      } else if (index >= 36) {
-        return 'E${index - 35}'; // Edge buttons labeled E1, E2, E3, E4, E5, E6
-      } else {
-        return 'Button ${index + 1}'; // Default text for buttons without options
-      }
-    });
+  const _ButtonLayout({
+    required this.model,
+    required this.constraints,
+    required this.onOptionSelected,
+  });
 
-    Widget buildSquare(int faceIndex, double iconCounterRotate) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (int row = 0; row < 2; row++)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (int col = 0; col < 3; col++)
-                  () {
-                    final int buttonIndex = faceIndex * 6 + row * 3 + col;
-                    final String buttonText = allButtons[buttonIndex];
+  @override
+  Widget build(BuildContext context) {
+    final config = _LayoutConfig(constraints);
 
-                    // Check if this button is selected
-                    final bool isSelected =
-                        selectedButtonIndices.contains(buttonIndex);
-
-                    return Container(
-                      padding: EdgeInsets.all(buttonSize * 0.1),
-                      child: SizedBox(
-                        width: buttonSize,
-                        height: buttonSize,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size(buttonSize, buttonSize),
-                            maximumSize: Size(buttonSize, buttonSize),
-                            backgroundColor: isSelected ? Colors.blue : null,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: () {
-                            print('Button $buttonIndex pressed'); // Debug print
-                            onOptionSelected(buttonIndex);
-                          },
-                          child: Transform.rotate(
-                            angle: -iconCounterRotate,
-                            child: Text(
-                              buttonText.length <= 2
-                                  ? buttonText
-                                  : buttonText.substring(0, 2),
-                              style: TextStyle(
-                                fontSize: buttonSize * 0.25,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : null,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }(),
-              ],
-            ),
-        ],
-      );
-    }
-
-    Widget buildEdgeButton(int buttonIndex) {
-      final String buttonText = allButtons[buttonIndex];
-      final bool isSelected = selectedButtonIndices.contains(buttonIndex);
-
-      return SizedBox(
-        width: buttonSize,
-        height: buttonSize,
-        child: OutlinedButton(
-          // Changed from ElevatedButton to OutlinedButton
-          style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size(buttonSize, buttonSize),
-            maximumSize: Size(buttonSize, buttonSize),
-            // Set background color to transparent for no fill
-            backgroundColor: Colors.transparent,
-            // Define the border (outline) color and width
-            side: BorderSide(
-              color: isSelected ? Colors.black : Colors.tealAccent[400]!,
-              width: 2.0, // Adjust the thickness of the outline
-            ),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          onPressed: () {
-            print('Edge Button $buttonIndex pressed');
-            onOptionSelected(buttonIndex);
-          },
-          child: Text(
-            buttonText.length <= 2 ? buttonText : buttonText.substring(0, 2),
-            style: TextStyle(
-              fontSize: buttonSize * 0.25,
-              fontWeight: FontWeight.bold,
-              // Text color will be the same as the outline for a consistent look
-              color: isSelected ? Colors.black : Colors.tealAccent[400],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      width: constraints.maxWidth,
-      height: constraints.maxHeight,
+    return SizedBox.fromSize(
+      size: Size(constraints.maxWidth, constraints.maxHeight),
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          // Original 6 faces with 6 buttons each (36 buttons total)
-          for (int face = 0; face < 6; face++)
-            () {
-              final double midAngle =
-                  -pi / 2 + face * (pi / 3) + pi / 6 + globalRotation;
-
-              final Offset basePos = Offset(
-                offsetFromCenter * cos(midAngle),
-                offsetFromCenter * sin(midAngle),
-              );
-
-              final double rotation = midAngle;
-
-              return Transform.translate(
-                offset: basePos,
-                child: Transform.rotate(
-                  angle: rotation,
-                  child: buildSquare(face, rotation),
-                ),
-              );
-            }(),
-
-          // 6 edge buttons positioned on all hexagon vertices
-          for (int edgeButton = 0; edgeButton < 6; edgeButton++)
-            () {
-              // Position edge buttons on all 6 hexagon vertices
-              // Hexagon vertices are at 60° intervals starting from the top-right
-              final double vertexAngle =
-                  (edgeButton * pi / 3) + globalRotation; // pi / 2;
-
-              final double hexagonRadius =
-                  widgetSize * 0.15; // Match hexagon radius
-
-              final Offset edgePos = Offset(
-                hexagonRadius * cos(vertexAngle),
-                hexagonRadius * sin(vertexAngle),
-              );
-
-              final int buttonIndex =
-                  36 + edgeButton; // Buttons 36, 37, 38, 39, 40, 41
-
-              return Transform.translate(
-                offset: edgePos,
-                child: buildEdgeButton(buttonIndex),
-              );
-            }(),
+          ..._buildFaceButtons(config),
+          ..._buildEdgeButtons(config),
         ],
+      ),
+    );
+  }
+
+  List<Widget> _buildFaceButtons(_LayoutConfig config) {
+    return List.generate(ReefConstants.facesCount, (face) {
+      final angle =
+          -pi / 2 + face * (pi / 3) + pi / 6 + ReefConstants.globalRotation;
+      final position = Offset(
+        config.offsetFromCenter * cos(angle),
+        config.offsetFromCenter * sin(angle),
+      );
+
+      return Transform.translate(
+        offset: position,
+        child: Transform.rotate(
+          angle: angle,
+          child: _FaceButtonGrid(
+            faceIndex: face,
+            config: config,
+            model: model,
+            rotationAngle: angle,
+            onPressed: onOptionSelected,
+          ),
+        ),
+      );
+    });
+  }
+
+  List<Widget> _buildEdgeButtons(_LayoutConfig config) {
+    return List.generate(ReefConstants.edgeButtons, (edgeButton) {
+      final angle = (edgeButton * pi / 3) + ReefConstants.globalRotation;
+      final position = Offset(
+        config.hexagonRadius * cos(angle),
+        config.hexagonRadius * sin(angle),
+      );
+      final buttonIndex = ReefConstants.faceButtons + edgeButton;
+
+      return Transform.translate(
+        offset: position,
+        child: _EdgeButton(
+          buttonIndex: buttonIndex,
+          config: config,
+          model: model,
+          onPressed: onOptionSelected,
+        ),
+      );
+    });
+  }
+}
+
+class _LayoutConfig {
+  final double widgetSize;
+  final double buttonSize;
+  final double offsetFromCenter;
+  final double hexagonRadius;
+
+  _LayoutConfig(BoxConstraints constraints)
+      : widgetSize = min(constraints.maxWidth, constraints.maxHeight),
+        buttonSize = min(constraints.maxWidth, constraints.maxHeight) * 0.08,
+        offsetFromCenter =
+            min(constraints.maxWidth, constraints.maxHeight) * 0.38,
+        hexagonRadius = min(constraints.maxWidth, constraints.maxHeight) * 0.15;
+}
+
+class _FaceButtonGrid extends StatelessWidget {
+  final int faceIndex;
+  final _LayoutConfig config;
+  final ReefModel model;
+  final double rotationAngle;
+  final Function(int) onPressed;
+
+  const _FaceButtonGrid({
+    required this.faceIndex,
+    required this.config,
+    required this.model,
+    required this.rotationAngle,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        2,
+        (row) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (col) {
+            final buttonIndex =
+                faceIndex * ReefConstants.buttonsPerFace + row * 3 + col;
+            return _FaceButton(
+              buttonIndex: buttonIndex,
+              config: config,
+              model: model,
+              rotationAngle: rotationAngle,
+              onPressed: onPressed,
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class _FaceButton extends StatelessWidget {
+  final int buttonIndex;
+  final _LayoutConfig config;
+  final ReefModel model;
+  final double rotationAngle;
+  final Function(int) onPressed;
+
+  const _FaceButton({
+    required this.buttonIndex,
+    required this.config,
+    required this.model,
+    required this.rotationAngle,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final status = model.getButtonStatus(buttonIndex);
+    final colors = ButtonColorScheme.faceColors[status]!;
+
+    return Container(
+      padding: EdgeInsets.all(config.buttonSize * 0.1),
+      child: SizedBox(
+        width: config.buttonSize,
+        height: config.buttonSize,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.zero,
+            backgroundColor: colors.background,
+            minimumSize: Size(config.buttonSize, config.buttonSize),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          onPressed: () => onPressed(buttonIndex),
+          child: Transform.rotate(angle: -rotationAngle),
+        ),
+      ),
+    );
+  }
+}
+
+class _EdgeButton extends StatelessWidget {
+  final int buttonIndex;
+  final _LayoutConfig config;
+  final ReefModel model;
+  final Function(int) onPressed;
+
+  const _EdgeButton({
+    required this.buttonIndex,
+    required this.config,
+    required this.model,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final status = model.getButtonStatus(buttonIndex);
+    final colors = ButtonColorScheme.edgeColors[status]!;
+
+    return SizedBox(
+      width: config.buttonSize,
+      height: config.buttonSize,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          backgroundColor: colors.background,
+          side: BorderSide(
+            color: colors.border ?? colors.text ?? Colors.orange,
+            width: 2.0,
+          ),
+          minimumSize: Size(config.buttonSize, config.buttonSize),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        onPressed: () => onPressed(buttonIndex),
+        child: const SizedBox.shrink(),
       ),
     );
   }
