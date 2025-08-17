@@ -1,0 +1,88 @@
+on robotPeriodic:
+    Reef.getInstance().getBranchsFromDashboard();
+    Reef.getInstance().chooseBranch();
+    Reef.getInstance().sendBranchsToDashBoard();
+
+
+make a new class:
+package frc.robot;
+
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.IntegerArrayPublisher;
+import edu.wpi.first.networktables.IntegerArraySubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
+import frc.LibPurple.Utils.Utils;
+
+public class Reef {
+    private static Reef instance;
+
+    public static Reef getInstance() {
+        if (instance == null) {
+            instance = new Reef();
+        }
+        return instance;
+    }
+
+    private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    private final NetworkTable table = inst.getTable("reef");
+
+    // Publisher: sends "branchs" array
+    private final IntegerArrayPublisher branchsPub;
+
+    // Subscriber: listens for "dashboardbranchs" array
+    private final IntegerArraySubscriber branchsSub;
+
+    // Publisher for type info
+    private final StringPublisher typePub;
+
+    private final long[] branchs = new long[42];
+
+    private Reef() {
+        // Create publisher and subscriber
+        branchsPub = table.getIntegerArrayTopic("branchs").publish();
+        branchsSub = table.getIntegerArrayTopic("dashboardbranchs").subscribe(branchs);
+
+        // Publish type info%
+        typePub = table.getStringTopic(".type").publish();
+        typePub.set("Reef2d");
+    }
+
+    public void setBranchs() {
+        for (int i = 0; i < branchs.length; i++) {
+            branchs[i] = 0;
+        }
+        branchsPub.set(branchs);
+    }
+
+    public void chooseBranch() {
+        branchs[3] = 2;
+    }
+
+    public void sendBranchsToDashBoard() {
+        branchsPub.set(branchs);
+    }
+
+    public void getBranchsFromDashboard() {
+        long[] branchsFromDas = branchsSub.get();
+
+        // Debug print to confirm values
+        Utils.print("Received length: " + branchsFromDas.length);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < branchsFromDas.length; i++) {
+            sb.append("[").append(i).append("] = ").append(branchsFromDas[i]).append(" ");
+        }
+        Utils.print(sb.toString());
+
+        // Update local branchs based on dashboard
+        for (int i = 0; i < branchsFromDas.length; i++) {
+            if (branchs[i] == 1 && branchsFromDas[i] == 0) {
+                branchs[i] = 0;
+            } else if (branchsFromDas[i] == 1) {
+                branchs[i] = 1;
+            }
+        }
+    }
+}

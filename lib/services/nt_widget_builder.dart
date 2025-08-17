@@ -45,6 +45,8 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
+import '../widgets/nt_widgets/multi_topic/reef.dart';
+
 typedef NTModelJsonProvider = NTWidgetModel Function({
   required Map<String, dynamic> jsonData,
   required NTConnection ntConnection,
@@ -127,6 +129,12 @@ class NTWidgetBuilder {
         fromJson: RadialGaugeModel.fromJson,
         minWidth: _normalSize * 1.6,
         minHeight: _normalSize * 1.6);
+
+    registerWithAlias(
+        names: {Reef.widgetType, 'Reef2d'},
+        model: ReefModel.new,
+        widget: Reef.new,
+        fromJson: ReefModel.fromJson);
 
     registerWithAlias(
         names: {TextDisplay.widgetType, 'Text View'},
