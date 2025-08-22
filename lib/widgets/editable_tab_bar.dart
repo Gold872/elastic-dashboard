@@ -9,6 +9,7 @@ import 'package:transitioned_indexed_stack/transitioned_indexed_stack.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/util/tab_data.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/gesture/context_menu_listener.dart';
 import 'package:elastic_dashboard/widgets/pixel_ratio_override.dart';
 import 'package:elastic_dashboard/widgets/tab_grid.dart';
 
@@ -96,6 +97,119 @@ class EditableTabBar extends StatelessWidget {
     onTabDestroy.call(index);
   }
 
+  Widget _buildTab(int index, BuildContext context, ThemeData theme) {
+    return ContextMenuListener(
+      onContextMenuGesture: (globalPosition, _) {
+        if (preferences.getBool(PrefKeys.layoutLocked) ??
+            Defaults.layoutLocked) {
+          return;
+        }
+        ContextMenu contextMenu = ContextMenu(
+          position: globalPosition,
+          borderRadius: BorderRadius.circular(5.0),
+          padding: const EdgeInsets.all(4.0),
+          entries: [
+            MenuHeader(
+              text: tabData[index].name,
+              disableUppercase: true,
+            ),
+            const MenuDivider(),
+            MenuItem(
+              label: 'Rename',
+              icon: Icons.drive_file_rename_outline_outlined,
+              onSelected: () => renameTab(context, index),
+            ),
+            MenuItem(
+              label: 'Duplicate',
+              icon: Icons.control_point_duplicate_sharp,
+              onSelected: () => duplicateTab(context, index),
+            ),
+            MenuItem(
+              label: 'Close',
+              icon: Icons.close,
+              onSelected: () => closeTab(index),
+            ),
+          ],
+        );
+
+        showContextMenu(
+          context,
+          contextMenu: contextMenu,
+          transitionDuration: const Duration(milliseconds: 100),
+          reverseTransitionDuration: Duration.zero,
+          maintainState: true,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+        );
+      },
+      child: GestureDetector(
+        onTap: () {
+          onTabChanged.call(index);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutExpo,
+          margin: const EdgeInsets.only(left: 5.0, right: 5.0, top: 5.0),
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+          decoration: BoxDecoration(
+            color: (currentIndex == index)
+                ? theme.colorScheme.onPrimaryContainer
+                : Colors.transparent,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10.0),
+              topRight: Radius.circular(10.0),
+            ),
+          ),
+          child: Center(
+            child: Row(
+              children: [
+                Text(
+                  tabData[index].name,
+                  style: theme.textTheme.bodyMedium!.copyWith(
+                    color: (currentIndex == index)
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                // Spacing for close button
+                Visibility(
+                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked),
+                  child: const SizedBox(width: 10),
+                ),
+                // Close button
+                Visibility(
+                  visible: !(preferences.getBool(PrefKeys.layoutLocked) ??
+                      Defaults.layoutLocked),
+                  child: IconButton(
+                    onPressed: () {
+                      closeTab(index);
+                    },
+                    padding: const EdgeInsets.all(0.0),
+                    alignment: Alignment.center,
+                    constraints: const BoxConstraints(
+                      minWidth: 15.0,
+                      minHeight: 15.0,
+                    ),
+                    iconSize: 14,
+                    color: (currentIndex == index)
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.onPrimaryContainer,
+                    icon: const Icon(Icons.close),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -125,123 +239,8 @@ class EditableTabBar extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
                     itemCount: tabData.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          onTabChanged.call(index);
-                        },
-                        onSecondaryTapUp: (details) {
-                          if (preferences.getBool(PrefKeys.layoutLocked) ??
-                              Defaults.layoutLocked) {
-                            return;
-                          }
-                          ContextMenu contextMenu = ContextMenu(
-                            position: details.globalPosition,
-                            borderRadius: BorderRadius.circular(5.0),
-                            padding: const EdgeInsets.all(4.0),
-                            entries: [
-                              MenuHeader(
-                                text: tabData[index].name,
-                                disableUppercase: true,
-                              ),
-                              const MenuDivider(),
-                              MenuItem(
-                                label: 'Rename',
-                                icon: Icons.drive_file_rename_outline_outlined,
-                                onSelected: () => renameTab(context, index),
-                              ),
-                              MenuItem(
-                                label: 'Duplicate',
-                                icon: Icons.control_point_duplicate_sharp,
-                                onSelected: () => duplicateTab(context, index),
-                              ),
-                              MenuItem(
-                                label: 'Close',
-                                icon: Icons.close,
-                                onSelected: () => closeTab(index),
-                              ),
-                            ],
-                          );
-
-                          showContextMenu(
-                            context,
-                            contextMenu: contextMenu,
-                            transitionDuration:
-                                const Duration(milliseconds: 100),
-                            reverseTransitionDuration: Duration.zero,
-                            maintainState: true,
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              );
-                            },
-                          );
-                        },
-                        // The tab itself
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOutExpo,
-                          margin: const EdgeInsets.only(
-                              left: 5.0, right: 5.0, top: 5.0),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 5.0),
-                          decoration: BoxDecoration(
-                            color: (currentIndex == index)
-                                ? theme.colorScheme.onPrimaryContainer
-                                : Colors.transparent,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(10.0),
-                              topRight: Radius.circular(10.0),
-                            ),
-                          ),
-                          child: Center(
-                            child: Row(
-                              children: [
-                                Text(
-                                  tabData[index].name,
-                                  style: theme.textTheme.bodyMedium!.copyWith(
-                                    color: (currentIndex == index)
-                                        ? theme.colorScheme.primaryContainer
-                                        : theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                ),
-                                // Spacing for close button
-                                Visibility(
-                                  visible: !(preferences
-                                          .getBool(PrefKeys.layoutLocked) ??
-                                      Defaults.layoutLocked),
-                                  child: const SizedBox(width: 10),
-                                ),
-                                // Close button
-                                Visibility(
-                                  visible: !(preferences
-                                          .getBool(PrefKeys.layoutLocked) ??
-                                      Defaults.layoutLocked),
-                                  child: IconButton(
-                                    onPressed: () {
-                                      closeTab(index);
-                                    },
-                                    padding: const EdgeInsets.all(0.0),
-                                    alignment: Alignment.center,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 15.0,
-                                      minHeight: 15.0,
-                                    ),
-                                    iconSize: 14,
-                                    color: (currentIndex == index)
-                                        ? theme.colorScheme.primaryContainer
-                                        : theme.colorScheme.onPrimaryContainer,
-                                    icon: const Icon(Icons.close),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                    itemBuilder: (context, index) =>
+                        _buildTab(index, context, theme),
                   ),
                 ),
                 const SizedBox(width: 16),

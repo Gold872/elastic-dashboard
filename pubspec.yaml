@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 2025.2.2
 
 environment:
-  sdk: '>=3.0.2 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 
 dependencies:
   animations: ^2.0.11
@@ -12,7 +12,7 @@ dependencies:
   decimal: ^3.2.1
   dot_cast: ^1.2.0
   dropdown_button2: ^2.3.9
-  elegant_notification: ^2.4.5
+  elegant_notification: ^2.5.1
   file_selector: ^1.0.3
   flex_seed_scheme: ^3.5.1
   flutter:
@@ -27,22 +27,24 @@ dependencies:
       url: https://github.com/Gold872/GaugesFlutter.git
       ref: elastic-version
   github: ^9.25.0
-  http: ^1.3.0
+  http: ^1.4.0
   import_sorter: ^4.6.0
   intl: ^0.20.2
   logger: ^2.5.0
-  messagepack: ^0.2.1
-  msgpack_dart: ^1.0.1
+  msgpack_dart:
+    git:
+      url: https://github.com/TheTripleV/msgpack_dart.git
+      ref: fix-64-bit-ints
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5
   patterns_canvas: ^0.5.0
   popover: ^0.3.1
-  provider: ^6.1.4
+  provider: ^6.1.5
   screen_retriever: ^0.2.0
-  searchable_listview: ^2.17.0
+  searchable_listview: ^2.17.3
   shared_preferences: ^2.5.3
-  syncfusion_flutter_charts: ^29.1.38
+  syncfusion_flutter_charts: ^29.2.5
   titlebar_buttons: ^1.0.0
   transitioned_indexed_stack: ^1.0.2
   url_launcher: ^6.3.1
@@ -50,6 +52,7 @@ dependencies:
   vector_math: ^2.1.4
   version: ^3.0.2
   visibility_detector: ^0.4.0+2
+  web: ^1.1.1
   web_socket_channel: ^3.0.3
   window_manager: ^0.4.3
 
@@ -57,15 +60,24 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  mockito: ^5.4.5
-  build_runner: ^2.4.6
+  mockito: ^5.4.6
+  build_runner: ^2.4.15
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-Regular.ttf
 
   assets:
     - assets/logos/
     - assets/fields/
+    - assets/third_party_licenses/
 
 import_sorter:
   comments: false
@@ -76,11 +88,10 @@ flutter_launcher_icons:
   image_path: "assets/logos/logo.png"
   windows:
     generate: true
-    image_path: "assets/logos/logo.png"
     icon_size: 256
   macos:
     generate: true
-    image_path: "assets/logos/logo.png"
   linux:
     generate: true
-    image_path: "assets/logos/logo.png"
+  web:
+    generate: true
