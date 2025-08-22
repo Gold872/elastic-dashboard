@@ -6,6 +6,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -242,10 +243,9 @@ class _GraphWidgetGraph extends StatefulWidget {
 
   final List<_GraphPoint> _currentData;
 
-  set currentData(List<_GraphPoint> data) {
-    _currentData.clear();
-    _currentData.addAll(data);
-  }
+  set currentData(List<_GraphPoint> data) => _currentData
+    ..clear()
+    ..addAll(data);
 
   const _GraphWidgetGraph({
     required this.initialData,
@@ -265,7 +265,8 @@ class _GraphWidgetGraph extends StatefulWidget {
   State<_GraphWidgetGraph> createState() => _GraphWidgetGraphState();
 }
 
-class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
+class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
+    with WidgetsBindingObserver {
   ChartSeriesController? _seriesController;
   late List<_GraphPoint> _graphData;
   StreamSubscription<Object?>? _subscriptionListener;
@@ -274,21 +275,19 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
   void initState() {
     super.initState();
 
-    _graphData = widget.initialData.toList();
+    WidgetsBinding.instance.addObserver(this);
 
-    if (_graphData.isEmpty) {
-      // This could cause data to be displayed slightly off if the time is 12:00 am on January 1st, 1970.
-      // However if that were the case, then the user would either have secretly invented a modern 64 bit
-      // operating system that can't even run on hardware from their time, or they invented time travel,
-      // which according to the second law of thermodynamics is literally impossible. In summary, this
-      // won't be causing issues unless if the user finds a way of violating the laws of thermodynamics,
-      // or for some reason they change their time on their device
-      _graphData.add(_GraphPoint(
-        x: 0,
-        y: tryCast(widget.subscription?.value) ?? widget.minValue ?? 0.0,
-      ));
-    } else if (_graphData.length > 1) {
-      _graphData.removeLast();
+    _graphData = List.of(widget.initialData);
+
+    if (_graphData.length < 2) {
+      final double x = DateTime.now().microsecondsSinceEpoch.toDouble();
+      final double y =
+          tryCast(widget.subscription?.value) ?? widget.minValue ?? 0.0;
+
+      _graphData = [
+        _GraphPoint(x: x - widget.timeDisplayed * 1e6, y: y),
+        _GraphPoint(x: x, y: y),
+      ];
     }
 
     widget.currentData = _graphData;
@@ -298,6 +297,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
     _subscriptionListener?.cancel();
 
     super.dispose();
@@ -314,16 +315,38 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
     super.didUpdateWidget(oldWidget);
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (widget.subscription?.value == null) {
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      logger.debug(
+        "State resumed, refreshing graph for ${widget.subscription?.topic}",
+      );
+      setState(() {});
+    }
+  }
+
   void _resetGraphData() {
-    int oldLength = _graphData.length;
+    final double x = DateTime.now().microsecondsSinceEpoch.toDouble();
+    final double y = tryCast<num>(widget.subscription?.value)?.toDouble() ??
+        widget.minValue ??
+        0.0;
 
-    _graphData.clear();
-    _graphData.add(_GraphPoint(x: 0, y: widget.minValue ?? 0.0));
+    setState(() {
+      _graphData
+        ..clear()
+        ..addAll([
+          _GraphPoint(
+            x: x - widget.timeDisplayed * 1e6,
+            y: y,
+          ),
+          _GraphPoint(x: x, y: y),
+        ]);
 
-    _seriesController?.updateDataSource(
-      removedDataIndexes: List.generate(oldLength, (index) => index),
-      addedDataIndex: 0,
-    );
+      widget.currentData = _graphData;
+    });
   }
 
   void _initializeListener() {
@@ -334,49 +357,57 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph> {
         return;
       }
       if (data != null) {
-        List<int> addedIndexes = [];
-        List<int> removedIndexes = [];
+        final double time = DateTime.now().microsecondsSinceEpoch.toDouble();
+        final double windowStart = time - widget.timeDisplayed * 1e6;
+        final double y =
+            tryCast<num>(data)?.toDouble() ?? widget.minValue ?? 0.0;
 
-        double currentTime = DateTime.now().microsecondsSinceEpoch.toDouble();
+        final List<_GraphPoint> newPoints = [];
+        final List<int> removedIndexes = [];
 
-        _graphData.add(_GraphPoint(x: currentTime, y: tryCast(data) ?? 0.0));
-
-        int indexOffset = 0;
-
-        while (currentTime - _graphData[0].x > widget.timeDisplayed * 1e6 &&
-            _graphData.length > 2) {
-          _graphData.removeAt(0);
-          removedIndexes.add(indexOffset++);
+        // Remove points older than the display time
+        for (int i = 0; i < _graphData.length;) {
+          if (_graphData[i].x < windowStart) {
+            _graphData.removeAt(i);
+            removedIndexes.add(i);
+          } else {
+            // Only shift list when nothing has changed
+            i++;
+          }
         }
 
-        int existingIndex = _graphData.indexWhere((e) => e.x == currentTime);
-        while (existingIndex != -1 &&
-            existingIndex != _graphData.length - 1 &&
-            _graphData.length > 1) {
-          removedIndexes.add(existingIndex + indexOffset++);
-          _graphData.removeAt(existingIndex);
-
-          existingIndex = _graphData.indexWhere((e) => e.x == currentTime);
+        if (_graphData.isEmpty || _graphData.first.x > windowStart) {
+          _GraphPoint padding = _GraphPoint(
+            x: windowStart,
+            y: _graphData.isEmpty ? y : _graphData.first.y,
+          );
+          _graphData.insert(0, padding);
+          newPoints.add(padding);
         }
 
-        if (_graphData.last.x - _graphData.first.x <
-            widget.timeDisplayed * 1e6) {
-          _graphData.insert(
-              0,
-              _GraphPoint(
-                x: _graphData.last.x - widget.timeDisplayed * 1e6,
-                y: _graphData.first.y,
-              ));
-          addedIndexes.add(0);
+        final _GraphPoint newPoint = _GraphPoint(x: time, y: y);
+        _graphData.add(newPoint);
+        newPoints.add(newPoint);
+
+        List<int> addedIndexes =
+            newPoints.map((point) => _graphData.indexOf(point)).toList();
+
+        try {
+          _seriesController?.updateDataSource(
+            addedDataIndexes: addedIndexes,
+            removedDataIndexes: removedIndexes.isEmpty ? null : removedIndexes,
+          );
+        } catch (_) {
+          // The update data source can get very finicky, so if there's an error,
+          // just refresh everything
+          setState(() {
+            logger.debug(
+              'Error in graph for topic ${widget.subscription?.topic}, resetting',
+            );
+          });
         }
-
-        addedIndexes.add(_graphData.length - 1);
-
-        _seriesController?.updateDataSource(
-          addedDataIndexes: addedIndexes,
-          removedDataIndexes: removedIndexes,
-        );
-      } else if (_graphData.length > 1) {
+      } else if (_graphData.length > 2) {
+        // Only reset if there's more than 2 points to prevent infinite resetting
         _resetGraphData();
       }
 

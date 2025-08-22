@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:collection/collection.dart';
 import 'package:dot_cast/dot_cast.dart';
-import 'package:messagepack/messagepack.dart';
 import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -789,11 +788,11 @@ class NT4Client {
           _onFirstMessageReceived();
         }
 
-        if (data is! List<int>) {
+        if (data is! Uint8List) {
           return;
         }
 
-        var msg = Unpacker.fromList(data).unpackList();
+        var msg = deserialize(data);
 
         int topicID = msg[0] as int;
         int timestampUS = msg[1] as int;
@@ -975,13 +974,13 @@ class NT4Client {
           return;
         }
       }
-    } else {
-      var u = Unpacker.fromList(data);
+    } else if (data is Uint8List) {
+      final decoder = Deserializer(data);
 
       bool done = false;
       while (!done) {
         try {
-          var msg = u.unpackList();
+          var msg = decoder.decode();
 
           int topicID = msg[0] as int;
           int timestampUS = msg[1] as int;
@@ -1006,6 +1005,10 @@ class NT4Client {
           done = true;
         }
       }
+    } else {
+      logger.warning(
+        '[NT4] Ignoring websocket message, invalid type: ${data.runtimeType}',
+      );
     }
   }
 
