@@ -1,3 +1,4 @@
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/coral_level_chooser.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dot_cast/dot_cast.dart';
@@ -181,6 +182,12 @@ class NTWidgetBuilder {
         widget: ComboBoxChooser.new,
         fromJson: ComboBoxChooserModel.fromJson,
         minHeight: _normalSize * 0.85);
+    
+    registerWithAlias(
+      names: {CoralLevelChooser.widgetType, 'Coral Chooser'},
+      model: CoralLevelChooserModel.new,
+      widget: CoralLevelChooser.new,
+      fromJson: CoralLevelChooserModel.fromJson);
 
     register(
         name: CommandSchedulerWidget.widgetType,
