@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
@@ -123,11 +122,7 @@ class NetworkTableTreeRow {
     SharedPreferences preferences,
     TreeTopicEntry entry,
   ) {
-    NT4Type entryType = entry.type();
-
-    logger.info(
-      'meta: ${entry.meta}, name: ${entry.topic.name}, topic.type: ${entry.topic.type}',
-    );
+    NT4Type entryType = entry.type;
 
     if (entryType.dataType == NT4DataType.boolean) {
       return BooleanBoxModel(
@@ -156,17 +151,15 @@ class NetworkTableTreeRow {
         return await getTypedWidget('$topic/.type');
       }
 
-      bool isCameraStream = hasRows([
-            'mode',
-            'modes',
-            'source',
-            'streams',
-          ]) &&
+      bool isCameraStream = hasRows(['mode', 'modes', 'source', 'streams']) &&
           (hasRow('description') || hasRow('connected'));
 
       if (isCameraStream) {
         return CameraStreamModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: topic,
+        );
       }
 
       if (hasRows([
@@ -179,7 +172,10 @@ class NetworkTableTreeRow {
         'sizeLeftRight',
       ])) {
         return YAGSLSwerveDriveModel(
-            ntConnection: ntConnection, preferences: preferences, topic: topic);
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: topic,
+        );
       }
 
       return null;
@@ -189,8 +185,10 @@ class NetworkTableTreeRow {
   }
 
   Future<String?> getTypeString(String typeTopic) async {
-    return ntConnection.subscribeAndRetrieveData(typeTopic,
-        timeout: const Duration(milliseconds: 500));
+    return ntConnection.subscribeAndRetrieveData(
+      typeTopic,
+      timeout: const Duration(milliseconds: 500),
+    );
   }
 
   Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {
@@ -214,8 +212,10 @@ class NetworkTableTreeRow {
         .whereNot((e) => e.rowName.startsWith('.'))
         .map((e) => e.toWidgetContainerModel(resortToListLayout: false));
 
-    Iterable<NTWidgetContainerModel> listChildren =
-        (await Future.wait(childrenFutures)).whereType();
+    Iterable<NTWidgetContainerModel> listChildren = (await Future.wait(
+      childrenFutures,
+    ))
+        .whereType();
 
     if (listChildren.isEmpty) {
       return null;

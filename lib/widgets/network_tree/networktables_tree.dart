@@ -115,7 +115,8 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   }
 
   List<NetworkTableTreeRow> _filterChildren(
-      List<NetworkTableTreeRow> children) {
+    List<NetworkTableTreeRow> children,
+  ) {
     // Apply the filter to each child
     return children.where((child) {
       if (_matchesFilter(child)) {
@@ -278,16 +279,14 @@ class TreeTopicEntry {
   final NT4Topic topic;
   final NT4StructMeta? meta;
 
+  NT4Type get type => meta?.type ?? topic.type;
+
   TreeTopicEntry({required this.topic, this.meta});
 
   @override
   String toString() {
     String topicData = 'NT4Topic(name: ${topic.name}, type: ${topic.type})';
     return 'TreeTopicEntry{topic: $topicData, meta: $meta}';
-  }
-
-  NT4Type type() {
-    return meta?.type ?? topic.type;
   }
 }
 
@@ -355,8 +354,9 @@ class _TreeTileState extends State<TreeTile> {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle trailingStyle =
-        Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey);
+    TextStyle trailingStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: Colors.grey);
     // I have absolutely no idea why Material is needed, but otherwise the tiles start bleeding all over the place, it makes zero sense
     return Material(
       child: Column(
@@ -375,7 +375,8 @@ class _TreeTileState extends State<TreeTile> {
                 }
                 dragging = true;
                 draggingWidget = await widget.entry.node.toWidgetContainerModel(
-                    listLayoutBuilder: widget.listLayoutBuilder);
+                  listLayoutBuilder: widget.listLayoutBuilder,
+                );
                 if (!dragging) {
                   draggingWidget?.unSubscribe();
                   draggingWidget?.disposeModel(deleting: true);
@@ -410,7 +411,8 @@ class _TreeTileState extends State<TreeTile> {
               },
               child: Padding(
                 padding: EdgeInsetsDirectional.only(
-                    start: widget.entry.level * 16.0),
+                  start: widget.entry.level * 16.0,
+                ),
                 child: Column(
                   children: [
                     ListTile(
@@ -432,7 +434,7 @@ class _TreeTileState extends State<TreeTile> {
                       title: Text(widget.entry.node.rowName),
                       trailing: (widget.entry.node.entry != null)
                           ? Text(
-                              widget.entry.node.entry!.type().serialize(),
+                              widget.entry.node.entry!.type.serialize(),
                               style: trailingStyle,
                             )
                           : null,
