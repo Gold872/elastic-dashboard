@@ -109,13 +109,15 @@ class SchemaManager {
     return _schemas[name];
   }
 
-  void processNewSchema(String name, List<int> rawData) {
+  bool processNewSchema(String name, List<int> rawData) {
     String schema = utf8.decode(rawData);
     if (name.contains(':')) {
       name = name.split(':').last;
     }
 
     _uncompiledSchemas[name] = schema;
+
+    bool compiledAny = false;
 
     while (_uncompiledSchemas.isNotEmpty) {
       bool compiled = false;
@@ -127,6 +129,7 @@ class SchemaManager {
           bool success = _addStringSchema(uncompiled.key, uncompiled.value);
           if (success) {
             newlyCompiled.add(uncompiled.key);
+            compiledAny = true;
           }
           compiled = compiled || success;
         }
@@ -138,6 +141,8 @@ class SchemaManager {
         break;
       }
     }
+
+    return compiledAny;
   }
 
   void _addSchema(String name, NTStructSchema schema) {

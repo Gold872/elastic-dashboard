@@ -236,6 +236,57 @@ class NTWidgetContainerModel extends WidgetContainerModel {
           ),
         ],
       ),
+      if (childModel is SingleTopicNTWidgetModel &&
+          (childModel as SingleTopicNTWidgetModel).ntStructMeta != null) ...[
+        Text('Struct Settings:'),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Struct Name
+            Flexible(
+              child: DialogTextInput(
+                onSubmit: (value) {
+                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
+                      childModel
+                          .cast<SingleTopicNTWidgetModel>()
+                          .ntStructMeta!
+                          .copyWith(schemaName: value);
+                  childModel.resetSubscription();
+                },
+                label: 'Struct Name',
+                initialText: (childModel as SingleTopicNTWidgetModel)
+                        .ntStructMeta
+                        ?.schemaName ??
+                    '',
+              ),
+            ),
+            const SizedBox(width: 5),
+            // Path
+            Flexible(
+              child: DialogTextInput(
+                onSubmit: (value) {
+                  List<String>? newPath =
+                      value.split('/').where((e) => e.isNotEmpty).toList();
+                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
+                      childModel
+                          .cast<SingleTopicNTWidgetModel>()
+                          .ntStructMeta!
+                          .copyWith(path: newPath);
+                  childModel.resetSubscription();
+                },
+                label: 'Path',
+                initialText: childModel
+                    .cast<SingleTopicNTWidgetModel>()
+                    .ntStructMeta!
+                    .path
+                    .join('/'),
+              ),
+            ),
+          ],
+        ),
+      ],
     ];
   }
 

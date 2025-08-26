@@ -189,6 +189,12 @@ class NT4StructMeta {
     }
   }
 
+  NT4StructMeta copyWith({List<String>? path, String? schemaName}) =>
+      NT4StructMeta(
+        path: path ?? this.path,
+        schemaName: schemaName ?? this.schemaName,
+      );
+
   factory NT4StructMeta.fromJson(Map<String, dynamic> json) {
     List<String> path = tryCast<List<dynamic>>(
           json['path'],
@@ -1084,13 +1090,21 @@ class NT4Client {
                 topic.type == NT4Type.structschema()) {
               String structName =
                   topic.name.split('/').last.replaceFirst('struct:', '');
-              schemaManager.processNewSchema(structName, value as List<int>);
-
-              for (final subscription in _subscribedTopics.where((e) =>
-                  e.options.structMeta != null &&
-                  e.options.structMeta!.schemaName == structName)) {
-                subscription.options.structMeta!.schema =
-                    schemaManager.getSchema(structName);
+              if (schemaManager.processNewSchema(
+                structName,
+                value as List<int>,
+              )) {
+                for (final subscription in _subscribedTopics.where(
+                  (e) =>
+                      e.options.structMeta != null &&
+                      e.options.structMeta!.schema == null,
+                )) {
+                  final NT4StructMeta structMeta =
+                      subscription.options.structMeta!;
+                  structMeta.schema = schemaManager.getSchema(
+                    structMeta.schemaName,
+                  );
+                }
               }
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {

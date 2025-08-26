@@ -193,6 +193,12 @@ class NTConnection {
       options: options,
     );
 
+    if (options.structMeta != null) {
+      options.structMeta!.schema ??= schemaManager.getSchema(
+        options.structMeta!.schemaName,
+      );
+    }
+
     subscriptionMap[hashCode] = newSubscription;
     subscriptionUseCount[newSubscription] = 1;
 
