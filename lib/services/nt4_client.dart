@@ -1074,7 +1074,8 @@ class NT4Client {
               }
             }
 
-            if (topic.name.startsWith('/.schema')) {
+            if (topic.name.startsWith('/.schema') &&
+                topic.type == NT4Type.structschema()) {
               String structName =
                   topic.name.split('/').last.replaceFirst('struct:', '');
               schemaManager.processNewSchema(structName, value as List<int>);
