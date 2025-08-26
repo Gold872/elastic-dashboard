@@ -106,6 +106,19 @@ void main() {
       expect(schema.fields[0].ntType, NT4Type.struct('SubSchema'));
     });
 
+    test('Schema with enum', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestEnum',
+        schema: 'enum {a=1, b=2, c=3} int8 testEnum;',
+      );
+
+      expect(schema.fields.length, 1);
+      expect(schema.fields[0].type, 'int8');
+      expect(schema.fields[0].fieldName, 'testEnum');
+      expect(schema.fields[0].enumData, isNotNull);
+      expect(schema.fields[0].enumData, {1: 'a', 2: 'b', 3: 'c'});
+    });
+
     group('Error Handling:', () {
       test('Unknown sub-schemas', () {
         expect(
@@ -160,6 +173,24 @@ void main() {
           ),
           throwsException,
           reason: 'Unspecified array length',
+        );
+
+        expect(
+          () => NTStructSchema.parse(
+            name: 'TestEnum',
+            schema: 'enum {a=1, b=2, c=3}',
+          ),
+          throwsA(isA<Error>()),
+          reason: 'Enum declared with no field',
+        );
+
+        expect(
+          () => NTStructSchema.parse(
+            name: 'TestEnum',
+            schema: 'enum int8 testEnum',
+          ),
+          throwsA(isA<Error>()),
+          reason: 'Invalid enum syntax',
         );
       });
     });

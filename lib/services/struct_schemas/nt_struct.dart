@@ -252,6 +252,7 @@ class NTFieldSchema {
   final NTStructSchema? subSchema;
   final int bitLength;
   final int? arrayLength;
+  final Map<int, String>? enumData;
   final (int start, int end) bitRange;
 
   StructValueType get valueType => StructValueType.parse(type);
@@ -275,15 +276,43 @@ class NTFieldSchema {
     required this.bitLength,
     this.arrayLength,
     this.subSchema,
+    this.enumData,
     required this.bitRange,
   });
 
   factory NTFieldSchema.parse({
     required int start,
-    required String definition,
-    required String type,
+    required String schemaString,
     required Map<String, NTStructSchema> knownSchemas,
   }) {
+    Map<int, String>? enumData;
+    if (schemaString.startsWith('enum')) {
+      enumData = {};
+      int enumStart = schemaString.indexOf('{') + 1;
+      int enumEnd = schemaString.indexOf('}');
+
+      String enumString = schemaString
+          .substring(enumStart, enumEnd)
+          .split('')
+          .whereNot((e) => e == ' ')
+          .join();
+
+      enumString.split(',').where((e) => e.isNotEmpty).forEach((pairString) {
+        List<String> pair = pairString.split('=');
+
+        if (pair.length == 2 && !int.parse(pair[1]).isNaN) {
+          enumData![int.parse(pair[1])] = pair[0];
+        }
+      });
+
+      schemaString = schemaString.substring(enumEnd + 1).trim();
+    }
+
+    var [type, definition] = [
+      schemaString.substring(0, schemaString.indexOf(' ')),
+      schemaString.substring(schemaString.indexOf(' ') + 1)
+    ];
+
     StructValueType fieldType = StructValueType.parse(type);
     late String fieldName;
     late (int start, int end) bitRange;
@@ -331,6 +360,7 @@ class NTFieldSchema {
       subSchema: subSchema,
       bitRange: bitRange,
       arrayLength: arrayLength,
+      enumData: enumData,
       bitLength: bitLength,
     );
   }
@@ -393,15 +423,10 @@ class NTStructSchema {
       if (part.isEmpty) {
         continue;
       }
-      var [type, definition] = [
-        part.substring(0, part.indexOf(' ')),
-        part.substring(part.indexOf(' ') + 1)
-      ];
 
       NTFieldSchema field = NTFieldSchema.parse(
         start: bitStart,
-        definition: definition,
-        type: type,
+        schemaString: part,
         knownSchemas: knownSchemas,
       );
       bitStart += field.bitLength;
