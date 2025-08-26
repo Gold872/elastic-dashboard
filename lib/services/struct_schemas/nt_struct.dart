@@ -367,7 +367,7 @@ class NTFieldSchema {
 
   Object? toValue(Uint8List data) {
     final view = data.buffer.asByteData();
-    return switch (valueType) {
+    final Object? value = switch (valueType) {
       StructValueType.bool => view.getUint8(0) > 0,
       StructValueType.char => utf8.decode(data),
       StructValueType.int8 => view.getInt8(0),
@@ -394,6 +394,11 @@ class NTFieldSchema {
           );
         }(),
     };
+
+    if (value != null && enumData != null && enumData!.containsKey(value)) {
+      return enumData![value];
+    }
+    return value;
   }
 }
 
