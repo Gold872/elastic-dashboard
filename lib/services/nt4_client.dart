@@ -262,11 +262,17 @@ class NT4SubscriptionOptions {
       other.periodicRateSeconds == periodicRateSeconds &&
       other.all == all &&
       other.topicsOnly == topicsOnly &&
-      other.prefix == prefix;
+      other.prefix == prefix &&
+      other.structMeta == structMeta;
 
   @override
-  int get hashCode =>
-      Object.hashAll([periodicRateSeconds, all, topicsOnly, prefix]);
+  int get hashCode => Object.hashAll([
+        periodicRateSeconds,
+        all,
+        topicsOnly,
+        prefix,
+        structMeta,
+      ]);
 
   @override
   String toString() {
