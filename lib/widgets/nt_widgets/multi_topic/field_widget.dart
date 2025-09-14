@@ -67,7 +67,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   final double _otherObjectSize = 0.55;
   final double _trajectoryPointSize = 0.08;
 
-  Size? _widgetSize;
+  Size? widgetSize;
 
   double get robotWidthMeters => _robotWidthMeters;
 
@@ -121,12 +121,6 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   double get otherObjectSize => _otherObjectSize;
 
   double get trajectoryPointSize => _trajectoryPointSize;
-
-  Size? get widgetSize => _widgetSize;
-
-  set widgetSize(value) {
-    _widgetSize = value;
-  }
 
   Field get field => _field;
 
@@ -246,7 +240,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
       ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
     }
 
-    _widgetSize = null;
+    widgetSize = null;
     rendered = false;
   }
 

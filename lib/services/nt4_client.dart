@@ -533,7 +533,7 @@ class NT4Client {
     return _getClientTimeUS() + _serverTimeOffsetUS;
   }
 
-  void _rttSendTimestamp([_]) {
+  void _rttSendTimestamp([dynamic _]) {
     var timeTopic = announcedTopics[-1];
     if (timeTopic != null) {
       int timeToSend = _getClientTimeUS();
@@ -892,7 +892,7 @@ class NT4Client {
     }
   }
 
-  void _wsOnMessage(data) {
+  void _wsOnMessage(dynamic data) {
     if (data is String) {
       var rxArr = jsonDecode(data.toString());
 

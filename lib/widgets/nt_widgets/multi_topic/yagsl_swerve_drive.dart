@@ -50,14 +50,14 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
 
   bool get showRobotRotation => _showRobotRotation;
 
-  set showRobotRotation(value) {
+  set showRobotRotation(bool value) {
     _showRobotRotation = value;
     refresh();
   }
 
   bool get showDesiredStates => _showDesiredStates;
 
-  set showDesiredStates(value) {
+  set showDesiredStates(bool value) {
     _showDesiredStates = value;
     refresh();
   }

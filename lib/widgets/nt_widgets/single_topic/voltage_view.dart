@@ -24,35 +24,35 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
 
   double get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double value) {
     _minValue = value;
     refresh();
   }
 
   double get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double value) {
     _maxValue = value;
     refresh();
   }
 
   int get divisions => _divisions;
 
-  set divisions(value) {
+  set divisions(int value) {
     _divisions = value;
     refresh();
   }
 
   bool get inverted => _inverted;
 
-  set inverted(value) {
+  set inverted(bool value) {
     _inverted = value;
     refresh();
   }
 
   String get orientation => _orientation;
 
-  set orientation(value) {
+  set orientation(String value) {
     _orientation = value;
     refresh();
   }
@@ -168,7 +168,7 @@ class VoltageViewModel extends SingleTopicNTWidgetModel {
             child: DialogTextInput(
               onSubmit: (value) {
                 int? newDivisions = int.tryParse(value);
-                if (newDivisions != null && newDivisions < 2) {
+                if (newDivisions == null || newDivisions < 2) {
                   return;
                 }
                 divisions = newDivisions;

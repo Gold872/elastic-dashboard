@@ -39,26 +39,10 @@ class ProfiledPIDControllerModel extends MultiTopicNTWidgetModel {
   TextEditingController? kdTextController;
   TextEditingController? goalTextController;
 
-  double _kpLastValue = 0.0;
-  double _kiLastValue = 0.0;
-  double _kdLastValue = 0.0;
-  double _goalLastValue = 0.0;
-
-  get kpLastValue => _kpLastValue;
-
-  set kpLastValue(value) => _kpLastValue = value;
-
-  get kiLastValue => _kiLastValue;
-
-  set kiLastValue(value) => _kiLastValue = value;
-
-  get kdLastValue => _kdLastValue;
-
-  set kdLastValue(value) => _kdLastValue = value;
-
-  get goalLastValue => _goalLastValue;
-
-  set goalLastValue(value) => _goalLastValue = value;
+  double kpLastValue = 0.0;
+  double kiLastValue = 0.0;
+  double kdLastValue = 0.0;
+  double goalLastValue = 0.0;
 
   ProfiledPIDControllerModel({
     required super.ntConnection,

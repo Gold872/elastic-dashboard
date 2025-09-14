@@ -22,24 +22,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   List<NT4Subscription> get subscriptions => [streamsSubscription];
 
-  int? _quality;
-  int? _fps;
-  Size? _resolution;
+  int? quality;
+  int? fps;
+  Size? resolution;
   int _rotationTurns = 0;
 
   MjpegController? controller;
-
-  int? get quality => _quality;
-
-  set quality(value) => _quality = value;
-
-  int? get fps => _fps;
-
-  set fps(value) => _fps = value;
-
-  Size? get resolution => _resolution;
-
-  set resolution(value) => _resolution = value;
 
   int get rotationTurns => _rotationTurns;
 
@@ -72,14 +60,12 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     int? compression,
-    int? fps,
-    Size? resolution,
+    this.fps,
+    this.resolution,
     int rotation = 0,
     super.dataType,
     super.period,
-  })  : _quality = compression,
-        _fps = fps,
-        _resolution = resolution,
+  })  : quality = compression,
         _rotationTurns = rotation,
         super();
 
@@ -88,8 +74,8 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    _quality = tryCast(jsonData['compression']);
-    _fps = tryCast(jsonData['fps']);
+    quality = tryCast(jsonData['compression']);
+    fps = tryCast(jsonData['fps']);
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
 
     List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
@@ -101,7 +87,10 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         resolution[0] += 1;
       }
       if (resolution[0] > 0 && resolution[1] > 0) {
-        _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+        this.resolution = Size(
+          resolution[0].toDouble(),
+          resolution[1].toDouble(),
+        );
       }
     }
   }

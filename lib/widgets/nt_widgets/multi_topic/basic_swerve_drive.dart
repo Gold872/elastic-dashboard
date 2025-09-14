@@ -14,23 +14,23 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   @override
   String type = SwerveDriveWidget.widgetType;
 
-  get frontLeftAngleTopic => '$topic/Front Left Angle';
+  String get frontLeftAngleTopic => '$topic/Front Left Angle';
 
-  get frontLeftVelocityTopic => '$topic/Front Left Velocity';
+  String get frontLeftVelocityTopic => '$topic/Front Left Velocity';
 
-  get frontRightAngleTopic => '$topic/Front Right Angle';
+  String get frontRightAngleTopic => '$topic/Front Right Angle';
 
-  get frontRightVelocityTopic => '$topic/Front Right Velocity';
+  String get frontRightVelocityTopic => '$topic/Front Right Velocity';
 
-  get backLeftAngleTopic => '$topic/Back Left Angle';
+  String get backLeftAngleTopic => '$topic/Back Left Angle';
 
-  get backLeftVelocityTopic => '$topic/Back Left Velocity';
+  String get backLeftVelocityTopic => '$topic/Back Left Velocity';
 
-  get backRightAngleTopic => '$topic/Back Right Angle';
+  String get backRightAngleTopic => '$topic/Back Right Angle';
 
-  get backRightVelocityTopic => '$topic/Back Right Velocity';
+  String get backRightVelocityTopic => '$topic/Back Right Velocity';
 
-  get robotAngleTopic => '$topic/Robot Angle';
+  String get robotAngleTopic => '$topic/Robot Angle';
 
   late NT4Subscription frontLeftAngleSubscription;
   late NT4Subscription frontLeftVelocitySubscription;

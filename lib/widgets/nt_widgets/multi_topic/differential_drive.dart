@@ -28,19 +28,11 @@ class DifferentialDriveModel extends MultiTopicNTWidgetModel {
   NT4Topic? leftSpeedTopic;
   NT4Topic? rightSpeedTopic;
 
-  double _leftSpeedPreviousValue = 0.0;
-  double _rightSpeedPreviousValue = 0.0;
+  double leftSpeedPreviousValue = 0.0;
+  double rightSpeedPreviousValue = 0.0;
 
   ValueNotifier<double> leftSpeedCurrentValue = ValueNotifier<double>(0.0);
   ValueNotifier<double> rightSpeedCurrentValue = ValueNotifier<double>(0.0);
-
-  get leftSpeedPreviousValue => _leftSpeedPreviousValue;
-
-  set leftSpeedPreviousValue(value) => _leftSpeedPreviousValue = value;
-
-  get rightSpeedPreviousValue => _rightSpeedPreviousValue;
-
-  set rightSpeedPreviousValue(value) => _rightSpeedPreviousValue = value;
 
   DifferentialDriveModel({
     required super.ntConnection,
@@ -72,7 +64,7 @@ class DifferentialDriveModel extends MultiTopicNTWidgetModel {
     leftSpeedPreviousValue = 0.0;
     leftSpeedCurrentValue.value = 0.0;
 
-    rightSpeedPreviousValue.value = 0.0;
+    rightSpeedPreviousValue = 0.0;
     rightSpeedCurrentValue.value = 0.0;
 
     super.resetSubscription();
