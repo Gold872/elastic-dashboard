@@ -68,12 +68,12 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
     String orientation = 'horizontal',
     super.dataType,
     super.period,
-  })  : _orientation = orientation,
-        _divisions = divisions,
-        _inverted = inverted,
-        _maxValue = maxValue,
-        _minValue = minValue,
-        super();
+  }) : _orientation = orientation,
+       _divisions = divisions,
+       _inverted = inverted,
+       _maxValue = maxValue,
+       _minValue = minValue,
+       super();
 
   NumberBarModel.fromJson({
     required super.ntConnection,
@@ -136,7 +136,8 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
                 minValue = newMin;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Min Value',
               initialText: _minValue.toString(),
             ),
@@ -151,7 +152,8 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
                 maxValue = newMax;
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Max Value',
               initialText: _maxValue.toString(),
             ),
@@ -226,8 +228,8 @@ class NumberBar extends NTWidget {
 
         RulerPosition rulerPosition =
             (gaugeOrientation == GaugeOrientation.vertical)
-                ? RulerPosition.right
-                : RulerPosition.bottom;
+            ? RulerPosition.right
+            : RulerPosition.bottom;
 
         List<Widget> children = [
           Text(
@@ -235,9 +237,7 @@ class NumberBar extends NTWidget {
             style: Theme.of(context).textTheme.bodyLarge,
             overflow: TextOverflow.ellipsis,
           ),
-          const Flexible(
-            child: SizedBox(width: 5.0, height: 5.0),
-          ),
+          const Flexible(child: SizedBox(width: 5.0, height: 5.0)),
           LinearGauge(
             key: UniqueKey(),
             rulers: RulerStyle(

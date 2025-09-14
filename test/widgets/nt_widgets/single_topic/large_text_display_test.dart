@@ -36,9 +36,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Large Text': 'Large Text!',
-      },
+      virtualValues: {'Test/Large Text': 'Large Text!'},
     );
   });
 
@@ -65,13 +63,13 @@ void main() {
   test('Large text display to json', () {
     NTWidgetModel largeTextDisplayModel =
         SingleTopicNTWidgetModel.createDefault(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      type: 'Large Text Display',
-      topic: 'Test/Large Text',
-      dataType: 'string',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          type: 'Large Text Display',
+          topic: 'Test/Large Text',
+          dataType: 'string',
+          period: 0.100,
+        );
 
     expect(largeTextDisplayModel.toJson(), largeTextDisplayJson);
   });
@@ -81,13 +79,13 @@ void main() {
 
     NTWidgetModel largeTextDisplayModel =
         SingleTopicNTWidgetModel.createDefault(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      type: 'Large Text Display',
-      topic: 'Test/Large Text',
-      dataType: 'string',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          type: 'Large Text Display',
+          topic: 'Test/Large Text',
+          dataType: 'string',
+          period: 0.100,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

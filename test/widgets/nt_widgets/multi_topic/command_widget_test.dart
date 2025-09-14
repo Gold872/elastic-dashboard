@@ -173,42 +173,32 @@ void main() {
     expect(showType, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showType,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showType, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.showType, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showType,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showType, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.showType, true);
 
-    final maximizeSpace =
-        find.widgetWithText(DialogToggleSwitch, 'Maximize Button Space');
+    final maximizeSpace = find.widgetWithText(
+      DialogToggleSwitch,
+      'Maximize Button Space',
+    );
 
     expect(maximizeSpace, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: maximizeSpace,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: maximizeSpace, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.maximizeButtonSpace, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: maximizeSpace,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: maximizeSpace, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(commandModel.maximizeButtonSpace, true);

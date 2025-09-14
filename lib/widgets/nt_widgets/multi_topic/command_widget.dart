@@ -19,9 +19,9 @@ class CommandModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        runningSubscription,
-        nameSubscription,
-      ];
+    runningSubscription,
+    nameSubscription,
+  ];
 
   NT4Topic? runningTopic;
 
@@ -51,9 +51,9 @@ class CommandModel extends MultiTopicNTWidgetModel {
     bool maximizeButtonSpace = false,
     super.dataType,
     super.period,
-  })  : _showType = showType,
-        _maximizeButtonSpace = maximizeButtonSpace,
-        super();
+  }) : _showType = showType,
+       _maximizeButtonSpace = maximizeButtonSpace,
+       super();
 
   CommandModel.fromJson({
     required super.ntConnection,
@@ -67,8 +67,10 @@ class CommandModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    runningSubscription =
-        ntConnection.subscribe(runningTopicName, super.period);
+    runningSubscription = ntConnection.subscribe(
+      runningTopicName,
+      super.period,
+    );
     nameSubscription = ntConnection.subscribe(nameTopicName, super.period);
   }
 
@@ -134,8 +136,9 @@ class CommandWidget extends NTWidget {
       onTapUp: (_) {
         bool publishTopic = model.runningTopic == null;
 
-        model.runningTopic ??=
-            model.ntConnection.getTopicFromName(model.runningTopicName);
+        model.runningTopic ??= model.ntConnection.getTopicFromName(
+          model.runningTopicName,
+        );
 
         if (model.runningTopic == null) {
           return;

@@ -104,14 +104,15 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
   void initSubscription(String topicName) {
     Object? previousValue = ntConnection.getLastAnnouncedValue(topicName);
 
-    NT4Subscription subscription =
-        ntConnection.subscribe(topicName, super.period);
+    NT4Subscription subscription = ntConnection.subscribe(
+      topicName,
+      super.period,
+    );
 
-    preferenceSubscriptions.addAll({
-      topicName: subscription,
-    });
+    preferenceSubscriptions.addAll({topicName: subscription});
     preferenceTextControllers.addAll({
-      topicName: TextEditingController()..text = previousValue?.toString() ?? ''
+      topicName: TextEditingController()
+        ..text = previousValue?.toString() ?? '',
     });
     previousValues.addAll({topicName: previousValue});
 
@@ -197,8 +198,9 @@ class RobotPreferences extends NTWidget {
         }
 
         if (formattedData == null) {
-          model.preferenceTextControllers[topic]?.text =
-              model.previousValues[topic].toString();
+          model.preferenceTextControllers[topic]?.text = model
+              .previousValues[topic]
+              .toString();
           model.ntConnection.unpublishTopic(nt4Topic);
           return;
         }
@@ -224,8 +226,10 @@ class PreferenceSearch extends StatelessWidget {
   final Function(String topic, String? data) onSubmit;
 
   List<String> filterList(String query) => model.preferenceTopicNames
-      .where((element) =>
-          element.split('/').last.toLowerCase().contains(query.toLowerCase()))
+      .where(
+        (element) =>
+            element.split('/').last.toLowerCase().contains(query.toLowerCase()),
+      )
       .toList();
 
   @override
@@ -233,14 +237,9 @@ class PreferenceSearch extends StatelessWidget {
     return SearchableList<String>(
       inputDecoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 8,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         label: const Text('Search'),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
       searchTextController: model.searchTextController,
       separatorBuilder: (context, _) => const Divider(height: 4.0),

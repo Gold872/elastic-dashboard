@@ -28,13 +28,13 @@ void main() {
   };
 
   Finder coloredText(String text, Color color) => find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            widget.data == text &&
-            widget.style != null &&
-            widget.style!.color != null &&
-            widget.style!.color!.toARGB32() == color.toARGB32(),
-      );
+    (widget) =>
+        widget is Text &&
+        widget.data == text &&
+        widget.style != null &&
+        widget.style!.color != null &&
+        widget.style!.color!.toARGB32() == color.toARGB32(),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;
@@ -51,9 +51,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': 96.0,
-      },
+      virtualValues: {'Test/Double Value': 96.0},
     );
   });
 
@@ -163,12 +161,14 @@ void main() {
   testWidgets('Match time edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    MatchTimeModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Match Time',
-      matchTimeJson,
-    ) as MatchTimeModel;
+    MatchTimeModel matchTimeModel =
+        NTWidgetBuilder.buildNTModelFromJson(
+              ntConnection,
+              preferences,
+              'Match Time',
+              matchTimeJson,
+            )
+            as MatchTimeModel;
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -200,8 +200,10 @@ void main() {
 
     final timeDisplayMode = find.text('Time Display Mode');
     final redStartTime = find.widgetWithText(DialogTextInput, 'Red Start Time');
-    final yellowStartTime =
-        find.widgetWithText(DialogTextInput, 'Yellow Start Time');
+    final yellowStartTime = find.widgetWithText(
+      DialogTextInput,
+      'Yellow Start Time',
+    );
 
     expect(timeDisplayMode, findsOneWidget);
     expect(redStartTime, findsOneWidget);
@@ -209,11 +211,13 @@ void main() {
 
     expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
     await widgetTester.tap(
-      find.byWidget(find
-          .byType(DialogDropdownChooser<String>)
-          .evaluate()
-          .elementAt(1)
-          .widget),
+      find.byWidget(
+        find
+            .byType(DialogDropdownChooser<String>)
+            .evaluate()
+            .elementAt(1)
+            .widget,
+      ),
     );
     await widgetTester.pumpAndSettle();
 

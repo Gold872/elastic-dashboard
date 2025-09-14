@@ -72,19 +72,20 @@ class GraphModel extends SingleTopicNTWidgetModel {
     double lineWidth = 2.0,
     super.dataType,
     super.period,
-  })  : _timeDisplayed = timeDisplayed,
-        _minValue = minValue,
-        _maxValue = maxValue,
-        _mainColor = mainColor,
-        _lineWidth = lineWidth,
-        super();
+  }) : _timeDisplayed = timeDisplayed,
+       _minValue = minValue,
+       _maxValue = maxValue,
+       _mainColor = mainColor,
+       _lineWidth = lineWidth,
+       super();
 
   GraphModel.fromJson({
     required super.ntConnection,
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    _timeDisplayed = tryCast(jsonData['time_displayed']) ??
+    _timeDisplayed =
+        tryCast(jsonData['time_displayed']) ??
         tryCast(jsonData['visibleTime']) ??
         5.0;
     _minValue = tryCast(jsonData['min_value']);
@@ -157,7 +158,8 @@ class GraphModel extends SingleTopicNTWidgetModel {
                 }
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Minimum',
               initialText: _minValue?.toString(),
               allowEmptySubmission: true,
@@ -176,7 +178,8 @@ class GraphModel extends SingleTopicNTWidgetModel {
                 }
               },
               formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
+                allowNegative: true,
+              ),
               label: 'Maximum',
               initialText: _maxValue?.toString(),
               allowEmptySubmission: true,
@@ -330,7 +333,8 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
 
   void _resetGraphData() {
     final double x = DateTime.now().microsecondsSinceEpoch.toDouble();
-    final double y = tryCast<num>(widget.subscription?.value)?.toDouble() ??
+    final double y =
+        tryCast<num>(widget.subscription?.value)?.toDouble() ??
         widget.minValue ??
         0.0;
 
@@ -338,10 +342,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
       _graphData
         ..clear()
         ..addAll([
-          _GraphPoint(
-            x: x - widget.timeDisplayed * 1e6,
-            y: y,
-          ),
+          _GraphPoint(x: x - widget.timeDisplayed * 1e6, y: y),
           _GraphPoint(x: x, y: y),
         ]);
 
@@ -351,8 +352,9 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
 
   void _initializeListener() {
     _subscriptionListener?.cancel();
-    _subscriptionListener =
-        widget.subscription?.periodicStream(yieldAll: true).listen((data) {
+    _subscriptionListener = widget.subscription?.periodicStream(yieldAll: true).listen((
+      data,
+    ) {
       if (_seriesController == null) {
         return;
       }
@@ -389,8 +391,9 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
         _graphData.add(newPoint);
         newPoints.add(newPoint);
 
-        List<int> addedIndexes =
-            newPoints.map((point) => _graphData.indexOf(point)).toList();
+        List<int> addedIndexes = newPoints
+            .map((point) => _graphData.indexOf(point))
+            .toList();
 
         try {
           _seriesController?.updateDataSource(

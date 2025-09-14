@@ -29,7 +29,7 @@ List<int> testPose2dStruct = [
   0xfb,
   0x21,
   0x09,
-  0x40
+  0x40,
 ];
 
 void main() {
@@ -64,7 +64,7 @@ void main() {
       0x18,
       0x2d,
       0x44,
-      0x54
+      0x54,
     ];
     Uint8List data = Uint8List.fromList(rawBytes);
 
@@ -114,7 +114,7 @@ void main() {
       0x00,
       0x14,
       0x40,
-      0x00
+      0x00,
     ]);
 
     List<Pose2dStruct> poseList = Pose2dStruct.listFromBytes(data);

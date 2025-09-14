@@ -44,9 +44,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': 0.0,
-      },
+      virtualValues: {'Test/Double Value': 0.0},
     );
   });
 
@@ -128,12 +126,14 @@ void main() {
   testWidgets('Graph edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    GraphModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Graph',
-      graphJson,
-    ) as GraphModel;
+    GraphModel graphModel =
+        NTWidgetBuilder.buildNTModelFromJson(
+              ntConnection,
+              preferences,
+              'Graph',
+              graphJson,
+            )
+            as GraphModel;
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -164,8 +164,10 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     final colorPicker = find.widgetWithText(DialogColorPicker, 'Graph Color');
-    final timeDisplayed =
-        find.widgetWithText(DialogTextInput, 'Time Displayed (Seconds)');
+    final timeDisplayed = find.widgetWithText(
+      DialogTextInput,
+      'Time Displayed (Seconds)',
+    );
     final minimum = find.widgetWithText(DialogTextInput, 'Minimum');
     final maximum = find.widgetWithText(DialogTextInput, 'Maximum');
     final lineWidth = find.widgetWithText(DialogTextInput, 'Line Width');

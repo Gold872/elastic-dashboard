@@ -57,8 +57,9 @@ void main() async {
       await _backupPreferences(appFolderPath);
     } catch (error) {
       logger.warning(
-          'Failed to get shared preferences instance, attempting to retrieve from backup',
-          error);
+        'Failed to get shared preferences instance, attempting to retrieve from backup',
+        error,
+      );
 
       // Remove broken preferences files and restore previous settings
       await _restorePreferencesFromBackup(appFolderPath);
@@ -68,8 +69,10 @@ void main() async {
     preferences = await SharedPreferences.getInstance();
   }
 
-  Level logLevel = Settings.logLevels.firstWhereOrNull((level) =>
-          level.levelName == preferences.getString(PrefKeys.logLevel)) ??
+  Level logLevel =
+      Settings.logLevels.firstWhereOrNull(
+        (level) => level.levelName == preferences.getString(PrefKeys.logLevel),
+      ) ??
       Defaults.logLevel;
   Logger.level = logLevel;
 
@@ -89,10 +92,9 @@ void main() async {
     final advantageScopeLicense = await rootBundle.loadString(
       'assets/third_party_licenses/AdvantageScopeAssets.txt',
     );
-    yield LicenseEntryWithLineBreaks(
-      ['advantagescope_assets'],
-      advantageScopeLicense,
-    );
+    yield LicenseEntryWithLineBreaks([
+      'advantagescope_assets',
+    ], advantageScopeLicense);
   });
 
   await FieldImages.loadFields('assets/fields/');
@@ -142,8 +144,11 @@ void main() async {
   );
 }
 
-Future<void> _restoreWindowPosition(SharedPreferences preferences,
-    Display primaryDisplay, Size minimumSize) async {
+Future<void> _restoreWindowPosition(
+  SharedPreferences preferences,
+  Display primaryDisplay,
+  Size minimumSize,
+) async {
   String? positionString = preferences.getString(PrefKeys.windowPosition);
 
   if (positionString == null) {
@@ -156,8 +161,10 @@ Future<void> _restoreWindowPosition(SharedPreferences preferences,
     return;
   }
 
-  List<double> position =
-      rawPosition.whereType<num>().map((n) => n.toDouble()).toList();
+  List<double> position = rawPosition
+      .whereType<num>()
+      .map((n) => n.toDouble())
+      .toList();
 
   if (position.length < 4) {
     return;
@@ -165,22 +172,19 @@ Future<void> _restoreWindowPosition(SharedPreferences preferences,
 
   double x = position[0];
   double y = position[1];
-  double width =
-      position[2].clamp(minimumSize.width, primaryDisplay.size.width);
-  double height =
-      position[3].clamp(minimumSize.height, primaryDisplay.size.height);
+  double width = position[2].clamp(
+    minimumSize.width,
+    primaryDisplay.size.width,
+  );
+  double height = position[3].clamp(
+    minimumSize.height,
+    primaryDisplay.size.height,
+  );
 
   x = x.clamp(0.0, primaryDisplay.size.width);
   y = y.clamp(0.0, primaryDisplay.size.height);
 
-  await windowManager.setBounds(
-    Rect.fromLTWH(
-      x,
-      y,
-      width,
-      height,
-    ),
-  );
+  await windowManager.setBounds(Rect.fromLTWH(x, y, width, height));
 }
 
 /// Makes a backup copy of the current shared preferences file.
@@ -238,35 +242,43 @@ class Elastic extends StatefulWidget {
 }
 
 class _ElasticState extends State<Elastic> {
-  late Color teamColor = Color(widget.preferences.getInt(PrefKeys.teamColor) ??
-      Colors.blueAccent.toARGB32());
-  late FlexSchemeVariant themeVariant = FlexSchemeVariant.values
-          .firstWhereOrNull((element) =>
-              element.variantName ==
-              widget.preferences.getString(PrefKeys.themeVariant)) ??
+  late Color teamColor = Color(
+    widget.preferences.getInt(PrefKeys.teamColor) ??
+        Colors.blueAccent.toARGB32(),
+  );
+  late FlexSchemeVariant themeVariant =
+      FlexSchemeVariant.values.firstWhereOrNull(
+        (element) =>
+            element.variantName ==
+            widget.preferences.getString(PrefKeys.themeVariant),
+      ) ??
       FlexSchemeVariant.material3Legacy;
 
   late final DashboardPageViewModel dashboardViewModel =
       DashboardPageViewModelImpl(
-    ntConnection: widget.ntConnection,
-    preferences: widget.preferences,
-    version: widget.version,
-    onColorChanged: (color) => setState(() {
-      teamColor = color;
-      widget.preferences.setInt(PrefKeys.teamColor, color.toARGB32());
-    }),
-    onThemeVariantChanged: (variant) async {
-      themeVariant = variant;
-      if (variant == Defaults.themeVariant) {
-        await widget.preferences
-            .setString(PrefKeys.themeVariant, Defaults.defaultVariantName);
-      } else {
-        await widget.preferences
-            .setString(PrefKeys.themeVariant, variant.variantName);
-      }
-      setState(() {});
-    },
-  );
+        ntConnection: widget.ntConnection,
+        preferences: widget.preferences,
+        version: widget.version,
+        onColorChanged: (color) => setState(() {
+          teamColor = color;
+          widget.preferences.setInt(PrefKeys.teamColor, color.toARGB32());
+        }),
+        onThemeVariantChanged: (variant) async {
+          themeVariant = variant;
+          if (variant == Defaults.themeVariant) {
+            await widget.preferences.setString(
+              PrefKeys.themeVariant,
+              Defaults.defaultVariantName,
+            );
+          } else {
+            await widget.preferences.setString(
+              PrefKeys.themeVariant,
+              variant.variantName,
+            );
+          }
+          setState(() {});
+        },
+      );
 
   FlexTones get themeTones => themeVariant.tones(Brightness.dark);
 
@@ -279,15 +291,17 @@ class _ElasticState extends State<Elastic> {
         brightness: Brightness.dark,
         tones: themeTones.copyWith(
           // Use older (but incorrect) material 3 legacy tones from 2025 version
-          surfaceTone:
-              themeVariant == FlexSchemeVariant.material3Legacy ? 8 : null,
-          primaryMinChroma:
-              themeVariant == FlexSchemeVariant.material3Legacy ? 0 : null,
+          surfaceTone: themeVariant == FlexSchemeVariant.material3Legacy
+              ? 8
+              : null,
+          primaryMinChroma: themeVariant == FlexSchemeVariant.material3Legacy
+              ? 0
+              : null,
           // Have the dialog color match the card colors
           surfaceContainerHighTone:
               themeVariant == FlexSchemeVariant.material3Legacy
-                  ? 8
-                  : themeTones.surfaceTone,
+              ? 8
+              : themeTones.surfaceTone,
         ),
       ),
     );

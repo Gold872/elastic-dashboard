@@ -37,9 +37,7 @@ class PixelRatioOverride extends StatelessWidget {
           alignment: Alignment.topLeft,
           scale: ratio,
           child: MediaQuery(
-            data: mediaQueryData.copyWith(
-              size: newScreenSize,
-            ),
+            data: mediaQueryData.copyWith(size: newScreenSize),
             child: child,
           ),
         ),
@@ -53,9 +51,7 @@ class PixelRatioOverride extends StatelessWidget {
           widthFactor: 1 / ratio,
           heightFactor: 1 / ratio,
           child: MediaQuery(
-            data: mediaQueryData.copyWith(
-              size: newScreenSize,
-            ),
+            data: mediaQueryData.copyWith(size: newScreenSize),
             child: child,
           ),
         ),

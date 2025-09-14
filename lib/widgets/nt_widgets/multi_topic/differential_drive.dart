@@ -21,9 +21,9 @@ class DifferentialDriveModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        leftSpeedSubscription,
-        rightSpeedSubscription,
-      ];
+    leftSpeedSubscription,
+    rightSpeedSubscription,
+  ];
 
   NT4Topic? leftSpeedTopic;
   NT4Topic? rightSpeedTopic;
@@ -50,10 +50,14 @@ class DifferentialDriveModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    leftSpeedSubscription =
-        ntConnection.subscribe(leftSpeedTopicName, super.period);
-    rightSpeedSubscription =
-        ntConnection.subscribe(rightSpeedTopicName, super.period);
+    leftSpeedSubscription = ntConnection.subscribe(
+      leftSpeedTopicName,
+      super.period,
+    );
+    rightSpeedSubscription = ntConnection.subscribe(
+      rightSpeedTopicName,
+      super.period,
+    );
   }
 
   @override
@@ -148,12 +152,14 @@ class DifferentialDrive extends NTWidget {
                     }
 
                     model.ntConnection.updateDataFromTopic(
-                        model.leftSpeedTopic!, model.leftSpeedCurrentValue);
+                      model.leftSpeedTopic!,
+                      model.leftSpeedCurrentValue,
+                    );
 
                     model.leftSpeedPreviousValue =
                         model.leftSpeedCurrentValue.value;
                   },
-                )
+                ),
               ],
               gaugeOrientation: GaugeOrientation.vertical,
               start: -1.0,
@@ -166,18 +172,24 @@ class DifferentialDrive extends NTWidget {
             Flexible(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  double sideLength =
-                      min(constraints.maxWidth, constraints.maxHeight);
+                  double sideLength = min(
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                  );
 
                   return SizedBox(
                     width: sideLength,
                     height: sideLength,
                     child: CustomPaint(
                       painter: _DifferentialDrivePainter(
-                        leftSpeed:
-                            model.leftSpeedCurrentValue.value.clamp(-1.0, 1.0),
-                        rightSpeed:
-                            model.rightSpeedCurrentValue.value.clamp(-1.0, 1.0),
+                        leftSpeed: model.leftSpeedCurrentValue.value.clamp(
+                          -1.0,
+                          1.0,
+                        ),
+                        rightSpeed: model.rightSpeedCurrentValue.value.clamp(
+                          -1.0,
+                          1.0,
+                        ),
                       ),
                     ),
                   );
@@ -230,7 +242,9 @@ class DifferentialDrive extends NTWidget {
                     }
 
                     model.ntConnection.updateDataFromTopic(
-                        model.rightSpeedTopic!, model.rightSpeedCurrentValue);
+                      model.rightSpeedTopic!,
+                      model.rightSpeedCurrentValue,
+                    );
 
                     model.rightSpeedPreviousValue =
                         model.rightSpeedCurrentValue.value;
@@ -263,7 +277,10 @@ class _DifferentialDrivePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawRobotFrame(canvas, size);
     _drawMotionVector(
-        canvas, size * 7 / 8, Offset(size.width / 2, size.height / 2));
+      canvas,
+      size * 7 / 8,
+      Offset(size.width / 2, size.height / 2),
+    );
   }
 
   void _drawRobotFrame(Canvas canvas, Size size) {
@@ -278,25 +295,31 @@ class _DifferentialDrivePainter extends CustomPainter {
     double wheelHeight = size.height / 3.25;
 
     Rect frontLeftWheel = Rect.fromCenter(
-        center: Offset(wheelWidth / 2, wheelHeight / 2),
-        width: wheelWidth,
-        height: wheelHeight);
+      center: Offset(wheelWidth / 2, wheelHeight / 2),
+      width: wheelWidth,
+      height: wheelHeight,
+    );
 
     Rect frontRightWheel = Rect.fromCenter(
-        center: Offset(size.width - wheelWidth / 2, wheelHeight / 2),
-        width: wheelWidth,
-        height: wheelHeight);
+      center: Offset(size.width - wheelWidth / 2, wheelHeight / 2),
+      width: wheelWidth,
+      height: wheelHeight,
+    );
 
     Rect backLeftWheel = Rect.fromCenter(
-        center: Offset(wheelWidth / 2, size.height - wheelHeight / 2),
-        width: wheelWidth,
-        height: wheelHeight);
+      center: Offset(wheelWidth / 2, size.height - wheelHeight / 2),
+      width: wheelWidth,
+      height: wheelHeight,
+    );
 
     Rect backRightWheel = Rect.fromCenter(
-        center:
-            Offset(size.width - wheelWidth / 2, size.height - wheelHeight / 2),
-        width: wheelWidth,
-        height: wheelHeight);
+      center: Offset(
+        size.width - wheelWidth / 2,
+        size.height - wheelHeight / 2,
+      ),
+      width: wheelWidth,
+      height: wheelHeight,
+    );
 
     Rect body = Rect.fromCenter(
       center: Offset(size.width / 2, size.height / 2),
@@ -368,11 +391,13 @@ class _DifferentialDrivePainter extends CustomPainter {
 
       Path vectorPath = Path()
         ..moveTo(center.dx, center.dy)
-        ..relativeArcToPoint(Offset(vectorX, vectorY),
-            radius: (radius != double.infinity)
-                ? Radius.circular(radius)
-                : Radius.zero,
-            clockwise: arcSign * forwardSpeedSign == 1);
+        ..relativeArcToPoint(
+          Offset(vectorX, vectorY),
+          radius: (radius != double.infinity)
+              ? Radius.circular(radius)
+              : Radius.zero,
+          clockwise: arcSign * forwardSpeedSign == 1,
+        );
 
       canvas.drawPath(vectorPath, vectorArc);
 
@@ -384,11 +409,19 @@ class _DifferentialDrivePainter extends CustomPainter {
 
       final double base = arrowScaleFactor * arrowSize / 2;
 
-      final double arrowRotation = atan2(vectorY, vectorX) +
+      final double arrowRotation =
+          atan2(vectorY, vectorX) +
           forwardSpeedSign * arcSign * arcLength / radius;
 
       drawArrowHead(
-          canvas, center, vectorX, vectorY, arrowRotation, arrowAngle, base);
+        canvas,
+        center,
+        vectorX,
+        vectorY,
+        arrowRotation,
+        arrowAngle,
+        base,
+      );
     } else {
       final double turnSign = (leftSpeed - rightSpeed).sign;
 
@@ -398,21 +431,31 @@ class _DifferentialDrivePainter extends CustomPainter {
         double angle = turnSign * pi;
         double startAngle = (moment < 0) ? pi : 0;
 
-        Rect arcOval =
-            Rect.fromCenter(center: center, width: radius, height: radius);
+        Rect arcOval = Rect.fromCenter(
+          center: center,
+          width: radius,
+          height: radius,
+        );
 
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
         final double arrowScaleFactor =
             (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1) *
-                scaleFactor;
+            scaleFactor;
 
         final double base = arrowScaleFactor * arrowSize / 2;
 
         const double arrowRotation = pi / 2;
 
-        drawArrowHead(canvas, center, turnSign * radius / 2, 0, arrowRotation,
-            arrowAngle, base);
+        drawArrowHead(
+          canvas,
+          center,
+          turnSign * radius / 2,
+          0,
+          arrowRotation,
+          arrowAngle,
+          base,
+        );
       } else {
         // Turning from inside the robot
         double dominant = turnRadius < 0 ? leftSpeed : rightSpeed;
@@ -421,14 +464,17 @@ class _DifferentialDrivePainter extends CustomPainter {
         double angle = turnSign * _map(secondary / dominant, 0, -1, 0.5, pi);
         double startAngle = turnRadius < 0 ? pi : 0;
 
-        Rect arcOval =
-            Rect.fromCenter(center: center, width: radius, height: radius);
+        Rect arcOval = Rect.fromCenter(
+          center: center,
+          width: radius,
+          height: radius,
+        );
 
         canvas.drawArc(arcOval, startAngle, angle, false, vectorArc);
 
         final double arrowScaleFactor =
             (2.0 * angle.abs() * radius / maxRadius).clamp(0.75, 1.1) *
-                scaleFactor;
+            scaleFactor;
 
         final double base = arrowScaleFactor * arrowSize / 2;
 
@@ -438,13 +484,27 @@ class _DifferentialDrivePainter extends CustomPainter {
         double arrowRotation = angle + startAngle + (pi / 2) * turnSign;
 
         drawArrowHead(
-            canvas, center, tipX, tipY, arrowRotation, arrowAngle, base);
+          canvas,
+          center,
+          tipX,
+          tipY,
+          arrowRotation,
+          arrowAngle,
+          base,
+        );
       }
     }
   }
 
-  void drawArrowHead(Canvas canvas, Offset center, double tipX, double tipY,
-      double arrowRotation, double arrowAngle, double base) {
+  void drawArrowHead(
+    Canvas canvas,
+    Offset center,
+    double tipX,
+    double tipY,
+    double arrowRotation,
+    double arrowAngle,
+    double base,
+  ) {
     Paint arrowHead = Paint()
       ..color = Colors.red
       ..strokeWidth = 2
@@ -457,19 +517,26 @@ class _DifferentialDrivePainter extends CustomPainter {
 
     Path arrowPath = Path()
       ..moveTo(
-          center.dx + tipX + xOffset - base * cos(arrowRotation - arrowAngle),
-          center.dy + tipY + yOffset - base * sin(arrowRotation - arrowAngle))
+        center.dx + tipX + xOffset - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY + yOffset - base * sin(arrowRotation - arrowAngle),
+      )
       ..lineTo(center.dx + tipX + xOffset, center.dy + tipY + yOffset)
       ..lineTo(
-          center.dx + tipX + xOffset - base * cos(arrowRotation + arrowAngle),
-          center.dy + tipY + yOffset - base * sin(arrowRotation + arrowAngle))
+        center.dx + tipX + xOffset - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY + yOffset - base * sin(arrowRotation + arrowAngle),
+      )
       ..close();
 
     canvas.drawPath(arrowPath, arrowHead);
   }
 
-  double _map(double x, double minInput, double maxInput, double minOutput,
-      double maxOutput) {
+  double _map(
+    double x,
+    double minInput,
+    double maxInput,
+    double minOutput,
+    double maxOutput,
+  ) {
     return (x - minInput) * (maxOutput - minOutput) / (maxInput - minInput) +
         minOutput;
   }

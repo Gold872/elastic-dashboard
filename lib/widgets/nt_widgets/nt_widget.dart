@@ -49,7 +49,8 @@ abstract class NTWidgetModel extends ChangeNotifier {
     required String topic,
     double? period,
   }) : _topic = topic {
-    this.period = period ??
+    this.period =
+        period ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
 
@@ -63,7 +64,8 @@ abstract class NTWidgetModel extends ChangeNotifier {
   }) {
     _topic = tryCast(jsonData['topic']) ?? '';
 
-    _period = tryCast(jsonData['period']) ??
+    _period =
+        tryCast(jsonData['period']) ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
 
@@ -72,10 +74,7 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    return {
-      'topic': topic,
-      'period': period,
-    };
+    return {'topic': topic, 'period': period};
   }
 
   void init();
@@ -143,8 +142,8 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     required super.topic,
     this.dataType = 'Unknown',
     super.period,
-  })  : _typeOverride = type,
-        super();
+  }) : _typeOverride = type,
+       super();
 
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
@@ -201,17 +200,12 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
           SingleColorView.widgetType,
         ];
       case NT4TypeStr.kStringArr:
-        return [
-          TextDisplay.widgetType,
-          MultiColorView.widgetType,
-        ];
+        return [TextDisplay.widgetType, MultiColorView.widgetType];
       case NT4TypeStr.kBoolArr:
       case NT4TypeStr.kFloat32Arr:
       case NT4TypeStr.kFloat64Arr:
       case NT4TypeStr.kIntArr:
-        return [
-          TextDisplay.widgetType,
-        ];
+        return [TextDisplay.widgetType];
     }
 
     return [type];
