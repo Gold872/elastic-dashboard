@@ -508,6 +508,7 @@ class NTStruct {
     Map<String, Object?> values = {};
 
     for (final field in schema.fields) {
+      if (field.bitRange.$2 > dataBitArray.length) break;
       if (field.isArray) {
         List<Object?> value = [];
 
