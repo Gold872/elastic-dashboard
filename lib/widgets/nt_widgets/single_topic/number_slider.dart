@@ -148,16 +148,17 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
               initialText: _divisions.toString(),
             ),
           ),
-          Flexible(
-            flex: 3,
-            child: DialogToggleSwitch(
-              initialValue: updateContinuously,
-              label: 'Update While Dragging',
-              onToggle: (value) {
-                updateContinuously = value;
-              },
+          if (ntStructMeta == null)
+            Flexible(
+              flex: 3,
+              child: DialogToggleSwitch(
+                initialValue: updateContinuously,
+                label: 'Update While Dragging',
+                onToggle: (value) {
+                  updateContinuously = value;
+                },
+              ),
             ),
-          ),
         ],
       ),
     ];
@@ -243,7 +244,7 @@ class NumberSlider extends NTWidget {
                     shape: PointerShape.circle,
                     enableAnimation: false,
                     height: 15,
-                    isInteractive: true,
+                    isInteractive: model.ntStructMeta == null,
                     onChangeStart: () {
                       model.dragging.value = true;
                     },
