@@ -250,7 +250,7 @@ void main() {
       );
 
       ByteData rawData = ByteData(16);
-      rawData.setInt64(0, -15000.toInt(), Endian.little);
+      rawData.setInt64(0, -15000, Endian.little);
       rawData.setUint64(8, 15000, Endian.little);
 
       final decodedStruct = NTStruct.parse(
@@ -341,6 +341,71 @@ void main() {
           i * 0.5,
         );
       }
+    });
+
+    test('Decoding enum', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestEnum',
+        schema: 'enum {a=1, b=2, c=3} int8 testEnum;',
+      );
+
+      ByteData rawData = ByteData(8);
+      rawData.setInt8(0, 3);
+
+      final NTStruct decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      final decodedValues = decodedStruct.values;
+
+      expect(decodedValues.length, 1);
+      expect(decodedValues['testEnum'], isA<String>());
+      expect(decodedValues['testEnum'], 'c');
+    });
+
+    test('Decoding enum (unknown value)', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestEnum',
+        schema: 'enum {a=1, b=2, c=3} int8 testEnum;',
+      );
+
+      ByteData rawData = ByteData(8);
+      rawData.setInt8(0, 5);
+
+      final NTStruct decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      final decodedValues = decodedStruct.values;
+
+      expect(decodedValues.length, 1);
+      expect(decodedValues['testEnum'], isA<String>());
+      expect(decodedValues['testEnum'], 'Unknown (5)');
+    });
+
+    test('Decoding with incorrectly sized raw data', () {
+      final schema = NTStructSchema.parse(
+        name: 'TestSchema',
+        schema: 'int64 one;uint64 two',
+      );
+
+      ByteData rawData = ByteData(12);
+      rawData.setInt64(0, -15000, Endian.little);
+      rawData.setUint32(8, 15000, Endian.little);
+
+      final decodedStruct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.view(rawData.buffer),
+      );
+
+      final decodedValues = decodedStruct.values;
+
+      expect(decodedValues.length, 1);
+      expect(decodedValues['one'], isA<int>());
+      expect(decodedValues['one'], -15000);
+      expect(decodedValues['two'], isNull);
     });
 
     test('Decoding all possible primitive types', () {
