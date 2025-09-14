@@ -296,6 +296,15 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       }
     }
 
+    // If the path of the struct has changed, we want to update its
+    // value of the struct field
+    if (ntStructMeta != null) {
+      subscription!.updateValue(
+        ntConnection.getLastAnnouncedValue(topic),
+        subscription!.timestamp,
+      );
+    }
+
     refresh();
   }
 }

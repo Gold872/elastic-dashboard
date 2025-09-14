@@ -238,7 +238,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       ),
       if (childModel is SingleTopicNTWidgetModel &&
           (childModel as SingleTopicNTWidgetModel).ntStructMeta != null) ...[
-        Text('Struct Settings:'),
+        const Text('Struct Settings:'),
         const SizedBox(height: 5),
         Row(
           mainAxisSize: MainAxisSize.min,

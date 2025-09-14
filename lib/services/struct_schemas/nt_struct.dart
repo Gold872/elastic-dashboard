@@ -400,8 +400,10 @@ class NTFieldSchema {
         }(),
     };
 
-    if (value != null && enumData != null && enumData!.containsKey(value)) {
-      return enumData![value];
+    // We assume all enum values being published are mapped, if they are not
+    // then we'll display it as an "unknown" string
+    if (value != null && enumData != null) {
+      return enumData![value] ?? 'Unknown ($value)';
     }
     return value;
   }
@@ -532,8 +534,11 @@ class NTStruct {
     Object? value = this;
 
     for (final k in key) {
+      // Path should only be advancing through sub-structs
+      // If the path is trying to point beyond a non-struct, return null
+      // since it would be invalid
       if (value is NTStruct) {
-        value = value[k]!;
+        value = value[k];
       } else {
         return null;
       }

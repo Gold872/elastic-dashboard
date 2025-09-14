@@ -123,7 +123,7 @@ class TextDisplay extends NTWidget {
         if (data?.toString() != model.previousValue?.toString()) {
           // Needed to prevent errors
           Future(() async {
-            String displayString = data.toString();
+            String displayString = data?.toString() ?? '';
             if (data is double) {
               if (cast<double>(data).abs() > 1e-10) {
                 displayString = Decimal.parse(data.toString()).toString();
