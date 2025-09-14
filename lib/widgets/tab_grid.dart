@@ -947,17 +947,19 @@ class TabGrid extends StatelessWidget {
             showContextMenu(
               context,
               contextMenu: contextMenu,
-              transitionDuration: const Duration(milliseconds: 100),
-              reverseTransitionDuration: Duration.zero,
-              transitionsBuilder: (
-                context,
-                animation,
-                secondaryAnimation,
-                child,
-              ) =>
-                  FadeTransition(
-                opacity: animation,
-                child: child,
+              routeOptions: MenuRouteOptions(
+                transitionDuration: const Duration(milliseconds: 100),
+                reverseTransitionDuration: Duration.zero,
+                transitionsBuilder: (
+                  context,
+                  animation,
+                  secondaryAnimation,
+                  child,
+                ) =>
+                    FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
               ),
             );
           },
@@ -1074,14 +1076,21 @@ class TabGrid extends StatelessWidget {
         showContextMenu(
           context,
           contextMenu: contextMenu,
-          transitionDuration: const Duration(milliseconds: 100),
-          reverseTransitionDuration: Duration.zero,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
+          routeOptions: MenuRouteOptions(
+            transitionDuration: const Duration(milliseconds: 100),
+            reverseTransitionDuration: Duration.zero,
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+          ),
         );
       },
       child: GestureDetector(

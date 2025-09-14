@@ -145,48 +145,33 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
       const SizedBox(height: 5),
       const Text('Rotation Unit'),
       StatefulBuilder(builder: (context, setState) {
-        return Column(
-          children: [
-            ListTile(
-              title: const Text('Radians'),
-              dense: true,
-              leading: Radio<String>(
-                value: 'Radians',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Radians';
-
-                  setState(() {});
-                },
+        return RadioGroup<String>(
+          groupValue: _rotationUnit,
+          onChanged: (value) {
+            if (value != null) {
+              rotationUnit = value;
+            }
+            setState(() {});
+          },
+          child: Column(
+            children: [
+              ListTile(
+                title: const Text('Radians'),
+                dense: true,
+                leading: Radio<String>(value: 'Radians'),
               ),
-            ),
-            ListTile(
-              title: const Text('Degrees'),
-              dense: true,
-              leading: Radio<String>(
-                value: 'Degrees',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Degrees';
-
-                  setState(() {});
-                },
+              ListTile(
+                title: const Text('Degrees'),
+                dense: true,
+                leading: Radio<String>(value: 'Degrees'),
               ),
-            ),
-            ListTile(
-              title: const Text('Rotations'),
-              dense: true,
-              leading: Radio<String>(
-                value: 'Rotations',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Rotations';
-
-                  setState(() {});
-                },
+              ListTile(
+                title: const Text('Rotations'),
+                dense: true,
+                leading: Radio<String>(value: 'Rotations'),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }),
     ];
