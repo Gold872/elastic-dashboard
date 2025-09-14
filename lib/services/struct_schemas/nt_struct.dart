@@ -109,6 +109,11 @@ class SchemaManager {
     return _schemas[name];
   }
 
+  /// Processes a new schema from raw bytes and adds it into the list of known structs
+  ///
+  /// If processing this schema results in a new schema being updated, it will return
+  /// true. Calling this method can result in 1 or more schemas being compiled, due to
+  /// some schemas depending on others
   bool processNewSchema(String name, List<int> rawData) {
     String schema = utf8.decode(rawData);
     if (name.contains(':')) {
@@ -161,6 +166,8 @@ class SchemaManager {
     _schemas[name] = schema;
   }
 
+  /// Parses and adds a schema from a String, returns whether or not
+  /// the schema was successfully parsed
   bool _addStringSchema(String name, String schema) {
     if (name.contains(':')) {
       name = name.split(':')[1];
@@ -222,6 +229,7 @@ enum StructValueType {
         StructValueType.struct;
   }
 
+  /// The [NT4Type] equivalent of the struct type
   NT4Type get ntType => switch (this) {
         StructValueType.bool => NT4Type.boolean(),
         StructValueType.char ||
@@ -248,9 +256,10 @@ enum StructValueType {
   }
 }
 
-/// This class represents a field schema in an NTStruct.
-/// It contains the field name and its type.
-/// It also provides a method to get type information for the field if it is a struct.
+/// Data representing a field schema in an NTStruct
+///
+/// Contains the information needed to decode the data for a specific
+/// field from the full bytes of a struct.
 class NTFieldSchema {
   final String fieldName;
   final String type;
@@ -266,6 +275,14 @@ class NTFieldSchema {
     NT4Type innerType = valueType != StructValueType.struct
         ? valueType.ntType
         : NT4Type.struct(type);
+
+    // If there's an enum map, use the string alias for an enum type
+    if (enumData != null) {
+      innerType = NT4Type(
+        dataType: NT4DataType.string,
+        name: 'enum',
+      );
+    }
 
     if (isArray) {
       return NT4Type.array(innerType);

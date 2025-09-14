@@ -234,7 +234,7 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
       if (topic.type.isStruct) {
         NTStructSchema? schema = widget.ntConnection.schemaManager.getSchema(
-          topic.type.name!,
+          topic.type.name,
         );
 
         if (schema != null && !topic.type.isArray) {

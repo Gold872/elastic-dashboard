@@ -60,57 +60,61 @@ class NT4Type {
   final NT4DataType dataType;
   final NT4TypeModifier modifier;
 
-  /// Only available if this is a struct type, or cannot be parsed.
-  final String? name;
+  /// The "display name" of the type
+  ///
+  /// In most cases, this will be the exact same as the data type, but
+  /// in some cases it could be a display name alias. For instance, enum
+  /// values in a struct use a display name "enum" when it's an underlying string
+  final String name;
 
   NT4Type({
     required this.dataType,
+    required this.name,
     this.modifier = NT4TypeModifier.normal,
-    this.name,
   });
 
   factory NT4Type.boolean() {
-    return NT4Type(dataType: NT4DataType.boolean);
+    return NT4Type(dataType: NT4DataType.boolean, name: 'boolean');
   }
 
   factory NT4Type.int() {
-    return NT4Type(dataType: NT4DataType.int32);
+    return NT4Type(dataType: NT4DataType.int32, name: 'int');
   }
 
   factory NT4Type.float() {
-    return NT4Type(dataType: NT4DataType.float32);
+    return NT4Type(dataType: NT4DataType.float32, name: 'float');
   }
 
   factory NT4Type.double() {
-    return NT4Type(dataType: NT4DataType.float64);
+    return NT4Type(dataType: NT4DataType.float64, name: 'double');
   }
 
   factory NT4Type.string() {
-    return NT4Type(dataType: NT4DataType.string);
+    return NT4Type(dataType: NT4DataType.string, name: 'string');
   }
 
   factory NT4Type.json() {
-    return NT4Type(dataType: NT4DataType.json);
+    return NT4Type(dataType: NT4DataType.json, name: 'json');
   }
 
   factory NT4Type.raw() {
-    return NT4Type(dataType: NT4DataType.raw);
+    return NT4Type(dataType: NT4DataType.raw, name: 'raw');
   }
 
   factory NT4Type.rpc() {
-    return NT4Type(dataType: NT4DataType.rpc);
+    return NT4Type(dataType: NT4DataType.rpc, name: 'rpc');
   }
 
   factory NT4Type.msgpack() {
-    return NT4Type(dataType: NT4DataType.msgpack);
+    return NT4Type(dataType: NT4DataType.msgpack, name: 'msgpack');
   }
 
   factory NT4Type.protobuf() {
-    return NT4Type(dataType: NT4DataType.protobuf);
+    return NT4Type(dataType: NT4DataType.protobuf, name: 'protobuf');
   }
 
   factory NT4Type.structschema() {
-    return NT4Type(dataType: NT4DataType.structschema);
+    return NT4Type(dataType: NT4DataType.structschema, name: 'structschema');
   }
 
   factory NT4Type.unknown(String type) {
@@ -188,6 +192,9 @@ class NT4Type {
       String subType = type.substring(0, type.length - 2);
       NT4Type sub = parse(subType);
       return NT4Type.array(sub);
+    } else if (type == 'enum') {
+      // Enum is a string alias for enum types in a struct
+      return NT4Type(dataType: NT4DataType.string, name: 'enum');
     } else {
       logger.debug('Could not parse type $type, falling back to String');
       return NT4Type.unknown(type);
@@ -245,25 +252,10 @@ class NT4Type {
       return 'struct:$name[]';
     }
 
-    String typeString = switch (dataType) {
-      NT4DataType.boolean => 'boolean',
-      NT4DataType.int32 => 'int',
-      NT4DataType.float32 => 'float',
-      NT4DataType.float64 => 'double',
-      NT4DataType.string => 'string',
-      NT4DataType.json => 'json',
-      NT4DataType.raw => 'raw',
-      NT4DataType.rpc => 'rpc',
-      NT4DataType.msgpack => 'msgpack',
-      NT4DataType.protobuf => 'protobuf',
-      NT4DataType.structschema => 'structschema',
-      NT4DataType.unknown => name ?? 'raw',
-    };
-
     if (modifier == NT4TypeModifier.array) {
-      return '$typeString[]';
+      return '$name[]';
     }
-    return typeString;
+    return name;
   }
 
   int get typeId {
