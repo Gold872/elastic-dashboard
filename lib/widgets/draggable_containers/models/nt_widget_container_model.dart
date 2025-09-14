@@ -83,7 +83,8 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       widgetProperties = tryCast(jsonData['properties']) ?? {};
     } else {
       onJsonLoadingWarning?.call(
-          'Network tables widget does not have any properties, defaulting to an empty properties map.');
+        'Network tables widget does not have any properties, defaulting to an empty properties map.',
+      );
     }
 
     String type = tryCast(jsonData['type']) ?? '';
@@ -235,6 +236,57 @@ class NTWidgetContainerModel extends WidgetContainerModel {
           ),
         ],
       ),
+      if (childModel is SingleTopicNTWidgetModel &&
+          (childModel as SingleTopicNTWidgetModel).ntStructMeta != null) ...[
+        const Text('Struct Settings:'),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Struct Name
+            Flexible(
+              child: DialogTextInput(
+                onSubmit: (value) {
+                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
+                      childModel
+                          .cast<SingleTopicNTWidgetModel>()
+                          .ntStructMeta!
+                          .copyWith(schemaName: value);
+                  childModel.resetSubscription();
+                },
+                label: 'Struct Name',
+                initialText: (childModel as SingleTopicNTWidgetModel)
+                        .ntStructMeta
+                        ?.schemaName ??
+                    '',
+              ),
+            ),
+            const SizedBox(width: 5),
+            // Path
+            Flexible(
+              child: DialogTextInput(
+                onSubmit: (value) {
+                  List<String>? newPath =
+                      value.split('/').where((e) => e.isNotEmpty).toList();
+                  childModel.cast<SingleTopicNTWidgetModel>().ntStructMeta =
+                      childModel
+                          .cast<SingleTopicNTWidgetModel>()
+                          .ntStructMeta!
+                          .copyWith(path: newPath);
+                  childModel.resetSubscription();
+                },
+                label: 'Path',
+                initialText: childModel
+                    .cast<SingleTopicNTWidgetModel>()
+                    .ntStructMeta!
+                    .path
+                    .join('/'),
+              ),
+            ),
+          ],
+        ),
+      ],
     ];
   }
 
@@ -317,11 +369,16 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,
       preferences,
+      switch (childModel) {
+        SingleTopicNTWidgetModel(ntStructMeta: var ntStructMeta) =>
+          ntStructMeta,
+        MultiTopicNTWidgetModel() => null,
+      },
       type,
       childModel.topic,
       dataType: (childModel is SingleTopicNTWidgetModel)
           ? cast<SingleTopicNTWidgetModel>(childModel).dataType
-          : 'Unkown',
+          : null,
       period: (type != 'Graph')
           ? childModel.period
           : preferences.getDouble(PrefKeys.defaultGraphPeriod) ??

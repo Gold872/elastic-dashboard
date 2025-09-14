@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
@@ -41,7 +42,6 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -151,10 +151,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
-        NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        NT4Type.string(),
+        properties: {'retained': true},
       );
     }
   }

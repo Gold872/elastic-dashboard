@@ -28,6 +28,8 @@ class ToggleButton extends NTWidget {
 
           return GestureDetector(
             onTapUp: (_) {
+              if (model.ntStructMeta != null) return;
+
               bool publishTopic = model.ntTopic == null ||
                   !model.ntConnection.isTopicPublished(model.ntTopic);
 

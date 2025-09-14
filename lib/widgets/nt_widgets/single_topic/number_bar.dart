@@ -5,7 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -66,6 +66,7 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
     int divisions = 5,
     bool inverted = false,
     String orientation = 'horizontal',
+    super.ntStructMeta,
     super.dataType,
     super.period,
   })  : _orientation = orientation,
@@ -218,7 +219,7 @@ class NumberBar extends NTWidget {
         double? divisionInterval =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         GaugeOrientation gaugeOrientation = (model.orientation == 'vertical')
             ? GaugeOrientation.vertical

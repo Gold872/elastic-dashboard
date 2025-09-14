@@ -63,7 +63,6 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     this.fps,
     this.resolution,
     int rotation = 0,
-    super.dataType,
     super.period,
   })  : quality = compression,
         _rotationTurns = rotation,
