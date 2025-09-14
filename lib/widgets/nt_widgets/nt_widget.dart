@@ -310,7 +310,6 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    NT4Type? dataType, // To allow for stubbing in NTWidgetBuilder
     super.period,
   }) : super() {
     init();

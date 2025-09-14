@@ -146,7 +146,6 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     double fieldRotation = 0.0,
     Color robotColor = Colors.red,
     Color trajectoryColor = Colors.white,
-    super.dataType,
     super.period,
   })  : _showTrajectories = showTrajectories,
         _showOtherObjects = showOtherObjects,

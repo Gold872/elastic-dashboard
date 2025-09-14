@@ -42,7 +42,6 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 

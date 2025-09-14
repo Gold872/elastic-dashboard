@@ -59,7 +59,6 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     bool sortOptions = false,
-    super.dataType,
     super.period,
   })  : _sortOptions = sortOptions,
         super();

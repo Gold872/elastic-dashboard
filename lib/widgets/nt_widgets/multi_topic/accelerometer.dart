@@ -23,7 +23,6 @@ class AccelerometerModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     super.period,
-    super.dataType,
   }) : super();
 
   AccelerometerModel.fromJson({

@@ -49,7 +49,6 @@ class CommandModel extends MultiTopicNTWidgetModel {
     required super.topic,
     bool showType = true,
     bool maximizeButtonSpace = false,
-    super.dataType,
     super.period,
   })  : _showType = showType,
         _maximizeButtonSpace = maximizeButtonSpace,

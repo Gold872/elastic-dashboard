@@ -54,12 +54,19 @@ typedef NTModelJsonProvider = NTWidgetModel Function({
 });
 
 typedef NTModelProvider = NTWidgetModel Function({
-  NT4Type? dataType,
-  double period,
-  NT4StructMeta? ntStructMeta,
   required NTConnection ntConnection,
   required SharedPreferences preferences,
   required String topic,
+  NT4Type? dataType,
+  double? period,
+  NT4StructMeta? ntStructMeta,
+});
+
+typedef MultiTopicNTModelProvider = MultiTopicNTWidgetModel Function({
+  required NTConnection ntConnection,
+  required SharedPreferences preferences,
+  required String topic,
+  double? period,
 });
 
 typedef NTWidgetProvider = NTWidget Function({Key? key});
@@ -602,22 +609,12 @@ class NTWidgetBuilder {
     );
   }
 
-  static void registerMultiTopic<ModelType extends NTWidgetModel,
+  static void registerMultiTopic<ModelType extends MultiTopicNTWidgetModel,
       WidgetType extends NTWidget>({
     required String name,
-    required MultiTopicNTWidgetModel Function({
-      NT4Type? dataType,
-      double period,
-      required NTConnection ntConnection,
-      required SharedPreferences preferences,
-      required String topic,
-    }) model,
+    required MultiTopicNTModelProvider model,
     required NTWidgetProvider widget,
-    required NTWidgetModel Function({
-      required Map<String, dynamic> jsonData,
-      required NTConnection ntConnection,
-      required SharedPreferences preferences,
-    }) fromJson,
+    required NTModelJsonProvider fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
@@ -627,34 +624,21 @@ class NTWidgetBuilder {
     registerWithAlias(
       names: {name, ...?aliases},
       model: ({
-        NT4Type? dataType,
-        double? period,
-        NT4StructMeta? ntStructMeta,
         required NTConnection ntConnection,
         required SharedPreferences preferences,
         required String topic,
+        double? period,
+        NT4Type? dataType,
+        NT4StructMeta? ntStructMeta,
       }) =>
           model(
-        dataType: dataType,
-        period: period ??
-            (preferences.getDouble(PrefKeys.defaultPeriod) ??
-                Defaults.defaultPeriod),
         ntConnection: ntConnection,
         preferences: preferences,
         topic: topic,
+        period: period,
       ),
       widget: widget,
-      fromJson: ({
-        required Map<String, dynamic> jsonData,
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        NT4StructMeta? ntStructMeta,
-      }) =>
-          fromJson(
-        jsonData: jsonData,
-        ntConnection: ntConnection,
-        preferences: preferences,
-      ),
+      fromJson: fromJson,
       minWidth: minWidth,
       minHeight: minHeight,
       defaultWidth: defaultWidth,
