@@ -235,11 +235,10 @@ class NT4StructMeta {
   bool operator ==(Object other) =>
       other is NT4StructMeta &&
       path.equals(other.path) &&
-      schemaName == other.schemaName &&
-      type == other.type;
+      schemaName == other.schemaName;
 
   @override
-  int get hashCode => Object.hashAll([path, schemaName, type]);
+  int get hashCode => Object.hashAll([schemaName, path]);
 }
 
 class NT4SubscriptionOptions {
@@ -287,7 +286,7 @@ class NT4SubscriptionOptions {
 
   @override
   String toString() {
-    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix)';
+    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix, Struct Meta: $structMeta)';
   }
 }
 
