@@ -29,14 +29,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
 
   Color get trueColor => _trueColor;
 
-  set trueColor(value) {
+  set trueColor(Color value) {
     _trueColor = value;
     refresh();
   }
 
   Color get falseColor => _falseColor;
 
-  set falseColor(value) {
+  set falseColor(Color value) {
     _falseColor = value;
     refresh();
   }

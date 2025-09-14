@@ -18,35 +18,31 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
   double _minValue = -1.0;
   double _maxValue = 1.0;
   int _divisions = 5;
-  bool _updateContinuously = false;
+  bool updateContinuously = false;
 
   ValueNotifier<double> displayValue = ValueNotifier(0.0);
   ValueNotifier<bool> dragging = ValueNotifier(false);
 
   double get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double value) {
     _minValue = value;
     refresh();
   }
 
   double get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double value) {
     _maxValue = value;
     refresh();
   }
 
   int get divisions => _divisions;
 
-  set divisions(value) {
+  set divisions(int value) {
     _divisions = value;
     refresh();
   }
-
-  bool get updateContinuously => _updateContinuously;
-
-  set updateContinuously(value) => _updateContinuously = value;
 
   NumberSliderModel({
     required super.ntConnection,
@@ -55,11 +51,10 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
     double minValue = -1.0,
     double maxValue = 1.0,
     int divisions = 5,
-    bool updateContinuously = false,
+    this.updateContinuously = false,
     super.dataType,
     super.period,
-  })  : _updateContinuously = updateContinuously,
-        _divisions = divisions,
+  })  : _divisions = divisions,
         _minValue = minValue,
         _maxValue = maxValue,
         super();
@@ -77,7 +72,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    _updateContinuously = tryCast(jsonData['update_continuously']) ??
+    updateContinuously = tryCast(jsonData['update_continuously']) ??
         tryCast(jsonData['publish_all']) ??
         false;
   }
@@ -89,7 +84,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
       'min_value': _minValue,
       'max_value': _maxValue,
       'divisions': _divisions,
-      'update_continuously': _updateContinuously,
+      'update_continuously': updateContinuously,
     };
   }
 
@@ -155,7 +150,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
           Flexible(
             flex: 3,
             child: DialogToggleSwitch(
-              initialValue: _updateContinuously,
+              initialValue: updateContinuously,
               label: 'Update While Dragging',
               onToggle: (value) {
                 updateContinuously = value;

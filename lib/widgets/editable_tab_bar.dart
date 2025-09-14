@@ -135,15 +135,22 @@ class EditableTabBar extends StatelessWidget {
         showContextMenu(
           context,
           contextMenu: contextMenu,
-          transitionDuration: const Duration(milliseconds: 100),
-          reverseTransitionDuration: Duration.zero,
-          maintainState: true,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
+          routeOptions: MenuRouteOptions(
+            transitionDuration: const Duration(milliseconds: 100),
+            reverseTransitionDuration: Duration.zero,
+            maintainState: true,
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+          ),
         );
       },
       child: GestureDetector(

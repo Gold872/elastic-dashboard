@@ -23,9 +23,9 @@ class GyroModel extends MultiTopicNTWidgetModel {
 
   bool _counterClockwisePositive = false;
 
-  get counterClockwisePositive => _counterClockwisePositive;
+  bool get counterClockwisePositive => _counterClockwisePositive;
 
-  set counterClockwisePositive(value) {
+  set counterClockwisePositive(bool value) {
     _counterClockwisePositive = value;
     refresh();
   }

@@ -19,7 +19,7 @@ on:
         required: false
 
 env:
-  FLUTTER_VERSION: 3.32.0
+  FLUTTER_VERSION: 3.35.3
 
 permissions:
   contents: write

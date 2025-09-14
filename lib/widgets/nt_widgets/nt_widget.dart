@@ -30,13 +30,15 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   late String _topic;
 
+  // ignore: unnecessary_getters_setters
   String get topic => _topic;
 
-  set topic(value) => _topic = value;
+  set topic(String value) => _topic = value;
 
-  get period => _period;
+  // ignore: unnecessary_getters_setters
+  double get period => _period;
 
-  set period(value) => _period = value;
+  set period(double value) => _period = value;
 
   bool _disposed = false;
   bool _forceDispose = false;

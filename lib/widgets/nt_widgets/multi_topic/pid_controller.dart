@@ -39,26 +39,10 @@ class PIDControllerModel extends MultiTopicNTWidgetModel {
   TextEditingController? kdTextController;
   TextEditingController? setpointTextController;
 
-  double _kpLastValue = 0.0;
-  double _kiLastValue = 0.0;
-  double _kdLastValue = 0.0;
-  double _setpointLastValue = 0.0;
-
-  get kpLastValue => _kpLastValue;
-
-  set kpLastValue(value) => _kpLastValue = value;
-
-  get kiLastValue => _kiLastValue;
-
-  set kiLastValue(value) => _kiLastValue = value;
-
-  get kdLastValue => _kdLastValue;
-
-  set kdLastValue(value) => _kdLastValue = value;
-
-  get setpointLastValue => _setpointLastValue;
-
-  set setpointLastValue(value) => _setpointLastValue = value;
+  double kpLastValue = 0.0;
+  double kiLastValue = 0.0;
+  double kdLastValue = 0.0;
+  double setpointLastValue = 0.0;
 
   PIDControllerModel({
     required super.ntConnection,

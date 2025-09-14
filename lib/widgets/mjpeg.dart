@@ -431,7 +431,7 @@ class MjpegController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _updateMetrics(_) {
+  void _updateMetrics(dynamic _) {
     bandwidth.value = _bitCount / 1e6;
     framesPerSecond.value = _frameCount;
 

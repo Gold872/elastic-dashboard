@@ -30,56 +30,56 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
 
   double get startAngle => _startAngle;
 
-  set startAngle(value) {
+  set startAngle(double value) {
     _startAngle = value;
     refresh();
   }
 
   double get endAngle => _endAngle;
 
-  set endAngle(value) {
+  set endAngle(double value) {
     _endAngle = value;
     refresh();
   }
 
   double get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double value) {
     _minValue = value;
     refresh();
   }
 
   double get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double value) {
     _maxValue = value;
     refresh();
   }
 
   int get numberOfLabels => _numberOfLabels;
 
-  set numberOfLabels(value) {
+  set numberOfLabels(int value) {
     _numberOfLabels = value;
     refresh();
   }
 
   bool get wrapValue => _wrapValue;
 
-  set wrapValue(value) {
+  set wrapValue(bool value) {
     _wrapValue = value;
     refresh();
   }
 
   bool get showPointer => _showPointer;
 
-  set showPointer(value) {
+  set showPointer(bool value) {
     _showPointer = value;
     refresh();
   }
 
   bool get showTicks => _showTicks;
 
-  set showTicks(value) {
+  set showTicks(bool value) {
     _showTicks = value;
     refresh();
   }
