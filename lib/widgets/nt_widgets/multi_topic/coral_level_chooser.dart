@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
@@ -217,6 +218,26 @@ class CoralLevelChooserModel extends MultiTopicNTWidgetModel {
       initial ? 0 : null,
     );
   }
+
+  void jumpToLevel(int level) {
+    if (previousOptions == null || previousOptions!.isEmpty) {
+      return;
+    }
+
+    // Convert 1-based level to 0-based index
+    int targetIndex = level - 1;
+
+    // Ensure the index is within bounds
+    if (targetIndex >= 0 && targetIndex < previousOptions!.length) {
+      indexCurrnetOption = targetIndex;
+      String selectedValue = previousOptions![indexCurrnetOption];
+      publishSelectedValue(selectedValue);
+
+      // Force update the previous selected to match what we just set
+      previousSelected = selectedValue;
+      notifyListeners(); // Add this to update the UI
+    }
+  }
 }
 
 class CoralLevelChooser extends NTWidget {
@@ -232,41 +253,65 @@ class CoralLevelChooser extends NTWidget {
 
     bool showWarning = model.previousActive != preview;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(
-              minHeight: 36.0,
-            ),
-            child: _CoralLevel(
-              selected: preview,
-              options: model.previousOptions ?? [preview ?? ''],
-              textController: model._searchController,
-              onValueChanged: (int value) {
-                model.indexCurrnetOption += value;
-                if (model.indexCurrnetOption < 0) {
-                  model.indexCurrnetOption = 0;
-                } else if (model.indexCurrnetOption >=
-                    model.previousOptions!.length) {
-                  model.indexCurrnetOption = model.previousOptions!.length - 1;
-                }
-                model.publishSelectedValue(
-                    model.previousOptions?.elementAt(model.indexCurrnetOption));
-              },
+    return RawKeyboardListener(
+      focusNode: FocusNode()..requestFocus(),
+      onKey: (RawKeyEvent event) {
+        if (event is RawKeyDownEvent) {
+          String key = event.data.keyLabel;
+          print('Key pressed: $key'); // Debug print
+
+          if (key == '1') {
+            print('Jumping to level 1'); // Debug print
+            model.jumpToLevel(1);
+          } else if (key == '2') {
+            print('Jumping to level 2'); // Debug print
+            model.jumpToLevel(2);
+          } else if (key == '3') {
+            print('Jumping to level 3'); // Debug print
+            model.jumpToLevel(3);
+          } else if (key == '4') {
+            print('Jumping to level 4'); // Debug print
+            model.jumpToLevel(4);
+          }
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Container(
+              constraints: const BoxConstraints(
+                minHeight: 36.0,
+              ),
+              child: _CoralLevel(
+                selected: preview,
+                options: model.previousOptions ?? [preview ?? ''],
+                textController: model._searchController,
+                onValueChanged: (int value) {
+                  model.indexCurrnetOption += value;
+                  if (model.indexCurrnetOption < 0) {
+                    model.indexCurrnetOption = 0;
+                  } else if (model.indexCurrnetOption >=
+                      model.previousOptions!.length) {
+                    model.indexCurrnetOption =
+                        model.previousOptions!.length - 1;
+                  }
+                  model.publishSelectedValue(model.previousOptions
+                      ?.elementAt(model.indexCurrnetOption));
+                },
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 5),
-        (showWarning)
-            ? const Tooltip(
-                message:
-                    'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
-                child: Icon(Icons.priority_high, color: Colors.red),
-              )
-            : const Icon(Icons.check, color: Colors.green),
-      ],
+          const SizedBox(width: 5),
+          (showWarning)
+              ? const Tooltip(
+                  message:
+                      'Selected value has not been published to Network Tables.\nRobot code will not be receiving the correct value.',
+                  child: Icon(Icons.priority_high, color: Colors.red),
+                )
+              : const Icon(Icons.check, color: Colors.green),
+        ],
+      ),
     );
   }
 }
