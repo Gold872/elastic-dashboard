@@ -1090,6 +1090,9 @@ class NT4Client {
               }
             }
 
+            // If it's a schema topic, try to process the new schema
+            // if any new schema has been successfully processed, update
+            // all subscriptions which don't currently have a processed schema
             if (topic.name.startsWith('/.schema') &&
                 topic.type == NT4Type.structschema()) {
               String structName =
@@ -1108,6 +1111,15 @@ class NT4Client {
                   structMeta.schema = schemaManager.getSchema(
                     structMeta.schemaName,
                   );
+                  // Update the subscription if there was a previously announced value
+                  // for the topic
+                  if (lastAnnouncedValues.containsKey(subscription.topic) &&
+                      lastAnnouncedTimestamps.containsKey(subscription.topic)) {
+                    subscription.updateValue(
+                      lastAnnouncedValues[subscription.topic]!,
+                      lastAnnouncedTimestamps[subscription.topic]!,
+                    );
+                  }
                 }
               }
             }
