@@ -259,6 +259,17 @@ class NT4Type {
   }
 
   int get typeId {
+    if (modifier == NT4TypeModifier.array) {
+      return switch (dataType) {
+        NT4DataType.boolean => 16,
+        NT4DataType.float64 => 17,
+        NT4DataType.int32 => 18,
+        NT4DataType.float32 => 19,
+        NT4DataType.string => 20,
+        _ => 5,
+      };
+    }
+
     return switch (dataType) {
       NT4DataType.boolean => 0,
       NT4DataType.float64 => 1,
