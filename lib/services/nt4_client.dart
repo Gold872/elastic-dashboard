@@ -583,6 +583,9 @@ class NT4Client {
   }
 
   void addSample(NT4Topic topic, dynamic data, [int? timestamp]) {
+    // Publishing to struct topics is not supported
+    if (topic.type.isStruct) return;
+
     timestamp ??= getServerTimeUS();
 
     logger.trace(
