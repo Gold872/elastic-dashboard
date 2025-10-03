@@ -14,19 +14,24 @@ void main() {
     expect(ntConnection.isNT4Connected, false);
 
     // Subscribing
-    NT4Subscription subscription1 =
-        ntConnection.subscribe('/SmartDashboard/Test Number');
+    NT4Subscription subscription1 = ntConnection.subscribe(
+      '/SmartDashboard/Test Number',
+    );
 
     expect(ntConnection.subscriptions.length, greaterThanOrEqualTo(1));
 
-    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
-        isNull);
+    expect(
+      ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+      isNull,
+    );
 
     // Publishing and adding to the last announced values
     ntConnection.updateDataFromSubscription(subscription1, 3.53);
 
-    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
-        isNull);
+    expect(
+      ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+      isNull,
+    );
 
     ntConnection.updateDataFromTopic(
       NT4Topic(
@@ -37,13 +42,16 @@ void main() {
       3.53,
     );
 
-    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
-        3.53);
+    expect(
+      ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+      3.53,
+    );
 
     expect(subscription1.currentValue != null, true);
 
-    NT4Subscription subscription2 =
-        ntConnection.subscribe('/SmartDashboard/Test Number');
+    NT4Subscription subscription2 = ntConnection.subscribe(
+      '/SmartDashboard/Test Number',
+    );
 
     // If the subscriptions are shared
     expect(ntConnection.subscriptions.length, 1);
@@ -57,16 +65,20 @@ void main() {
     expect(ntConnection.subscriptions.length, 0);
 
     // Changing ip address
-    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
-        3.53);
+    expect(
+      ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+      3.53,
+    );
 
     ntConnection.changeIPAddress('10.30.15.2');
 
     expect(ntConnection.serverBaseAddress, '10.30.15.2');
 
     expect(ntConnection.announcedTopics().length, 0);
-    expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
-        3.53);
+    expect(
+      ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
+      3.53,
+    );
   });
 
   test('NT4 Struct Subscription', () {
@@ -93,9 +105,7 @@ void main() {
 
     final NT4Subscription subscription = NT4Subscription(
       topic: '/Test/Pose',
-      options: NT4SubscriptionOptions(
-        structMeta: structMeta,
-      ),
+      options: NT4SubscriptionOptions(structMeta: structMeta),
     );
 
     ByteData byteData = ByteData((schema.bitLength / 8).ceil());

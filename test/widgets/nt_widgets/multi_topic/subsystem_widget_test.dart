@@ -40,9 +40,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Subsystem/.command': 'TestCommand',
-      },
+      virtualValues: {'Test/Subsystem/.command': 'TestCommand'},
     );
   });
 

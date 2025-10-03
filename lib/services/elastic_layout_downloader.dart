@@ -23,15 +23,13 @@ class ElasticLayoutDownloader {
       return (
         successful: false,
         data:
-            'Cannot download a remote layout while disconnected from the robot.'
+            'Cannot download a remote layout while disconnected from the robot.',
       );
     }
     String robotIP =
         preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
     String escapedName = Uri.encodeComponent('$layoutName.json');
-    Uri robotUri = Uri.parse(
-      'http://$robotIP:5800/$escapedName',
-    );
+    Uri robotUri = Uri.parse('http://$robotIP:5800/$escapedName');
     Response response;
     try {
       response = await client.get(robotUri);
@@ -57,15 +55,13 @@ class ElasticLayoutDownloader {
       return (
         successful: false,
         data: <String>[
-          'Cannot fetch remote layouts while disconnected from the robot'
-        ]
+          'Cannot fetch remote layouts while disconnected from the robot',
+        ],
       );
     }
     String robotIP =
         preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
-    Uri robotUri = Uri.parse(
-      'http://$robotIP:5800/?format=json',
-    );
+    Uri robotUri = Uri.parse('http://$robotIP:5800/?format=json');
     Response response;
     try {
       response = await client.get(robotUri);
@@ -79,7 +75,7 @@ class ElasticLayoutDownloader {
     if (!responseJson.containsKey('files')) {
       return (
         successful: false,
-        data: ['Response json does not contain files list']
+        data: ['Response json does not contain files list'],
       );
     }
 

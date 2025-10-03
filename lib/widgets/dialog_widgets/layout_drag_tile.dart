@@ -12,8 +12,10 @@ class LayoutDragTile extends StatefulWidget {
   final LayoutContainerModel Function() layoutBuilder;
 
   final void Function(Offset globalPosition, LayoutContainerModel widget)
-      onDragUpdate;
+  onDragUpdate;
+
   final void Function(LayoutContainerModel widget) onDragEnd;
+
   final void Function() onRemoveWidget;
 
   const LayoutDragTile({

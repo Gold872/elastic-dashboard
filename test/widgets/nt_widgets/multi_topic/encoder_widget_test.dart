@@ -109,14 +109,18 @@ void main() {
     expect(find.text('Speed'), findsOneWidget);
 
     expect(
-        find.descendant(
-            of: find.byType(SelectableText),
-            matching: find.textContaining('5.50')),
-        findsOneWidget);
+      find.descendant(
+        of: find.byType(SelectableText),
+        matching: find.textContaining('5.50'),
+      ),
+      findsOneWidget,
+    );
     expect(
-        find.descendant(
-            of: find.byType(SelectableText),
-            matching: find.textContaining('-10.00')),
-        findsOneWidget);
+      find.descendant(
+        of: find.byType(SelectableText),
+        matching: find.textContaining('-10.00'),
+      ),
+      findsOneWidget,
+    );
   });
 }

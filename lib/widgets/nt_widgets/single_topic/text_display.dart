@@ -70,10 +70,7 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_submit_button': showSubmitButton,
-    };
+    return {...super.toJson(), 'show_submit_button': showSubmitButton};
   }
 
   void publishData(String value) {
@@ -113,10 +110,7 @@ class TextDisplay extends NTWidget {
     ThemeData themeData = Theme.of(context);
 
     return ListenableBuilder(
-      listenable: Listenable.merge([
-        model.subscription!,
-        model.controller,
-      ]),
+      listenable: Listenable.merge([model.subscription!, model.controller]),
       builder: (context, child) {
         Object? data = model.subscription!.value;
 

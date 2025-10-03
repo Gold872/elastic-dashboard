@@ -55,7 +55,7 @@ void main() {
         'Test/Preferences/Test Preference': 0,
         'Test/Preferences/Preference 1': 0.100,
         'Test/Preferences/Preference 2': false,
-        'Test/Preferences/Preference 3': 'Original String'
+        'Test/Preferences/Preference 3': 'Original String',
       },
     );
   });
@@ -110,15 +110,18 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Test Preference'), findsOneWidget);
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Test Preference'), '1');
+      find.widgetWithText(TextField, 'Test Preference'),
+      '1',
+    );
     // Focusing on the text field should publish the topic
     verify(ntConnection.publishTopic(any)).called(1);
 
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Preferences/Test Preference'),
-        1);
+      ntConnection.getLastAnnouncedValue('Test/Preferences/Test Preference'),
+      1,
+    );
 
     // After submitting topic should be unpublished
     verify(ntConnection.unpublishTopic(any)).called(1);
@@ -127,14 +130,18 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Preference 1'), findsOneWidget);
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Preference 1'), '0.250');
+      find.widgetWithText(TextField, 'Preference 1'),
+      '0.250',
+    );
     // Focusing on the text field should publish the topic
     verify(ntConnection.publishTopic(any)).called(1);
 
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 1'),
-        0.250);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 1'),
+      0.250,
+    );
 
     // After submitting topic should be unpublished
     verify(ntConnection.unpublishTopic(any)).called(1);
@@ -143,14 +150,18 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Preference 2'), findsOneWidget);
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Preference 2'), 'true');
+      find.widgetWithText(TextField, 'Preference 2'),
+      'true',
+    );
     // Focusing on the text field should publish the topic
     verify(ntConnection.publishTopic(any)).called(1);
 
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 2'),
-        isTrue);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 2'),
+      isTrue,
+    );
 
     // After submitting topic should be unpublished
     verify(ntConnection.unpublishTopic(any)).called(1);
@@ -159,14 +170,18 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Preference 3'), findsOneWidget);
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Preference 3'), 'Edited String');
+      find.widgetWithText(TextField, 'Preference 3'),
+      'Edited String',
+    );
     // Focusing on the text field should publish the topic
     verify(ntConnection.publishTopic(any)).called(1);
 
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 3'),
-        'Edited String');
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Preferences/Preference 3'),
+      'Edited String',
+    );
     // After submitting topic should be unpublished
     verify(ntConnection.unpublishTopic(any)).called(1);
 

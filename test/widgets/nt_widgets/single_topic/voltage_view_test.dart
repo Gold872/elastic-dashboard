@@ -47,9 +47,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': 12.0,
-      },
+      virtualValues: {'Test/Double Value': 12.0},
     );
   });
 
@@ -140,9 +138,10 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
-            .gaugeOrientation,
-        GaugeOrientation.horizontal);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+          .gaugeOrientation,
+      GaugeOrientation.horizontal,
+    );
   });
 
   testWidgets('Voltage view widget test vertical', (widgetTester) async {
@@ -179,9 +178,10 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
-            .gaugeOrientation,
-        GaugeOrientation.vertical);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+          .gaugeOrientation,
+      GaugeOrientation.vertical,
+    );
   });
 
   testWidgets('Voltage view widget test with divisions', (widgetTester) async {
@@ -218,8 +218,9 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
-        0.9);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
+      0.9,
+    );
   });
 
   testWidgets('Voltage view edit properties', (widgetTester) async {
@@ -287,11 +288,13 @@ void main() {
 
     expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
     await widgetTester.tap(
-      find.byWidget(find
-          .byType(DialogDropdownChooser<String>)
-          .evaluate()
-          .elementAt(1)
-          .widget),
+      find.byWidget(
+        find
+            .byType(DialogDropdownChooser<String>)
+            .evaluate()
+            .elementAt(1)
+            .widget,
+      ),
     );
     await widgetTester.pumpAndSettle();
 
@@ -330,10 +333,7 @@ void main() {
     expect(voltageViewModel.divisions, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: inverted,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: inverted, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

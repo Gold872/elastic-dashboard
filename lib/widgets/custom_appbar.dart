@@ -79,7 +79,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-      ]
+      ],
     ],
   );
 
@@ -112,9 +112,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       textAlign: TextAlign.center,
       maxLines: 1,
       textDirection: TextDirection.ltr,
-    )..layout())
-        .size
-        .width;
+    )..layout()).size.width;
 
     return Material(
       color: appBarColor ?? const Color.fromARGB(255, 25, 25, 25),
@@ -131,9 +129,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: NavigationToolbar(
                   centerMiddle: true,
                   leading: leading,
-                  middle: _WindowDragArea(
-                    child: title,
-                  ),
+                  middle: _WindowDragArea(child: title),
                   trailing: trailing,
                 ),
               ),

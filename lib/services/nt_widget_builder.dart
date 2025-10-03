@@ -47,27 +47,30 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-typedef NTModelJsonProvider = NTWidgetModel Function({
-  required Map<String, dynamic> jsonData,
-  required NTConnection ntConnection,
-  required SharedPreferences preferences,
-});
+typedef NTModelJsonProvider =
+    NTWidgetModel Function({
+      required Map<String, dynamic> jsonData,
+      required NTConnection ntConnection,
+      required SharedPreferences preferences,
+    });
 
-typedef NTModelProvider = NTWidgetModel Function({
-  required NTConnection ntConnection,
-  required SharedPreferences preferences,
-  required String topic,
-  NT4Type? dataType,
-  double? period,
-  NT4StructMeta? ntStructMeta,
-});
+typedef NTModelProvider =
+    NTWidgetModel Function({
+      required NTConnection ntConnection,
+      required SharedPreferences preferences,
+      required String topic,
+      NT4Type? dataType,
+      double? period,
+      NT4StructMeta? ntStructMeta,
+    });
 
-typedef MultiTopicNTModelProvider = MultiTopicNTWidgetModel Function({
-  required NTConnection ntConnection,
-  required SharedPreferences preferences,
-  required String topic,
-  double? period,
-});
+typedef MultiTopicNTModelProvider =
+    MultiTopicNTWidgetModel Function({
+      required NTConnection ntConnection,
+      required SharedPreferences preferences,
+      required String topic,
+      double? period,
+    });
 
 typedef NTWidgetProvider = NTWidget Function({Key? key});
 
@@ -468,8 +471,9 @@ class NTWidgetBuilder {
       );
     }
 
-    onWidgetTypeNotFound
-        ?.call('Unknown widget type: \'$type\', defaulting to Empty Model.');
+    onWidgetTypeNotFound?.call(
+      'Unknown widget type: \'$type\', defaulting to Empty Model.',
+    );
     return SingleTopicNTWidgetModel.createDefault(
       ntConnection: ntConnection,
       preferences: preferences,
@@ -506,7 +510,9 @@ class NTWidgetBuilder {
     ensureInitialized();
 
     double snappedNormal = DraggableWidgetContainer.snapToGrid(
-        _normalSize, widget.preferences.getInt(PrefKeys.gridSize));
+      _normalSize,
+      widget.preferences.getInt(PrefKeys.gridSize),
+    );
 
     if (snappedNormal < _normalSize) {
       snappedNormal +=
@@ -523,7 +529,9 @@ class NTWidgetBuilder {
     ensureInitialized();
 
     double snappedNormal = DraggableWidgetContainer.snapToGrid(
-        _normalSize, widget.preferences.getInt(PrefKeys.gridSize));
+      _normalSize,
+      widget.preferences.getInt(PrefKeys.gridSize),
+    );
 
     if (snappedNormal < _normalSize) {
       snappedNormal +=
@@ -548,8 +556,10 @@ class NTWidgetBuilder {
         _widgetNameBuildMap.containsKey(name);
   }
 
-  static void registerSingleTopic<ModelType extends NTWidgetModel,
-      WidgetType extends NTWidget>({
+  static void registerSingleTopic<
+    ModelType extends NTWidgetModel,
+    WidgetType extends NTWidget
+  >({
     required String name,
     required SingleTopicNTWidgetModel Function({
       NT4Type? dataType,
@@ -558,13 +568,15 @@ class NTWidgetBuilder {
       required NTConnection ntConnection,
       required SharedPreferences preferences,
       required String topic,
-    }) model,
+    })
+    model,
     required NTWidgetProvider widget,
     required NTWidgetModel Function({
       required Map<String, dynamic> jsonData,
       required NTConnection ntConnection,
       required SharedPreferences preferences,
-    }) fromJson,
+    })
+    fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
@@ -573,35 +585,36 @@ class NTWidgetBuilder {
   }) {
     registerWithAlias(
       names: {name, ...?aliases},
-      model: ({
-        NT4Type? dataType,
-        double? period,
-        NT4StructMeta? ntStructMeta,
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required String topic,
-      }) =>
-          model(
-        dataType: dataType,
-        period: period ??
-            (preferences.getDouble(PrefKeys.defaultPeriod) ??
-                Defaults.defaultPeriod),
-        ntStructMeta: ntStructMeta,
-        ntConnection: ntConnection,
-        preferences: preferences,
-        topic: topic,
-      ),
+      model:
+          ({
+            NT4Type? dataType,
+            double? period,
+            NT4StructMeta? ntStructMeta,
+            required NTConnection ntConnection,
+            required SharedPreferences preferences,
+            required String topic,
+          }) => model(
+            dataType: dataType,
+            period:
+                period ??
+                (preferences.getDouble(PrefKeys.defaultPeriod) ??
+                    Defaults.defaultPeriod),
+            ntStructMeta: ntStructMeta,
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+          ),
       widget: widget,
-      fromJson: ({
-        required Map<String, dynamic> jsonData,
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-      }) =>
-          fromJson(
-        jsonData: jsonData,
-        ntConnection: ntConnection,
-        preferences: preferences,
-      ),
+      fromJson:
+          ({
+            required Map<String, dynamic> jsonData,
+            required NTConnection ntConnection,
+            required SharedPreferences preferences,
+          }) => fromJson(
+            jsonData: jsonData,
+            ntConnection: ntConnection,
+            preferences: preferences,
+          ),
       minWidth: minWidth,
       minHeight: minHeight,
       defaultWidth: defaultWidth,
@@ -609,8 +622,10 @@ class NTWidgetBuilder {
     );
   }
 
-  static void registerMultiTopic<ModelType extends MultiTopicNTWidgetModel,
-      WidgetType extends NTWidget>({
+  static void registerMultiTopic<
+    ModelType extends MultiTopicNTWidgetModel,
+    WidgetType extends NTWidget
+  >({
     required String name,
     required MultiTopicNTModelProvider model,
     required NTWidgetProvider widget,
@@ -623,20 +638,20 @@ class NTWidgetBuilder {
   }) {
     registerWithAlias(
       names: {name, ...?aliases},
-      model: ({
-        required NTConnection ntConnection,
-        required SharedPreferences preferences,
-        required String topic,
-        double? period,
-        NT4Type? dataType,
-        NT4StructMeta? ntStructMeta,
-      }) =>
-          model(
-        ntConnection: ntConnection,
-        preferences: preferences,
-        topic: topic,
-        period: period,
-      ),
+      model:
+          ({
+            required NTConnection ntConnection,
+            required SharedPreferences preferences,
+            required String topic,
+            double? period,
+            NT4Type? dataType,
+            NT4StructMeta? ntStructMeta,
+          }) => model(
+            ntConnection: ntConnection,
+            preferences: preferences,
+            topic: topic,
+            period: period,
+          ),
       widget: widget,
       fromJson: fromJson,
       minWidth: minWidth,
@@ -647,7 +662,7 @@ class NTWidgetBuilder {
   }
 
   static void
-      register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
+  register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
     required String name,
     required NTModelProvider model,
     required NTWidgetProvider widget,
@@ -675,8 +690,10 @@ class NTWidgetBuilder {
     }
   }
 
-  static void registerWithAlias<ModelType extends SingleTopicNTWidgetModel,
-      WidgetType extends NTWidget>({
+  static void registerWithAlias<
+    ModelType extends SingleTopicNTWidgetModel,
+    WidgetType extends NTWidget
+  >({
     required Set<String> names,
     required NTModelProvider model,
     required NTWidgetProvider widget,

@@ -40,9 +40,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Gyro/Value': 183.5,
-      },
+      virtualValues: {'Test/Gyro/Value': 183.5},
     );
   });
 
@@ -142,25 +140,21 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ccwPositive =
-        find.widgetWithText(DialogToggleSwitch, 'Counter Clockwise Positive');
+    final ccwPositive = find.widgetWithText(
+      DialogToggleSwitch,
+      'Counter Clockwise Positive',
+    );
 
     expect(ccwPositive, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: ccwPositive,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: ccwPositive, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(gyroModel.counterClockwisePositive, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: ccwPositive,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: ccwPositive, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(gyroModel.counterClockwisePositive, true);

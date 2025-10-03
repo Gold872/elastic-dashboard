@@ -27,11 +27,11 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        optionsSubscription,
-        selectedSubscription,
-        activeSubscription,
-        defaultSubscription,
-      ];
+    optionsSubscription,
+    selectedSubscription,
+    activeSubscription,
+    defaultSubscription,
+  ];
 
   late Listenable chooserStateListenable;
 
@@ -60,8 +60,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     required super.topic,
     bool sortOptions = false,
     super.period,
-  })  : _sortOptions = sortOptions,
-        super();
+  }) : _sortOptions = sortOptions,
+       super();
 
   ComboBoxChooserModel.fromJson({
     required super.ntConnection,
@@ -73,13 +73,19 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    optionsSubscription =
-        ntConnection.subscribe(optionsTopicName, super.period);
-    selectedSubscription =
-        ntConnection.subscribe(selectedTopicName, super.period);
+    optionsSubscription = ntConnection.subscribe(
+      optionsTopicName,
+      super.period,
+    );
+    selectedSubscription = ntConnection.subscribe(
+      selectedTopicName,
+      super.period,
+    );
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
-    defaultSubscription =
-        ntConnection.subscribe(defaultTopicName, super.period);
+    defaultSubscription = ntConnection.subscribe(
+      defaultTopicName,
+      super.period,
+    );
     chooserStateListenable = Listenable.merge(subscriptions);
     chooserStateListenable.addListener(onChooserStateUpdate);
 
@@ -103,10 +109,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'sort_options': _sortOptions,
-    };
+    return {...super.toJson(), 'sort_options': _sortOptions};
   }
 
   @override
@@ -123,8 +126,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   }
 
   void onChooserStateUpdate() {
-    List<Object?>? rawOptions =
-        optionsSubscription.value?.tryCast<List<Object?>>();
+    List<Object?>? rawOptions = optionsSubscription.value
+        ?.tryCast<List<Object?>>();
 
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
@@ -147,7 +150,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
       currentDefault = null;
     }
 
-    bool hasValue = currentOptions != null ||
+    bool hasValue =
+        currentOptions != null ||
         currentActive != null ||
         currentDefault != null;
 
@@ -188,9 +192,7 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
-      existing.properties.addAll({
-        'retained': true,
-      });
+      existing.properties.addAll({'retained': true});
       ntConnection.publishTopic(existing);
       _selectedTopic = existing;
     } else {
@@ -237,9 +239,7 @@ class ComboBoxChooser extends NTWidget {
       children: [
         Flexible(
           child: Container(
-            constraints: const BoxConstraints(
-              minHeight: 36.0,
-            ),
+            constraints: const BoxConstraints(minHeight: 36.0),
             child: _StringChooserDropdown(
               selected: preview,
               options: model.previousOptions ?? [preview ?? ''],
@@ -309,10 +309,9 @@ class _StringChooserDropdown extends StatelessWidget {
               dropdownSearchData: DropdownSearchData(
                 searchController: textController,
                 searchMatchFn: (item, searchValue) {
-                  return item.value
-                      .toString()
-                      .toLowerCase()
-                      .contains(searchValue.toLowerCase());
+                  return item.value.toString().toLowerCase().contains(
+                    searchValue.toLowerCase(),
+                  );
                 },
                 searchInnerWidgetHeight: 50,
                 searchInnerWidget: Container(
@@ -345,8 +344,10 @@ class _StringChooserDropdown extends StatelessWidget {
               items: options.map((String option) {
                 return DropdownMenuItem(
                   value: option,
-                  child: Text(option,
-                      style: Theme.of(context).textTheme.bodyMedium),
+                  child: Text(
+                    option,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 );
               }).toList(),
               onMenuStateChange: (isOpen) {

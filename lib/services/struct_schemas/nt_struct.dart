@@ -159,9 +159,7 @@ class SchemaManager {
       return;
     }
 
-    logger.debug(
-      'Adding schema: $name, $schema',
-    );
+    logger.debug('Adding schema: $name, $schema');
 
     _schemas[name] = schema;
   }
@@ -231,24 +229,22 @@ enum StructValueType {
 
   /// The [NT4Type] equivalent of the struct type
   NT4Type get ntType => switch (this) {
-        StructValueType.bool => NT4Type.boolean(),
-        StructValueType.char ||
-        StructValueType.int8 ||
-        StructValueType.int16 ||
-        StructValueType.int32 ||
-        StructValueType.int64 ||
-        StructValueType.uint8 ||
-        StructValueType.uint16 ||
-        StructValueType.uint32 ||
-        StructValueType.uint64 =>
-          NT4Type.int(),
-        StructValueType.float ||
-        StructValueType.float32 ||
-        StructValueType.double ||
-        StructValueType.float64 =>
-          NT4Type.double(),
-        StructValueType.struct => NT4Type.struct(name),
-      };
+    StructValueType.bool => NT4Type.boolean(),
+    StructValueType.char ||
+    StructValueType.int8 ||
+    StructValueType.int16 ||
+    StructValueType.int32 ||
+    StructValueType.int64 ||
+    StructValueType.uint8 ||
+    StructValueType.uint16 ||
+    StructValueType.uint32 ||
+    StructValueType.uint64 => NT4Type.int(),
+    StructValueType.float ||
+    StructValueType.float32 ||
+    StructValueType.double ||
+    StructValueType.float64 => NT4Type.double(),
+    StructValueType.struct => NT4Type.struct(name),
+  };
 
   @override
   String toString() {
@@ -278,10 +274,7 @@ class NTFieldSchema {
 
     // If there's an enum map, use the string alias for an enum type
     if (enumData != null) {
-      innerType = NT4Type(
-        dataType: NT4DataType.string,
-        name: 'enum',
-      );
+      innerType = NT4Type(dataType: NT4DataType.string, name: 'enum');
     }
 
     if (isArray) {
@@ -332,7 +325,7 @@ class NTFieldSchema {
 
     var [type, definition] = [
       schemaString.substring(0, schemaString.indexOf(' ')),
-      schemaString.substring(schemaString.indexOf(' ') + 1)
+      schemaString.substring(schemaString.indexOf(' ') + 1),
     ];
 
     StructValueType fieldType = StructValueType.parse(type);
@@ -401,20 +394,15 @@ class NTFieldSchema {
       StructValueType.uint32 => view.getUint32(0, Endian.little),
       StructValueType.uint64 => view.getUint64Web(0, Endian.little),
       StructValueType.float ||
-      StructValueType.float32 =>
-        view.getFloat32(0, Endian.little),
+      StructValueType.float32 => view.getFloat32(0, Endian.little),
       StructValueType.double ||
-      StructValueType.float64 =>
-        view.getFloat64(0, Endian.little),
+      StructValueType.float64 => view.getFloat64(0, Endian.little),
       StructValueType.struct => () {
-          if (subSchema == null) {
-            return null;
-          }
-          return NTStruct.parse(
-            schema: subSchema!,
-            data: data,
-          );
-        }(),
+        if (subSchema == null) {
+          return null;
+        }
+        return NTStruct.parse(schema: subSchema!, data: data);
+      }(),
     };
 
     // We assume all enum values being published are mapped, if they are not
@@ -494,10 +482,7 @@ class NTStruct {
   final NTStructSchema schema;
   final Map<String, Object?> values;
 
-  NTStruct({
-    required this.schema,
-    required this.values,
-  });
+  NTStruct({required this.schema, required this.values});
 
   factory NTStruct.parse({
     required NTStructSchema schema,
@@ -515,9 +500,11 @@ class NTStruct {
         int itemLength =
             (field.bitRange.$2 - field.bitRange.$1) ~/ field.arrayLength!;
 
-        for (int position = field.bitRange.$1;
-            position < dataBitArray.length;
-            position += itemLength) {
+        for (
+          int position = field.bitRange.$1;
+          position < dataBitArray.length;
+          position += itemLength
+        ) {
           value.add(
             field.toValue(
               dataBitArray.slice(position, position + itemLength).toUint8List(),

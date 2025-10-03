@@ -136,31 +136,31 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showRobotRotation =
-        find.widgetWithText(DialogToggleSwitch, 'Show Robot Rotation');
-    final showDesiredStates =
-        find.widgetWithText(DialogToggleSwitch, 'Show Desired States');
-    final angleOffset =
-        find.widgetWithText(DialogTextInput, 'Angle Offset (Degrees)');
+    final showRobotRotation = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Robot Rotation',
+    );
+    final showDesiredStates = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Desired States',
+    );
+    final angleOffset = find.widgetWithText(
+      DialogTextInput,
+      'Angle Offset (Degrees)',
+    );
 
     expect(showRobotRotation, findsOneWidget);
     expect(showDesiredStates, findsOneWidget);
     expect(angleOffset, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showRobotRotation,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showRobotRotation, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(yagslSwerveModel.showRobotRotation, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showDesiredStates,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showDesiredStates, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(yagslSwerveModel.showDesiredStates, false);

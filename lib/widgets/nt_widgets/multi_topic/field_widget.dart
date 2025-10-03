@@ -24,9 +24,9 @@ extension _SizeUtils on Size {
   Offset get toOffset => Offset(width, height);
 
   Size rotateBy(double angle) => Size(
-        (width * cos(angle) - height * sin(angle)).abs(),
-        (height * cos(angle) + width * sin(angle)).abs(),
-      );
+    (width * cos(angle) - height * sin(angle)).abs(),
+    (height * cos(angle) + width * sin(angle)).abs(),
+  );
 }
 
 class FieldWidgetModel extends MultiTopicNTWidgetModel {
@@ -41,9 +41,9 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        robotSubscription,
-        ..._otherObjectSubscriptions,
-      ];
+    robotSubscription,
+    ..._otherObjectSubscriptions,
+  ];
 
   bool rendered = false;
 
@@ -147,14 +147,14 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     Color robotColor = Colors.red,
     Color trajectoryColor = Colors.white,
     super.period,
-  })  : _showTrajectories = showTrajectories,
-        _showOtherObjects = showOtherObjects,
-        _robotWidthMeters = robotWidthMeters,
-        _robotLengthMeters = robotLengthMeters,
-        _fieldRotation = fieldRotation,
-        _robotColor = robotColor,
-        _trajectoryColor = trajectoryColor,
-        super() {
+  }) : _showTrajectories = showTrajectories,
+       _showOtherObjects = showOtherObjects,
+       _robotWidthMeters = robotWidthMeters,
+       _robotLengthMeters = robotLengthMeters,
+       _fieldRotation = fieldRotation,
+       _robotColor = robotColor,
+       _trajectoryColor = trajectoryColor,
+       super() {
     _fieldGame = fieldGame ?? _fieldGame;
 
     if (!FieldImages.hasField(_fieldGame)) {
@@ -172,7 +172,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     _fieldGame = tryCast(jsonData['field_game']) ?? _fieldGame;
 
     _robotWidthMeters = tryCast(jsonData['robot_width']) ?? 0.85;
-    _robotLengthMeters = tryCast(jsonData['robot_length']) ??
+    _robotLengthMeters =
+        tryCast(jsonData['robot_length']) ??
         tryCast(jsonData['robot_height']) ??
         0.85;
 
@@ -205,8 +206,9 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
           !nt4Topic.name.contains('.') &&
           !_otherObjectTopics.contains(nt4Topic.name)) {
         _otherObjectTopics.add(nt4Topic.name);
-        _otherObjectSubscriptions
-            .add(ntConnection.subscribe(nt4Topic.name, super.period));
+        _otherObjectSubscriptions.add(
+          ntConnection.subscribe(nt4Topic.name, super.period),
+        );
         refresh();
       }
     };
@@ -278,10 +280,9 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
                       builder: (context) {
                         return Text(
                           _field.sourceURL ?? '',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(color: Colors.black),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall!.copyWith(color: Colors.black),
                         );
                       },
                     ),
@@ -511,17 +512,19 @@ class FieldWidget extends NTWidget {
     }
     double xFromCenter =
         (x * model.field.pixelsPerMeterHorizontal - fieldCenter.dx) *
-            scaleReduction;
+        scaleReduction;
 
     double yFromCenter =
         (fieldCenter.dy - (y * model.field.pixelsPerMeterVertical)) *
-            scaleReduction;
+        scaleReduction;
 
-    double width = (objectSize?.width ?? model.otherObjectSize) *
+    double width =
+        (objectSize?.width ?? model.otherObjectSize) *
         model.field.pixelsPerMeterHorizontal *
         scaleReduction;
 
-    double length = (objectSize?.height ?? model.otherObjectSize) *
+    double length =
+        (objectSize?.height ?? model.otherObjectSize) *
         model.field.pixelsPerMeterVertical *
         scaleReduction;
 
@@ -530,10 +533,7 @@ class FieldWidget extends NTWidget {
 
     Widget otherObject = Container(
       alignment: Alignment.center,
-      constraints: const BoxConstraints(
-        minWidth: 4.0,
-        minHeight: 4.0,
-      ),
+      constraints: const BoxConstraints(minWidth: 4.0, minHeight: 4.0),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.35),
         border: Border.all(
@@ -545,9 +545,7 @@ class FieldWidget extends NTWidget {
       height: width,
       child: CustomPaint(
         size: Size(length * 0.275, width * 0.275),
-        painter: TrianglePainter(
-          strokeWidth: 0.08 * min(width, length),
-        ),
+        painter: TrianglePainter(strokeWidth: 0.08 * min(width, length)),
       ),
     );
 
@@ -573,11 +571,11 @@ class FieldWidget extends NTWidget {
     }
     double xFromCenter =
         (x * model.field.pixelsPerMeterHorizontal - fieldCenter.dx) *
-            scaleReduction;
+        scaleReduction;
 
     double yFromCenter =
         (fieldCenter.dy - (y * model.field.pixelsPerMeterVertical)) *
-            scaleReduction;
+        scaleReduction;
 
     return Offset(xFromCenter, yFromCenter);
   }
@@ -607,15 +605,17 @@ class FieldWidget extends NTWidget {
 
             if (model.isPoseStruct(model.robotTopicName)) {
               List<int> poseBytes = robotPositionRaw.whereType<int>().toList();
-              Pose2dStruct poseStruct =
-                  Pose2dStruct.valueFromBytes(Uint8List.fromList(poseBytes));
+              Pose2dStruct poseStruct = Pose2dStruct.valueFromBytes(
+                Uint8List.fromList(poseBytes),
+              );
 
               robotX = poseStruct.x;
               robotY = poseStruct.y;
               robotTheta = poseStruct.angle;
             } else {
-              List<double> robotPosition =
-                  robotPositionRaw.whereType<double>().toList();
+              List<double> robotPosition = robotPositionRaw
+                  .whereType<double>()
+                  .toList();
 
               if (robotPosition.length >= 3) {
                 robotX = robotPosition[0];
@@ -636,8 +636,9 @@ class FieldWidget extends NTWidget {
 
             FittedSizes rotatedFittedSizes = applyBoxFit(
               BoxFit.contain,
-              model.field.fieldImageSize
-                      ?.rotateBy(-radians(model.fieldRotation)) ??
+              model.field.fieldImageSize?.rotateBy(
+                    -radians(model.fieldRotation),
+                  ) ??
                   const Size(0, 0),
               size,
             );
@@ -649,7 +650,7 @@ class FieldWidget extends NTWidget {
                 (fittedSizes.destination.width / fittedSizes.source.width);
             double rotatedScaleReduction =
                 (rotatedFittedSizes.destination.width /
-                    rotatedFittedSizes.source.width);
+                rotatedFittedSizes.source.width);
 
             if (scaleReduction.isNaN) {
               scaleReduction = 0;
@@ -690,8 +691,8 @@ class FieldWidget extends NTWidget {
             if (model.showOtherObjects || model.showTrajectories) {
               for (NT4Subscription objectSubscription
                   in model._otherObjectSubscriptions) {
-                List<Object?>? objectPositionRaw =
-                    objectSubscription.value?.tryCast<List<Object?>>();
+                List<Object?>? objectPositionRaw = objectSubscription.value
+                    ?.tryCast<List<Object?>>();
 
                 if (objectPositionRaw == null) {
                   continue;
@@ -701,15 +702,17 @@ class FieldWidget extends NTWidget {
                     .toLowerCase()
                     .endsWith('trajectory');
 
-                bool isStructArray =
-                    model.isPoseArrayStruct(objectSubscription.topic);
+                bool isStructArray = model.isPoseArrayStruct(
+                  objectSubscription.topic,
+                );
 
                 bool isStructObject =
                     model.isPoseStruct(objectSubscription.topic) ||
-                        isStructArray;
+                    isStructArray;
 
                 if (isStructObject) {
-                  isTrajectory = isTrajectory ||
+                  isTrajectory =
+                      isTrajectory ||
                       (isStructArray &&
                           objectPositionRaw.length ~/ Pose2dStruct.length > 8);
                 } else {
@@ -726,11 +729,13 @@ class FieldWidget extends NTWidget {
                   List<Offset> objectTrajectory = [];
 
                   if (isStructObject) {
-                    List<int> structArrayBytes =
-                        objectPositionRaw.whereType<int>().toList();
+                    List<int> structArrayBytes = objectPositionRaw
+                        .whereType<int>()
+                        .toList();
 
                     List<Pose2dStruct> poseArray = Pose2dStruct.listFromBytes(
-                        Uint8List.fromList(structArrayBytes));
+                      Uint8List.fromList(structArrayBytes),
+                    );
 
                     for (Pose2dStruct pose in poseArray) {
                       objectTrajectory.add(
@@ -744,8 +749,9 @@ class FieldWidget extends NTWidget {
                       );
                     }
                   } else {
-                    List<double> objectPosition =
-                        objectPositionRaw.whereType<double>().toList();
+                    List<double> objectPosition = objectPositionRaw
+                        .whereType<double>()
+                        .toList();
 
                     for (int i = 0; i < objectPosition.length - 2; i += 3) {
                       objectTrajectory.add(
@@ -765,11 +771,13 @@ class FieldWidget extends NTWidget {
                   }
                 } else {
                   if (isStructObject) {
-                    List<int> structBytes =
-                        objectPositionRaw.whereType<int>().toList();
+                    List<int> structBytes = objectPositionRaw
+                        .whereType<int>()
+                        .toList();
                     if (isStructArray) {
                       List<Pose2dStruct> poses = Pose2dStruct.listFromBytes(
-                          Uint8List.fromList(structBytes));
+                        Uint8List.fromList(structBytes),
+                      );
 
                       for (Pose2dStruct pose in poses) {
                         otherObjects.add(
@@ -785,7 +793,8 @@ class FieldWidget extends NTWidget {
                       }
                     } else {
                       Pose2dStruct pose = Pose2dStruct.valueFromBytes(
-                          Uint8List.fromList(structBytes));
+                        Uint8List.fromList(structBytes),
+                      );
 
                       otherObjects.add(
                         _getTransformedFieldObject(
@@ -799,12 +808,15 @@ class FieldWidget extends NTWidget {
                       );
                     }
                   } else {
-                    List<double> objectPosition =
-                        objectPositionRaw.whereType<double>().toList();
+                    List<double> objectPosition = objectPositionRaw
+                        .whereType<double>()
+                        .toList();
 
                     for (int i = 0; i < objectPosition.length - 2; i += 3) {
-                      List<double> positionArray =
-                          objectPosition.sublist(i, i + 3);
+                      List<double> positionArray = objectPosition.sublist(
+                        i,
+                        i + 3,
+                      );
                       otherObjects.add(
                         _getTransformedFieldObject(
                           model,
@@ -840,7 +852,8 @@ class FieldWidget extends NTWidget {
                           center: fittedCenter,
                           color: model.trajectoryColor,
                           points: points,
-                          strokeWidth: model.trajectoryPointSize *
+                          strokeWidth:
+                              model.trajectoryPointSize *
                               model.field.pixelsPerMeterHorizontal *
                               scaleReduction,
                         ),

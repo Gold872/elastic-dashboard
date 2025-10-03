@@ -7,11 +7,7 @@ class Pose2dStruct {
   final double y;
   final double angle;
 
-  const Pose2dStruct({
-    required this.x,
-    required this.y,
-    required this.angle,
-  });
+  const Pose2dStruct({required this.x, required this.y, required this.angle});
 
   factory Pose2dStruct.valueFromBytes(Uint8List value, [int start = 0]) {
     ByteData view = ByteData.view(value.buffer, start);

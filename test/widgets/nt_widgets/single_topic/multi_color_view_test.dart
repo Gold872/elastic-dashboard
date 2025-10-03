@@ -23,15 +23,15 @@ void main() {
     'period': 0.100,
   };
 
-  Finder findGradient(List<Color> expectedColors) =>
-      find.byWidgetPredicate((widget) =>
-          widget is Container &&
-          widget.decoration is BoxDecoration &&
-          (widget.decoration as BoxDecoration).gradient != null &&
-          (widget.decoration as BoxDecoration)
-              .gradient!
-              .colors
-              .equals(expectedColors));
+  Finder findGradient(List<Color> expectedColors) => find.byWidgetPredicate(
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration as BoxDecoration).gradient != null &&
+        (widget.decoration as BoxDecoration).gradient!.colors.equals(
+          expectedColors,
+        ),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;
@@ -94,8 +94,9 @@ void main() {
     expect(multiColorViewModel.toJson(), multiColorViewJson);
   });
 
-  testWidgets('Multi color view widget test full gradient',
-      (widgetTester) async {
+  testWidgets('Multi color view widget test full gradient', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
@@ -143,9 +144,7 @@ void main() {
           ),
         ],
         virtualValues: {
-          'Test/String Array': [
-            Colors.red.toHexString(includeHashSign: true),
-          ],
+          'Test/String Array': [Colors.red.toHexString(includeHashSign: true)],
         },
       ),
       preferences,
@@ -167,11 +166,12 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(
-        findGradient([
-          Color(Colors.red.toARGB32()),
-          Color(Colors.red.toARGB32()),
-        ]),
-        findsOneWidget);
+      findGradient([
+        Color(Colors.red.toARGB32()),
+        Color(Colors.red.toARGB32()),
+      ]),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Multi color view widget test no colors', (widgetTester) async {
@@ -186,9 +186,7 @@ void main() {
             properties: {},
           ),
         ],
-        virtualValues: {
-          'Test/String Array': [],
-        },
+        virtualValues: {'Test/String Array': []},
       ),
       preferences,
       'Multi Color View',
@@ -209,10 +207,11 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(
-        findGradient([
-          Color(Colors.transparent.toARGB32()),
-          Color(Colors.transparent.toARGB32()),
-        ]),
-        findsOneWidget);
+      findGradient([
+        Color(Colors.transparent.toARGB32()),
+        Color(Colors.transparent.toARGB32()),
+      ]),
+      findsOneWidget,
+    );
   });
 }

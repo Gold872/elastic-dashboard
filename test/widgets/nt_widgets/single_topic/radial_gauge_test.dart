@@ -49,9 +49,7 @@ void main() {
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': -0.50,
-      },
+      virtualValues: {'Test/Double Value': -0.50},
     );
   });
 
@@ -104,17 +102,18 @@ void main() {
     expect(radialGaugeModel.type, 'Radial Gauge');
     expect(radialGaugeModel.runtimeType, RadialGaugeModel);
     expect(
-        radialGaugeModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-          'Large Text Display',
-        ]));
+      radialGaugeModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (radialGaugeModel is! RadialGaugeModel) {
       return;
@@ -196,9 +195,7 @@ void main() {
       virtualTopics: [
         NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
-      virtualValues: {
-        'Test/Int Value': -1,
-      },
+      virtualValues: {'Test/Int Value': -1},
     );
 
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
@@ -323,8 +320,10 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final startAngle =
-        find.widgetWithText(DialogTextInput, 'Start Angle (CW+)');
+    final startAngle = find.widgetWithText(
+      DialogTextInput,
+      'Start Angle (CW+)',
+    );
     final endAngle = find.widgetWithText(DialogTextInput, 'End Angle (CW+)');
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
@@ -372,10 +371,7 @@ void main() {
 
     await widgetTester.ensureVisible(wrapValue);
     await widgetTester.tap(
-      find.descendant(
-        of: wrapValue,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: wrapValue, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 
@@ -389,20 +385,14 @@ void main() {
     expect(radialGaugeModel.numberOfLabels, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showPointer,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showPointer, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 
     expect(radialGaugeModel.showPointer, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showTicks,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showTicks, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 
