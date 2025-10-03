@@ -45,14 +45,14 @@ class StructSwerveModel extends MultiTopicNTWidgetModel {
 
   bool get showRobotRotation => _showRobotRotation;
 
-  set showRobotRotation(value) {
+  set showRobotRotation(bool value) {
     _showRobotRotation = value;
     refresh();
   }
 
   bool get showDesiredStates => _showDesiredStates;
 
-  set showDesiredStates(value) {
+  set showDesiredStates(bool value) {
     _showDesiredStates = value;
     refresh();
   }
@@ -63,7 +63,6 @@ class StructSwerveModel extends MultiTopicNTWidgetModel {
     required super.topic,
     bool showRobotRotation = true,
     bool showDesiredStates = true,
-    super.dataType,
     super.period,
   }) : _showDesiredStates = showDesiredStates,
        _showRobotRotation = showRobotRotation,
