@@ -103,7 +103,8 @@ class DSInteropClient {
     } catch (e) {
       if (_attemptServerStart) {
         logger.info(
-            'Failed to start TCP server on port 1741, attempting to restart in 5 seconds');
+          'Failed to start TCP server on port 1741, attempting to restart in 5 seconds',
+        );
         Future.delayed(const Duration(seconds: 5), _startDBModeServer);
       } else {
         logger.info('Failed to start TCP server on port 1741');
@@ -245,7 +246,8 @@ class DSInteropClient {
 
     if (reconnect) {
       logger.info(
-          'Driver Station TCP Server on Port 1741 closed, attempting to reconnect in 5 seconds.');
+        'Driver Station TCP Server on Port 1741 closed, attempting to reconnect in 5 seconds.',
+      );
 
       Future.delayed(const Duration(seconds: 5), _startDBModeServer);
     } else {

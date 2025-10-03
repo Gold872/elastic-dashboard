@@ -137,10 +137,12 @@ class NTConnection {
 
     T? value;
     try {
-      value = await subscription
-          .periodicStream()
-          .firstWhere((element) => element != null && element is T)
-          .timeout(timeout) as T?;
+      value =
+          await subscription
+                  .periodicStream()
+                  .firstWhere((element) => element != null && element is T)
+                  .timeout(timeout)
+              as T?;
     } catch (e) {
       value = null;
     }

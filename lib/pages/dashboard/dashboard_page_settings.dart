@@ -115,7 +115,8 @@ mixin DashboardPageSettings on DashboardPageViewModel {
       return;
     }
 
-    bool? cancel = await showDialog<bool>(
+    bool? cancel =
+        await showDialog<bool>(
           context: state!.context,
           barrierDismissible: false,
           builder: (context) {
