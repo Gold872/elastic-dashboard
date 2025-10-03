@@ -76,7 +76,6 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
     bool showRobotRotation = true,
     bool showDesiredStates = true,
     double angleOffset = 0.0,
-    super.dataType,
     super.period,
   })  : _showDesiredStates = showDesiredStates,
         _showRobotRotation = showRobotRotation,

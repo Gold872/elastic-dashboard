@@ -4,6 +4,8 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
+import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
@@ -52,11 +54,19 @@ typedef NTModelJsonProvider = NTWidgetModel Function({
 });
 
 typedef NTModelProvider = NTWidgetModel Function({
-  String dataType,
   required NTConnection ntConnection,
-  double period,
   required SharedPreferences preferences,
   required String topic,
+  NT4Type? dataType,
+  double? period,
+  NT4StructMeta? ntStructMeta,
+});
+
+typedef MultiTopicNTModelProvider = MultiTopicNTWidgetModel Function({
+  required NTConnection ntConnection,
+  required SharedPreferences preferences,
+  required String topic,
+  double? period,
 });
 
 typedef NTWidgetProvider = NTWidget Function({Key? key});
@@ -86,263 +96,304 @@ class NTWidgetBuilder {
 
     logger.info('Configuring NT Widget Builder');
 
-    register(
-        name: BooleanBox.widgetType,
-        model: BooleanBoxModel.new,
-        widget: BooleanBox.new,
-        fromJson: BooleanBoxModel.fromJson);
+    registerSingleTopic(
+      name: BooleanBox.widgetType,
+      model: BooleanBoxModel.new,
+      widget: BooleanBox.new,
+      fromJson: BooleanBoxModel.fromJson,
+    );
 
-    register(
-        name: GraphWidget.widgetType,
-        model: GraphModel.new,
-        widget: GraphWidget.new,
-        fromJson: GraphModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2);
+    registerSingleTopic(
+      name: GraphWidget.widgetType,
+      model: GraphModel.new,
+      widget: GraphWidget.new,
+      fromJson: GraphModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+    );
 
-    register(
-        name: MatchTimeWidget.widgetType,
-        model: MatchTimeModel.new,
-        widget: MatchTimeWidget.new,
-        fromJson: MatchTimeModel.fromJson);
+    registerSingleTopic(
+      name: MatchTimeWidget.widgetType,
+      model: MatchTimeModel.new,
+      widget: MatchTimeWidget.new,
+      fromJson: MatchTimeModel.fromJson,
+    );
 
-    register(
-        name: NumberBar.widgetType,
-        model: NumberBarModel.new,
-        widget: NumberBar.new,
-        fromJson: NumberBarModel.fromJson,
-        minHeight: _normalSize);
+    registerSingleTopic(
+      name: NumberBar.widgetType,
+      model: NumberBarModel.new,
+      widget: NumberBar.new,
+      fromJson: NumberBarModel.fromJson,
+      minHeight: _normalSize,
+    );
 
-    register(
-        name: NumberSlider.widgetType,
-        model: NumberSliderModel.new,
-        widget: NumberSlider.new,
-        fromJson: NumberSliderModel.fromJson,
-        minHeight: _normalSize);
+    registerSingleTopic(
+      name: NumberSlider.widgetType,
+      model: NumberSliderModel.new,
+      widget: NumberSlider.new,
+      fromJson: NumberSliderModel.fromJson,
+      minHeight: _normalSize,
+    );
 
-    registerWithAlias(
-        names: {RadialGaugeWidget.widgetType, 'Simple Dial'},
-        model: RadialGaugeModel.new,
-        widget: RadialGaugeWidget.new,
-        fromJson: RadialGaugeModel.fromJson,
-        minWidth: _normalSize * 1.6,
-        minHeight: _normalSize * 1.6);
+    registerSingleTopic(
+      name: RadialGaugeWidget.widgetType,
+      aliases: {'Simple Dial'},
+      model: RadialGaugeModel.new,
+      widget: RadialGaugeWidget.new,
+      fromJson: RadialGaugeModel.fromJson,
+      minWidth: _normalSize * 1.6,
+      minHeight: _normalSize * 1.6,
+    );
 
-    registerWithAlias(
-        names: {TextDisplay.widgetType, 'Text View'},
-        model: TextDisplayModel.new,
-        widget: TextDisplay.new,
-        fromJson: TextDisplayModel.fromJson);
+    registerSingleTopic(
+      name: TextDisplay.widgetType,
+      aliases: {'Text View'},
+      model: TextDisplayModel.new,
+      widget: TextDisplay.new,
+      fromJson: TextDisplayModel.fromJson,
+    );
 
-    register(
-        name: VoltageView.widgetType,
-        model: VoltageViewModel.new,
-        widget: VoltageView.new,
-        fromJson: VoltageViewModel.fromJson,
-        minHeight: _normalSize);
+    registerSingleTopic(
+      name: VoltageView.widgetType,
+      model: VoltageViewModel.new,
+      widget: VoltageView.new,
+      fromJson: VoltageViewModel.fromJson,
+      minHeight: _normalSize,
+    );
 
-    register(
-        name: AccelerometerWidget.widgetType,
-        model: AccelerometerModel.new,
-        widget: AccelerometerWidget.new,
-        fromJson: AccelerometerModel.fromJson);
+    registerMultiTopic(
+      name: AccelerometerWidget.widgetType,
+      model: AccelerometerModel.new,
+      widget: AccelerometerWidget.new,
+      fromJson: AccelerometerModel.fromJson,
+    );
 
-    register(
-        name: SwerveDriveWidget.widgetType,
-        model: BasicSwerveModel.new,
-        widget: SwerveDriveWidget.new,
-        fromJson: BasicSwerveModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: SwerveDriveWidget.widgetType,
+      model: BasicSwerveModel.new,
+      widget: SwerveDriveWidget.new,
+      fromJson: BasicSwerveModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
+    );
 
-    register(
-        name: CameraStreamWidget.widgetType,
-        model: CameraStreamModel.new,
-        widget: CameraStreamWidget.new,
-        fromJson: CameraStreamModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: CameraStreamWidget.widgetType,
+      model: CameraStreamModel.new,
+      widget: CameraStreamWidget.new,
+      fromJson: CameraStreamModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
+    );
 
-    registerWithAlias(
-        names: {ComboBoxChooser.widgetType, 'String Chooser'},
-        model: ComboBoxChooserModel.new,
-        widget: ComboBoxChooser.new,
-        fromJson: ComboBoxChooserModel.fromJson,
-        minHeight: _normalSize * 0.85);
+    registerMultiTopic(
+      name: ComboBoxChooser.widgetType,
+      aliases: {'String Chooser'},
+      model: ComboBoxChooserModel.new,
+      widget: ComboBoxChooser.new,
+      fromJson: ComboBoxChooserModel.fromJson,
+      minHeight: _normalSize * 0.85,
+    );
 
-    register(
-        name: CommandSchedulerWidget.widgetType,
-        model: CommandSchedulerModel.new,
-        widget: CommandSchedulerWidget.new,
-        fromJson: CommandSchedulerModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 3);
+    registerMultiTopic(
+      name: CommandSchedulerWidget.widgetType,
+      model: CommandSchedulerModel.new,
+      widget: CommandSchedulerWidget.new,
+      fromJson: CommandSchedulerModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 3,
+    );
 
-    register(
-        name: CommandWidget.widgetType,
-        model: CommandModel.new,
-        widget: CommandWidget.new,
-        fromJson: CommandModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 0.90,
-        defaultWidth: 2);
+    registerMultiTopic(
+      name: CommandWidget.widgetType,
+      model: CommandModel.new,
+      widget: CommandWidget.new,
+      fromJson: CommandModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 0.90,
+      defaultWidth: 2,
+    );
 
-    registerWithAlias(
-        names: {DifferentialDrive.widgetType, 'Differential Drivebase'},
-        model: DifferentialDriveModel.new,
-        widget: DifferentialDrive.new,
-        fromJson: DifferentialDriveModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 3,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: DifferentialDrive.widgetType,
+      aliases: {'Differential Drivebase'},
+      model: DifferentialDriveModel.new,
+      widget: DifferentialDrive.new,
+      fromJson: DifferentialDriveModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 3,
+      defaultHeight: 2,
+    );
 
-    registerWithAlias(
-        names: {EncoderWidget.widgetType, 'Quadrature Encoder'},
-        model: EncoderModel.new,
-        widget: EncoderWidget.new,
-        fromJson: EncoderModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 0.86,
-        defaultWidth: 2);
+    registerMultiTopic(
+      name: EncoderWidget.widgetType,
+      aliases: {'Quadrature Encoder'},
+      model: EncoderModel.new,
+      widget: EncoderWidget.new,
+      fromJson: EncoderModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 0.86,
+      defaultWidth: 2,
+    );
 
-    registerWithAlias(
-        names: {FieldWidget.widgetType, 'Field2d'},
-        model: FieldWidgetModel.new,
-        widget: FieldWidget.new,
-        fromJson: FieldWidgetModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: FieldWidget.widgetType,
+      aliases: {'Field2d'},
+      model: FieldWidgetModel.new,
+      widget: FieldWidget.new,
+      fromJson: FieldWidgetModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
+    );
 
-    register(
-        name: FMSInfo.widgetType,
-        model: FMSInfoModel.new,
-        widget: FMSInfo.new,
-        fromJson: FMSInfoModel.fromJson,
-        minWidth: _normalSize * 3,
-        minHeight: _normalSize,
-        defaultWidth: 3);
+    registerMultiTopic(
+      name: FMSInfo.widgetType,
+      model: FMSInfoModel.new,
+      widget: FMSInfo.new,
+      fromJson: FMSInfoModel.fromJson,
+      minWidth: _normalSize * 3,
+      minHeight: _normalSize,
+      defaultWidth: 3,
+    );
 
-    register(
-        name: Gyro.widgetType,
-        model: GyroModel.new,
-        widget: Gyro.new,
-        fromJson: GyroModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: Gyro.widgetType,
+      model: GyroModel.new,
+      widget: Gyro.new,
+      fromJson: GyroModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
+    );
 
-    registerWithAlias(
-        names: {MotorController.widgetType, 'Nidec Brushless'},
-        model: MotorControllerModel.new,
-        widget: MotorController.new,
-        fromJson: MotorControllerModel.fromJson,
-        minHeight: _normalSize * 0.92);
+    registerMultiTopic(
+      name: MotorController.widgetType,
+      aliases: {'Nidec Brushless'},
+      model: MotorControllerModel.new,
+      widget: MotorController.new,
+      fromJson: MotorControllerModel.fromJson,
+      minHeight: _normalSize * 0.92,
+    );
 
-    register(
-        name: NetworkAlerts.widgetType,
-        model: NetworkAlertsModel.new,
-        widget: NetworkAlerts.new,
-        fromJson: NetworkAlertsModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 3);
+    registerMultiTopic(
+      name: NetworkAlerts.widgetType,
+      model: NetworkAlertsModel.new,
+      widget: NetworkAlerts.new,
+      fromJson: NetworkAlertsModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 3,
+    );
 
-    registerWithAlias(
-        names: {PIDControllerWidget.widgetType, 'PID Controller'},
-        model: PIDControllerModel.new,
-        widget: PIDControllerWidget.new,
-        fromJson: PIDControllerModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 3,
-        defaultWidth: 2,
-        defaultHeight: 3);
+    registerMultiTopic(
+      name: PIDControllerWidget.widgetType,
+      aliases: {'PID Controller'},
+      model: PIDControllerModel.new,
+      widget: PIDControllerWidget.new,
+      fromJson: PIDControllerModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 3,
+      defaultWidth: 2,
+      defaultHeight: 3,
+    );
 
-    registerWithAlias(
-        names: {PowerDistribution.widgetType, 'PDP'},
-        model: PowerDistributionModel.new,
-        widget: PowerDistribution.new,
-        fromJson: PowerDistributionModel.fromJson,
-        minWidth: _normalSize * 3,
-        minHeight: _normalSize * 3,
-        defaultWidth: 3,
-        defaultHeight: 4);
+    registerMultiTopic(
+      name: PowerDistribution.widgetType,
+      aliases: {'PDP'},
+      model: PowerDistributionModel.new,
+      widget: PowerDistribution.new,
+      fromJson: PowerDistributionModel.fromJson,
+      minWidth: _normalSize * 3,
+      minHeight: _normalSize * 3,
+      defaultWidth: 3,
+      defaultHeight: 4,
+    );
 
-    register(
-        name: ProfiledPIDControllerWidget.widgetType,
-        model: ProfiledPIDControllerModel.new,
-        widget: ProfiledPIDControllerWidget.new,
-        fromJson: ProfiledPIDControllerModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 3,
-        defaultWidth: 2,
-        defaultHeight: 3);
+    registerMultiTopic(
+      name: ProfiledPIDControllerWidget.widgetType,
+      model: ProfiledPIDControllerModel.new,
+      widget: ProfiledPIDControllerWidget.new,
+      fromJson: ProfiledPIDControllerModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 3,
+      defaultWidth: 2,
+      defaultHeight: 3,
+    );
 
-    register(
-        name: RelayWidget.widgetType,
-        model: RelayModel.new,
-        widget: RelayWidget.new,
-        fromJson: RelayModel.fromJson,
-        minHeight: _normalSize * 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: RelayWidget.widgetType,
+      model: RelayModel.new,
+      widget: RelayWidget.new,
+      fromJson: RelayModel.fromJson,
+      minHeight: _normalSize * 2,
+      defaultHeight: 2,
+    );
 
-    register(
-        name: RobotPreferences.widgetType,
-        model: RobotPreferencesModel.new,
-        widget: RobotPreferences.new,
-        fromJson: RobotPreferencesModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 3);
+    registerMultiTopic(
+      name: RobotPreferences.widgetType,
+      model: RobotPreferencesModel.new,
+      widget: RobotPreferences.new,
+      fromJson: RobotPreferencesModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 3,
+    );
 
-    register(
-        name: SplitButtonChooser.widgetType,
-        model: SplitButtonChooserModel.new,
-        widget: SplitButtonChooser.new,
-        fromJson: SplitButtonChooserModel.fromJson);
+    registerMultiTopic(
+      name: SplitButtonChooser.widgetType,
+      model: SplitButtonChooserModel.new,
+      widget: SplitButtonChooser.new,
+      fromJson: SplitButtonChooserModel.fromJson,
+    );
 
-    register(
-        name: SubsystemWidget.widgetType,
-        model: SubsystemModel.new,
-        widget: SubsystemWidget.new,
-        fromJson: SubsystemModel.fromJson,
-        minWidth: _normalSize * 2,
-        defaultWidth: 2);
+    registerMultiTopic(
+      name: SubsystemWidget.widgetType,
+      model: SubsystemModel.new,
+      widget: SubsystemWidget.new,
+      fromJson: SubsystemModel.fromJson,
+      minWidth: _normalSize * 2,
+      defaultWidth: 2,
+    );
 
-    registerWithAlias(
-        names: {ThreeAxisAccelerometer.widgetType, '3AxisAccelerometer'},
-        model: ThreeAxisAccelerometerModel.new,
-        widget: ThreeAxisAccelerometer.new,
-        fromJson: ThreeAxisAccelerometerModel.fromJson);
+    registerMultiTopic(
+      name: ThreeAxisAccelerometer.widgetType,
+      aliases: {'3AxisAccelerometer'},
+      model: ThreeAxisAccelerometerModel.new,
+      widget: ThreeAxisAccelerometer.new,
+      fromJson: ThreeAxisAccelerometerModel.fromJson,
+    );
 
-    register(
-        name: Ultrasonic.widgetType,
-        model: UltrasonicModel.new,
-        widget: Ultrasonic.new,
-        fromJson: UltrasonicModel.fromJson,
-        minWidth: _normalSize * 2,
-        defaultWidth: 2);
+    registerMultiTopic(
+      name: Ultrasonic.widgetType,
+      model: UltrasonicModel.new,
+      widget: Ultrasonic.new,
+      fromJson: UltrasonicModel.fromJson,
+      minWidth: _normalSize * 2,
+      defaultWidth: 2,
+    );
 
-    register(
-        name: YAGSLSwerveDrive.widgetType,
-        model: YAGSLSwerveDriveModel.new,
-        widget: YAGSLSwerveDrive.new,
-        fromJson: YAGSLSwerveDriveModel.fromJson,
-        minWidth: _normalSize * 2,
-        minHeight: _normalSize * 2,
-        defaultWidth: 2,
-        defaultHeight: 2);
+    registerMultiTopic(
+      name: YAGSLSwerveDrive.widgetType,
+      model: YAGSLSwerveDriveModel.new,
+      widget: YAGSLSwerveDrive.new,
+      fromJson: YAGSLSwerveDriveModel.fromJson,
+      minWidth: _normalSize * 2,
+      minHeight: _normalSize * 2,
+      defaultWidth: 2,
+      defaultHeight: 2,
+    );
 
     _widgetNameBuildMap.addAll({
       LargeTextDisplay.widgetType: LargeTextDisplay.new,
@@ -367,9 +418,10 @@ class NTWidgetBuilder {
   static NTWidgetModel buildNTModelFromType(
     NTConnection ntConnection,
     SharedPreferences preferences,
+    NT4StructMeta? ntStructMeta,
     String type,
     String topic, {
-    String dataType = 'Unknown',
+    NT4Type? dataType,
     double? period,
   }) {
     period ??=
@@ -382,6 +434,7 @@ class NTWidgetBuilder {
         ntConnection: ntConnection,
         preferences: preferences,
         topic: topic,
+        ntStructMeta: ntStructMeta,
         dataType: dataType,
         period: period,
       );
@@ -392,6 +445,7 @@ class NTWidgetBuilder {
       preferences: preferences,
       type: type,
       topic: topic,
+      ntStructMeta: ntStructMeta,
       dataType: dataType,
       period: period,
     );
@@ -421,7 +475,7 @@ class NTWidgetBuilder {
       preferences: preferences,
       type: type,
       topic: tryCast(jsonData['topic']) ?? '',
-      dataType: tryCast(jsonData['data_type']) ?? 'Unknown',
+      dataType: NT4Type.parseNullable(tryCast(jsonData['data_type'])),
       period: tryCast(jsonData['period']),
     );
   }
@@ -492,6 +546,104 @@ class NTWidgetBuilder {
     return (_modelNameBuildMap.containsKey(name) &&
             _modelJsonBuildMap.containsKey(name)) ||
         _widgetNameBuildMap.containsKey(name);
+  }
+
+  static void registerSingleTopic<ModelType extends NTWidgetModel,
+      WidgetType extends NTWidget>({
+    required String name,
+    required SingleTopicNTWidgetModel Function({
+      NT4Type? dataType,
+      double period,
+      required NT4StructMeta? ntStructMeta,
+      required NTConnection ntConnection,
+      required SharedPreferences preferences,
+      required String topic,
+    }) model,
+    required NTWidgetProvider widget,
+    required NTWidgetModel Function({
+      required Map<String, dynamic> jsonData,
+      required NTConnection ntConnection,
+      required SharedPreferences preferences,
+    }) fromJson,
+    double? minWidth,
+    double? minHeight,
+    double? defaultWidth,
+    double? defaultHeight,
+    Set<String>? aliases,
+  }) {
+    registerWithAlias(
+      names: {name, ...?aliases},
+      model: ({
+        NT4Type? dataType,
+        double? period,
+        NT4StructMeta? ntStructMeta,
+        required NTConnection ntConnection,
+        required SharedPreferences preferences,
+        required String topic,
+      }) =>
+          model(
+        dataType: dataType,
+        period: period ??
+            (preferences.getDouble(PrefKeys.defaultPeriod) ??
+                Defaults.defaultPeriod),
+        ntStructMeta: ntStructMeta,
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: topic,
+      ),
+      widget: widget,
+      fromJson: ({
+        required Map<String, dynamic> jsonData,
+        required NTConnection ntConnection,
+        required SharedPreferences preferences,
+      }) =>
+          fromJson(
+        jsonData: jsonData,
+        ntConnection: ntConnection,
+        preferences: preferences,
+      ),
+      minWidth: minWidth,
+      minHeight: minHeight,
+      defaultWidth: defaultWidth,
+      defaultHeight: defaultHeight,
+    );
+  }
+
+  static void registerMultiTopic<ModelType extends MultiTopicNTWidgetModel,
+      WidgetType extends NTWidget>({
+    required String name,
+    required MultiTopicNTModelProvider model,
+    required NTWidgetProvider widget,
+    required NTModelJsonProvider fromJson,
+    double? minWidth,
+    double? minHeight,
+    double? defaultWidth,
+    double? defaultHeight,
+    Set<String>? aliases,
+  }) {
+    registerWithAlias(
+      names: {name, ...?aliases},
+      model: ({
+        required NTConnection ntConnection,
+        required SharedPreferences preferences,
+        required String topic,
+        double? period,
+        NT4Type? dataType,
+        NT4StructMeta? ntStructMeta,
+      }) =>
+          model(
+        ntConnection: ntConnection,
+        preferences: preferences,
+        topic: topic,
+        period: period,
+      ),
+      widget: widget,
+      fromJson: fromJson,
+      minWidth: minWidth,
+      minHeight: minHeight,
+      defaultWidth: defaultWidth,
+      defaultHeight: defaultHeight,
+    );
   }
 
   static void

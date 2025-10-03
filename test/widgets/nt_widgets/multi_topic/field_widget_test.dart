@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -50,12 +51,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Field/Robot',
-          type: NT4TypeStr.kFloat64Arr,
+          type: NT4Type.array(NT4Type.double()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Field/OtherObject',
-          type: NT4TypeStr.kFloat64Arr,
+          type: NT4Type.array(NT4Type.double()),
           properties: {},
         ),
       ],
@@ -175,12 +176,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: 'struct:Pose2d',
+            type: NT4Type.struct('Pose2d'),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -229,17 +230,17 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/Trajectory',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -287,17 +288,17 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/Trajectory',
-            type: 'struct:Pose2d[]',
+            type: NT4Type.array(NT4Type.struct('Pose2d')),
             properties: {},
           ),
         ],
@@ -339,12 +340,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -385,12 +386,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObjects',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -429,12 +430,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: 'struct:Pose2d',
+            type: NT4Type.struct('Pose2d'),
             properties: {},
           ),
         ],
@@ -479,12 +480,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObjects',
-            type: 'struct:Pose2d[]',
+            type: NT4Type.array(NT4Type.struct('Pose2d')),
             properties: {},
           ),
         ],

@@ -67,7 +67,6 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
     super.period,
-    super.dataType,
   })  : _rotationUnit = rotationUnit,
         _showRobotRotation = showRobotRotation,
         super();

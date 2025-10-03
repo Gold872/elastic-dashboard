@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/encoder_widget.dart';
@@ -29,13 +30,15 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-            name: 'Test/Encoder/Distance',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
+          name: 'Test/Encoder/Distance',
+          type: NT4Type.float(),
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Encoder/Speed',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
+          name: 'Test/Encoder/Speed',
+          type: NT4Type.float(),
+          properties: {},
+        ),
       ],
       virtualValues: {
         'Test/Encoder/Distance': 5.50,

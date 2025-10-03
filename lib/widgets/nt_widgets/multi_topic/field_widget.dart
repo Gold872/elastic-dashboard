@@ -125,11 +125,13 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   Field get field => _field;
 
   bool isPoseStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d';
+    return ntConnection.getTopicFromName(topic)?.type.serialize() ==
+        'struct:Pose2d';
   }
 
   bool isPoseArrayStruct(String topic) {
-    return ntConnection.getTopicFromName(topic)?.type == 'struct:Pose2d[]';
+    return ntConnection.getTopicFromName(topic)?.type.serialize() ==
+        'struct:Pose2d[]';
   }
 
   FieldWidgetModel({
@@ -144,7 +146,6 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
     double fieldRotation = 0.0,
     Color robotColor = Colors.red,
     Color trajectoryColor = Colors.white,
-    super.dataType,
     super.period,
   })  : _showTrajectories = showTrajectories,
         _showOtherObjects = showOtherObjects,

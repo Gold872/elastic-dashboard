@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/robot_preferences.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
@@ -31,22 +32,22 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Preferences/Test Preference',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 1',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 2',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Preferences/Preference 3',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],

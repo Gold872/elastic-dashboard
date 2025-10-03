@@ -7,6 +7,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
@@ -58,7 +59,6 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     bool sortOptions = false,
-    super.dataType,
     super.period,
   })  : _sortOptions = sortOptions,
         super();
@@ -196,10 +196,8 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
-        NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        NT4Type.string(),
+        properties: {'retained': true},
       );
     }
   }

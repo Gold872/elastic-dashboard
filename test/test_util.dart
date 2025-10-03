@@ -8,7 +8,9 @@ import 'package:mockito/mockito.dart';
 
 import 'package:elastic_dashboard/services/ds_interop.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
 import 'test_util.mocks.dart';
 
@@ -23,6 +25,8 @@ MockNTConnection createMockOfflineNT4() {
 
   final mockNT4Connection = MockNTConnection();
   final mockSubscription = MockNT4Subscription();
+
+  when(mockNT4Connection.schemaManager).thenReturn(SchemaManager());
 
   when(mockNT4Connection.announcedTopics()).thenReturn({});
 
@@ -45,6 +49,9 @@ MockNTConnection createMockOfflineNT4() {
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
 
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
+
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any)).thenReturn(mockSubscription);
@@ -60,6 +67,7 @@ MockNTConnection createMockOnlineNT4({
   List<NT4Topic>? virtualTopics,
   Map<String, dynamic>? virtualValues,
   int serverTime = 0,
+  SchemaManager? schemaManager,
 }) {
   HttpOverrides.global = null;
 
@@ -69,17 +77,21 @@ MockNTConnection createMockOnlineNT4({
   virtualTopics ??= [
     NT4Topic(
       name: '/SmartDashboard/Test Value 1',
-      type: NT4TypeStr.kInt,
+      type: NT4Type.int(),
       properties: {},
     ),
     NT4Topic(
       name: '/SmartDashboard/Test Value 2',
-      type: NT4TypeStr.kFloat32,
+      type: NT4Type.float(),
       properties: {},
     ),
   ];
 
   virtualValues ??= {};
+
+  schemaManager ??= SchemaManager();
+
+  when(mockNT4Connection.schemaManager).thenReturn(schemaManager);
 
   Map<int, NT4Topic> virtualTopicsMap = {};
 
@@ -116,6 +128,9 @@ MockNTConnection createMockOnlineNT4({
   when(mockNT4Connection.latencyStream()).thenAnswer((_) => Stream.value(0));
 
   when(mockNT4Connection.getLastAnnouncedValue(any)).thenReturn(null);
+
+  when(mockNT4Connection.subscribeWithOptions(any, any))
+      .thenReturn(mockSubscription);
 
   when(mockNT4Connection.subscribe(any, any)).thenReturn(mockSubscription);
 
@@ -238,6 +253,9 @@ MockNTConnection createMockOnlineNT4({
 
     when(mockNT4Connection.getLastAnnouncedValue(topic.name))
         .thenAnswer((_) => virtualValues![topic.name]);
+
+    when(mockNT4Connection.subscribeWithOptions(topic.name, any))
+        .thenAnswer((_) => topicSubscription);
 
     when(mockNT4Connection.subscribe(topic.name, any))
         .thenAnswer((_) => topicSubscription);

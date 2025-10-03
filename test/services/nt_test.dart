@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 void main() {
   test('NT4 Client', () {
@@ -25,11 +29,13 @@ void main() {
         isNull);
 
     ntConnection.updateDataFromTopic(
-        NT4Topic(
-            name: '/SmartDashboard/Test Number',
-            type: NT4TypeStr.kFloat32,
-            properties: {}),
-        3.53);
+      NT4Topic(
+        name: '/SmartDashboard/Test Number',
+        type: NT4Type.float(),
+        properties: {},
+      ),
+      3.53,
+    );
 
     expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
         3.53);
@@ -61,5 +67,42 @@ void main() {
     expect(ntConnection.announcedTopics().length, 0);
     expect(ntConnection.getLastAnnouncedValue('/SmartDashboard/Test Number'),
         3.53);
+  });
+
+  test('NT4 Struct Subscription', () {
+    final schema = NTStructSchema.parse(
+      name: 'Pose2d',
+      schema: 'Translation2d translation;Rotation2d rotation',
+      knownSchemas: {
+        'Translation2d': NTStructSchema.parse(
+          name: 'Translation2d',
+          schema: 'double x;double y',
+        ),
+        'Rotation2d': NTStructSchema.parse(
+          name: 'Rotation2d',
+          schema: 'double value',
+        ),
+      },
+    );
+
+    final NT4StructMeta structMeta = NT4StructMeta(
+      path: ['translation', 'x'],
+      schemaName: 'Pose2d',
+      schema: schema,
+    );
+
+    final NT4Subscription subscription = NT4Subscription(
+      topic: '/Test/Pose',
+      options: NT4SubscriptionOptions(
+        structMeta: structMeta,
+      ),
+    );
+
+    ByteData byteData = ByteData((schema.bitLength / 8).ceil());
+    byteData.setFloat64(0, 5.50, Endian.little);
+
+    subscription.updateValue(Uint8List.view(byteData.buffer), 0);
+
+    expect(subscription.value, 5.50);
   });
 }

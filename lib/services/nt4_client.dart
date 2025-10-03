@@ -13,44 +13,8 @@ import 'package:msgpack_dart/msgpack_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:elastic_dashboard/services/log.dart';
-
-class NT4TypeStr {
-  static final Map<String, int> typeMap = {
-    'boolean': 0,
-    'double': 1,
-    'int': 2,
-    'float': 3,
-    'string': 4,
-    'json': 4,
-    'raw': 5,
-    'rpc': 5,
-    'msgpack': 5,
-    'protobuf': 5,
-    'structschema': 5,
-    'boolean[]': 16,
-    'double[]': 17,
-    'int[]': 18,
-    'float[]': 19,
-    'string[]': 20,
-  };
-
-  static const kBool = 'boolean';
-  static const kFloat64 = 'double';
-  static const kInt = 'int';
-  static const kFloat32 = 'float';
-  static const kString = 'string';
-  static const kJson = 'json';
-  static const kBinaryRaw = 'raw';
-  static const kBinaryRPC = 'rpc';
-  static const kBinaryMsgpack = 'msgpack';
-  static const kBinaryProtobuf = 'protobuf';
-  static const kStructSchema = 'structschema';
-  static const kBoolArr = 'boolean[]';
-  static const kFloat64Arr = 'double[]';
-  static const kIntArr = 'int[]';
-  static const kFloat32Arr = 'float[]';
-  static const kStringArr = 'string[]';
-}
+import 'package:elastic_dashboard/services/nt4_type.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 
 class NT4Subscription extends ValueNotifier<Object?> {
   final String topic;
@@ -75,6 +39,7 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
+    onChanged(value, timestamp);
   }
 
   Stream<Object?> periodicStream({bool yieldAll = true}) async* {
@@ -127,7 +92,26 @@ class NT4Subscription extends ValueNotifier<Object?> {
 
   void updateValue(Object? value, int timestamp) {
     logger.trace(
-        'Updating value for subscription: $this - Value: $value, Time: $timestamp');
+      'Updating value for subscription: $this - Value: $value, Time: $timestamp',
+    );
+
+    if (options.structMeta != null &&
+        value is List<int> &&
+        options.structMeta!.schema != null) {
+      NTStructSchema schema = options.structMeta!.schema!;
+      List<String> path = options.structMeta!.path;
+      NTStruct struct = NTStruct.parse(
+        schema: schema,
+        data: Uint8List.fromList(value),
+      );
+      Object? fieldValue = struct.get(path);
+      // Should only be displaying/subscribing to data types in structs
+      if (fieldValue is NTStruct) {
+        fieldValue = null;
+      }
+      value = fieldValue;
+    }
+
     for (var listener in _listeners) {
       listener(value, timestamp);
     }
@@ -161,17 +145,115 @@ class NT4Subscription extends ValueNotifier<Object?> {
   int get hashCode => Object.hashAll([topic, options]);
 }
 
+class NT4StructMeta {
+  final List<String> path;
+  final String schemaName;
+
+  NT4Type? _type;
+
+  NT4Type? get type {
+    if (schema == null) {
+      return _type;
+    }
+
+    if (path.isEmpty) {
+      return NT4Type.struct(schema!.name);
+    }
+
+    NTStructSchema currentSchema = schema!;
+    List<String> pathStack = List.from(path.reversed);
+
+    while (pathStack.isNotEmpty) {
+      String fieldName = pathStack.removeLast();
+      NTFieldSchema? field = currentSchema[fieldName];
+
+      if (field == null) {
+        return NT4Type.struct(currentSchema.name);
+      }
+
+      if (field.subSchema == null || pathStack.isEmpty) {
+        return field.ntType;
+      }
+
+      currentSchema = field.subSchema!;
+    }
+
+    return NT4Type.struct(currentSchema.name);
+  }
+
+  NTStructSchema? schema;
+
+  NT4StructMeta({
+    required this.path,
+    required this.schemaName,
+    this.schema,
+    NT4Type? type,
+  }) {
+    if (type != null) {
+      _type = type;
+    }
+  }
+
+  NT4StructMeta copyWith({List<String>? path, String? schemaName}) =>
+      NT4StructMeta(
+        path: path ?? this.path,
+        schemaName: schemaName ?? this.schemaName,
+      );
+
+  factory NT4StructMeta.fromJson(Map<String, dynamic> json) {
+    List<String> path = tryCast<List<dynamic>>(
+          json['path'],
+        )?.whereType<String>().toList() ??
+        [];
+
+    NT4Type? type;
+    if (json.containsKey('type')) {
+      type = NT4Type.parse(tryCast<String>(json['type']) ?? '');
+    }
+
+    return NT4StructMeta(
+      path: path,
+      schemaName: tryCast(json['schema_name']) ?? '',
+      type: type,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'schema_name': schemaName,
+      if (type != null) 'type': type!.serialize(),
+    };
+  }
+
+  @override
+  String toString() {
+    return 'NT4StructMeta(Path: $path, Schema Name: $schemaName, Type: $type)';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NT4StructMeta &&
+      path.equals(other.path) &&
+      schemaName == other.schemaName;
+
+  @override
+  int get hashCode => Object.hashAll([schemaName, path]);
+}
+
 class NT4SubscriptionOptions {
   final double periodicRateSeconds;
   final bool all;
   final bool topicsOnly;
   final bool prefix;
+  final NT4StructMeta? structMeta;
 
   const NT4SubscriptionOptions({
     this.periodicRateSeconds = 0.1,
     this.all = false,
     this.topicsOnly = false,
     this.prefix = true,
+    this.structMeta,
   });
 
   Map<String, dynamic> toJson() {
@@ -190,21 +272,27 @@ class NT4SubscriptionOptions {
       other.periodicRateSeconds == periodicRateSeconds &&
       other.all == all &&
       other.topicsOnly == topicsOnly &&
-      other.prefix == prefix;
+      other.prefix == prefix &&
+      other.structMeta == structMeta;
 
   @override
-  int get hashCode =>
-      Object.hashAll([periodicRateSeconds, all, topicsOnly, prefix]);
+  int get hashCode => Object.hashAll([
+        periodicRateSeconds,
+        all,
+        topicsOnly,
+        prefix,
+        structMeta,
+      ]);
 
   @override
   String toString() {
-    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix)';
+    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix, Struct Meta: $structMeta)';
   }
 }
 
 class NT4Topic {
   final String name;
-  final String type;
+  final NT4Type type;
   int id;
   int pubUID;
   final Map<String, dynamic> properties;
@@ -225,7 +313,7 @@ class NT4Topic {
   Map<String, dynamic> toPublishJson() {
     return {
       'name': name,
-      'type': type,
+      'type': type.serialize(),
       'pubuid': pubUID,
     };
   }
@@ -245,7 +333,7 @@ class NT4Topic {
   }
 
   int getTypeId() {
-    return NT4TypeStr.typeMap[type]!;
+    return type.typeId;
   }
 
   bool get isRetained =>
@@ -267,6 +355,8 @@ class NT4Client {
   final VoidCallback? onDisconnect;
   final List<Function(NT4Topic topic)> _topicAnnounceListeners = [];
   final List<Function(NT4Topic topic)> _topicUnannounceListeners = [];
+
+  final SchemaManager schemaManager;
 
   final Map<int, NT4Subscription> _subscriptions = {};
   final Set<NT4Subscription> _subscribedTopics = {};
@@ -315,6 +405,7 @@ class NT4Client {
 
   NT4Client({
     required this.serverBaseAddress,
+    required this.schemaManager,
     this.onConnect,
     this.onDisconnect,
   }) {
@@ -457,7 +548,7 @@ class NT4Client {
 
   NT4Topic publishNewTopic(
     String name,
-    String type, [
+    NT4Type type, [
     Map<String, dynamic> properties = const {},
   ]) {
     NT4Topic newTopic = NT4Topic(
@@ -492,6 +583,9 @@ class NT4Client {
   }
 
   void addSample(NT4Topic topic, dynamic data, [int? timestamp]) {
+    // Publishing to struct topics is not supported
+    if (topic.type.isStruct) return;
+
     timestamp ??= getServerTimeUS();
 
     logger.trace(
@@ -700,7 +794,7 @@ class NT4Client {
 
     NT4Topic timeTopic = NT4Topic(
       name: 'Time',
-      type: NT4TypeStr.kInt,
+      type: NT4Type.int(),
       id: -1,
       pubUID: -1,
       properties: {},
@@ -929,7 +1023,7 @@ class NT4Client {
 
           NT4Topic newTopic = NT4Topic(
             name: params['name'],
-            type: params['type'],
+            type: NT4Type.parse(params['type']),
             id: params['id'],
             pubUID: params['pubid'] ?? (currentTopic?.pubUID ?? 0),
             properties: params['properties'],
@@ -943,8 +1037,9 @@ class NT4Client {
           NT4Topic? removedTopic = announcedTopics[params['id']];
           if (removedTopic == null) {
             logger.warning(
-                '[NT4] Ignorining unannounce, topic was not previously announced');
-            return;
+              '[NT4] Ignorining unannounce, topic was not previously announced',
+            );
+            continue;
           }
           announcedTopics.remove(removedTopic.id);
 
@@ -955,9 +1050,10 @@ class NT4Client {
           String topicName = params['name'];
           NT4Topic? topic = getTopicFromName(topicName);
           if (topic == null) {
-            logger
-                .warning('[NT4] Ignoring properties, topic was not announced');
-            return;
+            logger.warning(
+              '[NT4] Ignoring properties, topic was not announced',
+            );
+            continue;
           }
 
           Map<String, dynamic> update = tryCast(params['update']) ?? {};
@@ -969,9 +1065,10 @@ class NT4Client {
             }
           }
         } else {
-          logger
-              .warning('[NT4] Ignoring text message - unknown method $method');
-          return;
+          logger.warning(
+            '[NT4] Ignoring text message - unknown method $method',
+          );
+          continue;
         }
       }
     } else if (data is Uint8List) {
@@ -993,6 +1090,40 @@ class NT4Client {
             for (NT4Subscription sub in _subscriptions.values) {
               if (sub.topic == topic.name) {
                 sub.updateValue(value, timestampUS);
+              }
+            }
+
+            // If it's a schema topic, try to process the new schema
+            // if any new schema has been successfully processed, update
+            // all subscriptions which don't currently have a processed schema
+            if (topic.name.startsWith('/.schema') &&
+                topic.type == NT4Type.structschema()) {
+              String structName =
+                  topic.name.split('/').last.replaceFirst('struct:', '');
+              if (schemaManager.processNewSchema(
+                structName,
+                value as List<int>,
+              )) {
+                for (final subscription in _subscribedTopics.where(
+                  (e) =>
+                      e.options.structMeta != null &&
+                      e.options.structMeta!.schema == null,
+                )) {
+                  final NT4StructMeta structMeta =
+                      subscription.options.structMeta!;
+                  structMeta.schema = schemaManager.getSchema(
+                    structMeta.schemaName,
+                  );
+                  // Update the subscription if there was a previously announced value
+                  // for the topic
+                  if (lastAnnouncedValues.containsKey(subscription.topic) &&
+                      lastAnnouncedTimestamps.containsKey(subscription.topic)) {
+                    subscription.updateValue(
+                      lastAnnouncedValues[subscription.topic]!,
+                      lastAnnouncedTimestamps[subscription.topic]!,
+                    );
+                  }
+                }
               }
             }
           } else if (topicID & 0xFF == 0xFF && !_useRTT) {
@@ -1033,19 +1164,5 @@ class NT4Client {
   int getNewPubUID() {
     _publishUIDCounter++;
     return _publishUIDCounter + _clientId;
-  }
-}
-
-class NT4ValueReq {
-  final List<String> topics;
-
-  const NT4ValueReq({
-    this.topics = const [],
-  });
-
-  Map<String, dynamic> toGetValsJson() {
-    return {
-      'topics': topics,
-    };
   }
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
@@ -48,7 +49,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Boolean Value',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
       ],
@@ -93,8 +94,9 @@ void main() {
     BooleanBoxModel booleanBoxModel = BooleanBoxModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Boolean Value',
-      dataType: 'boolean',
+      dataType: NT4Type.boolean(),
       period: 0.100,
       trueColor: Colors.green,
       falseColor: Colors.red,

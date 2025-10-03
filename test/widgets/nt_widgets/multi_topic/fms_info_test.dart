@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/fms_info.dart';
@@ -59,32 +60,32 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/FMSInfo/EventName',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/FMSControlData',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/IsRedAlliance',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/MatchNumber',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/MatchType',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/FMSInfo/ReplayNumber',
-          type: NT4TypeStr.kInt,
+          type: NT4Type.int(),
           properties: {},
         ),
       ],
@@ -102,7 +103,11 @@ void main() {
   Future<void> pushFMSInfoWidget(
       WidgetTester widgetTester, NTConnection ntConnection) async {
     NTWidgetModel fmsInfoModel = NTWidgetBuilder.buildNTModelFromJson(
-        ntConnection, preferences, 'FMSInfo', fmsInfoJson);
+      ntConnection,
+      preferences,
+      'FMSInfo',
+      fmsInfoJson,
+    );
 
     return widgetTester.pumpWidget(
       MaterialApp(

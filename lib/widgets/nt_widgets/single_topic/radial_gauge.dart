@@ -7,7 +7,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -96,6 +96,7 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
     bool wrapValue = false,
     bool showPointer = true,
     bool showTicks = true,
+    super.ntStructMeta,
     super.dataType,
     super.period,
   })  : _wrapValue = wrapValue,
@@ -314,7 +315,7 @@ class RadialGaugeWidget extends NTWidget {
 
         value = value.clamp(model.minValue, model.maxValue);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return LayoutBuilder(
           builder: (context, constraints) {

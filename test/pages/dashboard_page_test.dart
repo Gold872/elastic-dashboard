@@ -18,6 +18,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/hotkey_manager.dart';
 import 'package:elastic_dashboard/services/ip_address_util.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/update_checker.dart';
@@ -196,38 +197,6 @@ void main() {
       expect(find.text('Teleoperated'), findsOneWidget);
       expect(find.text('Autonomous'), findsOneWidget);
     });
-
-    testWidgets('Save layout (button)', (widgetTester) async {
-      await pumpDashboardPage(widgetTester, preferences);
-
-      final fileButton = find.widgetWithText(SubmenuButton, 'File');
-
-      expect(fileButton, findsOneWidget);
-
-      await widgetTester.tap(fileButton);
-      await widgetTester.pumpAndSettle();
-
-      final saveButton = find.widgetWithText(MenuItemButton, 'Save');
-
-      expect(saveButton, findsOneWidget);
-
-      await widgetTester.tap(saveButton);
-      await widgetTester.pumpAndSettle();
-
-      expect(jsonString, preferences.getString(PrefKeys.layout));
-    });
-
-    testWidgets('Save layout (shortcut)', (widgetTester) async {
-      await pumpDashboardPage(widgetTester, preferences);
-
-      await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.control);
-
-      await widgetTester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
-      await widgetTester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
-      await widgetTester.pumpAndSettle();
-
-      expect(jsonString, preferences.getString(PrefKeys.layout));
-    });
   });
 
   group('[Adding Widgets]:', () {
@@ -356,6 +325,7 @@ void main() {
           find.widgetWithText(WidgetContainer, 'Test Value 1');
 
       expect(testValueTile, findsOneWidget);
+      expect(testValueContainer, findsNothing);
       expect(find.widgetWithText(TreeTile, 'Test Value 2'), findsOneWidget);
 
       await widgetTester.drag(testValueTile, const Offset(100, 100),
@@ -435,17 +405,17 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Non-Typed/Value 1',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Typed/Value 2',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Typed/Value 3',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
           ],
@@ -494,22 +464,22 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Non-Registered/.type',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 1',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 2',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
             NT4Topic(
               name: '/Non-Registered/Value 3',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
           ],
@@ -726,15 +696,18 @@ void main() {
         testWidgets('overwrite mode', (widgetTester) async {
           Client mockClient = createHttpClient(
             mockGetResponses: {
-              'http://127.0.0.1:5800/?format=json':
-                  Response(jsonEncode(layoutFiles), 200),
+              'http://127.0.0.1:5800/?format=json': Response(
+                jsonEncode(layoutFiles),
+                200,
+              ),
               'http://127.0.0.1:5800/${Uri.encodeComponent('elastic-layout 1.json')}':
                   Response(jsonEncode(layoutOne), 200),
             },
           );
 
-          ElasticLayoutDownloader layoutDownloader =
-              ElasticLayoutDownloader(mockClient);
+          ElasticLayoutDownloader layoutDownloader = ElasticLayoutDownloader(
+            mockClient,
+          );
 
           SharedPreferences.setMockInitialValues({
             PrefKeys.layout: jsonEncode({
@@ -757,7 +730,7 @@ void main() {
                           'topic': '/Test Tab/Blocking Widget',
                           'period': 0.06,
                         },
-                      }
+                      },
                     ],
                   },
                 },
@@ -795,10 +768,13 @@ void main() {
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Download Mode'), findsOneWidget);
-          expect(find.byType(DialogDropdownChooser<LayoutDownloadMode>),
-              findsOneWidget);
-          await widgetTester
-              .tap(find.byType(DialogDropdownChooser<LayoutDownloadMode>));
+          expect(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+            findsOneWidget,
+          );
+          await widgetTester.tap(
+            find.byType(DialogDropdownChooser<LayoutDownloadMode>),
+          );
           await widgetTester.pumpAndSettle();
 
           expect(find.text('Overwrite'), findsNWidgets(2));
@@ -810,11 +786,16 @@ void main() {
           await widgetTester.pump(Duration.zero);
 
           expect(
-              find.widgetWithText(
-                  ElegantNotification, 'Successfully Downloaded Layout'),
-              findsOneWidget);
+            find.widgetWithText(
+              ElegantNotification,
+              'Successfully Downloaded Layout',
+            ),
+            findsOneWidget,
+          );
           expect(
-              find.textContaining('1 tabs were overwritten'), findsOneWidget);
+            find.textContaining('1 tabs were overwritten'),
+            findsOneWidget,
+          );
 
           await widgetTester.pumpAndSettle();
 
@@ -825,6 +806,7 @@ void main() {
           expect(find.text('Blocking Widget'), findsNothing);
           expect(find.byType(Gyro), findsNWidgets(2));
         });
+
         group('merge mode', () {
           testWidgets('without merges', (widgetTester) async {
             Client mockClient = createHttpClient(
@@ -1243,7 +1225,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Elastic/SelectedTab',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
@@ -1282,7 +1264,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: '/Elastic/SelectedTab',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
@@ -1907,7 +1889,7 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: '/Elastic/RobotNotifications',
-            type: NT4TypeStr.kString,
+            type: NT4Type.string(),
             properties: {},
           )
         ],

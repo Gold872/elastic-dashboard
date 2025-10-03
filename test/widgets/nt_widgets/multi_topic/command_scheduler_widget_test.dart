@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/nt_widget_builder.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/command_scheduler.dart';
@@ -29,17 +30,20 @@ void main() {
     ntConnection = createMockOnlineNT4(
       virtualTopics: [
         NT4Topic(
-            name: 'Test/Command Scheduler/Names',
-            type: NT4TypeStr.kStringArr,
-            properties: {}),
+          name: 'Test/Command Scheduler/Names',
+          type: NT4Type.array(NT4Type.string()),
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Command Scheduler/Ids',
-            type: NT4TypeStr.kIntArr,
-            properties: {}),
+          name: 'Test/Command Scheduler/Ids',
+          type: NT4Type.array(NT4Type.int()),
+          properties: {},
+        ),
         NT4Topic(
-            name: 'Test/Command Scheduler/Cancel',
-            type: NT4TypeStr.kIntArr,
-            properties: {}),
+          name: 'Test/Command Scheduler/Cancel',
+          type: NT4Type.array(NT4Type.int()),
+          properties: {},
+        ),
       ],
       virtualValues: {
         'Test/Command Scheduler/Names': ['Command 1', 'Command 2'],

@@ -35,7 +35,6 @@ class GyroModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     bool counterClockwisePositive = false,
-    super.dataType,
     super.period,
   })  : _counterClockwisePositive = counterClockwisePositive,
         super();

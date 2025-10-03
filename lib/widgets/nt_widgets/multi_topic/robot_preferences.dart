@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class RobotPreferencesModel extends MultiTopicNTWidgetModel {
@@ -32,7 +33,6 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -177,19 +177,20 @@ class RobotPreferences extends NTWidget {
 
         Object? formattedData;
 
-        String dataType = nt4Topic.type;
-        switch (dataType) {
-          case NT4TypeStr.kBool:
+        NT4Type dataType = nt4Topic.type;
+
+        switch (dataType.dataType) {
+          case NT4DataType.boolean:
             formattedData = bool.tryParse(data);
             break;
-          case NT4TypeStr.kFloat32:
-          case NT4TypeStr.kFloat64:
+          case NT4DataType.float32:
+          case NT4DataType.float64:
             formattedData = double.tryParse(data);
             break;
-          case NT4TypeStr.kInt:
+          case NT4DataType.int32:
             formattedData = int.tryParse(data);
             break;
-          case NT4TypeStr.kString:
+          case NT4DataType.string:
             formattedData = data;
             break;
           default:

@@ -6,6 +6,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class CommandSchedulerModel extends MultiTopicNTWidgetModel {
@@ -33,7 +34,6 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -66,8 +66,10 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
 
     currentCancellations.add(id);
 
-    _cancelTopic ??=
-        ntConnection.publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??= ntConnection.publishNewTopic(
+      cancelTopicName,
+      NT4Type.array(NT4Type.int()),
+    );
 
     if (_cancelTopic == null) {
       return;
