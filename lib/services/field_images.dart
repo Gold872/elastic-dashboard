@@ -143,7 +143,7 @@ class Field {
         );
   }
 
-  void dispose() async {
+  Future<void> dispose() async {
     logger.debug('Soft disposing field: $game');
     instanceCount--;
     logger.trace('New instance count for $game: $instanceCount');

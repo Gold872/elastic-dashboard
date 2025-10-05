@@ -567,7 +567,7 @@ class _DashboardPageState extends State<DashboardPage>
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     removeUnloadHandler();
     windowManager.removeListener(this);
     model._state = null;

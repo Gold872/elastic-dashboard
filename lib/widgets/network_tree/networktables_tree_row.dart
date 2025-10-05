@@ -233,7 +233,7 @@ class NetworkTableTreeRow {
     if (primary == null || !NTWidgetBuilder.isRegistered(primary.type)) {
       primary?.unSubscribe();
       primary?.disposeWidget(deleting: true);
-      primary?.forceDispose();
+      primary?.dispose();
 
       if (resortToListLayout && listLayoutBuilder != null) {
         List<NTWidgetContainerModel>? listLayoutChildren =
@@ -254,7 +254,7 @@ class NetworkTableTreeRow {
     if (widget == null) {
       primary.unSubscribe();
       primary.disposeWidget(deleting: true);
-      primary.forceDispose();
+      primary.dispose();
       return null;
     }
 
@@ -280,7 +280,7 @@ class NetworkTableTreeRow {
     if (widget == null) {
       primary.unSubscribe();
       primary.disposeWidget(deleting: true);
-      primary.forceDispose();
+      primary.dispose();
 
       return null;
     }

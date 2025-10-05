@@ -190,7 +190,7 @@ class PIDControllerWidget extends NTWidget {
 
         // Since they were null they're not being listened to when created during build
         if (wasNull) {
-          model.refresh();
+          Future(() => model.refresh());
         }
 
         // Updates the text of the text editing controller if the kp value has changed

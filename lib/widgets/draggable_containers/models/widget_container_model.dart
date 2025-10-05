@@ -31,9 +31,6 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _disposed = false;
-  bool _forceDispose = false;
-
   late Rect _draggingRect = Rect.fromLTWH(
     0,
     0,
@@ -176,26 +173,6 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   }) : _enabled = enabled {
     fromJson(jsonData);
     init();
-  }
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    if (!hasListeners || _forceDispose) {
-      super.dispose();
-      _disposed = true;
-    }
-  }
-
-  void forceDispose() {
-    _forceDispose = true;
-    dispose();
   }
 
   void init() {

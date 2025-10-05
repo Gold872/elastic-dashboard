@@ -235,11 +235,11 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {
+  void disposeWidget({bool deleting = false}) async {
     super.disposeWidget(deleting: deleting);
 
     if (deleting) {
-      _field.dispose();
+      await _field.dispose();
       ntConnection.removeTopicAnnounceListener(topicAnnounceListener);
     }
 
@@ -317,7 +317,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
         ),
       ),
       DialogDropdownChooser<String?>(
-        onSelectionChanged: (value) {
+        onSelectionChanged: (value) async {
           if (value == null) {
             return;
           }
@@ -329,7 +329,7 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
           }
 
           _fieldGame = value;
-          _field.dispose();
+          await _field.dispose();
           _field = newField;
 
           widgetSize = null;

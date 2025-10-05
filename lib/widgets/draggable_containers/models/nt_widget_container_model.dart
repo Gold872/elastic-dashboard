@@ -109,9 +109,9 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   }
 
   @override
-  void forceDispose() {
-    super.forceDispose();
-    childModel.forceDispose();
+  void dispose() {
+    childModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -362,7 +362,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     childModel.disposeWidget(deleting: true);
     childModel.unSubscribe();
-    childModel.forceDispose();
+    childModel.dispose();
 
     childModel = NTWidgetBuilder.buildNTModelFromType(
       ntConnection,

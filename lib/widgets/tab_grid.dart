@@ -661,7 +661,7 @@ class TabGridModel extends ChangeNotifier {
         widget.disposeModel(deleting: !fromLayout);
         if (!fromLayout) {
           widget.unSubscribe();
-          widget.forceDispose();
+          widget.dispose();
         }
 
         notifyListeners();
@@ -673,7 +673,7 @@ class TabGridModel extends ChangeNotifier {
       widget.disposeModel(deleting: !fromLayout);
       if (!fromLayout) {
         widget.unSubscribe();
-        widget.forceDispose();
+        widget.dispose();
       }
 
       notifyListeners();
@@ -737,9 +737,9 @@ class TabGridModel extends ChangeNotifier {
 
   void removeWidget(WidgetContainerModel widget) {
     widget.removeListener(notifyListeners);
-    widget.disposeModel(deleting: true);
     widget.unSubscribe();
-    widget.forceDispose();
+    widget.disposeModel(deleting: true);
+    widget.dispose();
     _widgetModels.remove(widget);
     notifyListeners();
   }
@@ -748,9 +748,9 @@ class TabGridModel extends ChangeNotifier {
   void clearWidgets() {
     for (WidgetContainerModel container in _widgetModels) {
       container.removeListener(notifyListeners);
-      container.disposeModel(deleting: true);
       container.unSubscribe();
-      container.forceDispose();
+      container.disposeModel(deleting: true);
+      container.dispose();
     }
     _widgetModels.clear();
     notifyListeners();
@@ -805,7 +805,7 @@ class TabGridModel extends ChangeNotifier {
       container.removeListener(notifyListeners);
       container.disposeModel(deleting: true);
       container.unSubscribe();
-      container.forceDispose();
+      container.dispose();
     }
     _widgetModels.clear();
   }

@@ -40,9 +40,11 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
     if (draggingWidget != null) {
       draggingWidget?.unSubscribe();
       draggingWidget?.disposeModel(deleting: true);
-      draggingWidget?.forceDispose();
+      draggingWidget?.dispose();
 
       widget.onRemoveWidget();
+
+      draggingWidget = null;
     }
   }
 
