@@ -8,7 +8,7 @@ import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -68,7 +68,7 @@ void main() {
   });
 
   test('Field from json', () {
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Field',
@@ -95,7 +95,7 @@ void main() {
   });
 
   test('Field from alias json', () {
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Field2d',
@@ -147,7 +147,7 @@ void main() {
       (widget) => widget is CustomPaint && widget.painter is TrajectoryPainter,
     );
     testWidgets('non-struct robot, no trajectory', (widgetTester) async {
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -193,7 +193,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -253,7 +253,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -311,7 +311,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -357,7 +357,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -403,7 +403,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -447,7 +447,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -497,7 +497,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',

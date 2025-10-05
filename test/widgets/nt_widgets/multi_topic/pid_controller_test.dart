@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -60,7 +60,7 @@ void main() {
   });
 
   test('PID controller from json', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PIDController',
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('PID controller from alias name', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PID Controller',
@@ -97,7 +97,7 @@ void main() {
   testWidgets('PID controller widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PIDController',

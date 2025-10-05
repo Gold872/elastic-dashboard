@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('Number slider from json', () {
-    NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberSliderModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Slider',
@@ -105,7 +105,7 @@ void main() {
   ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberSliderModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Slider',
@@ -311,8 +311,8 @@ void main() {
       initialPosition: Rect.fromLTWH(
         0,
         0,
-        3 * NTWidgetBuilder.getNormalSize(),
-        NTWidgetBuilder.getNormalSize(),
+        3 * NTWidgetRegistry.getNormalSize(),
+        NTWidgetRegistry.getNormalSize(),
       ),
       title: 'Number Slider',
       childModel: numberSliderModel,

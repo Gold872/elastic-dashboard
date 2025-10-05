@@ -48,7 +48,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    required super.ntStructMeta,
+    super.ntStructMeta,
     double minValue = -1.0,
     double maxValue = 1.0,
     int divisions = 5,

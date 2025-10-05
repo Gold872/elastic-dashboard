@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
 import '../../../test_util.dart';
@@ -62,7 +62,7 @@ void main() {
   });
 
   test('Multi color view from json', () {
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Multi Color View',
@@ -99,7 +99,7 @@ void main() {
   ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Multi Color View',
@@ -134,7 +134,7 @@ void main() {
   testWidgets('Multi color view widget test one color', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
@@ -177,7 +177,7 @@ void main() {
   testWidgets('Multi color view widget test no colors', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(

@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -52,7 +52,7 @@ void main() {
   });
 
   test('Number bar from json', () {
-    NTWidgetModel numberBarModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberBarModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Bar',

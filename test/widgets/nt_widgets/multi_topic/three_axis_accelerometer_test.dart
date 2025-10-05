@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -55,7 +55,7 @@ void main() {
 
   test('Three axis accelerometer from json', () {
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
           ntConnection,
           preferences,
           '3-Axis Accelerometer',
@@ -71,7 +71,7 @@ void main() {
 
   test('Three axis accelerometer from alias name', () {
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
           ntConnection,
           preferences,
           '3AxisAccelerometer',
@@ -101,7 +101,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
           ntConnection,
           preferences,
           '3-Axis Accelerometer',

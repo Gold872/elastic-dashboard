@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -54,7 +54,7 @@ void main() {
   });
 
   test('Radial gauge from json', () {
-    NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel radialGaugeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Radial Gauge',
@@ -92,7 +92,7 @@ void main() {
   });
 
   test('Radial gauge from alias name', () {
-    NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel radialGaugeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Simple Dial',

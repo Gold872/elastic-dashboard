@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('Text display from json', () {
-    NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel textDisplayModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Text Display',
@@ -64,7 +64,7 @@ void main() {
   });
 
   test('Text display from alias name', () {
-    NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel textDisplayModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Text View',
