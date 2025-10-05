@@ -31,9 +31,6 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _disposed = false;
-  bool _forceDispose = false;
-
   late Rect _draggingRect = Rect.fromLTWH(
     0,
     0,
@@ -178,26 +175,6 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     init();
   }
 
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    if (!hasListeners || _forceDispose) {
-      super.dispose();
-      _disposed = true;
-    }
-  }
-
-  void forceDispose() {
-    _forceDispose = true;
-    dispose();
-  }
-
   void init() {
     draggingRect = displayRect;
     dragStartLocation = displayRect;
@@ -240,7 +217,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     return [];
   }
 
-  void disposeModel({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 
   void unSubscribe() {}
 

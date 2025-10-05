@@ -349,7 +349,7 @@ class TabGridModel extends ChangeNotifier {
     model.previewVisible = false;
     model.validLocation = true;
 
-    model.disposeModel();
+    model.softDispose();
   }
 
   void onWidgetDragEnd(WidgetContainerModel model) {
@@ -365,7 +365,7 @@ class TabGridModel extends ChangeNotifier {
     model.previewVisible = false;
     model.validLocation = true;
 
-    model.disposeModel(deleting: false);
+    model.softDispose(deleting: false);
   }
 
   void onWidgetDragCancel(WidgetContainerModel model) {
@@ -384,7 +384,7 @@ class TabGridModel extends ChangeNotifier {
     model.resizing = false;
     model.draggingIntoLayout = false;
 
-    model.disposeModel();
+    model.softDispose();
   }
 
   void onWidgetUpdate(
@@ -658,10 +658,10 @@ class TabGridModel extends ChangeNotifier {
       if (layoutContainer.willAcceptWidget(widget)) {
         layoutContainer.addWidget(widget);
       } else {
-        widget.disposeModel(deleting: !fromLayout);
+        widget.softDispose(deleting: !fromLayout);
         if (!fromLayout) {
           widget.unSubscribe();
-          widget.forceDispose();
+          widget.dispose();
         }
 
         notifyListeners();
@@ -670,10 +670,10 @@ class TabGridModel extends ChangeNotifier {
     } else if (!isValidMoveLocation(widget, previewLocation)) {
       _containerDraggingIn = null;
 
-      widget.disposeModel(deleting: !fromLayout);
+      widget.softDispose(deleting: !fromLayout);
       if (!fromLayout) {
         widget.unSubscribe();
-        widget.forceDispose();
+        widget.dispose();
       }
 
       notifyListeners();
@@ -687,7 +687,7 @@ class TabGridModel extends ChangeNotifier {
 
     _containerDraggingIn = null;
 
-    widget.disposeModel();
+    widget.softDispose();
     notifyListeners();
 
     return true;
@@ -737,9 +737,9 @@ class TabGridModel extends ChangeNotifier {
 
   void removeWidget(WidgetContainerModel widget) {
     widget.removeListener(notifyListeners);
-    widget.disposeModel(deleting: true);
     widget.unSubscribe();
-    widget.forceDispose();
+    widget.softDispose(deleting: true);
+    widget.dispose();
     _widgetModels.remove(widget);
     notifyListeners();
   }
@@ -748,9 +748,9 @@ class TabGridModel extends ChangeNotifier {
   void clearWidgets() {
     for (WidgetContainerModel container in _widgetModels) {
       container.removeListener(notifyListeners);
-      container.disposeModel(deleting: true);
       container.unSubscribe();
-      container.forceDispose();
+      container.softDispose(deleting: true);
+      container.dispose();
     }
     _widgetModels.clear();
     notifyListeners();
@@ -803,9 +803,9 @@ class TabGridModel extends ChangeNotifier {
   void onDestroy() {
     for (WidgetContainerModel container in _widgetModels) {
       container.removeListener(notifyListeners);
-      container.disposeModel(deleting: true);
+      container.softDispose(deleting: true);
       container.unSubscribe();
-      container.forceDispose();
+      container.dispose();
     }
     _widgetModels.clear();
   }

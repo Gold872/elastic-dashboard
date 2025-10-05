@@ -149,11 +149,11 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  void disposeModel({bool deleting = false}) {
-    super.disposeModel(deleting: deleting);
+  void softDispose({bool deleting = false}) {
+    super.softDispose(deleting: deleting);
 
     for (var child in children) {
-      child.disposeModel(deleting: deleting);
+      child.softDispose(deleting: deleting);
     }
   }
 
@@ -241,10 +241,8 @@ class ListLayoutModel extends LayoutContainerModel {
                                           children.remove(container);
 
                                           container.unSubscribe();
-                                          container.disposeModel(
-                                            deleting: true,
-                                          );
-                                          container.forceDispose();
+                                          container.softDispose(deleting: true);
+                                          container.dispose();
 
                                           notifyListeners();
                                         });

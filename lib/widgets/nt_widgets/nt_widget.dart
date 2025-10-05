@@ -43,9 +43,6 @@ sealed class NTWidgetModel extends ChangeNotifier {
 
   set period(double value) => _period = value;
 
-  bool _disposed = false;
-  bool _forceDispose = false;
-
   NTWidgetModel({
     required this.ntConnection,
     required this.preferences,
@@ -80,7 +77,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
 
   void unSubscribe();
 
-  void disposeWidget({bool deleting = false});
+  void softDispose({bool deleting = false});
 
   void resetSubscription();
 
@@ -90,30 +87,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
     return const [];
   }
 
-  void forceDispose() {
-    _forceDispose = true;
-    dispose();
-  }
-
-  @override
-  void dispose() {
-    if (!hasListeners || _forceDispose) {
-      super.dispose();
-
-      _disposed = true;
-    }
-  }
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  void refresh() {
-    Future(() => notifyListeners());
-  }
+  void refresh() => notifyListeners();
 }
 
 class SingleTopicNTWidgetModel extends NTWidgetModel {
@@ -262,7 +236,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 
   @override
   void resetSubscription() {
@@ -375,7 +349,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 }
 
 abstract class NTWidget extends StatelessWidget {
