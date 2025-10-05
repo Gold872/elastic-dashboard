@@ -153,7 +153,7 @@ void main() {
 
     expect(find.text('Log Level'), findsOneWidget);
     expect(
-      find.widgetWithText(DialogTextInput, 'Grid DPI (Experimental)'),
+      find.widgetWithText(DialogTextInput, 'Grid DPI'),
       findsOneWidget,
     );
     expect(find.text('Open Assets Folder'), findsOneWidget);
@@ -938,10 +938,7 @@ void main() {
     await widgetTester.tap(devSettings);
     await widgetTester.pumpAndSettle();
 
-    final dpiOverride = find.widgetWithText(
-      DialogTextInput,
-      'Grid DPI (Experimental)',
-    );
+    final dpiOverride = find.widgetWithText(DialogTextInput, 'Grid DPI');
 
     expect(dpiOverride, findsOneWidget);
 

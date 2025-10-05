@@ -559,7 +559,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       .getDouble(PrefKeys.gridDpiOverride)
                       ?.toString() ??
                   '',
-              label: 'Grid DPI (Experimental)',
+              label: 'Grid DPI',
               formatter: TextFormatterBuilder.decimalTextFormatter(),
               allowEmptySubmission: true,
               onSubmit: (value) async {
