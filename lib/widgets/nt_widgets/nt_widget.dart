@@ -7,6 +7,8 @@ import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/large_text_display.dart';
@@ -171,10 +173,11 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       createTopicIfNull();
       dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
+
     return {
       ...super.toJson(),
-      if (dataType != null) 'data_type': dataType?.serialize(),
-      if (ntStructMeta != null) 'struct_meta': ntStructMeta!.toJson(),
+      'data_type': ?dataType?.serialize(),
+      'struct_meta': ?ntStructMeta?.toJson(),
     };
   }
 
@@ -189,24 +192,10 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
       return [type];
     }
 
-    List<String> availableTypes = [type];
+    List<String> availableTypes = [];
 
-    // everything can be text
-    if (dataType!.isViewable) {
-      availableTypes.addAll([
-        TextDisplay.widgetType,
-        LargeTextDisplay.widgetType,
-      ]);
-    }
+    // Add all type-specific widgets first
 
-    // color for single string or multicolor for array of strings
-    if (dataType!.dataType == NT4DataType.string && !dataType!.isArray) {
-      availableTypes.addAll([SingleColorView.widgetType]);
-    } else if (dataType!.isArray && dataType!.dataType == NT4DataType.string) {
-      availableTypes.addAll([MultiColorView.widgetType]);
-    }
-
-    // other type-specific widgets
     if (ntDataType == NT4DataType.boolean) {
       availableTypes.addAll([
         BooleanBox.widgetType,
@@ -225,6 +214,25 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
         MatchTimeWidget.widgetType,
       ]);
     }
+
+    // Special color widgets for string and string arrays
+    if (ntDataType == NT4DataType.string) {
+      if (dataType!.isArray) {
+        availableTypes.add(MultiColorView.widgetType);
+      } else {
+        availableTypes.add(SingleColorView.widgetType);
+      }
+    }
+
+    // Add the rest of the default widgets for anything that is viewable
+    if (dataType!.isViewable) {
+      availableTypes.addAll([
+        TextDisplay.widgetType,
+        LargeTextDisplay.widgetType,
+      ]);
+    }
+
+    availableTypes.add(type);
 
     return availableTypes.toSet().toList();
   }
@@ -358,8 +366,9 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
 
   @override
   List<String> getAvailableDisplayTypes() {
-    if (type == 'ComboBox Chooser' || type == 'Split Button Chooser') {
-      return ['ComboBox Chooser', 'Split Button Chooser'];
+    if (type == ComboBoxChooser.widgetType ||
+        type == SplitButtonChooser.widgetType) {
+      return [ComboBoxChooser.widgetType, SplitButtonChooser.widgetType];
     }
 
     return [type];
