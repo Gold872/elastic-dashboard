@@ -56,22 +56,21 @@ class TextDisplayModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      DialogToggleSwitch(
-        label: 'Show Submit Button',
-        initialValue: _showSubmitButton,
-        onToggle: (value) {
-          showSubmitButton = value;
-        },
-      ),
-    ];
-  }
+  List<Widget> getEditProperties(BuildContext context) => [
+    DialogToggleSwitch(
+      label: 'Show Submit Button',
+      initialValue: _showSubmitButton,
+      onToggle: (value) {
+        showSubmitButton = value;
+      },
+    ),
+  ];
 
   @override
-  Map<String, dynamic> toJson() {
-    return {...super.toJson(), 'show_submit_button': showSubmitButton};
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'show_submit_button': showSubmitButton,
+  };
 
   void publishData(String value) {
     bool publishTopic =

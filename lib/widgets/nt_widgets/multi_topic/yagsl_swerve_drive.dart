@@ -122,63 +122,59 @@ class YAGSLSwerveDriveModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_robot_rotation': _showRobotRotation,
-      'show_desired_states': _showDesiredStates,
-      'angle_offset': _angleOffset,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'show_robot_rotation': _showRobotRotation,
+    'show_desired_states': _showDesiredStates,
+    'angle_offset': _angleOffset,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Row(
-        children: [
-          Flexible(
-            child: DialogToggleSwitch(
-              initialValue: _showRobotRotation,
-              label: 'Show Robot Rotation',
-              onToggle: (value) {
-                showRobotRotation = value;
-              },
-            ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Row(
+      children: [
+        Flexible(
+          child: DialogToggleSwitch(
+            initialValue: _showRobotRotation,
+            label: 'Show Robot Rotation',
+            onToggle: (value) {
+              showRobotRotation = value;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              initialValue: _showDesiredStates,
-              label: 'Show Desired States',
-              onToggle: (value) {
-                showDesiredStates = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            initialValue: _showDesiredStates,
+            label: 'Show Desired States',
+            onToggle: (value) {
+              showDesiredStates = value;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              initialText: angleOffset.toString(),
-              label: 'Angle Offset (Degrees)',
-              onSubmit: (String value) {
-                double? doubleValue = double.tryParse(value);
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            initialText: angleOffset.toString(),
+            label: 'Angle Offset (Degrees)',
+            onSubmit: (String value) {
+              double? doubleValue = double.tryParse(value);
 
-                if (doubleValue != null) {
-                  angleOffset = doubleValue;
-                }
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
+              if (doubleValue != null) {
+                angleOffset = doubleValue;
+              }
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
             ),
           ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class YAGSLSwerveDrive extends NTWidget {
@@ -789,7 +785,5 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

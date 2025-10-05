@@ -234,45 +234,43 @@ class PreferenceSearch extends StatelessWidget {
       .toList();
 
   @override
-  Widget build(BuildContext context) {
-    return SearchableList<String>(
-      inputDecoration: InputDecoration(
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        label: const Text('Search'),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      searchTextController: model.searchTextController,
-      separatorBuilder: (context, _) => const Divider(height: 4.0),
-      searchFieldPadding: const EdgeInsets.symmetric(
-        horizontal: 2,
-        vertical: 7.5,
-      ),
-      filter: (query) => filterList(query),
-      initialList: filterList(model.searchTextController.text),
-      itemBuilder: (item) {
-        TextEditingController? textController =
-            model.preferenceTextControllers[item];
+  Widget build(BuildContext context) => SearchableList<String>(
+    inputDecoration: InputDecoration(
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      label: const Text('Search'),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    searchTextController: model.searchTextController,
+    separatorBuilder: (context, _) => const Divider(height: 4.0),
+    searchFieldPadding: const EdgeInsets.symmetric(
+      horizontal: 2,
+      vertical: 7.5,
+    ),
+    filter: (query) => filterList(query),
+    initialList: filterList(model.searchTextController.text),
+    itemBuilder: (item) {
+      TextEditingController? textController =
+          model.preferenceTextControllers[item];
 
-        return _RobotPreference(
-          label: item.split('/').last,
-          textController: textController ?? TextEditingController(),
-          onFocusGained: () {
-            NT4Topic? nt4Topic = model.preferenceTopics[item];
+      return _RobotPreference(
+        label: item.split('/').last,
+        textController: textController ?? TextEditingController(),
+        onFocusGained: () {
+          NT4Topic? nt4Topic = model.preferenceTopics[item];
 
-            if (nt4Topic == null) {
-              return;
-            }
+          if (nt4Topic == null) {
+            return;
+          }
 
-            model.ntConnection.publishTopic(nt4Topic);
-          },
-          onSubmit: (data) {
-            onSubmit.call(item, data);
-          },
-        );
-      },
-    );
-  }
+          model.ntConnection.publishTopic(nt4Topic);
+        },
+        onSubmit: (data) {
+          onSubmit.call(item, data);
+        },
+      );
+    },
+  );
 }
 
 class _RobotPreference extends StatelessWidget {
@@ -289,37 +287,35 @@ class _RobotPreference extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Focus(
-        onFocusChange: (value) {
-          // Don't consider the text submitted when focus is gained
-          if (value) {
-            onFocusGained.call();
-            return;
-          }
-          String textValue = textController.text;
-          if (textValue.isNotEmpty) {
-            onSubmit.call(textValue);
-          }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(4.0),
+    child: Focus(
+      onFocusChange: (value) {
+        // Don't consider the text submitted when focus is gained
+        if (value) {
+          onFocusGained.call();
+          return;
+        }
+        String textValue = textController.text;
+        if (textValue.isNotEmpty) {
+          onSubmit.call(textValue);
+        }
+      },
+      child: TextField(
+        onSubmitted: (value) {
+          onSubmit.call(value);
         },
-        child: TextField(
-          onSubmitted: (value) {
-            onSubmit.call(value);
-          },
-          controller: textController,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 8,
-            ),
-            labelText: label,
-            border: const OutlineInputBorder(),
+        controller: textController,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 8,
           ),
+          labelText: label,
+          border: const OutlineInputBorder(),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

@@ -119,40 +119,38 @@ mixin DashboardPageSettings on DashboardPageViewModel {
         await showDialog<bool>(
           context: state!.context,
           barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: const Row(
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.warning, color: Colors.yellow),
+                SizedBox(width: 5),
+                Text('Grid Resizing Warning'),
+              ],
+            ),
+            content: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.warning, color: Colors.yellow),
-                  SizedBox(width: 5),
-                  Text('Grid Resizing Warning'),
+                  Text(
+                    'Resizing the grid may cause widgets to become misaligned due to sizing constraints. Manual work may be required after resizing.',
+                  ),
                 ],
               ),
-              content: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Resizing the grid may cause widgets to become misaligned due to sizing constraints. Manual work may be required after resizing.',
-                    ),
-                  ],
-                ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Okay'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Okay'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Cancel'),
-                ),
-              ],
-            );
-          },
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
         ) ??
         true;
 

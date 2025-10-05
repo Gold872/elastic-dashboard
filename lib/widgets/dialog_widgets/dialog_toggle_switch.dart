@@ -20,34 +20,32 @@ class _DialogToggleSwitchState extends State<DialogToggleSwitch> {
   late bool value = widget.initialValue;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5.0),
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Flexible(
-              child: Text(widget.label ?? '', textAlign: TextAlign.center),
-            ),
-            const SizedBox(width: 3),
-            Switch(
-              onChanged: (value) {
-                widget.onToggle(value);
-
-                setState(() => this.value = value);
-              },
-              value: value,
-            ),
-          ],
-        ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5.0),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
-    );
-  }
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: Text(widget.label ?? '', textAlign: TextAlign.center),
+          ),
+          const SizedBox(width: 3),
+          Switch(
+            onChanged: (value) {
+              widget.onToggle(value);
+
+              setState(() => this.value = value);
+            },
+            value: value,
+          ),
+        ],
+      ),
+    ),
+  );
 }

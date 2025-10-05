@@ -54,27 +54,23 @@ class GyroModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'counter_clockwise_positive': _counterClockwisePositive,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'counter_clockwise_positive': _counterClockwisePositive,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Center(
-        child: DialogToggleSwitch(
-          initialValue: _counterClockwisePositive,
-          label: 'Counter Clockwise Positive',
-          onToggle: (value) {
-            counterClockwisePositive = value;
-          },
-        ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Center(
+      child: DialogToggleSwitch(
+        initialValue: _counterClockwisePositive,
+        label: 'Counter Clockwise Positive',
+        onToggle: (value) {
+          counterClockwisePositive = value;
+        },
       ),
-    ];
-  }
+    ),
+  ];
 }
 
 class Gyro extends NTWidget {

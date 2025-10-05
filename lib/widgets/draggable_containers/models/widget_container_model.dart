@@ -181,15 +181,13 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   }
 
   @mustCallSuper
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'x': displayRect.left,
-      'y': displayRect.top,
-      'width': displayRect.width,
-      'height': displayRect.height,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'x': displayRect.left,
+    'y': displayRect.top,
+    'width': displayRect.width,
+    'height': displayRect.height,
+  };
 
   @mustCallSuper
   void fromJson(
@@ -213,9 +211,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     displayRect = Rect.fromLTWH(x, y, width, height);
   }
 
-  List<ContextMenuEntry> getContextMenuItems() {
-    return [];
-  }
+  List<ContextMenuEntry> getContextMenuItems() => [];
 
   void softDispose({bool deleting = false}) {}
 
@@ -250,96 +246,88 @@ abstract class WidgetContainerModel extends ChangeNotifier {
   void showEditProperties(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Properties'),
-          content: SizedBox(
-            width: 353,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: getContainerEditProperties(),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  List<Widget> getContainerEditProperties() {
-    return [
-      // Settings for the widget container
-      const Text('Container Settings'),
-      const SizedBox(height: 5),
-      DialogTextInput(
-        onSubmit: (value) {
-          title = value;
-        },
-        label: 'Title',
-        initialText: title,
-      ),
-    ];
-  }
-
-  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
-    return WidgetContainer(
-      title: title,
-      width: draggingRect.width,
-      height: draggingRect.height,
-      cornerRadius:
-          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
-      opacity: 0.80,
-      child: Container(),
-    );
-  }
-
-  WidgetContainer getWidgetContainer(BuildContext context) {
-    return WidgetContainer(
-      title: title,
-      width: displayRect.width,
-      height: displayRect.height,
-      cornerRadius:
-          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
-      child: Container(),
-    );
-  }
-
-  Widget getDefaultPreview() {
-    return Positioned(
-      left: previewRect.left,
-      top: previewRect.top,
-      width: previewRect.width,
-      height: previewRect.height,
-      child: Visibility(
-        visible: previewVisible,
-        child: Container(
-          decoration: BoxDecoration(
-            color: (validLocation)
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(
-              preferences.getDouble(PrefKeys.cornerRadius) ??
-                  Defaults.cornerRadius,
-            ),
-            border: Border.all(
-              color: (validLocation)
-                  ? Colors.lightGreenAccent.shade400
-                  : Colors.red,
-              width: 5.0,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Properties'),
+        content: SizedBox(
+          width: 353,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: getContainerEditProperties(),
             ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
+
+  List<Widget> getContainerEditProperties() => [
+    // Settings for the widget container
+    const Text('Container Settings'),
+    const SizedBox(height: 5),
+    DialogTextInput(
+      onSubmit: (value) {
+        title = value;
+      },
+      label: 'Title',
+      initialText: title,
+    ),
+  ];
+
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) =>
+      WidgetContainer(
+        title: title,
+        width: draggingRect.width,
+        height: draggingRect.height,
+        cornerRadius:
+            preferences.getDouble(PrefKeys.cornerRadius) ??
+            Defaults.cornerRadius,
+        opacity: 0.80,
+        child: Container(),
+      );
+
+  WidgetContainer getWidgetContainer(BuildContext context) => WidgetContainer(
+    title: title,
+    width: displayRect.width,
+    height: displayRect.height,
+    cornerRadius:
+        preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
+    child: Container(),
+  );
+
+  Widget getDefaultPreview() => Positioned(
+    left: previewRect.left,
+    top: previewRect.top,
+    width: previewRect.width,
+    height: previewRect.height,
+    child: Visibility(
+      visible: previewVisible,
+      child: Container(
+        decoration: BoxDecoration(
+          color: (validLocation)
+              ? Colors.white.withValues(alpha: 0.25)
+              : Colors.black.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(
+            preferences.getDouble(PrefKeys.cornerRadius) ??
+                Defaults.cornerRadius,
+          ),
+          border: Border.all(
+            color: (validLocation)
+                ? Colors.lightGreenAccent.shade400
+                : Colors.red,
+            width: 5.0,
+          ),
+        ),
+      ),
+    ),
+  );
 }

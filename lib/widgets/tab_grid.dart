@@ -285,9 +285,7 @@ class TabGridModel extends ChangeNotifier {
     return localPosition;
   }
 
-  bool isDraggingInContainer() {
-    return _containerDraggingIn != null;
-  }
+  bool isDraggingInContainer() => _containerDraggingIn != null;
 
   /// Returns weather `widget` is able to be moved to `location` without overlapping anything else.
   ///
@@ -310,9 +308,8 @@ class TabGridModel extends ChangeNotifier {
     return true;
   }
 
-  bool isValidLayoutLocation(Offset globalPosition) {
-    return getLayoutAtLocation(globalPosition) != null;
-  }
+  bool isValidLayoutLocation(Offset globalPosition) =>
+      getLayoutAtLocation(globalPosition) != null;
 
   /// Returns weather `location` will overlap with widgets already on the dashboard
   bool isValidLocation(Rect location) {
@@ -706,28 +703,24 @@ class TabGridModel extends ChangeNotifier {
   ListLayoutModel createListLayout({
     String title = 'List Layout',
     List<NTWidgetContainerModel>? children,
-  }) {
-    return ListLayoutModel(
-      preferences: preferences,
-      title: title,
-      initialPosition: Rect.fromLTWH(
-        0.0,
-        0.0,
-        NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) *
-            2,
-        NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) *
-            2,
-      ),
-      children: children,
-      minWidth: 128.0,
-      minHeight: 128.0,
-      dragOutFunctions: (
-        dragOutUpdate: layoutDragOutUpdate,
-        dragOutEnd: layoutDragOutEnd,
-      ),
-      onDragCancel: _layoutContainerOnDragCancel,
-    );
-  }
+  }) => ListLayoutModel(
+    preferences: preferences,
+    title: title,
+    initialPosition: Rect.fromLTWH(
+      0.0,
+      0.0,
+      NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
+      NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
+    ),
+    children: children,
+    minWidth: 128.0,
+    minHeight: 128.0,
+    dragOutFunctions: (
+      dragOutUpdate: layoutDragOutUpdate,
+      dragOutEnd: layoutDragOutEnd,
+    ),
+    onDragCancel: _layoutContainerOnDragCancel,
+  );
 
   void addWidget(WidgetContainerModel widget) {
     _widgetModels.add(widget);
@@ -1103,9 +1096,8 @@ class TabGrid extends StatelessWidget {
             transitionDuration: const Duration(milliseconds: 100),
             reverseTransitionDuration: Duration.zero,
             transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
+                (context, animation, secondaryAnimation, child) =>
+                    FadeTransition(opacity: animation, child: child),
           ),
         );
       },

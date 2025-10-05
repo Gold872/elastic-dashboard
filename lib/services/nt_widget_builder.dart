@@ -544,9 +544,8 @@ class NTWidgetBuilder {
     return snappedNormal;
   }
 
-  static double getNormalSize([int? gridSize]) {
-    return DraggableWidgetContainer.snapToGrid(_normalSize, gridSize);
-  }
+  static double getNormalSize([int? gridSize]) =>
+      DraggableWidgetContainer.snapToGrid(_normalSize, gridSize);
 
   static bool isRegistered(String name) {
     ensureInitialized();

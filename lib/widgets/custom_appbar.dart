@@ -150,28 +150,26 @@ class _WindowDragArea extends StatelessWidget {
   const _WindowDragArea({this.child});
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onPanStart: (details) {
-        if (!Settings.isWindowDraggable) {
-          return;
-        }
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.translucent,
+    onPanStart: (details) {
+      if (!Settings.isWindowDraggable) {
+        return;
+      }
 
-        windowManager.startDragging();
-      },
-      onDoubleTap: () async {
-        if (!Settings.isWindowMaximizable) {
-          return;
-        }
+      windowManager.startDragging();
+    },
+    onDoubleTap: () async {
+      if (!Settings.isWindowMaximizable) {
+        return;
+      }
 
-        if (await windowManager.isMaximized()) {
-          await windowManager.unmaximize();
-        } else {
-          await windowManager.maximize();
-        }
-      },
-      child: child ?? Container(),
-    );
-  }
+      if (await windowManager.isMaximized()) {
+        await windowManager.unmaximize();
+      } else {
+        await windowManager.maximize();
+      }
+    },
+    child: child ?? Container(),
+  );
 }

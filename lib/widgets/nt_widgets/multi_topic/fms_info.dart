@@ -102,9 +102,7 @@ class FMSInfo extends NTWidget {
     }
   }
 
-  bool _flagMatches(int word, int flag) {
-    return (word & flag) != 0;
-  }
+  bool _flagMatches(int word, int flag) => (word & flag) != 0;
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +261,5 @@ class _BlackAndYellowStripes extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -108,22 +108,21 @@ class ComboBoxChooserModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {...super.toJson(), 'sort_options': _sortOptions};
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'sort_options': _sortOptions,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      DialogToggleSwitch(
-        label: 'Sort Options Alphabetically',
-        initialValue: _sortOptions,
-        onToggle: (value) {
-          sortOptions = value;
-        },
-      ),
-    ];
-  }
+  List<Widget> getEditProperties(BuildContext context) => [
+    DialogToggleSwitch(
+      label: 'Sort Options Alphabetically',
+      initialValue: _sortOptions,
+      onToggle: (value) {
+        sortOptions = value;
+      },
+    ),
+  ];
 
   void onChooserStateUpdate() {
     List<Object?>? rawOptions = optionsSubscription.value
@@ -277,89 +276,86 @@ class _StringChooserDropdown extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return ExcludeFocus(
-      child: Tooltip(
-        message: selected ?? '',
-        waitDuration: const Duration(milliseconds: 250),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return DropdownButton2<String>(
-              isExpanded: true,
-              value: selected,
-              selectedItemBuilder: (context) => [
-                ...options.map((String option) {
-                  return Container(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      option,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }),
-              ],
-              dropdownStyleData: DropdownStyleData(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.0),
+  Widget build(BuildContext context) => ExcludeFocus(
+    child: Tooltip(
+      message: selected ?? '',
+      waitDuration: const Duration(milliseconds: 250),
+      child: LayoutBuilder(
+        builder: (context, constraints) => DropdownButton2<String>(
+          isExpanded: true,
+          value: selected,
+          selectedItemBuilder: (context) => [
+            ...options.map(
+              (String option) => Container(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  option,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxHeight: 250,
-                width: max(constraints.maxWidth, 250),
               ),
-              dropdownSearchData: DropdownSearchData(
-                searchController: textController,
-                searchMatchFn: (item, searchValue) {
-                  return item.value.toString().toLowerCase().contains(
-                    searchValue.toLowerCase(),
-                  );
-                },
-                searchInnerWidgetHeight: 50,
-                searchInnerWidget: Container(
-                  color: Theme.of(context).colorScheme.surface,
-                  height: 50,
-                  padding: const EdgeInsets.only(
-                    top: 8,
-                    bottom: 4,
-                    right: 8,
-                    left: 8,
+            ),
+          ],
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            maxHeight: 250,
+            width: max(constraints.maxWidth, 250),
+          ),
+          dropdownSearchData: DropdownSearchData(
+            searchController: textController,
+            searchMatchFn: (item, searchValue) =>
+                item.value.toString().toLowerCase().contains(
+                  searchValue.toLowerCase(),
+                ),
+            searchInnerWidgetHeight: 50,
+            searchInnerWidget: Container(
+              color: Theme.of(context).colorScheme.surface,
+              height: 50,
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 4,
+                right: 8,
+                left: 8,
+              ),
+              child: TextFormField(
+                expands: true,
+                maxLines: null,
+                controller: textController,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
                   ),
-                  child: TextFormField(
-                    expands: true,
-                    maxLines: null,
-                    controller: textController,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
-                      ),
-                      label: const Text('Search'),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                  label: const Text('Search'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              items: options.map((String option) {
-                return DropdownMenuItem(
+            ),
+          ),
+          items: options
+              .map(
+                (String option) => DropdownMenuItem(
                   value: option,
                   child: Text(
                     option,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                );
-              }).toList(),
-              onMenuStateChange: (isOpen) {
-                if (!isOpen) {
-                  textController.clear();
-                }
-              },
-              onChanged: onValueChanged,
-            );
+                ),
+              )
+              .toList(),
+          onMenuStateChange: (isOpen) {
+            if (!isOpen) {
+              textController.clear();
+            }
           },
+          onChanged: onValueChanged,
         ),
       ),
-    );
-  }
+    ),
+  );
 }

@@ -64,50 +64,48 @@ class _LayoutDragTileState extends State<LayoutDragTile> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
-      child: DragListener(
-        onDragStart: (details) {
-          if (draggingWidget != null) {
-            return;
-          }
+  Widget build(BuildContext context) => InkWell(
+    onTap: () {},
+    child: DragListener(
+      onDragStart: (details) {
+        if (draggingWidget != null) {
+          return;
+        }
 
-          // Prevents 2 finger drags from dragging a widget
-          if (details.kind != null &&
-              details.kind! == PointerDeviceKind.trackpad) {
-            draggingWidget = null;
-            return;
-          }
+        // Prevents 2 finger drags from dragging a widget
+        if (details.kind != null &&
+            details.kind! == PointerDeviceKind.trackpad) {
+          draggingWidget = null;
+          return;
+        }
 
-          setState(() => draggingWidget = widget.layoutBuilder.call());
-        },
-        onDragUpdate: (details) {
-          if (draggingWidget == null) {
-            return;
-          }
+        setState(() => draggingWidget = widget.layoutBuilder.call());
+      },
+      onDragUpdate: (details) {
+        if (draggingWidget == null) {
+          return;
+        }
 
-          widget.onDragUpdate.call(details.globalPosition, draggingWidget!);
-        },
-        onDragEnd: (details) {
-          if (draggingWidget == null) {
-            return;
-          }
+        widget.onDragUpdate.call(details.globalPosition, draggingWidget!);
+      },
+      onDragEnd: (details) {
+        if (draggingWidget == null) {
+          return;
+        }
 
-          widget.onDragEnd.call(draggingWidget!);
+        widget.onDragEnd.call(draggingWidget!);
 
-          setState(() => draggingWidget = null);
-        },
-        child: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 16.0),
-          child: ListTile(
-            style: ListTileStyle.drawer,
-            contentPadding: const EdgeInsets.only(right: 20.0),
-            leading: Icon(widget.icon),
-            title: Text(widget.title),
-          ),
+        setState(() => draggingWidget = null);
+      },
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 16.0),
+        child: ListTile(
+          style: ListTileStyle.drawer,
+          contentPadding: const EdgeInsets.only(right: 20.0),
+          leading: Icon(widget.icon),
+          title: Text(widget.title),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

@@ -535,14 +535,12 @@ class _DifferentialDrivePainter extends CustomPainter {
     double maxInput,
     double minOutput,
     double maxOutput,
-  ) {
-    return (x - minInput) * (maxOutput - minOutput) / (maxInput - minInput) +
-        minOutput;
-  }
+  ) =>
+      (x - minInput) * (maxOutput - minOutput) / (maxInput - minInput) +
+      minOutput;
 
   @override
-  bool shouldRepaint(_DifferentialDrivePainter oldDelegate) {
-    return oldDelegate.leftSpeed != leftSpeed ||
-        oldDelegate.rightSpeed != rightSpeed;
-  }
+  bool shouldRepaint(_DifferentialDrivePainter oldDelegate) =>
+      oldDelegate.leftSpeed != leftSpeed ||
+      oldDelegate.rightSpeed != rightSpeed;
 }

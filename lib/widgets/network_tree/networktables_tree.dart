@@ -117,16 +117,15 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
 
   List<NetworkTableTreeRow> _filterChildren(
     List<NetworkTableTreeRow> children,
-  ) {
+  ) => children.where((child) {
     // Apply the filter to each child
-    return children.where((child) {
-      if (_matchesFilter(child)) {
-        return true;
-      }
-      // Recursively check if any descendant matches the filter
-      return _filterChildren(child.children).isNotEmpty;
-    }).toList();
-  }
+
+    if (_matchesFilter(child)) {
+      return true;
+    }
+    // Recursively check if any descendant matches the filter
+    return _filterChildren(child.children).isNotEmpty;
+  }).toList();
 
   bool _matchesFilter(NetworkTableTreeRow node) {
     // Don't filter if there isn't a search
@@ -256,23 +255,23 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     return TreeView<NetworkTableTreeRow>(
       treeController: treeController,
       nodeBuilder:
-          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
-            return TreeTile(
-              gridIndex: widget.gridIndex,
-              preferences: widget.preferences,
-              entry: entry,
-              listLayoutBuilder: widget.listLayoutBuilder,
-              onDragUpdate: widget.onDragUpdate,
-              onDragEnd: widget.onDragEnd,
-              onRemoveWidget: widget.onRemoveWidget,
-              onTap: () {
-                if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
-                  return;
-                }
-                setState(() => treeController.toggleExpansion(entry.node));
-              },
-            );
-          },
+          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) =>
+              TreeTile(
+                gridIndex: widget.gridIndex,
+                preferences: widget.preferences,
+                entry: entry,
+                listLayoutBuilder: widget.listLayoutBuilder,
+                onDragUpdate: widget.onDragUpdate,
+                onDragEnd: widget.onDragEnd,
+                onRemoveWidget: widget.onRemoveWidget,
+                onTap: () {
+                  if (widget.hideMetadata &&
+                      entry.node.containsOnlyMetadata()) {
+                    return;
+                  }
+                  setState(() => treeController.toggleExpansion(entry.node));
+                },
+              ),
     );
   }
 }

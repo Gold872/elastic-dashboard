@@ -89,114 +89,110 @@ class NumberBarModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'min_value': minValue,
-      'max_value': maxValue,
-      'divisions': divisions,
-      'inverted': inverted,
-      'orientation': orientation,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'min_value': minValue,
+    'max_value': maxValue,
+    'divisions': divisions,
+    'inverted': inverted,
+    'orientation': orientation,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      // Orientation
-      Column(
-        children: [
-          const Text('Orientation'),
-          DialogDropdownChooser<String>(
-            initialValue:
-                '${_orientation[0].toUpperCase()}${_orientation.substring(1)}',
-            choices: const ['Horizontal', 'Vertical'],
-            onSelectionChanged: (value) {
-              if (value == null) {
+  List<Widget> getEditProperties(BuildContext context) => [
+    // Orientation
+    Column(
+      children: [
+        const Text('Orientation'),
+        DialogDropdownChooser<String>(
+          initialValue:
+              '${_orientation[0].toUpperCase()}${_orientation.substring(1)}',
+          choices: const ['Horizontal', 'Vertical'],
+          onSelectionChanged: (value) {
+            if (value == null) {
+              return;
+            }
+
+            orientation = value.toLowerCase();
+          },
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Min and max values
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMin = double.tryParse(value);
+              if (newMin == null) {
                 return;
               }
-
-              orientation = value.toLowerCase();
+              minValue = newMin;
             },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            label: 'Min Value',
+            initialText: _minValue.toString(),
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Min and max values
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMin = double.tryParse(value);
-                if (newMin == null) {
-                  return;
-                }
-                minValue = newMin;
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMax = double.tryParse(value);
+              if (newMax == null) {
+                return;
+              }
+              maxValue = newMax;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            label: 'Max Value',
+            initialText: _maxValue.toString(),
+          ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Number of divisions and orientation
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Expanded(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              int? newDivisions = int.tryParse(value);
+              if (newDivisions == null || newDivisions < 2) {
+                return;
+              }
+              divisions = newDivisions;
+            },
+            formatter: FilteringTextInputFormatter.digitsOnly,
+            label: 'Divisions',
+            initialText: _divisions.toString(),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Center(
+            child: DialogToggleSwitch(
+              initialValue: _inverted,
+              label: 'Inverted',
+              onToggle: (value) {
+                inverted = value;
               },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Min Value',
-              initialText: _minValue.toString(),
             ),
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMax = double.tryParse(value);
-                if (newMax == null) {
-                  return;
-                }
-                maxValue = newMax;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Max Value',
-              initialText: _maxValue.toString(),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Number of divisions and orientation
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                int? newDivisions = int.tryParse(value);
-                if (newDivisions == null || newDivisions < 2) {
-                  return;
-                }
-                divisions = newDivisions;
-              },
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              label: 'Divisions',
-              initialText: _divisions.toString(),
-            ),
-          ),
-          const SizedBox(width: 5),
-          Expanded(
-            child: Center(
-              child: DialogToggleSwitch(
-                initialValue: _inverted,
-                label: 'Inverted',
-                onToggle: (value) {
-                  inverted = value;
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class NumberBar extends NTWidget {

@@ -345,57 +345,55 @@ mixin DashboardPageLayouts on DashboardPageViewModel {
         content: SizedBox(
           width: 350,
           child: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('Layout File'),
-                  ValueListenableBuilder(
-                    valueListenable: layoutSelection,
-                    builder: (_, value, child) => DialogDropdownChooser<String>(
-                      choices: fileNames,
-                      initialValue: value,
-                      onSelectionChanged: (selection) =>
-                          layoutSelection.value = selection,
+            builder: (context, setState) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Layout File'),
+                ValueListenableBuilder(
+                  valueListenable: layoutSelection,
+                  builder: (_, value, child) => DialogDropdownChooser<String>(
+                    choices: fileNames,
+                    initialValue: value,
+                    onSelectionChanged: (selection) =>
+                        layoutSelection.value = selection,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text('Download Mode'),
+                Row(
+                  children: [
+                    Flexible(
+                      child: ValueListenableBuilder(
+                        valueListenable: modeSelection,
+                        builder: (_, value, child) =>
+                            DialogDropdownChooser<LayoutDownloadMode>(
+                              choices: LayoutDownloadMode.values,
+                              initialValue: value,
+                              nameMap: (value) => value.name,
+                              onSelectionChanged: (selection) {
+                                if (selection != null) {
+                                  modeSelection.value = selection;
+                                }
+                              },
+                            ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Download Mode'),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: ValueListenableBuilder(
-                          valueListenable: modeSelection,
-                          builder: (_, value, child) =>
-                              DialogDropdownChooser<LayoutDownloadMode>(
-                                choices: LayoutDownloadMode.values,
-                                initialValue: value,
-                                nameMap: (value) => value.name,
-                                onSelectionChanged: (selection) {
-                                  if (selection != null) {
-                                    modeSelection.value = selection;
-                                  }
-                                },
-                              ),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      TextButton.icon(
-                        label: const Text('Help'),
-                        icon: const Icon(Icons.help_outline),
-                        onPressed: () {
-                          setState(() => showModes = !showModes);
-                        },
-                      ),
-                    ],
-                  ),
-                  if (showModes) ...[
-                    const SizedBox(height: 5),
-                    Text(LayoutDownloadMode.descriptions),
+                    const SizedBox(width: 5),
+                    TextButton.icon(
+                      label: const Text('Help'),
+                      icon: const Icon(Icons.help_outline),
+                      onPressed: () {
+                        setState(() => showModes = !showModes);
+                      },
+                    ),
                   ],
+                ),
+                if (showModes) ...[
+                  const SizedBox(height: 5),
+                  Text(LayoutDownloadMode.descriptions),
                 ],
-              );
-            },
+              ],
+            ),
           ),
         ),
         actions: [

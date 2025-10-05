@@ -127,159 +127,155 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'start_angle': _startAngle,
-      'end_angle': _endAngle,
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'number_of_labels': _numberOfLabels,
-      'wrap_value': _wrapValue,
-      'show_pointer': _showPointer,
-      'show_ticks': _showTicks,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'start_angle': _startAngle,
+    'end_angle': _endAngle,
+    'min_value': _minValue,
+    'max_value': _maxValue,
+    'number_of_labels': _numberOfLabels,
+    'wrap_value': _wrapValue,
+    'show_pointer': _showPointer,
+    'show_ticks': _showTicks,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      // Start/End angles
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Start Angle (CW+)',
-              initialText: _startAngle.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              onSubmit: (value) {
-                double? newStartAngle = double.tryParse(value);
+  List<Widget> getEditProperties(BuildContext context) => [
+    // Start/End angles
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Start Angle (CW+)',
+            initialText: _startAngle.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newStartAngle = double.tryParse(value);
 
-                if (newStartAngle == null) {
-                  return;
-                }
-                startAngle = newStartAngle;
-              },
-            ),
+              if (newStartAngle == null) {
+                return;
+              }
+              startAngle = newStartAngle;
+            },
           ),
-          Flexible(
-            child: DialogTextInput(
-              label: 'End Angle (CW+)',
-              initialText: _endAngle.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              onSubmit: (value) {
-                double? newEndAngle = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            label: 'End Angle (CW+)',
+            initialText: _endAngle.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newEndAngle = double.tryParse(value);
 
-                if (newEndAngle == null) {
-                  return;
-                }
-                endAngle = newEndAngle;
-              },
-            ),
+              if (newEndAngle == null) {
+                return;
+              }
+              endAngle = newEndAngle;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Min/Max values
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Min Value',
-              initialText: _minValue.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              onSubmit: (value) {
-                double? newMin = double.tryParse(value);
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Min/Max values
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Min Value',
+            initialText: _minValue.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newMin = double.tryParse(value);
 
-                if (newMin == null) {
-                  return;
-                }
-                minValue = newMin;
-              },
-            ),
+              if (newMin == null) {
+                return;
+              }
+              minValue = newMin;
+            },
           ),
-          Flexible(
-            child: DialogTextInput(
-              label: 'Max Value',
-              initialText: _maxValue.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              onSubmit: (value) {
-                double? newMax = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            label: 'Max Value',
+            initialText: _maxValue.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newMax = double.tryParse(value);
 
-                if (newMax == null) {
-                  return;
-                }
-                maxValue = newMax;
-              },
-            ),
+              if (newMax == null) {
+                return;
+              }
+              maxValue = newMax;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Wrap value & Show pointer
-      Row(
-        children: [
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Wrap Value',
-              initialValue: _wrapValue,
-              onToggle: (value) {
-                wrapValue = value;
-              },
-            ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Wrap value & Show pointer
+    Row(
+      children: [
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Wrap Value',
+            initialValue: _wrapValue,
+            onToggle: (value) {
+              wrapValue = value;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Show Pointer',
-              initialValue: _showPointer,
-              onToggle: (value) {
-                showPointer = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Show Pointer',
+            initialValue: _showPointer,
+            onToggle: (value) {
+              showPointer = value;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Label & tick customization
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Number of Labels',
-              initialText: _numberOfLabels.toString(),
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              onSubmit: (value) {
-                int? newLabelCount = int.tryParse(value);
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Label & tick customization
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Number of Labels',
+            initialText: _numberOfLabels.toString(),
+            formatter: FilteringTextInputFormatter.digitsOnly,
+            onSubmit: (value) {
+              int? newLabelCount = int.tryParse(value);
 
-                if (newLabelCount == null) {
-                  return;
-                }
+              if (newLabelCount == null) {
+                return;
+              }
 
-                numberOfLabels = newLabelCount;
-              },
-            ),
+              numberOfLabels = newLabelCount;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Show Ticks',
-              initialValue: _showTicks,
-              onToggle: (value) {
-                showTicks = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Show Ticks',
+            initialValue: _showTicks,
+            onToggle: (value) {
+              showTicks = value;
+            },
           ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class RadialGaugeWidget extends NTWidget {

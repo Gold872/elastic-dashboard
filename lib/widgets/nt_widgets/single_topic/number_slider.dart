@@ -81,92 +81,88 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'divisions': _divisions,
-      'update_continuously': updateContinuously,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'min_value': _minValue,
+    'max_value': _maxValue,
+    'divisions': _divisions,
+    'update_continuously': updateContinuously,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      // Min and max values
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        mainAxisSize: MainAxisSize.max,
-        children: [
+  List<Widget> getEditProperties(BuildContext context) => [
+    // Min and max values
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMin = double.tryParse(value);
+              if (newMin == null) {
+                return;
+              }
+              minValue = newMin;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            label: 'Min Value',
+            initialText: _minValue.toString(),
+          ),
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMax = double.tryParse(value);
+              if (newMax == null) {
+                return;
+              }
+              maxValue = newMax;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            label: 'Max Value',
+            initialText: _maxValue.toString(),
+          ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Number of divisions
+    Row(
+      children: [
+        Flexible(
+          flex: 2,
+          child: DialogTextInput(
+            onSubmit: (value) {
+              int? newDivisions = int.tryParse(value);
+              if (newDivisions == null || newDivisions < 2) {
+                return;
+              }
+              divisions = newDivisions;
+            },
+            formatter: FilteringTextInputFormatter.digitsOnly,
+            label: 'Divisions',
+            initialText: _divisions.toString(),
+          ),
+        ),
+        if (ntStructMeta == null)
           Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMin = double.tryParse(value);
-                if (newMin == null) {
-                  return;
-                }
-                minValue = newMin;
+            flex: 3,
+            child: DialogToggleSwitch(
+              initialValue: updateContinuously,
+              label: 'Update While Dragging',
+              onToggle: (value) {
+                updateContinuously = value;
               },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Min Value',
-              initialText: _minValue.toString(),
             ),
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMax = double.tryParse(value);
-                if (newMax == null) {
-                  return;
-                }
-                maxValue = newMax;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Max Value',
-              initialText: _maxValue.toString(),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Number of divisions
-      Row(
-        children: [
-          Flexible(
-            flex: 2,
-            child: DialogTextInput(
-              onSubmit: (value) {
-                int? newDivisions = int.tryParse(value);
-                if (newDivisions == null || newDivisions < 2) {
-                  return;
-                }
-                divisions = newDivisions;
-              },
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              label: 'Divisions',
-              initialText: _divisions.toString(),
-            ),
-          ),
-          if (ntStructMeta == null)
-            Flexible(
-              flex: 3,
-              child: DialogToggleSwitch(
-                initialValue: updateContinuously,
-                label: 'Update While Dragging',
-                onToggle: (value) {
-                  updateContinuously = value;
-                },
-              ),
-            ),
-        ],
-      ),
-    ];
-  }
+      ],
+    ),
+  ];
 
   void publishValue(double value) {
     bool publishTopic =
