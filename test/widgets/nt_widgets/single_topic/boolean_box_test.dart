@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -58,7 +58,7 @@ void main() {
   });
 
   test('Boolean box from json', () {
-    NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel booleanBoxModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Boolean Box',
@@ -108,7 +108,7 @@ void main() {
   testWidgets('Boolean box widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel booleanBoxModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel booleanBoxModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Boolean Box',
@@ -159,7 +159,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     BooleanBoxModel booleanBoxModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
               ntConnection,
               preferences,
               'Boolean Box',

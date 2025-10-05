@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -57,7 +57,7 @@ void main() {
   });
 
   test('Match time from json', () {
-    NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel matchTimeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Match Time',
@@ -108,7 +108,7 @@ void main() {
   testWidgets('Match time widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel matchTimeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Match Time',
@@ -164,7 +164,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     MatchTimeModel matchTimeModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
               ntConnection,
               preferences,
               'Match Time',

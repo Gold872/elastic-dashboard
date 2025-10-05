@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -37,7 +37,7 @@ void main() {
   });
 
   test('Camera stream from json', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -81,7 +81,7 @@ void main() {
   });
 
   test('Camera stream from json (with invalid resolution)', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -103,7 +103,7 @@ void main() {
   });
 
   test('Camera stream from json (with negative resolution)', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -143,7 +143,7 @@ void main() {
   testWidgets('Camera stream online widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -173,7 +173,7 @@ void main() {
   testWidgets('Camera stream offline widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOfflineNT4(),
       preferences,
       'Camera Stream',

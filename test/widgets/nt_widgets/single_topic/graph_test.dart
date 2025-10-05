@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('Graph from json', () {
-    NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel graphModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Graph',
@@ -104,7 +104,7 @@ void main() {
   testWidgets('Graph widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel graphModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel graphModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Graph',
@@ -129,7 +129,7 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     GraphModel graphModel =
-        NTWidgetBuilder.buildNTModelFromJson(
+        NTWidgetRegistry.buildNTModelFromJson(
               ntConnection,
               preferences,
               'Graph',

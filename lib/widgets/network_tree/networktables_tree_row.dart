@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -198,7 +198,7 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    return NTWidgetBuilder.buildNTModelFromType(
+    return NTWidgetRegistry.buildNTModelFromType(
       ntConnection,
       preferences,
       entry?.meta,
@@ -229,7 +229,7 @@ class NetworkTableTreeRow {
   }) async {
     NTWidgetModel? primary = await getPrimaryWidget();
 
-    if (primary == null || !NTWidgetBuilder.isRegistered(primary.type)) {
+    if (primary == null || !NTWidgetRegistry.isRegistered(primary.type)) {
       primary?.unSubscribe();
       primary?.softDispose(deleting: true);
       primary?.dispose();
@@ -248,7 +248,7 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    NTWidget? widget = NTWidgetBuilder.buildNTWidgetFromModel(primary);
+    NTWidget? widget = NTWidgetRegistry.buildNTWidgetFromModel(primary);
 
     if (widget == null) {
       primary.unSubscribe();
@@ -257,8 +257,8 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    double width = NTWidgetBuilder.getDefaultWidth(primary);
-    double height = NTWidgetBuilder.getDefaultHeight(primary);
+    double width = NTWidgetRegistry.getDefaultWidth(primary);
+    double height = NTWidgetRegistry.getDefaultHeight(primary);
 
     return NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -274,7 +274,7 @@ class NetworkTableTreeRow {
     if (primary == null) {
       return null;
     }
-    NTWidget? widget = NTWidgetBuilder.buildNTWidgetFromModel(primary);
+    NTWidget? widget = NTWidgetRegistry.buildNTWidgetFromModel(primary);
 
     if (widget == null) {
       primary.unSubscribe();
@@ -284,8 +284,8 @@ class NetworkTableTreeRow {
       return null;
     }
 
-    double width = NTWidgetBuilder.getDefaultWidth(primary);
-    double height = NTWidgetBuilder.getDefaultHeight(primary);
+    double width = NTWidgetRegistry.getDefaultWidth(primary);
+    double height = NTWidgetRegistry.getDefaultHeight(primary);
 
     return WidgetContainer(
       title: rowName,

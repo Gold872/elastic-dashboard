@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -65,7 +65,7 @@ void main() {
   });
 
   test('Combo box chooser from json', () {
-    NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel comboBoxChooserModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'ComboBox Chooser',
@@ -83,7 +83,7 @@ void main() {
   });
 
   test('Combo box chooser alias name', () {
-    NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel comboBoxChooserModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'String Chooser',
@@ -115,7 +115,7 @@ void main() {
   testWidgets('Combo box chooser widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel comboBoxChooserModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel comboBoxChooserModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'ComboBox Chooser',

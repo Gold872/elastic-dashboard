@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
 import '../../../test_util.dart';
@@ -56,7 +56,7 @@ void main() {
   });
 
   test('Single color view from json', () {
-    NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel singleColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Single Color View',
@@ -91,7 +91,7 @@ void main() {
   testWidgets('Single color view widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel singleColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Single Color View',

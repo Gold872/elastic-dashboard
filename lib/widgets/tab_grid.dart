@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_list_layout.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -709,8 +709,8 @@ class TabGridModel extends ChangeNotifier {
     initialPosition: Rect.fromLTWH(
       0.0,
       0.0,
-      NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
-      NTWidgetBuilder.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
+      NTWidgetRegistry.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
+      NTWidgetRegistry.getNormalSize(preferences.getInt(PrefKeys.gridSize)) * 2,
     ),
     children: children,
     minWidth: 128.0,

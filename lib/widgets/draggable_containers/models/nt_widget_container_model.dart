@@ -5,7 +5,7 @@ import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
@@ -41,10 +41,10 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   void init() {
     super.init();
 
-    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
-    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
+    minWidth = NTWidgetRegistry.getMinimumWidth(childModel);
+    minHeight = NTWidgetRegistry.getMinimumHeight(childModel);
 
-    NTWidget? childWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);
+    NTWidget? childWidget = NTWidgetRegistry.buildNTWidgetFromModel(childModel);
 
     if (childWidget != null) {
       child = childWidget;
@@ -88,7 +88,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
 
     String type = tryCast(jsonData['type']) ?? '';
 
-    childModel = NTWidgetBuilder.buildNTModelFromJson(
+    childModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       type,
@@ -352,7 +352,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
     childModel.unSubscribe();
     childModel.dispose();
 
-    childModel = NTWidgetBuilder.buildNTModelFromType(
+    childModel = NTWidgetRegistry.buildNTModelFromType(
       ntConnection,
       preferences,
       switch (childModel) {
@@ -371,21 +371,21 @@ class NTWidgetContainerModel extends WidgetContainerModel {
                 Defaults.defaultGraphPeriod,
     );
 
-    NTWidget? newWidget = NTWidgetBuilder.buildNTWidgetFromModel(childModel);
+    NTWidget? newWidget = NTWidgetRegistry.buildNTWidgetFromModel(childModel);
 
     newWidget ??= const EmptyNTWidget();
 
     child = newWidget;
 
-    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
-    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
+    minWidth = NTWidgetRegistry.getMinimumWidth(childModel);
+    minHeight = NTWidgetRegistry.getMinimumHeight(childModel);
 
     notifyListeners();
   }
 
   void updateMinimumSize() {
-    minWidth = NTWidgetBuilder.getMinimumWidth(childModel);
-    minHeight = NTWidgetBuilder.getMinimumHeight(childModel);
+    minWidth = NTWidgetRegistry.getMinimumWidth(childModel);
+    minHeight = NTWidgetRegistry.getMinimumHeight(childModel);
 
     notifyListeners();
   }

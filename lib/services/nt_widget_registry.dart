@@ -74,7 +74,7 @@ typedef MultiTopicNTModelProvider<T extends MultiTopicNTWidgetModel> =
 
 typedef NTWidgetProvider<T extends NTWidget> = T Function({Key? key});
 
-class NTWidgetBuilder {
+class NTWidgetRegistry {
   static final Map<String, NTWidgetProvider> _widgetNameBuildMap = {};
 
   static final Map<String, NTModelProvider> _modelNameBuildMap = {};
@@ -89,7 +89,7 @@ class NTWidgetBuilder {
 
   static const double _normalSize = 128.0;
 
-  NTWidgetBuilder._();
+  NTWidgetRegistry._();
 
   static bool _initialized = false;
   static void ensureInitialized() {

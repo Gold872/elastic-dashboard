@@ -17,7 +17,7 @@ import 'package:elastic_dashboard/services/app_distributor.dart';
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/log.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 
 import 'package:path_provider/path_provider.dart'
@@ -76,7 +76,7 @@ void main() async {
       Defaults.logLevel;
   Logger.level = logLevel;
 
-  NTWidgetBuilder.ensureInitialized();
+  NTWidgetRegistry.ensureInitialized();
 
   String ipAddress =
       preferences.getString(PrefKeys.ipAddress) ?? Defaults.ipAddress;
