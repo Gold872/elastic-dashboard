@@ -118,33 +118,31 @@ class CommandSchedulerWidget extends NTWidget {
             Flexible(
               child: ListView.builder(
                 itemCount: commandsLength,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.only(
-                      left: 16.0,
-                      right: 8.0,
-                    ),
-                    visualDensity: const VisualDensity(
-                      vertical: VisualDensity.minimumDensity,
-                    ),
-                    title: Text(names[index], overflow: TextOverflow.ellipsis),
-                    trailing: IconButton(
-                      tooltip: 'Cancel Command',
-                      onPressed: () {
-                        model.cancelCommand(ids[index]);
-                      },
-                      color: Colors.red,
-                      icon: const Icon(Icons.cancel_outlined),
-                    ),
-                    subtitle: Text(
-                      'ID: ${ids[index].toString()}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall!.copyWith(color: Colors.grey),
-                    ),
-                  );
-                },
+                itemBuilder: (context, index) => ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.only(
+                    left: 16.0,
+                    right: 8.0,
+                  ),
+                  visualDensity: const VisualDensity(
+                    vertical: VisualDensity.minimumDensity,
+                  ),
+                  title: Text(names[index], overflow: TextOverflow.ellipsis),
+                  trailing: IconButton(
+                    tooltip: 'Cancel Command',
+                    onPressed: () {
+                      model.cancelCommand(ids[index]);
+                    },
+                    color: Colors.red,
+                    icon: const Icon(Icons.cancel_outlined),
+                  ),
+                  subtitle: Text(
+                    'ID: ${ids[index].toString()}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: Colors.grey),
+                  ),
+                ),
               ),
             ),
           ],

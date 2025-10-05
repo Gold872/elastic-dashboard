@@ -59,14 +59,12 @@ class DraggableWidgetContainer extends StatelessWidget {
             .toSet(),
         draggable: model.draggable,
         resizable: model.draggable,
-        contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Builder(
-            builder: (context) {
-              controller = TransformableBox.controllerOf(context);
-              return Container();
-            },
-          );
-        },
+        contentBuilder: (BuildContext context, Rect rect, Flip flip) => Builder(
+          builder: (context) {
+            controller = TransformableBox.controllerOf(context);
+            return Container();
+          },
+        ),
         onDragStart: (event) {
           model.dragging = true;
           model.previewVisible = true;
@@ -213,30 +211,28 @@ class WidgetContainer extends StatelessWidget {
                 children: [
                   // Title
                   LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(cornerRadius),
-                            topRight: Radius.circular(cornerRadius),
-                          ),
-                          color: theme.colorScheme.primaryContainer,
+                    builder: (context, constraints) => Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(cornerRadius),
+                          topRight: Radius.circular(cornerRadius),
                         ),
-                        width: constraints.maxWidth,
-                        alignment: Alignment.center,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 6.50,
-                          ),
-                          child: Text(
-                            title!,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall,
-                          ),
+                        color: theme.colorScheme.primaryContainer,
+                      ),
+                      width: constraints.maxWidth,
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 6.50,
                         ),
-                      );
-                    },
+                        child: Text(
+                          title!,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                    ),
                   ),
                   // The child widget
                   Expanded(

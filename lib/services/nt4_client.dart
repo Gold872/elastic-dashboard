@@ -33,9 +33,8 @@ class NT4Subscription extends ValueNotifier<Object?> {
   }) : super(null);
 
   @override
-  String toString() {
-    return 'NT4Subscription(Topic: $topic, Options: $options, Uid: $uid)';
-  }
+  String toString() =>
+      'NT4Subscription(Topic: $topic, Options: $options, Uid: $uid)';
 
   void listen(Function(Object?, int) onChanged) {
     _listeners.add(onChanged);
@@ -123,17 +122,13 @@ class NT4Subscription extends ValueNotifier<Object?> {
     super.value = value;
   }
 
-  Map<String, dynamic> _toSubscribeJson() {
-    return {
-      'topics': [topic],
-      'options': options.toJson(),
-      'subuid': uid,
-    };
-  }
+  Map<String, dynamic> _toSubscribeJson() => {
+    'topics': [topic],
+    'options': options.toJson(),
+    'subuid': uid,
+  };
 
-  Map<String, dynamic> _toUnsubscribeJson() {
-    return {'subuid': uid};
-  }
+  Map<String, dynamic> _toUnsubscribeJson() => {'subuid': uid};
 
   @override
   bool operator ==(Object other) =>
@@ -218,18 +213,15 @@ class NT4StructMeta {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'path': path,
-      'schema_name': schemaName,
-      if (type != null) 'type': type!.serialize(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'path': path,
+    'schema_name': schemaName,
+    if (type != null) 'type': type!.serialize(),
+  };
 
   @override
-  String toString() {
-    return 'NT4StructMeta(Path: $path, Schema Name: $schemaName, Type: $type)';
-  }
+  String toString() =>
+      'NT4StructMeta(Path: $path, Schema Name: $schemaName, Type: $type)';
 
   @override
   bool operator ==(Object other) =>
@@ -256,14 +248,12 @@ class NT4SubscriptionOptions {
     this.structMeta,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'periodic': periodicRateSeconds,
-      'all': all,
-      'topicsonly': topicsOnly,
-      'prefix': prefix,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'periodic': periodicRateSeconds,
+    'all': all,
+    'topicsonly': topicsOnly,
+    'prefix': prefix,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -285,9 +275,8 @@ class NT4SubscriptionOptions {
   ]);
 
   @override
-  String toString() {
-    return 'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix, Struct Meta: $structMeta)';
-  }
+  String toString() =>
+      'NT4SubscriptionOptions(Periodic: $periodicRateSeconds, All: $all, TopicsOnly: $topicsOnly, Prefix: $prefix, Struct Meta: $structMeta)';
 }
 
 class NT4Topic {
@@ -306,25 +295,23 @@ class NT4Topic {
   });
 
   @override
-  String toString() {
-    return 'NT4Topic(Name: $name, Type: $type, ID: $id, PubUID: $pubUID, Properties: $properties)';
-  }
+  String toString() =>
+      'NT4Topic(Name: $name, Type: $type, ID: $id, PubUID: $pubUID, Properties: $properties)';
 
-  Map<String, dynamic> toPublishJson() {
-    return {'name': name, 'type': type.serialize(), 'pubuid': pubUID};
-  }
+  Map<String, dynamic> toPublishJson() => {
+    'name': name,
+    'type': type.serialize(),
+    'pubuid': pubUID,
+  };
 
-  Map<String, dynamic> toUnpublishJson() {
-    return {'name': name, 'pubuid': pubUID};
-  }
+  Map<String, dynamic> toUnpublishJson() => {'name': name, 'pubuid': pubUID};
 
-  Map<String, dynamic> toPropertiesJson() {
-    return {'name': name, 'update': properties};
-  }
+  Map<String, dynamic> toPropertiesJson() => {
+    'name': name,
+    'update': properties,
+  };
 
-  int getTypeId() {
-    return type.typeId;
-  }
+  int getTypeId() => type.typeId;
 
   bool get isRetained =>
       properties.containsKey('retained') && properties['retained'];
@@ -530,13 +517,11 @@ class NT4Client {
     _wsSetProperties(topic);
   }
 
-  NT4Topic? getTopicFromName(String topic) {
-    return announcedTopics.values.firstWhereOrNull((e) => e.name == topic);
-  }
+  NT4Topic? getTopicFromName(String topic) =>
+      announcedTopics.values.firstWhereOrNull((e) => e.name == topic);
 
-  bool isTopicPublished(NT4Topic? topic) {
-    return _clientPublishedTopics.containsValue(topic);
-  }
+  bool isTopicPublished(NT4Topic? topic) =>
+      _clientPublishedTopics.containsValue(topic);
 
   NT4Topic publishNewTopic(
     String name,
@@ -607,13 +592,9 @@ class NT4Client {
     logger.debug('[NT4] Topic not found: $topic');
   }
 
-  int _getClientTimeUS() {
-    return DateTime.now().microsecondsSinceEpoch;
-  }
+  int _getClientTimeUS() => DateTime.now().microsecondsSinceEpoch;
 
-  int getServerTimeUS() {
-    return _getClientTimeUS() + _serverTimeOffsetUS;
-  }
+  int getServerTimeUS() => _getClientTimeUS() + _serverTimeOffsetUS;
 
   void _rttSendTimestamp([dynamic _]) {
     var timeTopic = announcedTopics[-1];

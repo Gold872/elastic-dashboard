@@ -157,13 +157,9 @@ class NTConnection {
     }
   }
 
-  Map<int, NT4Topic> announcedTopics() {
-    return _ntClient.announcedTopics;
-  }
+  Map<int, NT4Topic> announcedTopics() => _ntClient.announcedTopics;
 
-  Stream<double> latencyStream() {
-    return _ntClient.latencyStream();
-  }
+  Stream<double> latencyStream() => _ntClient.latencyStream();
 
   void changeIPAddress(String ipAddress) {
     if (_ntClient.serverBaseAddress == ipAddress) {
@@ -232,13 +228,10 @@ class NTConnection {
     }
   }
 
-  NT4Topic? getTopicFromSubscription(NT4Subscription subscription) {
-    return _ntClient.getTopicFromName(subscription.topic);
-  }
+  NT4Topic? getTopicFromSubscription(NT4Subscription subscription) =>
+      _ntClient.getTopicFromName(subscription.topic);
 
-  NT4Topic? getTopicFromName(String topic) {
-    return _ntClient.getTopicFromName(topic);
-  }
+  NT4Topic? getTopicFromName(String topic) => _ntClient.getTopicFromName(topic);
 
   void publishTopic(NT4Topic topic) {
     _ntClient.publishTopic(topic);
@@ -248,17 +241,12 @@ class NTConnection {
     String name,
     NT4Type type, {
     Map<String, dynamic> properties = const {},
-  }) {
-    return _ntClient.publishNewTopic(name, type, properties);
-  }
+  }) => _ntClient.publishNewTopic(name, type, properties);
 
-  bool isTopicPublished(NT4Topic? topic) {
-    return _ntClient.isTopicPublished(topic);
-  }
+  bool isTopicPublished(NT4Topic? topic) => _ntClient.isTopicPublished(topic);
 
-  Object? getLastAnnouncedValue(String topic) {
-    return _ntClient.lastAnnouncedValues[topic];
-  }
+  Object? getLastAnnouncedValue(String topic) =>
+      _ntClient.lastAnnouncedValues[topic];
 
   void unpublishTopic(NT4Topic topic) {
     _ntClient.unpublishTopic(topic);

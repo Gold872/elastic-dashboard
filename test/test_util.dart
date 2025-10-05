@@ -173,9 +173,9 @@ MockNTConnection createMockOnlineNT4({
     publishedTopics.remove(invocation.positionalArguments[0]);
   });
 
-  when(mockNT4Connection.isTopicPublished(any)).thenAnswer((invocation) {
-    return publishedTopics.contains(invocation.positionalArguments[0]);
-  });
+  when(mockNT4Connection.isTopicPublished(any)).thenAnswer(
+    (invocation) => publishedTopics.contains(invocation.positionalArguments[0]),
+  );
 
   when(mockNT4Connection.updateDataFromTopic(any, any)).thenAnswer((
     invocation,
@@ -203,9 +203,7 @@ MockNTConnection createMockOnlineNT4({
 
     when(topicSubscription.topic).thenReturn(topic.name);
 
-    when(topicSubscription.value).thenAnswer((_) {
-      return virtualValues![topic.name];
-    });
+    when(topicSubscription.value).thenAnswer((_) => virtualValues![topic.name]);
 
     when(topicSubscription.value = any).thenAnswer((invocation) {
       virtualValues![topic.name] = invocation.positionalArguments[0];

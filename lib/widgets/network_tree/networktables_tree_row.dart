@@ -185,12 +185,11 @@ class NetworkTableTreeRow {
     return getNTWidgetFromTopic(ntConnection, preferences, entry!);
   }
 
-  Future<String?> getTypeString(String typeTopic) async {
-    return ntConnection.subscribeAndRetrieveData(
-      typeTopic,
-      timeout: const Duration(milliseconds: 500),
-    );
-  }
+  Future<String?> getTypeString(String typeTopic) async =>
+      ntConnection.subscribeAndRetrieveData(
+        typeTopic,
+        timeout: const Duration(milliseconds: 500),
+      );
 
   Future<NTWidgetModel?>? getTypedWidget(String typeTopic) async {
     String? type = await getTypeString(typeTopic);

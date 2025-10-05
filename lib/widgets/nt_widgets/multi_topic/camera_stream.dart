@@ -114,183 +114,175 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'rotation_turns': rotationTurns,
-      if (quality != null) 'compression': quality,
-      if (fps != null) 'fps': fps,
-      if (resolution != null)
-        'resolution': [resolution!.width, resolution!.height],
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'rotation_turns': rotationTurns,
+    if (quality != null) 'compression': quality,
+    if (fps != null) 'fps': fps,
+    if (resolution != null)
+      'resolution': [resolution!.width, resolution!.height],
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      StatefulBuilder(
-        builder: (context, setState) {
-          return Row(
-            children: [
-              Flexible(
-                child: DialogTextInput(
-                  allowEmptySubmission: true,
-                  initialText: fps?.toString() ?? '-1',
-                  label: 'FPS',
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                  onSubmit: (value) {
-                    int? newFPS = int.tryParse(value);
-
-                    setState(() {
-                      if (newFPS == -1 || newFPS == 0) {
-                        fps = null;
-                        return;
-                      }
-
-                      fps = newFPS;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              const Text('Resolution'),
-              Flexible(
-                child: DialogTextInput(
-                  allowEmptySubmission: true,
-                  initialText: resolution?.width.floor().toString() ?? '-1',
-                  label: 'Width',
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                  onSubmit: (value) {
-                    int? newWidth = int.tryParse(value);
-
-                    setState(() {
-                      if (newWidth == null || newWidth == 0) {
-                        resolution = null;
-                        return;
-                      }
-
-                      if (newWidth! % 2 != 0) {
-                        // Won't allow += for some reason
-                        newWidth = newWidth! + 1;
-                      }
-
-                      resolution = Size(
-                        newWidth!.toDouble(),
-                        resolution?.height.toDouble() ?? 0,
-                      );
-                    });
-                  },
-                ),
-              ),
-              const Text('x'),
-              Flexible(
-                child: DialogTextInput(
-                  allowEmptySubmission: true,
-                  initialText: resolution?.height.floor().toString() ?? '-1',
-                  label: 'Height',
-                  formatter: FilteringTextInputFormatter.digitsOnly,
-                  onSubmit: (value) {
-                    int? newHeight = int.tryParse(value);
-
-                    setState(() {
-                      if (newHeight == null || newHeight == 0) {
-                        resolution = null;
-                        return;
-                      }
-
-                      resolution = Size(
-                        resolution?.width.toDouble() ?? 0,
-                        newHeight.toDouble(),
-                      );
-                    });
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      StatefulBuilder(
-        builder: (context, setState) {
-          return Row(
-            children: [
-              const Text('Quality:'),
-              Expanded(
-                child: Slider(
-                  value: quality?.toDouble() ?? -5.0,
-                  min: -5.0,
-                  max: 100.0,
-                  divisions: 104,
-                  label: '${quality ?? -1}',
-                  onChanged: (value) {
-                    setState(() {
-                      if (value < 0) {
-                        quality = null;
-                      } else {
-                        quality = value.floor();
-                      }
-                    });
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      TextButton(
-        onPressed: () => refresh(),
-        child: const Text('Apply Quality Settings'),
-      ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+  List<Widget> getEditProperties(BuildContext context) => [
+    StatefulBuilder(
+      builder: (context, setState) => Row(
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                label: const Text('Rotate Left'),
-                icon: const Icon(Icons.rotate_90_degrees_ccw),
-                onPressed: () {
-                  int newRotation = rotationTurns - 1;
-                  if (newRotation < 0) {
-                    newRotation += 4;
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: fps?.toString() ?? '-1',
+              label: 'FPS',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newFPS = int.tryParse(value);
+
+                setState(() {
+                  if (newFPS == -1 || newFPS == 0) {
+                    fps = null;
+                    return;
                   }
-                  rotationTurns = newRotation;
-                },
-              ),
+
+                  fps = newFPS;
+                });
+              },
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                label: const Text('Rotate Right'),
-                icon: const Icon(Icons.rotate_90_degrees_cw),
-                onPressed: () {
-                  int newRotation = rotationTurns + 1;
-                  if (newRotation >= 4) {
-                    newRotation -= 4;
+          const SizedBox(width: 10.0),
+          const Text('Resolution'),
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: resolution?.width.floor().toString() ?? '-1',
+              label: 'Width',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newWidth = int.tryParse(value);
+
+                setState(() {
+                  if (newWidth == null || newWidth == 0) {
+                    resolution = null;
+                    return;
                   }
-                  rotationTurns = newRotation;
-                },
-              ),
+
+                  if (newWidth! % 2 != 0) {
+                    // Won't allow += for some reason
+                    newWidth = newWidth! + 1;
+                  }
+
+                  resolution = Size(
+                    newWidth!.toDouble(),
+                    resolution?.height.toDouble() ?? 0,
+                  );
+                });
+              },
+            ),
+          ),
+          const Text('x'),
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: resolution?.height.floor().toString() ?? '-1',
+              label: 'Height',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newHeight = int.tryParse(value);
+
+                setState(() {
+                  if (newHeight == null || newHeight == 0) {
+                    resolution = null;
+                    return;
+                  }
+
+                  resolution = Size(
+                    resolution?.width.toDouble() ?? 0,
+                    newHeight.toDouble(),
+                  );
+                });
+              },
             ),
           ),
         ],
       ),
-    ];
-  }
+    ),
+    StatefulBuilder(
+      builder: (context, setState) => Row(
+        children: [
+          const Text('Quality:'),
+          Expanded(
+            child: Slider(
+              value: quality?.toDouble() ?? -5.0,
+              min: -5.0,
+              max: 100.0,
+              divisions: 104,
+              label: '${quality ?? -1}',
+              onChanged: (value) {
+                setState(() {
+                  if (value < 0) {
+                    quality = null;
+                  } else {
+                    quality = value.floor();
+                  }
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+    TextButton(
+      onPressed: () => refresh(),
+      child: const Text('Apply Quality Settings'),
+    ),
+    const SizedBox(height: 5),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+              label: const Text('Rotate Left'),
+              icon: const Icon(Icons.rotate_90_degrees_ccw),
+              onPressed: () {
+                int newRotation = rotationTurns - 1;
+                if (newRotation < 0) {
+                  newRotation += 4;
+                }
+                rotationTurns = newRotation;
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+              label: const Text('Rotate Right'),
+              icon: const Icon(Icons.rotate_90_degrees_cw),
+              onPressed: () {
+                int newRotation = rotationTurns + 1;
+                if (newRotation >= 4) {
+                  newRotation -= 4;
+                }
+                rotationTurns = newRotation;
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  ];
 
   @override
   void softDispose({bool deleting = false}) {

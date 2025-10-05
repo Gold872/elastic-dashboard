@@ -68,53 +68,37 @@ class NT4Type {
     this.modifier = NT4TypeModifier.normal,
   });
 
-  factory NT4Type.boolean() {
-    return NT4Type(dataType: NT4DataType.boolean, name: 'boolean');
-  }
+  factory NT4Type.boolean() =>
+      NT4Type(dataType: NT4DataType.boolean, name: 'boolean');
 
-  factory NT4Type.int() {
-    return NT4Type(dataType: NT4DataType.int32, name: 'int');
-  }
+  factory NT4Type.int() => NT4Type(dataType: NT4DataType.int32, name: 'int');
 
-  factory NT4Type.float() {
-    return NT4Type(dataType: NT4DataType.float32, name: 'float');
-  }
+  factory NT4Type.float() =>
+      NT4Type(dataType: NT4DataType.float32, name: 'float');
 
-  factory NT4Type.double() {
-    return NT4Type(dataType: NT4DataType.float64, name: 'double');
-  }
+  factory NT4Type.double() =>
+      NT4Type(dataType: NT4DataType.float64, name: 'double');
 
-  factory NT4Type.string() {
-    return NT4Type(dataType: NT4DataType.string, name: 'string');
-  }
+  factory NT4Type.string() =>
+      NT4Type(dataType: NT4DataType.string, name: 'string');
 
-  factory NT4Type.json() {
-    return NT4Type(dataType: NT4DataType.json, name: 'json');
-  }
+  factory NT4Type.json() => NT4Type(dataType: NT4DataType.json, name: 'json');
 
-  factory NT4Type.raw() {
-    return NT4Type(dataType: NT4DataType.raw, name: 'raw');
-  }
+  factory NT4Type.raw() => NT4Type(dataType: NT4DataType.raw, name: 'raw');
 
-  factory NT4Type.rpc() {
-    return NT4Type(dataType: NT4DataType.rpc, name: 'rpc');
-  }
+  factory NT4Type.rpc() => NT4Type(dataType: NT4DataType.rpc, name: 'rpc');
 
-  factory NT4Type.msgpack() {
-    return NT4Type(dataType: NT4DataType.msgpack, name: 'msgpack');
-  }
+  factory NT4Type.msgpack() =>
+      NT4Type(dataType: NT4DataType.msgpack, name: 'msgpack');
 
-  factory NT4Type.protobuf() {
-    return NT4Type(dataType: NT4DataType.protobuf, name: 'protobuf');
-  }
+  factory NT4Type.protobuf() =>
+      NT4Type(dataType: NT4DataType.protobuf, name: 'protobuf');
 
-  factory NT4Type.structschema() {
-    return NT4Type(dataType: NT4DataType.structschema, name: 'structschema');
-  }
+  factory NT4Type.structschema() =>
+      NT4Type(dataType: NT4DataType.structschema, name: 'structschema');
 
-  factory NT4Type.unknown(String type) {
-    return NT4Type(dataType: NT4DataType.unknown, name: type);
-  }
+  factory NT4Type.unknown(String type) =>
+      NT4Type(dataType: NT4DataType.unknown, name: type);
 
   factory NT4Type.struct(String name) {
     if (name.contains(':')) {
@@ -135,9 +119,8 @@ class NT4Type {
     );
   }
 
-  factory NT4Type.structArray(String name) {
-    return NT4Type.array(NT4Type.struct(name));
-  }
+  factory NT4Type.structArray(String name) =>
+      NT4Type.array(NT4Type.struct(name));
 
   factory NT4Type.array(NT4Type subType) {
     if (subType.dataType.isBinary && !subType.isStruct) {
@@ -280,17 +263,14 @@ class NT4Type {
   }
 
   @override
-  String toString() {
-    return 'NT4Type(${serialize()})';
-  }
+  String toString() => 'NT4Type(${serialize()})';
 
   @override
-  bool operator ==(Object other) {
-    return other is NT4Type &&
-        dataType == other.dataType &&
-        modifier == other.modifier &&
-        name == other.name;
-  }
+  bool operator ==(Object other) =>
+      other is NT4Type &&
+      dataType == other.dataType &&
+      modifier == other.modifier &&
+      name == other.name;
 
   @override
   int get hashCode => Object.hashAll([dataType, modifier, name]);

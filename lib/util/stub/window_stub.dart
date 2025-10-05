@@ -78,11 +78,8 @@ class WindowManager {
 
   void removeListener(WindowListener listener) {}
 
-  double getDevicePixelRatio() {
-    // Subsequent version, remove this deprecated member.
-    // ignore: deprecated_member_use
-    return window.devicePixelRatio;
-  }
+  // ignore: deprecated_member_use
+  double getDevicePixelRatio() => window.devicePixelRatio;
 
   Future<void> ensureInitialized() async {}
 
@@ -280,7 +277,7 @@ class WindowManager {
   Future<void> setAlwaysOnBottom(bool isAlwaysOnBottom) async {}
 
   /// Returns `String` - The title of the native window.
-  Future<String> getTitle() async => "";
+  Future<String> getTitle() async => '';
 
   /// Changes the title of native window to title.
   Future<void> setTitle(String title) async {}

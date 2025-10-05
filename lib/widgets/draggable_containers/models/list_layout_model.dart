@@ -80,9 +80,7 @@ class ListLayoutModel extends LayoutContainerModel {
   }) : super.fromJson();
 
   @override
-  Map<String, dynamic> toJson() {
-    return {...super.toJson(), ...getChildrenJson()};
-  }
+  Map<String, dynamic> toJson() => {...super.toJson(), ...getChildrenJson()};
 
   Map<String, dynamic> getChildrenJson() {
     var childrenJson = [];
@@ -95,9 +93,7 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  Map<String, dynamic> getProperties() {
-    return {'label_position': labelPosition};
-  }
+  Map<String, dynamic> getProperties() => {'label_position': labelPosition};
 
   @override
   void fromJson(
@@ -179,124 +175,120 @@ class ListLayoutModel extends LayoutContainerModel {
   void showEditProperties(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Properties'),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return SizedBox(
-                width: 375,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ...getContainerEditProperties(),
-                    const Divider(),
-                    const Center(child: Text('Label Position')),
-                    DialogDropdownChooser(
-                      onSelectionChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Properties'),
+        content: StatefulBuilder(
+          builder: (context, setState) => SizedBox(
+            width: 375,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...getContainerEditProperties(),
+                const Divider(),
+                const Center(child: Text('Label Position')),
+                DialogDropdownChooser(
+                  onSelectionChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
 
-                        if (!labelPositions.contains(value)) {
-                          return;
-                        }
+                    if (!labelPositions.contains(value)) {
+                      return;
+                    }
 
+                    setState(() {
+                      labelPosition = value.toUpperCase();
+
+                      notifyListeners();
+                    });
+                  },
+                  choices: labelPositions,
+                  initialValue:
+                      labelPosition.substring(0, 1).toUpperCase() +
+                      labelPosition.substring(1).toLowerCase(),
+                ),
+                const Divider(),
+                if (children.isNotEmpty)
+                  Flexible(
+                    child: ReorderableListView(
+                      header: const Text('Children Order & Properties'),
+                      shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: children
+                          .map(
+                            (container) => Padding(
+                              key: UniqueKey(),
+                              padding: EdgeInsets.zero,
+                              child: ExpansionTile(
+                                title: Text(container.title ?? ''),
+                                subtitle: Text(container.childModel.type),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      children.remove(container);
+
+                                      container.unSubscribe();
+                                      container.softDispose(deleting: true);
+                                      container.dispose();
+
+                                      notifyListeners();
+                                    });
+                                  },
+                                ),
+                                tilePadding: const EdgeInsets.only(
+                                  right: 40.0,
+                                ),
+                                childrenPadding: const EdgeInsets.only(
+                                  left: 16.0,
+                                  top: 8.0,
+                                  right: 32.0,
+                                  bottom: 8.0,
+                                ),
+                                expandedCrossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: getChildEditProperties(
+                                  context,
+                                  container,
+                                  setState,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onReorder: (oldIndex, newIndex) {
                         setState(() {
-                          labelPosition = value.toUpperCase();
+                          if (newIndex > oldIndex) {
+                            newIndex--;
+                          }
+                          var temp = children[newIndex];
+                          children[newIndex] = children[oldIndex];
+                          children[oldIndex] = temp;
 
                           notifyListeners();
                         });
                       },
-                      choices: labelPositions,
-                      initialValue:
-                          labelPosition.substring(0, 1).toUpperCase() +
-                          labelPosition.substring(1).toLowerCase(),
                     ),
-                    const Divider(),
-                    if (children.isNotEmpty)
-                      Flexible(
-                        child: ReorderableListView(
-                          header: const Text('Children Order & Properties'),
-                          shrinkWrap: true,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: children
-                              .map(
-                                (container) => Padding(
-                                  key: UniqueKey(),
-                                  padding: EdgeInsets.zero,
-                                  child: ExpansionTile(
-                                    title: Text(container.title ?? ''),
-                                    subtitle: Text(container.childModel.type),
-                                    controlAffinity:
-                                        ListTileControlAffinity.leading,
-                                    trailing: IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () {
-                                        setState(() {
-                                          children.remove(container);
-
-                                          container.unSubscribe();
-                                          container.softDispose(deleting: true);
-                                          container.dispose();
-
-                                          notifyListeners();
-                                        });
-                                      },
-                                    ),
-                                    tilePadding: const EdgeInsets.only(
-                                      right: 40.0,
-                                    ),
-                                    childrenPadding: const EdgeInsets.only(
-                                      left: 16.0,
-                                      top: 8.0,
-                                      right: 32.0,
-                                      bottom: 8.0,
-                                    ),
-                                    expandedCrossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: getChildEditProperties(
-                                      context,
-                                      container,
-                                      setState,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onReorder: (oldIndex, newIndex) {
-                            setState(() {
-                              if (newIndex > oldIndex) {
-                                newIndex--;
-                              }
-                              var temp = children[newIndex];
-                              children[newIndex] = children[oldIndex];
-                              children[oldIndex] = temp;
-
-                              notifyListeners();
-                            });
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
+                  ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -357,9 +349,10 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition}) {
-    return widget is NTWidgetContainerModel;
-  }
+  bool willAcceptWidget(
+    WidgetContainerModel widget, {
+    Offset? globalPosition,
+  }) => widget is NTWidgetContainerModel;
 
   List<Widget> _getListColumn() {
     List<Widget> column = [];
@@ -559,43 +552,17 @@ class ListLayoutModel extends LayoutContainerModel {
   }
 
   @override
-  WidgetContainer getDraggingWidgetContainer(BuildContext context) {
-    return WidgetContainer(
-      title: title,
-      width: draggingRect.width,
-      height: draggingRect.height,
-      cornerRadius:
-          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
-      opacity: 0.80,
-      horizontalPadding: 5.0,
-      verticalPadding: 5.0,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Column(children: [..._getListColumn()]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  WidgetContainer getWidgetContainer(BuildContext context) {
-    return WidgetContainer(
-      title: title,
-      width: displayRect.width,
-      height: displayRect.height,
-      cornerRadius:
-          preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
-      opacity: (previewVisible) ? 0.25 : 1.00,
-      horizontalPadding: 5.0,
-      verticalPadding: 5.0,
-      child: Opacity(
-        opacity: (enabled) ? 1.00 : 0.50,
+  WidgetContainer getDraggingWidgetContainer(BuildContext context) =>
+      WidgetContainer(
+        title: title,
+        width: draggingRect.width,
+        height: draggingRect.height,
+        cornerRadius:
+            preferences.getDouble(PrefKeys.cornerRadius) ??
+            Defaults.cornerRadius,
+        opacity: 0.80,
+        horizontalPadding: 5.0,
+        verticalPadding: 5.0,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -607,7 +574,31 @@ class ListLayoutModel extends LayoutContainerModel {
             ),
           ],
         ),
+      );
+
+  @override
+  WidgetContainer getWidgetContainer(BuildContext context) => WidgetContainer(
+    title: title,
+    width: displayRect.width,
+    height: displayRect.height,
+    cornerRadius:
+        preferences.getDouble(PrefKeys.cornerRadius) ?? Defaults.cornerRadius,
+    opacity: (previewVisible) ? 0.25 : 1.00,
+    horizontalPadding: 5.0,
+    verticalPadding: 5.0,
+    child: Opacity(
+      opacity: (enabled) ? 1.00 : 0.50,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Column(children: [..._getListColumn()]),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

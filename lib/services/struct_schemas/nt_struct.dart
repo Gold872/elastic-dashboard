@@ -91,7 +91,7 @@ extension ByteDataWebUtil on ByteData {
 }
 
 class SchemaParseException implements Exception {
-  SchemaParseException([var message]);
+  SchemaParseException([Object? message]);
 }
 
 /// This class is a singleton that manages the schemas of NTStructs.
@@ -222,10 +222,9 @@ enum StructValueType {
   final String name;
   final int maxBits;
 
-  static StructValueType parse(String type) {
-    return StructValueType.values.firstWhereOrNull((e) => e.name == type) ??
-        StructValueType.struct;
-  }
+  static StructValueType parse(String type) =>
+      StructValueType.values.firstWhereOrNull((e) => e.name == type) ??
+      StructValueType.struct;
 
   /// The [NT4Type] equivalent of the struct type
   NT4Type get ntType => switch (this) {
@@ -247,9 +246,7 @@ enum StructValueType {
   };
 
   @override
-  String toString() {
-    return name;
-  }
+  String toString() => name;
 }
 
 /// Data representing a field schema in an NTStruct
@@ -469,9 +466,8 @@ class NTStructSchema {
   }
 
   @override
-  String toString() {
-    return '$name { ${fields.map((field) => '${field.fieldName}: ${field.type}').join(', ')} }';
-  }
+  String toString() =>
+      '$name { ${fields.map((field) => '${field.fieldName}: ${field.type}').join(', ')} }';
 }
 
 /// This class represents an NTStruct.
@@ -531,9 +527,7 @@ class NTStruct {
     return NTStruct(schema: schema, values: values);
   }
 
-  dynamic operator [](String key) {
-    return values[key];
-  }
+  dynamic operator [](String key) => values[key];
 
   Object? get(List<String> key) {
     Object? value = this;

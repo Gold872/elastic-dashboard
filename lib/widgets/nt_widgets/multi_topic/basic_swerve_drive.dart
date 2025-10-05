@@ -139,62 +139,56 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_robot_rotation': _showRobotRotation,
-      'rotation_unit': _rotationUnit,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'show_robot_rotation': _showRobotRotation,
+    'rotation_unit': _rotationUnit,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Center(
-        child: DialogToggleSwitch(
-          initialValue: _showRobotRotation,
-          label: 'Show Robot Rotation',
-          onToggle: (value) {
-            showRobotRotation = value;
-          },
-        ),
-      ),
-      const SizedBox(height: 5),
-      const Text('Rotation Unit'),
-      StatefulBuilder(
-        builder: (context, setState) {
-          return RadioGroup<String>(
-            groupValue: _rotationUnit,
-            onChanged: (value) {
-              if (value != null) {
-                rotationUnit = value;
-              }
-              setState(() {});
-            },
-            child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Radians'),
-                  dense: true,
-                  leading: Radio<String>(value: 'Radians'),
-                ),
-                ListTile(
-                  title: const Text('Degrees'),
-                  dense: true,
-                  leading: Radio<String>(value: 'Degrees'),
-                ),
-                ListTile(
-                  title: const Text('Rotations'),
-                  dense: true,
-                  leading: Radio<String>(value: 'Rotations'),
-                ),
-              ],
-            ),
-          );
+  List<Widget> getEditProperties(BuildContext context) => [
+    Center(
+      child: DialogToggleSwitch(
+        initialValue: _showRobotRotation,
+        label: 'Show Robot Rotation',
+        onToggle: (value) {
+          showRobotRotation = value;
         },
       ),
-    ];
-  }
+    ),
+    const SizedBox(height: 5),
+    const Text('Rotation Unit'),
+    StatefulBuilder(
+      builder: (context, setState) => RadioGroup<String>(
+        groupValue: _rotationUnit,
+        onChanged: (value) {
+          if (value != null) {
+            rotationUnit = value;
+          }
+          setState(() {});
+        },
+        child: Column(
+          children: [
+            ListTile(
+              title: const Text('Radians'),
+              dense: true,
+              leading: Radio<String>(value: 'Radians'),
+            ),
+            ListTile(
+              title: const Text('Degrees'),
+              dense: true,
+              leading: Radio<String>(value: 'Degrees'),
+            ),
+            ListTile(
+              title: const Text('Rotations'),
+              dense: true,
+              leading: Radio<String>(value: 'Rotations'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ];
 
   bool get showRobotRotation => _showRobotRotation;
 
@@ -774,7 +768,5 @@ class SwerveDrivePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

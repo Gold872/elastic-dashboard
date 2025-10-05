@@ -69,9 +69,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
   }
 
   @mustCallSuper
-  Map<String, dynamic> toJson() {
-    return {'topic': topic, 'period': period};
-  }
+  Map<String, dynamic> toJson() => {'topic': topic, 'period': period};
 
   void init();
 
@@ -83,9 +81,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
 
   List<String> getAvailableDisplayTypes();
 
-  List<Widget> getEditProperties(BuildContext context) {
-    return const [];
-  }
+  List<Widget> getEditProperties(BuildContext context) => const [];
 
   void refresh() => notifyListeners();
 }

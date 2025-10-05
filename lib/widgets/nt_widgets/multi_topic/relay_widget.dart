@@ -109,15 +109,17 @@ class RelayWidget extends NTWidget {
                   isSelected: model.selectedOptions
                       .map((e) => selected == e)
                       .toList(),
-                  children: model.selectedOptions.map((element) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 0.0,
-                      ),
-                      child: Text(element),
-                    );
-                  }).toList(),
+                  children: model.selectedOptions
+                      .map(
+                        (element) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 0.0,
+                          ),
+                          child: Text(element),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],

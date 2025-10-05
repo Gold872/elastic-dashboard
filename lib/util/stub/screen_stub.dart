@@ -35,17 +35,13 @@ class ScreenRetriever {
   /// The shared instance of [ScreenRetriever].
   static final ScreenRetriever instance = ScreenRetriever._();
 
-  Future<Offset> getCursorScreenPoint() async {
-    return const Offset(0, 0);
-  }
+  Future<Offset> getCursorScreenPoint() async => const Offset(0, 0);
 
-  Future<Display> getPrimaryDisplay() async {
-    return Display(id: "", size: Size(0, 0));
-  }
+  Future<Display> getPrimaryDisplay() async =>
+      Display(id: '', size: Size(0, 0));
 
-  Future<List<Display>> getAllDisplays() async {
-    return List.filled(1, Display(id: "", size: Size(0, 0)));
-  }
+  Future<List<Display>> getAllDisplays() async =>
+      List.filled(1, Display(id: '', size: Size(0, 0)));
 }
 
 final screenRetriever = ScreenRetriever._();

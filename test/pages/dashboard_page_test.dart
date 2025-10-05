@@ -2087,9 +2087,9 @@ void main() {
         }
       });
 
-      when(connection.subscribeAll(any, any)).thenAnswer((realInvocation) {
-        return mockSub;
-      });
+      when(
+        connection.subscribeAll(any, any),
+      ).thenAnswer((realInvocation) => mockSub);
 
       final notificationWidget = find.widgetWithText(
         ElegantNotification,

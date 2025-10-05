@@ -81,41 +81,37 @@ class CommandModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_type': showType,
-      'maximize_button_space': maximizeButtonSpace,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'show_type': showType,
+    'maximize_button_space': maximizeButtonSpace,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Row(
-        children: [
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Show Type',
-              initialValue: _showType,
-              onToggle: (value) {
-                showType = value;
-              },
-            ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Row(
+      children: [
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Show Type',
+            initialValue: _showType,
+            onToggle: (value) {
+              showType = value;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Maximize Button Space',
-              initialValue: _maximizeButtonSpace,
-              onToggle: (value) {
-                maximizeButtonSpace = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Maximize Button Space',
+            initialValue: _maximizeButtonSpace,
+            onToggle: (value) {
+              maximizeButtonSpace = value;
+            },
           ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class CommandWidget extends NTWidget {

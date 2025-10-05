@@ -98,116 +98,112 @@ class GraphModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'time_displayed': _timeDisplayed,
-      if (_minValue != null) 'min_value': _minValue,
-      if (_maxValue != null) 'max_value': _maxValue,
-      'color': _mainColor.toARGB32(),
-      'line_width': _lineWidth,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'time_displayed': _timeDisplayed,
+    if (_minValue != null) 'min_value': _minValue,
+    if (_maxValue != null) 'max_value': _maxValue,
+    'color': _mainColor.toARGB32(),
+    'line_width': _lineWidth,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: DialogColorPicker(
-              onColorPicked: (color) {
-                mainColor = color;
-              },
-              label: 'Graph Color',
-              initialColor: _mainColor,
-              defaultColor: Colors.cyan,
-            ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: DialogColorPicker(
+            onColorPicked: (color) {
+              mainColor = color;
+            },
+            label: 'Graph Color',
+            initialColor: _mainColor,
+            defaultColor: Colors.cyan,
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newTime = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newTime = double.tryParse(value);
 
-                if (newTime == null) {
-                  return;
-                }
-                timeDisplayed = newTime;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(),
-              label: 'Time Displayed (Seconds)',
-              initialText: _timeDisplayed.toString(),
-            ),
+              if (newTime == null) {
+                return;
+              }
+              timeDisplayed = newTime;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(),
+            label: 'Time Displayed (Seconds)',
+            initialText: _timeDisplayed.toString(),
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMinimum = double.tryParse(value);
-                bool refreshGraph = newMinimum != _minValue;
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMinimum = double.tryParse(value);
+              bool refreshGraph = newMinimum != _minValue;
 
-                _minValue = newMinimum;
+              _minValue = newMinimum;
 
-                if (refreshGraph) {
-                  refresh();
-                }
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Minimum',
-              initialText: _minValue?.toString(),
-              allowEmptySubmission: true,
+              if (refreshGraph) {
+                refresh();
+              }
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
             ),
+            label: 'Minimum',
+            initialText: _minValue?.toString(),
+            allowEmptySubmission: true,
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMaximum = double.tryParse(value);
-                bool refreshGraph = newMaximum != _maxValue;
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMaximum = double.tryParse(value);
+              bool refreshGraph = newMaximum != _maxValue;
 
-                _maxValue = newMaximum;
+              _maxValue = newMaximum;
 
-                if (refreshGraph) {
-                  refresh();
-                }
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                allowNegative: true,
-              ),
-              label: 'Maximum',
-              initialText: _maxValue?.toString(),
-              allowEmptySubmission: true,
+              if (refreshGraph) {
+                refresh();
+              }
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
             ),
+            label: 'Maximum',
+            initialText: _maxValue?.toString(),
+            allowEmptySubmission: true,
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newWidth = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newWidth = double.tryParse(value);
 
-                if (newWidth == null || newWidth < 0.01) {
-                  return;
-                }
+              if (newWidth == null || newWidth < 0.01) {
+                return;
+              }
 
-                lineWidth = newWidth;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(),
-              label: 'Line Width',
-              initialText: _lineWidth.toString(),
-            ),
+              lineWidth = newWidth;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(),
+            label: 'Line Width',
+            initialText: _lineWidth.toString(),
           ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class GraphWidget extends NTWidget {
@@ -263,9 +259,7 @@ class _GraphWidgetGraph extends StatefulWidget {
     this.maxValue,
   }) : _currentData = initialData;
 
-  List<_GraphPoint> getCurrentData() {
-    return _currentData;
-  }
+  List<_GraphPoint> getCurrentData() => _currentData;
 
   @override
   State<_GraphWidgetGraph> createState() => _GraphWidgetGraphState();
@@ -328,7 +322,7 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
     }
     if (state == AppLifecycleState.resumed) {
       logger.debug(
-        "State resumed, refreshing graph for ${widget.subscription?.topic}",
+        'State resumed, refreshing graph for ${widget.subscription?.topic}',
       );
       setState(() {});
     }
@@ -421,44 +415,35 @@ class _GraphWidgetGraphState extends State<_GraphWidgetGraph>
     });
   }
 
-  List<FastLineSeries<_GraphPoint, num>> _getChartData() {
-    return <FastLineSeries<_GraphPoint, num>>[
-      FastLineSeries<_GraphPoint, num>(
-        animationDuration: 0.0,
-        animationDelay: 0.0,
-        sortingOrder: SortingOrder.ascending,
-        onRendererCreated: (controller) => _seriesController = controller,
-        color: widget.mainColor,
-        width: widget.lineWidth,
-        dataSource: _graphData,
-        xValueMapper: (value, index) {
-          return value.x;
-        },
-        yValueMapper: (value, index) {
-          return value.y;
-        },
-        sortFieldValueMapper: (datum, index) {
-          return datum.x;
-        },
-      ),
-    ];
-  }
+  List<FastLineSeries<_GraphPoint, num>> _getChartData() =>
+      <FastLineSeries<_GraphPoint, num>>[
+        FastLineSeries<_GraphPoint, num>(
+          animationDuration: 0.0,
+          animationDelay: 0.0,
+          sortingOrder: SortingOrder.ascending,
+          onRendererCreated: (controller) => _seriesController = controller,
+          color: widget.mainColor,
+          width: widget.lineWidth,
+          dataSource: _graphData,
+          xValueMapper: (value, index) => value.x,
+          yValueMapper: (value, index) => value.y,
+          sortFieldValueMapper: (datum, index) => datum.x,
+        ),
+      ];
 
   @override
-  Widget build(BuildContext context) {
-    return SfCartesianChart(
-      series: _getChartData(),
-      margin: const EdgeInsets.only(top: 8.0),
-      primaryXAxis: NumericAxis(
-        labelStyle: const TextStyle(color: Colors.transparent),
-        desiredIntervals: 5,
-      ),
-      primaryYAxis: NumericAxis(
-        minimum: widget.minValue,
-        maximum: widget.maxValue,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SfCartesianChart(
+    series: _getChartData(),
+    margin: const EdgeInsets.only(top: 8.0),
+    primaryXAxis: NumericAxis(
+      labelStyle: const TextStyle(color: Colors.transparent),
+      desiredIntervals: 5,
+    ),
+    primaryYAxis: NumericAxis(
+      minimum: widget.minValue,
+      maximum: widget.maxValue,
+    ),
+  );
 }
 
 class _GraphPoint {
