@@ -4,11 +4,9 @@
 
 A simple and modern dashboard for FRC.
 
-Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, and Linux.
+Download files can be found [here](https://github.com/Gold872/elastic-dashboard/releases/latest), the supported platforms are Windows, MacOS, Linux, and Web.
 
-_Important Notes/Warnings:_ 
-* _Your robot code must be using WPILib version 2023.3.1 or higher, otherwise you might not be able to add widgets._
-    * _WPILib v2023.3.1 fixed a bug in Network Tables where values wouldn't be sent to a client after subscribing topics only. Since the program subscribes topics only to everything, any widget that is built using a sendable will not be possible to add since the program will not be able to retrieve the widget's type. See https://github.com/wpilibsuite/allwpilib/pull/4991 for more info._
+Try it in your browser! https://gold872.github.io/elastic-dashboard/
 
 ## About
 
@@ -32,3 +30,9 @@ This dashboard wouldn't have been made without the help and inspiration from the
 * [Oh yes 10 FPS](https://github.com/oh-yes-0-fps) from Team 3173
 * [Jason](https://github.com/jasondaming) and [Peter](https://github.com/PeterJohnson) from WPILib
 * All mentors and advisors of Team 353, the POBots
+
+## Contributors
+
+<a href="https://github.com/Gold872/elastic-dashboard/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Gold872/elastic-dashboard" />
+</a>
