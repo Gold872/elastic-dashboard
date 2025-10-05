@@ -47,15 +47,15 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-typedef NTModelJsonProvider =
-    NTWidgetModel Function({
+typedef NTModelJsonProvider<T extends NTWidgetModel> =
+    T Function({
       required Map<String, dynamic> jsonData,
       required NTConnection ntConnection,
       required SharedPreferences preferences,
     });
 
-typedef NTModelProvider =
-    NTWidgetModel Function({
+typedef NTModelProvider<T extends NTWidgetModel> =
+    T Function({
       required NTConnection ntConnection,
       required SharedPreferences preferences,
       required String topic,
@@ -64,15 +64,15 @@ typedef NTModelProvider =
       NT4StructMeta? ntStructMeta,
     });
 
-typedef MultiTopicNTModelProvider =
-    MultiTopicNTWidgetModel Function({
+typedef MultiTopicNTModelProvider<T extends MultiTopicNTWidgetModel> =
+    T Function({
       required NTConnection ntConnection,
       required SharedPreferences preferences,
       required String topic,
       double? period,
     });
 
-typedef NTWidgetProvider = NTWidget Function({Key? key});
+typedef NTWidgetProvider<T extends NTWidget> = T Function({Key? key});
 
 class NTWidgetBuilder {
   static final Map<String, NTWidgetProvider> _widgetNameBuildMap = {};
@@ -556,120 +556,76 @@ class NTWidgetBuilder {
   }
 
   static void registerSingleTopic<
-    ModelType extends NTWidgetModel,
+    ModelType extends SingleTopicNTWidgetModel,
     WidgetType extends NTWidget
   >({
     required String name,
-    required SingleTopicNTWidgetModel Function({
-      NT4Type? dataType,
-      double period,
-      required NT4StructMeta? ntStructMeta,
-      required NTConnection ntConnection,
-      required SharedPreferences preferences,
-      required String topic,
-    })
-    model,
-    required NTWidgetProvider widget,
-    required NTWidgetModel Function({
-      required Map<String, dynamic> jsonData,
-      required NTConnection ntConnection,
-      required SharedPreferences preferences,
-    })
-    fromJson,
+    Set<String>? aliases,
+    required NTModelProvider<ModelType> model,
+    required NTWidgetProvider<WidgetType> widget,
+    required NTModelJsonProvider<ModelType> fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
     double? defaultHeight,
-    Set<String>? aliases,
-  }) {
-    registerWithAlias(
-      names: {name, ...?aliases},
-      model:
-          ({
-            NT4Type? dataType,
-            double? period,
-            NT4StructMeta? ntStructMeta,
-            required NTConnection ntConnection,
-            required SharedPreferences preferences,
-            required String topic,
-          }) => model(
-            dataType: dataType,
-            period:
-                period ??
-                (preferences.getDouble(PrefKeys.defaultPeriod) ??
-                    Defaults.defaultPeriod),
-            ntStructMeta: ntStructMeta,
-            ntConnection: ntConnection,
-            preferences: preferences,
-            topic: topic,
-          ),
-      widget: widget,
-      fromJson:
-          ({
-            required Map<String, dynamic> jsonData,
-            required NTConnection ntConnection,
-            required SharedPreferences preferences,
-          }) => fromJson(
-            jsonData: jsonData,
-            ntConnection: ntConnection,
-            preferences: preferences,
-          ),
-      minWidth: minWidth,
-      minHeight: minHeight,
-      defaultWidth: defaultWidth,
-      defaultHeight: defaultHeight,
-    );
-  }
+  }) => registerWithAlias(
+    names: {name, ...?aliases},
+    model: model,
+    widget: widget,
+    fromJson: fromJson,
+    minWidth: minWidth,
+    minHeight: minHeight,
+    defaultWidth: defaultWidth,
+    defaultHeight: defaultHeight,
+  );
 
   static void registerMultiTopic<
     ModelType extends MultiTopicNTWidgetModel,
     WidgetType extends NTWidget
   >({
     required String name,
-    required MultiTopicNTModelProvider model,
-    required NTWidgetProvider widget,
-    required NTModelJsonProvider fromJson,
+    Set<String>? aliases,
+    required MultiTopicNTModelProvider<ModelType> model,
+    required NTWidgetProvider<WidgetType> widget,
+    required NTModelJsonProvider<ModelType> fromJson,
     double? minWidth,
     double? minHeight,
     double? defaultWidth,
     double? defaultHeight,
-    Set<String>? aliases,
-  }) {
-    registerWithAlias(
-      names: {name, ...?aliases},
-      model:
-          ({
-            required NTConnection ntConnection,
-            required SharedPreferences preferences,
-            required String topic,
-            double? period,
-            NT4Type? dataType,
-            NT4StructMeta? ntStructMeta,
-          }) => model(
-            ntConnection: ntConnection,
-            preferences: preferences,
-            topic: topic,
-            period: period,
-          ),
-      widget: widget,
-      fromJson: fromJson,
-      minWidth: minWidth,
-      minHeight: minHeight,
-      defaultWidth: defaultWidth,
-      defaultHeight: defaultHeight,
-    );
-  }
+  }) => registerWithAlias(
+    names: {name, ...?aliases},
+    model:
+        ({
+          required NTConnection ntConnection,
+          required SharedPreferences preferences,
+          required String topic,
+          double? period,
+          NT4Type? dataType,
+          NT4StructMeta? ntStructMeta,
+        }) => model(
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: topic,
+          period: period,
+        ),
+    widget: widget,
+    fromJson: fromJson,
+    minWidth: minWidth,
+    minHeight: minHeight,
+    defaultWidth: defaultWidth,
+    defaultHeight: defaultHeight,
+  );
 
   static void
   register<ModelType extends NTWidgetModel, WidgetType extends NTWidget>({
     required String name,
-    required NTModelProvider model,
-    required NTWidgetProvider widget,
-    required NTModelJsonProvider fromJson,
-    double? minWidth,
-    double? minHeight,
-    double? defaultWidth,
-    double? defaultHeight,
+    required NTModelProvider<ModelType> model,
+    required NTWidgetProvider<WidgetType> widget,
+    required NTModelJsonProvider<ModelType> fromJson,
+    required double? minWidth,
+    required double? minHeight,
+    required double? defaultWidth,
+    required double? defaultHeight,
   }) {
     _modelNameBuildMap.addAll({name: model});
     _modelJsonBuildMap.addAll({name: fromJson});
@@ -690,17 +646,17 @@ class NTWidgetBuilder {
   }
 
   static void registerWithAlias<
-    ModelType extends SingleTopicNTWidgetModel,
+    ModelType extends NTWidgetModel,
     WidgetType extends NTWidget
   >({
     required Set<String> names,
-    required NTModelProvider model,
-    required NTWidgetProvider widget,
-    required NTModelJsonProvider fromJson,
-    double? minWidth,
-    double? minHeight,
-    double? defaultWidth,
-    double? defaultHeight,
+    required NTModelProvider<ModelType> model,
+    required NTWidgetProvider<WidgetType> widget,
+    required NTModelJsonProvider<ModelType> fromJson,
+    required double? minWidth,
+    required double? minHeight,
+    required double? defaultWidth,
+    required double? defaultHeight,
   }) {
     for (String name in names) {
       register(
