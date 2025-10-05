@@ -293,13 +293,13 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {
+  void softDispose({bool deleting = false}) {
     if (deleting) {
       controller?.dispose();
       ntConnection.ntConnected.removeListener(onNTConnected);
     }
 
-    super.disposeWidget(deleting: deleting);
+    super.softDispose(deleting: deleting);
   }
 
   void onNTConnected() {

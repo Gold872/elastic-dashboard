@@ -102,10 +102,10 @@ class NTWidgetContainerModel extends WidgetContainerModel {
   }
 
   @override
-  void disposeModel({bool deleting = false}) {
-    super.disposeModel(deleting: deleting);
+  void softDispose({bool deleting = false}) {
+    super.softDispose(deleting: deleting);
 
-    childModel.disposeWidget(deleting: deleting);
+    childModel.softDispose(deleting: deleting);
   }
 
   @override
@@ -360,7 +360,7 @@ class NTWidgetContainerModel extends WidgetContainerModel {
       return;
     }
 
-    childModel.disposeWidget(deleting: true);
+    childModel.softDispose(deleting: true);
     childModel.unSubscribe();
     childModel.dispose();
 

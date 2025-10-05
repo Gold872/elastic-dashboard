@@ -329,7 +329,7 @@ class _TreeTileState extends State<TreeTile> {
   void cancelDrag() {
     if (draggingWidget != null) {
       draggingWidget!.unSubscribe();
-      draggingWidget!.disposeModel(deleting: true);
+      draggingWidget!.softDispose(deleting: true);
       draggingWidget!.dispose();
 
       widget.onRemoveWidget?.call();
@@ -381,7 +381,7 @@ class _TreeTileState extends State<TreeTile> {
                 );
                 if (!dragging) {
                   draggingWidget?.unSubscribe();
-                  draggingWidget?.disposeModel(deleting: true);
+                  draggingWidget?.softDispose(deleting: true);
                   draggingWidget?.dispose();
 
                   draggingWidget = null;

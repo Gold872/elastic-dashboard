@@ -217,7 +217,7 @@ abstract class WidgetContainerModel extends ChangeNotifier {
     return [];
   }
 
-  void disposeModel({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 
   void unSubscribe() {}
 

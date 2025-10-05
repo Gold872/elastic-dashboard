@@ -235,8 +235,8 @@ class FieldWidgetModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) async {
-    super.disposeWidget(deleting: deleting);
+  void softDispose({bool deleting = false}) async {
+    super.softDispose(deleting: deleting);
 
     if (deleting) {
       await _field.dispose();

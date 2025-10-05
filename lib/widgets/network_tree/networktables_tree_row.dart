@@ -232,7 +232,7 @@ class NetworkTableTreeRow {
 
     if (primary == null || !NTWidgetBuilder.isRegistered(primary.type)) {
       primary?.unSubscribe();
-      primary?.disposeWidget(deleting: true);
+      primary?.softDispose(deleting: true);
       primary?.dispose();
 
       if (resortToListLayout && listLayoutBuilder != null) {
@@ -253,7 +253,7 @@ class NetworkTableTreeRow {
 
     if (widget == null) {
       primary.unSubscribe();
-      primary.disposeWidget(deleting: true);
+      primary.softDispose(deleting: true);
       primary.dispose();
       return null;
     }
@@ -279,7 +279,7 @@ class NetworkTableTreeRow {
 
     if (widget == null) {
       primary.unSubscribe();
-      primary.disposeWidget(deleting: true);
+      primary.softDispose(deleting: true);
       primary.dispose();
 
       return null;

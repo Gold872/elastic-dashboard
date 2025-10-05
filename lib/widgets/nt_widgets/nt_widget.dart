@@ -77,7 +77,7 @@ sealed class NTWidgetModel extends ChangeNotifier {
 
   void unSubscribe();
 
-  void disposeWidget({bool deleting = false});
+  void softDispose({bool deleting = false});
 
   void resetSubscription();
 
@@ -236,7 +236,7 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 
   @override
   void resetSubscription() {
@@ -349,7 +349,7 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 }
 
 abstract class NTWidget extends StatelessWidget {
