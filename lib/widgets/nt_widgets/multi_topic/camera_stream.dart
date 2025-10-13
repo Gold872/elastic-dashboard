@@ -25,6 +25,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [streamsSubscription];
+  MjpegController? controller;
 
   int? quality;
   int? fps;
@@ -90,7 +91,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
           resolution!.width != 0.0 &&
           resolution!.height != 0.0)
         'resolution':
-            '${resolution!.width.floor()}x${resolution!.height.floor()}',
+        '${resolution!.width.floor()}x${resolution!.height.floor()}',
       if (fps != null) 'fps': '$fps',
       if (quality != null) 'compression': '$quality',
     });
@@ -102,6 +103,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+
     int? compression,
     this.fps,
     this.resolution,
@@ -113,11 +115,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     int crosshairX = 0,
     int crosshairY = 0,
     Color crosshairColor = Colors.red,
-    super.dataType,
     super.period,
-  })  : quality = compression,
-        _fps = fps,
-        _resolution = resolution,
+  })
+      : quality = compression,
         _rotationTurns = rotation,
         _crosshairEnabled = crosshairEnabled,
         _crosshairWidth = crosshairWidth,
@@ -205,340 +205,343 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  List<Widget> getEditProperties(BuildContext context) => [
-    StatefulBuilder(
-      builder: (context, setState) => Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              allowEmptySubmission: true,
-              initialText: fps?.toString() ?? '-1',
-              label: 'FPS',
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              onSubmit: (value) {
-                int? newFPS = int.tryParse(value);
-
-                setState(() {
-                  if (newFPS == -1 || newFPS == 0) {
-                    fps = null;
-                    return;
-                  }
-
-                  fps = newFPS;
-                });
-              },
-            ),
-          ),
-          const SizedBox(width: 10.0),
-          const Text('Resolution'),
-          Flexible(
-            child: DialogTextInput(
-              allowEmptySubmission: true,
-              initialText: resolution?.width.floor().toString() ?? '-1',
-              label: 'Width',
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              onSubmit: (value) {
-                int? newWidth = int.tryParse(value);
-
-                setState(() {
-                  if (newWidth == null || newWidth == 0) {
-                    resolution = null;
-                    return;
-                  }
-
-                  if (newWidth! % 2 != 0) {
-                    // Won't allow += for some reason
-                    newWidth = newWidth! + 1;
-                  }
-
-                  resolution = Size(
-                    newWidth!.toDouble(),
-                    resolution?.height.toDouble() ?? 0,
-                  );
-                });
-              },
-            ),
-          ),
-          const Text('x'),
-          Flexible(
-            child: DialogTextInput(
-              allowEmptySubmission: true,
-              initialText: resolution?.height.floor().toString() ?? '-1',
-              label: 'Height',
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              onSubmit: (value) {
-                int? newHeight = int.tryParse(value);
-
-                setState(() {
-                  if (newHeight == null || newHeight == 0) {
-                    resolution = null;
-                    return;
-                  }
-
-                  resolution = Size(
-                    resolution?.width.toDouble() ?? 0,
-                    newHeight.toDouble(),
-                  );
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    ),
-    StatefulBuilder(
-      builder: (context, setState) => Row(
-        children: [
-          const Text('Quality:'),
-          Expanded(
-            child: Slider(
-              value: quality?.toDouble() ?? -5.0,
-              min: -5.0,
-              max: 100.0,
-              divisions: 104,
-              label: '${quality ?? -1}',
-              onChanged: (value) {
-                setState(() {
-                  if (value < 0) {
-                    quality = null;
-                  } else {
-                    quality = value.floor();
-                  }
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    ),
-    TextButton(
-      onPressed: () => refresh(),
-      child: const Text('Apply Quality Settings'),
-    ),
-    const SizedBox(height: 5),
-    Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-              label: const Text('Rotate Left'),
-              icon: const Icon(Icons.rotate_90_degrees_ccw),
-              onPressed: () {
-                int newRotation = rotationTurns - 1;
-                if (newRotation < 0) {
-                  newRotation += 4;
-                }
-                rotationTurns = newRotation;
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-              label: const Text('Rotate Right'),
-              icon: const Icon(Icons.rotate_90_degrees_cw),
-              onPressed: () {
-                int newRotation = rotationTurns + 1;
-                if (newRotation >= 4) {
-                  newRotation -= 4;
-                }
-                rotationTurns = newRotation;
-              },
-            ),
-          ),
-        ],
-      ),
-      //Camera Crosshair
-      StatefulBuilder(
-        builder: (context, setState) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 15),
-              Divider(
-                height: 10,
-              ),
-              Text("Crosshair Settings"),
-              const SizedBox(height: 10),
-              DialogToggleSwitch(
-                  onToggle: (value) => setState(
-                        () => _crosshairEnabled = value,
-                      ),
-                  initialValue: _crosshairEnabled,
-                  label: "Enabled"),
-              const SizedBox(height: 10),
-              //Height, Width, Thickness
+  List<Widget> getEditProperties(BuildContext context) =>
+      [
+        StatefulBuilder(
+          builder: (context, setState) =>
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
                     child: DialogTextInput(
                       allowEmptySubmission: true,
-                      initialText: "$_crosshairWidth",
+                      initialText: fps?.toString() ?? '-1',
+                      label: 'FPS',
+                      formatter: FilteringTextInputFormatter.digitsOnly,
+                      onSubmit: (value) {
+                        int? newFPS = int.tryParse(value);
+
+                        setState(() {
+                          if (newFPS == -1 || newFPS == 0) {
+                            fps = null;
+                            return;
+                          }
+
+                          fps = newFPS;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10.0),
+                  const Text('Resolution'),
+                  Flexible(
+                    child: DialogTextInput(
+                      allowEmptySubmission: true,
+                      initialText: resolution?.width.floor().toString() ?? '-1',
                       label: 'Width',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newWidth = int.tryParse(value) ?? 0;
+                        int? newWidth = int.tryParse(value);
+
                         setState(() {
-                          if (newWidth >= 0) {
-                            _crosshairWidth = newWidth;
+                          if (newWidth == null || newWidth == 0) {
+                            resolution = null;
                             return;
                           }
+
+                          if (newWidth! % 2 != 0) {
+                            // Won't allow += for some reason
+                            newWidth = newWidth! + 1;
+                          }
+
+                          resolution = Size(
+                            newWidth!.toDouble(),
+                            resolution?.height.toDouble() ?? 0,
+                          );
                         });
                       },
                     ),
                   ),
+                  const Text('x'),
                   Flexible(
                     child: DialogTextInput(
                       allowEmptySubmission: true,
-                      initialText: "$_crosshairHeight",
+                      initialText: resolution?.height.floor().toString() ??
+                          '-1',
                       label: 'Height',
                       formatter: FilteringTextInputFormatter.digitsOnly,
                       onSubmit: (value) {
-                        int? newHeight = int.tryParse(value) ?? 0;
+                        int? newHeight = int.tryParse(value);
+
                         setState(() {
-                          if (newHeight >= 0) {
-                            _crosshairHeight = newHeight;
+                          if (newHeight == null || newHeight == 0) {
+                            resolution = null;
                             return;
                           }
-                        });
-                      },
-                    ),
-                  ),
-                  Flexible(
-                    child: DialogTextInput(
-                      allowEmptySubmission: true,
-                      initialText: "$_crosshairThickness",
-                      label: 'Thickness',
-                      formatter: FilteringTextInputFormatter.digitsOnly,
-                      onSubmit: (value) {
-                        int? newThickness = int.tryParse(value) ?? 0;
-                        setState(() {
-                          if (newThickness >= 0) {
-                            _crosshairThickness = newThickness;
-                            return;
-                          }
+
+                          resolution = Size(
+                            resolution?.width.toDouble() ?? 0,
+                            newHeight.toDouble(),
+                          );
                         });
                       },
                     ),
                   ),
                 ],
               ),
-
-              SizedBox(height: 10),
-              //Centered, X and Y POS
-              DialogToggleSwitch(
-                  onToggle: (value) => setState(
-                        () => _crosshairCentered = value,
-                      ),
-                  initialValue: _crosshairCentered,
-                  label: "Centered"),
-              SizedBox(height: 10),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: DialogTextInput(
-                      enabled: !_crosshairCentered,
-                      allowEmptySubmission: true,
-                      initialText: "$_crosshairX",
-                      label: 'X Position',
-                      formatter: FilteringTextInputFormatter.digitsOnly,
-                      onSubmit: (value) {
-                        int? newX = int.tryParse(value) ?? 0;
-                        setState(() {
-                          if (newX >= 0) {
-                            _crosshairX = newX;
-                            return;
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                  Flexible(
-                    child: DialogTextInput(
-                      enabled: !_crosshairCentered,
-                      allowEmptySubmission: true,
-                      initialText: "$_crosshairY",
-                      label: 'Y Position',
-                      formatter: FilteringTextInputFormatter.digitsOnly,
-                      onSubmit: (value) {
-                        int? newY = int.tryParse(value) ?? 0;
-                        setState(() {
-                          if (newY >= 0) {
-                            _crosshairY = newY;
-                            return;
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-
-              DialogColorPicker(
-                onColorPicked: (color) => setState(
-                  () => setState(
-                    () => _crosshairColor = color,
-                  ),
-                ),
-                label: 'Crosshair Color',
-                initialColor: _crosshairColor,
-                defaultColor: Colors.red,
-                rowSize: MainAxisSize.max,
-              ),
-            ],
-          );
-        },
-      )
-    ];
-  }
         ),
-      ],
-    ),
-  ];
+        StatefulBuilder(
+          builder: (context, setState) =>
+              Row(
+                children: [
+                  const Text('Quality:'),
+                  Expanded(
+                    child: Slider(
+                      value: quality?.toDouble() ?? -5.0,
+                      min: -5.0,
+                      max: 100.0,
+                      divisions: 104,
+                      label: '${quality ?? -1}',
+                      onChanged: (value) {
+                        setState(() {
+                          if (value < 0) {
+                            quality = null;
+                          } else {
+                            quality = value.floor();
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+        ),
+        TextButton(
+          onPressed: () => refresh(),
+          child: const Text('Apply Quality Settings'),
+        ),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  label: const Text('Rotate Left'),
+                  icon: const Icon(Icons.rotate_90_degrees_ccw),
+                  onPressed: () {
+                    int newRotation = rotationTurns - 1;
+                    if (newRotation < 0) {
+                      newRotation += 4;
+                    }
+                    rotationTurns = newRotation;
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    label: const Text('Rotate Right'),
+                    icon: const Icon(Icons.rotate_90_degrees_cw),
+                    onPressed: () {
+                      int newRotation = rotationTurns + 1;
+                      if (newRotation >= 4) {
+                        newRotation -= 4;
+                      }
+                      rotationTurns = newRotation;
+                    },
+                  ),
+                )
+            ),
+          ],
+        ),
+        //Camera Crosshair
+        StatefulBuilder(
+          builder: (context, setState) =>
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 15),
+                  Divider(
+                    height: 10,
+                  ),
+                  Text("Crosshair Settings"),
+                  const SizedBox(height: 10),
+                  DialogToggleSwitch(
+                      onToggle: (value) =>
+                          setState(
+                                () => _crosshairEnabled = value,
+                          ),
+                      initialValue: _crosshairEnabled,
+                      label: "Enabled"),
+                  const SizedBox(height: 10),
+                  //Height, Width, Thickness
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: DialogTextInput(
+                          allowEmptySubmission: true,
+                          initialText: "$_crosshairWidth",
+                          label: 'Width',
+                          formatter: FilteringTextInputFormatter.digitsOnly,
+                          onSubmit: (value) {
+                            int? newWidth = int.tryParse(value) ?? 0;
+                            setState(() {
+                              if (newWidth >= 0) {
+                                _crosshairWidth = newWidth;
+                                return;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: DialogTextInput(
+                          allowEmptySubmission: true,
+                          initialText: "$_crosshairHeight",
+                          label: 'Height',
+                          formatter: FilteringTextInputFormatter.digitsOnly,
+                          onSubmit: (value) {
+                            int? newHeight = int.tryParse(value) ?? 0;
+                            setState(() {
+                              if (newHeight >= 0) {
+                                _crosshairHeight = newHeight;
+                                return;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: DialogTextInput(
+                          allowEmptySubmission: true,
+                          initialText: "$_crosshairThickness",
+                          label: 'Thickness',
+                          formatter: FilteringTextInputFormatter.digitsOnly,
+                          onSubmit: (value) {
+                            int? newThickness = int.tryParse(value) ?? 0;
+                            setState(() {
+                              if (newThickness >= 0) {
+                                _crosshairThickness = newThickness;
+                                return;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
 
-  @override
-  void softDispose({bool deleting = false}) {
-    if (deleting) {
-      controller?.dispose();
-      ntConnection.ntConnected.removeListener(onNTConnected);
-    }
+                  SizedBox(height: 10),
+                  //Centered, X and Y POS
+                  DialogToggleSwitch(
+                      onToggle: (value) =>
+                          setState(
+                                () => _crosshairCentered = value,
+                          ),
+                      initialValue: _crosshairCentered,
+                      label: "Centered"),
+                  SizedBox(height: 10),
 
-    super.softDispose(deleting: deleting);
-  }
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: DialogTextInput(
+                          enabled: !_crosshairCentered,
+                          allowEmptySubmission: true,
+                          initialText: "$_crosshairX",
+                          label: 'X Position',
+                          formatter: FilteringTextInputFormatter.digitsOnly,
+                          onSubmit: (value) {
+                            int? newX = int.tryParse(value) ?? 0;
+                            setState(() {
+                              if (newX >= 0) {
+                                _crosshairX = newX;
+                                return;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                      Flexible(
+                        child: DialogTextInput(
+                          enabled: !_crosshairCentered,
+                          allowEmptySubmission: true,
+                          initialText: "$_crosshairY",
+                          label: 'Y Position',
+                          formatter: FilteringTextInputFormatter.digitsOnly,
+                          onSubmit: (value) {
+                            int? newY = int.tryParse(value) ?? 0;
+                            setState(() {
+                              if (newY >= 0) {
+                                _crosshairY = newY;
+                                return;
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
 
-  void onNTConnected() {
-    if (ntConnection.ntConnected.value) {
-      closeClient();
-    } else {
-      controller?.changeCycleState(StreamCycleState.idle);
-    }
-  }
+                  DialogColorPicker(
+                    onColorPicked: (color) =>
+                        setState(
+                              () =>
+                              setState(
+                                    () => _crosshairColor = color,
+                              ),
+                        ),
+                    label: 'Crosshair Color',
+                    initialColor: _crosshairColor,
+                    defaultColor: Colors.red,
+                    rowSize: MainAxisSize.max,
+                  ),
+                ],
+              ),
+        )
+      ];
 
-  void closeClient() {
+
+@override
+void softDispose({bool deleting = false}) {
+  if (deleting) {
     controller?.dispose();
-    controller = null;
+    ntConnection.ntConnected.removeListener(onNTConnected);
+  }
+
+  super.softDispose(deleting: deleting);
+}
+
+void onNTConnected() {
+  if (ntConnection.ntConnected.value) {
+    closeClient();
+  } else {
+    controller?.changeCycleState(StreamCycleState.idle);
   }
 }
+
+void closeClient() {
+  controller?.dispose();
+  controller = null;
+}}
 
 class CameraStreamWidget extends NTWidget {
   static const String widgetType = 'Camera Stream';
@@ -607,7 +610,7 @@ class CameraStreamWidget extends NTWidget {
 
         createNewWidget =
             createNewWidget ||
-            !(model.controller?.streams.equals(streamUrls) ?? false);
+                !(model.controller?.streams.equals(streamUrls) ?? false);
 
         if (createNewWidget) {
           model.controller?.dispose();
@@ -675,8 +678,7 @@ class CrosshairPainter extends CustomPainter {
   final Color? crosshairColor;
   final bool? centered;
 
-  CrosshairPainter(
-      this.crosshairWidth,
+  CrosshairPainter(this.crosshairWidth,
       this.crosshairHeight,
       this.crosshairThickness,
       this.crosshairX,
@@ -709,13 +711,15 @@ class CrosshairPainter extends CustomPainter {
             center: Offset(x, y),
             width: crosshairWidth! * widthModifier,
             height: crosshairThickness! * heightModifier),
-        Paint()..color = crosshairColor!);
+        Paint()
+          ..color = crosshairColor!);
     canvas.drawRect(
         Rect.fromCenter(
             center: Offset(x, y),
             width: crosshairThickness! * heightModifier,
             height: crosshairHeight! * widthModifier),
-        Paint()..color = crosshairColor!);
+        Paint()
+          ..color = crosshairColor!);
   }
 
   @override
