@@ -18,15 +18,14 @@ class EncoderModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        distanceSubscription,
-        speedSubscription,
-      ];
+    distanceSubscription,
+    speedSubscription,
+  ];
 
   EncoderModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -63,25 +62,23 @@ class EncoderWidget extends NTWidget {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(
-                      color: Colors.grey.shade700,
-                      width: 1.5,
-                    ),
+                    bottom: BorderSide(color: Colors.grey.shade700, width: 1.5),
                   ),
                 ),
                 child: ValueListenableBuilder(
-                    valueListenable: model.distanceSubscription,
-                    builder: (context, value, child) {
-                      double distance = tryCast(value) ?? 0.0;
-                      return SelectableText(
-                        distance.toStringAsPrecision(10),
-                        maxLines: 1,
-                        showCursor: true,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                      );
-                    }),
+                  valueListenable: model.distanceSubscription,
+                  builder: (context, value, child) {
+                    double distance = tryCast(value) ?? 0.0;
+                    return SelectableText(
+                      distance.toStringAsPrecision(10),
+                      maxLines: 1,
+                      showCursor: true,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -94,25 +91,23 @@ class EncoderWidget extends NTWidget {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(
-                      color: Colors.grey.shade700,
-                      width: 1.5,
-                    ),
+                    bottom: BorderSide(color: Colors.grey.shade700, width: 1.5),
                   ),
                 ),
                 child: ValueListenableBuilder(
-                    valueListenable: model.speedSubscription,
-                    builder: (context, value, child) {
-                      double speed = tryCast(value) ?? 0.0;
-                      return SelectableText(
-                        speed.toStringAsPrecision(10),
-                        maxLines: 1,
-                        showCursor: true,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                      );
-                    }),
+                  valueListenable: model.speedSubscription,
+                  builder: (context, value, child) {
+                    double speed = tryCast(value) ?? 0.0;
+                    return SelectableText(
+                      speed.toStringAsPrecision(10),
+                      maxLines: 1,
+                      showCursor: true,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

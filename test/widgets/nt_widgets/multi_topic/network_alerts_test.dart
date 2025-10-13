@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/network_alerts.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,17 +31,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Alerts/errors',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Alerts/warnings',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Alerts/infos',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
       ],
@@ -53,7 +54,7 @@ void main() {
   });
 
   test('Network alerts from json', () {
-    NTWidgetModel networkAlertsModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel networkAlertsModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Alerts',
@@ -78,7 +79,7 @@ void main() {
   testWidgets('Network alerts widget', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel networkAlertsModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel networkAlertsModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Alerts',

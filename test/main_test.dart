@@ -23,9 +23,7 @@ void main() {
 
     String jsonString = File(filePath).readAsStringSync();
 
-    SharedPreferences.setMockInitialValues({
-      PrefKeys.layout: jsonString,
-    });
+    SharedPreferences.setMockInitialValues({PrefKeys.layout: jsonString});
 
     SharedPreferences preferences = await SharedPreferences.getInstance();
 

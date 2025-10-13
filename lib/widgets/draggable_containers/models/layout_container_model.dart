@@ -26,17 +26,13 @@ abstract class LayoutContainerModel extends WidgetContainerModel {
 
   @override
   @mustCallSuper
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'type': type,
-      'properties': getProperties(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'type': type,
+    'properties': getProperties(),
+  };
 
-  Map<String, dynamic> getProperties() {
-    return {};
-  }
+  Map<String, dynamic> getProperties() => {};
 
   bool willAcceptWidget(WidgetContainerModel widget, {Offset? globalPosition});
 

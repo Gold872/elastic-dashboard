@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/three_axis_accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,17 +31,17 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Three Axis Accelerometer/X',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Three Axis Accelerometer/Y',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Three Axis Accelerometer/Z',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -54,40 +55,44 @@ void main() {
 
   test('Three axis accelerometer from json', () {
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3-Axis Accelerometer',
-      threeAxisAccelerometerJson,
-    );
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          '3-Axis Accelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     expect(threeAxisAccelerometerModel.type, '3-Axis Accelerometer');
     expect(
-        threeAxisAccelerometerModel.runtimeType, ThreeAxisAccelerometerModel);
+      threeAxisAccelerometerModel.runtimeType,
+      ThreeAxisAccelerometerModel,
+    );
   });
 
   test('Three axis accelerometer from alias name', () {
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3AxisAccelerometer',
-      threeAxisAccelerometerJson,
-    );
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          '3AxisAccelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     expect(threeAxisAccelerometerModel.type, '3-Axis Accelerometer');
     expect(
-        threeAxisAccelerometerModel.runtimeType, ThreeAxisAccelerometerModel);
+      threeAxisAccelerometerModel.runtimeType,
+      ThreeAxisAccelerometerModel,
+    );
   });
 
   test('Three axis accelerometer to json', () {
     ThreeAxisAccelerometerModel threeAxisAccelerometerModel =
         ThreeAxisAccelerometerModel(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      topic: 'Test/Three Axis Accelerometer',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          topic: 'Test/Three Axis Accelerometer',
+          period: 0.100,
+        );
 
     expect(threeAxisAccelerometerModel.toJson(), threeAxisAccelerometerJson);
   });
@@ -96,12 +101,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel threeAxisAccelerometerModel =
-        NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      '3-Axis Accelerometer',
-      threeAxisAccelerometerJson,
-    );
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          '3-Axis Accelerometer',
+          threeAxisAccelerometerJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

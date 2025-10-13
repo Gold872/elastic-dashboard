@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/subsystem_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,23 +31,21 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Subsystem/.default',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Subsystem/.command',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Subsystem/.command': 'TestCommand',
-      },
+      virtualValues: {'Test/Subsystem/.command': 'TestCommand'},
     );
   });
 
   test('Subsystem model from json', () {
-    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel subsystemModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Subsystem',
@@ -71,7 +70,7 @@ void main() {
   testWidgets('Subsystem widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel subsystemModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel subsystemModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Subsystem',

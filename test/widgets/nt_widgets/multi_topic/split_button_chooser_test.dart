@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,25 +31,23 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Split Button Chooser/options',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/active',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/default',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Split Button Chooser/selected',
-          type: NT4TypeStr.kString,
-          properties: {
-            'retained': true,
-          },
+          type: NT4Type.string(),
+          properties: {'retained': true},
         ),
       ],
       virtualValues: {
@@ -62,12 +61,12 @@ void main() {
 
   test('Split button chooser from json', () {
     NTWidgetModel splitButtonChooserModel =
-        NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     expect(splitButtonChooserModel.type, 'Split Button Chooser');
     expect(splitButtonChooserModel.runtimeType, SplitButtonChooserModel);
@@ -88,12 +87,12 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     NTWidgetModel splitButtonChooserModel =
-        NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Split Button Chooser',
-      splitButtonChooserJson,
-    );
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'Split Button Chooser',
+          splitButtonChooserJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

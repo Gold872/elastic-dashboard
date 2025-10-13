@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import '../../../test_util.dart';
@@ -31,18 +32,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Boolean Value',
-          type: NT4TypeStr.kBool,
+          type: NT4Type.boolean(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Boolean Value': false,
-      },
+      virtualValues: {'Test/Boolean Value': false},
     );
   });
 
   test('Toggle switch from json', () {
-    NTWidgetModel toggleSwitchModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel toggleSwitchModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Toggle Switch',
@@ -69,7 +68,7 @@ void main() {
       preferences: preferences,
       type: 'Toggle Switch',
       topic: 'Test/Boolean Value',
-      dataType: 'boolean',
+      dataType: NT4Type.boolean(),
       period: 0.100,
     );
 
@@ -79,7 +78,7 @@ void main() {
   testWidgets('Toggle switch widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel toggleSwitchModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel toggleSwitchModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Toggle Switch',

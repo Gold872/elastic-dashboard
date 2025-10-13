@@ -20,16 +20,15 @@ class NetworkAlertsModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        errorsSubscription,
-        warningsSubscription,
-        infosSubscription,
-      ];
+    errorsSubscription,
+    warningsSubscription,
+    infosSubscription,
+  ];
 
   NetworkAlertsModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -42,8 +41,10 @@ class NetworkAlertsModel extends MultiTopicNTWidgetModel {
   @override
   void initializeSubscriptions() {
     errorsSubscription = ntConnection.subscribe(errorsTopicName, super.period);
-    warningsSubscription =
-        ntConnection.subscribe(warningsTopicName, super.period);
+    warningsSubscription = ntConnection.subscribe(
+      warningsTopicName,
+      super.period,
+    );
     infosSubscription = ntConnection.subscribe(infosTopicName, super.period);
   }
 }

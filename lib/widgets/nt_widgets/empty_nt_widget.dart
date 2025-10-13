@@ -6,7 +6,5 @@ class EmptyNTWidget extends NTWidget {
   const EmptyNTWidget({super.key}) : super();
 
   @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
+  Widget build(BuildContext context) => const Placeholder();
 }

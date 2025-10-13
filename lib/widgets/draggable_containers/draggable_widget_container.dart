@@ -10,11 +10,15 @@ import 'package:elastic_dashboard/services/settings.dart';
 import 'models/widget_container_model.dart';
 
 typedef DraggableContainerUpdateFunctions = ({
-  Function(WidgetContainerModel widget, Rect newRect,
-      TransformResult result) onUpdate,
+  Function(WidgetContainerModel widget, Rect newRect, TransformResult result)
+  onUpdate,
   Function(WidgetContainerModel widget) onDragBegin,
-  Function(WidgetContainerModel widget, Rect releaseRect,
-      {Offset? globalPosition}) onDragEnd,
+  Function(
+    WidgetContainerModel widget,
+    Rect releaseRect, {
+    Offset? globalPosition,
+  })
+  onDragEnd,
   Function(WidgetContainerModel widget) onDragCancel,
   Function(WidgetContainerModel widget) onResizeBegin,
   Function(WidgetContainerModel widget, Rect releaseRect) onResizeEnd,
@@ -24,10 +28,7 @@ typedef DraggableContainerUpdateFunctions = ({
 class DraggableWidgetContainer extends StatelessWidget {
   final DraggableContainerUpdateFunctions? updateFunctions;
 
-  const DraggableWidgetContainer({
-    super.key,
-    this.updateFunctions,
-  });
+  const DraggableWidgetContainer({super.key, this.updateFunctions});
 
   static double snapToGrid(double value, [int? gridSize]) {
     gridSize ??= Defaults.gridSize;
@@ -40,8 +41,12 @@ class DraggableWidgetContainer extends StatelessWidget {
       TransformableBox(
         handleAlignment: HandleAlignment.inside,
         rect: model.draggingRect,
-        clampingRect:
-            const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
+        clampingRect: const Rect.fromLTWH(
+          0,
+          0,
+          double.infinity,
+          double.infinity,
+        ),
         resizeModeResolver: () => ResizeMode.freeform,
         allowFlippingWhileResizing: false,
         handleTapSize: 12,
@@ -54,14 +59,12 @@ class DraggableWidgetContainer extends StatelessWidget {
             .toSet(),
         draggable: model.draggable,
         resizable: model.draggable,
-        contentBuilder: (BuildContext context, Rect rect, Flip flip) {
-          return Builder(
-            builder: (context) {
-              controller = TransformableBox.controllerOf(context);
-              return Container();
-            },
-          );
-        },
+        contentBuilder: (BuildContext context, Rect rect, Flip flip) => Builder(
+          builder: (context) {
+            controller = TransformableBox.controllerOf(context);
+            return Container();
+          },
+        ),
         onDragStart: (event) {
           model.dragging = true;
           model.previewVisible = true;
@@ -70,7 +73,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.previewRect = model.dragStartLocation;
           model.validLocation =
               updateFunctions?.isValidMoveLocation(model, model.previewRect) ??
-                  true;
+              true;
 
           updateFunctions?.onDragBegin(model);
 
@@ -85,7 +88,7 @@ class DraggableWidgetContainer extends StatelessWidget {
           model.previewRect = model.dragStartLocation;
           model.validLocation =
               updateFunctions?.isValidMoveLocation(model, model.previewRect) ??
-                  true;
+              true;
 
           updateFunctions?.onResizeBegin.call(model);
 
@@ -109,8 +112,11 @@ class DraggableWidgetContainer extends StatelessWidget {
           }
           model.dragging = false;
 
-          updateFunctions?.onDragEnd(model, model.draggingRect,
-              globalPosition: model.cursorGlobalLocation);
+          updateFunctions?.onDragEnd(
+            model,
+            model.draggingRect,
+            globalPosition: model.cursorGlobalLocation,
+          );
 
           controller?.setRect(model.draggingRect);
         },
@@ -150,9 +156,7 @@ class DraggableWidgetContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     WidgetContainerModel model = context.read<WidgetContainerModel>();
 
-    return Stack(
-      children: getStackChildren(model),
-    );
+    return Stack(children: getStackChildren(model));
   }
 }
 
@@ -207,28 +211,28 @@ class WidgetContainer extends StatelessWidget {
                 children: [
                   // Title
                   LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(cornerRadius),
-                            topRight: Radius.circular(cornerRadius),
-                          ),
-                          color: theme.colorScheme.primaryContainer,
+                    builder: (context, constraints) => Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(cornerRadius),
+                          topRight: Radius.circular(cornerRadius),
                         ),
-                        width: constraints.maxWidth,
-                        alignment: Alignment.center,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 6.50),
-                          child: Text(
-                            title!,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall,
-                          ),
+                        color: theme.colorScheme.primaryContainer,
+                      ),
+                      width: constraints.maxWidth,
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
+                          vertical: 6.50,
                         ),
-                      );
-                    },
+                        child: Text(
+                          title!,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                    ),
                   ),
                   // The child widget
                   Expanded(

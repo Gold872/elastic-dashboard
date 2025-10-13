@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -21,7 +22,7 @@ void main() {
 
   final Map<String, dynamic> radialGaugeJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'start_angle': -140.0,
     'end_angle': 140.0,
@@ -44,18 +45,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': -0.50,
-      },
+      virtualValues: {'Test/Double Value': -0.50},
     );
   });
 
   test('Radial gauge from json', () {
-    NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel radialGaugeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Radial Gauge',
@@ -93,7 +92,7 @@ void main() {
   });
 
   test('Radial gauge from alias name', () {
-    NTWidgetModel radialGaugeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel radialGaugeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Simple Dial',
@@ -103,17 +102,18 @@ void main() {
     expect(radialGaugeModel.type, 'Radial Gauge');
     expect(radialGaugeModel.runtimeType, RadialGaugeModel);
     expect(
-        radialGaugeModel.getAvailableDisplayTypes(),
-        unorderedEquals([
-          'Text Display',
-          'Number Bar',
-          'Number Slider',
-          'Graph',
-          'Voltage View',
-          'Radial Gauge',
-          'Match Time',
-          'Large Text Display',
-        ]));
+      radialGaugeModel.getAvailableDisplayTypes(),
+      unorderedEquals([
+        'Text Display',
+        'Number Bar',
+        'Number Slider',
+        'Graph',
+        'Voltage View',
+        'Radial Gauge',
+        'Match Time',
+        'Large Text Display',
+      ]),
+    );
 
     if (radialGaugeModel is! RadialGaugeModel) {
       return;
@@ -133,8 +133,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -155,8 +156,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -191,22 +193,17 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
-      virtualValues: {
-        'Test/Int Value': -1,
-      },
+      virtualValues: {'Test/Int Value': -1},
     );
 
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -243,8 +240,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -280,8 +278,9 @@ void main() {
     RadialGaugeModel radialGaugeModel = RadialGaugeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       startAngle: -140.0,
       endAngle: 140.0,
@@ -321,8 +320,10 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final startAngle =
-        find.widgetWithText(DialogTextInput, 'Start Angle (CW+)');
+    final startAngle = find.widgetWithText(
+      DialogTextInput,
+      'Start Angle (CW+)',
+    );
     final endAngle = find.widgetWithText(DialogTextInput, 'End Angle (CW+)');
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
@@ -370,10 +371,7 @@ void main() {
 
     await widgetTester.ensureVisible(wrapValue);
     await widgetTester.tap(
-      find.descendant(
-        of: wrapValue,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: wrapValue, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 
@@ -387,20 +385,14 @@ void main() {
     expect(radialGaugeModel.numberOfLabels, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showPointer,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showPointer, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 
     expect(radialGaugeModel.showPointer, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showTicks,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showTicks, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/field_images.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -50,12 +51,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Field/Robot',
-          type: NT4TypeStr.kFloat64Arr,
+          type: NT4Type.array(NT4Type.double()),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Field/OtherObject',
-          type: NT4TypeStr.kFloat64Arr,
+          type: NT4Type.array(NT4Type.double()),
           properties: {},
         ),
       ],
@@ -67,7 +68,7 @@ void main() {
   });
 
   test('Field from json', () {
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Field',
@@ -94,7 +95,7 @@ void main() {
   });
 
   test('Field from alias json', () {
-    NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Field2d',
@@ -115,7 +116,9 @@ void main() {
     expect(fieldWidgetModel.fieldRotation, 90.0);
     expect(fieldWidgetModel.robotColor.toARGB32(), Colors.red.toARGB32());
     expect(
-        fieldWidgetModel.trajectoryColor.toARGB32(), Colors.white.toARGB32());
+      fieldWidgetModel.trajectoryColor.toARGB32(),
+      Colors.white.toARGB32(),
+    );
   });
 
   test('Field to json', () {
@@ -144,7 +147,7 @@ void main() {
       (widget) => widget is CustomPaint && widget.painter is TrajectoryPainter,
     );
     testWidgets('non-struct robot, no trajectory', (widgetTester) async {
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -175,12 +178,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: 'struct:Pose2d',
+            type: NT4Type.struct('Pose2d'),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -190,7 +193,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -229,17 +232,17 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/Trajectory',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -250,7 +253,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -287,17 +290,17 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/Trajectory',
-            type: 'struct:Pose2d[]',
+            type: NT4Type.array(NT4Type.struct('Pose2d')),
             properties: {},
           ),
         ],
@@ -308,7 +311,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -339,12 +342,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -354,7 +357,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -385,12 +388,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObjects',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
         ],
@@ -400,7 +403,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -429,12 +432,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObject',
-            type: 'struct:Pose2d',
+            type: NT4Type.struct('Pose2d'),
             properties: {},
           ),
         ],
@@ -444,7 +447,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -479,12 +482,12 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Field/Robot',
-            type: NT4TypeStr.kFloat64Arr,
+            type: NT4Type.array(NT4Type.double()),
             properties: {},
           ),
           NT4Topic(
             name: 'Test/Field/OtherObjects',
-            type: 'struct:Pose2d[]',
+            type: NT4Type.array(NT4Type.struct('Pose2d')),
             properties: {},
           ),
         ],
@@ -494,7 +497,7 @@ void main() {
         },
       );
 
-      NTWidgetModel fieldWidgetModel = NTWidgetBuilder.buildNTModelFromJson(
+      NTWidgetModel fieldWidgetModel = NTWidgetRegistry.buildNTModelFromJson(
         ntConnection,
         preferences,
         'Field',
@@ -567,12 +570,18 @@ void main() {
 
     final game = find.byType(DialogDropdownChooser<String?>);
     final width = find.widgetWithText(DialogTextInput, 'Robot Width (meters)');
-    final length =
-        find.widgetWithText(DialogTextInput, 'Robot Length (meters)');
-    final showNonRobot =
-        find.widgetWithText(DialogToggleSwitch, 'Show Non-Robot Objects');
-    final showTrajectories =
-        find.widgetWithText(DialogToggleSwitch, 'Show Trajectories');
+    final length = find.widgetWithText(
+      DialogTextInput,
+      'Robot Length (meters)',
+    );
+    final showNonRobot = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Non-Robot Objects',
+    );
+    final showTrajectories = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Trajectories',
+    );
     final rotateLeft = find.ancestor(
       of: find.text('Rotate Left'),
       matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
@@ -582,8 +591,10 @@ void main() {
       matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
     );
     final robotColor = find.widgetWithText(DialogColorPicker, 'Robot Color');
-    final trajectoryColor =
-        find.widgetWithText(DialogColorPicker, 'Trajectory Color');
+    final trajectoryColor = find.widgetWithText(
+      DialogColorPicker,
+      'Trajectory Color',
+    );
 
     expect(game, findsOneWidget);
     expect(width, findsOneWidget);
@@ -619,20 +630,14 @@ void main() {
 
     await widgetTester.ensureVisible(showNonRobot);
     await widgetTester.tap(
-      find.descendant(
-        of: showNonRobot,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showNonRobot, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(fieldWidgetModel.showOtherObjects, false);
 
     await widgetTester.ensureVisible(showTrajectories);
     await widgetTester.tap(
-      find.descendant(
-        of: showTrajectories,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showTrajectories, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(fieldWidgetModel.showTrajectories, false);

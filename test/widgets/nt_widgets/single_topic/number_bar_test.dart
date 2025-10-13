@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -22,7 +23,7 @@ void main() {
 
   final Map<String, dynamic> numberBarJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
@@ -42,18 +43,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': -1.0,
-      },
+      virtualValues: {'Test/Double Value': -1.0},
     );
   });
 
   test('Number bar from json', () {
-    NTWidgetModel numberBarModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberBarModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Bar',
@@ -91,8 +90,9 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -110,8 +110,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -137,9 +138,10 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
-            .gaugeOrientation,
-        GaugeOrientation.horizontal);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+          .gaugeOrientation,
+      GaugeOrientation.horizontal,
+    );
   });
 
   testWidgets('Number bar widget test vertical', (widgetTester) async {
@@ -148,8 +150,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -175,9 +178,10 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
-            .gaugeOrientation,
-        GaugeOrientation.vertical);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge)
+          .gaugeOrientation,
+      GaugeOrientation.vertical,
+    );
   });
 
   testWidgets('Number bar widget test integer', (widgetTester) async {
@@ -185,22 +189,17 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
-      virtualValues: {
-        'Test/Int Value': -1,
-      },
+      virtualValues: {'Test/Int Value': -1},
     );
 
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -233,8 +232,9 @@ void main() {
     NTWidgetModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -260,8 +260,9 @@ void main() {
     expect(find.byType(LinearGauge), findsOneWidget);
 
     expect(
-        (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
-        1.0);
+      (find.byType(LinearGauge).evaluate().first.widget as LinearGauge).steps,
+      1.0,
+    );
   });
 
   testWidgets('Number bar edit properties', (widgetTester) async {
@@ -270,8 +271,9 @@ void main() {
     NumberBarModel numberBarModel = NumberBarModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -322,11 +324,13 @@ void main() {
 
     expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
     await widgetTester.tap(
-      find.byWidget(find
-          .byType(DialogDropdownChooser<String>)
-          .evaluate()
-          .elementAt(1)
-          .widget),
+      find.byWidget(
+        find
+            .byType(DialogDropdownChooser<String>)
+            .evaluate()
+            .elementAt(1)
+            .widget,
+      ),
     );
     await widgetTester.pumpAndSettle();
 
@@ -365,10 +369,7 @@ void main() {
     expect(numberBarModel.divisions, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: inverted,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: inverted, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

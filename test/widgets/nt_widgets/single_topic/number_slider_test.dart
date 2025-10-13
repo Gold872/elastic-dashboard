@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -21,7 +22,7 @@ void main() {
 
   final Map<String, dynamic> numberSliderJson = {
     'topic': 'Test/Double Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'min_value': -5.0,
     'max_value': 5.0,
@@ -40,18 +41,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': -1.0,
-      },
+      virtualValues: {'Test/Double Value': -1.0},
     );
   });
 
   test('Number slider from json', () {
-    NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberSliderModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Slider',
@@ -88,8 +87,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -100,11 +100,12 @@ void main() {
     expect(numberSliderModel.toJson(), numberSliderJson);
   });
 
-  testWidgets('Number slider widget test continuous update',
-      (widgetTester) async {
+  testWidgets('Number slider widget test continuous update', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel numberSliderModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel numberSliderModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Number Slider',
@@ -149,19 +150,23 @@ void main() {
     expect(draggingDuringDrag, isTrue);
     expect(valueDuringDrag, isNot(-1.0));
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
-        greaterThan(0.0));
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Double Value'),
+      greaterThan(0.0),
+    );
   });
 
-  testWidgets('Number slider widget test non-continuous update',
-      (widgetTester) async {
+  testWidgets('Number slider widget test non-continuous update', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -206,8 +211,10 @@ void main() {
     expect(draggingDuringDrag, isTrue);
     expect(valueDuringDrag, -1.0);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/Double Value'),
-        greaterThan(0.0));
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/Double Value'),
+      greaterThan(0.0),
+    );
   });
 
   testWidgets('Number slider widget test integer', (widgetTester) async {
@@ -215,22 +222,17 @@ void main() {
 
     NTConnection ntConnection = createMockOnlineNT4(
       virtualTopics: [
-        NT4Topic(
-          name: 'Test/Int Value',
-          type: NT4TypeStr.kInt,
-          properties: {},
-        ),
+        NT4Topic(name: 'Test/Int Value', type: NT4Type.int(), properties: {}),
       ],
-      virtualValues: {
-        'Test/Int Value': -1,
-      },
+      virtualValues: {'Test/Int Value': -1},
     );
 
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Int Value',
-      dataType: 'int',
+      dataType: NT4Type.int(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -277,10 +279,14 @@ void main() {
     expect(valueDuringDrag, -1);
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Int Value'), greaterThan(0));
+      ntConnection.getLastAnnouncedValue('Test/Int Value'),
+      greaterThan(0),
+    );
 
     expect(
-        ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType, int);
+      ntConnection.getLastAnnouncedValue('Test/Int Value').runtimeType,
+      int,
+    );
   });
 
   testWidgets('Number slider edit properties', (widgetTester) async {
@@ -289,8 +295,9 @@ void main() {
     NumberSliderModel numberSliderModel = NumberSliderModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       minValue: -5.0,
       maxValue: 5.0,
@@ -304,8 +311,8 @@ void main() {
       initialPosition: Rect.fromLTWH(
         0,
         0,
-        3 * NTWidgetBuilder.getNormalSize(),
-        NTWidgetBuilder.getNormalSize(),
+        3 * NTWidgetRegistry.getNormalSize(),
+        NTWidgetRegistry.getNormalSize(),
       ),
       title: 'Number Slider',
       childModel: numberSliderModel,
@@ -334,8 +341,10 @@ void main() {
     final minimum = find.widgetWithText(DialogTextInput, 'Min Value');
     final maximum = find.widgetWithText(DialogTextInput, 'Max Value');
     final divisions = find.widgetWithText(DialogTextInput, 'Divisions');
-    final updateWhileDragging =
-        find.widgetWithText(DialogToggleSwitch, 'Update While Dragging');
+    final updateWhileDragging = find.widgetWithText(
+      DialogToggleSwitch,
+      'Update While Dragging',
+    );
 
     expect(minimum, findsOneWidget);
     expect(maximum, findsOneWidget);
@@ -371,10 +380,7 @@ void main() {
     expect(numberSliderModel.divisions, 10);
 
     await widgetTester.tap(
-      find.descendant(
-        of: updateWhileDragging,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: updateWhileDragging, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

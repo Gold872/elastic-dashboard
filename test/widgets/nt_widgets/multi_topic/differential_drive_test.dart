@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/differential_drive.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -31,12 +32,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Differential Drive/Left Motor Speed',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Differential Drive/Right Motor Speed',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -48,12 +49,13 @@ void main() {
   });
 
   test('Differential drive from json', () {
-    NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'DifferentialDrive',
-      differentialDriveJson,
-    );
+    NTWidgetModel differentialDriveModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'DifferentialDrive',
+          differentialDriveJson,
+        );
 
     expect(differentialDriveModel.type, 'DifferentialDrive');
     expect(differentialDriveModel.runtimeType, DifferentialDriveModel);
@@ -73,12 +75,13 @@ void main() {
   testWidgets('Differential drive widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel differentialDriveModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'DifferentialDrive',
-      differentialDriveJson,
-    );
+    NTWidgetModel differentialDriveModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'DifferentialDrive',
+          differentialDriveJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(
@@ -98,25 +101,35 @@ void main() {
     expect(find.byType(Pointer), findsNWidgets(2));
 
     await widgetTester.drag(
-        find.byType(Pointer).first, const Offset(0.0, 200.0));
+      find.byType(Pointer).first,
+      const Offset(0.0, 200.0),
+    );
     await widgetTester.pumpAndSettle();
 
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Left Motor Speed'),
-        isNot(0.50));
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Left Motor Speed',
+      ),
+      isNot(0.50),
+    );
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Right Motor Speed'),
-        0.50);
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Right Motor Speed',
+      ),
+      0.50,
+    );
 
     await widgetTester.drag(
-        find.byType(Pointer).last, const Offset(0.0, 300.0));
+      find.byType(Pointer).last,
+      const Offset(0.0, 300.0),
+    );
     await widgetTester.pumpAndSettle();
 
     expect(
-        ntConnection
-            .getLastAnnouncedValue('Test/Differential Drive/Right Motor Speed'),
-        isNot(0.50));
+      ntConnection.getLastAnnouncedValue(
+        'Test/Differential Drive/Right Motor Speed',
+      ),
+      isNot(0.50),
+    );
   });
 }

@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
@@ -35,18 +36,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Gyro/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Gyro/Value': 183.5,
-      },
+      virtualValues: {'Test/Gyro/Value': 183.5},
     );
   });
 
   test('Gyro from json', () {
-    NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel gyroModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Gyro',
@@ -78,7 +77,7 @@ void main() {
   testWidgets('Gyro widget', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel gyroModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel gyroModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Gyro',
@@ -141,25 +140,21 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final ccwPositive =
-        find.widgetWithText(DialogToggleSwitch, 'Counter Clockwise Positive');
+    final ccwPositive = find.widgetWithText(
+      DialogToggleSwitch,
+      'Counter Clockwise Positive',
+    );
 
     expect(ccwPositive, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: ccwPositive,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: ccwPositive, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(gyroModel.counterClockwisePositive, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: ccwPositive,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: ccwPositive, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(gyroModel.counterClockwisePositive, true);

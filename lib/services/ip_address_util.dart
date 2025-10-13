@@ -13,9 +13,7 @@ enum IPAddressMode {
   final String displayName;
 
   @override
-  String toString() {
-    return displayName;
-  }
+  String toString() => displayName;
 
   static IPAddressMode fromIndex(int? index) {
     if (index == null || index >= values.length) {
@@ -27,13 +25,10 @@ enum IPAddressMode {
 }
 
 class IPAddressUtil {
-  static bool isTeamNumber(String ipAddress) {
-    return int.tryParse(ipAddress) != null;
-  }
+  static bool isTeamNumber(String ipAddress) => int.tryParse(ipAddress) != null;
 
-  static String teamNumberToRIOmDNS(int teamNumber) {
-    return 'roboRIO-$teamNumber-FRC.local';
-  }
+  static String teamNumberToRIOmDNS(int teamNumber) =>
+      'roboRIO-$teamNumber-FRC.local';
 
   static String teamNumberToIP(int teamNumber) {
     String te = (teamNumber ~/ 100).toString();
@@ -44,6 +39,6 @@ class IPAddressUtil {
 
   static String getIpFromInt32Value(int value) =>
       InternetAddress.fromRawAddress(
-              (ByteData(4)..setInt32(0, value)).buffer.asUint8List())
-          .address;
+        (ByteData(4)..setInt32(0, value)).buffer.asUint8List(),
+      ).address;
 }

@@ -26,7 +26,7 @@ class Mjpeg extends StatefulWidget {
 
   final WidgetBuilder? loading;
   final Widget Function(BuildContext contet, dynamic error, dynamic stack)?
-      error;
+  error;
 
   const Mjpeg({
     required this.controller,
@@ -47,18 +47,15 @@ class Mjpeg extends StatefulWidget {
 class _MjpegState extends State<Mjpeg> {
   final streamKey = UniqueKey();
 
-  late void Function() listener;
-
   @override
   void initState() {
-    listener = () => setState(() {});
-    widget.controller.addListener(listener);
+    widget.controller.addListener(_onControllerUpdate);
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(listener);
+    widget.controller.removeListener(_onControllerUpdate);
 
     widget.controller.setMounted(streamKey, false);
     widget.controller.setVisible(streamKey, false);
@@ -72,13 +69,17 @@ class _MjpegState extends State<Mjpeg> {
     final oldController = oldWidget.controller;
 
     if (oldController != controller) {
-      oldController.removeListener(listener);
-      controller.addListener(listener);
+      oldController.removeListener(_onControllerUpdate);
+      controller.addListener(_onControllerUpdate);
 
       controller.setMounted(streamKey, oldController.isMounted(streamKey));
       controller.setVisible(streamKey, oldController.isVisible(streamKey));
     }
     super.didUpdateWidget(oldWidget);
+  }
+
+  void _onControllerUpdate() {
+    setState(() {});
   }
 
   @override
@@ -87,10 +88,12 @@ class _MjpegState extends State<Mjpeg> {
 
     controller.setMounted(streamKey, context.mounted);
 
+    late Widget streamView;
+
     if (controller.errorState.value != null && kDebugMode) {
       String errorText =
           '${controller.errorState.value!.first}\n${controller.errorState.value!.last.toString()}';
-      return SizedBox(
+      streamView = SizedBox(
         width: widget.width,
         height: widget.height,
         child: widget.error == null
@@ -110,57 +113,61 @@ class _MjpegState extends State<Mjpeg> {
                 controller.errorState.value!.last,
               ),
       );
+    } else {
+      streamView = StreamBuilder<List<int>?>(
+        stream: controller.imageStream.stream,
+        builder: (context, snapshot) {
+          if (!controller.isStreamActive) {
+            // Request has been sent but no status received yet
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CustomLoadingIndicator(),
+                const SizedBox(height: 10),
+                const Text('Attempting to establish HTTP connection.'),
+              ],
+            );
+          }
+          if (snapshot.data == null && controller.previousImage == null) {
+            return SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child:
+                  widget.loading?.call(context) ??
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CustomLoadingIndicator(),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Connection established but no data received.\nCamera may be disconnected from device.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+            );
+          }
+
+          return RotatedBox(
+            quarterTurns: widget.quarterTurns,
+            child: Image.memory(
+              Uint8List.fromList(snapshot.data ?? controller.previousImage!),
+              width: widget.width,
+              height: widget.height,
+              gaplessPlayback: true,
+              fit: widget.fit,
+              scale: (widget.expandToFit) ? 1e-6 : 1.0,
+            ),
+          );
+        },
+      );
     }
 
     return VisibilityDetector(
       key: streamKey,
-      child: StreamBuilder<List<int>?>(
-          stream: controller.imageStream.stream,
-          builder: (context, snapshot) {
-            if (!controller.isStreaming) {
-              // Request has been sent but no status received yet
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CustomLoadingIndicator(),
-                  const SizedBox(height: 10),
-                  const Text('Attempting to establish HTTP connection.'),
-                ],
-              );
-            }
-            if (snapshot.data == null && controller.previousImage == null) {
-              return SizedBox(
-                width: widget.width,
-                height: widget.height,
-                child: widget.loading?.call(context) ??
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        CustomLoadingIndicator(),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Connection established but no data received.\nCamera may be disconnected from device.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-              );
-            }
-
-            return RotatedBox(
-              quarterTurns: widget.quarterTurns,
-              child: Image.memory(
-                Uint8List.fromList(snapshot.data ?? controller.previousImage!),
-                width: widget.width,
-                height: widget.height,
-                gaplessPlayback: true,
-                fit: widget.fit,
-                scale: (widget.expandToFit) ? 1e-6 : 1.0,
-              ),
-            );
-          }),
+      child: streamView,
       onVisibilityChanged: (VisibilityInfo info) {
         if (controller.isMounted(streamKey)) {
           controller.setVisible(streamKey, info.visibleFraction != 0);
@@ -169,6 +176,8 @@ class _MjpegState extends State<Mjpeg> {
     );
   }
 }
+
+enum StreamCycleState { idle, connecting, reconnecting, streaming, disposed }
 
 class MjpegController extends ChangeNotifier {
   static const _trigger = 0xFF;
@@ -208,9 +217,11 @@ class MjpegController extends ChangeNotifier {
   final Set<Key> _mountedKeys = {};
   final Set<Key> _visibleKeys = {};
 
-  bool _disposed = false;
+  StreamCycleState _cycleState = StreamCycleState.idle;
+  StreamCycleState get cycleState => _cycleState;
 
-  bool get _inUse => !_disposed && _mountedKeys.isNotEmpty;
+  bool get _inUse =>
+      cycleState != StreamCycleState.disposed && _mountedKeys.isNotEmpty;
 
   bool get _shouldStream => _visibleKeys.isNotEmpty && _inUse;
 
@@ -224,9 +235,10 @@ class MjpegController extends ChangeNotifier {
 
       if (hasChanged) {
         logger.trace(
-            'Visibility changed to true, notifying listeners for mjpeg stream');
-        if (!isStreaming && errorState.value == null) {
-          startStream();
+          'Visibility changed to true, notifying listeners for mjpeg stream',
+        );
+        if (!isStreamActive && cycleState != StreamCycleState.reconnecting) {
+          changeCycleState(StreamCycleState.connecting);
         }
         notifyListeners();
       }
@@ -239,7 +251,7 @@ class MjpegController extends ChangeNotifier {
             errorState.value = null;
           }
         });
-        stopStream();
+        changeCycleState(StreamCycleState.idle);
       }
     }
   }
@@ -255,9 +267,43 @@ class MjpegController extends ChangeNotifier {
     }
   }
 
-  bool _attemptingConnection = false;
+  void changeCycleState(StreamCycleState next) {
+    if (cycleState == next || cycleState == StreamCycleState.disposed) {
+      return;
+    }
 
-  bool get isStreaming => _rawSubscription != null;
+    logger.debug('Transitioning from $cycleState to $next');
+    _cycleState = next;
+    _updateCycleState();
+  }
+
+  void _updateCycleState() {
+    switch (cycleState) {
+      case StreamCycleState.idle || StreamCycleState.disposed:
+        if (isStreamActive) {
+          stopStream();
+        }
+        break;
+      case StreamCycleState.connecting:
+        startStream();
+        break;
+      case StreamCycleState.streaming:
+        break;
+      case StreamCycleState.reconnecting:
+        if (isStreamActive) stopStream();
+        unawaited(
+          Future.delayed(const Duration(milliseconds: 100), () {
+            // State changed during delay
+            if (cycleState != StreamCycleState.reconnecting) return;
+            _switchToNextStream();
+            changeCycleState(StreamCycleState.connecting);
+          }),
+        );
+        break;
+    }
+  }
+
+  bool get isStreamActive => _rawSubscription != null;
 
   MjpegController({
     required this.streams,
@@ -288,38 +334,36 @@ class MjpegController extends ChangeNotifier {
         errorState.value?.firstOrNull,
         errorState.value?.lastOrNull,
       );
-      if (errorState.value!.first is TimeoutException ||
-          errorState.value!.first is HttpException) {
-        stopStream(retry: _inUse);
-      } else {
-        stopStream();
-      }
     }
     notifyListeners();
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     errorState.removeListener(_onError);
-    stopStream();
-    imageStream.close();
-    _disposed = true;
+    await stopStream();
+    await imageStream.close();
+    changeCycleState(StreamCycleState.disposed);
     super.dispose();
   }
 
-  void startStream() async {
-    if (isStreaming || !_shouldStream || _attemptingConnection) {
+  Future<void> startStream() async {
+    if (isStreamActive ||
+        !_shouldStream ||
+        cycleState != StreamCycleState.connecting) {
       return;
     }
-    _attemptingConnection = true;
     String stream = streams[currentStreamIndex];
     logger.info('Starting camera stream on URL $stream');
     ByteStream? byteStream;
     try {
       final request = Request('GET', Uri.parse(stream));
       request.headers.addAll(headers);
-      final response = await httpClient.send(request).timeout(
-          timeout); //timeout is to prevent process to hang forever in some case
+      final response = await httpClient
+          .send(request)
+          .timeout(
+            timeout,
+          ); //timeout is to prevent process to hang forever in some case
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         byteStream = response.stream;
@@ -351,11 +395,16 @@ class MjpegController extends ChangeNotifier {
       }
     }
 
-    _attemptingConnection = false;
-
-    if (byteStream == null || !_shouldStream) {
+    if (!_shouldStream) {
       return;
     }
+
+    if (byteStream == null) {
+      changeCycleState(StreamCycleState.reconnecting);
+      return;
+    }
+
+    changeCycleState(StreamCycleState.streaming);
 
     previousImage = null;
     _buffer.clear();
@@ -366,7 +415,7 @@ class MjpegController extends ChangeNotifier {
         _handleData(data);
       },
       onDone: () {
-        stopStream(retry: _inUse);
+        changeCycleState(StreamCycleState.reconnecting);
         notifyListeners();
       },
     );
@@ -379,7 +428,7 @@ class MjpegController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _updateMetrics(_) {
+  void _updateMetrics(dynamic _) {
     bandwidth.value = _bitCount / 1e6;
     framesPerSecond.value = _frameCount;
 
@@ -393,10 +442,11 @@ class MjpegController extends ChangeNotifier {
       currentStreamIndex = 0;
     }
     logger.info(
-        'Switching to stream at index $currentStreamIndex: $currentStream');
+      'Switching to stream at index $currentStreamIndex: $currentStream',
+    );
   }
 
-  void stopStream({bool retry = false}) async {
+  Future<void> stopStream() async {
     logger.info('Stopping camera stream on URL $currentStream');
     _metricsTimer?.cancel();
     _metricsTimer = null;
@@ -407,12 +457,6 @@ class MjpegController extends ChangeNotifier {
     _frameCount = 0;
     httpClient.close();
     httpClient = Client();
-
-    if (retry && !isStreaming) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      _switchToNextStream();
-      startStream();
-    }
   }
 
   void _handleNewPacket() {

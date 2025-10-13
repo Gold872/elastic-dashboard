@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/ultrasonic.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,18 +31,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Ultrasonic/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Ultrasonic/Value': 0.12,
-      },
+      virtualValues: {'Test/Ultrasonic/Value': 0.12},
     );
   });
 
   test('Ultrasonic from json', () {
-    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel ultrasonicModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Ultrasonic',
@@ -66,7 +65,7 @@ void main() {
   testWidgets('Ultrasonic widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel ultrasonicModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel ultrasonicModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Ultrasonic',

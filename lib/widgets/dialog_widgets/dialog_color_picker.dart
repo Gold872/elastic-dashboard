@@ -37,127 +37,128 @@ class _DialogColorPickerState extends State<DialogColorPicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: widget.rowSize,
-      children: [
-        Text(widget.label),
-        const SizedBox(width: 5),
-        ElevatedButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('Select Color'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SingleChildScrollView(
-                        child: ColorPicker(
-                          pickerColor: selectedColor ?? initialColor,
-                          enableAlpha: false,
-                          hexInputBar: true,
-                          hexInputController: hexInputController,
-                          onColorChanged: (Color color) {
-                            setState(() {
-                              selectedColor = color;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: TextField(
-                          controller: hexInputController,
-                          autofocus: false,
-                          decoration: InputDecoration(
-                            constraints: const BoxConstraints(
-                              maxWidth: 150,
-                            ),
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            labelText: 'Hex Code',
-                            prefixText: '#',
-                            counterText: '',
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4)),
-                          ),
-                          maxLength: 6,
-                          inputFormatters: [
-                            // Any custom input formatter can be passed
-                            // here or use any Form validator you want.
-                            UpperCaseTextFormatter(),
-                            FilteringTextInputFormatter.allow(
-                                RegExp(kValidHexPattern)),
-                          ],
-                        ),
-                      )
-                    ],
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisSize: widget.rowSize,
+    children: [
+      Text(widget.label),
+      const SizedBox(width: 5),
+      ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Select Color'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SingleChildScrollView(
+                    child: ColorPicker(
+                      pickerColor: selectedColor ?? initialColor,
+                      enableAlpha: false,
+                      hexInputBar: true,
+                      hexInputController: hexInputController,
+                      onColorChanged: (Color color) {
+                        setState(() {
+                          selectedColor = color;
+                        });
+                      },
+                    ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                        widget.onColorPicked.call(initialColor);
-
-                        setState(() {
-                          selectedColor = initialColor;
-                        });
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                    if (widget.defaultColor != null)
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                          widget.onColorPicked.call(widget.defaultColor!);
-
-                          setState(() {
-                            selectedColor = widget.defaultColor!;
-                          });
-                        },
-                        child: const Text('Restore Default'),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      controller: hexInputController,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        contentPadding: const EdgeInsets.fromLTRB(
+                          8,
+                          4,
+                          8,
+                          4,
+                        ),
+                        labelText: 'Hex Code',
+                        prefixText: '#',
+                        counterText: '',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                        widget.onColorPicked
-                            .call(selectedColor ?? initialColor);
-
-                        setState(() {
-                          initialColor = selectedColor ?? initialColor;
-                        });
-                      },
-                      child: const Text('Save'),
+                      maxLength: 6,
+                      inputFormatters: [
+                        // Any custom input formatter can be passed
+                        // here or use any Form validator you want.
+                        UpperCaseTextFormatter(),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(kValidHexPattern),
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ).then((value) {
-              bool dismissed = value ?? true;
-              if (dismissed) {
-                widget.onColorPicked.call(initialColor);
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                    widget.onColorPicked.call(initialColor);
 
-                setState(() {
-                  selectedColor = initialColor;
-                });
-              }
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: selectedColor ?? initialColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(7.5),
+                    setState(() {
+                      selectedColor = initialColor;
+                    });
+                  },
+                  child: const Text('Cancel'),
+                ),
+                if (widget.defaultColor != null)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                      widget.onColorPicked.call(widget.defaultColor!);
+
+                      setState(() {
+                        selectedColor = widget.defaultColor!;
+                      });
+                    },
+                    child: const Text('Restore Default'),
+                  ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                    widget.onColorPicked.call(
+                      selectedColor ?? initialColor,
+                    );
+
+                    setState(() {
+                      initialColor = selectedColor ?? initialColor;
+                    });
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
             ),
+          ).then((value) {
+            bool dismissed = value ?? true;
+            if (dismissed) {
+              widget.onColorPicked.call(initialColor);
+
+              setState(() {
+                selectedColor = initialColor;
+              });
+            }
+          });
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: selectedColor ?? initialColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(7.5),
           ),
-          child: Container(),
         ),
-      ],
-    );
-  }
+        child: Container(),
+      ),
+    ],
+  );
 }

@@ -23,9 +23,9 @@ class GyroModel extends MultiTopicNTWidgetModel {
 
   bool _counterClockwisePositive = false;
 
-  get counterClockwisePositive => _counterClockwisePositive;
+  bool get counterClockwisePositive => _counterClockwisePositive;
 
-  set counterClockwisePositive(value) {
+  set counterClockwisePositive(bool value) {
     _counterClockwisePositive = value;
     refresh();
   }
@@ -35,10 +35,9 @@ class GyroModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     bool counterClockwisePositive = false,
-    super.dataType,
     super.period,
-  })  : _counterClockwisePositive = counterClockwisePositive,
-        super();
+  }) : _counterClockwisePositive = counterClockwisePositive,
+       super();
 
   GyroModel.fromJson({
     required super.ntConnection,
@@ -55,27 +54,23 @@ class GyroModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'counter_clockwise_positive': _counterClockwisePositive,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'counter_clockwise_positive': _counterClockwisePositive,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Center(
-        child: DialogToggleSwitch(
-          initialValue: _counterClockwisePositive,
-          label: 'Counter Clockwise Positive',
-          onToggle: (value) {
-            counterClockwisePositive = value;
-          },
-        ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Center(
+      child: DialogToggleSwitch(
+        initialValue: _counterClockwisePositive,
+        label: 'Counter Clockwise Positive',
+        onToggle: (value) {
+          counterClockwisePositive = value;
+        },
       ),
-    ];
-  }
+    ),
+  ];
 }
 
 class Gyro extends NTWidget {
@@ -100,8 +95,10 @@ class Gyro extends NTWidget {
         const double flexCoefficient = 20.0 / 23;
         // measured on a 2x2 gyro widget
         const double normalSquareSide = 199.9 * flexCoefficient;
-        double squareSide =
-            min(constraints.maxWidth, constraints.maxHeight * flexCoefficient);
+        double squareSide = min(
+          constraints.maxWidth,
+          constraints.maxHeight * flexCoefficient,
+        );
         return Transform.scale(
           scale: squareSide / normalSquareSide,
           child: ValueListenableBuilder(
@@ -137,19 +134,25 @@ class Gyro extends NTWidget {
                               steps: 360 ~/ 45,
                               color: const Color.fromRGBO(97, 97, 97, 1),
                               trackStyle: TrackStyle(
-                                  primaryRulerColor: Colors.grey,
-                                  secondaryRulerColor:
-                                      const Color.fromRGBO(97, 97, 97, 1),
-                                  labelStyle:
-                                      Theme.of(context).textTheme.bodySmall,
-                                  primaryRulersHeight: 7.25,
-                                  primaryRulersWidth: 2,
-                                  secondaryRulersHeight: 7.25,
-                                  rulersOffset: -18.5,
-                                  labelOffset: -58.0,
-                                  showLastLabel: false,
-                                  secondaryRulerPerInterval: 8,
-                                  inverseRulers: true),
+                                primaryRulerColor: Colors.grey,
+                                secondaryRulerColor: const Color.fromRGBO(
+                                  97,
+                                  97,
+                                  97,
+                                  1,
+                                ),
+                                labelStyle: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall,
+                                primaryRulersHeight: 7.25,
+                                primaryRulersWidth: 2,
+                                secondaryRulersHeight: 7.25,
+                                rulersOffset: -18.5,
+                                labelOffset: -58.0,
+                                showLastLabel: false,
+                                secondaryRulerPerInterval: 8,
+                                inverseRulers: true,
+                              ),
                               trackLabelFormater: (value) =>
                                   value.toStringAsFixed(0),
                             ),

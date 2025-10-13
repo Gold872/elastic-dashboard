@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/single_color_view.dart';
 import '../../../test_util.dart';
@@ -17,18 +18,18 @@ void main() {
 
   final Map<String, dynamic> singleColorViewJson = {
     'topic': 'Test/String Value',
-    'data_type': 'string',
+    'data_type': NT4Type.string().serialize(),
     'period': 0.100,
   };
 
   Finder findColor(Color color) => find.byWidgetPredicate(
-        (widget) =>
-            widget is Container &&
-            widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color != null &&
-            (widget.decoration as BoxDecoration).color!.toARGB32() ==
-                color.toARGB32(),
-      );
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration as BoxDecoration).color != null &&
+        (widget.decoration as BoxDecoration).color!.toARGB32() ==
+            color.toARGB32(),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;
@@ -41,7 +42,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/String Value',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
@@ -55,7 +56,7 @@ void main() {
   });
 
   test('Single color view from json', () {
-    NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel singleColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Single Color View',
@@ -80,7 +81,7 @@ void main() {
       preferences: preferences,
       type: 'Single Color View',
       topic: 'Test/String Value',
-      dataType: 'string',
+      dataType: NT4Type.string(),
       period: 0.100,
     );
 
@@ -90,7 +91,7 @@ void main() {
   testWidgets('Single color view widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel singleColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel singleColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Single Color View',

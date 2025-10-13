@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_color_picker.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
@@ -47,7 +47,7 @@ void main() {
   });
 
   test('Camera stream from json', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -79,13 +79,17 @@ void main() {
 
     cameraStreamModel.fps = null;
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=100x100&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=100x100&compression=50',
+    );
 
     cameraStreamModel.resolution = const Size(0.0, 100);
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?compression=50',
+    );
 
     cameraStreamModel.quality = null;
 
@@ -93,7 +97,7 @@ void main() {
   });
 
   test('Camera stream from json (with invalid resolution)', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -108,12 +112,14 @@ void main() {
     }
     expect(cameraStreamModel.resolution, const Size(102.0, 100.0));
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=102x100&fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=102x100&fps=60&compression=50',
+    );
   });
 
   test('Camera stream from json (with negative resolution)', () {
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -129,8 +135,10 @@ void main() {
 
     expect(cameraStreamModel.resolution, isNull);
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?fps=60&compression=50',
+    );
   });
 
   test('Camera stream to json', () {
@@ -157,7 +165,7 @@ void main() {
   testWidgets('Camera stream online widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Camera Stream',
@@ -179,13 +187,15 @@ void main() {
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Waiting for Camera Stream connection...'), findsOneWidget);
+      find.text('Waiting for Camera Stream connection...'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Camera stream offline widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel cameraStreamModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel cameraStreamModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOfflineNT4(),
       preferences,
       'Camera Stream',
@@ -207,7 +217,9 @@ void main() {
 
     expect(find.byType(CustomLoadingIndicator), findsOneWidget);
     expect(
-        find.text('Waiting for Network Tables connection...'), findsOneWidget);
+      find.text('Waiting for Network Tables connection...'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Camera stream edit properties', (widgetTester) async {

@@ -26,11 +26,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
   List<NT4Subscription> get subscriptions => [streamsSubscription];
 
-  MjpegController? controller;
-  int? _quality;
-  int? _fps;
-  Size? _resolution;
-
+  int? quality;
+  int? fps;
+  Size? resolution;
   int _rotationTurns = 0;
   bool _crosshairEnabled = false;
   int _crosshairX = 0;
@@ -73,18 +71,6 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
 
   set crosshairThickness(int value) => _crosshairThickness = value;
 
-  int? get quality => _quality;
-
-  set quality(value) => _quality = value;
-
-  int? get fps => _fps;
-
-  set fps(value) => _fps = value;
-
-  Size? get resolution => _resolution;
-
-  set resolution(value) => _resolution = value;
-
   int get rotationTurns => _rotationTurns;
 
   set rotationTurns(int value) {
@@ -95,8 +81,9 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   String getUrlWithParameters(String urlString) {
     Uri url = Uri.parse(urlString);
 
-    Map<String, String> parameters =
-        Map<String, String>.from(url.queryParameters);
+    Map<String, String> parameters = Map<String, String>.from(
+      url.queryParameters,
+    );
 
     parameters.addAll({
       if (resolution != null &&
@@ -116,8 +103,8 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required super.topic,
     int? compression,
-    int? fps,
-    Size? resolution,
+    this.fps,
+    this.resolution,
     int rotation = 0,
     bool crosshairEnabled = false,
     int crosshairWidth = 50,
@@ -128,7 +115,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     Color crosshairColor = Colors.red,
     super.dataType,
     super.period,
-  })  : _quality = compression,
+  })  : quality = compression,
         _fps = fps,
         _resolution = resolution,
         _rotationTurns = rotation,
@@ -146,8 +133,8 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    _quality = tryCast(jsonData['compression']);
-    _fps = tryCast(jsonData['fps']);
+    quality = tryCast(jsonData['compression']);
+    fps = tryCast(jsonData['fps']);
     _crosshairEnabled = tryCast(jsonData['crosshair_enabled']) ?? false;
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
     _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 25;
@@ -159,16 +146,19 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         tryCast<int>(jsonData['crosshair_color']) ?? Colors.red.toARGB32());
     _crosshairCentered = tryCast(jsonData['crosshair_centered']) ?? false;
 
-    List<num>? resolution = tryCast<List<Object?>>(jsonData['resolution'])
-        ?.whereType<num>()
-        .toList();
+    List<num>? resolution = tryCast<List<Object?>>(
+      jsonData['resolution'],
+    )?.whereType<num>().toList();
 
     if (resolution != null && resolution.length > 1) {
       if (resolution[0] % 2 != 0) {
         resolution[0] += 1;
       }
       if (resolution[0] > 0 && resolution[1] > 0) {
-        _resolution = Size(resolution[0].toDouble(), resolution[1].toDouble());
+        this.resolution = Size(
+          resolution[0].toDouble(),
+          resolution[1].toDouble(),
+        );
       }
     }
   }
@@ -195,7 +185,7 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'rotation_turns': rotationTurns,
+      'rotation_turns': _rotationTurns,
       'crosshair_enabled': crosshairEnabled,
       'crosshair_width': crosshairWidth,
       'crosshair_height': crosshairHeight,
@@ -215,163 +205,159 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      StatefulBuilder(builder: (context, setState) {
-        return Row(
-          children: [
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: fps?.toString() ?? '-1',
-                label: 'FPS',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newFPS = int.tryParse(value);
-
-                  setState(() {
-                    if (newFPS == -1 || newFPS == 0) {
-                      fps = null;
-                      return;
-                    }
-
-                    fps = newFPS;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 10.0),
-            const Text('Resolution'),
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: resolution?.width.floor().toString() ?? '-1',
-                label: 'Width',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newWidth = int.tryParse(value);
-
-                  setState(() {
-                    if (newWidth == null || newWidth == 0) {
-                      resolution = null;
-                      return;
-                    }
-
-                    if (newWidth! % 2 != 0) {
-                      // Won't allow += for some reason
-                      newWidth = newWidth! + 1;
-                    }
-
-                    resolution = Size(
-                      newWidth!.toDouble(),
-                      resolution?.height.toDouble() ?? 0,
-                    );
-                  });
-                },
-              ),
-            ),
-            const Text('x'),
-            Flexible(
-              child: DialogTextInput(
-                allowEmptySubmission: true,
-                initialText: resolution?.height.floor().toString() ?? '-1',
-                label: 'Height',
-                formatter: FilteringTextInputFormatter.digitsOnly,
-                onSubmit: (value) {
-                  int? newHeight = int.tryParse(value);
-
-                  setState(() {
-                    if (newHeight == null || newHeight == 0) {
-                      resolution = null;
-                      return;
-                    }
-
-                    resolution = Size(
-                      resolution?.width.toDouble() ?? 0,
-                      newHeight.toDouble(),
-                    );
-                  });
-                },
-              ),
-            ),
-          ],
-        );
-      }),
-      StatefulBuilder(
-        builder: (context, setState) {
-          return Row(
-            children: [
-              const Text('Quality:'),
-              Expanded(
-                child: Slider(
-                  value: quality?.toDouble() ?? -5.0,
-                  min: -5.0,
-                  max: 100.0,
-                  divisions: 104,
-                  label: '${quality ?? -1}',
-                  onChanged: (value) {
-                    setState(() {
-                      if (value < 0) {
-                        quality = null;
-                      } else {
-                        quality = value.floor();
-                      }
-                    });
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      TextButton(
-        onPressed: () => refresh(),
-        child: const Text('Apply Quality Settings'),
-      ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+  List<Widget> getEditProperties(BuildContext context) => [
+    StatefulBuilder(
+      builder: (context, setState) => Row(
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                label: const Text('Rotate Left'),
-                icon: const Icon(Icons.rotate_90_degrees_ccw),
-                onPressed: () {
-                  int newRotation = rotationTurns - 1;
-                  if (newRotation < 0) {
-                    newRotation += 4;
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: fps?.toString() ?? '-1',
+              label: 'FPS',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newFPS = int.tryParse(value);
+
+                setState(() {
+                  if (newFPS == -1 || newFPS == 0) {
+                    fps = null;
+                    return;
                   }
-                  rotationTurns = newRotation;
-                },
-              ),
+
+                  fps = newFPS;
+                });
+              },
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                label: const Text('Rotate Right'),
-                icon: const Icon(Icons.rotate_90_degrees_cw),
-                onPressed: () {
-                  int newRotation = rotationTurns + 1;
-                  if (newRotation >= 4) {
-                    newRotation -= 4;
+          const SizedBox(width: 10.0),
+          const Text('Resolution'),
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: resolution?.width.floor().toString() ?? '-1',
+              label: 'Width',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newWidth = int.tryParse(value);
+
+                setState(() {
+                  if (newWidth == null || newWidth == 0) {
+                    resolution = null;
+                    return;
                   }
-                  rotationTurns = newRotation;
-                },
+
+                  if (newWidth! % 2 != 0) {
+                    // Won't allow += for some reason
+                    newWidth = newWidth! + 1;
+                  }
+
+                  resolution = Size(
+                    newWidth!.toDouble(),
+                    resolution?.height.toDouble() ?? 0,
+                  );
+                });
+              },
+            ),
+          ),
+          const Text('x'),
+          Flexible(
+            child: DialogTextInput(
+              allowEmptySubmission: true,
+              initialText: resolution?.height.floor().toString() ?? '-1',
+              label: 'Height',
+              formatter: FilteringTextInputFormatter.digitsOnly,
+              onSubmit: (value) {
+                int? newHeight = int.tryParse(value);
+
+                setState(() {
+                  if (newHeight == null || newHeight == 0) {
+                    resolution = null;
+                    return;
+                  }
+
+                  resolution = Size(
+                    resolution?.width.toDouble() ?? 0,
+                    newHeight.toDouble(),
+                  );
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+    StatefulBuilder(
+      builder: (context, setState) => Row(
+        children: [
+          const Text('Quality:'),
+          Expanded(
+            child: Slider(
+              value: quality?.toDouble() ?? -5.0,
+              min: -5.0,
+              max: 100.0,
+              divisions: 104,
+              label: '${quality ?? -1}',
+              onChanged: (value) {
+                setState(() {
+                  if (value < 0) {
+                    quality = null;
+                  } else {
+                    quality = value.floor();
+                  }
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+    TextButton(
+      onPressed: () => refresh(),
+      child: const Text('Apply Quality Settings'),
+    ),
+    const SizedBox(height: 5),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
               ),
+              label: const Text('Rotate Left'),
+              icon: const Icon(Icons.rotate_90_degrees_ccw),
+              onPressed: () {
+                int newRotation = rotationTurns - 1;
+                if (newRotation < 0) {
+                  newRotation += 4;
+                }
+                rotationTurns = newRotation;
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+              label: const Text('Rotate Right'),
+              icon: const Icon(Icons.rotate_90_degrees_cw),
+              onPressed: () {
+                int newRotation = rotationTurns + 1;
+                if (newRotation >= 4) {
+                  newRotation -= 4;
+                }
+                rotationTurns = newRotation;
+              },
             ),
           ),
         ],
@@ -525,22 +511,26 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
       )
     ];
   }
+        ),
+      ],
+    ),
+  ];
 
   @override
-  void disposeWidget({bool deleting = false}) {
+  void softDispose({bool deleting = false}) {
     if (deleting) {
       controller?.dispose();
       ntConnection.ntConnected.removeListener(onNTConnected);
     }
 
-    super.disposeWidget(deleting: deleting);
+    super.softDispose(deleting: deleting);
   }
 
   void onNTConnected() {
     if (ntConnection.ntConnected.value) {
       closeClient();
     } else {
-      controller?.stopStream();
+      controller?.changeCycleState(StreamCycleState.idle);
     }
   }
 
@@ -615,7 +605,8 @@ class CameraStreamWidget extends NTWidget {
             .map((stream) => model.getUrlWithParameters(stream))
             .toList();
 
-        createNewWidget = createNewWidget ||
+        createNewWidget =
+            createNewWidget ||
             !(model.controller?.streams.equals(streamUrls) ?? false);
 
         if (createNewWidget) {

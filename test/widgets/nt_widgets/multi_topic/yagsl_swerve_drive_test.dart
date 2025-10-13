@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('YAGSL swerve drive from json', () {
-    NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel yagslSwerveModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'YAGSL Swerve Drive',
@@ -72,7 +72,7 @@ void main() {
   testWidgets('YAGSL swerve drive widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel yagslSwerveModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel yagslSwerveModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'YAGSL Swerve Drive',
@@ -136,31 +136,31 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showRobotRotation =
-        find.widgetWithText(DialogToggleSwitch, 'Show Robot Rotation');
-    final showDesiredStates =
-        find.widgetWithText(DialogToggleSwitch, 'Show Desired States');
-    final angleOffset =
-        find.widgetWithText(DialogTextInput, 'Angle Offset (Degrees)');
+    final showRobotRotation = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Robot Rotation',
+    );
+    final showDesiredStates = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Desired States',
+    );
+    final angleOffset = find.widgetWithText(
+      DialogTextInput,
+      'Angle Offset (Degrees)',
+    );
 
     expect(showRobotRotation, findsOneWidget);
     expect(showDesiredStates, findsOneWidget);
     expect(angleOffset, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showRobotRotation,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showRobotRotation, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(yagslSwerveModel.showRobotRotation, false);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showDesiredStates,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showDesiredStates, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
     expect(yagslSwerveModel.showDesiredStates, false);

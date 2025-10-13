@@ -7,8 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/multi_color_view.dart';
 import '../../../test_util.dart';
@@ -22,15 +23,15 @@ void main() {
     'period': 0.100,
   };
 
-  Finder findGradient(List<Color> expectedColors) =>
-      find.byWidgetPredicate((widget) =>
-          widget is Container &&
-          widget.decoration is BoxDecoration &&
-          (widget.decoration as BoxDecoration).gradient != null &&
-          (widget.decoration as BoxDecoration)
-              .gradient!
-              .colors
-              .equals(expectedColors));
+  Finder findGradient(List<Color> expectedColors) => find.byWidgetPredicate(
+    (widget) =>
+        widget is Container &&
+        widget.decoration is BoxDecoration &&
+        (widget.decoration as BoxDecoration).gradient != null &&
+        (widget.decoration as BoxDecoration).gradient!.colors.equals(
+          expectedColors,
+        ),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;
@@ -43,7 +44,7 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/String Array',
-          type: NT4TypeStr.kStringArr,
+          type: NT4Type.array(NT4Type.string()),
           properties: {},
         ),
       ],
@@ -61,7 +62,7 @@ void main() {
   });
 
   test('Multi color view from json', () {
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Multi Color View',
@@ -75,6 +76,7 @@ void main() {
       unorderedEquals([
         'Multi Color View',
         'Text Display',
+        'Large Text Display',
       ]),
     );
   });
@@ -85,18 +87,19 @@ void main() {
       preferences: preferences,
       type: 'Multi Color View',
       topic: 'Test/String Array',
-      dataType: 'string[]',
+      dataType: NT4Type.array(NT4Type.string()),
       period: 0.100,
     );
 
     expect(multiColorViewModel.toJson(), multiColorViewJson);
   });
 
-  testWidgets('Multi color view widget test full gradient',
-      (widgetTester) async {
+  testWidgets('Multi color view widget test full gradient', (
+    widgetTester,
+  ) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Multi Color View',
@@ -131,19 +134,17 @@ void main() {
   testWidgets('Multi color view widget test one color', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],
         virtualValues: {
-          'Test/String Array': [
-            Colors.red.toHexString(includeHashSign: true),
-          ],
+          'Test/String Array': [Colors.red.toHexString(includeHashSign: true)],
         },
       ),
       preferences,
@@ -165,28 +166,27 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(
-        findGradient([
-          Color(Colors.red.toARGB32()),
-          Color(Colors.red.toARGB32()),
-        ]),
-        findsOneWidget);
+      findGradient([
+        Color(Colors.red.toARGB32()),
+        Color(Colors.red.toARGB32()),
+      ]),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Multi color view widget test no colors', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel multiColorViewModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel multiColorViewModel = NTWidgetRegistry.buildNTModelFromJson(
       createMockOnlineNT4(
         virtualTopics: [
           NT4Topic(
             name: 'Test/String Array',
-            type: NT4TypeStr.kStringArr,
+            type: NT4Type.array(NT4Type.string()),
             properties: {},
           ),
         ],
-        virtualValues: {
-          'Test/String Array': [],
-        },
+        virtualValues: {'Test/String Array': []},
       ),
       preferences,
       'Multi Color View',
@@ -207,10 +207,11 @@ void main() {
     await widgetTester.pumpAndSettle();
 
     expect(
-        findGradient([
-          Color(Colors.transparent.toARGB32()),
-          Color(Colors.transparent.toARGB32()),
-        ]),
-        findsOneWidget);
+      findGradient([
+        Color(Colors.transparent.toARGB32()),
+        Color(Colors.transparent.toARGB32()),
+      ]),
+      findsOneWidget,
+    );
   });
 }

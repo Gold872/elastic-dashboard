@@ -7,17 +7,20 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
+import 'package:elastic_dashboard/services/struct_schemas/nt_struct.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/list_layout_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/nt_widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/models/widget_container_model.dart';
 import 'package:elastic_dashboard/widgets/gesture/drag_listener.dart';
 import 'package:elastic_dashboard/widgets/network_tree/networktables_tree_row.dart';
 
-typedef ListLayoutBuilder = ListLayoutModel Function({
-  required String title,
-  required List<NTWidgetContainerModel> children,
-});
+typedef ListLayoutBuilder =
+    ListLayoutModel Function({
+      required String title,
+      required List<NTWidgetContainerModel> children,
+    });
 
 class NetworkTableTree extends StatefulWidget {
   final NTConnection ntConnection;
@@ -27,7 +30,7 @@ class NetworkTableTree extends StatefulWidget {
   final int gridIndex;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)?
-      onDragUpdate;
+  onDragUpdate;
   final void Function(WidgetContainerModel widget)? onDragEnd;
   final void Function()? onRemoveWidget;
   final String searchQuery;
@@ -113,16 +116,16 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
   }
 
   List<NetworkTableTreeRow> _filterChildren(
-      List<NetworkTableTreeRow> children) {
+    List<NetworkTableTreeRow> children,
+  ) => children.where((child) {
     // Apply the filter to each child
-    return children.where((child) {
-      if (_matchesFilter(child)) {
-        return true;
-      }
-      // Recursively check if any descendant matches the filter
-      return _filterChildren(child.children).isNotEmpty;
-    }).toList();
-  }
+
+    if (_matchesFilter(child)) {
+      return true;
+    }
+    // Recursively check if any descendant matches the filter
+    return _filterChildren(child.children).isNotEmpty;
+  }).toList();
 
   bool _matchesFilter(NetworkTableTreeRow node) {
     // Don't filter if there isn't a search
@@ -152,60 +155,96 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void createRows(NT4Topic nt4Topic) {
-    String topic = nt4Topic.name;
+  void createRows(TreeTopicEntry entry) {
+    String topic = entry.topic.name;
     bool hasLeading = topic.startsWith('/');
     if (!hasLeading) {
       topic = '/$topic';
     }
 
-    List<String> rows = topic.substring(1).split('/');
-    NetworkTableTreeRow? current;
+    List<String> rows = [
+      ...topic.substring(1).split('/'),
+      ...?entry.meta?.path,
+    ];
+    NetworkTableTreeRow current = root;
     String currentTopic = '';
 
     for (String row in rows) {
       currentTopic += '/$row';
 
-      String effectiveTopic =
-          hasLeading ? currentTopic : currentTopic.substring(1);
+      String effectiveTopic = hasLeading
+          ? currentTopic
+          : currentTopic.substring(1);
 
-      bool lastElement = currentTopic == topic;
+      bool lastElement = currentTopic == '/${rows.join('/')}';
 
-      if (current != null) {
-        if (current.hasRow(row)) {
-          current = current.getRow(row);
-        } else {
-          current = current.createNewRow(
-              topic: effectiveTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
-        }
+      if (current.hasRow(row)) {
+        current = current.getRow(row);
       } else {
-        if (root.hasRow(row)) {
-          current = root.getRow(row);
-        } else {
-          current = root.createNewRow(
-              topic: effectiveTopic,
-              name: row,
-              ntTopic: (lastElement) ? nt4Topic : null);
-        }
+        current = current.createNewRow(
+          topic: effectiveTopic,
+          name: row,
+          entry: (lastElement) ? entry : null,
+        );
       }
     }
   }
 
+  List<TreeTopicEntry> parseStruct(
+    NT4Topic topic,
+    NTStructSchema schema,
+    NTStructSchema root,
+    List<String> structPath,
+  ) {
+    List<TreeTopicEntry> topics = [];
+
+    for (NTFieldSchema field in schema.fields) {
+      topics.add(
+        TreeTopicEntry(
+          topic: topic,
+          meta: NT4StructMeta(
+            path: [...structPath, field.fieldName],
+            schemaName: root.name,
+            schema: root,
+          ),
+        ),
+      );
+      if (field.subSchema != null && !field.isArray) {
+        topics.addAll(
+          parseStruct(topic, field.subSchema!, root, [
+            ...structPath,
+            field.fieldName,
+          ]),
+        );
+      }
+    }
+
+    return topics;
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<NT4Topic> topics = [];
+    List<TreeTopicEntry> topics = [];
 
     for (NT4Topic topic in widget.ntConnection.announcedTopics().values) {
       if (topic.name == 'Time') {
         continue;
       }
 
-      topics.add(topic);
+      topics.add(TreeTopicEntry(topic: topic));
+
+      if (topic.type.isStruct) {
+        NTStructSchema? schema = widget.ntConnection.schemaManager.getSchema(
+          topic.type.name,
+        );
+
+        if (schema != null && !topic.type.isArray) {
+          topics.addAll(parseStruct(topic, schema, schema, []));
+        }
+      }
     }
 
-    for (NT4Topic topic in topics) {
+    for (TreeTopicEntry topic in topics) {
       createRows(topic);
     }
 
@@ -216,24 +255,39 @@ class _NetworkTableTreeState extends State<NetworkTableTree> {
     return TreeView<NetworkTableTreeRow>(
       treeController: treeController,
       nodeBuilder:
-          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) {
-        return TreeTile(
-          gridIndex: widget.gridIndex,
-          preferences: widget.preferences,
-          entry: entry,
-          listLayoutBuilder: widget.listLayoutBuilder,
-          onDragUpdate: widget.onDragUpdate,
-          onDragEnd: widget.onDragEnd,
-          onRemoveWidget: widget.onRemoveWidget,
-          onTap: () {
-            if (widget.hideMetadata && entry.node.containsOnlyMetadata()) {
-              return;
-            }
-            setState(() => treeController.toggleExpansion(entry.node));
-          },
-        );
-      },
+          (BuildContext context, TreeEntry<NetworkTableTreeRow> entry) =>
+              TreeTile(
+                gridIndex: widget.gridIndex,
+                preferences: widget.preferences,
+                entry: entry,
+                listLayoutBuilder: widget.listLayoutBuilder,
+                onDragUpdate: widget.onDragUpdate,
+                onDragEnd: widget.onDragEnd,
+                onRemoveWidget: widget.onRemoveWidget,
+                onTap: () {
+                  if (widget.hideMetadata &&
+                      entry.node.containsOnlyMetadata()) {
+                    return;
+                  }
+                  setState(() => treeController.toggleExpansion(entry.node));
+                },
+              ),
     );
+  }
+}
+
+class TreeTopicEntry {
+  final NT4Topic topic;
+  final NT4StructMeta? meta;
+
+  NT4Type get type => meta?.type ?? topic.type;
+
+  TreeTopicEntry({required this.topic, this.meta});
+
+  @override
+  String toString() {
+    String topicData = 'NT4Topic(name: ${topic.name}, type: ${topic.type})';
+    return 'TreeTopicEntry{topic: $topicData, meta: $meta}';
   }
 }
 
@@ -247,7 +301,7 @@ class TreeTile extends StatefulWidget {
   final ListLayoutBuilder? listLayoutBuilder;
 
   final void Function(Offset globalPosition, WidgetContainerModel widget)?
-      onDragUpdate;
+  onDragUpdate;
   final void Function(WidgetContainerModel widget)? onDragEnd;
   final void Function()? onRemoveWidget;
 
@@ -274,8 +328,8 @@ class _TreeTileState extends State<TreeTile> {
   void cancelDrag() {
     if (draggingWidget != null) {
       draggingWidget!.unSubscribe();
-      draggingWidget!.disposeModel(deleting: true);
-      draggingWidget!.forceDispose();
+      draggingWidget!.softDispose(deleting: true);
+      draggingWidget!.dispose();
 
       widget.onRemoveWidget?.call();
 
@@ -301,8 +355,9 @@ class _TreeTileState extends State<TreeTile> {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle trailingStyle =
-        Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.grey);
+    TextStyle trailingStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: Colors.grey);
     // I have absolutely no idea why Material is needed, but otherwise the tiles start bleeding all over the place, it makes zero sense
     return Material(
       child: Column(
@@ -320,13 +375,13 @@ class _TreeTileState extends State<TreeTile> {
                   return;
                 }
                 dragging = true;
-
                 draggingWidget = await widget.entry.node.toWidgetContainerModel(
-                    listLayoutBuilder: widget.listLayoutBuilder);
+                  listLayoutBuilder: widget.listLayoutBuilder,
+                );
                 if (!dragging) {
                   draggingWidget?.unSubscribe();
-                  draggingWidget?.disposeModel(deleting: true);
-                  draggingWidget?.forceDispose();
+                  draggingWidget?.softDispose(deleting: true);
+                  draggingWidget?.dispose();
 
                   draggingWidget = null;
                 }
@@ -357,19 +412,22 @@ class _TreeTileState extends State<TreeTile> {
               },
               child: Padding(
                 padding: EdgeInsetsDirectional.only(
-                    start: widget.entry.level * 16.0),
+                  start: widget.entry.level * 16.0,
+                ),
                 child: Column(
                   children: [
                     ListTile(
                       dense: true,
                       contentPadding: const EdgeInsets.only(right: 20.0),
-                      leading: (widget.entry.hasChildren ||
+                      leading:
+                          (widget.entry.hasChildren ||
                               widget.entry.node.containsOnlyMetadata())
                           ? FolderButton(
                               openedIcon: const Icon(Icons.arrow_drop_down),
                               closedIcon: const Icon(Icons.arrow_right),
                               iconSize: 24,
-                              isOpen: widget.entry.hasChildren &&
+                              isOpen:
+                                  widget.entry.hasChildren &&
                                   widget.entry.isExpanded,
                               onPressed: widget.entry.hasChildren
                                   ? widget.onTap
@@ -377,9 +435,11 @@ class _TreeTileState extends State<TreeTile> {
                             )
                           : const SizedBox(width: 8.0),
                       title: Text(widget.entry.node.rowName),
-                      trailing: (widget.entry.node.ntTopic != null)
-                          ? Text(widget.entry.node.ntTopic!.type,
-                              style: trailingStyle)
+                      trailing: (widget.entry.node.entry != null)
+                          ? Text(
+                              widget.entry.node.entry!.type.serialize(),
+                              style: trailingStyle,
+                            )
                           : null,
                     ),
                   ],

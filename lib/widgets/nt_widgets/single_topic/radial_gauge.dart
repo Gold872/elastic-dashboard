@@ -7,7 +7,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -30,56 +30,56 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
 
   double get startAngle => _startAngle;
 
-  set startAngle(value) {
+  set startAngle(double value) {
     _startAngle = value;
     refresh();
   }
 
   double get endAngle => _endAngle;
 
-  set endAngle(value) {
+  set endAngle(double value) {
     _endAngle = value;
     refresh();
   }
 
   double get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double value) {
     _minValue = value;
     refresh();
   }
 
   double get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double value) {
     _maxValue = value;
     refresh();
   }
 
   int get numberOfLabels => _numberOfLabels;
 
-  set numberOfLabels(value) {
+  set numberOfLabels(int value) {
     _numberOfLabels = value;
     refresh();
   }
 
   bool get wrapValue => _wrapValue;
 
-  set wrapValue(value) {
+  set wrapValue(bool value) {
     _wrapValue = value;
     refresh();
   }
 
   bool get showPointer => _showPointer;
 
-  set showPointer(value) {
+  set showPointer(bool value) {
     _showPointer = value;
     refresh();
   }
 
   bool get showTicks => _showTicks;
 
-  set showTicks(value) {
+  set showTicks(bool value) {
     _showTicks = value;
     refresh();
   }
@@ -96,17 +96,18 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
     bool wrapValue = false,
     bool showPointer = true,
     bool showTicks = true,
+    super.ntStructMeta,
     super.dataType,
     super.period,
-  })  : _wrapValue = wrapValue,
-        _showTicks = showTicks,
-        _showPointer = showPointer,
-        _numberOfLabels = numberOfLabels,
-        _maxValue = maxValue,
-        _minValue = minValue,
-        _startAngle = startAngle,
-        _endAngle = endAngle,
-        super();
+  }) : _wrapValue = wrapValue,
+       _showTicks = showTicks,
+       _showPointer = showPointer,
+       _numberOfLabels = numberOfLabels,
+       _maxValue = maxValue,
+       _minValue = minValue,
+       _startAngle = startAngle,
+       _endAngle = endAngle,
+       super();
 
   RadialGaugeModel.fromJson({
     required super.ntConnection,
@@ -126,155 +127,155 @@ class RadialGaugeModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'start_angle': _startAngle,
-      'end_angle': _endAngle,
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'number_of_labels': _numberOfLabels,
-      'wrap_value': _wrapValue,
-      'show_pointer': _showPointer,
-      'show_ticks': _showTicks,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'start_angle': _startAngle,
+    'end_angle': _endAngle,
+    'min_value': _minValue,
+    'max_value': _maxValue,
+    'number_of_labels': _numberOfLabels,
+    'wrap_value': _wrapValue,
+    'show_pointer': _showPointer,
+    'show_ticks': _showTicks,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      // Start/End angles
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Start Angle (CW+)',
-              initialText: _startAngle.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              onSubmit: (value) {
-                double? newStartAngle = double.tryParse(value);
+  List<Widget> getEditProperties(BuildContext context) => [
+    // Start/End angles
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Start Angle (CW+)',
+            initialText: _startAngle.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newStartAngle = double.tryParse(value);
 
-                if (newStartAngle == null) {
-                  return;
-                }
-                startAngle = newStartAngle;
-              },
-            ),
+              if (newStartAngle == null) {
+                return;
+              }
+              startAngle = newStartAngle;
+            },
           ),
-          Flexible(
-            child: DialogTextInput(
-              label: 'End Angle (CW+)',
-              initialText: _endAngle.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              onSubmit: (value) {
-                double? newEndAngle = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            label: 'End Angle (CW+)',
+            initialText: _endAngle.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newEndAngle = double.tryParse(value);
 
-                if (newEndAngle == null) {
-                  return;
-                }
-                endAngle = newEndAngle;
-              },
-            ),
+              if (newEndAngle == null) {
+                return;
+              }
+              endAngle = newEndAngle;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Min/Max values
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Min Value',
-              initialText: _minValue.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              onSubmit: (value) {
-                double? newMin = double.tryParse(value);
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Min/Max values
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Min Value',
+            initialText: _minValue.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newMin = double.tryParse(value);
 
-                if (newMin == null) {
-                  return;
-                }
-                minValue = newMin;
-              },
-            ),
+              if (newMin == null) {
+                return;
+              }
+              minValue = newMin;
+            },
           ),
-          Flexible(
-            child: DialogTextInput(
-              label: 'Max Value',
-              initialText: _maxValue.toString(),
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              onSubmit: (value) {
-                double? newMax = double.tryParse(value);
+        ),
+        Flexible(
+          child: DialogTextInput(
+            label: 'Max Value',
+            initialText: _maxValue.toString(),
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
+            ),
+            onSubmit: (value) {
+              double? newMax = double.tryParse(value);
 
-                if (newMax == null) {
-                  return;
-                }
-                maxValue = newMax;
-              },
-            ),
+              if (newMax == null) {
+                return;
+              }
+              maxValue = newMax;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Wrap value & Show pointer
-      Row(
-        children: [
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Wrap Value',
-              initialValue: _wrapValue,
-              onToggle: (value) {
-                wrapValue = value;
-              },
-            ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Wrap value & Show pointer
+    Row(
+      children: [
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Wrap Value',
+            initialValue: _wrapValue,
+            onToggle: (value) {
+              wrapValue = value;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Show Pointer',
-              initialValue: _showPointer,
-              onToggle: (value) {
-                showPointer = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Show Pointer',
+            initialValue: _showPointer,
+            onToggle: (value) {
+              showPointer = value;
+            },
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Label & tick customization
-      Row(
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              label: 'Number of Labels',
-              initialText: _numberOfLabels.toString(),
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              onSubmit: (value) {
-                int? newLabelCount = int.tryParse(value);
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Label & tick customization
+    Row(
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            label: 'Number of Labels',
+            initialText: _numberOfLabels.toString(),
+            formatter: FilteringTextInputFormatter.digitsOnly,
+            onSubmit: (value) {
+              int? newLabelCount = int.tryParse(value);
 
-                if (newLabelCount == null) {
-                  return;
-                }
+              if (newLabelCount == null) {
+                return;
+              }
 
-                numberOfLabels = newLabelCount;
-              },
-            ),
+              numberOfLabels = newLabelCount;
+            },
           ),
-          Flexible(
-            child: DialogToggleSwitch(
-              label: 'Show Ticks',
-              initialValue: _showTicks,
-              onToggle: (value) {
-                showTicks = value;
-              },
-            ),
+        ),
+        Flexible(
+          child: DialogToggleSwitch(
+            label: 'Show Ticks',
+            initialValue: _showTicks,
+            onToggle: (value) {
+              showTicks = value;
+            },
           ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class RadialGaugeWidget extends NTWidget {
@@ -314,12 +315,14 @@ class RadialGaugeWidget extends NTWidget {
 
         value = value.clamp(model.minValue, model.maxValue);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            double squareSide =
-                min(constraints.maxWidth, constraints.maxHeight);
+            double squareSide = min(
+              constraints.maxWidth,
+              constraints.maxHeight,
+            );
 
             return Stack(
               alignment: Alignment.center,
@@ -342,10 +345,12 @@ class RadialGaugeWidget extends NTWidget {
                       secondaryRulersHeight: model.showTicks ? 8 : 0,
                       rulersOffset: -5,
                       labelOffset: -10,
-                      showLastLabel: _getWrappedValue(
-                              model.endAngle - model.startAngle,
-                              -180.0,
-                              180.0) !=
+                      showLastLabel:
+                          _getWrappedValue(
+                            model.endAngle - model.startAngle,
+                            -180.0,
+                            180.0,
+                          ) !=
                           0.0,
                     ),
                     trackLabelFormater: (value) =>

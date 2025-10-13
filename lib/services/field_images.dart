@@ -28,14 +28,13 @@ class FieldImages {
     return field;
   }
 
-  static bool hasField(String game) {
-    return fields.map((e) => e.game).contains(game);
-  }
+  static bool hasField(String game) => fields.map((e) => e.game).contains(game);
 
   static Future<void> loadFields(String directory) async {
     logger.info('Loading fields');
-    AssetManifest assetManifest =
-        await AssetManifest.loadFromAssetBundle(rootBundle);
+    AssetManifest assetManifest = await AssetManifest.loadFromAssetBundle(
+      rootBundle,
+    );
 
     List<String> filePaths = assetManifest
         .listAssets()
@@ -70,8 +69,8 @@ class Field {
 
   Size? get fieldImageSize =>
       (fieldImageWidth != null && fieldImageHeight != null)
-          ? Size(fieldImageWidth!.toDouble(), fieldImageHeight!.toDouble())
-          : null;
+      ? Size(fieldImageWidth!.toDouble(), fieldImageHeight!.toDouble())
+      : null;
 
   late double fieldWidthMeters;
   late double fieldHeightMeters;
@@ -80,9 +79,11 @@ class Field {
   late Offset bottomRightCorner;
 
   Offset get center => (fieldImageLoaded)
-      ? Offset(bottomRightCorner.dx - topLeftCorner.dx,
-              bottomRightCorner.dy - topLeftCorner.dy) /
-          2
+      ? Offset(
+              bottomRightCorner.dx - topLeftCorner.dx,
+              bottomRightCorner.dy - topLeftCorner.dy,
+            ) /
+            2
       : const Offset(0, 0);
 
   late Image fieldImage;
@@ -108,12 +109,14 @@ class Field {
     fieldHeightMeters = jsonData['field-size'][1];
 
     topLeftCorner = Offset(
-        (jsonData['field-corners']['top-left'][0] as int).toDouble(),
-        (jsonData['field-corners']['top-left'][1] as int).toDouble());
+      (jsonData['field-corners']['top-left'][0] as int).toDouble(),
+      (jsonData['field-corners']['top-left'][1] as int).toDouble(),
+    );
 
     bottomRightCorner = Offset(
-        (jsonData['field-corners']['bottom-right'][0] as int).toDouble(),
-        (jsonData['field-corners']['bottom-right'][1] as int).toDouble());
+      (jsonData['field-corners']['bottom-right'][0] as int).toDouble(),
+      (jsonData['field-corners']['bottom-right'][1] as int).toDouble(),
+    );
 
     double fieldWidthPixels = bottomRightCorner.dx - topLeftCorner.dx;
     double fieldHeightPixels = bottomRightCorner.dy - topLeftCorner.dy;
@@ -124,22 +127,21 @@ class Field {
 
   void loadFieldImage() {
     logger.debug('Loading field image for $game');
-    fieldImage = Image.asset(
-      jsonData['field-image'],
-      fit: BoxFit.contain,
-    );
+    fieldImage = Image.asset(jsonData['field-image'], fit: BoxFit.contain);
     fieldImage.image
         .resolve(ImageConfiguration.empty)
-        .addListener(ImageStreamListener((image, synchronousCall) {
-      logger.trace('Initializing image width and height for $game');
-      fieldImageWidth = image.image.width;
-      fieldImageHeight = image.image.height;
+        .addListener(
+          ImageStreamListener((image, synchronousCall) {
+            logger.trace('Initializing image width and height for $game');
+            fieldImageWidth = image.image.width;
+            fieldImageHeight = image.image.height;
 
-      fieldImageLoaded = true;
-    }));
+            fieldImageLoaded = true;
+          }),
+        );
   }
 
-  void dispose() async {
+  Future<void> dispose() async {
     logger.debug('Soft disposing field: $game');
     instanceCount--;
     logger.trace('New instance count for $game: $instanceCount');

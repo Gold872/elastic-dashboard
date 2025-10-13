@@ -4,6 +4,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
@@ -22,11 +23,11 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        optionsSubscription,
-        selectedSubscription,
-        activeSubscription,
-        defaultSubscription,
-      ];
+    optionsSubscription,
+    selectedSubscription,
+    activeSubscription,
+    defaultSubscription,
+  ];
 
   late Listenable chooserStateListenable;
 
@@ -41,7 +42,6 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -53,13 +53,19 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
 
   @override
   void initializeSubscriptions() {
-    optionsSubscription =
-        ntConnection.subscribe(optionsTopicName, super.period);
-    selectedSubscription =
-        ntConnection.subscribe(selectedTopicName, super.period);
+    optionsSubscription = ntConnection.subscribe(
+      optionsTopicName,
+      super.period,
+    );
+    selectedSubscription = ntConnection.subscribe(
+      selectedTopicName,
+      super.period,
+    );
     activeSubscription = ntConnection.subscribe(activeTopicName, super.period);
-    defaultSubscription =
-        ntConnection.subscribe(defaultTopicName, super.period);
+    defaultSubscription = ntConnection.subscribe(
+      defaultTopicName,
+      super.period,
+    );
     chooserStateListenable = Listenable.merge(subscriptions);
     chooserStateListenable.addListener(onChooserStateUpdate);
 
@@ -82,8 +88,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
   }
 
   void onChooserStateUpdate() {
-    List<Object?>? rawOptions =
-        optionsSubscription.value?.tryCast<List<Object?>>();
+    List<Object?>? rawOptions = optionsSubscription.value
+        ?.tryCast<List<Object?>>();
 
     List<String>? currentOptions = rawOptions?.whereType<String>().toList();
 
@@ -102,7 +108,8 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
       currentDefault = null;
     }
 
-    bool hasValue = currentOptions != null ||
+    bool hasValue =
+        currentOptions != null ||
         currentActive != null ||
         currentDefault != null;
 
@@ -143,18 +150,14 @@ class SplitButtonChooserModel extends MultiTopicNTWidgetModel {
     NT4Topic? existing = ntConnection.getTopicFromName(selectedTopicName);
 
     if (existing != null) {
-      existing.properties.addAll({
-        'retained': true,
-      });
+      existing.properties.addAll({'retained': true});
       ntConnection.publishTopic(existing);
       _selectedTopic = existing;
     } else {
       _selectedTopic = ntConnection.publishNewTopic(
         selectedTopicName,
-        NT4TypeStr.kString,
-        properties: {
-          'retained': true,
-        },
+        NT4Type.string(),
+        properties: {'retained': true},
       );
     }
   }
@@ -200,15 +203,19 @@ class SplitButtonChooser extends NTWidget {
               onPressed: (index) {
                 model.publishSelectedValue(model.previousOptions?[index]);
               },
-              isSelected: model.previousOptions
+              isSelected:
+                  model.previousOptions
                       ?.map((String option) => option == preview)
                       .toList() ??
                   [],
-              children: model.previousOptions
-                      ?.map((String option) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(option),
-                          ))
+              children:
+                  model.previousOptions
+                      ?.map(
+                        (String option) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(option),
+                        ),
+                      )
                       .toList() ??
                   [],
             ),

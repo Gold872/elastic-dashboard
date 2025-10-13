@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_dropdown_chooser.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -28,13 +29,13 @@ void main() {
   };
 
   Finder coloredText(String text, Color color) => find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            widget.data == text &&
-            widget.style != null &&
-            widget.style!.color != null &&
-            widget.style!.color!.toARGB32() == color.toARGB32(),
-      );
+    (widget) =>
+        widget is Text &&
+        widget.data == text &&
+        widget.style != null &&
+        widget.style!.color != null &&
+        widget.style!.color!.toARGB32() == color.toARGB32(),
+  );
 
   late SharedPreferences preferences;
   late NTConnection ntConnection;
@@ -47,18 +48,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Double Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Double Value': 96.0,
-      },
+      virtualValues: {'Test/Double Value': 96.0},
     );
   });
 
   test('Match time from json', () {
-    NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel matchTimeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Match Time',
@@ -94,8 +93,9 @@ void main() {
     MatchTimeModel matchTimeModel = MatchTimeModel(
       ntConnection: ntConnection,
       preferences: preferences,
+      ntStructMeta: null,
       topic: 'Test/Double Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       timeDisplayMode: 'Minutes and Seconds',
       redStartTime: 15,
@@ -108,7 +108,7 @@ void main() {
   testWidgets('Match time widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel matchTimeModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Match Time',
@@ -163,12 +163,14 @@ void main() {
   testWidgets('Match time edit properties', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    MatchTimeModel matchTimeModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'Match Time',
-      matchTimeJson,
-    ) as MatchTimeModel;
+    MatchTimeModel matchTimeModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+              ntConnection,
+              preferences,
+              'Match Time',
+              matchTimeJson,
+            )
+            as MatchTimeModel;
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -200,8 +202,10 @@ void main() {
 
     final timeDisplayMode = find.text('Time Display Mode');
     final redStartTime = find.widgetWithText(DialogTextInput, 'Red Start Time');
-    final yellowStartTime =
-        find.widgetWithText(DialogTextInput, 'Yellow Start Time');
+    final yellowStartTime = find.widgetWithText(
+      DialogTextInput,
+      'Yellow Start Time',
+    );
 
     expect(timeDisplayMode, findsOneWidget);
     expect(redStartTime, findsOneWidget);
@@ -209,11 +213,13 @@ void main() {
 
     expect(find.byType(DialogDropdownChooser<String>), findsNWidgets(2));
     await widgetTester.tap(
-      find.byWidget(find
-          .byType(DialogDropdownChooser<String>)
-          .evaluate()
-          .elementAt(1)
-          .widget),
+      find.byWidget(
+        find
+            .byType(DialogDropdownChooser<String>)
+            .evaluate()
+            .elementAt(1)
+            .widget,
+      ),
     );
     await widgetTester.pumpAndSettle();
 

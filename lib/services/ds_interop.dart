@@ -55,7 +55,8 @@ class DSInteropClient {
       _socket = await Socket.connect(serverBaseAddress, 1742);
     } catch (e) {
       logger.debug(
-          'Failed to connect to Driver Station on port 1742, attempting to reconnect in 5 seconds.');
+        'Failed to connect to Driver Station on port 1742, attempting to reconnect in 5 seconds.',
+      );
       Future.delayed(const Duration(seconds: 5), _tcpSocketConnect);
       return;
     }
@@ -84,7 +85,8 @@ class DSInteropClient {
       _dbModeServer = await ServerSocket.bind(serverBaseAddress, 1741);
     } catch (e) {
       logger.info(
-          'Failed to start TCP server on port 1741, attempting to reconnect in 5 seconds');
+        'Failed to start TCP server on port 1741, attempting to reconnect in 5 seconds',
+      );
       Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
       return;
     }
@@ -123,8 +125,9 @@ class DSInteropClient {
     var rawIP = jsonData['robotIP'];
 
     if (rawIP == null) {
-      logger
-          .warning('[DS INTEROP] Ignoring Json message, robot IP is not valid');
+      logger.warning(
+        '[DS INTEROP] Ignoring Json message, robot IP is not valid',
+      );
       return;
     }
 
@@ -156,8 +159,9 @@ class DSInteropClient {
         break;
       }
 
-      Uint8List sublist =
-          Uint8List.fromList(_tcpBuffer.sublist(i + 2, i + 2 + size));
+      Uint8List sublist = Uint8List.fromList(
+        _tcpBuffer.sublist(i + 2, i + 2 + size),
+      );
       int tagID = sublist[0];
       mappedData[tagID] = sublist.sublist(1);
 
@@ -191,7 +195,8 @@ class DSInteropClient {
     onDisconnect?.call();
 
     logger.info(
-        'Driver Station connection on TCP port 1742 closed, attempting to reconnect in 5 seconds.');
+      'Driver Station connection on TCP port 1742 closed, attempting to reconnect in 5 seconds.',
+    );
 
     Future.delayed(const Duration(seconds: 5), _connect);
   }
@@ -207,7 +212,8 @@ class DSInteropClient {
     _dbModeConnectionActive = false;
 
     logger.info(
-        'Driver Station TCP Server on Port 1741 closed, attempting to reconnect in 5 seconds.');
+      'Driver Station TCP Server on Port 1741 closed, attempting to reconnect in 5 seconds.',
+    );
 
     Future.delayed(const Duration(seconds: 5), _dbModeServerConnect);
   }

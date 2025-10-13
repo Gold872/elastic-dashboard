@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/accelerometer.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,18 +31,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Test Accelerometer/Value',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
-        )
+        ),
       ],
-      virtualValues: {
-        'Test/Test Accelerometer/Value': 0.50,
-      },
+      virtualValues: {'Test/Test Accelerometer/Value': 0.50},
     );
   });
 
   test('Creating accelerometer from json', () {
-    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel accelerometerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Accelerometer',
@@ -51,8 +50,10 @@ void main() {
     expect(accelerometerModel.type, 'Accelerometer');
     expect(accelerometerModel.runtimeType, AccelerometerModel);
 
-    expect((accelerometerModel as AccelerometerModel).valueTopic,
-        'Test/Test Accelerometer/Value');
+    expect(
+      (accelerometerModel as AccelerometerModel).valueTopic,
+      'Test/Test Accelerometer/Value',
+    );
   });
 
   test('Saving accelerometer to json', () {
@@ -69,7 +70,7 @@ void main() {
   testWidgets('Accelerometer widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel accelerometerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel accelerometerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Accelerometer',

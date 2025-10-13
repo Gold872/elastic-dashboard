@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class RobotPreferencesModel extends MultiTopicNTWidgetModel {
@@ -32,7 +33,6 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -104,14 +104,15 @@ class RobotPreferencesModel extends MultiTopicNTWidgetModel {
   void initSubscription(String topicName) {
     Object? previousValue = ntConnection.getLastAnnouncedValue(topicName);
 
-    NT4Subscription subscription =
-        ntConnection.subscribe(topicName, super.period);
+    NT4Subscription subscription = ntConnection.subscribe(
+      topicName,
+      super.period,
+    );
 
-    preferenceSubscriptions.addAll({
-      topicName: subscription,
-    });
+    preferenceSubscriptions.addAll({topicName: subscription});
     preferenceTextControllers.addAll({
-      topicName: TextEditingController()..text = previousValue?.toString() ?? ''
+      topicName: TextEditingController()
+        ..text = previousValue?.toString() ?? '',
     });
     previousValues.addAll({topicName: previousValue});
 
@@ -177,19 +178,20 @@ class RobotPreferences extends NTWidget {
 
         Object? formattedData;
 
-        String dataType = nt4Topic.type;
-        switch (dataType) {
-          case NT4TypeStr.kBool:
+        NT4Type dataType = nt4Topic.type;
+
+        switch (dataType.dataType) {
+          case NT4DataType.boolean:
             formattedData = bool.tryParse(data);
             break;
-          case NT4TypeStr.kFloat32:
-          case NT4TypeStr.kFloat64:
+          case NT4DataType.float32:
+          case NT4DataType.float64:
             formattedData = double.tryParse(data);
             break;
-          case NT4TypeStr.kInt:
+          case NT4DataType.int32:
             formattedData = int.tryParse(data);
             break;
-          case NT4TypeStr.kString:
+          case NT4DataType.string:
             formattedData = data;
             break;
           default:
@@ -197,8 +199,9 @@ class RobotPreferences extends NTWidget {
         }
 
         if (formattedData == null) {
-          model.preferenceTextControllers[topic]?.text =
-              model.previousValues[topic].toString();
+          model.preferenceTextControllers[topic]?.text = model
+              .previousValues[topic]
+              .toString();
           model.ntConnection.unpublishTopic(nt4Topic);
           return;
         }
@@ -224,55 +227,50 @@ class PreferenceSearch extends StatelessWidget {
   final Function(String topic, String? data) onSubmit;
 
   List<String> filterList(String query) => model.preferenceTopicNames
-      .where((element) =>
-          element.split('/').last.toLowerCase().contains(query.toLowerCase()))
+      .where(
+        (element) =>
+            element.split('/').last.toLowerCase().contains(query.toLowerCase()),
+      )
       .toList();
 
   @override
-  Widget build(BuildContext context) {
-    return SearchableList<String>(
-      inputDecoration: InputDecoration(
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 8,
-        ),
-        label: const Text('Search'),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      searchTextController: model.searchTextController,
-      seperatorBuilder: (context, _) => const Divider(height: 4.0),
-      searchFieldPadding: const EdgeInsets.symmetric(
-        horizontal: 2,
-        vertical: 7.5,
-      ),
-      filter: (query) => filterList(query),
-      initialList: filterList(model.searchTextController.text),
-      itemBuilder: (item) {
-        TextEditingController? textController =
-            model.preferenceTextControllers[item];
+  Widget build(BuildContext context) => SearchableList<String>(
+    inputDecoration: InputDecoration(
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      label: const Text('Search'),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    searchTextController: model.searchTextController,
+    separatorBuilder: (context, _) => const Divider(height: 4.0),
+    searchFieldPadding: const EdgeInsets.symmetric(
+      horizontal: 2,
+      vertical: 7.5,
+    ),
+    filter: (query) => filterList(query),
+    initialList: filterList(model.searchTextController.text),
+    itemBuilder: (item) {
+      TextEditingController? textController =
+          model.preferenceTextControllers[item];
 
-        return _RobotPreference(
-          label: item.split('/').last,
-          textController: textController ?? TextEditingController(),
-          onFocusGained: () {
-            NT4Topic? nt4Topic = model.preferenceTopics[item];
+      return _RobotPreference(
+        label: item.split('/').last,
+        textController: textController ?? TextEditingController(),
+        onFocusGained: () {
+          NT4Topic? nt4Topic = model.preferenceTopics[item];
 
-            if (nt4Topic == null) {
-              return;
-            }
+          if (nt4Topic == null) {
+            return;
+          }
 
-            model.ntConnection.publishTopic(nt4Topic);
-          },
-          onSubmit: (data) {
-            onSubmit.call(item, data);
-          },
-        );
-      },
-    );
-  }
+          model.ntConnection.publishTopic(nt4Topic);
+        },
+        onSubmit: (data) {
+          onSubmit.call(item, data);
+        },
+      );
+    },
+  );
 }
 
 class _RobotPreference extends StatelessWidget {
@@ -289,37 +287,35 @@ class _RobotPreference extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Focus(
-        onFocusChange: (value) {
-          // Don't consider the text submitted when focus is gained
-          if (value) {
-            onFocusGained.call();
-            return;
-          }
-          String textValue = textController.text;
-          if (textValue.isNotEmpty) {
-            onSubmit.call(textValue);
-          }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(4.0),
+    child: Focus(
+      onFocusChange: (value) {
+        // Don't consider the text submitted when focus is gained
+        if (value) {
+          onFocusGained.call();
+          return;
+        }
+        String textValue = textController.text;
+        if (textValue.isNotEmpty) {
+          onSubmit.call(textValue);
+        }
+      },
+      child: TextField(
+        onSubmitted: (value) {
+          onSubmit.call(value);
         },
-        child: TextField(
-          onSubmitted: (value) {
-            onSubmit.call(value);
-          },
-          controller: textController,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 8,
-            ),
-            labelText: label,
-            border: const OutlineInputBorder(),
+        controller: textController,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 8,
           ),
+          labelText: label,
+          border: const OutlineInputBorder(),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

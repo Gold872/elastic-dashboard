@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/services/settings.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/draggable_containers/draggable_nt_widget_container.dart';
@@ -20,7 +21,7 @@ void main() {
 
   final Map<String, dynamic> textDisplayJson = {
     'topic': 'Test/Display Value',
-    'data_type': 'double',
+    'data_type': NT4Type.double().serialize(),
     'period': 0.100,
     'show_submit_button': true,
   };
@@ -36,18 +37,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Display Value',
-          type: NT4TypeStr.kFloat64,
+          type: NT4Type.double(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Display Value': 0.000001,
-      },
+      virtualValues: {'Test/Display Value': 0.000001},
     );
   });
 
   test('Text display from json', () {
-    NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel textDisplayModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Text Display',
@@ -65,7 +64,7 @@ void main() {
   });
 
   test('Text display from alias name', () {
-    NTWidgetModel textDisplayModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel textDisplayModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Text View',
@@ -88,22 +87,18 @@ void main() {
         virtualTopics: [
           NT4Topic(
             name: 'Test/Display Value',
-            type: NT4TypeStr.kFloat64,
-            properties: {
-              'persistent': true,
-            },
+            type: NT4Type.double(),
+            properties: {'persistent': true},
           ),
         ],
-        virtualValues: {
-          'Test/Display Value': 0.000001,
-        },
+        virtualValues: {'Test/Display Value': 0.000001},
       );
 
       TextDisplayModel textDisplayModel = TextDisplayModel(
         ntConnection: ntConnection,
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'double',
+        dataType: NT4Type.double(),
         period: 0.100,
       );
 
@@ -119,7 +114,7 @@ void main() {
         ntConnection: ntConnection,
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'double',
+        dataType: NT4Type.double(),
         period: 0.100,
       );
 
@@ -135,7 +130,7 @@ void main() {
         ntConnection: ntConnection,
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'double',
+        dataType: NT4Type.double(),
         period: 0.100,
       );
 
@@ -148,7 +143,7 @@ void main() {
       ntConnection: ntConnection,
       preferences: preferences,
       topic: 'Test/Display Value',
-      dataType: 'double',
+      dataType: NT4Type.double(),
       period: 0.100,
       showSubmitButton: true,
     );
@@ -169,7 +164,7 @@ void main() {
         ntConnection: ntConnection,
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'double',
+        dataType: NT4Type.double(),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -195,7 +190,9 @@ void main() {
       await widgetTester.enterText(find.byType(TextField), '3.53');
       await widgetTester.pump(Duration.zero);
       expect(
-          ntConnection.getLastAnnouncedValue('Test/Display Value'), 0.000001);
+        ntConnection.getLastAnnouncedValue('Test/Display Value'),
+        0.000001,
+      );
       expect(textDisplayHasError(), true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
@@ -215,17 +212,15 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kInt,
+              type: NT4Type.int(),
               properties: {},
             ),
           ],
-          virtualValues: {
-            'Test/Display Value': 0,
-          },
+          virtualValues: {'Test/Display Value': 0},
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'int',
+        dataType: NT4Type.int(),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -270,17 +265,15 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kBool,
+              type: NT4Type.boolean(),
               properties: {},
             ),
           ],
-          virtualValues: {
-            'Test/Display Value': false,
-          },
+          virtualValues: {'Test/Display Value': false},
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'boolean',
+        dataType: NT4Type.boolean(),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -305,8 +298,10 @@ void main() {
 
       await widgetTester.enterText(find.byType(TextField), 'true');
       await widgetTester.pump(Duration.zero);
-      expect(boolNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          isFalse);
+      expect(
+        boolNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        isFalse,
+      );
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
@@ -314,7 +309,9 @@ void main() {
       await widgetTester.pumpAndSettle();
 
       expect(
-          boolNTConnection.getLastAnnouncedValue('Test/Display Value'), isTrue);
+        boolNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        isTrue,
+      );
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -329,17 +326,15 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
-          virtualValues: {
-            'Test/Display Value': 'Hello',
-          },
+          virtualValues: {'Test/Display Value': 'Hello'},
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'string',
+        dataType: NT4Type.string(),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -363,18 +358,24 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
 
       await widgetTester.enterText(
-          find.byType(TextField), 'I Edited This Text');
+        find.byType(TextField),
+        'I Edited This Text',
+      );
       await widgetTester.pump(Duration.zero);
-      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          'Hello');
+      expect(
+        stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        'Hello',
+      );
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
 
-      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          'I Edited This Text');
+      expect(
+        stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        'I Edited This Text',
+      );
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -389,7 +390,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kIntArr,
+              type: NT4Type.array(NT4Type.int()),
               properties: {},
             ),
           ],
@@ -399,7 +400,7 @@ void main() {
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'int[]',
+        dataType: NT4Type.array(NT4Type.string()),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -424,16 +425,21 @@ void main() {
 
       await widgetTester.enterText(find.byType(TextField), '[1, 2, 3]');
       await widgetTester.pump(Duration.zero);
-      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [0, 0]);
+      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'), [
+        0,
+        0,
+      ]);
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
 
-      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [1, 2, 3]);
+      expect(intArrNTConnection.getLastAnnouncedValue('Test/Display Value'), [
+        1,
+        2,
+        3,
+      ]);
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -448,7 +454,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kBoolArr,
+              type: NT4Type.array(NT4Type.boolean()),
               properties: {},
             ),
           ],
@@ -458,7 +464,7 @@ void main() {
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'boolean[]',
+        dataType: NT4Type.array(NT4Type.boolean()),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -482,18 +488,25 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
 
       await widgetTester.enterText(
-          find.byType(TextField), '[true, false, true]');
+        find.byType(TextField),
+        '[true, false, true]',
+      );
       await widgetTester.pump(Duration.zero);
-      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [false, true]);
+      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'), [
+        false,
+        true,
+      ]);
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
 
-      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [true, false, true]);
+      expect(boolArrNTConnection.getLastAnnouncedValue('Test/Display Value'), [
+        true,
+        false,
+        true,
+      ]);
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -508,7 +521,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kFloat64Arr,
+              type: NT4Type.array(NT4Type.double()),
               properties: {},
             ),
           ],
@@ -518,7 +531,7 @@ void main() {
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'double[]',
+        dataType: NT4Type.array(NT4Type.double()),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -543,16 +556,20 @@ void main() {
 
       await widgetTester.enterText(find.byType(TextField), '[1.0, 2.0, 3.0]');
       await widgetTester.pump(Duration.zero);
-      expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [0.0, 0.0]);
+      expect(
+        doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        [0.0, 0.0],
+      );
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
 
-      expect(doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          [1.0, 2.0, 3.0]);
+      expect(
+        doubleArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        [1.0, 2.0, 3.0],
+      );
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -567,7 +584,7 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kStringArr,
+              type: NT4Type.array(NT4Type.string()),
               properties: {},
             ),
           ],
@@ -577,7 +594,7 @@ void main() {
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'string[]',
+        dataType: NT4Type.array(NT4Type.string()),
         period: 0.100,
         showSubmitButton: true,
       );
@@ -601,18 +618,24 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
 
       await widgetTester.enterText(
-          find.byType(TextField), '["I", "am", "very", "tired"]');
+        find.byType(TextField),
+        '["I", "am", "very", "tired"]',
+      );
       await widgetTester.pump(Duration.zero);
-      expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          ['Hello', 'There']);
+      expect(
+        stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        ['Hello', 'There'],
+      );
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.tap(find.byIcon(Icons.exit_to_app));
       await widgetTester.pumpAndSettle();
 
-      expect(stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          ['I', 'am', 'very', 'tired']);
+      expect(
+        stringArrNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        ['I', 'am', 'very', 'tired'],
+      );
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -627,17 +650,15 @@ void main() {
           virtualTopics: [
             NT4Topic(
               name: 'Test/Display Value',
-              type: NT4TypeStr.kString,
+              type: NT4Type.string(),
               properties: {},
             ),
           ],
-          virtualValues: {
-            'Test/Display Value': 'There isn\'t a submit button',
-          },
+          virtualValues: {'Test/Display Value': 'There isn\'t a submit button'},
         ),
         preferences: preferences,
         topic: 'Test/Display Value',
-        dataType: 'string',
+        dataType: NT4Type.string(),
         period: 0.100,
         showSubmitButton: false,
       );
@@ -661,18 +682,24 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
 
       await widgetTester.enterText(
-          find.byType(TextField), 'I\'m submitting this without a button!');
+        find.byType(TextField),
+        'I\'m submitting this without a button!',
+      );
       await widgetTester.pump(Duration.zero);
-      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          'There isn\'t a submit button');
+      expect(
+        stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        'There isn\'t a submit button',
+      );
       expect(textDisplayHasError(), true);
       expect(textDisplayModel.typing, true);
 
       await widgetTester.testTextInput.receiveAction(TextInputAction.done);
       await widgetTester.pumpAndSettle();
 
-      expect(stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
-          'I\'m submitting this without a button!');
+      expect(
+        stringNTConnection.getLastAnnouncedValue('Test/Display Value'),
+        'I\'m submitting this without a button!',
+      );
       expect(textDisplayHasError(), false);
       expect(textDisplayModel.typing, false);
     });
@@ -685,7 +712,7 @@ void main() {
       ntConnection: ntConnection,
       preferences: preferences,
       topic: 'Test/Display Value',
-      dataType: 'string',
+      dataType: NT4Type.string(),
       period: 0.100,
       showSubmitButton: true,
     );
@@ -718,16 +745,15 @@ void main() {
 
     await widgetTester.pumpAndSettle();
 
-    final showSubmit =
-        find.widgetWithText(DialogToggleSwitch, 'Show Submit Button');
+    final showSubmit = find.widgetWithText(
+      DialogToggleSwitch,
+      'Show Submit Button',
+    );
 
     expect(showSubmit, findsOneWidget);
 
     await widgetTester.tap(
-      find.descendant(
-        of: showSubmit,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: showSubmit, matching: find.byType(Switch)),
     );
     await widgetTester.pumpAndSettle();
 

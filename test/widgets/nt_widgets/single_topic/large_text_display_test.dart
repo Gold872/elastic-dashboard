@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/large_text_display.dart';
 import '../../../test_util.dart';
@@ -32,18 +33,16 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Large Text',
-          type: NT4TypeStr.kString,
+          type: NT4Type.string(),
           properties: {},
         ),
       ],
-      virtualValues: {
-        'Test/Large Text': 'Large Text!',
-      },
+      virtualValues: {'Test/Large Text': 'Large Text!'},
     );
   });
 
   test('Large text display from json', () {
-    NTWidgetModel largeTextModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel largeTextModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'Large Text Display',
@@ -65,13 +64,13 @@ void main() {
   test('Large text display to json', () {
     NTWidgetModel largeTextDisplayModel =
         SingleTopicNTWidgetModel.createDefault(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      type: 'Large Text Display',
-      topic: 'Test/Large Text',
-      dataType: 'string',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          type: 'Large Text Display',
+          topic: 'Test/Large Text',
+          dataType: NT4Type.string(),
+          period: 0.100,
+        );
 
     expect(largeTextDisplayModel.toJson(), largeTextDisplayJson);
   });
@@ -81,13 +80,13 @@ void main() {
 
     NTWidgetModel largeTextDisplayModel =
         SingleTopicNTWidgetModel.createDefault(
-      ntConnection: ntConnection,
-      preferences: preferences,
-      type: 'Large Text Display',
-      topic: 'Test/Large Text',
-      dataType: 'string',
-      period: 0.100,
-    );
+          ntConnection: ntConnection,
+          preferences: preferences,
+          type: 'Large Text Display',
+          topic: 'Test/Large Text',
+          dataType: NT4Type.string(),
+          period: 0.100,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

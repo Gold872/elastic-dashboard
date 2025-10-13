@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/power_distribution.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,11 +31,13 @@ void main() {
     Map<String, double> virtualChannelValues = {};
 
     for (int i = 0; i <= PowerDistributionModel.numberOfChannels; i++) {
-      channelTopics.add(NT4Topic(
-        name: 'Test/Power Distribution/Chan$i',
-        type: NT4TypeStr.kFloat32,
-        properties: {},
-      ));
+      channelTopics.add(
+        NT4Topic(
+          name: 'Test/Power Distribution/Chan$i',
+          type: NT4Type.float(),
+          properties: {},
+        ),
+      );
 
       virtualChannelValues.addAll({'Test/Power Distribution/Chan$i': 0.00});
     }
@@ -43,12 +46,12 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/Power Distribution/Voltage',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/Power Distribution/TotalCurrent',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         ...channelTopics,
@@ -62,24 +65,26 @@ void main() {
   });
 
   test('Power distribution from json', () {
-    NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'PowerDistribution',
-      powerDistributionJson,
-    );
+    NTWidgetModel powerDistributionModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'PowerDistribution',
+          powerDistributionJson,
+        );
 
     expect(powerDistributionModel.type, 'PowerDistribution');
     expect(powerDistributionModel.runtimeType, PowerDistributionModel);
   });
 
   test('Power distribution from alias name', () {
-    NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'PDP',
-      powerDistributionJson,
-    );
+    NTWidgetModel powerDistributionModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'PDP',
+          powerDistributionJson,
+        );
 
     expect(powerDistributionModel.type, 'PowerDistribution');
     expect(powerDistributionModel.runtimeType, PowerDistributionModel);
@@ -99,12 +104,13 @@ void main() {
   testWidgets('Power distribution widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel powerDistributionModel = NTWidgetBuilder.buildNTModelFromJson(
-      ntConnection,
-      preferences,
-      'PowerDistribution',
-      powerDistributionJson,
-    );
+    NTWidgetModel powerDistributionModel =
+        NTWidgetRegistry.buildNTModelFromJson(
+          ntConnection,
+          preferences,
+          'PowerDistribution',
+          powerDistributionJson,
+        );
 
     await widgetTester.pumpWidget(
       MaterialApp(

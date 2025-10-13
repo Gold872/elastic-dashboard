@@ -6,6 +6,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:provider/provider.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 
 class CommandSchedulerModel extends MultiTopicNTWidgetModel {
@@ -24,16 +25,15 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        namesSubscription,
-        idsSubscription,
-        cancelSubscription,
-      ];
+    namesSubscription,
+    idsSubscription,
+    cancelSubscription,
+  ];
 
   CommandSchedulerModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    super.dataType,
     super.period,
   }) : super();
 
@@ -61,13 +61,16 @@ class CommandSchedulerModel extends MultiTopicNTWidgetModel {
     List<Object?> currentCancellationsRaw =
         cancelSubscription.value?.tryCast<List<Object?>>() ?? [];
 
-    List<int> currentCancellations =
-        currentCancellationsRaw.whereType<int>().toList();
+    List<int> currentCancellations = currentCancellationsRaw
+        .whereType<int>()
+        .toList();
 
     currentCancellations.add(id);
 
-    _cancelTopic ??=
-        ntConnection.publishNewTopic(cancelTopicName, NT4TypeStr.kIntArr);
+    _cancelTopic ??= ntConnection.publishNewTopic(
+      cancelTopicName,
+      NT4Type.array(NT4Type.int()),
+    );
 
     if (_cancelTopic == null) {
       return;
@@ -106,37 +109,40 @@ class CommandSchedulerWidget extends NTWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(left: 4.0, top: 4.0, right: 4.0),
-              child:
-                  Text('Scheduled Commands:', overflow: TextOverflow.ellipsis),
+              child: Text(
+                'Scheduled Commands:',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const Divider(),
             Flexible(
               child: ListView.builder(
                 itemCount: commandsLength,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    dense: true,
-                    contentPadding:
-                        const EdgeInsets.only(left: 16.0, right: 8.0),
-                    visualDensity: const VisualDensity(
-                        vertical: VisualDensity.minimumDensity),
-                    title: Text(names[index], overflow: TextOverflow.ellipsis),
-                    trailing: IconButton(
-                      tooltip: 'Cancel Command',
-                      onPressed: () {
-                        model.cancelCommand(ids[index]);
-                      },
-                      color: Colors.red,
-                      icon: const Icon(Icons.cancel_outlined),
-                    ),
-                    subtitle: Text(
-                      'ID: ${ids[index].toString()}',
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Colors.grey,
-                          ),
-                    ),
-                  );
-                },
+                itemBuilder: (context, index) => ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.only(
+                    left: 16.0,
+                    right: 8.0,
+                  ),
+                  visualDensity: const VisualDensity(
+                    vertical: VisualDensity.minimumDensity,
+                  ),
+                  title: Text(names[index], overflow: TextOverflow.ellipsis),
+                  trailing: IconButton(
+                    tooltip: 'Cancel Command',
+                    onPressed: () {
+                      model.cancelCommand(ids[index]);
+                    },
+                    color: Colors.red,
+                    icon: const Icon(Icons.cancel_outlined),
+                  ),
+                  subtitle: Text(
+                    'ID: ${ids[index].toString()}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: Colors.grey),
+                  ),
+                ),
               ),
             ),
           ],

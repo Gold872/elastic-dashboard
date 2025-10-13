@@ -14,10 +14,7 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   Color _trueColor = Colors.green;
   Color _falseColor = Colors.red;
 
-  static const List<String> _trueIconOptions = [
-    'None',
-    'Checkmark',
-  ];
+  static const List<String> _trueIconOptions = ['None', 'Checkmark'];
   static const List<String> _falseIconOptions = [
     'None',
     'X',
@@ -29,14 +26,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
 
   Color get trueColor => _trueColor;
 
-  set trueColor(value) {
+  set trueColor(Color value) {
     _trueColor = value;
     refresh();
   }
 
   Color get falseColor => _falseColor;
 
-  set falseColor(value) {
+  set falseColor(Color value) {
     _falseColor = value;
     refresh();
   }
@@ -63,13 +60,14 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
     Color falseColor = Colors.red,
     String trueIcon = 'None',
     String falseIcon = 'None',
+    super.ntStructMeta,
     super.dataType,
     super.period,
-  })  : _falseColor = falseColor,
-        _trueColor = trueColor,
-        _trueIcon = trueIcon,
-        _falseIcon = falseIcon,
-        super();
+  }) : _falseColor = falseColor,
+       _trueColor = trueColor,
+       _trueIcon = trueIcon,
+       _falseIcon = falseIcon,
+       super();
 
   BooleanBoxModel.fromJson({
     required super.ntConnection,
@@ -117,88 +115,85 @@ class BooleanBoxModel extends SingleTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'true_color': _trueColor.toARGB32(),
-      'false_color': _falseColor.toARGB32(),
-      'true_icon': _trueIcon,
-      'false_icon': _falseIcon,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'true_color': _trueColor.toARGB32(),
+    'false_color': _falseColor.toARGB32(),
+    'true_icon': _trueIcon,
+    'false_icon': _falseIcon,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          DialogColorPicker(
-            onColorPicked: (Color color) {
-              trueColor = color;
-            },
-            label: 'True Color',
-            initialColor: _trueColor,
-            defaultColor: Colors.green,
+  List<Widget> getEditProperties(BuildContext context) => [
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        DialogColorPicker(
+          onColorPicked: (Color color) {
+            trueColor = color;
+          },
+          label: 'True Color',
+          initialColor: _trueColor,
+          defaultColor: Colors.green,
+        ),
+        const SizedBox(width: 10),
+        DialogColorPicker(
+          onColorPicked: (Color color) {
+            falseColor = color;
+          },
+          label: 'False Color',
+          initialColor: _falseColor,
+          defaultColor: Colors.red,
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: Column(
+            children: [
+              const Text('True Icon'),
+              DialogDropdownChooser<String>(
+                onSelectionChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  trueIcon = value;
+                },
+                choices: _trueIconOptions,
+                initialValue: (_trueIconOptions.contains(_trueIcon))
+                    ? _trueIcon
+                    : null,
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          DialogColorPicker(
-            onColorPicked: (Color color) {
-              falseColor = color;
-            },
-            label: 'False Color',
-            initialColor: _falseColor,
-            defaultColor: Colors.red,
+        ),
+        Flexible(
+          child: Column(
+            children: [
+              const Text('False Icon'),
+              DialogDropdownChooser<String>(
+                onSelectionChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  falseIcon = value;
+                },
+                choices: _falseIconOptions,
+                initialValue: (_falseIconOptions.contains(_falseIcon))
+                    ? _falseIcon
+                    : null,
+              ),
+            ],
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: Column(
-              children: [
-                const Text('True Icon'),
-                DialogDropdownChooser<String>(
-                  onSelectionChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    trueIcon = value;
-                  },
-                  choices: _trueIconOptions,
-                  initialValue:
-                      (_trueIconOptions.contains(_trueIcon)) ? _trueIcon : null,
-                ),
-              ],
-            ),
-          ),
-          Flexible(
-            child: Column(
-              children: [
-                const Text('False Icon'),
-                DialogDropdownChooser<String>(
-                  onSelectionChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    falseIcon = value;
-                  },
-                  choices: _falseIconOptions,
-                  initialValue: (_falseIconOptions.contains(_falseIcon))
-                      ? _falseIcon
-                      : null,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
+        ),
+      ],
+    ),
+  ];
 }
 
 class BooleanBox extends NTWidget {
@@ -216,11 +211,11 @@ class BooleanBox extends NTWidget {
         bool value = tryCast(data) ?? false;
 
         Widget defaultWidget() => Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                color: (value) ? model.trueColor : model.falseColor,
-              ),
-            );
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            color: (value) ? model.trueColor : model.falseColor,
+          ),
+        );
 
         Widget? widgetToDisplay;
         if (value && model.trueIcon.toUpperCase() != 'NONE') {

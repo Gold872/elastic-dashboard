@@ -23,7 +23,7 @@ void main() {
       0xfb,
       0x21,
       0xf9,
-      0x3f
+      0x3f,
     ];
     Uint8List data = Uint8List.fromList(rawBytes);
 
@@ -48,7 +48,7 @@ void main() {
       0x2d,
       0x44,
       0x54,
-      0xfb
+      0xfb,
     ];
     Uint8List data = Uint8List.fromList(rawBytes);
 
@@ -87,10 +87,13 @@ void main() {
       0xfb,
       0x21,
       0xf9,
-      0x3f
+      0x3f,
     ];
-    Uint8List data =
-        Uint8List.fromList([...rawBytes, ...rawBytes, ...rawBytes]);
+    Uint8List data = Uint8List.fromList([
+      ...rawBytes,
+      ...rawBytes,
+      ...rawBytes,
+    ]);
 
     List<SwerveModuleStateStruct> moduleStateStruct =
         SwerveModuleStateStruct.listFromBytes(data);
@@ -120,10 +123,17 @@ void main() {
       0xfb,
       0x21,
       0xf9,
-      0x3f
+      0x3f,
     ];
-    Uint8List data = Uint8List.fromList(
-        [...rawBytes, ...rawBytes, ...rawBytes, 0x00, 0x00, 0x14, 0x40]);
+    Uint8List data = Uint8List.fromList([
+      ...rawBytes,
+      ...rawBytes,
+      ...rawBytes,
+      0x00,
+      0x00,
+      0x14,
+      0x40,
+    ]);
 
     List<SwerveModuleStateStruct> moduleStateStruct =
         SwerveModuleStateStruct.listFromBytes(data);

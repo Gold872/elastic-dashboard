@@ -5,7 +5,7 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
 import 'package:provider/provider.dart';
 
-import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/text_formatter_builder.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
@@ -18,51 +18,47 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
   double _minValue = -1.0;
   double _maxValue = 1.0;
   int _divisions = 5;
-  bool _updateContinuously = false;
+  bool updateContinuously = false;
 
   ValueNotifier<double> displayValue = ValueNotifier(0.0);
   ValueNotifier<bool> dragging = ValueNotifier(false);
 
   double get minValue => _minValue;
 
-  set minValue(value) {
+  set minValue(double value) {
     _minValue = value;
     refresh();
   }
 
   double get maxValue => _maxValue;
 
-  set maxValue(value) {
+  set maxValue(double value) {
     _maxValue = value;
     refresh();
   }
 
   int get divisions => _divisions;
 
-  set divisions(value) {
+  set divisions(int value) {
     _divisions = value;
     refresh();
   }
-
-  bool get updateContinuously => _updateContinuously;
-
-  set updateContinuously(value) => _updateContinuously = value;
 
   NumberSliderModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+    super.ntStructMeta,
     double minValue = -1.0,
     double maxValue = 1.0,
     int divisions = 5,
-    bool updateContinuously = false,
+    this.updateContinuously = false,
     super.dataType,
     super.period,
-  })  : _updateContinuously = updateContinuously,
-        _divisions = divisions,
-        _minValue = minValue,
-        _maxValue = maxValue,
-        super();
+  }) : _divisions = divisions,
+       _minValue = minValue,
+       _maxValue = maxValue,
+       super();
 
   NumberSliderModel.fromJson({
     required super.ntConnection,
@@ -73,99 +69,100 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
         tryCast(jsonData['min_value']) ?? tryCast(jsonData['min']) ?? -1.0;
     _maxValue =
         tryCast(jsonData['max_value']) ?? tryCast(jsonData['max']) ?? 1.0;
-    _divisions = tryCast(jsonData['divisions']) ??
+    _divisions =
+        tryCast(jsonData['divisions']) ??
         tryCast(jsonData['numOfTickMarks']) ??
         5;
 
-    _updateContinuously = tryCast(jsonData['update_continuously']) ??
+    updateContinuously =
+        tryCast(jsonData['update_continuously']) ??
         tryCast(jsonData['publish_all']) ??
         false;
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'min_value': _minValue,
-      'max_value': _maxValue,
-      'divisions': _divisions,
-      'update_continuously': _updateContinuously,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'min_value': _minValue,
+    'max_value': _maxValue,
+    'divisions': _divisions,
+    'update_continuously': updateContinuously,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      // Min and max values
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMin = double.tryParse(value);
-                if (newMin == null) {
-                  return;
-                }
-                minValue = newMin;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              label: 'Min Value',
-              initialText: _minValue.toString(),
+  List<Widget> getEditProperties(BuildContext context) => [
+    // Min and max values
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMin = double.tryParse(value);
+              if (newMin == null) {
+                return;
+              }
+              minValue = newMin;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
             ),
+            label: 'Min Value',
+            initialText: _minValue.toString(),
           ),
-          Flexible(
-            child: DialogTextInput(
-              onSubmit: (value) {
-                double? newMax = double.tryParse(value);
-                if (newMax == null) {
-                  return;
-                }
-                maxValue = newMax;
-              },
-              formatter: TextFormatterBuilder.decimalTextFormatter(
-                  allowNegative: true),
-              label: 'Max Value',
-              initialText: _maxValue.toString(),
+        ),
+        Flexible(
+          child: DialogTextInput(
+            onSubmit: (value) {
+              double? newMax = double.tryParse(value);
+              if (newMax == null) {
+                return;
+              }
+              maxValue = newMax;
+            },
+            formatter: TextFormatterBuilder.decimalTextFormatter(
+              allowNegative: true,
             ),
+            label: 'Max Value',
+            initialText: _maxValue.toString(),
           ),
-        ],
-      ),
-      const SizedBox(height: 5),
-      // Number of divisions
-      Row(
-        children: [
-          Flexible(
-            flex: 2,
-            child: DialogTextInput(
-              onSubmit: (value) {
-                int? newDivisions = int.tryParse(value);
-                if (newDivisions == null || newDivisions < 2) {
-                  return;
-                }
-                divisions = newDivisions;
-              },
-              formatter: FilteringTextInputFormatter.digitsOnly,
-              label: 'Divisions',
-              initialText: _divisions.toString(),
-            ),
+        ),
+      ],
+    ),
+    const SizedBox(height: 5),
+    // Number of divisions
+    Row(
+      children: [
+        Flexible(
+          flex: 2,
+          child: DialogTextInput(
+            onSubmit: (value) {
+              int? newDivisions = int.tryParse(value);
+              if (newDivisions == null || newDivisions < 2) {
+                return;
+              }
+              divisions = newDivisions;
+            },
+            formatter: FilteringTextInputFormatter.digitsOnly,
+            label: 'Divisions',
+            initialText: _divisions.toString(),
           ),
+        ),
+        if (ntStructMeta == null)
           Flexible(
             flex: 3,
             child: DialogToggleSwitch(
-              initialValue: _updateContinuously,
+              initialValue: updateContinuously,
               label: 'Update While Dragging',
               onToggle: (value) {
                 updateContinuously = value;
               },
             ),
           ),
-        ],
-      ),
-    ];
-  }
+      ],
+    ),
+  ];
 
   void publishValue(double value) {
     bool publishTopic =
@@ -181,7 +178,7 @@ class NumberSliderModel extends SingleTopicNTWidgetModel {
       ntConnection.publishTopic(ntTopic!);
     }
 
-    if (dataType == NT4TypeStr.kInt) {
+    if (dataType == NT4Type.int()) {
       ntConnection.updateDataFromTopic(ntTopic!, value.round());
     } else {
       ntConnection.updateDataFromTopic(ntTopic!, value);
@@ -217,7 +214,7 @@ class NumberSlider extends NTWidget {
         double divisionSeparation =
             (model.maxValue - model.minValue) / (model.divisions - 1);
 
-        int fractionDigits = (model.dataType == NT4TypeStr.kInt) ? 0 : 2;
+        int fractionDigits = (model.dataType == NT4Type.int()) ? 0 : 2;
 
         return Column(
           children: [
@@ -247,12 +244,12 @@ class NumberSlider extends NTWidget {
                     shape: PointerShape.circle,
                     enableAnimation: false,
                     height: 15,
-                    isInteractive: true,
+                    isInteractive: model.ntStructMeta == null,
                     onChangeStart: () {
                       model.dragging.value = true;
                     },
                     onChanged: (value) {
-                      if (model.dataType == NT4TypeStr.kInt) {
+                      if (model.dataType == NT4Type.int()) {
                         model.displayValue.value = value.roundToDouble();
                       } else {
                         model.displayValue.value = value;

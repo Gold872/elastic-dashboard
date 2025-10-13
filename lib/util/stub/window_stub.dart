@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart'
     show DockSide, WindowOptions;
 
-enum TitleBarStyle {
-  normal,
-  hidden,
-}
+enum TitleBarStyle { normal, hidden }
 
 abstract mixin class WindowListener {
   /// Emitted when the window is going to be closed.
@@ -81,11 +78,8 @@ class WindowManager {
 
   void removeListener(WindowListener listener) {}
 
-  double getDevicePixelRatio() {
-    // Subsequent version, remove this deprecated member.
-    // ignore: deprecated_member_use
-    return window.devicePixelRatio;
-  }
+  // ignore: deprecated_member_use
+  double getDevicePixelRatio() => window.devicePixelRatio;
 
   Future<void> ensureInitialized() async {}
 
@@ -190,9 +184,7 @@ class WindowManager {
   }) async {}
 
   /// Moves window to the center of the screen.
-  Future<void> center({
-    bool animate = false,
-  }) async {}
+  Future<void> center({bool animate = false}) async {}
 
   /// Returns `Rect` - The bounds of the window as Object.
   Future<Rect> getBounds() async => Rect.fromLTWH(0, 0, 0, 0);
@@ -209,22 +201,15 @@ class WindowManager {
   Future<Size> getSize() async => Size.zero;
 
   /// Resizes the window to `width` and `height`.
-  Future<void> setSize(Size size, {bool animate = false}) => setBounds(
-        null,
-        size: size,
-        animate: animate,
-      );
+  Future<void> setSize(Size size, {bool animate = false}) =>
+      setBounds(null, size: size, animate: animate);
 
   /// Returns `Offset` - Contains the window's current position.
   Future<Offset> getPosition() async => Offset.zero;
 
   /// Moves window to position.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
-    await setBounds(
-      null,
-      position: position,
-      animate: animate,
-    );
+    await setBounds(null, position: position, animate: animate);
   }
 
   /// Sets the minimum size of window to `width` and `height`.
@@ -292,7 +277,7 @@ class WindowManager {
   Future<void> setAlwaysOnBottom(bool isAlwaysOnBottom) async {}
 
   /// Returns `String` - The title of the native window.
-  Future<String> getTitle() async => "";
+  Future<String> getTitle() async => '';
 
   /// Changes the title of native window to title.
   Future<void> setTitle(String title) async {}

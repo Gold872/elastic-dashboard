@@ -14,23 +14,23 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   @override
   String type = SwerveDriveWidget.widgetType;
 
-  get frontLeftAngleTopic => '$topic/Front Left Angle';
+  String get frontLeftAngleTopic => '$topic/Front Left Angle';
 
-  get frontLeftVelocityTopic => '$topic/Front Left Velocity';
+  String get frontLeftVelocityTopic => '$topic/Front Left Velocity';
 
-  get frontRightAngleTopic => '$topic/Front Right Angle';
+  String get frontRightAngleTopic => '$topic/Front Right Angle';
 
-  get frontRightVelocityTopic => '$topic/Front Right Velocity';
+  String get frontRightVelocityTopic => '$topic/Front Right Velocity';
 
-  get backLeftAngleTopic => '$topic/Back Left Angle';
+  String get backLeftAngleTopic => '$topic/Back Left Angle';
 
-  get backLeftVelocityTopic => '$topic/Back Left Velocity';
+  String get backLeftVelocityTopic => '$topic/Back Left Velocity';
 
-  get backRightAngleTopic => '$topic/Back Right Angle';
+  String get backRightAngleTopic => '$topic/Back Right Angle';
 
-  get backRightVelocityTopic => '$topic/Back Right Velocity';
+  String get backRightVelocityTopic => '$topic/Back Right Velocity';
 
-  get robotAngleTopic => '$topic/Robot Angle';
+  String get robotAngleTopic => '$topic/Robot Angle';
 
   late NT4Subscription frontLeftAngleSubscription;
   late NT4Subscription frontLeftVelocitySubscription;
@@ -45,16 +45,16 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [
-        frontLeftAngleSubscription,
-        frontLeftVelocitySubscription,
-        frontRightAngleSubscription,
-        frontRightVelocitySubscription,
-        backLeftAngleSubscription,
-        backLeftVelocitySubscription,
-        backRightAngleSubscription,
-        backRightVelocitySubscription,
-        robotAngleSubscription,
-      ];
+    frontLeftAngleSubscription,
+    frontLeftVelocitySubscription,
+    frontRightAngleSubscription,
+    frontRightVelocitySubscription,
+    backLeftAngleSubscription,
+    backLeftVelocitySubscription,
+    backRightAngleSubscription,
+    backRightVelocitySubscription,
+    robotAngleSubscription,
+  ];
 
   bool _showRobotRotation = true;
 
@@ -67,10 +67,9 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
     bool showRobotRotation = true,
     String rotationUnit = 'Radians',
     super.period,
-    super.dataType,
-  })  : _rotationUnit = rotationUnit,
-        _showRobotRotation = showRobotRotation,
-        super();
+  }) : _rotationUnit = rotationUnit,
+       _showRobotRotation = showRobotRotation,
+       super();
 
   BasicSwerveModel.fromJson({
     required super.ntConnection,
@@ -89,25 +88,43 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   }
 
   void initSubscriptions() {
-    frontLeftAngleSubscription =
-        ntConnection.subscribe(frontLeftAngleTopic, super.period);
-    frontLeftVelocitySubscription =
-        ntConnection.subscribe(frontLeftVelocityTopic, super.period);
-    frontRightAngleSubscription =
-        ntConnection.subscribe(frontRightAngleTopic, super.period);
-    frontRightVelocitySubscription =
-        ntConnection.subscribe(frontRightVelocityTopic, super.period);
-    backLeftAngleSubscription =
-        ntConnection.subscribe(backLeftAngleTopic, super.period);
-    backLeftVelocitySubscription =
-        ntConnection.subscribe(backLeftVelocityTopic, super.period);
-    backRightAngleSubscription =
-        ntConnection.subscribe(backRightAngleTopic, super.period);
-    backRightVelocitySubscription =
-        ntConnection.subscribe(backRightVelocityTopic, super.period);
+    frontLeftAngleSubscription = ntConnection.subscribe(
+      frontLeftAngleTopic,
+      super.period,
+    );
+    frontLeftVelocitySubscription = ntConnection.subscribe(
+      frontLeftVelocityTopic,
+      super.period,
+    );
+    frontRightAngleSubscription = ntConnection.subscribe(
+      frontRightAngleTopic,
+      super.period,
+    );
+    frontRightVelocitySubscription = ntConnection.subscribe(
+      frontRightVelocityTopic,
+      super.period,
+    );
+    backLeftAngleSubscription = ntConnection.subscribe(
+      backLeftAngleTopic,
+      super.period,
+    );
+    backLeftVelocitySubscription = ntConnection.subscribe(
+      backLeftVelocityTopic,
+      super.period,
+    );
+    backRightAngleSubscription = ntConnection.subscribe(
+      backRightAngleTopic,
+      super.period,
+    );
+    backRightVelocitySubscription = ntConnection.subscribe(
+      backRightVelocityTopic,
+      super.period,
+    );
 
-    robotAngleSubscription =
-        ntConnection.subscribe(robotAngleTopic, super.period);
+    robotAngleSubscription = ntConnection.subscribe(
+      robotAngleTopic,
+      super.period,
+    );
   }
 
   @override
@@ -122,75 +139,56 @@ class BasicSwerveModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'show_robot_rotation': _showRobotRotation,
-      'rotation_unit': _rotationUnit,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    ...super.toJson(),
+    'show_robot_rotation': _showRobotRotation,
+    'rotation_unit': _rotationUnit,
+  };
 
   @override
-  List<Widget> getEditProperties(BuildContext context) {
-    return [
-      Center(
-        child: DialogToggleSwitch(
-          initialValue: _showRobotRotation,
-          label: 'Show Robot Rotation',
-          onToggle: (value) {
-            showRobotRotation = value;
-          },
-        ),
+  List<Widget> getEditProperties(BuildContext context) => [
+    Center(
+      child: DialogToggleSwitch(
+        initialValue: _showRobotRotation,
+        label: 'Show Robot Rotation',
+        onToggle: (value) {
+          showRobotRotation = value;
+        },
       ),
-      const SizedBox(height: 5),
-      const Text('Rotation Unit'),
-      StatefulBuilder(builder: (context, setState) {
-        return Column(
+    ),
+    const SizedBox(height: 5),
+    const Text('Rotation Unit'),
+    StatefulBuilder(
+      builder: (context, setState) => RadioGroup<String>(
+        groupValue: _rotationUnit,
+        onChanged: (value) {
+          if (value != null) {
+            rotationUnit = value;
+          }
+          setState(() {});
+        },
+        child: Column(
           children: [
             ListTile(
               title: const Text('Radians'),
               dense: true,
-              leading: Radio<String>(
-                value: 'Radians',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Radians';
-
-                  setState(() {});
-                },
-              ),
+              leading: Radio<String>(value: 'Radians'),
             ),
             ListTile(
               title: const Text('Degrees'),
               dense: true,
-              leading: Radio<String>(
-                value: 'Degrees',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Degrees';
-
-                  setState(() {});
-                },
-              ),
+              leading: Radio<String>(value: 'Degrees'),
             ),
             ListTile(
               title: const Text('Rotations'),
               dense: true,
-              leading: Radio<String>(
-                value: 'Rotations',
-                groupValue: _rotationUnit,
-                onChanged: (value) {
-                  rotationUnit = 'Rotations';
-
-                  setState(() {});
-                },
-              ),
+              leading: Radio<String>(value: 'Rotations'),
             ),
           ],
-        );
-      }),
-    ];
-  }
+        ),
+      ),
+    ),
+  ];
 
   bool get showRobotRotation => _showRobotRotation;
 
@@ -317,25 +315,34 @@ class SwerveDrivePainter extends CustomPainter {
     const double arrowScale = robotFrameScale * 0.45;
 
     drawRobotFrame(
-        canvas,
-        size * robotFrameScale,
-        Offset(size.width - size.width * robotFrameScale,
-                size.height - size.height * robotFrameScale) /
-            2);
+      canvas,
+      size * robotFrameScale,
+      Offset(
+            size.width - size.width * robotFrameScale,
+            size.height - size.height * robotFrameScale,
+          ) /
+          2,
+    );
 
     drawRobotDirectionArrow(
-        canvas,
-        size * arrowScale,
-        Offset(size.width - size.width * arrowScale,
-                size.height - size.height * arrowScale) /
-            2);
+      canvas,
+      size * arrowScale,
+      Offset(
+            size.width - size.width * arrowScale,
+            size.height - size.height * arrowScale,
+          ) /
+          2,
+    );
 
     drawMotionArrows(
-        canvas,
-        size * robotFrameScale,
-        Offset(size.width - size.width * robotFrameScale,
-                size.height - size.height * robotFrameScale) /
-            2);
+      canvas,
+      size * robotFrameScale,
+      Offset(
+            size.width - size.width * robotFrameScale,
+            size.height - size.height * robotFrameScale,
+          ) /
+          2,
+    );
   }
 
   void drawRobotFrame(Canvas canvas, Size size, Offset offset) {
@@ -348,49 +355,65 @@ class SwerveDrivePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Front left circle
-    canvas.drawCircle(Offset(circleRadius, circleRadius) + offset, circleRadius,
-        framePainter);
+    canvas.drawCircle(
+      Offset(circleRadius, circleRadius) + offset,
+      circleRadius,
+      framePainter,
+    );
 
     // Front right circle
-    canvas.drawCircle(Offset(size.width - circleRadius, circleRadius) + offset,
-        circleRadius, framePainter);
+    canvas.drawCircle(
+      Offset(size.width - circleRadius, circleRadius) + offset,
+      circleRadius,
+      framePainter,
+    );
 
     // Back left circle
-    canvas.drawCircle(Offset(circleRadius, size.height - circleRadius) + offset,
-        circleRadius, framePainter);
+    canvas.drawCircle(
+      Offset(circleRadius, size.height - circleRadius) + offset,
+      circleRadius,
+      framePainter,
+    );
 
     // Back right circle
     canvas.drawCircle(
-        Offset(offset.dx + size.width - circleRadius,
-            offset.dy + size.height - circleRadius),
-        circleRadius,
-        framePainter);
+      Offset(
+        offset.dx + size.width - circleRadius,
+        offset.dy + size.height - circleRadius,
+      ),
+      circleRadius,
+      framePainter,
+    );
 
     // Top line
     canvas.drawLine(
-        Offset(circleRadius * 2, circleRadius) + offset,
-        Offset(size.width - circleRadius * 2, circleRadius) + offset,
-        framePainter);
+      Offset(circleRadius * 2, circleRadius) + offset,
+      Offset(size.width - circleRadius * 2, circleRadius) + offset,
+      framePainter,
+    );
 
     // Right line
     canvas.drawLine(
-        Offset(size.width - circleRadius, circleRadius * 2) + offset,
-        Offset(size.width - circleRadius, size.height - circleRadius * 2) +
-            offset,
-        framePainter);
+      Offset(size.width - circleRadius, circleRadius * 2) + offset,
+      Offset(size.width - circleRadius, size.height - circleRadius * 2) +
+          offset,
+      framePainter,
+    );
 
     // Bottom line
     canvas.drawLine(
-        Offset(circleRadius * 2, size.height - circleRadius) + offset,
-        Offset(size.width - circleRadius * 2, size.height - circleRadius) +
-            offset,
-        framePainter);
+      Offset(circleRadius * 2, size.height - circleRadius) + offset,
+      Offset(size.width - circleRadius * 2, size.height - circleRadius) +
+          offset,
+      framePainter,
+    );
 
     // Left line
     canvas.drawLine(
-        Offset(circleRadius, circleRadius * 2) + offset,
-        Offset(circleRadius, size.height - circleRadius * 2) + offset,
-        framePainter);
+      Offset(circleRadius, circleRadius * 2) + offset,
+      Offset(circleRadius, size.height - circleRadius * 2) + offset,
+      framePainter,
+    );
   }
 
   void drawMotionArrows(Canvas canvas, Size size, Offset offset) {
@@ -417,12 +440,18 @@ class SwerveDrivePainter extends CustomPainter {
 
     // Front left angle indicator thing
     Rect frontLeftWheel = Rect.fromCenter(
-        center: Offset(circleRadius, circleRadius) + offset,
-        width: circleRadius * 2,
-        height: circleRadius * 2);
+      center: Offset(circleRadius, circleRadius) + offset,
+      width: circleRadius * 2,
+      height: circleRadius * 2,
+    );
 
-    canvas.drawArc(frontLeftWheel, -(frontLeftAngle + radians(22.5)) - pi / 2,
-        radians(45), false, anglePaint);
+    canvas.drawArc(
+      frontLeftWheel,
+      -(frontLeftAngle + radians(22.5)) - pi / 2,
+      radians(45),
+      false,
+      anglePaint,
+    );
 
     // Front left vector arrow
     if (frontLeftVelocity.abs() >= 0.05) {
@@ -436,40 +465,56 @@ class SwerveDrivePainter extends CustomPainter {
       }
 
       double frontLeftArrowLength = frontLeftVelocity.abs() * pixelsPerMPS;
-      double frontLeftArrowBase =
-          (frontLeftArrowLength / 3.0).clamp(minArrowBase, maxArrowBase);
+      double frontLeftArrowBase = (frontLeftArrowLength / 3.0).clamp(
+        minArrowBase,
+        maxArrowBase,
+      );
 
       canvas.drawLine(
-          Offset(circleRadius, circleRadius) + offset,
-          Offset(frontLeftArrowLength * cos(frontLeftAngle),
-                  frontLeftArrowLength * sin(frontLeftAngle)) +
-              Offset(circleRadius, circleRadius) +
-              offset,
-          arrowPaint);
+        Offset(circleRadius, circleRadius) + offset,
+        Offset(
+              frontLeftArrowLength * cos(frontLeftAngle),
+              frontLeftArrowLength * sin(frontLeftAngle),
+            ) +
+            Offset(circleRadius, circleRadius) +
+            offset,
+        arrowPaint,
+      );
 
       drawArrowHead(
-          canvas,
-          Offset(circleRadius, circleRadius) / 2 + offset,
-          frontLeftArrowLength * cos(frontLeftAngle) + circleRadius / 2,
-          frontLeftArrowLength * sin(frontLeftAngle) + circleRadius / 2,
-          frontLeftAngle,
-          arrowAngle,
-          frontLeftArrowBase,
-          arrowPaint);
+        canvas,
+        Offset(circleRadius, circleRadius) / 2 + offset,
+        frontLeftArrowLength * cos(frontLeftAngle) + circleRadius / 2,
+        frontLeftArrowLength * sin(frontLeftAngle) + circleRadius / 2,
+        frontLeftAngle,
+        arrowAngle,
+        frontLeftArrowBase,
+        arrowPaint,
+      );
     } else {
       // Draw an X
-      drawX(canvas, Offset(circleRadius, circleRadius) + offset, circleRadius,
-          arrowPaint);
+      drawX(
+        canvas,
+        Offset(circleRadius, circleRadius) + offset,
+        circleRadius,
+        arrowPaint,
+      );
     }
 
     // Front right angle indicator thing
     Rect frontRightWheel = Rect.fromCenter(
-        center: Offset(size.width - circleRadius, circleRadius) + offset,
-        width: circleRadius * 2,
-        height: circleRadius * 2);
+      center: Offset(size.width - circleRadius, circleRadius) + offset,
+      width: circleRadius * 2,
+      height: circleRadius * 2,
+    );
 
-    canvas.drawArc(frontRightWheel, -(frontRightAngle + radians(22.5)) - pi / 2,
-        radians(45), false, anglePaint);
+    canvas.drawArc(
+      frontRightWheel,
+      -(frontRightAngle + radians(22.5)) - pi / 2,
+      radians(45),
+      false,
+      anglePaint,
+    );
 
     // Front right vector arrow
     if (frontRightVelocity.abs() >= 0.05) {
@@ -483,40 +528,56 @@ class SwerveDrivePainter extends CustomPainter {
       }
 
       double frontRightArrowLength = frontRightVelocity.abs() * pixelsPerMPS;
-      double frontRightArrowBase =
-          (frontRightArrowLength / 3.0).clamp(minArrowBase, maxArrowBase);
+      double frontRightArrowBase = (frontRightArrowLength / 3.0).clamp(
+        minArrowBase,
+        maxArrowBase,
+      );
 
       canvas.drawLine(
-          Offset(size.width - circleRadius, circleRadius) + offset,
-          Offset(frontRightArrowLength * cos(frontRightAngle),
-                  frontRightArrowLength * sin(frontRightAngle)) +
-              Offset(size.width - circleRadius, circleRadius) +
-              offset,
-          arrowPaint);
+        Offset(size.width - circleRadius, circleRadius) + offset,
+        Offset(
+              frontRightArrowLength * cos(frontRightAngle),
+              frontRightArrowLength * sin(frontRightAngle),
+            ) +
+            Offset(size.width - circleRadius, circleRadius) +
+            offset,
+        arrowPaint,
+      );
 
       drawArrowHead(
-          canvas,
-          Offset(size.width - circleRadius / 2, circleRadius / 2) + offset,
-          frontRightArrowLength * cos(frontRightAngle) - circleRadius / 2,
-          frontRightArrowLength * sin(frontRightAngle) + circleRadius / 2,
-          frontRightAngle,
-          arrowAngle,
-          frontRightArrowBase,
-          arrowPaint);
+        canvas,
+        Offset(size.width - circleRadius / 2, circleRadius / 2) + offset,
+        frontRightArrowLength * cos(frontRightAngle) - circleRadius / 2,
+        frontRightArrowLength * sin(frontRightAngle) + circleRadius / 2,
+        frontRightAngle,
+        arrowAngle,
+        frontRightArrowBase,
+        arrowPaint,
+      );
     } else {
       // Draw an X
-      drawX(canvas, Offset(size.width - circleRadius, circleRadius) + offset,
-          circleRadius, arrowPaint);
+      drawX(
+        canvas,
+        Offset(size.width - circleRadius, circleRadius) + offset,
+        circleRadius,
+        arrowPaint,
+      );
     }
 
     // Back left angle indicator thing
     Rect backLeftWheel = Rect.fromCenter(
-        center: Offset(circleRadius, size.height - circleRadius) + offset,
-        width: circleRadius * 2,
-        height: circleRadius * 2);
+      center: Offset(circleRadius, size.height - circleRadius) + offset,
+      width: circleRadius * 2,
+      height: circleRadius * 2,
+    );
 
-    canvas.drawArc(backLeftWheel, -(backLeftAngle + radians(22.5)) - pi / 2,
-        radians(45), false, anglePaint);
+    canvas.drawArc(
+      backLeftWheel,
+      -(backLeftAngle + radians(22.5)) - pi / 2,
+      radians(45),
+      false,
+      anglePaint,
+    );
 
     // Back left vector arrow
     if (backLeftVelocity.abs() >= 0.05) {
@@ -530,41 +591,58 @@ class SwerveDrivePainter extends CustomPainter {
       }
 
       double backLeftArrowLength = backLeftVelocity.abs() * pixelsPerMPS;
-      double backLeftArrowBase =
-          (backLeftArrowLength / 3.0).clamp(minArrowBase, maxArrowBase);
+      double backLeftArrowBase = (backLeftArrowLength / 3.0).clamp(
+        minArrowBase,
+        maxArrowBase,
+      );
 
       canvas.drawLine(
-          Offset(circleRadius, size.height - circleRadius) + offset,
-          Offset(backLeftArrowLength * cos(backLeftAngle),
-                  backLeftArrowLength * sin(backLeftAngle)) +
-              Offset(circleRadius, size.height - circleRadius) +
-              offset,
-          arrowPaint);
+        Offset(circleRadius, size.height - circleRadius) + offset,
+        Offset(
+              backLeftArrowLength * cos(backLeftAngle),
+              backLeftArrowLength * sin(backLeftAngle),
+            ) +
+            Offset(circleRadius, size.height - circleRadius) +
+            offset,
+        arrowPaint,
+      );
 
       drawArrowHead(
-          canvas,
-          Offset(circleRadius / 2, size.height - circleRadius / 2) + offset,
-          backLeftArrowLength * cos(backLeftAngle) + circleRadius / 2,
-          backLeftArrowLength * sin(backLeftAngle) - circleRadius / 2,
-          backLeftAngle,
-          arrowAngle,
-          backLeftArrowBase,
-          arrowPaint);
+        canvas,
+        Offset(circleRadius / 2, size.height - circleRadius / 2) + offset,
+        backLeftArrowLength * cos(backLeftAngle) + circleRadius / 2,
+        backLeftArrowLength * sin(backLeftAngle) - circleRadius / 2,
+        backLeftAngle,
+        arrowAngle,
+        backLeftArrowBase,
+        arrowPaint,
+      );
     } else {
       // Draw an X
-      drawX(canvas, Offset(circleRadius, size.height - circleRadius) + offset,
-          circleRadius, arrowPaint);
+      drawX(
+        canvas,
+        Offset(circleRadius, size.height - circleRadius) + offset,
+        circleRadius,
+        arrowPaint,
+      );
     }
 
     // Back right angle indicator thing
     Rect backRightWheel = Rect.fromCenter(
-        center: Offset(size.width - circleRadius, size.height - circleRadius) +
-            offset,
-        width: circleRadius * 2,
-        height: circleRadius * 2);
+      center:
+          Offset(size.width - circleRadius, size.height - circleRadius) +
+          offset,
+      width: circleRadius * 2,
+      height: circleRadius * 2,
+    );
 
-    canvas.drawArc(backRightWheel, -(backRightAngle + radians(22.5)) - pi / 2,
-        radians(45), false, anglePaint);
+    canvas.drawArc(
+      backRightWheel,
+      -(backRightAngle + radians(22.5)) - pi / 2,
+      radians(45),
+      false,
+      anglePaint,
+    );
 
     // Back right vector arrow
     if (backRightVelocity.abs() >= 0.05) {
@@ -578,58 +656,78 @@ class SwerveDrivePainter extends CustomPainter {
       }
 
       double backRightArrowLength = backRightVelocity.abs() * pixelsPerMPS;
-      double backRightArrowBase =
-          (backRightArrowLength / 3.0).clamp(minArrowBase, maxArrowBase);
+      double backRightArrowBase = (backRightArrowLength / 3.0).clamp(
+        minArrowBase,
+        maxArrowBase,
+      );
 
       canvas.drawLine(
-          Offset(size.width - circleRadius, size.height - circleRadius) +
-              offset,
-          Offset(backRightArrowLength * cos(backRightAngle),
-                  backRightArrowLength * sin(backRightAngle)) +
-              Offset(size.width - circleRadius, size.height - circleRadius) +
-              offset,
-          arrowPaint);
+        Offset(size.width - circleRadius, size.height - circleRadius) + offset,
+        Offset(
+              backRightArrowLength * cos(backRightAngle),
+              backRightArrowLength * sin(backRightAngle),
+            ) +
+            Offset(size.width - circleRadius, size.height - circleRadius) +
+            offset,
+        arrowPaint,
+      );
 
       drawArrowHead(
-          canvas,
-          Offset(size.width - circleRadius / 2,
-                  size.height - circleRadius / 2) +
-              offset,
-          backRightArrowLength * cos(backRightAngle) - circleRadius / 2,
-          backRightArrowLength * sin(backRightAngle) - circleRadius / 2,
-          backRightAngle,
-          arrowAngle,
-          backRightArrowBase,
-          arrowPaint);
+        canvas,
+        Offset(size.width - circleRadius / 2, size.height - circleRadius / 2) +
+            offset,
+        backRightArrowLength * cos(backRightAngle) - circleRadius / 2,
+        backRightArrowLength * sin(backRightAngle) - circleRadius / 2,
+        backRightAngle,
+        arrowAngle,
+        backRightArrowBase,
+        arrowPaint,
+      );
     } else {
       // Draw an X
       drawX(
-          canvas,
-          Offset(size.width - circleRadius, size.height - circleRadius) +
-              offset,
-          circleRadius,
-          arrowPaint);
+        canvas,
+        Offset(size.width - circleRadius, size.height - circleRadius) + offset,
+        circleRadius,
+        arrowPaint,
+      );
     }
   }
 
   void drawX(Canvas canvas, Offset offset, double circleRadius, Paint xPaint) {
-    canvas.drawLine(Offset(circleRadius / 2, circleRadius / 2) * 0.75 + offset,
-        -Offset(circleRadius / 2, circleRadius / 2) * 0.75 + offset, xPaint);
+    canvas.drawLine(
+      Offset(circleRadius / 2, circleRadius / 2) * 0.75 + offset,
+      -Offset(circleRadius / 2, circleRadius / 2) * 0.75 + offset,
+      xPaint,
+    );
 
     canvas.drawLine(
-        -Offset(-circleRadius / 2, circleRadius / 2) * 0.75 + offset,
-        Offset(-circleRadius / 2, circleRadius / 2) * 0.75 + offset,
-        xPaint);
+      -Offset(-circleRadius / 2, circleRadius / 2) * 0.75 + offset,
+      Offset(-circleRadius / 2, circleRadius / 2) * 0.75 + offset,
+      xPaint,
+    );
   }
 
-  void drawArrowHead(Canvas canvas, Offset center, double tipX, double tipY,
-      double arrowRotation, double arrowAngle, double base, Paint arrowPaint) {
+  void drawArrowHead(
+    Canvas canvas,
+    Offset center,
+    double tipX,
+    double tipY,
+    double arrowRotation,
+    double arrowAngle,
+    double base,
+    Paint arrowPaint,
+  ) {
     Path arrowPath = Path()
-      ..moveTo(center.dx + tipX - base * cos(arrowRotation - arrowAngle),
-          center.dy + tipY - base * sin(arrowRotation - arrowAngle))
+      ..moveTo(
+        center.dx + tipX - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation - arrowAngle),
+      )
       ..lineTo(center.dx + tipX, center.dy + tipY)
-      ..lineTo(center.dx + tipX - base * cos(arrowRotation + arrowAngle),
-          center.dy + tipY - base * sin(arrowRotation + arrowAngle));
+      ..lineTo(
+        center.dx + tipX - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation + arrowAngle),
+      );
 
     canvas.drawPath(arrowPath, arrowPaint);
   }
@@ -651,19 +749,24 @@ class SwerveDrivePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     Path arrowHead = Path()
-      ..moveTo(center.dx + tipX - base * cos(arrowRotation - arrowAngle),
-          center.dy + tipY - base * sin(arrowRotation - arrowAngle))
+      ..moveTo(
+        center.dx + tipX - base * cos(arrowRotation - arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation - arrowAngle),
+      )
       ..lineTo(center.dx + tipX, center.dy + tipY)
-      ..lineTo(center.dx + tipX - base * cos(arrowRotation + arrowAngle),
-          center.dy + tipY - base * sin(arrowRotation + arrowAngle));
+      ..lineTo(
+        center.dx + tipX - base * cos(arrowRotation + arrowAngle),
+        center.dy + tipY - base * sin(arrowRotation + arrowAngle),
+      );
 
     canvas.drawPath(arrowHead, arrowPainter);
-    canvas.drawLine(Offset(tipX, tipY) + center, Offset(tipX, -tipY) + center,
-        arrowPainter);
+    canvas.drawLine(
+      Offset(tipX, tipY) + center,
+      Offset(tipX, -tipY) + center,
+      arrowPainter,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

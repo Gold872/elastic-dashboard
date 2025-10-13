@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
-import 'package:elastic_dashboard/services/nt_widget_builder.dart';
+import 'package:elastic_dashboard/services/nt_widget_registry.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/pid_controller.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
 import '../../../test_util.dart';
@@ -30,22 +31,22 @@ void main() {
       virtualTopics: [
         NT4Topic(
           name: 'Test/PID Controller/p',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/i',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/d',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
         NT4Topic(
           name: 'Test/PID Controller/setpoint',
-          type: NT4TypeStr.kFloat32,
+          type: NT4Type.float(),
           properties: {},
         ),
       ],
@@ -59,7 +60,7 @@ void main() {
   });
 
   test('PID controller from json', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PIDController',
@@ -71,7 +72,7 @@ void main() {
   });
 
   test('PID controller from alias name', () {
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PID Controller',
@@ -96,7 +97,7 @@ void main() {
   testWidgets('PID controller widget test', (widgetTester) async {
     FlutterError.onError = ignoreOverflowErrors;
 
-    NTWidgetModel pidControllerModel = NTWidgetBuilder.buildNTModelFromJson(
+    NTWidgetModel pidControllerModel = NTWidgetRegistry.buildNTModelFromJson(
       ntConnection,
       preferences,
       'PIDController',
@@ -138,11 +139,15 @@ void main() {
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.0);
 
     await widgetTester.enterText(
-        find.widgetWithText(TextField, 'Setpoint'), '0.100');
+      find.widgetWithText(TextField, 'Setpoint'),
+      '0.100',
+    );
     await widgetTester.testTextInput.receiveAction(TextInputAction.done);
 
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
-        0.0);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+      0.0,
+    );
 
     pidControllerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -150,9 +155,12 @@ void main() {
     expect(find.byIcon(Icons.priority_high), findsOneWidget);
 
     expect(
-        find.widgetWithText(OutlinedButton, 'Publish Values'), findsOneWidget);
-    await widgetTester
-        .tap(find.widgetWithText(OutlinedButton, 'Publish Values'));
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+      findsOneWidget,
+    );
+    await widgetTester.tap(
+      find.widgetWithText(OutlinedButton, 'Publish Values'),
+    );
 
     pidControllerModel.refresh();
     await widgetTester.pumpAndSettle();
@@ -160,8 +168,10 @@ void main() {
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/p'), 0.1);
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/i'), 0.1);
     expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/d'), 0.1);
-    expect(ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
-        0.1);
+    expect(
+      ntConnection.getLastAnnouncedValue('Test/PID Controller/setpoint'),
+      0.1,
+    );
 
     expect(find.byIcon(Icons.priority_high), findsNothing);
   });

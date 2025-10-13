@@ -4,8 +4,11 @@ import 'package:dot_cast/dot_cast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:elastic_dashboard/services/nt4_client.dart';
+import 'package:elastic_dashboard/services/nt4_type.dart';
 import 'package:elastic_dashboard/services/nt_connection.dart';
 import 'package:elastic_dashboard/services/settings.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/combo_box_chooser.dart';
+import 'package:elastic_dashboard/widgets/nt_widgets/multi_topic/split_button_chooser.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/boolean_box.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/graph.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/large_text_display.dart';
@@ -20,7 +23,7 @@ import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_button.
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/single_topic/voltage_view.dart';
 
-abstract class NTWidgetModel extends ChangeNotifier {
+sealed class NTWidgetModel extends ChangeNotifier {
   String get type;
 
   final NTConnection ntConnection;
@@ -30,16 +33,15 @@ abstract class NTWidgetModel extends ChangeNotifier {
 
   late String _topic;
 
+  // ignore: unnecessary_getters_setters
   String get topic => _topic;
 
-  set topic(value) => _topic = value;
+  set topic(String value) => _topic = value;
 
-  get period => _period;
+  // ignore: unnecessary_getters_setters
+  double get period => _period;
 
-  set period(value) => _period = value;
-
-  bool _disposed = false;
-  bool _forceDispose = false;
+  set period(double value) => _period = value;
 
   NTWidgetModel({
     required this.ntConnection,
@@ -47,11 +49,10 @@ abstract class NTWidgetModel extends ChangeNotifier {
     required String topic,
     double? period,
   }) : _topic = topic {
-    this.period = period ??
+    this.period =
+        period ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
-
-    init();
   }
 
   NTWidgetModel.fromJson({
@@ -61,59 +62,28 @@ abstract class NTWidgetModel extends ChangeNotifier {
   }) {
     _topic = tryCast(jsonData['topic']) ?? '';
 
-    _period = tryCast(jsonData['period']) ??
+    _period =
+        tryCast(jsonData['period']) ??
         preferences.getDouble(PrefKeys.defaultPeriod) ??
         Defaults.defaultPeriod;
-
-    init();
   }
 
   @mustCallSuper
-  Map<String, dynamic> toJson() {
-    return {
-      'topic': topic,
-      'period': period,
-    };
-  }
+  Map<String, dynamic> toJson() => {'topic': topic, 'period': period};
 
   void init();
 
   void unSubscribe();
 
-  void disposeWidget({bool deleting = false});
+  void softDispose({bool deleting = false});
 
   void resetSubscription();
 
   List<String> getAvailableDisplayTypes();
 
-  List<Widget> getEditProperties(BuildContext context) {
-    return const [];
-  }
+  List<Widget> getEditProperties(BuildContext context) => const [];
 
-  void forceDispose() {
-    _forceDispose = true;
-    dispose();
-  }
-
-  @override
-  void dispose() {
-    if (!hasListeners || _forceDispose) {
-      super.dispose();
-
-      _disposed = true;
-    }
-  }
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  void refresh() {
-    Future(() => notifyListeners());
-  }
+  void refresh() => notifyListeners();
 }
 
 class SingleTopicNTWidgetModel extends NTWidgetModel {
@@ -121,104 +91,132 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   @override
   String get type => _typeOverride;
 
-  String dataType = 'Unknown';
+  NT4Type? dataType;
 
   NT4Subscription? subscription;
+  NT4StructMeta? ntStructMeta;
   NT4Topic? ntTopic;
 
   SingleTopicNTWidgetModel({
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    this.dataType = 'Unknown',
+    this.ntStructMeta,
+    this.dataType,
     super.period,
-  }) : super();
+  }) : super() {
+    init();
+  }
 
   SingleTopicNTWidgetModel.createDefault({
     required super.ntConnection,
     required super.preferences,
     required String type,
     required super.topic,
-    this.dataType = 'Unknown',
+    this.ntStructMeta,
+    this.dataType,
     super.period,
-  })  : _typeOverride = type,
-        super();
+  }) : _typeOverride = type,
+       super() {
+    init();
+  }
 
   SingleTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
     required Map<String, dynamic> jsonData,
   }) : super.fromJson(jsonData: jsonData) {
-    dataType = tryCast(jsonData['data_type']) ?? dataType;
+    dataType = NT4Type.parseNullable(tryCast(jsonData['data_type']));
+
+    Map<String, dynamic>? structMetaJson = jsonData['struct_meta'];
+    if (structMetaJson != null) {
+      ntStructMeta = NT4StructMeta.fromJson(structMetaJson);
+    }
+
+    init();
   }
 
   @override
   @mustCallSuper
   Map<String, dynamic> toJson() {
-    if (dataType == 'Unknown' && ntConnection.isNT4Connected) {
+    if (dataType == null && ntConnection.isNT4Connected) {
       createTopicIfNull();
-      dataType = ntTopic?.type ?? dataType;
+      dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
     }
+
     return {
       ...super.toJson(),
-      if (dataType != 'Unknown') 'data_type': dataType,
+      'data_type': ?dataType?.serialize(),
+      'struct_meta': ?ntStructMeta?.toJson(),
     };
   }
 
   @override
   List<String> getAvailableDisplayTypes() {
     createTopicIfNull();
-    dataType = ntTopic?.type ?? dataType;
+    dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
 
-    switch (dataType) {
-      case NT4TypeStr.kBool:
-        return [
-          BooleanBox.widgetType,
-          ToggleSwitch.widgetType,
-          ToggleButton.widgetType,
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kFloat32:
-      case NT4TypeStr.kFloat64:
-      case NT4TypeStr.kInt:
-        return [
-          TextDisplay.widgetType,
-          NumberBar.widgetType,
-          NumberSlider.widgetType,
-          VoltageView.widgetType,
-          RadialGaugeWidget.widgetType,
-          GraphWidget.widgetType,
-          MatchTimeWidget.widgetType,
-          LargeTextDisplay.widgetType,
-        ];
-      case NT4TypeStr.kString:
-        return [
-          TextDisplay.widgetType,
-          LargeTextDisplay.widgetType,
-          SingleColorView.widgetType,
-        ];
-      case NT4TypeStr.kStringArr:
-        return [
-          TextDisplay.widgetType,
-          MultiColorView.widgetType,
-        ];
-      case NT4TypeStr.kBoolArr:
-      case NT4TypeStr.kFloat32Arr:
-      case NT4TypeStr.kFloat64Arr:
-      case NT4TypeStr.kIntArr:
-        return [
-          TextDisplay.widgetType,
-        ];
+    NT4DataType? ntDataType = dataType?.dataType;
+
+    if (ntDataType == null || dataType == null) {
+      return [type];
     }
 
-    return [type];
+    List<String> availableTypes = [];
+
+    // Add all type-specific widgets first
+
+    if (ntDataType == NT4DataType.boolean) {
+      availableTypes.addAll([
+        BooleanBox.widgetType,
+        ToggleSwitch.widgetType,
+        ToggleButton.widgetType,
+      ]);
+    }
+
+    if (ntDataType.isNumber) {
+      availableTypes.addAll([
+        NumberBar.widgetType,
+        NumberSlider.widgetType,
+        VoltageView.widgetType,
+        RadialGaugeWidget.widgetType,
+        GraphWidget.widgetType,
+        MatchTimeWidget.widgetType,
+      ]);
+    }
+
+    // Special color widgets for string and string arrays
+    if (ntDataType == NT4DataType.string) {
+      if (dataType!.isArray) {
+        availableTypes.add(MultiColorView.widgetType);
+      } else {
+        availableTypes.add(SingleColorView.widgetType);
+      }
+    }
+
+    // Add the rest of the default widgets for anything that is viewable
+    if (dataType!.isViewable) {
+      availableTypes.addAll([
+        TextDisplay.widgetType,
+        LargeTextDisplay.widgetType,
+      ]);
+    }
+
+    availableTypes.add(type);
+
+    return availableTypes.toSet().toList();
   }
 
   @override
   @mustCallSuper
   void init() async {
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribeWithOptions(
+      topic,
+      NT4SubscriptionOptions(
+        periodicRateSeconds: period,
+        structMeta: ntStructMeta,
+      ),
+    );
   }
 
   void createTopicIfNull() {
@@ -234,12 +232,18 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 
   @override
   void resetSubscription() {
     if (subscription == null) {
-      subscription = ntConnection.subscribe(topic, period);
+      subscription = ntConnection.subscribeWithOptions(
+        topic,
+        NT4SubscriptionOptions(
+          periodicRateSeconds: period,
+          structMeta: ntStructMeta,
+        ),
+      );
 
       ntTopic = null;
 
@@ -250,17 +254,32 @@ class SingleTopicNTWidgetModel extends NTWidgetModel {
     bool resetDataType = subscription!.topic != topic;
 
     ntConnection.unSubscribe(subscription!);
-    subscription = ntConnection.subscribe(topic, period);
+    subscription = ntConnection.subscribeWithOptions(
+      topic,
+      NT4SubscriptionOptions(
+        periodicRateSeconds: period,
+        structMeta: ntStructMeta,
+      ),
+    );
 
     ntTopic = null;
 
     createTopicIfNull();
     if (resetDataType) {
       if (ntTopic == null && ntConnection.isNT4Connected) {
-        dataType = 'Unknown';
+        dataType = null;
       } else {
-        dataType = ntTopic?.type ?? dataType;
+        dataType = ntStructMeta?.type ?? ntTopic?.type ?? dataType;
       }
+    }
+
+    // If the path of the struct has changed, we want to update its
+    // value of the struct field
+    if (ntStructMeta != null) {
+      subscription!.updateValue(
+        ntConnection.getLastAnnouncedValue(topic),
+        subscription!.timestamp,
+      );
     }
 
     refresh();
@@ -277,15 +296,18 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
-    String dataType = '', // To allow for stubbing in NTWidgetBuilder
     super.period,
-  }) : super();
+  }) : super() {
+    init();
+  }
 
   MultiTopicNTWidgetModel.fromJson({
     required super.ntConnection,
     required super.preferences,
     required super.jsonData,
-  }) : super.fromJson();
+  }) : super.fromJson() {
+    init();
+  }
 
   @override
   @mustCallSuper
@@ -314,15 +336,16 @@ class MultiTopicNTWidgetModel extends NTWidgetModel {
 
   @override
   List<String> getAvailableDisplayTypes() {
-    if (type == 'ComboBox Chooser' || type == 'Split Button Chooser') {
-      return ['ComboBox Chooser', 'Split Button Chooser'];
+    if (type == ComboBoxChooser.widgetType ||
+        type == SplitButtonChooser.widgetType) {
+      return [ComboBoxChooser.widgetType, SplitButtonChooser.widgetType];
     }
 
     return [type];
   }
 
   @override
-  void disposeWidget({bool deleting = false}) {}
+  void softDispose({bool deleting = false}) {}
 }
 
 abstract class NTWidget extends StatelessWidget {
