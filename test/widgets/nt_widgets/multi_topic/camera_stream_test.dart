@@ -33,7 +33,7 @@ void main() {
     'crosshair_x': 15,
     'crosshair_y': 10,
     'crosshair_color': 4294198070, //Colors.red.toARGB32()
-    'crosshair_centered': false
+    'crosshair_centered': false,
   };
 
   late SharedPreferences preferences;
@@ -74,8 +74,10 @@ void main() {
     expect(cameraStreamModel.crosshairY, 10);
     expect(cameraStreamModel.crosshairColor, Color(Colors.red.toARGB32()));
 
-    expect(cameraStreamModel.getUrlWithParameters('0.0.0.0'),
-        '0.0.0.0?resolution=100x100&fps=60&compression=50');
+    expect(
+      cameraStreamModel.getUrlWithParameters('0.0.0.0'),
+      '0.0.0.0?resolution=100x100&fps=60&compression=50',
+    );
 
     cameraStreamModel.fps = null;
 
@@ -143,21 +145,22 @@ void main() {
 
   test('Camera stream to json', () {
     CameraStreamModel cameraStreamModel = CameraStreamModel(
-        ntConnection: ntConnection,
-        preferences: preferences,
-        topic: 'Test/Camera Stream',
-        rotation: 0,
-        period: 0.100,
-        compression: 50,
-        fps: 60,
-        resolution: const Size(100.0, 100.0),
-        crosshairEnabled: false,
-        crosshairWidth: 25,
-        crosshairHeight: 35,
-        crosshairThickness: 2,
-        crosshairX: 15,
-        crosshairY: 10,
-        crosshairColor: Colors.red);
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Camera Stream',
+      rotation: 0,
+      period: 0.100,
+      compression: 50,
+      fps: 60,
+      resolution: const Size(100.0, 100.0),
+      crosshairEnabled: false,
+      crosshairWidth: 25,
+      crosshairHeight: 35,
+      crosshairThickness: 2,
+      crosshairX: 15,
+      crosshairY: 10,
+      crosshairColor: Colors.red,
+    );
 
     expect(cameraStreamModel.toJson(), cameraStreamJson);
   });
@@ -226,21 +229,22 @@ void main() {
     FlutterError.onError = ignoreOverflowErrors;
 
     CameraStreamModel cameraStreamModel = CameraStreamModel(
-        ntConnection: ntConnection,
-        preferences: preferences,
-        topic: 'Test/Camera Stream',
-        period: 0.100,
-        rotation: 0,
-        compression: 50,
-        fps: 60,
-        resolution: const Size(100.0, 100.0),
-        crosshairEnabled: false,
-        crosshairWidth: 15,
-        crosshairHeight: 15,
-        crosshairThickness: 2,
-        crosshairX: 0,
-        crosshairY: 0,
-        crosshairColor: Colors.red);
+      ntConnection: ntConnection,
+      preferences: preferences,
+      topic: 'Test/Camera Stream',
+      period: 0.100,
+      rotation: 0,
+      compression: 50,
+      fps: 60,
+      resolution: const Size(100.0, 100.0),
+      crosshairEnabled: false,
+      crosshairWidth: 15,
+      crosshairHeight: 15,
+      crosshairThickness: 2,
+      crosshairX: 0,
+      crosshairY: 0,
+      crosshairColor: Colors.red,
+    );
 
     NTWidgetContainerModel ntContainerModel = NTWidgetContainerModel(
       ntConnection: ntConnection,
@@ -285,13 +289,16 @@ void main() {
 
     final crosshairEnabled = find.ancestor(
       of: find.text('Enabled'),
-      matching:
-          find.byWidgetPredicate((widget) => widget is DialogToggleSwitch),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is DialogToggleSwitch,
+      ),
     );
     final crosshairX = find.widgetWithText(DialogTextInput, 'X Position');
     final crosshairY = find.widgetWithText(DialogTextInput, 'Y Position');
-    final crosshairThickness =
-        find.widgetWithText(DialogTextInput, 'Thickness');
+    final crosshairThickness = find.widgetWithText(
+      DialogTextInput,
+      'Thickness',
+    );
     final crosshairColor = find.ancestor(
       of: find.text('Crosshair Color'),
       matching: find.byWidgetPredicate((widget) => widget is DialogColorPicker),
