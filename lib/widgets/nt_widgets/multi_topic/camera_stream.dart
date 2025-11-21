@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,8 +10,10 @@ import 'package:provider/provider.dart';
 import 'package:elastic_dashboard/services/nt4_client.dart';
 import 'package:elastic_dashboard/widgets/custom_loading_indicator.dart';
 import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_text_input.dart';
+import 'package:elastic_dashboard/widgets/dialog_widgets/dialog_toggle_switch.dart';
 import 'package:elastic_dashboard/widgets/mjpeg.dart';
 import 'package:elastic_dashboard/widgets/nt_widgets/nt_widget.dart';
+import '../../dialog_widgets/dialog_color_picker.dart';
 
 class CameraStreamModel extends MultiTopicNTWidgetModel {
   @override
@@ -21,13 +25,52 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
 
   @override
   List<NT4Subscription> get subscriptions => [streamsSubscription];
+  MjpegController? controller;
 
   int? quality;
   int? fps;
   Size? resolution;
   int _rotationTurns = 0;
+  bool _crosshairEnabled = false;
+  int _crosshairX = 0;
+  int _crosshairY = 0;
+  int _crosshairWidth = 25;
+  int _crosshairHeight = 25;
+  int _crosshairThickness = 2;
+  Color _crosshairColor = Colors.red;
+  bool _crosshairCentered = false;
 
-  MjpegController? controller;
+  bool get crosshairCentered => _crosshairCentered;
+
+  set crosshairCentered(bool value) => _crosshairCentered = value;
+
+  Color get crosshairColor => _crosshairColor;
+
+  set crosshairColor(Color value) => _crosshairColor = value;
+
+  bool get crosshairEnabled => _crosshairEnabled;
+
+  set crosshairEnabled(bool value) => _crosshairEnabled = value;
+
+  int get crosshairX => _crosshairX;
+
+  set crosshairX(int value) => _crosshairX = value;
+
+  int get crosshairY => _crosshairY;
+
+  set crosshairY(int value) => _crosshairY = value;
+
+  int get crosshairWidth => _crosshairWidth;
+
+  set crosshairWidth(int value) => _crosshairWidth = value;
+
+  int get crosshairHeight => _crosshairHeight;
+
+  set crosshairHeight(int value) => _crosshairHeight = value;
+
+  int get crosshairThickness => _crosshairThickness;
+
+  set crosshairThickness(int value) => _crosshairThickness = value;
 
   int get rotationTurns => _rotationTurns;
 
@@ -60,13 +103,28 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
     required super.ntConnection,
     required super.preferences,
     required super.topic,
+
     int? compression,
     this.fps,
     this.resolution,
     int rotation = 0,
+    bool crosshairEnabled = false,
+    int crosshairWidth = 50,
+    int crosshairHeight = 50,
+    int crosshairThickness = 2,
+    int crosshairX = 0,
+    int crosshairY = 0,
+    Color crosshairColor = Colors.red,
     super.period,
   }) : quality = compression,
        _rotationTurns = rotation,
+       _crosshairEnabled = crosshairEnabled,
+       _crosshairWidth = crosshairWidth,
+       _crosshairHeight = crosshairHeight,
+       _crosshairThickness = crosshairThickness,
+       _crosshairX = crosshairX,
+       _crosshairY = crosshairY,
+       _crosshairColor = crosshairColor,
        super();
 
   CameraStreamModel.fromJson({
@@ -76,7 +134,17 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }) : super.fromJson(jsonData: jsonData) {
     quality = tryCast(jsonData['compression']);
     fps = tryCast(jsonData['fps']);
+    _crosshairEnabled = tryCast(jsonData['crosshair_enabled']) ?? false;
     _rotationTurns = tryCast(jsonData['rotation_turns']) ?? 0;
+    _crosshairWidth = tryCast(jsonData['crosshair_width']) ?? 25;
+    _crosshairHeight = tryCast(jsonData['crosshair_height']) ?? 25;
+    _crosshairThickness = tryCast(jsonData['crosshair_thickness']) ?? 2;
+    _crosshairX = tryCast(jsonData['crosshair_x']) ?? 0;
+    _crosshairY = tryCast(jsonData['crosshair_y']) ?? 0;
+    _crosshairColor = Color(
+      tryCast<int>(jsonData['crosshair_color']) ?? Colors.red.toARGB32(),
+    );
+    _crosshairCentered = tryCast(jsonData['crosshair_centered']) ?? false;
 
     List<num>? resolution = tryCast<List<Object?>>(
       jsonData['resolution'],
@@ -114,14 +182,27 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-    ...super.toJson(),
-    'rotation_turns': rotationTurns,
-    if (quality != null) 'compression': quality,
-    if (fps != null) 'fps': fps,
-    if (resolution != null)
-      'resolution': [resolution!.width, resolution!.height],
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'rotation_turns': _rotationTurns,
+      'crosshair_enabled': crosshairEnabled,
+      'crosshair_width': crosshairWidth,
+      'crosshair_height': crosshairHeight,
+      'crosshair_thickness': crosshairThickness,
+      'crosshair_x': crosshairX,
+      'crosshair_y': crosshairY,
+      'crosshair_color': _crosshairColor.toARGB32(),
+      'crosshair_centered': _crosshairCentered,
+      if (quality != null) 'compression': quality,
+      if (fps != null) 'fps': fps,
+      if (resolution != null)
+        'resolution': [
+          resolution!.width,
+          resolution!.height,
+        ],
+    };
+  }
 
   @override
   List<Widget> getEditProperties(BuildContext context) => [
@@ -282,6 +363,153 @@ class CameraStreamModel extends MultiTopicNTWidgetModel {
         ),
       ],
     ),
+    //Camera Crosshair
+    StatefulBuilder(
+      builder: (context, setState) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 15),
+          Divider(
+            height: 10,
+          ),
+          Text("Crosshair Settings"),
+          const SizedBox(height: 10),
+          DialogToggleSwitch(
+            onToggle: (value) => setState(
+              () => _crosshairEnabled = value,
+            ),
+            initialValue: _crosshairEnabled,
+            label: "Enabled",
+          ),
+          const SizedBox(height: 10),
+          //Height, Width, Thickness
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: "$_crosshairWidth",
+                  label: 'Width',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newWidth = int.tryParse(value) ?? 0;
+                    setState(() {
+                      if (newWidth >= 0) {
+                        _crosshairWidth = newWidth;
+                        return;
+                      }
+                    });
+                  },
+                ),
+              ),
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: "$_crosshairHeight",
+                  label: 'Height',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newHeight = int.tryParse(value) ?? 0;
+                    setState(() {
+                      if (newHeight >= 0) {
+                        _crosshairHeight = newHeight;
+                        return;
+                      }
+                    });
+                  },
+                ),
+              ),
+              Flexible(
+                child: DialogTextInput(
+                  allowEmptySubmission: true,
+                  initialText: "$_crosshairThickness",
+                  label: 'Thickness',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newThickness = int.tryParse(value) ?? 0;
+                    setState(() {
+                      if (newThickness >= 0) {
+                        _crosshairThickness = newThickness;
+                        return;
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 10),
+          //Centered, X and Y POS
+          DialogToggleSwitch(
+            onToggle: (value) => setState(
+              () => _crosshairCentered = value,
+            ),
+            initialValue: _crosshairCentered,
+            label: "Centered",
+          ),
+          SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: DialogTextInput(
+                  enabled: !_crosshairCentered,
+                  allowEmptySubmission: true,
+                  initialText: "$_crosshairX",
+                  label: 'X Position',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newX = int.tryParse(value) ?? 0;
+                    setState(() {
+                      if (newX >= 0) {
+                        _crosshairX = newX;
+                        return;
+                      }
+                    });
+                  },
+                ),
+              ),
+              Flexible(
+                child: DialogTextInput(
+                  enabled: !_crosshairCentered,
+                  allowEmptySubmission: true,
+                  initialText: "$_crosshairY",
+                  label: 'Y Position',
+                  formatter: FilteringTextInputFormatter.digitsOnly,
+                  onSubmit: (value) {
+                    int? newY = int.tryParse(value) ?? 0;
+                    setState(() {
+                      if (newY >= 0) {
+                        _crosshairY = newY;
+                        return;
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+
+          DialogColorPicker(
+            onColorPicked: (color) => setState(
+              () => setState(
+                () => _crosshairColor = color,
+              ),
+            ),
+            label: 'Crosshair Color',
+            initialColor: _crosshairColor,
+            defaultColor: Colors.red,
+            rowSize: MainAxisSize.max,
+          ),
+        ],
+      ),
+    ),
   ];
 
   @override
@@ -405,11 +633,27 @@ class CameraStreamWidget extends NTWidget {
                 ],
               ),
               Flexible(
-                child: Mjpeg(
-                  controller: model.controller!,
-                  fit: BoxFit.contain,
-                  expandToFit: true,
-                  quarterTurns: model.rotationTurns,
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      foregroundPainter: CrosshairPainter(
+                        model._crosshairWidth,
+                        model._crosshairHeight,
+                        model._crosshairThickness,
+                        model._crosshairX,
+                        model._crosshairY,
+                        model._crosshairEnabled,
+                        model._crosshairColor,
+                        model._crosshairCentered,
+                      ),
+                      child: Mjpeg(
+                        controller: model.controller!,
+                        fit: BoxFit.contain,
+                        expandToFit: true,
+                        quarterTurns: model.rotationTurns,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const Text(''),
@@ -418,5 +662,75 @@ class CameraStreamWidget extends NTWidget {
         );
       },
     );
+  }
+}
+
+class CrosshairPainter extends CustomPainter {
+  final bool? enabled;
+  final int? crosshairWidth;
+  final int? crosshairHeight;
+  final int? crosshairThickness;
+  final int? crosshairY;
+  final int? crosshairX;
+  final Color? crosshairColor;
+  final bool? centered;
+
+  CrosshairPainter(
+    this.crosshairWidth,
+    this.crosshairHeight,
+    this.crosshairThickness,
+    this.crosshairX,
+    this.crosshairY,
+    this.enabled,
+    this.crosshairColor,
+    this.centered,
+  );
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!enabled!) return;
+    var widthModifier = size.width / 250;
+    var heightModifier = size.height / 250;
+    var maxWidth = size.width - (crosshairWidth! / 2 * widthModifier);
+    var maxHeight = size.height - (crosshairHeight! / 2 * widthModifier);
+    double x;
+    double y;
+    if (centered!) {
+      x = (size.width / 2);
+      y = (size.height / 2);
+    } else {
+      x = clampDouble(
+        (crosshairX! + crosshairWidth! / 2) * widthModifier,
+        0,
+        maxWidth,
+      );
+      y = clampDouble(
+        (crosshairY! + crosshairHeight! / 2) * widthModifier,
+        0,
+        maxHeight,
+      );
+    }
+
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: Offset(x, y),
+        width: crosshairWidth! * widthModifier,
+        height: crosshairThickness! * heightModifier,
+      ),
+      Paint()..color = crosshairColor!,
+    );
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: Offset(x, y),
+        width: crosshairThickness! * heightModifier,
+        height: crosshairHeight! * widthModifier,
+      ),
+      Paint()..color = crosshairColor!,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return enabled!;
   }
 }
